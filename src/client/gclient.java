@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -93,7 +93,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     commit,
     cancel;
   
-  TextField
+  JLabel
     statusLabel;
 
   JSplitPane
@@ -508,20 +508,36 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    
     add("Center",sPane);
 
-    JBufferedPane statusBar = new JBufferedPane(false);
-    statusBar.setBackground(ClientColor.menu);
-    statusBar.setForeground(ClientColor.menuText);
-    statusBar.setLayout(new BorderLayout());
-    statusLabel = new TextField();
-    statusLabel.setEditable(false);
+    // Create the bottomBar, for the bottom of the window
+
+    JBufferedPane bottomBar = new JBufferedPane(false);
+    bottomBar.setBackground(ClientColor.menu);
+    bottomBar.setForeground(ClientColor.menuText);
+    bottomBar.setLayout(new BorderLayout());
+
+    JBorderedPane statusBorder = new JBorderedPane(BorderFactory.createBezelBorder(1));
+    statusBorder.setLayout(new BorderLayout());
+
+    statusLabel = new JLabel();
     statusLabel.setBackground(ClientColor.menu);
     statusLabel.setForeground(ClientColor.menuText);
+    statusLabel.setInsets(new Insets(5,5,5,5));
+
+    statusBorder.add("Center", statusLabel);
+
     JLabel l = new JLabel("Status: ");
     l.setBackground(ClientColor.menu);
     l.setForeground(ClientColor.menuText);
-    statusBar.add("West", l);
-    statusBar.add("Center", statusLabel);
-    add("South", statusBar);
+    l.setInsets(new Insets(5,5,5,5));
+
+
+    JBorderedPane labelBorder = new JBorderedPane(BorderFactory.createBezelBorder(1));
+    labelBorder.setLayout(new BorderLayout());
+    labelBorder.add("Center", l);
+
+    bottomBar.add("West", l);
+    bottomBar.add("Center", statusBorder);
+    add("South", bottomBar);
 
     statusLabel.setText("Starting up");
 
@@ -557,7 +573,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public void setStatus(String status)
   {
+    if (debug)
+      {
+	System.out.println("Setting status: " + status);
+      }
     statusLabel.setText(status);
+    statusLabel.repaint();
   }
 
   /**
@@ -1162,6 +1183,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	try
 	  {
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	    // Update all the note panels here
+
 	    wp.closeEditables();
 	    somethingChanged = false;
 	    session.commitTransaction();
