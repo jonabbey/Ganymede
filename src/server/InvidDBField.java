@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -412,7 +412,18 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldRemote != null)
       {
-	oldRef = session.editDBObject(oldRemote);
+	// check to see if we have permission to anonymously unlink
+	// this field from the target field, else go through the
+	// GanymedeSession layer to have our permissions checked.
+
+	if (session.getObjectHook(oldRemote).anonymousUnlinkOK(targetField))
+	  {
+	    oldRef = (DBEditObject) session.editDBObject(oldRemote);
+	  }
+	else
+	  {
+	    oldRef = (DBEditObject) session.getGSession().edit_db_object(oldRemote);
+	  }
 
 	if (oldRef == null)
 	  {
@@ -442,7 +453,19 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    newRef = session.editDBObject(newRemote);
+    // check to see if we have permission to anonymously link
+    // this field to the target field, else go through the
+    // GanymedeSession layer to have our permissions checked.
+
+
+    if (session.getObjectHook(newRemote).anonymousLinkOK(targetField))
+      {
+	newRef = session.editDBObject(newRemote);
+      }
+    else
+      {
+	newRef = (DBEditObject) session.getGSession().edit_db_object(newRemote);
+      }
     
     if (newRef == null)
       {
@@ -545,16 +568,36 @@ public final class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    oldRef = session.editDBObject(remote);
-	
-    if (oldRef == null)
-      {
-	return true;		// it's not there, so we are certainly unbound, no?
+    // check to see if we have permission to anonymously unlink
+    // this field from the target field, else go through the
+    // GanymedeSession layer to have our permissions checked.
 
-	//	setLastError("couldn't check out old invid " + remote + " for symmetry maintenance");
-	//	return false;
+    if (session.getObjectHook(remote).anonymousUnlinkOK(targetField))
+      {
+	oldRef = session.editDBObject(remote);
+
+	if (oldRef == null)
+	  {
+	    return true;		// it's not there, so we are certainly unbound, no?
+	  }
       }
-    
+    else
+      {
+	oldRef = (DBEditObject) session.getGSession().edit_db_object(remote);
+
+	if (oldRef == null)
+	  {
+	    if (session.viewDBObject(remote) == null)
+	      {
+		return true;	// it's not there, so we are certainly unbound, no?
+	      }
+	    else
+	      {
+		return false;	// it's there, but we can't unlink it
+	      }
+	  }
+      }
+
     try
       {
 	oldRefField = (InvidDBField) oldRef.getField(targetField);
