@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,25 +14,22 @@
 package arlut.csd.ganymede;
 
 import arlut.csd.Util.*;
-import arlut.csd.DataComponent.*;
-import arlut.csd.Dialog.*;
+import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.*;
+
+import com.sun.java.swing.*;
 
 import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
-import java.awt.*;
+//import java.awt.*;
 import java.awt.event.*;
-import java.net.*;
-import java.applet.*;
+//import java.net.*;
+//import java.applet.*;
 import java.util.*;
 
 import jdj.PackageResources;
-
-import gjt.Box;
-import gjt.Util;
-import gjt.RowLayout;
-import gjt.ColumnLayout;
 
 import arlut.csd.JTree.*;
 
@@ -42,7 +39,10 @@ import arlut.csd.JTree.*;
 
 ------------------------------------------------------------------------------*/
 
-class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
+class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
+
+  boolean 
+    listenToCallbacks = true;
 
   BaseNode
     baseNode;
@@ -50,20 +50,20 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
   Base 
     base;
 
-  numberField 
+  JnumberField 
     typeN;
 
-  stringField 
+  JstringField 
     nameS, 
     classS;
 
-  Choice
+  JComboBox
     labelC;
 
-  componentAttr 
-    ca;
+  JcomponentAttr 
+    ca = null;
 
-  Panel 
+  JPanel 
     editPanel;
 
   GASHSchema
@@ -83,26 +83,27 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
     base = null;
     this.owner = owner;
 
-    editPanel = new InsetPanel(10, 10, 10, 10);
+    editPanel = new JPanel(false);
+    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setLayout(new TableLayout(false));
     
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
+    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
+			   java.awt.Color.black, java.awt.Color.white);
 
-    typeN = new numberField(20, ca, false, false, 0, 0);
+    typeN = new JnumberField(20, ca, false, false, 0, 0);
     typeN.setCallback(this);
     addRow(editPanel, typeN, "ObjectType ID:", 0);
 
 
-    nameS = new stringField(20, 100, ca, true, false, null, null);
+    nameS = new JstringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Object Type:", 1);
 
-    classS = new stringField(20, 100, ca, true, false, null, null);
+    classS = new JstringField(20, 100, ca, true, false, null, null);
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", 2);
 
-    labelC = new Choice();
+    labelC = new JComboBox();
     labelC.addItemListener(this);
     addRow(editPanel, labelC, "Label:", 3);
 
@@ -118,6 +119,9 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
 
   public void editBase(BaseNode baseNode)
   {
+    listenToCallbacks = false;
+    owner.setWaitCursor();
+
     this.baseNode = baseNode;
     this.base = baseNode.getBase();
 
@@ -132,6 +136,9 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
       {
 	System.err.println("editBase: accessor failed: " + ex);
       }
+
+    owner.setNormalCursor();
+    listenToCallbacks = true;
   }
 
   /**
@@ -149,7 +156,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
 
     /* -- */
 
-    labelC.removeAll();
+    labelC.removeAllItems();
 
     if (base == null)
       {
@@ -166,7 +173,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
 	throw new RuntimeException("exception getting fields: " + rx);
       }
     
-    labelC.add("<none>");
+    labelC.addItem("<none>");
     
     if (fields == null)
       {
@@ -185,7 +192,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
 		if (currentField.isString() || currentField.isNumeric() ||
 		    currentField.isIP())
 		  {
-		    labelC.add(currentField.getName());
+		    labelC.addItem(currentField.getName());
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -207,25 +214,31 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
     if (labelField == null)
       {
 	System.out.println("selecting <none>");
-	labelC.select("<none>");
+	labelC.getModel().setSelectedItem("<none>");
       }
     else
       {
 	try
 	  {
 	    System.out.println("selecting label: " + labelField);
-	    labelC.select(labelField);
+	    labelC.getModel().setSelectedItem(labelField);
 	  }
 	catch (NullPointerException ex)
 	  {
 	    System.out.println("Attempted to set label to field not in choice, setting it to <none>");
-	    labelC.select("<none>");
+	    labelC.setSelectedItem("<none>");
 	  }
       }
   }
 
   public void itemStateChanged(ItemEvent e)
   {
+    if (!listenToCallbacks)
+      {
+	System.out.println("I'm not listening, go away.");
+	return;
+      }
+
     String label = null;
 
     /* -- */
@@ -236,7 +249,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
       {
 	try
 	  {
-	    label = labelC.getSelectedItem();
+	    label = (String)labelC.getModel().getSelectedItem();
 
 	    System.out.println("setting label to " + label);
 
@@ -258,9 +271,15 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
       }
   }
 
-  public boolean setValuePerformed(ValueObject v)
+  public boolean setValuePerformed(JValueObject v)
   {
-    Component source;
+    if (!listenToCallbacks)
+      {
+	System.out.println("Not listening");
+	return true;
+      }
+
+    java.awt.Component source;
     String val;
 
     /* -- */
@@ -307,9 +326,9 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
     return true;
   }
 
-  void addRow(Panel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
-    Label l = new Label(label);
+    JLabel l = new JLabel(label);
     
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhwHW", comp);
