@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -286,8 +286,11 @@ public class ReturnVal implements java.io.Serializable {
   {
     StringBuffer buffer = new StringBuffer();
 
+    /* -- */
+
     if (rescanList != null)
       {
+	buffer.append("dumpRescanInfo(): ");
 	buffer.append(rescanList.toString());
       }
     else
@@ -304,7 +307,7 @@ public class ReturnVal implements java.io.Serializable {
 	    Object key = keys.nextElement();
 	    ReturnVal retVal = (ReturnVal) objRescanHash.get(key);
 
-	    buffer.append("\n");
+	    buffer.append("\nRescan info for object " + key + ":\n");
 	    buffer.append(retVal.dumpRescanInfo());
 	  }
       }
@@ -485,6 +488,11 @@ public class ReturnVal implements java.io.Serializable {
 	  {
 	    return;
 	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("ReturnVal.addRescanField(" + fieldID+")");
       }
 
     rescanList.append(fieldID);
