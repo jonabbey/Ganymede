@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.6 $
-# $Date: 1999/07/08 04:25:19 $
+# $Revision: 1.7 $
+# $Date: 1999/07/26 23:32:46 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -137,9 +137,6 @@ ENDOK
 # Customize and copy the client web pages
 
 &install_file("webforms/index.html", "$installdir/index.html");
-&install_file("webforms/titleframe.html", "$installdir/titleframe.html");
-&install_file("webforms/leftframe.html", "$installdir/leftframe.html");
-&install_file("webforms/rightframe.html", "$installdir/rightframe.html");
 &install_file("webforms/client_plugin.html", "$installdir/client_plugin.html");
 &install_file("webforms/client_native.html", "$installdir/client_native.html");
 &install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
