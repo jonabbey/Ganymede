@@ -3,8 +3,8 @@
 # Ganymede build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.5 $
-# Date: $Date: 1999/01/22 00:39:02 $
+# Version: $Revision: 1.6 $
+# Date: $Date: 1999/01/22 00:54:50 $
 #
 ############################################################
 
@@ -23,7 +23,7 @@ cd $builddir
 
 ##################################################
 
-CLASSPATH=$CLASSDIR:$TARGETDIR:$CLASSPATH; export CLASSPATH
+CLASSPATH=$CLASSDIR:$TARGETDIR:$currentdir/../../custom_src/classes:$CLASSPATH; export CLASSPATH
 export CLASSPATH
 
 echo "Compiling $COMPNAME Loader files"
