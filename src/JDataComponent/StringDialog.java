@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,9 +55,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   JLabel
     imageCanvas;
-
-  JComponent
-    firstComp;   // This is the first component in the dialog.  It will request the focus.
 
   JButton 
     OKButton,
@@ -564,11 +561,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	JComponent c = (JComponent)components.elementAt(i);
 
-	// first object.. we'll remember it for initial focus
-
 	if (i == 0) 
 	  {
-	    firstComp = c;
+	    // not sure if this does us any good on X Windows, as
+	    // focus is usually managed by clicking or rolling the
+	    // mouse on to the dialog window.. might help on Win32.
+
+	    c.requestFocus();
 	  }
 	
 	if (debug)
