@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 2001/06/01 01:35:02 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 2001/06/13 22:58:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1168,6 +1168,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
+    // call finalizeSetValue to allow for chained reactions
+
     retVal = ((DBEditObject) owner).finalizeSetValue(this, null);
 
     if (retVal != null && !retVal.didSucceed())
@@ -1270,6 +1272,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
+    // call finalizeSetValue to allow for chained reactions
+
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
 
     if (retVal == null || retVal.didSucceed())
@@ -1354,6 +1358,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
+    // call finalizeSetValue to allow for chained reactions
+
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
 
     if (retVal == null || retVal.didSucceed())
@@ -1430,6 +1436,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	    return retVal;
 	  }
       }
+
+    // call finalizeSetValue to allow for chained reactions
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
 
