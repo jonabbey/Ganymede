@@ -16,10 +16,12 @@ import java.rmi.*;
 import java.util.*;
 
 import arlut.csd.ganymede.*; 
+import arlut.csd.JDialog.*;
 import com.sun.java.swing.*;
+import com.sun.java.swing.event.*;
 import com.sun.java.swing.border.*;
 
-public class personaPanel extends JPanel implements ActionListener{
+public class personaPanel extends JPanel implements ActionListener, ChangeListener{
   
   boolean debug = true;
 
@@ -55,6 +57,9 @@ public class personaPanel extends JPanel implements ActionListener{
   EmptyBorder
     empty = new EmptyBorder(new Insets(7,7,7,7));
 
+  boolean
+    fieldIsEditable = false;
+
   /* -- */
 
   public personaPanel(invid_field field, boolean editable, framePanel fp) 
@@ -67,8 +72,17 @@ public class personaPanel extends JPanel implements ActionListener{
     debug = gc.debug;
 
     setLayout(new BorderLayout());
+    
+    try
+      {
+	fieldIsEditable = field.isEditable();
+      }
+    catch(RemoteException rx)
+      {
+	throw new RuntimeException("Could not call field.isEditable in personaPanel: " + rx);
+      }
 
-    if (editable)
+    if (editable && fieldIsEditable)
       {
 	// Create the button panel for the bottom
 	JPanel bottom = new JPanel(false);
@@ -108,7 +122,42 @@ public class personaPanel extends JPanel implements ActionListener{
 	personaContainer pc = null;
 	try
 	  {
-	    pc = new personaContainer((Invid)personas.elementAt(i), i, editable && field.isEditable(), this);
+	    boolean thisOneEditable = editable && field.isEditable();
+	    Invid thisInvid = (Invid)personas.elementAt(i);
+	    if (thisOneEditable)
+	      {
+		db_object ob = gc.getSession().edit_db_object(thisInvid);
+		if (ob == null)
+		  {
+		    System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
+		    ob = gc.getSession().view_db_object(thisInvid);
+		
+		    if (ob == null)
+		      {
+			System.out.println("That didn't work...its still not giving me anything back.  Giving up.");
+		      }
+		    else
+		      {
+			pc = new personaContainer(thisInvid, i, false, this, ob); //Now I know it is not editable
+		      }
+		  }
+		else
+		  {
+		    pc = new personaContainer(thisInvid, i, thisOneEditable, this, ob);
+		  }
+	      }
+	    else
+	      {
+		db_object ob = gc.getSession().view_db_object(thisInvid);
+		if (ob == null)
+		  {
+		    System.out.println("Whoa, got a null object(view), skipping.");
+		  }
+		else
+		  {
+		    pc = new personaContainer(thisInvid, i, thisOneEditable, this, ob);
+		  }
+	      }		
 	  }
 	catch (RemoteException rx)
 	  {
@@ -116,13 +165,18 @@ public class personaPanel extends JPanel implements ActionListener{
 	  }
 
 	panels.put(new Integer(i), pc);
+	middle.addTab("Persona " + i, pc);
+
 	Thread t = new Thread(pc);
 	t.start();
 
-	middle.addTab("Persona " + i, pc);
+	
+
       }
 
     // Show the first one(will just be a progress bar for now)
+
+    middle.addChangeListener(this);
 
     if (total > 0)
       {
@@ -143,37 +197,93 @@ public class personaPanel extends JPanel implements ActionListener{
 
     if (e.getActionCommand().equals("Create"))
       {
+	gc.setWaitCursor();
 	int index = middle.getTabCount();
-	personaContainer pc = new personaContainer(null, index, editable, this, true);
-
-	panels.put(new Integer(index), pc);
-	Thread t = new Thread(pc);
-	t.start();
-
-	middle.addTab("New Persona " + index, pc);
-
-	pc.waitForLoad();
-
-	if (debug)
+	// Make sure the default owner is chosen
+ 	    
+	try
 	  {
-	    System.out.println("Showing: " + index);
+	    if (!fp.getgclient().defaultOwnerChosen())
+	      {
+		fp.getgclient().chooseDefaultOwner(false);
+	      }
+	    
+	    // Create the object
+	    db_object newObject = fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
+	    Invid user = fp.getObjectInvid();
+
+	    gc.somethingChanged();
+	    
+	    // Tell the user about the persona
+	    fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
+	    // Tell the persona about the user
+	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
+	    
+	    personaContainer pc = new personaContainer(null, index, editable, this, newObject);
+	    middle.addTab("New Persona " + index, pc);
+
+	    pc.run();
+	    
+	    panels.put(new Integer(index), pc);
+	    //Thread t = new Thread(pc);
+	    //t.start();
+
+
+
+	    pc.waitForLoad();
+	    
+	    if (debug)
+	      {
+		System.out.println("Showing: " + index);
+	      }
+	    
+	    middle.setSelectedIndex(index);
+	  }
+	catch (NullPointerException ne)
+	  {
+	    gc.showErrorMessage("You don't have permission to create objects of this type.");
+	    add.setEnabled(false);
+	    gc.setNormalCursor();
+	    return;
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not create new persona: " + rx);
 	  }
 
-	middle.setSelectedIndex(index);
+	gc.setNormalCursor();
 
       }
     else if (e.getActionCommand().equals("Delete"))
       {
+	gc.setWaitCursor();
 	boolean removed = false;
 	boolean deleted = false;
 
 	personaContainer pc = (personaContainer)panels.get(new Integer(middle.getSelectedIndex()));
 	Invid invid = pc.getInvid();
 
+	StringDialog d = new StringDialog(gc, "Confirm deletion", "Are you sure you want to delete persona " + middle.getTitleAt(middle.getSelectedIndex()) + "?", true);
+
+	gc.setNormalCursor();
+
+	if (d.DialogShow() == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Cancelled.");
+	      }
+	    return;
+	  }
+
+	gc.somethingChanged();
+
 	if (debug)
 	  {
 	    System.out.println("invid to delete: " + invid);
 	  }
+		
+	gc.setWaitCursor();
 
 	try
 	  {
@@ -241,6 +351,18 @@ public class personaPanel extends JPanel implements ActionListener{
 		System.out.println("Could not fully remove the object.");
 	      }
 	  }
+	
+	gc.setNormalCursor();
+
+      }
+  }
+
+  public void stateChanged(ChangeEvent e)
+  {
+    personaContainer pc = (personaContainer)middle.getSelectedComponent();
+    if (delete != null)
+      {
+	delete.setEnabled(pc.isEditable());
       }
   }
 } 
@@ -251,6 +373,10 @@ public class personaPanel extends JPanel implements ActionListener{
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * Make sure you add this tab to a JTabbedPane BEFORE you call run()!
+ *
+ */
 class personaContainer extends JScrollPane implements Runnable{
 
   private final static boolean debug = true;
@@ -279,16 +405,20 @@ class personaContainer extends JScrollPane implements Runnable{
   JPanel
     progressPane;
 
+  db_object object;
+
   /* -- */
 
-  public personaContainer(Invid invid, int index, boolean editable,personaPanel pp)
-  {
-    this(invid, index, editable, pp, false);
-  }
 
-  public personaContainer(Invid invid, int index, boolean editable, personaPanel pp, boolean createNew)
+  public personaContainer(Invid invid, int index, boolean editable, personaPanel pp, db_object object)
   {
+    if (object == null)
+      {
+	throw new IllegalArgumentException("Got a null object in personaContainer.");
+      }
+
     this.invid = invid;
+    this.object = object;
     this.index = index;
     this.pp = pp;
     gc = pp.gc;
@@ -302,6 +432,11 @@ class personaContainer extends JScrollPane implements Runnable{
     setViewportView(progressPane);
   }
 
+  public boolean isEditable()
+  {
+    return editable;
+  }
+
   public synchronized void run()
   {
     if (debug)
@@ -311,67 +446,20 @@ class personaContainer extends JScrollPane implements Runnable{
 
     try
       {
-	if (createNew)
+	String label = object.getLabel();
+	if ((label != null) && (!label.equals("null")))
 	  {
-	    // Make sure the default owner is chosen
-	    
-	    if (!pp.fp.getgclient().defaultOwnerChosen())
-	      {
-		pp.fp.getgclient().chooseDefaultOwner(false);
-	      }
-	    
-	    // First set up the back linking
-	    db_object newObject = pp.fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
-	    Invid user = pp.fp.getObjectInvid();
-	    
-	    pp.fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
-	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
-	    
-	    pp.middle.setTitleAt(index, "New persona");
-	    // Then add that puppy
-	    containerPanel cp = new containerPanel(newObject,
-						   editable,
-						   pp.fp.getgclient(), pp.fp.getWindowPanel(), 
-						   pp.fp, progressBar);
-
-	    pp.fp.containerPanels.addElement(cp);
-
-	    cp.setBorder(pp.empty);
-	    setViewportView(cp);
+	    pp.middle.setTitleAt(index, label);
 	  }
-	else if (editable)
-	  {
-	    boolean thisPanelEditable = editable;
-	    db_object object = pp.fp.getgclient().getSession().edit_db_object(invid);
-	    if (object == null)
-	      {
-		object = pp.fp.getgclient().getSession().view_db_object(invid);
-		thisPanelEditable = false;
-	      }
-
-	    pp.middle.setTitleAt(index, object.getLabel());
-	    containerPanel cp = new containerPanel(object,
-						   thisPanelEditable,
-						   pp.fp.getgclient(), 
-						   pp.fp.getWindowPanel(), 
-						   pp.fp,
-						   progressBar);
-	    cp.setBorder(pp.empty);
-	    setViewportView(cp);
-	  }
-	else
-	  {
-	    db_object object = pp.fp.getgclient().getSession().view_db_object(invid);
-	    pp.middle.setTitleAt(index, object.getLabel());
-	    containerPanel cp = new containerPanel(object,
-						   editable,
-						   pp.fp.getgclient(), 
-						   pp.fp.getWindowPanel(), 
-						   pp.fp,
-						   progressBar);
-	    cp.setBorder(pp.empty);
-	    setViewportView(cp);
-	  }
+	
+	containerPanel cp = new containerPanel(object,
+					       editable,
+					       pp.fp.getgclient(), 
+					       pp.fp.getWindowPanel(), 
+					       pp.fp,
+					       progressBar);
+	cp.setBorder(pp.empty);
+	setViewportView(cp);
       }
     catch (RemoteException rx)
       {
@@ -385,18 +473,31 @@ class personaContainer extends JScrollPane implements Runnable{
 	System.out.println("Done with thread in personaPanel");
       }
 
-    this.invalidate();
-    pp.validate();
+    pp.invalidate();
+    pp.fp.validate();
 
   }
 
   public synchronized void waitForLoad()
   {
+    long startTime = System.currentTimeMillis();
+
     while (! loaded)
       {
 	try
 	  {
-	    this.wait();
+	    if (debug)
+	      {
+		System.out.println("presona panel waiting for load!");
+	      }
+
+	    this.wait(1000);
+
+	    if (System.currentTimeMillis() - startTime > 200000)
+	      {
+		System.out.println("Something went wrong loading the persona panel.  The wait for load thread was taking too long, so I gave up on it.");
+		break;
+	      }
 	  }
 	catch (InterruptedException e)
 	  {
