@@ -2387,6 +2387,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // probably won't hurt too bad
 
     DBObjectBase base = Ganymede.db.getObjectBase(XMLUtils.XMLDecode(objectTypeName));
+
+    if (base == null)
+      {
+	throw new NullPointerException("Oh, why won't you let my people look up: " + objectTypeName + ", oh my lord?");
+      }
+
     return base.getTypeID();
   }
 
