@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.86 $ %D%
+   Version: $Revision: 1.87 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1766,10 +1766,21 @@ public final class InvidDBField extends DBField implements invid_field {
 					   " in object " + owner.getLabel());
       }
 
+    if ((this.value == null && value == null) ||
+	(this.value != null && this.value.equals(value)))
+      {
+	if (debug)
+	  {
+	    Ganymede.debug("InvidDBField.setValue(): no change");
+	  }
+
+	return null;		// no change
+      }
+
     if (!verifyNewValue(value, local))
       {
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
-					  getLastError());
+					  "verifyNewValue() reported " + getLastError());
       }
 
     // we now know that value is an invid
