@@ -101,7 +101,7 @@ class DBNameSpaceHandle implements Cloneable {
    * transaction.</P>
    */
 
-  private Invid fieldInvid;
+  private Invid persistentFieldInvid;
 
   /**
    * <P>If this handle is associated with a value that has been
@@ -110,7 +110,7 @@ class DBNameSpaceHandle implements Cloneable {
    * object referenced by fieldInvid.</P>
    */
 
-  private short fieldId;
+  private short persistentFieldId;
 
   /**
    * if this handle is currently being edited by an editset,
@@ -156,7 +156,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean isPersisted()
   {
-    return fieldInvid != null;
+    return persistentFieldInvid != null;
   }
 
   /**
@@ -169,55 +169,56 @@ class DBNameSpaceHandle implements Cloneable {
   {
     if (field != null)
       {
-	fieldInvid = field.getOwner().getInvid();
-	fieldId = field.getID();
+	persistentFieldInvid = field.getOwner().getInvid();
+	persistentFieldId = field.getID();
       }
     else
       {
-	fieldInvid = null;
-	fieldId = -1;
+	persistentFieldInvid = null;
+	persistentFieldId = -1;
       }
   }
 
   /**
-   * <p>If the value that this handle is associated with is stored in the Ganymede server's
-   * persistent data store (i.e., that this handle is associated with a field in an
-   * already-committed object), this method will return a pointer to the DBField that
+   * <p>If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
    * contains this handle's value in the committed data store.</p>
+   *
+   * <p>Note that if the GanymedeSession passed in is currently
+   * editing the object which is identified by persistentFieldInvid,
+   * the DBField returned will be the editable version of the field
+   * from the DBEditObject the session is working with.  This may be
+   * something of a surprise, as the field returned may not actually
+   * contain the value sought.</p>
    */
 
   public DBField getPersistentField(GanymedeSession session)
   {
-    if (fieldInvid == null)
+    if (persistentFieldInvid == null)
       {
 	return null;
       }
 
     if (session != null)
       {
-	DBObject _obj = session.session.viewDBObject(fieldInvid);
+	DBObject _obj = session.session.viewDBObject(persistentFieldInvid);
 	
-	return (DBField) _obj.getField(fieldId);
+	return (DBField) _obj.getField(persistentFieldId);
       }
     else
       {
 	// during start-up, before we have a session available
 
-	DBObjectBase _base = Ganymede.db.getObjectBase(fieldInvid.getType());
-
-	if (_base == null)
-	  {
-	    return null;
-	  }
-
-	DBObject _obj = _base.getObject(fieldInvid);
+	DBObject _obj = Ganymede.db.viewDBObject(persistentFieldInvid);
 
 	if (_obj == null)
 	  {
 	    return null;
 	  }
 
-	return (DBField) _obj.getField(fieldId);
+	return (DBField) _obj.getField(persistentFieldId);
       }
   }
 
@@ -287,9 +288,9 @@ class DBNameSpaceHandle implements Cloneable {
    * field as the one specified by the parameter list.</p>
    */
 
-  public boolean matches(Invid fieldInvid, short fieldId)
+  public boolean matches(Invid persistentFieldInvid, short persistentFieldId)
   {
-    return (this.fieldInvid == fieldInvid) && (this.fieldId == fieldId);
+    return (this.persistentFieldInvid == persistentFieldInvid) && (this.persistentFieldId == persistentFieldId);
   }
 
   /**
@@ -297,16 +298,16 @@ class DBNameSpaceHandle implements Cloneable {
    * kind of field as the one specified by the parameter list.</p>
    */
 
-  public boolean matches (short objectType, short fieldId)
+  public boolean matches (short objectType, short persistentFieldId)
   {
-    return (this.fieldInvid.getType() == objectType) &&
-      (this.fieldId == fieldId);
+    return (this.persistentFieldInvid.getType() == objectType) &&
+      (this.persistentFieldId == persistentFieldId);
   }
 
   public void cleanup()
   {
     owner = null;
-    fieldInvid = null;
+    persistentFieldInvid = null;
     shadowField = null;
   }
 }
