@@ -6,8 +6,8 @@
    
    Created: 12 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2003/07/31 22:54:51 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2003/08/02 00:15:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,7 +74,7 @@ public interface userSchema {
   final static short CATEGORY=273;
   final static short FULLNAME=257;
   final static short BADGE=276;
-  final static short SOCIALSECURITY=274;
+  final static short SOCIALSECURITY=274; // removed
   final static short DIVISION=258;
   final static short ROOM=259;
   final static short OFFICEPHONE=260;
