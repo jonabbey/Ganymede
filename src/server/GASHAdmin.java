@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,6 +229,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.dumpSchema();
   }
 
+  void runInvidTest() throws RemoteException
+  {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
+    aSession.runInvidTest();
+  }
+
   void pullSchema() throws RemoteException
   {
     SchemaEdit editor = null;
@@ -293,6 +303,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   MenuItem dumpSchemaMI = null;
   MenuItem schemaMI = null;
   MenuItem shutdownMI = null;
+  MenuItem runInvidTestMI = null;
   MenuItem killAllMI = null;
 
   PopupMenu popMenu = null;
@@ -303,7 +314,8 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   StringDialog
     shutdownDialog = null,
     dumpDialog = null,
-    killDialog = null;
+    killDialog = null,
+    invidTestDialog = null;
 
   String killVictim = null;
 
@@ -365,12 +377,16 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     schemaMI = new MenuItem("Edit Schema");
     schemaMI.addActionListener(this);
 
+    runInvidTestMI = new MenuItem("Run Invid Test");
+    runInvidTestMI.addActionListener(this);
+
     quitMI = new MenuItem("Close Console");
     quitMI.addActionListener(this);
 
     controlMenu.add(shutdownMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
+    controlMenu.add(runInvidTestMI);
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
     controlMenu.add(dumpSchemaMI);
@@ -397,6 +413,11 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 				  "Ganymede Server Dump",
 				  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
 				  "Yes", "No", question);
+
+    invidTestDialog = new StringDialog(this,
+				       "Invid Test",
+				       "Are you you want to trigger a full invid sweep?  It'll take forever.",
+				       "Yes", "No", question);
 
     //    setBackground(Color.white);
 
@@ -699,6 +720,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	controlMenu.remove(dumpMI);
 	controlMenu.remove(dumpSchemaMI);
 	controlMenu.remove(shutdownMI);
+	controlMenu.remove(runInvidTestMI);
 	controlMenu.remove(schemaMI);
 	controlMenu.remove(killAllMI);
       }
@@ -765,6 +787,22 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	catch (RemoteException e)
 	  {
 	    admin.forceDisconnect("Couldn't talk to server");
+	  }
+      }
+    else if (event.getSource() == runInvidTestMI)
+      {
+	if (invidTestDialog.DialogShow() != null)
+	  {
+	    System.err.println("Affirmative invid test request");
+
+	    try
+	      {
+		admin.runInvidTest();
+	      }
+	    catch (RemoteException ex)
+	      {
+		admin.forceDisconnect("Couldn't talk to server" + ex);
+	      }
 	  }
       }
     else if (event.getSource() == shutdownMI)
