@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- JNLP File for Ganymede Client -->
+<!-- JNLP File for Ganymede Client 
+
+     This file defines the launch characteristics for the
+     Ganymede client, allowing the Java Web Start program
+     to properly launch the Ganymede client.  This file
+     format is documented at 
+
+     http://java.sun.com/products/javawebstart/developers.html
+
+-->
 
 <jnlp spec="1.0+" codebase="#WEBROOT" href="client.jnlp">
   <information>

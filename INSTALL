@@ -212,6 +212,18 @@ _3. Installing the Server_
           you will need to go through the various scripts and files and
           make sure that any reference to the old path has been updated.
           
+   _What URL path will resolve to the ganymede web access directory?_
+          This question is asking what URL the installed web access files
+          will map to in your web server. The installWeb script needs
+          this information in order to configure the Java Network Launch
+          Protocol (JNLP) files for the Ganymede client and admin console
+          for use with the Java Web Start launch manager.
+          
+          If you don't get this right when you install the clients, the
+          Java Web Start option will not work properly. You can edit the
+          installed client.jnlp and console.jnlp files to fix this after
+          the fact, if need be.
+          
    _What is the name of the system that the server will run on?_
           This information is used by the stopServer and xmlclient
           clients that are installed into the server tree. This may be an
@@ -672,4 +684,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Mon Jun 4 01:30:09 CDT 2001
+   Last modified: Thu Jul 19 23:37:13 CDT 2001

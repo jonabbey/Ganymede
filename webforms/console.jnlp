@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- JNLP File for Ganymede Admin Console -->
+<!-- JNLP File for Ganymede Admin Console
+
+     This file defines the launch characteristics for the
+     Ganymede admin console, allowing the Java Web Start program
+     to properly launch the Ganymede admin console.  This file
+     format is documented at 
+
+     http://java.sun.com/products/javawebstart/developers.html
+
+-->
 
 <jnlp spec="1.0+" codebase="#WEBROOT" href="console.jnlp">
   <information>
