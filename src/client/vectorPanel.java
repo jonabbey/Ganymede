@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.18 $ %D%
+  Version: $Revision: 1.19 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -163,14 +163,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	throw new RuntimeException("Cannot get field type: " + rx);
       }
-
-    addB = new JButton("Create new element");
-
     try
       {
 	if (editable && my_field.isEditable())
 	  {
-	    addB.addActionListener(this);
+	    addMouseListener(this);
 	  }
       }
     catch (RemoteException rx)
@@ -180,7 +177,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     
     setLayout(new BorderLayout());
 
-    EmptyBorder eb = (EmptyBorder) BorderFactory.createEmptyBorder(10, 10, 10, 10);
+    EmptyBorder eb = parent.emptyBorder10;
     TitledBorder tb;
 
     try
@@ -203,8 +200,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     ewHash = new Hashtable();
 
     createVectorComponents();
-
-    addMouseListener(this);
 
     invalidateRight();
   }
@@ -677,13 +672,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
       /* If there is only one element remaining in the vector,
 	 the the user should not be able to delete the element. */
-
+    /*
     if (compVector.size() == 1)
       {
 	System.err.println("You cannot delete the only element in a vector");
 	return;
       }
-
+      */
     try
       {
 	if (debug)
