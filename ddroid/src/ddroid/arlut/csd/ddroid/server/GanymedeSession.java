@@ -2976,12 +2976,17 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public QueryResultContainer testQuery(String queryString) throws NotLoggedInException, DDParseException
   {
+    return testQuery(queryString, QueryResultContainer.ARRAYROWS);
+  }
+  
+  public QueryResultContainer testQuery(String queryString, int rowType) throws NotLoggedInException, DDParseException
+  {
     checklogin();
 
     DDQueryTransmuter transmuter = new DDQueryTransmuter();
     Query q = transmuter.transmuteQueryString(queryString);
     QueryResult qr = queryDispatch(q, false, true, null, null); 
-    QueryResultContainer qrc = new QueryResultContainer();
+    QueryResultContainer qrc = new QueryResultContainer(rowType);
 
     /* Get the list of fields the user wants returned */
     List fieldIDs = q.permitList;
