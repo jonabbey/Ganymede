@@ -98,11 +98,6 @@ public class Qsmtp implements Runnable {
 
   // --
 
-  protected DataInputStream replyStream = null;
-  protected BufferedReader reply = null;
-  protected PrintWriter send = null;
-  protected Socket sock = null;
-
   private String hostid = null;
   private InetAddress address = null;
   private int port = DEFAULT_PORT;
@@ -485,6 +480,11 @@ public class Qsmtp implements Runnable {
     String message = msgObj.message;
     Vector extraHeaders = msgObj.extraHeaders;
 
+    DataInputStream replyStream = null;
+    BufferedReader reply = null;
+    PrintWriter send = null;
+    Socket sock = null;
+
     /* -- */
 
     try 
@@ -514,147 +514,184 @@ public class Qsmtp implements Runnable {
 	sock = new Socket(address, port);
       }
 
-    replyStream = new DataInputStream(sock.getInputStream());
-    reply = new BufferedReader(new InputStreamReader(replyStream));
-    send = new PrintWriter(sock.getOutputStream(), true);
 
-    rstr = reply.readLine();
-
-    if (!rstr.startsWith("220")) 
+    try
       {
-	throw new ProtocolException(rstr);
-      }
+	replyStream = new DataInputStream(sock.getInputStream());
+	reply = new BufferedReader(new InputStreamReader(replyStream));
+	send = new PrintWriter(sock.getOutputStream(), true);
 
-    while (rstr.indexOf('-') == 3) 
-      {
 	rstr = reply.readLine();
 
 	if (!rstr.startsWith("220")) 
 	  {
 	    throw new ProtocolException(rstr);
 	  }
-      }
 
-    String host = local.getHostName();
+	while (rstr.indexOf('-') == 3) 
+	  {
+	    rstr = reply.readLine();
 
-    send.print("HELO " + host);
-    send.print(EOL);
-    send.flush();
+	    if (!rstr.startsWith("220")) 
+	      {
+		throw new ProtocolException(rstr);
+	      }
+	  }
 
-    rstr = reply.readLine();
-    if (!rstr.startsWith("250")) 
-      {
-	throw new ProtocolException(rstr);
-      }
+	String host = local.getHostName();
 
-    sstr = "MAIL FROM: " + from_address ;
-    send.print(sstr);
-    send.print(EOL);
-    send.flush();
+	send.print("HELO " + host);
+	send.print(EOL);
+	send.flush();
 
-    rstr = reply.readLine();
-    if (!rstr.startsWith("250")) 
-      {
-	throw new ProtocolException(rstr);
-      }
+	rstr = reply.readLine();
+	if (!rstr.startsWith("250")) 
+	  {
+	    throw new ProtocolException(rstr);
+	  }
 
-    for (int i = 0; i < to_addresses.size(); i++)
-      {
-	sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
+	sstr = "MAIL FROM: " + from_address ;
 	send.print(sstr);
 	send.print(EOL);
 	send.flush();
 
 	rstr = reply.readLine();
-
 	if (!rstr.startsWith("250")) 
 	  {
-	    throw new ProtocolException(rstr + " received for address " + 
-					(String) to_addresses.elementAt(i));
-	  }
-      }
-
-    send.print("DATA");
-    send.print(EOL);
-    send.flush();
-
-    rstr = reply.readLine();
-    if (!rstr.startsWith("354")) 
-      {
-	throw new ProtocolException(rstr);
-      }
-
-    send.print("From: " + from_address);
-    send.print(EOL);
-
-    StringBuffer targetString = new StringBuffer();
-
-    for (int i = 0; i < to_addresses.size(); i++)
-      {
-	if (i > 0)
-	  {
-	    targetString.append(", ");
+	    throw new ProtocolException(rstr);
 	  }
 
-	targetString.append((String) to_addresses.elementAt(i));
-      }
-
-    send.print("To: " + targetString.toString());
-    send.print(EOL);
-    send.print("Subject: " + subject);
-    send.print(EOL);
-    
-    // Create Date - we'll cheat by assuming that local clock is right
-    
-    Date today_date = new Date();
-    send.print("Date: " + formatDate(today_date));
-    send.print(EOL);
-    send.flush();
-
-    // Warn the world that we are on the loose - with the comments header:
-
-    send.print("Comment: Unauthenticated sender");
-    send.print(EOL);
-    send.print("X-Mailer: JNet Qsmtp");
-    send.print(EOL);
-
-    if (extraHeaders != null)
-      {
-	String header;
-
-	for (int i = 0; i < extraHeaders.size(); i++)
+	for (int i = 0; i < to_addresses.size(); i++)
 	  {
-	    header = (String) extraHeaders.elementAt(i);
-	    send.print(header);
+	    sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
+	    send.print(sstr);
 	    send.print(EOL);
 	    send.flush();
+
+	    rstr = reply.readLine();
+
+	    if (!rstr.startsWith("250")) 
+	      {
+		throw new ProtocolException(rstr + " received for address " + 
+					    (String) to_addresses.elementAt(i));
+	      }
+	  }
+
+	send.print("DATA");
+	send.print(EOL);
+	send.flush();
+
+	rstr = reply.readLine();
+	if (!rstr.startsWith("354")) 
+	  {
+	    throw new ProtocolException(rstr);
+	  }
+
+	send.print("From: " + from_address);
+	send.print(EOL);
+
+	StringBuffer targetString = new StringBuffer();
+
+	for (int i = 0; i < to_addresses.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		targetString.append(", ");
+	      }
+
+	    targetString.append((String) to_addresses.elementAt(i));
+	  }
+
+	send.print("To: " + targetString.toString());
+	send.print(EOL);
+	send.print("Subject: " + subject);
+	send.print(EOL);
+    
+	// Create Date - we'll cheat by assuming that local clock is right
+    
+	Date today_date = new Date();
+	send.print("Date: " + formatDate(today_date));
+	send.print(EOL);
+	send.flush();
+
+	// Warn the world that we are on the loose - with the comments header:
+
+	send.print("Comment: Unauthenticated sender");
+	send.print(EOL);
+	send.print("X-Mailer: JNet Qsmtp");
+	send.print(EOL);
+
+	if (extraHeaders != null)
+	  {
+	    String header;
+
+	    for (int i = 0; i < extraHeaders.size(); i++)
+	      {
+		header = (String) extraHeaders.elementAt(i);
+		send.print(header);
+		send.print(EOL);
+		send.flush();
+	      }
+	  }
+
+	// Sending a blank line ends the header part.
+
+	send.print(EOL);
+
+	// Now send the message proper
+	send.print(message);
+	send.print(EOL);
+	send.print(".");
+	send.print(EOL);
+	send.flush();
+    
+	rstr = reply.readLine();
+	if (!rstr.startsWith("250")) 
+	  {
+	    throw new ProtocolException(rstr);
+	  }
+
+	// close our mailer connection
+
+	send.print("QUIT");
+	send.print(EOL);
+	send.flush();
+      }
+    finally
+      {
+	try
+	  {
+	    if (replyStream != null)
+	      {
+		replyStream.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+				// shrug
+	  }
+
+	try
+	  {
+	    if (send != null)
+	      {
+		send.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+				// shrug
+	  }
+
+	try
+	  {
+	    sock.close();
+	  }
+	catch (IOException ex)
+	  {
+				// shrug
 	  }
       }
-
-    // Sending a blank line ends the header part.
-
-    send.print(EOL);
-
-    // Now send the message proper
-    send.print(message);
-    send.print(EOL);
-    send.print(".");
-    send.print(EOL);
-    send.flush();
-    
-    rstr = reply.readLine();
-    if (!rstr.startsWith("250")) 
-      {
-	throw new ProtocolException(rstr);
-      }
-
-    // close our mailer connection
-
-    send.print("QUIT");
-    send.print(EOL);
-    send.flush();
-
-    sock.close();
   }
 
   /**
