@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/07/14 21:51:53 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/07/28 22:05:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -266,15 +266,15 @@ public class userRenameWizard extends GanymediatorWizard {
 			 "Thanks",
 			 null,
 			 "ok.gif");
-	
-	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
-	retVal.addRescanField(userObject.getInvid(), userSchema.ALIASES);
-	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
-	retVal.addRescanField(userObject.getInvid(), userSchema.VOLUMES);
-	retVal.addRescanField(userObject.getInvid(), userSchema.EMAILTARGET);
       }
-    
-    System.err.println("Returning confirmation dialog");
+    else if (retVal.didSucceed())
+      {
+	retVal.setDialog(new JDialogBuff("User Rename Performed",
+					 "OK, User renamed.",
+					 "Thanks",
+					 null,
+					 "ok.gif"));
+      }
     
     return retVal;
   }
