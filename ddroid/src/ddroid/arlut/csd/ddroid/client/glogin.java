@@ -383,7 +383,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     JLabel image = new JLabel(new ImageIcon(ganymede_logo));
     image.setOpaque(true);
-    image.setBackground(Color.black);
+    image.setBackground(new Color(111,207,247));
 
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridx = 0;

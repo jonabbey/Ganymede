@@ -22,10 +22,6 @@ echo "Running Directory Droid Client"
 
 export CLASSPATH
 
-# For Java 1.1
-
-#$JAVA -mx48m arlut.csd.ddroid.client.glogin properties=$PROPERTIES
-
 # For Java 1.2/1.3
 
 $JAVA -Xmx48m arlut.csd.ddroid.client.glogin properties=$PROPERTIES

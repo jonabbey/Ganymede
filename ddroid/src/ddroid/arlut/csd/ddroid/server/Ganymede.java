@@ -339,24 +339,32 @@ public class Ganymede {
 
     ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.Ganymede");
         
-    propFilename = ParseArgs.getArg("properties", argv);
-    
-    debugFilename = ParseArgs.getArg("debug", argv);
-
     /* If the "usedirectory" option is set, then use the supplied directory name 
      * as the base path to the properties file (which is assumed to be 
      * "ganymede.properties" and the debug log (assumed to be debug.log).
      */
     useDirectory = ParseArgs.getArg("usedirectory", argv);
+
     if (useDirectory != null)
       {
         String fileSeparator = System.getProperty("file.separator");
         
-        if (propFilename == null)
-          propFilename = useDirectory + fileSeparator + "ganymede.properties";
+	propFilename = useDirectory + fileSeparator + "ganymede.properties";
         
-        if (debugFilename == null)
-          debugFilename = useDirectory + fileSeparator + "debug.log";
+	if (ParseArgs.switchExists("logrmi", argv))
+	  {
+	    debugFilename = useDirectory + fileSeparator + "debug.log";
+	  }
+      }
+
+    if (ParseArgs.getArg("properties", argv) != null)
+      {
+	propFilename = ParseArgs.getArg("properties", argv);
+      }
+    
+    if (ParseArgs.getArg("logrmi", argv) != null)
+      {
+	debugFilename = ParseArgs.getArg("debug", argv);
       }
 
     if (propFilename == null)

@@ -63,6 +63,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ddroid.common.Invid;
@@ -110,6 +111,13 @@ import arlut.csd.ddroid.rmi.invid_field;
 public final class InvidDBField extends DBField implements invid_field {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.InvidDBField");
 
   // ---
 
@@ -198,14 +206,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition)
   {
-    if (definition.isArray())
-      {
-	throw new IllegalArgumentException("scalar value constructor called on vector field " + getName() +
-					   " in object " + owner.getLabel());
-      }
-
     this.owner = owner;
     this.fieldcode = definition.getID();
+
+    if (definition.isArray())
+      {
+	// "scalar value constructor called on vector field {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("init.type_mismatch", getName(), owner.getLabel()));
+      }
+
     this.value = value;
   }
 
@@ -217,14 +226,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
-    if (!definition.isArray())
-      {
-	throw new IllegalArgumentException("vector value constructor called on scalar field " + getName() +
-					   " in object " + owner.getLabel());
-      }
-
     this.owner = owner;
     this.fieldcode = definition.getID();
+
+    if (!definition.isArray())
+      {
+	// "vector value constructor called on scalar field {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("init.type_mismatch2", getName(), owner.getLabel()));
+      }
     
     if (values == null)
       {
@@ -452,8 +461,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (target == null)
       {
-	System.err.println("InvidDBField.emitInvidXML(): " + this.toString() + 
-			   " has an invalid invid: " + invid + ", not writing it to XML.");
+	// "InvidDBField.emitInvidXML(): {0} has an invalid invid: {1}, not writing it to XML."
+	System.err.println(ts.l("emitInvidXML.bad_invid", this.toString(), invid));
 	return;
       }
 
@@ -509,8 +518,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName() +
-					   " in object " + owner.getLabel());
+	// "scalar accessor called on vector field {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("value.type_mismatch", getName(), owner.getLabel()));
       }
 
     return (Invid) value;
@@ -520,8 +529,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar " + getName() +
-					   " in object " + owner.getLabel());
+	// "vector accessor called on scalar field {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("value.type_mismatch2", getName(), owner.getLabel()));
       }
 
     return (Invid) getVectVal().elementAt(index);
@@ -659,7 +668,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (objectRef == null)
 	  {
-	    return "***no target for invid " + invid.toString() + " ***";
+	    // "*** no target for invid {0} ***"
+	    return ts.l("getRemoteLabel.nonesuch", invid.toString());
 	  }
 
 	return objectRef.getLabel();
@@ -711,12 +721,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!(orig instanceof InvidDBField))
       {
-	throw new IllegalArgumentException("bad field comparison " + getName());
-      }
-
-    if (debug)
-      {
-	System.err.println("Entering InvidDBField getDiffString()");
+	// "Bad field comparison {0}"
+	throw new IllegalArgumentException(ts.l("getDiffString.badtype", getName()));
       }
 
     if (orig == this)
@@ -754,11 +760,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	/* -- */
 
-	if (debug)
-	  {
-	    System.err.println("vector diff.. searching for deleted items");
-	  }
-
 	// find elements in the orig field that aren't in our present field
 
 	Hashtable currentElements = new Hashtable();
@@ -779,11 +780,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	while (en.hasMoreElements())
 	  {
-	    if (debug)
-	      {
-		System.err.print("x");
-	      }
-
 	    element = en.nextElement();
 
 	    if (currentElements.get(element) == null)
@@ -794,20 +790,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// find elements in our present field that aren't in the orig field
 
-	if (debug)
-	  {
-	    System.err.println("vector diff.. searching for added items");
-	  }
-
 	Hashtable origElements = new Hashtable();
 
 	for (int i = 0; !found && i < origValues.size(); i++)
 	  {
-	    if (debug)
-	      {
-		System.err.print(",");
-	      }
-
 	    element = origValues.elementAt(i);
 	    
 	    origElements.put(element, element);
@@ -817,11 +803,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	while (en.hasMoreElements())
 	  {
-	    if (debug)
-	      {
-		System.err.print("x");
-	      }
-
 	    element = en.nextElement();
 
 	    if (origElements.get(element) == null)
@@ -840,11 +821,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (deleted.size() != 0)
 	      {
-		if (debug)
-		  {
-		    System.err.print("Working out deleted items");
-		  }
-
 		result.append("\tDeleted: ");
 	    
 		for (int i = 0; i < deleted.size(); i++)
@@ -864,11 +840,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (added.size() != 0)
 	      {
-		if (debug)
-		  {
-		    System.err.print("Working out added items");
-		  }
-
 		result.append("\tAdded: ");
 	    
 		for (int i = 0; i < added.size(); i++)
@@ -891,11 +862,6 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("InvidDBField: scalar getDiffString() comparison");
-	  }
-
 	if (origI.value().equals(this.value()))
 	  {
 	    return null;
