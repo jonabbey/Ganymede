@@ -671,16 +671,9 @@ public class Qsmtp implements Runnable {
 				// shrug
 	  }
 
-	try
+	if (send != null)
 	  {
-	    if (send != null)
-	      {
-		send.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-				// shrug
+	    send.close();
 	  }
 
 	try
