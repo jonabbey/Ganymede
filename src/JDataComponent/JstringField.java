@@ -10,8 +10,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/01/22 18:04:00 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/02/25 01:26:09 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -74,7 +74,7 @@ import java.rmi.RemoteException;
  *    be preset.</p>
  */
 
-public class JstringField extends JentryField implements KeyListener{
+public class JstringField extends JentryField implements KeyListener {
 
   public static final boolean debug = false;
 
@@ -320,14 +320,14 @@ public class JstringField extends JentryField implements KeyListener{
 
   public void setAllowedChars(String s)
   {
-     if (s != null)
-       {
-	 this.allowedChars = s;
-       }
-     else 
-       {
-	 this.allowedChars = null;
-       }
+    if (s != null)
+      {
+	this.allowedChars = s;
+      }
+    else 
+      {
+	this.allowedChars = null;
+      }
   }
  
   /**

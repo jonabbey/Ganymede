@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/01/22 18:04:01 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/02/25 01:26:09 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -56,6 +56,7 @@ import java.rmi.*;
 import java.net.*;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.border.*;
 
 import arlut.csd.JTable.*;
@@ -346,19 +347,46 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 				   addCustom.doClick();
 				 }
 			     });
-      
+
+
     JPanel customP = new JPanel();
     customP.setLayout(new BorderLayout());
     customP.add("Center", custom);
 
     if (editable)
       {
-	if (! (mustChoose && out == null))
+	if (!(mustChoose && out == null))
 	  {
 	    addCustom = new JButton("Add");
+	    addCustom.setEnabled(false);
 	    addCustom.setActionCommand("AddNewString");
 	    addCustom.addActionListener(this);
 	    customP.add("East", addCustom);
+
+	    // we only want this add button to be active when the user
+	    // has entered something in the text field.  Some users
+	    // have been confused by the add button just sitting there
+	    // active.
+
+	    custom.getDocument().addDocumentListener(new DocumentListener()
+						     {
+						       public void changedUpdate(DocumentEvent x) {}
+						       public void insertUpdate(DocumentEvent x) 
+							 {
+							   if (x.getDocument().getLength() > 0)
+							     {
+							       addCustom.setEnabled(true);
+							     }
+							 }
+						       
+						       public void removeUpdate(DocumentEvent x) 
+							 {
+							   if (x.getDocument().getLength() == 0)
+							     {
+							       addCustom.setEnabled(false);
+							     }
+							 }
+						     });
 	  }
       }
     
