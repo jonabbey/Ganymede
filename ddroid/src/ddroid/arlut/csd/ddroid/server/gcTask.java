@@ -87,7 +87,7 @@ class gcTask implements Runnable {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.gctask");
+	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.gcTask");
       }
   }
 

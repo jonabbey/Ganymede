@@ -77,7 +77,7 @@ class dumpAndArchiveTask implements Runnable {
   {
     if (dumpAndArchiveTask.ts == null)
       {
-	dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumpandarchivetask");
+	dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumpAndArchiveTask");
       }
   }
 

@@ -70,7 +70,7 @@ import java.io.*;
 
 class dumpTask implements Runnable {
 
-  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumptask");
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumpTask");
 
   public dumpTask()
   {

@@ -309,7 +309,7 @@ public class Ganymede {
 
     /* -- */
 
-    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.ganymede");
+    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.Ganymede");
 
     propFilename = ParseArgs.getArg("properties", argv);
 

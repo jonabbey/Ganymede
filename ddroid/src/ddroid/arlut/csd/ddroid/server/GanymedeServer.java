@@ -142,6 +142,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
   /**
+   * <p>TranslationService object for handling string localization in the Ganymede
+   * server.</p>
+   */
+
+  static TranslationService ts = null;
+
+  /**
    * <p>During the login process, we need to get exclusive access over
    * an extended time to synchronized methods in a privileged
    * GanymedeSession to do the query operations for login.  If we used
@@ -169,6 +176,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public GanymedeServer() throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
+
+    ts = new TranslationService("arlut.csd.ddroid.server.GanymedeServer");
  
     if (server == null)
       {
@@ -176,8 +185,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     else
       {
-	Ganymede.debug("Error: attempted to start a second server");
-	throw new RemoteException("Error: attempted to start a second server");
+	Ganymede.debug(ts.l("init.multiserver"));
+	throw new RemoteException(ts.l("init.multiserver"));
       }
 
     loginSession = new GanymedeSession(); // supergash
@@ -314,14 +323,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    if (error.equals("shutdown"))
 	      {
-		return Ganymede.createErrorDialog("No logins allowed",
-						  "The server is currently waiting to shut down.  No logins will be " +
-						  "accepted until the server has restarted.");
+		return Ganymede.createErrorDialog(ts.l("processLogins.nologins"),
+						  ts.l("processLogins.nologins_shutdown"));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("No logins allowed",
-						  "Can't login to the Directory Droid server.. semaphore disabled: " + error);
+		return Ganymede.createErrorDialog(ts.l("processLogins.nologins"),
+						  ts.l("processLogins.nologins_semaphore", error));
 	      }
 	  }
       }
@@ -425,14 +433,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		    if (pdbf == null)
 		      {
-			System.err.println("GanymedeServer.login(): Couldn't get password for persona " + 
-					   persona.getLabel());
+			System.err.println(ts.l("processLogin.nopersonapass", persona.getLabel()));
 		      }
 		    else
 		      {
 			if (clientPass == null)
 			  {
-			    System.err.println("GanymedeServer.login(): null clientpass.. ");
+			    System.err.println(ts.l("processLogin.nopass"));
 			  }
 			else
 			  {
@@ -474,7 +481,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 							      user, persona, 
 							      directSession, clientIsRemote);
 
-		Ganymede.debug(session.username + " logged in from " + session.clienthost);
+		Ganymede.debug(ts.l("processLogin.loggedin", session.username, session.clienthost));
 
 		Vector objects = new Vector();
 
@@ -490,10 +497,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		if (Ganymede.log != null)
 		  {
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
-							       "OK login for username: " + 
-							       clientName + 
-							       " from host " + 
-							       session.clienthost,
+							       ts.l("processLogin.logevent", clientName, session.clienthost),
 							       null,
 							       clientName,
 							       objects,
@@ -535,17 +539,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    //	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
 
 		    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-							       "Bad login attempt for username: " + 
-							       clientName + " from host " + 
-							       clienthost,
+							       ts.l("processLogin.badlogevent", clientName, clienthost),
 							       null,
 							       clientName,
 							       null,
 							       recipients));
 		  }
 
-		return Ganymede.createErrorDialog("Bad login attempt",
-						  "Bad username or password, login rejected.");
+		return Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
+						  ts.l("processLogin.badlogintext"));
 	      }
 	  }
       }
@@ -559,7 +561,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    // semaphore so the notify won't show the semaphore
 	    // increment
 
-	    Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
+	    Ganymede.debug(ts.l("processLogin.badlogevent", clientName, clienthost));
 	  }
       }
   }
@@ -794,7 +796,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		GanymedeServer.shutdown();
 	      }
-	    }, "Directory Droid Shutdown Thread");
+	      }, ts.l("clearActiveUser.deathThread"));
 
 	    deathThread.start();
 	  }
@@ -821,7 +823,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   {
     if ((key.indexOf('/') != -1) || (key.indexOf('\\') != -1))
       {
-	throw new IllegalArgumentException("Error, attempt to use path separator in message key.");
+	throw new IllegalArgumentException(ts.l("getTextMessage.badargs"));
       }
 
     if (html)
@@ -835,7 +837,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (Ganymede.messageDirectoryProperty == null)
       {
-	Ganymede.debug("GanymedeServer.getTextMessage(): messageDirectoryProperty not set.  Can't provide " + key);
+	Ganymede.debug(ts.l("getTextMessage.nodir", key));
 	return null;
       }
 
@@ -892,8 +894,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("IOException in GanymedeServer.getTextMessage(" + 
-			   filename + "):\n" + ex.getMessage());
+	    Ganymede.debug(ts.l("getTextMessage.IOExceptionReport", filename, ex.getMessage()));
 	    Ganymede.debug(result.toString());
 	  }
       }
@@ -947,8 +948,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (error != null)
       {
-	return Ganymede.createErrorDialog("Admin Console Connect Failure",
-					  "Can't connect admin console to server.. semaphore disabled: " + error);
+	return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
+					  ts.l("admin.semaphore_failure", error));
       }
 
     // we want to match against either the persona name field or
@@ -1041,9 +1042,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	if (Ganymede.log != null)
 	  {
 	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-						       "Bad console attach attempt by: " + 
-						       clientName + " from host " + 
-						       clienthost,
+						       ts.l("admin.badlogevent", clientName, clienthost),
 						       null,
 						       clientName,
 						       null,
@@ -1062,14 +1061,14 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     // even though we haven't returned the admin session to the admin
     // console client
 
-    Ganymede.debug("Admin console attached for admin " + clientName + " from: " + clienthost);
+    String eventStr = ts.l("admin.goodlogevent", clientName, clienthost);
+
+    Ganymede.debug(eventStr);
 
     if (Ganymede.log != null)
       {
 	Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
-						   "Admin console attached by: " + 
-						   clientName + " from host " + 
-						   clienthost,
+						   eventStr,
 						   null,
 						   clientName,
 						   null,
@@ -1107,7 +1106,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (GanymedeServer.lSemaphore.getCount() == 0)
       {
-	GanymedeAdmin.setState("No users logged in, shutting down.");
+	GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
 
 	GanymedeServer.shutdown();
 
@@ -1120,7 +1119,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     shutdown = true;
 
-    GanymedeAdmin.setState("Server going down.. waiting for users to log out");
+    GanymedeAdmin.setState(ts.l("setShutDown.waiting_state"));
   }
 
   /**
@@ -1154,16 +1153,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	if (semaphoreState != null)
 	  {
-	    return Ganymede.createErrorDialog("Shutdown failure",
-					      "Shutdown failure.. couldn't shutdown the server, semaphore " +
-					      "already locked with condition " + semaphoreState);
+	    return Ganymede.createErrorDialog(ts.l("shutdown.failure"),
+					      ts.l("shutdown.failure_text", semaphoreState));
 	  }
       }
     
     // wait for any phase 2 builder tasks to complete, block any new builder tasks
     // from executing
 
-    Ganymede.debug("Server going down.. waiting for any builder tasks to finish phase 2");
+    Ganymede.debug(ts.l("shutdown.goingdown"));
 
     try
       {
@@ -1174,7 +1172,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// not much that we can do at this point
       }
 
-    Ganymede.debug("Server going down.. performing final dump");
+    Ganymede.debug(ts.l("shutdown.dumping"));
 
     try
       {
@@ -1194,16 +1192,16 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("shutdown error: couldn't successfully consolidate db.");
+	    Ganymede.debug(ts.l("shutdown.dumperror"));
 	    throw ex;		// maybe didn't lock, so go down hard
 	  }
 
 	// ok, we now are left holding a dump lock.  it should be safe to kick
 	// everybody off and shut down the server
 
-	Ganymede.debug("Server going down.. database locked");
+	Ganymede.debug(ts.l("shutdown.locked"));
 
-	Ganymede.debug("Server going down.. disconnecting clients");
+	Ganymede.debug(ts.l("shutdown.clients"));
 
 	// forceOff modifies GanymedeServer.sessions, so we need to
 	// copy our list before we iterate over it.
@@ -1227,26 +1225,27 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	// stop any background tasks running
 
-	Ganymede.debug("Server going down.. interrupting scheduler");
+	Ganymede.debug(ts.l("shutdown.scheduler"));
 
 	Ganymede.scheduler.interrupt();
 
 	// disconnect the admin consoles
 
-	Ganymede.debug("Server going down.. disconnecting consoles");
+	Ganymede.debug(ts.l("shutdown.consoles"));
 
-	GanymedeAdmin.closeAllConsoles("Server going down now.");
+	GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
 
 	// log our shutdown and close the log
 
 	Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-						   "Server shutdown",
+						   ts.l("shutdown.logevent"),
 						   null,
 						   null,
 						   null,
 						   null));
 
-	System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
+	System.err.println();
+	System.err.println(ts.l("shutdown.closinglog"));
 
 	try
 	  {
@@ -1254,22 +1253,23 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("IO Exception closing log file:" + ex);
+	    System.err.println(ts.l("shutdown.logIOException", ex.toString()));
 	  }
       }
     catch (Exception ex)
       {
-	System.err.println("Caught exception during final shutdown:");
+	System.err.println(ts.l("shutdown.Exception"));
 	ex.printStackTrace();
       }
     catch (Error ex)
       {
-	System.err.println("Caught error during final shutdown:");
+	System.err.println(ts.l("shutdown.Error"));
 	ex.printStackTrace();
       }
     finally
       {
-	System.err.println("\nServer shutdown complete.");
+	System.err.println();
+	System.err.println(ts.l("shutdown.finally"));
 	
 	System.exit(0);
 	
@@ -1293,7 +1293,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (IOException ex)
       {
-	throw new RuntimeException("GanymedeServer.dump error: " + ex);
+	throw new RuntimeException(ts.l("dump.exception", ex.toString()));
       }
   }
 
@@ -1359,7 +1359,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("sweepInvids couldn't proceed.");
+	Ganymede.debug(ts.l("sweepInvids.noproceed"));
 
 	return false;		// actually we just failed, but same difference
       }
@@ -1374,7 +1374,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    base = (DBObjectBase) enum1.nextElement();
 
-	    Ganymede.debug("GanymedeServer.sweepInvids(): sweeping " + base);
+	    Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
 
 	    // loop 2: iterate over the objects in the current object base
 
@@ -1426,10 +1426,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 				  }
 				else
 				  {
-				    Ganymede.debug("Removing invid: " + invid + 
-						   " from vector field " + iField.getName() +
-						   " from object " +  base.getName() + 
-						   ":" + object.getLabel());
+				    Ganymede.debug(ts.l("sweepInvids.removing_vector",
+							invid.toString(),
+							iField.getName(),
+							base.getName(),
+							object.getLabel()));
+
 				    swept = true;
 				  }
 			      }
@@ -1451,10 +1453,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 				swept = true;
 				removeVector.addElement(new Short(iField.getID()));
 
-				Ganymede.debug("Removing invid: " + invid + 
-					       " from scalar field " + iField.getName() +
-					       " from object " +  base.getName() + 
-					       ":" + object.getLabel());
+				Ganymede.debug(ts.l("sweepInvids.removing_scalar",
+						    invid.toString(),
+						    iField.getName(),
+						    base.getName(),
+						    object.getLabel()));
 			      }
 			  }
 		      }
@@ -1466,10 +1469,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  {
 		    object.clearField(((Short) removeVector.elementAt(i)).shortValue());
 
-		    Ganymede.debug("Undefining (now) empty field: " + 
-				   removeVector.elementAt(i) +
-				   " from object " +  base.getName() + 
-				   ":" + object.getLabel());
+		    Ganymede.debug(ts.l("sweepInvids.undefining",
+					removeVector.elementAt(i).toString(),
+					base.getName(),
+					object.getLabel()));
 		  }
 	      }
 	  }
@@ -1479,7 +1482,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	lock.release();
       }
 
-    Ganymede.debug("GanymedeServer.sweepInvids(): completed");
+    Ganymede.debug(ts.l("sweepInvids.done"));
 
     return swept;
   }
@@ -1543,7 +1546,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("checkInvids couldn't proceed.");
+	Ganymede.debug(ts.l("checkInvids.noproceed"));
 
 	return false;		// actually we just failed, but same difference
       }
@@ -1560,15 +1563,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    // loop over the objects in this base
 
-	    Ganymede.debug("Testing invid links for objects of type " + base.getName());
+	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
 	
 	    enum2 = base.objectTable.elements();
 
 	    while (enum2.hasMoreElements())
 	      {
 		object = (DBObject) enum2.nextElement();
-
-		//	Ganymede.debug("Testing invid links for object " + object.getLabel());
 
 		// loop over the fields in this object	    
 
@@ -1598,9 +1599,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	synchronized (Ganymede.db.backPointers)
 	  {
-	    Ganymede.debug("Testing Directory Droid backPointers hash structure for validity");
-	    Ganymede.debug("Directory Droid backPointers hash structure tracking " + Ganymede.db.backPointers.size() +
-			   " invid's.");
+	    Ganymede.debug(ts.l("checkInvids.backpointers"));
+	    Ganymede.debug(ts.l("checkInvids.backpointers2", Ganymede.db.backPointers.size()));
 
 	    Enumeration keys = Ganymede.db.backPointers.keys();
 
@@ -1622,9 +1622,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 			// is safe because it just winds up being
 			// another viewDBObject call
 		    
-			Ganymede.debug("*** Backpointers hash for object " +
-				       session.getGSession().describe(key) +
-				       " has an invid pointing to a non-existent object: " + backTarget);
+			Ganymede.debug(ts.l("checkInvids.aha", 
+					    session.getGSession().describe(key),
+					    backTarget.toString()));
 		      }
 		  }
 	      }
@@ -1635,7 +1635,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	lock.release();
       }
 
-    Ganymede.debug("Directory Droid invid link test complete");
+    Ganymede.debug(ts.l("checkInvids.done"));
 
     return ok;
   }
@@ -1684,7 +1684,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("checkEmbeddedObjects couldn't proceed.");
+	Ganymede.debug(ts.l("checkEmbeddedObjects.noproceed"));
 
 	return false;		// actually we just failed, but same difference
       }
@@ -1706,7 +1706,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    // loop over the objects in this base
 
-	    Ganymede.debug("Testing embedded object container integrity for objects of type " + base.getName());
+	    Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
 	
 	    enum2 = base.objectTable.elements();
 
@@ -1720,7 +1720,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  }
 		catch (IntegrityConstraintException ex)
 		  {
-		    Ganymede.debug("Couldn't find containing object for " + object.getTypeName() + ": " + object.getLabel());
+		    Ganymede.debug(ts.l("checkEmbeddedObjects.aha", object.getTypeName(), object.getLabel()));
 		    ok = false;
 		  }
 	      }
@@ -1731,7 +1731,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	lock.release();
       }
 
-    Ganymede.debug("Directory Droid embedded object test complete");
+    Ganymede.debug(ts.l("checkEmbeddedObjects.done"));
 
     return ok;
   }
@@ -1777,8 +1777,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
-	return Ganymede.createErrorDialog("Failure",
-					  "Couldn't get a dump lock to sweep the database for embedded objects");
+	return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.failure"),
+					  ts.l("sweepEmbeddedObjects.failure_text"));
       }
 
     try
@@ -1798,7 +1798,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    // loop over the objects in this base
 
-	    Ganymede.debug("Testing embedded object container integrity for objects of type " + base.getName());
+	    Ganymede.debug(ts.l("sweepEmbeddedObjects.checking", base.getName()));
 	
 	    enum2 = base.objectTable.elements();
 
@@ -1824,7 +1824,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (invidsToDelete.size() == 0)
       {
-	Ganymede.debug("Directory Droid embedded object sweep complete");
+	Ganymede.debug(ts.l("sweepEmbeddedObjects.complete"));
 
 	return null;
       }
@@ -1861,11 +1861,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		Ganymede.debug("Couldn't delete object " + gSession.viewObjectLabel(objInvid));
+		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.viewObjectLabel(objInvid)));
 	      }
 	    else
 	      {
-		Ganymede.debug("Deleted object " + gSession.viewObjectLabel(objInvid));
+		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.viewObjectLabel(objInvid)));
 	      }
 	  }
 
@@ -1873,8 +1873,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Mysterious not logged in error:" + ex.getMessage());
+	return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.error"),
+					  ts.l("sweepEmbeddedObjects.error_text", ex.getMessage()));
       }
     finally
       {

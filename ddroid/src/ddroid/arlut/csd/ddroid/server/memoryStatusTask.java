@@ -72,6 +72,10 @@ import java.util.*;
  * arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} by {@link
  * arlut.csd.ddroid.server.Ganymede#registerTasks() registerTasks()}, to
  * run every minute.</p> 
+ *
+ * <p>This task implements {@link arlut.csd.ddroid.server.silentTask silentTask}
+ * in order to signal the GanymedeScheduler not to print anything to the console
+ * when the task is run.</p>
  */
 
 class memoryStatusTask implements Runnable, silentTask {
@@ -109,7 +113,7 @@ class memoryStatusTask implements Runnable, silentTask {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.memorystatustask");
+	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.memoryStatusTask");
       }
   }
 

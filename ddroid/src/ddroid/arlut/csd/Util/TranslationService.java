@@ -85,8 +85,6 @@ import java.text.MessageFormat;
 
 public class TranslationService {
 
-  // - Statics
-
   /**
    * <p>This is a factory method for creating TranslationService
    * objects.  We use a factory method so that we have the option
@@ -119,8 +117,7 @@ public class TranslationService {
   Locale ourLocale = null;
   MessageFormat formatter = null;
   String lastPattern = null;
-  String lastKey = null;
-  Object[] singleArgs, doubleArgs, tripleArgs;
+  Object[] singleArgs, doubleArgs, tripleArgs, quadArgs;
   String resourceName;
   int wordWrapCols=0;
 
@@ -183,27 +180,29 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key)
+  public String l(String key)
   {
     String pattern = null;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    return wrap(pattern);
+    catch (MissingResourceException ex)
+      {
+	return null;
+      }
+    
+    if (wordWrapCols > 0 && pattern.length() > wordWrapCols)
+      {
+	return WordWrap.wrap(pattern, wordWrapCols);
+      }
+    else
+      {
+	return pattern;
+      }
   }
 
   /**
@@ -221,34 +220,18 @@ public class TranslationService {
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
 
     this.singleArgs[0] = param; 
 
-    return wrap(formatter.format(pattern, singleArgs));
+    return this.format(pattern, singleArgs);
   }
 
   /**
@@ -263,37 +246,26 @@ public class TranslationService {
   public synchronized String l(String key, int param)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
 
     this.singleArgs[0] = new Integer(param); 
 
-    return wrap(formatter.format(pattern, singleArgs));
+    result = this.format(pattern, singleArgs);
+
+    this.singleArgs[0] = null;
+
+    return result;
   }
 
   /**
@@ -308,38 +280,28 @@ public class TranslationService {
   public synchronized String l(String key, String param, String param2)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
 
     this.doubleArgs[0] = param; 
-    this.doubleArgs[0] = param2; 
+    this.doubleArgs[1] = param2; 
 
-    return wrap(formatter.format(pattern, doubleArgs));
+    result = this.format(pattern, doubleArgs);
+
+    this.doubleArgs[0] = null;
+    this.doubleArgs[1] = null;
+
+    return result;
   }
 
   /**
@@ -354,38 +316,28 @@ public class TranslationService {
   public synchronized String l(String key, String param, int param2)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
 
     this.doubleArgs[0] = param; 
-    this.doubleArgs[0] = new Integer(param2); 
+    this.doubleArgs[1] = new Integer(param2); 
 
-    return wrap(formatter.format(pattern, doubleArgs));
+    result = this.format(pattern, doubleArgs);
+
+    this.doubleArgs[0] = null;
+    this.doubleArgs[1] = null;
+
+    return result;
   }
 
   /**
@@ -400,39 +352,30 @@ public class TranslationService {
   public synchronized String l(String key, String param, String param2, String param3)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
 
     this.tripleArgs[0] = param; 
-    this.tripleArgs[0] = param2; 
-    this.tripleArgs[0] = param3; 
+    this.tripleArgs[1] = param2; 
+    this.tripleArgs[2] = param3; 
 
-    return wrap(formatter.format(pattern, tripleArgs));
+    result = this.format(pattern, tripleArgs);
+
+    this.tripleArgs[0] = null;
+    this.tripleArgs[1] = null; 
+    this.tripleArgs[2] = null; 
+
+    return result;
   }
 
   /**
@@ -447,39 +390,61 @@ public class TranslationService {
   public synchronized String l(String key, String param, String param2, int param3)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
-    if (this.lastKey == null || key != this.lastKey)
+    try
       {
-	try
-	  {
-	    pattern = bundle.getString(key);
-	  }
-	catch (MissingResourceException ex)
-	  {
-	    return null;
-	  }
-
-	this.lastKey = key;
+	pattern = bundle.getString(key);
       }
-
-    if (formatter == null)
+    catch (MissingResourceException ex)
       {
-	formatter = new MessageFormat(pattern);
+	return null;
       }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-      }
-
-    this.lastPattern = pattern;
-
+    
     this.tripleArgs[0] = param; 
-    this.tripleArgs[0] = param2; 
-    this.tripleArgs[0] = new Integer(param3); 
+    this.tripleArgs[1] = param2; 
+    this.tripleArgs[2] = new Integer(param3); 
 
-    return wrap(formatter.format(pattern, tripleArgs));
+    result = this.format(pattern, tripleArgs);
+
+    this.tripleArgs[0] = null;
+    this.tripleArgs[1] = null; 
+    this.tripleArgs[2] = null; 
+
+    return result;
+  }
+
+  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4)
+  {
+    String pattern = null;
+    String result;
+
+    /* -- */
+
+    try
+      {
+	pattern = bundle.getString(key);
+      }
+    catch (MissingResourceException ex)
+      {
+	return null;
+      }
+    
+    this.quadArgs[0] = param; 
+    this.quadArgs[1] = param2; 
+    this.quadArgs[2] = param3;
+    this.quadArgs[3] = param4;
+
+    result = this.format(pattern, quadArgs);
+
+    this.quadArgs[0] = null;
+    this.quadArgs[1] = null;
+    this.quadArgs[2] = null;
+    this.quadArgs[3] = null;
+
+    return result;
   }
 
   public String toString()
@@ -487,14 +452,25 @@ public class TranslationService {
     return("TranslationService: " + resourceName + ", locale = " + ourLocale.toString());
   }
 
-  private String wrap(String in)
+  private String format(String pattern, Object params[])
   {
-    if (wordWrapCols > 0 && in.length() > wordWrapCols)
+    if (formatter == null)
       {
-	return WordWrap.wrap(in, wordWrapCols);
+	formatter = new MessageFormat(pattern);
+      }
+    else if (pattern != this.lastPattern)
+      {
+	formatter.applyPattern(pattern);
+	lastPattern = pattern;
       }
 
-    return in;
+    String result = formatter.format(pattern, params);
+
+    if (wordWrapCols > 0 && result.length() > wordWrapCols)
+      {
+	result = WordWrap.wrap(result, wordWrapCols);
+      }
+
+    return result;
   }
 }
-
