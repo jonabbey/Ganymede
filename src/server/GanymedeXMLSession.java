@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2001/06/11 21:33:07 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2001/06/11 21:35:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2245,7 +2245,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 		if (msg != null)
 		  {
-		    err.println("Error editing object " + newObject + ", reason: " + msg);
+		    err.println("Error editing object " + newObject + ", reason:\n" + msg);
 		  }
 		else
 		  {
@@ -2272,7 +2272,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 		if (msg != null)
 		  {
-		    err.println("Error creating " + newObject + ", reason: " + msg);
+		    err.println("Error creating " + newObject + ", reason:\n" + msg);
 		  }
 		else
 		  {
@@ -2307,7 +2307,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    err.print("edited object ");
 		  }
 
-		err.println(newObject + ", reason: " + msg);
+		err.println(newObject + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2350,7 +2350,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("[2] Error registering fields for " + newObject + ", reason: " + msg);
+		err.println("[2] Error registering fields for " + newObject + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2378,7 +2378,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error editing object " + object + ", reason: " + msg);
+		err.println("Error editing object " + object + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2397,7 +2397,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("[3] Error registering fields for " + object + ", reason: " + msg);
+		err.println("[3] Error registering fields for " + object + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2421,7 +2421,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("[4] Error registering fields for " + object + ", reason: " + msg);
+		err.println("[4] Error registering fields for " + object + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2459,7 +2459,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error inactivating " + object + ", reason: " + msg);
+		err.println("Error inactivating " + object + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2497,7 +2497,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error deleting " + object + ", reason: " + msg);
+		err.println("Error deleting " + object + ", reason:\n" + msg);
 	      }
 	    else
 	      {
@@ -2523,7 +2523,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error committing transaction, reason: " + msg);
+		err.println("Error committing transaction, reason:\n" + msg);
 	      }
 	    else
 	      {
