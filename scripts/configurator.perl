@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.4 $
-# $Date: 1999/01/15 21:58:03 $
+# $Revision: 1.5 $
+# $Date: 1999/01/15 22:41:19 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -220,22 +220,26 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/schemas/nisonly", "NIS Schema Classes",
 	  "$rootdir/src/schemas/ganymede.old", "Old Ganymede Schema Classes");
 
-print "Generating config.sh files in source directories.";
+print "Generating config.sh files in source directories.\n\n";
 
 while ($#configs > 0) {
     write_config(shift @configs, shift @configs);
 }
 
-@rebuilds=("$rootdir/src/server", "arlut/csd/ganymede",
-	   "$rootdir/src/client", "arlut/csd/ganymede/client",
-	   "$rootdir/src/schemas/bsd/custom_src", "arlut/csd/ganymede/custom",
-	   "$rootdir/src/schemas/gash/custom_src", "arlut/csd/ganymede/custom",
-	   "$rootdir/src/schemas/gasharl/custom_src", "arlut/csd/ganymede/custom",
-	   "$rootdir/src/schemas/linux/custom_src", "arlut/csd/ganymede/custom",
-	   "$rootdir/src/schemas/nisonly/custom_src", "arlut/csd/ganymede/custom",
-	   "$rootdir/src/schemas/ganymede.old/custom_src", "arlut/csd/ganymede/custom");
+@rebuilds=("$rootdir/src/server", "$rootdir/src/classes/arlut/csd/ganymede",
+	   "$rootdir/src/client", "$rootdir/src/classes/arlut/csd/ganymede/client",
+	   "$rootdir/src/schemas/bsd/custom_src", "$rootdir/schemas/bsd/custom_src/classes/arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/gash/custom_src", "$rootdir/schemas/gash/custom_src/classes/arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/gasharl/custom_src",
+	   "$rootdir/schemas/gasharl/custom_src/classes/arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/linux/custom_src",
+	   "$rootdir/schemas/linux/custom_src/classes/arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/nisonly/custom_src",
+	   "$rootdir/schemas/nisonly/custom_src/classes/arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/ganymede.old/custom_src", 
+	   "$rootdir/schemas/ganymede.old/custom_src/classes/arlut/csd/ganymede/custom");
 
-print "Generating rebuild files in source directories.";
+print "Generating rebuild files in source directories.\n\n";
 
 while ($#rebuilds > 0) {
     write_rebuild(shift @rebuilds, shift @rebuilds);

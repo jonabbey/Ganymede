@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.1 $
-# $Date: 1999/01/15 21:41:49 $
+# $Revision: 1.2 $
+# $Date: 1999/01/15 22:41:19 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -153,7 +153,7 @@ sub get_vars {
     }
   } 
 
-  $customclassdir = "$mydir/classes/MYTARGETCLASSDIR";
+  $customclassdir = "MYTARGETCLASSDIR";
 
   close(CONFIG);
 }  
