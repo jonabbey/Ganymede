@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2000/09/30 00:45:23 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2000/09/30 21:52:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -178,12 +178,22 @@ public class DBEditSet {
   Stack checkpoints = new Stack();
 
   /**
+   * <p>We keep track of the thread that is doing checkpointing.. once
+   * a thread starts a checkpoint on this transaction, we don't allow
+   * any other threads to checkpoint until the first thread releases
+   * its checkpoint.  This is to prevent problems resulting from
+   * interleaved checkpoint/popCheckpoint/rollback activities across
+   * multiple threads.</p>
+   */
+
+  Thread currentCheckpointThread = null;
+
+  /**
    * The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
    * {@link arlut.csd.ganymede.DBEditSet#releaseWriteLock(java.lang.String) releaseWriteLock()}
    * method, but wLock should really never be non-null outside of the
-   * context of the commit() call.
-   */
+   * context of the commit() call.  */
 
   DBWriteLock wLock = null;
 
@@ -407,6 +417,15 @@ public class DBEditSet {
    * state. If need be, this transaction can later be rolled back
    * to this point by calling the rollback() method.</p>
    *
+   * <p>Once a thread checkpoints a transaction, no other thread
+   * can checkpoint a transaction until some thread clears the
+   * checkpoint, either by doing a rollback() or a popCheckpoint().
+   * checkpoint() will block any threads that try to establish a checkpoint()
+   * until the prior thread's checkpoint is resolved.</p>
+   *
+   * <p>See DBSession.deleteDBObject() and DBSesssion.createDBObject()
+   * for instances of this.</p>
+   *
    * @param name An identifier for this checkpoint
    */
 
@@ -421,6 +440,59 @@ public class DBEditSet {
       {
 	return;
       }
+
+    Thread thisThread = java.lang.Thread.currentThread();
+
+    int waitcount = 0;
+
+    while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
+      {
+	System.err.println("DBEditSet.checkpoint(\"" + name + "\") waiting for prior thread " +
+			   currentCheckpointThread.toString() +
+			   " to finish with prior checkpoint");
+	try
+	  {
+	    wait(1000);		// only wait a second at a time, so we'll get lots of printlns if we get stuck
+	  }
+	catch (InterruptedException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
+	waitcount++;
+
+	if (waitcount > 60)
+	  {
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") has waited to checkpoint for 60 seconds");
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") giving up to avoid deadlock");
+
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") stack trace:");
+	    thisThread.dumpStack();
+	    
+	    if (currentCheckpointThread.isAlive())
+	      {
+		System.err.println("DBEditSet.checkpoint(\"" + name + "\") printing blocking thread stack trace:");
+		currentCheckpointThread.dumpStack();
+	      }
+
+	    throw new RuntimeException("DBEditSet.checkpoint(\"" + name + "\") timed out");
+	  }
+      }
+
+    if (waitcount > 0)
+      {
+	System.err.println("DBEditSet.checkpoint(\"" + name + "\") proceeding");
+      }
+
+    // if we slept until the transaction was committed or aborted, oops
+
+    if (session == null)
+      {
+	throw new RuntimeException("DBEditSet.checkpoint(" + name + ") slept until transaction committed/cleared");
+      }
+
+    currentCheckpointThread = thisThread;
 
     // checkpoint our objects, logEvents, and deletion locks
 
@@ -450,7 +522,7 @@ public class DBEditSet {
    *
    * @param name An identifier for the checkpoint to take off
    * the checkpoint stack.
-
+   *
    * @return null if the checkpoint could not be found on the
    * stack, or the DBCheckPoint object representing the state
    * of the transaction at the checkpoint time if the checkpoint
@@ -497,10 +569,14 @@ public class DBEditSet {
 	System.err.println("DBEditSet.popCheckpoint(): seeking to pop " + name);
       }
 
+    // if we're not an interactive transaction, we disregard all checkpoints
+
     if (!interactive)
       {
 	return null;
       }
+
+    // see if we can find the checkpoint
 
     found = false;
 
@@ -531,6 +607,9 @@ public class DBEditSet {
 	return null;
       }
 
+    // okay, we know the checkpoint is there, go ahead and pop
+    // checkpoints off until we find it
+
     found = false;
 
     while (!found && !checkpoints.empty())
@@ -557,6 +636,15 @@ public class DBEditSet {
 	  {
 	    ((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
 	  }
+      }
+
+    // if we've cleared the last checkpoint stacked, wake up any
+    // threads that are blocking to create new checkpoints
+
+    if (checkpoints.empty())
+      {
+	currentCheckpointThread = null;
+	this.notifyAll();
       }
 
     if (found)
@@ -611,7 +699,7 @@ public class DBEditSet {
 	return true;
       }
 
-    point = popCheckpoint(name, true);
+    point = popCheckpoint(name, true); // this may wake up blocking checkpointers
 
     if (point == null)
       {
@@ -1521,6 +1609,11 @@ public class DBEditSet {
 
 	checkpoints.removeAllElements();
 
+	// and wake up any threads sleeping to checkpoint
+
+	this.currentCheckpointThread = null;
+	this.notifyAll();
+
 	// reset the basesModified hash
 
 	basesModified.clear();
@@ -1717,8 +1810,16 @@ public class DBEditSet {
     objects = null;
     session = null;
     basesModified.clear();
-    checkpoints.removeAllElements();
     logEvents.removeAllElements();
+
+    // clear checkpoints
+
+    checkpoints.removeAllElements();
+
+    // wake up any sleepy heads
+
+    this.currentCheckpointThread = null;
+    this.notifyAll();
   }
 
   /**

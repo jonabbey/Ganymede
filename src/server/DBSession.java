@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2000/09/30 00:45:24 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2000/09/30 21:52:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.92 $ %D%
+ * @version $Revision: 1.93 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -930,10 +930,8 @@ final public class DBSession {
 
 	if (!DBDeletionManager.setDeleteStatus(eObj, this))
 	  {
-	    // the only thing changed by setDeleteStatus is the object's
-	    // status, but that's a critical thing to undo, or else
-	    // the transaction will blithely blow this object away
-	    // at commit time
+	    // if setDeleteStatus() fails, nothing will have been changed,
+	    // so we can just pop our checkpoint
 
 	    popCheckpoint(key);
 
@@ -1137,15 +1135,20 @@ final public class DBSession {
 
   /**
    * <p>Convenience pass-through method</p>
+   *
+   * <p>This method may block if another thread has already checkpointed
+   * this transaction.  Checkpoints are intended to be of definite extent,
+   * as the interleaving of checkpoints by multiple threads would lead
+   * to trouble.</p>
    * 
-   * @see arlut.csd.ganymede.DBEditSet#checkpoint(java.lang.String)
+   * @see arlut.csd.ganymede.DBEditSet#checkpoint(java.lang.String) 
    */
 
   public final void checkpoint(String name)
   {
     if (editSet != null)
       {
-	editSet.checkpoint(name);
+	editSet.checkpoint(name); // *synchronized*
       }
   }
 
@@ -1163,7 +1166,7 @@ final public class DBSession {
 
     if (editSet != null)
       {
-	point = editSet.popCheckpoint(name);
+	point = editSet.popCheckpoint(name); // *synchronized*
       }
 
     return (point != null);
@@ -1171,7 +1174,7 @@ final public class DBSession {
 
   /**
    * <p>Convenience pass-through method</p>
-   * 
+   *
    * @see arlut.csd.ganymede.DBEditSet#rollback(java.lang.String)
    */
 
@@ -1179,7 +1182,7 @@ final public class DBSession {
   {
     if (editSet != null)
       {
-	return editSet.rollback(name);
+	return editSet.rollback(name); // *synchronized*
       }
 
     return false;

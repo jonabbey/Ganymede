@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.202 $
-   Last Mod Date: $Date: 2000/09/30 00:45:25 $
+   Version: $Revision: 1.203 $
+   Last Mod Date: $Date: 2000/09/30 21:52:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.202 $ $Date: 2000/09/30 00:45:25 $
+ * @version $Revision: 1.203 $ $Date: 2000/09/30 21:52:49 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2104,7 +2104,43 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * it is an error to call either checkpoint() or rollback() if
    * the server does not have a transaction open.</p>
    *
-   * @see arlut.csd.ganymede.Session
+   * <p>Further, checkpointing is essentially a serialized
+   * mechanism.. multiple threads may not have checkpoints open on a
+   * transaction simultaneously.  If another thread (either a
+   * server-local thread, or a remote client manipulating a db_object
+   * or db_field reference in a way that would necessitate
+   * checkpointing) has a checkpoint active on this session's transaction,
+   * the checkpoint() call will block until the earlier thread clears
+   * the checkpoint.</p>
+   *
+   * <p>Because RMI does not guarantee that subsequent calls from the
+   * client will map into the same server thread, a remote RMI client
+   * should not depend on being able to nest checkpoints.  There is
+   * no restriction on having the same thread perform a rollback or
+   * popCheckpoint, however, so single-depth checkpointing can reliably
+   * be done from a remote client.</p>
+   *
+   * <p>Attempting to nest checkpoints can cause deadlock, as follows:</p>
+   *
+   * <pre>
+   * checkpoint("1");
+   * &lt;changes&gt;
+   * checkpoint("2");
+   * &lt;changes&gt;
+   * rollback("2");
+   * rollback("1");
+   * </pre>
+   *
+   * <p>In this case, the checkpoint("2") call will likely block until such
+   * time as the rollback("1") call is made or the transaction itself is
+   * committed or aborted, which may never happen because the client itself
+   * is blocked on the checkpoint("2") call.</p>
+   *
+   * <p>This restriction does not apply for a single thread in server
+   * side code, which can reliably make subsequent checkpoint() calls
+   * on the same thread.</p>
+   *
+   * @see arlut.csd.ganymede.Session 
    */
 
   public synchronized void checkpoint(String key)
@@ -2123,13 +2159,47 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method call causes the server to remove a named
+   * checkpoint on the current state of an open transaction on the
+   * server, thereby removing the ability to rollback the transaction
+   * to the point at which it was checkpointed.</p>
+   *
+   * <p>Because the server serializes checkpointing by thread, it is
+   * essential to perform a popCheckpoint() on a checkpoint established
+   * by a remote client as soon as it is determined that the checkpoint
+   * is no longer needed.<p>
+   *
+   * <p>Like checkpointing, popCheckpoint() only makes sense in the
+   * context of a transaction; it is an error to call popCheckpoint()
+   * if the server does not have a transaction open.</p> 
+   *
+   * @see arlut.csd.ganymede.Session 
+   */
+
+  public synchronized void popCheckpoint(String key)
+  {
+    checklogin();
+
+    if (session.editSet == null)
+      {
+	throw new RuntimeException("popCheckpoint called in the absence of a transaction");
+      }
+
+    /* - */
+
+    session.popCheckpoint(key);
+    setLastEvent("popCheckpoint:" + key);
+  }
+
+  /**
    * <p>This method call causes the server to roll back the state
-   * of an open transaction on the server.</p>
+   * of an open transaction on the server to the point at which
+   * a named checkpoint was established.</p>
    *
    * <p>Checkpoints are held in a Stack on the server;  it is never
    * permissible to try to 'rollforward' to a checkpoint that
    * was itself rolled back.  That is, the following sequence is 
-   * not permissible.</p>
+   * not logically permissible.</p>
    *
    * <pre>
    * checkpoint("1");
@@ -2145,15 +2215,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * checkpoint 1.  checkpoint 2 no longer exists, and so the second
    * rollback call will return false.</p>
    *
-   * <p>Checkpointing only makes sense in the context of a transaction;
-   * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.</p>
+   * <p>As mentioned in the {@link
+   * arlut.csd.ganymede.GanymedeSession#checkpoint(java.lang.String)
+   * checkpoint()} javadoc, stacked checkpoints will generally not
+   * work for remote clients, even if the checkpoint and rollback
+   * ordering is done properly.</p>
+   *
+   * <p>rollback only makes sense in the context of a transaction; it
+   * is an error to call rollback() if the server does not have a
+   * transaction open.</p>
    *
    * @return true if the rollback could be carried out successfully.
    * 
-   * @see arlut.csd.ganymede.Session
-   *
-   */
+   * @see arlut.csd.ganymede.Session */
 
   public synchronized boolean rollback(String key)
   {

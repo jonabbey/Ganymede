@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.143 $
-   Last Mod Date: $Date: 2000/09/30 00:45:26 $
+   Version: $Revision: 1.144 $
+   Last Mod Date: $Date: 2000/09/30 21:52:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.143 $ %D%
+ * @version $Revision: 1.144 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2335,7 +2335,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = "setValue" + getName() + owner.getLabel();
 
-    eObj.getSession().checkpoint(checkkey);
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     // try to do the binding
 
@@ -2506,7 +2506,8 @@ public final class InvidDBField extends DBField implements invid_field {
     newRemote = (Invid) value;
 
     checkkey = "setElement" + getName() + owner.getLabel();
-    eObj.getSession().checkpoint(checkkey);
+
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
     
     // try to do the binding
 
@@ -2653,7 +2654,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = "addElement" + getName() + owner.getLabel();
 
-    eObj.getSession().checkpoint(checkkey);
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
 
     newRetVal = bind(null, remote, local);
 
@@ -2863,7 +2864,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
       }
 
-    eObj.getSession().checkpoint(checkkey);
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     if (debug)
       {
@@ -3163,7 +3164,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	DBSession session = eObj.getSession();
 	String ckp_label = eObj.getLabel() + "addEmbed";
 
-	session.checkpoint(ckp_label);
+	session.checkpoint(ckp_label); // may block if another thread has checkpointed this transaction
 	boolean checkpointed = true;
 
 	try
@@ -3381,7 +3382,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
       }
 
-    eObj.getSession().checkpoint(checkkey);
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     if (debug)
       {
@@ -3561,7 +3562,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
       }
     
-    eObj.getSession().checkpoint(checkkey);
+    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     if (debug)
       {
