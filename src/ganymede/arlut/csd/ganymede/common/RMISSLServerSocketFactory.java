@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -139,8 +139,19 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 	KeyStore ks;
 	char[] pass = passphrase.toCharArray();
 
+	String factoryID = null;
+
+	if (System.getProperty("java.vm.vendor").indexOf("Sun") != -1)
+	  {
+	    factoryID = "SunX509";
+	  }
+	else
+	  {
+	    factoryID = "IbmX509"; // for IBM JVMs
+	  }
+
 	ctx = SSLContext.getInstance("TLS");
-	kmf = KeyManagerFactory.getInstance("SunX509");
+	kmf = KeyManagerFactory.getInstance(factoryID);
 	ks = KeyStore.getInstance("JKS");
 
 	InputStream x = PackageResources.getPackageResourceAsStream(keysResource, this.getClass());

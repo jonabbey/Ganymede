@@ -164,8 +164,19 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 	KeyStore ks;
 	SSLContext ctx;
 
+	String factoryID = null;
+
+	if (System.getProperty("java.vm.vendor").indexOf("Sun") != -1)
+	  {
+	    factoryID = "SunX509";
+	  }
+	else
+	  {
+	    factoryID = "IbmX509"; // for IBM JVMs
+	  }
+
 	ctx = SSLContext.getInstance("TLS");
-	tmf = TrustManagerFactory.getInstance("SunX509");
+	tmf = TrustManagerFactory.getInstance(factoryID);
 	ks = KeyStore.getInstance("JKS");
 
 	InputStream x = PackageResources.getPackageResourceAsStream(certsResource, this.getClass());
