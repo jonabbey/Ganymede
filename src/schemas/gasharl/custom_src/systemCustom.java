@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/01/22 18:05:06 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/04/14 19:05:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   Vector freeNets = new Vector();
 
   /**
-   * map of IPNet Invids to addresses
+   * <p>map of IPNet Invids to addresses.  This hashtable maps invids of
+   * network DBObjects to IP addresses that this system has allocated for
+   * each network.  If a system has multiple interfaces and we take an
+   * interface from one net to another, and then move it back, this
+   * hashtable will let us give it back the same address that it had
+   * before when it was associated with this net.</p>
    */
 
   Hashtable ipAddresses = new Hashtable();
@@ -124,34 +129,32 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Initialize a newly created DBEditObject.</p>
    *
-   * Initialize a newly created DBEditObject.
-   *
-   * When this method is called, the DBEditObject has been created,
+   * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
    * DBObjectBase have been instantiated without defined
-   * values.<br><br>
+   * values.</p>
    *
-   * This method is responsible for filling in any default
+   * <p>This method is responsible for filling in any default
    * values that can be calculated from the DBSession
-   * associated with the editset defined in this DBEditObject.<br><br>
+   * associated with the editset defined in this DBEditObject.</p>
    *
-   * If initialization fails for some reason, initializeNewObject()
+   * <p>If initialization fails for some reason, initializeNewObject()
    * will return false.  If the owning GanymedeSession is not in
    * bulk-loading mode (i.e., enableOversight is true),
    * DBSession.createDBObject() will checkpoint the transaction before
    * calling this method.  If this method returns false, the calling
    * method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.<br><br>
+   * checkpoint/rollback logic will take care of that.</p>
    *
-   * If enableOversight is false, DBSession.createDBObject() will not
+   * <p>If enableOversight is false, DBSession.createDBObject() will not
    * checkpoint the transaction status prior to calling initializeNewObject(),
    * so it is the responsibility of this method to handle any checkpointing
-   * needed.<br><br>
+   * needed.</p>
    *
-   * This method should be overridden in subclasses.
-   *   
+   * <p>This method should be overridden in subclasses.</p>
    */
 
   public boolean initializeNewObject()
@@ -173,13 +176,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Returns a vector of ObjectHandle objects describing the I.P. nets
+   * available for this system to be connected to.</p>
    *
-   * Returns a vector of ObjectHandle objects describing the I.P. nets
-   * available for this system to be connected to.<br><br>
-   *
-   * Used by the interfaceCustom object to provide a list of network
-   * choices.
-   *
+   * <p>Used by the interfaceCustom object to provide a list of network
+   * choices.</p>
    */
 
   public Vector getAvailableNets()
@@ -200,10 +201,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method returns an IPv4 address for an embedded interface
    * based on the network invid passed in.
-   *
    */
 
   public Byte[] getAddress(Invid netInvid)
@@ -217,11 +216,9 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method allows an embedded interfaceCustom object to change
    * this systemCustom's notion of what the preferred address is for a
    * particular available IP network.
-   *
    */
 
   public void setAddress(Byte[] address, Invid netInvid)
@@ -236,14 +233,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Marks a network in the current room that was previously used as
+   * <p>Marks a network in the current room that was previously used as
    * available for an interface attached to this system to be
-   * connected to.<br><br>
+   * connected to.</p>
    *
-   * Used by the interfaceCustom object to provide a list of network
-   * choices.
-   * 
+   * <p>Used by the interfaceCustom object to provide a list of network
+   * choices.</p>
    */
 
   public synchronized boolean freeNet(Invid netInvid)
@@ -309,13 +304,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Checks out a network for use by an interface in the current room.</p>
    *
-   * Checks out a network for use by an interface in the current room.
-   * <br><br>
-   *
-   * Used by the interfaceCustom object to provide a list of network
-   * choices.
-   * 
+   * <p>Used by the interfaceCustom object to provide a list of network
+   * choices.</p>
    */
 
   public synchronized boolean allocNet(Invid netInvid)
@@ -574,14 +566,20 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Allocates a free I.P. address for the given network object.  This
+   * is done using the {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}
+   * attached to the interface address value field.  getIPAddress() will
+   * seek through the Class-C host range looking for an IP address that
+   * is not yet taken.  The direction of host id scanning depends on the
+   * system category attached to this object.</p>
    *
-   * This method is designed to allocated a free I.P. address for the
-   * given net.
-   *
+   * @return An IP address if one could be allocated, null otherwise
    */
 
   private Byte[] getIPAddress(Invid netInvid)
   {
+    // the namespace being used to manage the IP address space
+
     DBNameSpace namespace = Ganymede.db.getNameSpace("IPspace");
 
     // default IP host-byte scan pattern 
@@ -616,8 +614,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     // ok, we've got our net prefix.. try to find an open slot..
 
-    // this really should use the IP range specified in our system
-    // type.. we can elaborate that once this is working ok
+    // first see if we have an attached system type which modifies our IP
+    // search pattern
 
     try
       {
@@ -644,18 +642,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     int i = start;
     address[3] = new Byte(u2s(i));
 
-    // find an unused hostname on this net
+    // find an unused ip address on this net
 
     if (start > stop)
       {
-	while (i > stop && !namespace.reserve(editset, address))
+	while (i > stop && !namespace.reserve(editset, address, true))
 	  {
 	    address[3] = new Byte(u2s(--i));
 	  }
       }
     else
       {
-	while (i < stop && !namespace.reserve(editset, address))
+	while (i < stop && !namespace.reserve(editset, address, true))
 	  {
 	    address[3] = new Byte(u2s(++i));
 	  }
@@ -663,7 +661,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     // see if we really did wind up with an acceptable address
 
-    if (!namespace.reserve(editset, address))
+    if (!namespace.reserve(editset, address, true))
       {
 	return null;
       }
@@ -691,10 +689,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
+   * to a legal signed byte value, and is used to down shift
+   * values from the 0-255 that can only be held in a short or
+   * larger to a signed byte for storage.
    */
 
   public final static byte u2s(int x)
@@ -708,10 +706,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method maps a u2s-encoded signed byte value to an
    * int value between 0 and 255 inclusive.
-   *
    */
 
   public final static short s2u(byte b)
@@ -720,15 +716,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Hook to allow subclasses to grant ownership privileges to a given
+   * <p>Hook to allow subclasses to grant ownership privileges to a given
    * object.  If this method returns true on a given object, the Ganymede
    * Permissions system will provide access to the object as owned with
    * whatever permissions apply to objects owned by the persona active
-   * in gSession.<br><br>
+   * in gSession.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
-   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean grantOwnership(GanymedeSession gSession, DBObject object)
@@ -745,12 +739,16 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -773,8 +771,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    Invid systemType = (Invid) object.getFieldValueLocal(systemSchema.SYSTEMTYPE);
 
-	    // we're PSEUDOSTATIC, so we need to get ahold of the internal session
-	    // so we can look up objects
+	    // we're PSEUDOSTATIC, so we need to get ahold of the
+	    // internal session so we can look up objects
 	    
 	    DBObject typeObject = internalSession().getSession().viewDBObject(systemType);
 
@@ -784,9 +782,9 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 	catch (NullPointerException ex)
 	  {
-	    // if we can't get the system type reference, assume that we
-	    // aren't gonna require it.. the user will still
-	    // be prompted to set a system type, and once they go back
+	    // if we can't get the system type reference, assume that
+	    // we aren't gonna require it.. the user will still be
+	    // prompted to set a system type, and once they go back
 	    // and do that and try to re-commit, they'll hit us again
 	    // and we can make the proper determination at that point.
 
@@ -798,15 +796,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -835,12 +831,17 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
-   * 
+   * obtainChoiceList() method to get a list of valid choices.</p>
+   *
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
+   *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field)
@@ -863,11 +864,9 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
-   *
+   * choose from a choice provided by obtainChoiceList()</p>
    */
 
   public boolean mustChoose(DBField field)
@@ -881,23 +880,19 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
   
   /**
+   * <p>This method allows the DBEditObject to have executive approval of
+   * any scalar set operation, and to take any special actions in
+   * reaction to the set.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its value.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.</p>
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any scalar set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's value.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
-   *
-   * The DBField that called us will take care of all possible checks
+   * <p>The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
-   * here.<br><br>
-   *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *  
+   * here.</p>
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -912,17 +907,46 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == systemSchema.ROOM)
       {
-	// need to update the net information from this room
-
 	if (debug)
 	  {
 	    System.err.println("systemCustom: room changed to " + 
 			       getGSession().viewObjectLabel((Invid) value));
 	  }
+
+	// rework our structures to reflect the networks available due to our
+	// change in room
 	
 	initializeNets((Invid) value);
+
+	// we need to generate a returnval that will cause all our
+	// interfaces' ipnet fields to be rescanned.
+
+	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	if (interfaces == null)
+	  {
+	    return null;
+	  }
+
+	// create the ReturnVal that we are actually going to
+	// return.. the second true tells the code that called us to
+	// go ahead and proceed normally, but to include the ReturnVal
+	// information that we are returning when the results finally
+	// go back to the client.
+
+	ReturnVal result = new ReturnVal(true, true);
+
+	// Have all of the interface objects under us refresh their IPNET
+	// field to go along with the change in room.
+
+	for (int i = 0; i < interfaces.size(); i++)
+	  {
+	    result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.IPNET);
+	  }
+
+	return result;
       }
-    
+
     if (field.getID() == systemSchema.SYSTEMTYPE)
       {
 	// need to update the ip addresses pre-allocated for this system
@@ -940,22 +964,72 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>This method allows the DBEditObject to have executive approval of
+   * any vector add operation, and to take any special actions in
+   * reaction to the add.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.</p>
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any vector delete operation, and to take any special actions
-   * in reaction to the delete.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * its vector.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
-   *
-   * The DBField that called us will take care of all possible checks
+   * <p>The DBField that called us will take care of all possible checks
    * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.<br><br>
+   * circumstances, we won't need to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElement(DBField field, Object value)
+  {
+    if (field.getID() == systemSchema.INTERFACES)
+      {
+	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	if (interfaces == null)
+	  {
+	    return null;
+	  }
+
+	// create the ReturnVal that we are actually going to
+	// return.. the second true tells the code that called us to
+	// go ahead and proceed normally, but to include the ReturnVal
+	// information that we are returning when the results finally
+	// go back to the client.
+	    
+	ReturnVal result = new ReturnVal(true, true);
+
+	// Have all of the interface objects under us refresh
+	// their IPNET field to go along with the changes
+	// resulting from the extra interface
+	    
+	for (int i = 0; i < interfaces.size(); i++)
+	  {
+	    result.addRescanField((Invid) interfaces.elementAt(i), 
+				  interfaceSchema.NAME);
+
+	    result.addRescanField((Invid) interfaces.elementAt(i), 
+				  interfaceSchema.ALIASES);
+	  }
+	    
+	return result;
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval of
+   * any vector delete operation, and to take any special actions in
+   * reaction to the delete.. if this method returns null or a success
+   * code in its ReturnVal, the {@link arlut.csd.ganymede.DBField DBField}
+   * that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.</p>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *
+   * <p>The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.</p>
    */
 
   public ReturnVal finalizeDeleteElement(DBField field, int index)
@@ -989,7 +1063,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    throw new ArrayIndexOutOfBoundsException("can't delete an index out of range");
 	  }
 
-	interfaceCustom io = (interfaceCustom) getSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
+	interfaceCustom io = (interfaceCustom) 
+	  getSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
 	    
 	ReturnVal retVal = io.setFieldValueLocal(interfaceSchema.NAME, null);
 	    
@@ -1011,45 +1086,64 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    sourceField.deleteElement(0);
 	    aliasesField.addElementLocal(alias);
 	  }
+
+	ReturnVal result = new ReturnVal(true, true);
+
+	// We want to rescan the remaining interface, whichever that might be
+	
+	if (index == 1)
+	  {
+	    index = 0;
+	  }
+	else if (index == 0)
+	  {
+	    index = 1;
+	  }
+
+	result.addRescanField((Invid) interfaces.elementAt(index), 
+			      interfaceSchema.NAME);
+	result.addRescanField((Invid) interfaces.elementAt(index), 
+			      interfaceSchema.ALIASES);
+	    
+	// finalizeDeleteElement() may add things to the SYSTEMALIASES field.
+	
+	result.addRescanField(this.getInvid(), systemSchema.SYSTEMALIASES);
+	return result;
       }
 
     return null;
   }
 
   /**
-   * This method is the hook that DBEditObject subclasses use to interpose
-   * wizards when a field's value is being changed.<br><br>
+   * <p>This method is the hook that DBEditObject subclasses use to interpose
+   * {@link arlut.csd.ganymede.GanymediatorWizard wizards} when a field's
+   * value is being changed.</p>
    *
-   * Whenever a field is changed in this object, this method will be
+   * <p>Whenever a field is changed in this object, this method will be
    * called with details about the change. This method can refuse to
    * perform the operation, it can make changes to other objects in
    * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.<br><br>
+   * choose to allow the operation to continue as requested.</p>
    *
-   * In the latter two cases, the wizardHook code may specify a list
+   * <p>In the latter two cases, the wizardHook code may specify a list
    * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.<br><br>
+   * order to maintain a consistent view of the database.</p>
    *
-   * If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will never be
+   * <p>If server-local code has called
+   * {@link arlut.csd.ganymede.GanymedeSession#enableOversight(boolean) 
+   * enableOversight(false)},
+   * this method will never be
    * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.<br><br>
+   * bulk-loading of the database.</p>
    *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.<br><br>
+   * <p>This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.</p>
    *
-   * This method is called before the finalize*() methods.. the finalize*()
+   * <p>This method is called before the finalize*() methods.. the finalize*()
    * methods is where last minute cascading changes should be performed..
-   * the finalize*() methods have no power to set object/field rescan
-   * or return dialogs to the client, however.. in cases where such
-   * is necessary, a custom plug-in class must have wizardHook() and
-   * finalize*() configured to work together to both provide proper field
-   * rescan notification and to check the operation being performed and
-   * make any changes necessary to other fields and/or objects.<br><br>
-   *
    * Note as well that wizardHook() is called before the namespace checking
    * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
+   * called after the namespace checking.</p>
    *
    * @return a ReturnVal object indicated success or failure, objects and
    * fields to be rescanned by the client, and a doNormalProcessing flag
@@ -1061,115 +1155,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * return new ReturnVal(true, false) if the wizardHook performs the operation
    * (or a logically related operation) itself.  The same holds true for the
    * respond() method in GanymediatorWizard subclasses.
-   *
    */
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (field.getID() == systemSchema.ROOM)
-      {
-	// we need to generate a returnval that will cause all our
-	// interfaces' ipnet fields to be rescanned.
-
-	// Note that we are here taking advantage of the fact that
-	// wizardHook can interject rescan information without needing
-	// to actually go through a wizard.
-
-	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
-
-	if (interfaces == null)
-	  {
-	    return null;
-	  }
-
-	// create the ReturnVal that we are actually going to
-	// return.. the second true tells the code that called us to
-	// go ahead and proceed normally, but to include the ReturnVal
-	// information that we are returning when the results finally
-	// go back to the client.
-
-	ReturnVal result = new ReturnVal(true, true);
-
-	// Have all of the interface objects under us refresh their IPNET
-	// field to go along with the change in room.
-
-	for (int i = 0; i < interfaces.size(); i++)
-	  {
-	    result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.IPNET);
-	  }
-
-	return result;
-      }
-
-    if (field.getID() == systemSchema.INTERFACES)
-      {
-	if (operation == ADDELEMENT)
-	  {
-	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
-
-	    if (interfaces == null)
-	      {
-		return null;
-	      }
-
-	    // create the ReturnVal that we are actually going to
-	    // return.. the second true tells the code that called us to
-	    // go ahead and proceed normally, but to include the ReturnVal
-	    // information that we are returning when the results finally
-	    // go back to the client.
-	    
-	    ReturnVal result = new ReturnVal(true, true);
-
-	    // Have all of the interface objects under us refresh
-	    // their IPNET field to go along with the changes
-	    // resulting from the extra interface
-	    
-	    for (int i = 0; i < interfaces.size(); i++)
-	      {
-		result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.NAME);
-		result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.ALIASES);
-	      }
-	    
-	    return result;
-	  }
-	else if (operation == DELELEMENT)
-	  {
-	    int index = ((Integer) param1).intValue();
-
-	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
-
-	    // we don't need to get fancy if we aren't going from 2 to 1 interfaces
-
-	    if (interfaces.size() != 2)
-	      {
-		return null;
-	      }
-	    
-	    // see notes above
-	    
-	    ReturnVal result = new ReturnVal(true, true);
-
-	    // We want to rescan the remaining interface, whichever that might be
-	    
-	    if (index == 1)
-	      {
-		index = 0;
-	      }
-	    else if (index == 0)
-	      {
-		index = 1;
-	      }
-
-	    result.addRescanField((Invid) interfaces.elementAt(index), interfaceSchema.NAME);
-	    result.addRescanField((Invid) interfaces.elementAt(index), interfaceSchema.ALIASES);
-	    
-	    // finalizeDeleteElement() may add things to the SYSTEMALIASES field.
-
-	    result.addRescanField(this.getInvid(), systemSchema.SYSTEMALIASES);
-	    return result;
-	  }
-      }
-    
     return null;
   }
 }

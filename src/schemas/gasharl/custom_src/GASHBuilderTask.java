@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/02/16 18:57:04 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/04/14 19:05:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,6 +50,7 @@ package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.SharedStringBuffer;
 
 import java.util.*;
 import java.text.*;
@@ -81,7 +82,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private Date now = null;
   private boolean backedup = false;
-  private StringBuffer result = new StringBuffer();
+  private SharedStringBuffer result = new SharedStringBuffer();
 
   /* -- */
 
@@ -156,17 +157,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	
 	if (out != null)
 	  {
-	    DBObject user;
-	    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-	    while (users.hasMoreElements())
+	    try
 	      {
-		user = (DBObject) users.nextElement();
-
-		writeUserLine(user, out);
+		DBObject user;
+		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+		while (users.hasMoreElements())
+		  {
+		    user = (DBObject) users.nextElement();
+		    
+		    writeUserLine(user, out);
+		  }
 	      }
-
-	    out.close();
+	    finally
+	      {
+		out.close();
+	      }
 	  }
 
 	success = true;
@@ -191,17 +197,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	
 	if (out != null)
 	  {
-	    DBObject group;
-	    Enumeration groups = enumerateObjects((short) 257);
-
-	    while (groups.hasMoreElements())
+	    try
 	      {
-		group = (DBObject) groups.nextElement();
-
-		writeGroupLine(group, out);
+		DBObject group;
+		Enumeration groups = enumerateObjects((short) 257);
+		
+		while (groups.hasMoreElements())
+		  {
+		    group = (DBObject) groups.nextElement();
+		    
+		    writeGroupLine(group, out);
+		  }
 	      }
-
-	    out.close();
+	    finally
+	      {
+		out.close();
+	      }
 	  }
 
 	success = true;
@@ -300,7 +311,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
+	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + 
+			   ") due to IOException: " + ex);
 	  }
 	catch (InterruptedException ex)
 	  {
@@ -483,7 +495,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeGroupLine(): Warning!  user " + 
+	System.err.println("GASHBuilder.writeUserLine(): Warning!  user " + 
 			   username + " overflows the GASH line length!");
       }
 
@@ -521,19 +533,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
-    // currently in the Ganymede schema, group passwords aren't in passfields.
+    // currently in the GASH schema, group passwords aren't in
+    // passfields.
 
     pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
     
-    // we currently don't explicitly record the home group.. just take the first group
-    // that the user is in.
-
     invids = object.getFieldValuesLocal(groupSchema.USERS);
 
     if (invids == null)
       {
-	// System.err.println("GASHBuilder.writeUserLine(): null user list for group " + groupname);
+	// System.err.println("GASHBuilder.writeGroupLine(): null user list for group " + groupname);
       }
     else
       {
@@ -601,29 +611,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeNetgroup(): couldn't open netgroup file: " + ex);
       }
 
-    // first the user netgroups
-
-    netgroups = enumerateObjects((short) 270);
-
-    while (netgroups.hasMoreElements())
+    try
       {
-	netgroup = (DBObject) netgroups.nextElement();
-	
-	writeUserNetgroup(netgroup, netgroupFile);
-      }
+	// first the user netgroups
 
-    // now the system netgroups
+	netgroups = enumerateObjects((short) 270);
+
+	while (netgroups.hasMoreElements())
+	  {
+	    netgroup = (DBObject) netgroups.nextElement();
+	
+	    writeUserNetgroup(netgroup, netgroupFile);
+	  }
+
+	// now the system netgroups
     
-    netgroups = enumerateObjects((short) 271);
+	netgroups = enumerateObjects((short) 271);
 
-    while (netgroups.hasMoreElements())
-      {
-	netgroup = (DBObject) netgroups.nextElement();
+	while (netgroups.hasMoreElements())
+	  {
+	    netgroup = (DBObject) netgroups.nextElement();
 	
-	writeSystemNetgroup(netgroup, netgroupFile);
+	    writeSystemNetgroup(netgroup, netgroupFile);
+	  }
       }
-
-    netgroupFile.close();
+    finally
+      {
+	netgroupFile.close();
+      }
 
     return true;
   }
@@ -663,10 +678,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // it, put in an entry to link the netgroup with a
     // sub netgroup for continuation.
 
-    // Thus, we want to save enough space to be able to put
-    // the link information at the end.  We reduce it by
-    // a further 6 chars to leave space for the per-entry
-    // syntax.
+    // Thus, we want to save enough space to be able to put the link
+    // information at the end.  We reduce it by a further 6 chars to
+    // leave space for the per-entry syntax.
+
+    // We could do this check during our buffer building loop, but by
+    // doing it up front we guarantee that we're never going to exceed
+    // the real limit during any single iteration of our netgroup line
+    // construction without having to constantly be adding 6 to the
+    // item length.
 
     lengthlimit = 1024 - name.length() - 6;
 
@@ -763,6 +783,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // a further 6 chars to leave space for the per-entry
     // syntax.
 
+    // We could do this check during our buffer building loop, but by
+    // doing it up front we guarantee that we're never going to exceed
+    // the real limit during any single iteration of our netgroup line
+    // construction without having to constantly be adding 6 to the
+    // item length.
+
     lengthlimit = 1024 - name.length() - 6;
 
     buffer.append(name);
@@ -831,7 +857,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     PrintWriter autoFile = null;
     DBObject map, obj, user;
     Enumeration vols, maps, entries;
-    StringBuffer buf = new StringBuffer();
+    SharedStringBuffer buf = new SharedStringBuffer();
     String mountopts, mapname;
     String volName, sysName;
     Vector tempVect;
@@ -850,60 +876,71 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
       }
 
-    // find the volume definitions
-
-    vols = enumerateObjects((short) 276);
-
-    while (vols.hasMoreElements())
+    try
       {
-	obj = (DBObject) vols.nextElement();
+	// find the volume definitions
 
-	buf.setLength(0);
+	vols = enumerateObjects((short) 276);
 
-	volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
-
-	if (volName == null)
+	while (vols.hasMoreElements())
 	  {
-	    Ganymede.debug("Couldn't emit a volume definition.. null label");
-	    continue;
+	    obj = (DBObject) vols.nextElement();
+
+	    buf.setLength(0);
+
+	    volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
+
+	    if (volName == null)
+	      {
+		Ganymede.debug("Couldn't emit a volume definition.. null label");
+		continue;
+	      }
+
+	    buf.append(volName); // volume label
+	    buf.append("\t\t");
+
+	    // mount options.. NeXT's like this.  Ugh.
+
+	    mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); 
+
+	    if (mountopts != null && !mountopts.equals(""))
+	      {
+		buf.append(mountopts);
+		buf.append(" ");
+	      }
+
+	    sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
+
+	    if (sysName == null)
+	      {
+		Ganymede.debug("Couldn't emit proper volume definition for " + 
+			       volName + ", no system found");
+		continue;
+	      }
+
+	    buf.append(sysName);
+	    buf.append(dnsdomain);
+
+	    buf.append(":");
+
+	    // mount path
+
+	    buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); 
+
+	    autoFile.println(buf.toString());
 	  }
-
-	buf.append(volName); // volume label
-	buf.append("\t\t");
-
-	mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); // mount options.. NeXT's like this.  Ugh.
-
-	if (mountopts != null && !mountopts.equals(""))
-	  {
-	    buf.append(mountopts);
-	    buf.append(" ");
-	  }
-
-	sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
-
-	if (sysName == null)
-	  {
-	    Ganymede.debug("Couldn't emit proper volume definition for " + 
-			   volName + ", no system found");
-	    continue;
-	  }
-
-	buf.append(sysName);
-	buf.append(dnsdomain);
-
-	buf.append(":");
-	buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); // mount path
-
-	autoFile.println(buf.toString());
       }
-
-    autoFile.close();
+    finally
+      {
+	autoFile.close();
+      }
 
     // second, write out all the auto.home.* files mapping user name
     // to volume name.  We depend on the GASH build scripts to convert
-    // these to the form that NIS will actually use.. we could and possibly
-    // will change this to write out the combined auto.home/auto.vol info
-    // rather than forcing it to be done after-the-fact via perl.
+    // these to the form that NIS will actually use.. we could and
+    // possibly will change this to write out the combined
+    // auto.home/auto.vol info rather than forcing it to be done
+    // after-the-fact via perl.
 
     maps = enumerateObjects((short) 277);
 
@@ -919,51 +956,60 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " + mapname + ": " + ex);
+	    System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " + 
+			       mapname + ": " + ex);
 	  }
 
-	tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
+	try
+	  {
+	    tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
 
-	if (tempVect == null)
+	    if (tempVect == null)
+	      {
+		autoFile.close();
+		continue;
+	      }
+
+	    entries = tempVect.elements();
+
+	    while (entries.hasMoreElements())
+	      {
+		ref = (Invid) entries.nextElement();
+		obj = getObject(ref);
+
+		// the entry is embedded in the user's record.. get
+		// the user' id and label
+
+		userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+
+		if (userRef.getType() != SchemaConstants.UserBase)
+		  {
+		    throw new RuntimeException("Schema and/or database error");
+		  }
+
+		buf.setLength(0);
+	    
+		buf.append(getLabel(userRef)); // the user's name
+		buf.append("\t");
+
+		// nfs volume for this entry
+
+		ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME); 
+
+		if (ref == null || ref.getType() != (short) 276)
+		  {
+		    throw new RuntimeException("Schema and/or database error");
+		  }
+
+		buf.append(getLabel(ref));
+
+		autoFile.println(buf.toString());
+	      }
+	  }
+	finally
 	  {
 	    autoFile.close();
-	    continue;
 	  }
-
-	entries = tempVect.elements();
-
-	while (entries.hasMoreElements())
-	  {
-	    ref = (Invid) entries.nextElement();
-	    obj = getObject(ref);
-
-	    // the entry is embedded in the user's record.. get the user' id and label
-
-	    userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-
-	    if (userRef.getType() != SchemaConstants.UserBase)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.setLength(0);
-	    
-	    buf.append(getLabel(userRef)); // the user's name
-	    buf.append("\t");
-
-	    ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME); // nfs volume for this entry
-
-	    if (ref == null || ref.getType() != (short) 276)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.append(getLabel(ref));
-
-	    autoFile.println(buf.toString());
-	  }
-
-	autoFile.close();
       }
 
     return true;
@@ -1000,47 +1046,51 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeAliasesFile(): couldn't open aliases_info file: " + ex);
       }
 
-    // our email aliases database is spread across three separate object
-    // bases.
-
-    users = enumerateObjects(SchemaConstants.UserBase);
-
-    while (users.hasMoreElements())
+    try
       {
-	user = (DBObject) users.nextElement();
-	
-	writeUserAlias(user, aliases_info);
-      }
+	// our email aliases database is spread across three separate object
+	// bases.
 
-    // now the mail lists
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+	
+	    writeUserAlias(user, aliases_info);
+	  }
+
+	// now the mail lists
     
-    mailgroups = enumerateObjects((short) 274);
+	mailgroups = enumerateObjects((short) 274);
 
-    while (mailgroups.hasMoreElements())
-      {
-	group = (DBObject) mailgroups.nextElement();
+	while (mailgroups.hasMoreElements())
+	  {
+	    group = (DBObject) mailgroups.nextElement();
 	
-	writeGroupAlias(group, aliases_info);
-      }
+	    writeGroupAlias(group, aliases_info);
+	  }
 
-    // and the external mail addresses
+	// and the external mail addresses
     
-    externals = enumerateObjects((short) 275);
+	externals = enumerateObjects((short) 275);
 
-    while (externals.hasMoreElements())
-      {
-	external = (DBObject) externals.nextElement();
+	while (externals.hasMoreElements())
+	  {
+	    external = (DBObject) externals.nextElement();
 	
-	writeExternalAlias(external, aliases_info);
+	    writeExternalAlias(external, aliases_info);
+	  }
       }
-
-    aliases_info.close();
+    finally
+      {
+	aliases_info.close();
+      }
 
     return true;
   }
   
   /**
-   *
    * This method writes out a user alias line to the aliases_info GASH source file.<br><br>
    *
    * The user alias lines in this file look like the following:<br><br>
@@ -1057,7 +1107,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   *
    */
 
   private void writeUserAlias(DBObject object, PrintWriter writer)
@@ -1299,30 +1348,36 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open hosts_info file: " + ex);
       }
 
-    // the hosts_info file is kind of squirrely.  We emit all of the system lines
-    // first, followed by all of the interface lines.
-
-    systems = enumerateObjects((short) 263);
-
-    while (systems.hasMoreElements())
+    try
       {
-	system = (DBObject) systems.nextElement();
-	
-	writeSystem(system, hosts_info);
-      }
+	// the hosts_info file is kind of squirrely.  We emit all of
+	// the system lines first, followed by all of the interface
+	// lines.
 
-    // now the interfaces
+	systems = enumerateObjects((short) 263);
+
+	while (systems.hasMoreElements())
+	  {
+	    system = (DBObject) systems.nextElement();
+	
+	    writeSystem(system, hosts_info);
+	  }
+
+	// now the interfaces
     
-    interfaces = enumerateObjects((short) 265);
+	interfaces = enumerateObjects((short) 265);
 
-    while (interfaces.hasMoreElements())
-      {
-	interfaceObj = (DBObject) interfaces.nextElement();
+	while (interfaces.hasMoreElements())
+	  {
+	    interfaceObj = (DBObject) interfaces.nextElement();
 	
-	writeInterface(interfaceObj, hosts_info);
+	    writeInterface(interfaceObj, hosts_info);
+	  }
       }
-
-    hosts_info.close();
+    finally
+      {
+	hosts_info.close();
+      }
 
     return true;
   }
