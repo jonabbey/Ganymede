@@ -130,19 +130,33 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * GanymedeBuilderTasks registered to be run on database commit will
  * automatically be issued by the {@link
  * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} when
- * transactions commit.  The GanymedeScheduler is designed so that it
- * will not re-issue a specific task while a previous instance of the
- * task is still running, so you don't have to be concerned about
- * builderPhase2() having its input files overwritten by an
- * overlapping execution of your builderPhase1() method.  Your
- * builderPhase1() method should execute and complete as fast as
- * possible, however, as no transactions can commit while a
- * builderPhase1() method is executing.  The Ganymede server can
- * execute overlapping builderPhase1() methods from multiple builder
- * tasks, however, so you if you have a lot of work to do in a build,
- * you are free to break your builds up into several discrete builder
- * tasks, if you like.  This can also reduce your builderPhase2()
- * latencies, since they will also run in parallel.</P>
+ * transactions commit.  The GanymedeScheduler is designed to run only
+ * a single instance of a task at a time, waiting to issue any new
+ * execution of the task until the previous execution completes.  A
+ * GanymedeBuilderTasks doesn't finish executing until its
+ * builderPhase2() method returns.  This protects your builderPhase2()
+ * method from having its input data being overwritten by the next
+ * builderPhase1() method writing out new data.  It also sets a
+ * minimum build-to-build latency, according to how long your
+ * builderPhase1() and builderPhase2() methods take to complete.  No
+ * matter how long builderPhase2() takes, the GanymedeScheduler will
+ * run the builds as fast as it can, back-to-back.</P>
+ *
+ * <P>Your builderPhase1() method, however, should execute and
+ * complete as fast as possible.  The dump lock protecting
+ * builderPhase1() prevents any transactions from committing while a
+ * builderPhase1() method is executing.  Any significant delay in
+ * transaction commits may cause noticeable delays for your users.
+ * Fortunately, since builderPhase1() implementations just scan the
+ * Ganymede in-memory database and write out some text files, this
+ * usually doesn't take very long.  If you find that your
+ * builderPhase1() method is taking too long, you may want to consider
+ * splitting your build into multiple builder tasks.  The
+ * GanymedeBuilderTask is designed so that the server can execute
+ * multiple distinct builder tasks concurrently.  Splitting your build
+ * into multiple pieces that can be run concurrently can also improve
+ * your build latency by reducing the amount of work that a given
+ * external process has to do when called by builderPhase2().</P>
  *
  * <p>GanymedeBuilderTask includes a set of helper methods that
  * subclasses can take advantage of in order to facilitate their
