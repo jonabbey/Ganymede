@@ -3963,16 +3963,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	// wouldn't it be nice if java had decent support for declared data structures?
 
-	if ((base.getTypeID() == SchemaConstants.UserBase &&
-	     getID() == SchemaConstants.UserUserName) ||
-	    (base.getTypeID() == SchemaConstants.PersonaBase &&
-	     getID() == SchemaConstants.PersonaLabelField) ||
-	    (base.getTypeID() == SchemaConstants.OwnerBase &&
-	     getID() == SchemaConstants.OwnerNameField) ||
-	    (base.getTypeID() == SchemaConstants.EventBase &&
-	     getID() == SchemaConstants.EventToken) ||
-	    (base.getTypeID() == SchemaConstants.RoleBase &&
-	     getID() == SchemaConstants.RoleName))
+	if ((base.getTypeID() == SchemaConstants.UserBase && getID() == SchemaConstants.UserUserName) ||
+	    (base.getTypeID() == SchemaConstants.PersonaBase && getID() == SchemaConstants.PersonaLabelField) ||
+	    (base.getTypeID() == SchemaConstants.OwnerBase && getID() == SchemaConstants.OwnerNameField) ||
+	    (base.getTypeID() == SchemaConstants.EventBase && getID() == SchemaConstants.EventToken) ||
+	    (base.getTypeID() == SchemaConstants.RoleBase && getID() == SchemaConstants.RoleName))
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("setNameSpace.need_namespace", this.toString()));
@@ -4101,7 +4096,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * this field definition is not a string, numeric, or IP type.</p>
    */
 
-  ReturnVal setNameSpace(DBNameSpace newNamespace)
+  private ReturnVal setNameSpace(DBNameSpace newNamespace)
   {
     if (!isString() && !isNumeric() && !isIP())
       {
