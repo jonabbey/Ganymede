@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.87 $ %D%
+   Version: $Revision: 1.88 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.87 $ %D%
+ * @version $Revision: 1.88 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -588,10 +588,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	// checks is supposed to make up for this.. this is really not the way
 	// to do it.  THis is rank laziness.
 
-	if (!field.defined || 
-	    (!(field instanceof PermissionMatrixDBField) &&
-	    ((field.value == null) && 
-	     ((field.values == null) || (field.values.size() == 0)))))
+	if (!field.defined)
 	  {
 	    removeList.addElement(field);
 
