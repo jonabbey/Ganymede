@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2176,6 +2176,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	setStatus("Loading objects for base " + node.getText());
 	setWaitCursor();
+
 	try
 	  {
 	    refreshObjects((BaseNode)node, true);
@@ -2209,13 +2210,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public void treeNodeMenuPerformed(treeNode node,
 				    java.awt.event.ActionEvent event)
   {
+    // Unclear why the following bit was here.. I've commented it out for
+    // now.  As far as I can see, the only possible impact to commenting this
+    // out is to cause object creation to not have the new node updated properly..
+    // this is a minor thing compared to unnecessary delay as we load the object nodes
+    //
+    // 23 Jan 1998 - Jon
 
-    if (node instanceof BaseNode)
-      {
-	// make sure we've got the list updated
-
-	treeNodeExpanded(node);
-      }
+    //    if (node instanceof BaseNode)
+    //      {
+    //	// make sure we've got the list updated
+    //
+    //	treeNodeExpanded(node);
+    //      }
     
     if (event.getSource() == createMI)
       {
@@ -2288,14 +2295,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    try
 	      {
 		Query _query = new Query(baseN.getBase().getTypeID(), null, true);
+
+		setStatus("Sending query for base " + node.getText() + " to server");
+
 		DumpResult buffer = session.dump(_query);
 
 		if (buffer == null)
 		  {
+		    setStatus("results == null");
 		    System.out.println("results == null");
 		  }
 		else
 		  {
+		    setStatus("Server returned results for query on base " + node.getText() + " - building table");
+
 		    System.out.println();
 
 		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
@@ -2306,7 +2319,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		throw new RuntimeException("Could not get query: " + rx);
 	      }
 	  }
-      
 	else
 	  {
 	    System.out.println("viewMI from a node other than a BaseNode");
@@ -2327,14 +2339,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    try
 	      {
 		Query _query = new Query(baseN.getBase().getTypeID(), null, false);
+
+		setStatus("Sending query for base " + node.getText() + " to server");
+
 		DumpResult buffer = session.dump(_query);
 		
 		if (buffer == null)
 		  {
+		    setStatus("results == null");
 		    System.out.println("results == null");
 		  }
 		else
 		  {
+		    setStatus("Server returned results for query on base " + node.getText() + " - building table");
+
 		    System.out.println();
 		    
 		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
@@ -2368,6 +2386,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 		try
 		  {
+		    setStatus("Sending query for base " + node.getText() + " to server");
+
 		    buffer = session.dump(q);
 		  }
 		catch (RemoteException ex)
@@ -2375,7 +2395,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		    throw new RuntimeException("caught remote: " + ex);
 		  }
 
-		wp.addTableWindow(session, q, buffer, "Query Results");
+		if (buffer != null)
+		  {
+		    setStatus("Server returned results for query on base " + 
+			      node.getText() + " - building table");
+		    
+		    wp.addTableWindow(session, q, buffer, "Query Results");
+		  }
+		else
+		  {
+		    setStatus("results == null");
+		    System.out.println("results == null");
+		  }
 	      }
 	  }
       }
