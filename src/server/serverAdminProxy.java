@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2002/01/26 06:04:52 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2002/01/26 06:13:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.20 $ $Date: 2002/01/26 06:04:52 $
+ * @version $Revision: 1.21 $ $Date: 2002/01/26 06:13:41 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -97,11 +97,14 @@ public class serverAdminProxy implements Admin, Runnable {
   private Vector eventBuffer;
 
   /**
-   * <p>How many events we'll queue up before deciding that the
-   * admin console isn't responding.</p>
+   * <p>How many events we'll queue up before deciding that the admin
+   * console isn't responding.  Right now all events are either being
+   * handled with coalesce or replace, so we should never, ever have
+   * more objects in our eventBuffer than we have types of
+   * events.</p>
    */
 
-  private int maxBufferSize = 15; // only 10 kinds of things, all of which we coalesce/replace
+  private int maxBufferSize = 15; // only 10 kinds of things defined right now
 
   /**
    * <p>Our remote reference to the admin console client</p>
@@ -373,6 +376,8 @@ public class serverAdminProxy implements Admin, Runnable {
 
     try
       {
+	// loop until we have shut down and all of our events have drained
+
 	while (!(done && eventBuffer.size() == 0))
 	  {
 	    synchronized (eventBuffer)
