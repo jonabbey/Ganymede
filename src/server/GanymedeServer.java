@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2002/08/03 01:40:27 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2002/08/07 00:39:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -621,12 +621,14 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public static Vector getUserTable()
   {
     GanymedeSession session;
-    Vector entries = new Vector();
+    Vector entries;
 
     /* -- */
 
     synchronized (sessions)
       {
+	entries = new Vector(sessions.size());
+	
 	for (int i = 0; i < sessions.size(); i++)
 	  {
 	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(i);
