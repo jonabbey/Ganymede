@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.158 $
-   Last Mod Date: $Date: 1999/10/29 18:45:13 $
+   Version: $Revision: 1.159 $
+   Last Mod Date: $Date: 1999/10/29 19:12:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.158 $ %D%
+ * @version $Revision: 1.159 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3832,7 +3832,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObject vObj;
     DBEditObject newObj;
     ReturnVal retVal;
-    boolean save_wizard = this.enableWizards;
 
     /* -- */
 
@@ -3844,43 +3843,34 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error, the client attempted to clone a null invid.");
       }
 
-    enableWizards(false);
-    
-    try
+    retVal = view_db_object(invid); // get a copy customized for per-field visibility
+
+    if (!retVal.didSucceed())
       {
-	retVal = view_db_object(invid); // get a copy customized for per-field visibility
-
-	if (!retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
-
-	vObj = (DBObject) retVal.getObject();
-
-	retVal = create_db_object(invid.getType());
-
-	if (!retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
-
-	newObj = (DBEditObject) retVal.getObject();
-
-	retVal = newObj.cloneFromObject(session, vObj, false);
-
-	if (!retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
-
-	retVal.setObject(newObj);
-
 	return retVal;
       }
-    finally
+    
+    vObj = (DBObject) retVal.getObject();
+
+    retVal = create_db_object(invid.getType());
+    
+    if (!retVal.didSucceed())
       {
-	enableWizards(save_wizard);
+	return retVal;
       }
+    
+    newObj = (DBEditObject) retVal.getObject();
+
+    retVal = newObj.cloneFromObject(session, vObj, false);
+    
+    if (!retVal.didSucceed())
+      {
+	return retVal;
+      }
+    
+    retVal.setObject(newObj);
+    
+    return retVal;
   }
 
   /**
