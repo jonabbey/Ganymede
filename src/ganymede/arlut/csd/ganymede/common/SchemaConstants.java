@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -113,6 +113,12 @@ package arlut.csd.ganymede.common;
  * <td>A kind of event that can occur in relation to a specific database object, which can be logged
  * and for which mail can be sent to a list of addresses.</td>
  * </tr>
+ * <tr>
+ * <td>Sync Channel</td>
+ * <td>7</td>
+ * <td>Definition for a synchronous sync channel that uses message queueing logic to send change deltas to external
+ * sync targets.</td>
+ * </tr>
  * </table>
  * </p>
  *
@@ -173,17 +179,10 @@ package arlut.csd.ganymede.common;
  * <td>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</td>
  * <td>string describing the administrator who last modified this object</td>
  * </tr>
- * <tr>
- * <td>BackLinksField</td>
- * <td>8</td>
- * <td>{@link arlut.csd.ganymede.server.InvidDBField InvidDBField}</td>
- * <td>any miscellaneous pointers pointing to us are kept track of in
- * this field if we don't have an explicit back-link field set</td>
- * </tr>
  * </table>
  * </p>
  *
- * <p>This file contains lots of other constants for fields in the 7 mandatory
+ * <p>This file contains lots of other constants for fields in the 8 mandatory
  * object types, but I'm tired of typing, so I'm not going to try to document
  * them in the javadoc class header right now.</p>
  */
@@ -222,8 +221,9 @@ public interface SchemaConstants {
    * <p>any miscellaneous pointers pointing to us are kept track of in
    * this field if we don't have an explicit back-link field.</p>
    *
-   * <p>This field is DEPRECATED, and should only be encountered in
-   * ganymede.db files from old versions of the Ganymede server.</p>
+   * <p>This field is DEPRECATED and RESERVED, and should only be
+   * encountered in ganymede.db files from old versions of the
+   * Ganymede server.</p>
    */
 
   final static short BackLinksField = 8; 
@@ -512,8 +512,53 @@ public interface SchemaConstants {
    */
   final static short TaskOptionStrings = 107;
 
+  //  
+  //  /* Sync Channel */
+  //
+
+  /**
+   * Records of synchronous message queue channels for delta change
+   * transmissions.
+   */
+
+  final static short SyncChannelBase = 7;
+
+  /**
+   * Name of this sync channel
+   */
+
+  final static short SyncChannelName = 100;
+
+  /**
+   * Directory to write sync records to
+   */
+
+  final static short SyncChannelDirectory = 101;
+
+  /**
+   * External program to run to serve this sync channel.
+   */
+
+  final static short SyncChannelServicer = 102;
+
+  /**
+   * What fields are we interested in syncing to this channel?
+   */
+
+  final static short SyncChannelFields = 103;
+
+  /**
+   * Do we allow plaintext passwords on this channel?
+   */
+
+  final static short SyncChannelPlaintextOK = 104;
+
+  // ======================================================================
+  // ======================================================================
+  // ======================================================================
+
   /**
    * what's the last base we currently have defined as a mandatory base? 
    */
-  final static short FinalBase = ObjectEventBase;
+  final static short FinalBase = SyncChannelBase;
 }

@@ -2113,6 +2113,61 @@ public final class DBStore implements JythonMap {
 	// and record the base
 
 	setBase(b);
+
+	// create Sync Channel Base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "Sync Channel";
+	b.classname = "arlut.csd.ganymede.server.taskCustom";
+	b.type_code = (short) SchemaConstants.SyncChannelBase; // 7
+
+	adminCategory.addNodeAfter(b, null); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Name";
+	bf.loading = true;
+	bf.setNameSpace("syncchannel");
+	bf.loading = false;
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelDirectory;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Directory Path";
+	bf.comment = "Location of the sync channel directory on disk";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelServicer;
+	bf.field_type = FieldType.String;
+	bf.field_name = "Service Program";
+	bf.comment = "The location of the program to service this sync channel";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelFields;
+	bf.field_type = FieldType.FIELDOPTIONS;
+	bf.field_name = "Sync Data";
+	bf.comment = "The definitions for what object and fields we want to include in this sync channel";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Allow Plaintext Passwords";
+	b.addFieldToEnd(bf);
+
+	b.setLabelField(SchemaConstants.SyncChannelName);
+
+    	// link in the class we specified
+
+	b.createHook();
+
+	// and record the base
+
+	setBase(b);
       }
     catch (RemoteException ex)
       {
