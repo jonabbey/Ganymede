@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.1 $
-# $Date: 1999/01/20 00:33:14 $
+# $Revision: 1.2 $
+# $Date: 1999/01/20 03:43:59 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -28,7 +28,7 @@
 
 # What directory are we handling?
 
-chdir("<CLASSDIR>/admin_classes/arlut/csd/ganymede") || die ("Couldn't change dir");
+chdir("<#CLASSDIR#>/admin_classes/arlut/csd/ganymede") || die ("Couldn't change dir");
 
 # Clean it out
 
@@ -36,11 +36,11 @@ system("rm -rf *");
 
 # Now link in all the base classes we need
 
-link("<CLASSDIR>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
+link("<#CLASSDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
 
 foreach $file (@ganymede_classes) {
   print "Linking " . $file . ".class\n";
-  $result = link ("<CLASSDIR>/arlut/csd/ganymede/".$file.".class", $file.".class");
+  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file.".class", $file.".class");
 
   if (!$result){
     print "$! -- $file\n";
@@ -52,14 +52,14 @@ foreach $file (@ganymede_classes) {
 print "Attempting to link class families\n";
 
 foreach $family (@class_families) {
-  opendir SOURCEDIR, "<CLASSDIR>/arlut/csd/ganymede" or die "couldn't open dir for families";
+  opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
   @classes = grep /^$family/, readdir SOURCEDIR;
   closedir SOURCEDIR;
   
   foreach $file (@classes) {
     print "Linking " . $file . "\n";
     
-    $result = link ("<CLASSDIR>/arlut/csd/ganymede/".$file, $file);
+    $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
     
     if (!$result){
       print "$! -- $file\n";
@@ -71,14 +71,14 @@ foreach $family (@class_families) {
 
 print "Attempting to link stubs\n";
 
-opendir SOURCEDIR, "<CLASSDIR>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@stubs) {
   print "Linking " . $file . "\n";
 
-  $result = link ("<CLASSDIR>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
@@ -89,14 +89,14 @@ foreach $file (@stubs) {
 
 print "Attempting to link skels\n";
 
-opendir SOURCEDIR, "<CLASSDIR>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Skel/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@stubs) {
   print "Linking " . $file . "\n";
 
-  $result = link ("<CLASSDIR>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
@@ -107,14 +107,14 @@ foreach $file (@stubs) {
 
 print "Attempting to link gifs\n";
 
-opendir SOURCEDIR, "<CLASSDIR>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @gifs = grep /\.gif/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@gifs) {
   print "Linking " . $file . "\n";
 
-  $result = link ("<CLASSDIR>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
