@@ -348,10 +348,14 @@ documentation.</p>
 store backup copies of any networking files written out by the schema
 kit's builder tasks.  These back up copies will be written into
 subdirectories that are named by date, and which will be automatically
-zipped up once a day.  Nothing in this directory is used by the Ganymede
-server for any purpose other than your peace of mind in case you have
-a problem with the Ganymede server and need to get back an old copy of
-a passwd or nis file.</p>
+zipped up once a day.  Nothing in this directory is used by the
+Ganymede server for any purpose other than your peace of mind in case
+you have a problem with the Ganymede server and need to get back an
+old copy of a passwd or nis file in a pinch.  If you don't want to
+spend the disk space on archival copies of your network data files,
+just edit the <a
+href="glossary.html#server.properties">ganymede.properties</a> file
+and comment out the 'ganymede.builder.backups' property.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -788,7 +792,7 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Fri Jan 12 16:55:11 CST 2001
+Last modified: Wed Jan 24 20:24:52 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
