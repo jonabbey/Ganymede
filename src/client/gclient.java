@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,7 @@ import arlut.csd.Util.*;
 import arlut.csd.Tree.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -79,6 +80,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
 		      	             // are vectors of fields
+    baseMap = null,                  // Hash of Short to Base
     changedHash = new Hashtable(),   // Hash of objects that might have changed
     deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
     createHash = new Hashtable();    // Hash of objects waiting to be created
@@ -105,13 +107,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   treeControl tree;
 
   // The top lines
-  JBufferedPane
+  JPanel
+    leftP,
     leftTop,
-    rightTop;
-
-  JBorderedPane
-    leftBorder,
-    rightBorder;
+    rightTop,
+    mainPanel;   //Everything is in this, so it is double buffered
 
   public JLabel
     leftL,
@@ -138,6 +138,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   MenuItem 
     createMI = null,
     viewMI = null,
+    viewAllMI = null,
     queryMI = null,
     menubarQueryMI = null;
 
@@ -165,6 +166,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   WindowBar
     windowBar;
 
+  CompoundBorder
+    statusBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(new Insets(5,5,5,5)));
+
   /* -- */
 
   /**
@@ -189,10 +193,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     session = s;
     _myglogin = g;
 
-    setLayout(new BorderLayout());
+    mainPanel = new JPanel(true);
+    mainPanel.setLayout(new BorderLayout());
 
-    BorderLayout layout = new BorderLayout();
-    setLayout( layout );
+    setLayout(new BorderLayout());
+    add("Center", mainPanel);
+
+    //BorderLayout layout = new BorderLayout();
+    //setLayout( layout );
 
     if (debug)
       {
@@ -241,7 +249,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Personae menu
     PersonaMenu = new Menu("Persona");
-    personaListener = new PersonaListener(session);
+    personaListener = new PersonaListener(session, this);
     try
       {
 	Vector personae = session.getPersonae();
@@ -267,10 +275,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     this.setMenuBar(menubar);
 
     createMI = new MenuItem("Create");
-    viewMI = new MenuItem("List");
+    viewMI = new MenuItem("List editable");
+    viewAllMI = new MenuItem("List all");
     queryMI = new MenuItem("Query");
 
     pMenu.add(viewMI);
+    pMenu.add(viewAllMI);
     pMenu.add(createMI);
     pMenu.add(queryMI);
 
@@ -333,12 +343,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
 
     //    Box leftBox = new Box(tree, "Objects");
-    JBufferedPane leftP = new JBufferedPane(false);
+    leftP = new JPanel(false);
     leftP.setLayout(new BorderLayout());
     leftP.add("Center", tree);
 
-    leftTop = new JBufferedPane(false);
-    leftTop.setInsets(new Insets(4,4,4,4));
+    leftTop = new JPanel(false);
+    leftTop.setBorder(new EmptyBorder(new Insets(4,4,4,4)));
+    leftTop.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.RAISED), new EmptyBorder(new Insets(4,4,4,4))));
     
     leftL = new JLabel("Objects");
     leftTop.setLayout(new BorderLayout());
@@ -346,13 +357,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftTop.setForeground(ClientColor.menuText);
     leftTop.add("Center", leftL);
 
-    leftBorder = new JBorderedPane();
-    leftBorder.setLayout(new BorderLayout());
-    //leftBorder.setBorder(BorderFactory.createBezelBorder(1));
-    leftBorder.setBorder(BorderFactory.createGroovedBorder());
-    leftBorder.add("Center", leftTop);
-
-    leftP.add("North", leftBorder);
+    leftP.add("North", leftTop);
 
     if (debug)
       {
@@ -383,9 +388,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // The right panel which will contain the windowPanel
 
-    JBufferedPane rightP = new JBufferedPane(true);
+    JPanel rightP = new JPanel(true);
     rightP.setBackground(ClientColor.background);
-    rightP.setBuffered(true);
     rightP.setLayout(new BorderLayout());
 
     wp = new windowPanel(this, windowMenu);
@@ -394,28 +398,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     rightL = new JLabel("Open objects");
     
-    rightTop = new JBufferedPane(false);
+    rightTop = new JPanel(false);
     rightTop.setBackground(ClientColor.menu);
     rightTop.setForeground(ClientColor.menuText);
-    rightTop.setInsets(new Insets(4,4,4,4));
+    rightTop.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.RAISED), new EmptyBorder(new Insets(4,4,4,4))));
     rightTop.setLayout(new BorderLayout());
     rightTop.add("West", rightL);
 
     timerLabel = new JLabel();
-    timer = new connectedTimer(timerLabel, 1000);
+    timer = new connectedTimer(timerLabel, 5000);
     rightTop.add("East", timerLabel);
 
-    rightBorder = new JBorderedPane();
-    rightBorder.setLayout(new BorderLayout());
-    rightBorder.setBorder(BorderFactory.createGroovedBorder());
-    rightBorder.add("Center", rightTop);
-
-    rightP.add("North", rightBorder);
+    rightP.add("North", rightTop);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
-    JBufferedPane bottomButtonP = new JBufferedPane(false);
-    JBufferedPane leftButtonP = new JBufferedPane(false);
-    JBufferedPane rightButtonP = new JBufferedPane(false);
+    JPanel bottomButtonP = new JPanel(false);
+    JPanel leftButtonP = new JPanel(false);
+    JPanel rightButtonP = new JPanel(false);
     bottomButtonP.setLayout(new BorderLayout());
     bottomButtonP.add("West", leftButtonP);
     bottomButtonP.add("Center", rightButtonP);
@@ -428,8 +427,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     //wp.addWindowBar(windowBar);
 
     commit = new JButton("Commit");
+    commit.setOpaque(true);
+    commit.setBackground(Color.lightGray);
+    commit.setForeground(Color.black);
     commit.setToolTipText("Click this to commit all changes to database");
     cancel = new JButton("Cancel");
+    cancel.setOpaque(true);
+    cancel.setBackground(Color.lightGray);
+    cancel.setForeground(Color.black);
     cancel.setToolTipText("Click this to cancel all changes");
     commit.addActionListener(this);
     cancel.addActionListener(this);
@@ -440,46 +445,29 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
    
-    add("Center",sPane);
+    mainPanel.add("Center",sPane);
 
     // Create the bottomBar, for the bottom of the window
 
-    JBufferedPane bottomBar = new JBufferedPane(false);
+    JPanel bottomBar = new JPanel(false);
     bottomBar.setBackground(ClientColor.menu);
     bottomBar.setForeground(ClientColor.menuText);
     bottomBar.setLayout(new BorderLayout());
 
-    JBorderedPane statusBorder = new JBorderedPane(BorderFactory.createGroovedBorder());
-    statusBorder.setLayout(new BorderLayout());
-    JBufferedPane statusPane = new JBufferedPane(new BorderLayout());
-    statusPane.setInsets(new Insets(5,5,5,5));
-
-    statusPane.setBackground(ClientColor.menu);
-    statusPane.setForeground(ClientColor.menuText);
-
     statusLabel = new JTextField();
+    statusLabel.setOpaque(true);
     statusLabel.setBackground(ClientColor.menu);
     statusLabel.setForeground(ClientColor.menuText);
-    //statusLabel.setInsets(new Insets(5,5,5,5));
-
-    statusPane.add("Center", statusLabel);
-    statusBorder.add("Center", statusPane);
+    statusLabel.setBorder(statusBorder);
 
     JLabel l = new JLabel("Status: ");
     l.setBackground(ClientColor.menu);
     l.setForeground(ClientColor.menuText);
-    //l.setInsets(new Insets(5,5,5,5));
-    JBufferedPane lPane = new JBufferedPane(new BorderLayout());
-    lPane.add("Center", l);
-    lPane.setInsets(new Insets(5,5,5,5));
+    //l.setBorder(statusBorder);
 
-    JBorderedPane labelBorder = new JBorderedPane(BorderFactory.createGroovedBorder());
-    labelBorder.setLayout(new BorderLayout());
-    labelBorder.add("Center", lPane);
-
-    bottomBar.add("West", labelBorder);
-    bottomBar.add("Center", statusBorder);
-    add("South", bottomBar);
+    bottomBar.add("West", l);
+    bottomBar.add("Center", statusLabel);
+    mainPanel.add("South", bottomBar);
 
     statusLabel.setText("Starting up");
 
@@ -500,6 +488,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     pack();
     setSize(800, 600);
     show();
+  }
+
+  public void update(Graphics g)
+  {
+    paint(g);
   }
 
   /** 
@@ -528,6 +521,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return baseHash;
   }
 
+  public Hashtable getBaseMap()
+  {
+    if (baseMap == null)
+      {
+	baseMap = loader.getBaseMap();
+      }
+
+    return baseMap;
+
+  }
+
   /**
    * Change the text in the status bar
    *
@@ -541,6 +545,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	System.out.println("Setting status: " + status);
       }
     statusLabel.setText(status);
+    //repaint();
+    statusLabel.paintImmediately(statusLabel.getVisibleRect());
   }
 
   /**
@@ -551,22 +557,36 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   {
     return statusLabel.getText();
   }
-
-  /**
-   * Set the look and feel for the window
-   *
-   * @param look path to UIFactory
-   */
-
-  public void setLook(String look)
+  
+  public void setRose()
+  {
+    try 
+      {
+	UIManager.setLookAndFeel("com.sun.java.swing.rose.RoseLookAndFeel");
+	SwingUtilities.updateComponentTreeUI(this);
+	leftP.invalidate();
+	invalidate();
+	validate();
+      } 
+    catch (Exception e) 
+      {
+	System.out.println(e);
+      }
+  }
+  
+  public void setBasic() 
   {
     try
       {
-	UIManager.setUIFactory(look, this);
-      }
-    catch (ClassNotFoundException ex)
+	UIManager.setLookAndFeel("com.sun.java.swing.basic.BasicLookAndFeel");
+	SwingUtilities.updateComponentTreeUI(this);
+	leftP.invalidate();
+	invalidate();
+	validate();
+      } 
+    catch (Exception e) 
       {
-	System.out.println("Could not load Rose: " + ex);
+	System.out.println(e);
       }
   }
 
@@ -1048,6 +1068,50 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 
   }
+
+  public void commitTransaction()
+  {
+    try
+      {
+	this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	updateNotePanels();
+	
+	wp.closeEditables();
+	somethingChanged = false;
+	session.commitTransaction();
+	wp.refreshTableWindows();
+	session.openTransaction("gclient");
+	
+	System.out.println("Done committing");
+	this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+	refreshTree(true);
+	
+	wp.resetWindowCount();
+
+	
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not commit transaction" + rx);
+      }
+  }
+
+  public void cancelTransaction()
+  {
+    try
+      {
+	wp.closeEditables();
+	session.abortTransaction();
+	somethingChanged = false;
+	session.openTransaction("glient");
+	refreshTree(false);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not abort transaction" + rx);
+      }
+  }
   // ActionListener Methods
   
   public void actionPerformed(java.awt.event.ActionEvent event)
@@ -1056,61 +1120,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	System.err.println("cancel button clicked");
 
-	try
-	  {
-	    wp.closeEditables();
-	    session.abortTransaction();
-	    somethingChanged = false;
-	    session.openTransaction("glient");
-	    refreshTree(false);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not abort transaction" + rx);
-	  }
+	cancelTransaction();
+
+
       }
     else if (event.getSource() == commit)
       {
 	System.out.println("commit button clicked");
 
-	try
-	  {
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    updateNotePanels();
-	    
-	    wp.closeEditables();
-	    somethingChanged = false;
-	    session.commitTransaction();
-	    wp.refreshTableWindows();
-	    session.openTransaction("gclient");
-
-	    System.out.println("Done committing");
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not commit transaction" + rx);
-	  }
+	commitTransaction();
 	
-	try
-	  {
-	    refreshTree(true);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not refresh tree: " + rx);
-	  }
-
       }
     else if (event.getSource() == menubarQueryMI)
       {
-	if (baseHash == null)
-	  {
-	    baseHash = loader.getBaseHash();
-	  }
 
-	querybox box = new querybox(baseHash, this, "Query Panel");
+	querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
 	Query q = box.myshow();
 
 	if (q != null)
@@ -1161,11 +1185,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else if (event.getSource() == roseMI)
       {
-	try
+	setRose();
+	/*	try
 	  {
 	    setStatus("Switching to Rose look and feel");
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    UIManager.setUIFactory("com.sun.java.swing.rose.RoseFactory", this);
+	    UIManager.setLookAndFeel("com.sun.java.swing.rose.RoseFactory");
 	    this.invalidate();
 	    this.validate();
 	    this.repaint();
@@ -1176,15 +1201,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    System.out.println("Could not load Rose: " + ex);
 	  }
-	  
+	catch (IllegalAccessException ex)
+	  {
+	    System.out.println("Could not load new look: " + ex);
+	  }
+	catch (InstantiationException ex)
+	  {
+	    System.out.println("Could not load new look: " + ex);
+	  }
+	  */	
       }
     else if (event.getSource() == win95MI)
       {
+	setBasic();
+
+	/*
 	try
 	  {
 	    setStatus("Switching to win95 look and feel");
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    UIManager.setUIFactory("com.sun.java.swing.basic.BasicFactory", this);
+	    UIManager.setLookAndFeel("com.sun.java.swing.basic.BasicFactory");
 	    this.invalidate();
 	    this.validate();
 	    this.repaint();
@@ -1193,8 +1229,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 	catch (ClassNotFoundException ex)
 	  {
-	    System.out.println("Could not load basic factory: " + ex);
+	    System.out.println("Could not load Rose: " + ex);
 	  }
+	catch (IllegalAccessException ex)
+	  {
+	    System.out.println("Could not load new look: " + ex);
+	  }
+	catch (InstantiationException ex)
+	  {
+	    System.out.println("Could not load new look: " + ex);
+	  }
+	  */
       }
 
     else
@@ -1304,7 +1349,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    try
 	      {
-		Query _query = new Query(baseN.getBase().getTypeID());
+		Query _query = new Query(baseN.getBase().getTypeID(), null, true);
 		DumpResult buffer = session.dump(_query);
 
 		if (buffer == null)
@@ -1323,9 +1368,48 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		throw new RuntimeException("Could not get query: " + rx);
 	      }
 	  }
+      
 	else
 	  {
 	    System.out.println("viewMI from a node other than a BaseNode");
+	  }
+      }
+    
+    else if (event.getSource() ==  viewAllMI)
+      {
+	if (debug)
+	  {
+	    System.out.println("viewAllMI");
+	  }
+	
+	if (node instanceof BaseNode)
+	  {
+	    BaseNode baseN = (BaseNode)node;
+	    
+	    try
+	      {
+		Query _query = new Query(baseN.getBase().getTypeID(), null, false);
+		DumpResult buffer = session.dump(_query);
+		
+		if (buffer == null)
+		  {
+		    System.out.println("results == null");
+		  }
+		else
+		  {
+		    System.out.println();
+		    
+		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
+		  }
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not get query: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.out.println("viewAllMI from a node other than a BaseNode");
 	  }
       }
     else if (event.getSource() ==  queryMI)
@@ -1334,14 +1418,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	if (node instanceof BaseNode)
 	  {
-	    if (baseHash == null)
-	      {
-		baseHash = loader.getBaseHash();
-	      }
-
 	    Base base = ((BaseNode) node).getBase();
 
-	    querybox box = new querybox(base, baseHash, this, "Query Panel");
+	    querybox box = new querybox(base, getBaseHash(), getBaseMap(),  this, "Query Panel");
 
 	    Query q = box.myshow();
 
@@ -1417,12 +1496,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    try
 	      {
-		System.out.println("Deleting invid= " + invidN.getInvid());
-		session.remove_db_object(invidN.getInvid());
-		deleteHash.put(invidN.getInvid(), invidN);
-		invidN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
-		tree.refresh();
-		setStatus("Object will be deleted when commit is clicked.");
+		if (debug)
+		  {
+		    System.out.println("Deleting invid= " + invidN.getInvid());
+		  }
+		if (session.remove_db_object(invidN.getInvid()))
+		  {
+		    deleteHash.put(invidN.getInvid(), invidN);
+		    invidN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+		    tree.refresh();
+		    setStatus("Object will be deleted when commit is clicked.");
+		  }
+		else
+		  {
+		    setStatus(session.getLastError());
+		  }
 	      }
 	    catch(RemoteException rx)
 	      {
@@ -1462,6 +1550,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 class InvidNode extends arlut.csd.Tree.treeNode {
 
+  final static boolean debug = true;
+
   private Invid invid;
 
   public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
@@ -1469,6 +1559,14 @@ class InvidNode extends arlut.csd.Tree.treeNode {
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.invid = invid;
+
+    if (debug)
+      {
+	if (invid == null)
+	  {
+	    System.out.println(" null invid in InvidNode: " + text);
+	  }
+      }
   }
 
   public Invid getInvid()
@@ -1548,23 +1646,93 @@ class PersonaListener implements ActionListener{
 
   Session session;
 
-  PersonaListener(Session session)
+  DialogRsrc
+    resource = null;
+
+  gclient
+    parent;
+
+  PersonaListener(Session session, gclient parent)
     {
       this.session = session;
+      this.parent = parent;
     }
 
   public void actionPerformed(ActionEvent event)
     {
-      
-      System.out.println("MenuItem action command: " + event.getActionCommand());
-      try
+
+      if (parent.somethingChanged)
 	{
-	  String password = new String("heya");
-	  session.selectPersona(event.getActionCommand(), password);
+	  // need to ask: commit, cancel, abort?
+	  StringDialog d = new StringDialog(parent,
+					    "Changing personas",
+					    "Before changing personas, the transaction must be closed.  Would you like to commit your changes?",
+					    "Commit",
+					    "Cancel");
+	  Hashtable result = d.DialogShow();
+	  if (result == null)
+	    {
+	      parent.setStatus("Persona change cancelled");
+	      return;
+	    }
+	  else
+	    {
+	      parent.setStatus("Committing transaction.");
+	      parent.commitTransaction();
+	    }
 	}
-      catch (RemoteException rx)
+
+
+      boolean personaChangeSuccessful = false;
+      if (resource == null)
 	{
-	  throw new RuntimeException("Could not set persona to " + event.getActionCommand() + ": " + rx);
+	  resource = new DialogRsrc(parent, "Change Persona", "Enter the persona password:");
+	  resource.addPassword("Password:");
+	}
+
+      System.out.println("MenuItem action command: " + event.getActionCommand());
+      
+      Hashtable result = null;
+      String password = null;
+
+      if (event.getActionCommand().indexOf(":") > 0)
+	{
+	  StringDialog d = new StringDialog(resource);
+	  result = d.DialogShow();
+	  password = (String)result.get("Password:");
+	}
+      else
+	{
+	  password = "yada";
+	}
+
+      if (password != null)
+	{
+	  try
+	    {	      
+	      personaChangeSuccessful = session.selectPersona(event.getActionCommand(), password);
+	      
+	      if (personaChangeSuccessful)
+		{
+		  parent.setStatus("Successfully changed persona.");
+		  parent.setTitle("Ganymede Client: " + event.getActionCommand() + " logged in.");
+		  parent.commitTransaction();
+		}
+	      else
+		{
+		  parent.setStatus("Danger Danger!");
+		  (new StringDialog(parent, "Error: persona no changie", 
+				    "Could not change persona:\n" + parent.getSession().getLastError(),
+				    false)).DialogShow();
+
+		  parent.setStatus("Persona change failed");
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not set persona to " + event.getActionCommand() + ": " + rx);
+	    }
+
 	}
       
 
