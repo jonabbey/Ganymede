@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 1999/10/07 17:37:11 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 1999/10/07 21:04:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.91 $ %D%
+ * @version $Revision: 1.92 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1978,13 +1978,13 @@ public class DBStore {
 
   /**
    * <p>Creates required objects when a new database is created
-   * from scratch.</p>
+   * from scratch, or if a pre-existing but damaged database file
+   * is loaded..</p>
    */
 
   void initializeObjects()
   {
-    DBEditObject eO;
-    Invid inv;
+    DBEditObject eObj;
     StringDBField s;
     PasswordDBField p;
     InvidDBField i;
@@ -1993,7 +1993,13 @@ public class DBStore {
     DBSession session;
     PermissionMatrixDBField pm;
     ReturnVal retVal;
-    
+    boolean success = false;
+
+    Invid supergashOwner = new Invid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
+    Invid supergash = new Invid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
+    Invid monitor = new Invid(SchemaConstants.PersonaBase, SchemaConstants.PersonaMonitorObj);
+    Invid defaultRole = new Invid(SchemaConstants.RoleBase, SchemaConstants.RoleDefaultObj);
+
     /* -- */
 
     // manually insert the root (supergash) admin object
@@ -2010,162 +2016,228 @@ public class DBStore {
     session = gSession.session;
     session.openTransaction("DBStore bootstrap initialization");
 
-    retVal = session.createDBObject(SchemaConstants.OwnerBase, null); // create a new owner group 
-
-    if (retVal == null || !retVal.didSucceed())
+    try
       {
-	throw new RuntimeException("Couldn't create supergash owner group.");
-      }
+	// make sure the supergash owner group exists
 
-    eO = (DBEditObject) retVal.getObject();
+	if (!exists(session, supergashOwner))
+	  {
+	    System.err.println("Creating supergash Owner Group");
 
-    inv = eO.getInvid();
+	    retVal = session.createDBObject(SchemaConstants.OwnerBase, supergashOwner, null);
 
-    s = (StringDBField) eO.getField("Name");
-    s.setValueLocal(Ganymede.rootname);
+	    if (retVal == null || !retVal.didSucceed())
+	      {
+		throw new RuntimeException("Couldn't create supergash owner group.");
+	      }
+
+	    eObj = (DBEditObject) retVal.getObject();
+
+	    s = (StringDBField) eObj.getField("Name");
+	    s.setValueLocal(Ganymede.rootname);
+	  }
+
+	// make sure the supergash admin persona object exists
+
+	if (!exists(session, supergash))
+	  {
+	    System.err.println("Creating supergash persona object");
+	
+	    retVal = session.createDBObject(SchemaConstants.PersonaBase, supergash, null);
+	
+	    if (retVal == null || !retVal.didSucceed())
+	      {
+		throw new RuntimeException("Couldn't create supergash admin persona.");
+	      }
+	
+	    eObj = (DBEditObject) retVal.getObject();
+	
+	    s = (StringDBField) eObj.getField("Name");
+	    s.setValueLocal(Ganymede.rootname);
     
-    // create a supergash admin persona object 
+	    p = (PasswordDBField) eObj.getField("Password");
+	    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	
+	    //	    i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
+	    //	    i.addElementLocal(supergashOwner);
+	
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+	    b.setValueLocal(Boolean.TRUE);
+	
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+	    b.setValueLocal(Boolean.TRUE);
+	  }
 
-    retVal = session.createDBObject(SchemaConstants.PersonaBase, null);
+	// make sure the supergash admin persona and supergash owner group are linked.
 
-    if (retVal == null || !retVal.didSucceed())
-      {
-	throw new RuntimeException("Couldn't create supergash admin persona.");
-      }
+	eObj = session.editDBObject(supergash);
 
-    eO = (DBEditObject) retVal.getObject();
+	i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
 
-    s = (StringDBField) eO.getField("Name");
-    s.setValueLocal(Ganymede.rootname);
+	if (!i.containsElement(supergashOwner))
+	  {
+	    System.err.println("Linking supergash Persona object to supergash Owner Group");
+	    i.addElementLocal(supergashOwner);
+	  }
+
+	// make sure the monitor object exists if the properties file defines one
+
+	if (!exists(session, monitor) && Ganymede.monitornameProperty != null && 
+	    Ganymede.defaultmonitorpassProperty != null)
+	  {
+	    System.err.println("Creating monitor persona");
+	
+	    retVal = session.createDBObject(SchemaConstants.PersonaBase, monitor, null);
+
+	    if (retVal == null || !retVal.didSucceed())
+	      {
+		throw new RuntimeException("Couldn't create monitor admin persona.");
+	      }
+	
+	    eObj = (DBEditObject) retVal.getObject();
+	
+	    s = (StringDBField) eObj.getField("Name");
+	
+	    if (Ganymede.monitornameProperty != null)
+	      {
+		s.setValueLocal(Ganymede.monitornameProperty);
+	      }
+	    else
+	      {
+		throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
+	      }
     
-    p = (PasswordDBField) eO.getField("Password");
-    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	    p = (PasswordDBField) eObj.getField("Password");
+	
+	    if (Ganymede.defaultmonitorpassProperty != null)
+	      {
+		p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
+	      }
+	    else
+	      {
+		throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
+	      }
 
-    i = (InvidDBField) eO.getField(SchemaConstants.PersonaGroupsField);
-    i.addElementLocal(inv);
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+	    b.setValueLocal(Boolean.TRUE);
 
-    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValueLocal(Boolean.TRUE);
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+	    b.setValueLocal(Boolean.FALSE);
+	  }
 
-    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValueLocal(Boolean.TRUE);
+	// make sure we have the default role object
 
-    // create a monitor admin persona object 
+	if (!exists(session, defaultRole))
+	  {
+	    System.err.println("Creating default Role object");
 
-    retVal = session.createDBObject(SchemaConstants.PersonaBase, null);
+	    retVal = session.createDBObject(SchemaConstants.RoleBase, defaultRole, null);
 
-    if (retVal == null || !retVal.didSucceed())
-      {
-	throw new RuntimeException("Couldn't create monitor admin persona.");
+	    if (retVal == null || !retVal.didSucceed())
+	      {
+		throw new RuntimeException("Couldn't create permissions default object.");
+	      }
+
+	    eObj = (DBEditObject) retVal.getObject();
+	
+	    s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
+	    s.setValueLocal("Default");
+	
+	    // what can users do with objects they own?  Includes users themselves
+	
+	    pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
+	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); // view self, nothing else
+	  }
+
+	createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
+
+	createSysEventObj(session, "adminconnect", "Admin Console Attached", 
+			  "Admin Console Attached", false);
+
+	createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", 
+			  "Admin Console Disconnected", false);
+
+	createSysEventObj(session, "badpass", "Failed login attempt", 
+			  "Bad username and/or password", true);
+
+	createSysEventObj(session, "deleteobject", "Object Deleted", 
+			  "This object has been deleted.", true);
+
+	createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
+
+	createSysEventObj(session, "expirationwarn", "Expiration Warning", 
+			  "This object is going to expire soon.", false);
+
+	createSysEventObj(session, "expirenotify", "Expiration Notification", 
+			  "This object has been expired.", false);
+
+	createSysEventObj(session, "finishtransaction", "transaction end", null, false);
+
+	createSysEventObj(session, "goodlogin", "Successful login", null, false);
+
+	createSysEventObj(session, "inactivateobject", "Object Inactivation", 
+			  "This object has been inactivated", true);
+
+	createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
+
+	createSysEventObj(session, "normallogout", "Normal Logout", null, false);
+
+	createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
+
+	createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
+
+	createSysEventObj(session, "reactivateobject", "Object Reactivation", 
+			  "This object has been reactivated", true);
+
+	createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
+
+	createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
+
+	createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
+
+	createSysEventObj(session, "shutdown", "Server shutdown", 
+			  "The Ganymede server was cleanly shut down", false);
+
+	createSysEventObj(session, "starttransaction", "transaction start", null, false);
+
+	// we commit the transaction at the DBStore level because we don't
+	// want to mess with running builder tasks
+
+	retVal = session.commitTransaction();
+
+	// if the DBSession commit failed, we won't get an automatic
+	// abort..  do that here.
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    session.abortTransaction();
+	  }
+
+	gSession.logout();
+	success = true;
       }
-
-    eO = (DBEditObject) retVal.getObject();
-
-    s = (StringDBField) eO.getField("Name");
-
-    if (Ganymede.monitornameProperty != null)
+    finally
       {
-	s.setValueLocal(Ganymede.monitornameProperty);
+	if (!success)
+	  {
+	    session.abortTransaction();
+	    gSession.logout();
+	  }
       }
-    else
-      {
-	throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
-      }
-    
-    p = (PasswordDBField) eO.getField("Password");
-
-    if (Ganymede.defaultmonitorpassProperty != null)
-      {
-	p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
-      }
-    else
-      {
-	throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
-      }
-
-    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValueLocal(Boolean.TRUE);
-
-    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValueLocal(Boolean.FALSE);
-
-    // create SchemaConstants.PermDefaultObj
-
-    retVal = session.createDBObject(SchemaConstants.RoleBase, null);
-
-    if (retVal == null || !retVal.didSucceed())
-      {
-	throw new RuntimeException("Couldn't create permissions default object.");
-      }
-
-    eO = (DBEditObject) retVal.getObject();
-
-    s = (StringDBField) eO.getField(SchemaConstants.RoleName);
-    s.setValueLocal("Default");
-
-    // what can users do with objects they own?  Includes users themselves
-
-    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleMatrix);
-    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); // view self, nothing else
-
-    // what can arbitrary users do with objects they don't own?  nothing by default
-
-    // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleDefaultMatrix);
-
-    createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
-
-    createSysEventObj(session, "adminconnect", "Admin Console Attached", 
-		      "Admin Console Attached", false);
-
-    createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", 
-		      "Admin Console Disconnected", false);
-
-    createSysEventObj(session, "badpass", "Failed login attempt", 
-		      "Bad username and/or password", true);
-
-    createSysEventObj(session, "deleteobject", "Object Deleted", 
-		      "This object has been deleted.", true);
-
-    createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
-
-    createSysEventObj(session, "expirationwarn", "Expiration Warning", 
-		      "This object is going to expire soon.", false);
-
-    createSysEventObj(session, "expirenotify", "Expiration Notification", 
-		      "This object has been expired.", false);
-
-    createSysEventObj(session, "finishtransaction", "transaction end", null, false);
-
-    createSysEventObj(session, "goodlogin", "Successful login", null, false);
-
-    createSysEventObj(session, "inactivateobject", "Object Inactivation", 
-		      "This object has been inactivated", true);
-
-    createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
-
-    createSysEventObj(session, "normallogout", "Normal Logout", null, false);
-
-    createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
-
-    createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
-
-    createSysEventObj(session, "reactivateobject", "Object Reactivation", 
-		      "This object has been reactivated", true);
-
-    createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
-
-    createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
-
-    createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
-
-    createSysEventObj(session, "shutdown", "Server shutdown", 
-		      "The Ganymede server was cleanly shut down", false);
-
-    createSysEventObj(session, "starttransaction", "transaction start", null, false);
-
-    session.commitTransaction();
-    gSession.logout();
   }
+
+  /**
+   * Convenience method for initializeObjects().
+   */
+
+  private boolean exists(DBSession session, Invid invid)
+  {
+    return (session.viewDBObject(invid) != null);
+  }
+
+  /**
+   * Convenience method for initializeObjects().
+   */
 
   private void createSysEventObj(DBSession session, 
 				 String token, String name, String description,
@@ -2174,6 +2246,13 @@ public class DBStore {
   {
     DBEditObject eO = null;
     ReturnVal retVal;
+
+    if (sysEventExists(token))
+      {
+	return;
+      }
+
+    System.err.println("Creating " + token + " system event object");
 
     retVal = session.createDBObject(SchemaConstants.EventBase, null);
 
@@ -2207,6 +2286,15 @@ public class DBStore {
 	    throw new RuntimeException("Error, could not set description system event object " + token);
 	  }
       }
+  }
+
+  /**
+   * Convenience method for createSysEventObj().
+   */
+
+  private boolean sysEventExists(String token)
+  {
+    return (Ganymede.internalSession.findLabeledObject(token, SchemaConstants.EventBase) != null);
   }
 
   /*

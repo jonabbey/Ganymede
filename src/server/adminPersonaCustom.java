@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/08/14 00:49:07 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/07 21:04:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -511,5 +511,4 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     return false;		// by default, permission is denied
   }
-
 }

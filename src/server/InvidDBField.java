@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 1999/10/07 17:37:13 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 1999/10/07 21:04:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.110 $ %D%
+ * @version $Revision: 1.111 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1691,18 +1691,18 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * This method is used to effect the remote side of an unbind operation.<br><br>
+   * <p>This method is used to effect the remote side of an unbind operation.</p>
    *
-   * An InvidDBField being manipulated with the standard editing accessors
+   * <p>An InvidDBField being manipulated with the standard editing accessors
    * (setValue, addElement, deleteElement, setElement) will call this method
    * on another InvidDBField in order to unlink a pair of symmetrically bound
-   * InvidDBFields.<br><br>
+   * InvidDBFields.</p>
    *
-   * This method will return false if the unbinding could not be performed for
-   * some reason.<br><br>
+   * <p>This method will return false if the unbinding could not be performed for
+   * some reason.</p>
    *
-   * <b>This method is private, and is not to be called by any code outside
-   * of this class.</b>
+   * <p>This method is private, and is not to be called by any code outside
+   * of this class.</p>
    *
    * @param oldInvid The invid to be unlinked from this field.  If this
    * field is not linked to the invid specified, nothing will happen.
@@ -2078,10 +2078,21 @@ public final class InvidDBField extends DBField implements invid_field {
 		continue;
 	      }
 
-	    if (backField == null || !backField.isDefined())
+	    if (backField == null)
 	      {
-		Ganymede.debug("InvidDBField.test(): Null backField field in targeted field: " + 
-			       objectName + " in field " + getName());
+		Ganymede.debug("InvidDBField.test(): Object " + objectName + ", field " + getName() + 
+			       " is targeting a field, " + targetField + ", in object " + 
+			       target + " which does not exist!");
+		result = false;
+
+		continue;
+	      }
+
+	    if (backField != null && !backField.isDefined())
+	      {
+		Ganymede.debug("InvidDBField.test(): Object " + objectName + ", field " + getName() + 
+			       " is targeting a field, " + targetField + ", in object " + 
+			       target + " which is not defined.!");
 		result = false;
 
 		continue;

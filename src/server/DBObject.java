@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 1999/10/07 17:37:10 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 1999/10/07 21:04:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.78 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.79 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -813,16 +813,20 @@ public class DBObject implements db_object, FieldType, Remote {
 	  {
 	    out.writeShort(key.shortValue());
 
-	    if (key.shortValue() == SchemaConstants.OwnerMembersField)
-	      {
-		// only want to emit the persona objects we're keeping,
-		// which would be supergash and monitor
+	    // If we're writing out the members field of an owner
+	    // group object, we only want to include links to the
+	    // persona objects we're keeping, which would be supergash
+	    // and monitor
 
+	    if (objectBase.getTypeID() == SchemaConstants.OwnerBase &&
+		key.shortValue() == SchemaConstants.OwnerMembersField)
+	      {
 		DBField oldF = (DBField) fields.get(keynum);
 
 		if (!(oldF instanceof InvidDBField))
 		  {
-		    Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be invidfield");
+		    Ganymede.debug("Error in DBObject.partialEmit(): expected " +
+				   "SchemaConstants.OwnerMembersField to be invidfield");
 		    ((DBField) fields.get(keynum)).emit(out);
 		  }
 		else
@@ -831,15 +835,35 @@ public class DBObject implements db_object, FieldType, Remote {
 
 		    if (!invF.isVector())
 		      {
-			Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be vector");
+			Ganymede.debug("Error in DBObject.partialEmit(): expected " +
+				       "SchemaConstants.OwnerMembersField to be vector");
 			((DBField) fields.get(keynum)).emit(out);
 		      }
 		    else
 		      {
-			invF.values = new Vector();
+			Vector temp = new Vector();
 
-			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 1)); // 1 is supergash
-			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 2)); // 2 monitor
+			Invid supergash = new Invid(SchemaConstants.PersonaBase, 
+						    SchemaConstants.PersonaSupergashObj);
+			Invid monitor = new Invid(SchemaConstants.PersonaBase, 
+						  SchemaConstants.PersonaMonitorObj);
+
+			// we're keeping supergash and monitor, so if
+			// we see references to either of those
+			// personae, emit them.  Else we're going to
+			// emit an empty member list.
+
+			if (invF.containsElementLocal(supergash))
+			  {
+			    temp.addElement(supergash);
+			  }
+
+			if (invF.containsElementLocal(monitor))
+			  {
+			    temp.addElement(monitor);
+			  }
+
+			invF.values = temp;
 
 			invF.emit(out);
 		      }

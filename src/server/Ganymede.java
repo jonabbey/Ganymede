@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 1999/10/07 17:37:12 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 1999/10/07 21:04:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -873,8 +873,17 @@ public class Ganymede {
     Invid defaultInv;
     StringDBField s;
     PermissionMatrixDBField pm;
+
+    ReturnVal retVal;
     
     /* -- */
+
+    // check to make sure the datastructures for supergash in the
+    // ganymede.db file are set.
+
+    Ganymede.db.initializeObjects();
+
+    // and reset the password if we need to
 
     if (resetadmin && Ganymede.defaultrootpassProperty != null)
       {
@@ -943,9 +952,9 @@ public class Ganymede {
 
 	    // create SchemaConstants.RoleDefaultObj
 
-	    ReturnVal retVal = internalSession.session.createDBObject(SchemaConstants.RoleBase, 
-							       defaultInv,
-							       null);
+	    retVal = internalSession.session.createDBObject(SchemaConstants.RoleBase, 
+							    defaultInv,
+							    null);
 
 	    if (retVal != null && retVal.didSucceed())
 	      {
@@ -972,7 +981,7 @@ public class Ganymede {
 	    System.err.println("Not Creating the RoleDefaultObj");
 	  }
 
-	ReturnVal retVal = internalSession.commitTransaction();
+	retVal = internalSession.commitTransaction();
     
 	if (retVal == null || retVal.didSucceed())
 	  {

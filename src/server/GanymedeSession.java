@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.151 $
-   Last Mod Date: $Date: 1999/10/07 17:37:12 $
+   Version: $Revision: 1.152 $
+   Last Mod Date: $Date: 1999/10/07 21:04:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.151 $ %D%
+ * @version $Revision: 1.152 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3938,15 +3938,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	(invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete default permissions definitions");
+					  "Error.. can't delete default permissions definitions.. this object " +
+					  "is critical to the proper functioning of the Ganymede server.");
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
-	(invid.getNum() == 1))
+	(invid.getNum() == SchemaConstants.PersonaSupergashObj))
       {
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete " + 
-					  Ganymede.rootname + " persona");
+					  "Error.. can't delete the " + 
+					  Ganymede.rootname + " persona.. this object " +
+					  "is critical to the proper functioning of the Ganymede server.");
+      }
+
+    if ((invid.getType() == SchemaConstants.OwnerBase) &&
+	(invid.getNum() == SchemaConstants.OwnerSupergash))
+      {
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Error.. can't delete the supergash owner group.. this object " +
+					  "is critical to the proper functioning of the Ganymede server.");
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());

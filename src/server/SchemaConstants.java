@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/04/01 22:17:52 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/07 21:04:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -296,6 +296,9 @@ public interface SchemaConstants {
 
   /** Object number for a pre-defined object used by the server */
   final static short PersonaSupergashObj = 1;
+
+  /** Object number for a pre-defined object used by the server */
+  final static short PersonaMonitorObj =21;
 
   //
   // /* Role */
