@@ -4,12 +4,13 @@
    Ganymede client login module
 
    This client has been developed so that it can run as both an applet,
-   as well as, an application.
+   as well as an application.
+
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.4 $ %D%
-   Module By: Navin Manohar
+   Version: $Revision: 1.5 $ %D%
+   Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -151,7 +152,7 @@ public class glogin extends java.applet.Applet implements Runnable {
     p.add(new FieldWrapper("Password:",passwd));
     
     username.setEnabled(false);
-    username.setText("root");
+    username.setText("supergash");
     passwd.setEnabled(false);
 
     bPanel = new JPanel();
