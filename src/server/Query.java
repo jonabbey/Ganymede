@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,14 +40,92 @@ import java.util.*;
 
 public class Query implements java.io.Serializable {
 
+  static final boolean debug = true;
+
+  // ---
+
+  /**
+   *
+   * The name of the object type that the queryNodes are looking
+   * to match on.
+   *
+   */
+
   String objectName = null;
+
+  /**
+   *
+   * The name of the object type that the query should return.. used
+   * in the case where the search is performed on embedded objects.
+   *
+   */
+
   String returnName = null;
+
+  /**
+   *
+   * We want to be able to save a query on the server and re-issue it
+   * on behalf of the user.  If we are saved, the name to save under
+   * will be here.  We may or may not want it here.
+   *
+   */
+
   String saveName = null;
+
+  /**
+   *
+   * The id of the object type that the queryNodes are looking
+   * to match on.
+   *
+   */
+
   short objectType = -1;
+
+  /**
+   *
+   * The id of the object type that the query should return.. used
+   * in the case where the search is performed on embedded objects.
+   *
+   */
+
   short returnType = -1;
+
+  /**
+   *
+   * The root of a graph of QueryNodes that encodes the desired
+   * search criteria.
+   *
+   */
+
   QueryNode root;
+
+  /**
+   *
+   * If true, this query will only be matched against objects in the
+   * database that the user has permission to edit.
+   *
+   */
+
   boolean editableOnly;
+
+  /**
+   *
+   * If true, this query will only be matched against the subset of
+   * objects in the database that the user has requested via
+   * the Session filter mechanism.
+   *
+   */
+
   boolean filtered;
+
+  /**
+   *
+   * A list of field id's in Short form that the server will take into
+   * account when returning a data dump.  If null, the default fields
+   * will be returned.
+   * 
+   */
+
   Hashtable permitList = null;
 
   /* -- */
@@ -76,7 +154,8 @@ public class Query implements java.io.Serializable {
    *
    * @param objectName name of object type to query
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
-   * @param editableOnly if true, the server will only return objects that the user's session currently has permission to edit
+   * @param editableOnly if true, the server will only return objects that
+   * the user's session currently has permission to edit
    */
 
   public Query(String objectName, QueryNode root, boolean editableOnly)
@@ -199,6 +278,7 @@ public class Query implements java.io.Serializable {
    * fields that may be returned.  Once this method
    * is called with a field identifier, the query will
    * only return fields that have been explicitly added.
+   * <br><br>
    *
    * resetPermitList() may be called to reset the
    * list to the initial allow-all state.
@@ -213,85 +293,5 @@ public class Query implements java.io.Serializable {
 
     permitList.put(new Short(id), this);
   }
-
-  
-  public String dumpToString()
-    {
-      /** 
-       *
-       * The dumpToSting method for the query creates a string representation
-       * of the query's actual values. It calls each node's dumpToString method 
-       * until the number of nodes in the query has been exhausted
-       *
-       */
-      
-      String queryString = null;
-
-      saveName = "Testing";
-
-      // Attach the name of the saved query first...
-
-      if (saveName == null)
-	{  
-	  System.err.println("Error: No name given to saved query");
-	  queryString = "(No name):";
-	}
-      else 
-	{
-	  queryString = saveName + ":";
-	}
-      
-      // Then add the object type by id or name
-      
-      /*  If the object is denoted by its ID, throw a 
-       *  # sign before it to indicate it. Remember to 
-       *  back-slash any pound signs in object name field
-       *  to avoid confusion	 
-       */
-      
-      if (objectName != null)
-	{
-	  // The query object is denoted by its name
-	  
-	  queryString = queryString + objectName + ":";
-	
-	}
-      else if (objectType != -1)
-	{
-	  // The object is assigned by short ID
-
-	  queryString = queryString + "#" + objectType + ":";
-
-	}
-      else 
-	{
-	  System.err.println("Error: No object given for Query");
-	  
-	  // Whoops! Time to leave
-	  
-	  return null;
-	}
-
-      // Then add editable only value...
-     
-      if (editableOnly == true)
-	{
-	  queryString = queryString + "editTrue:(";
-	}
-      else 
-	{
-	  queryString = queryString + "editFalse:(";
-	}
-      
-      // Now dump it..
-      
-      if (root != null)
-	{
-	  queryString = queryString + root.dumpToString() + ")";
-	}
-      
-      return queryString;
-      
-    }
 }
 
