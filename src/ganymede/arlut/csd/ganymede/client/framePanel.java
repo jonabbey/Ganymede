@@ -15,8 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   The University of Texas at Austin.
+   Copyright (C) 1996-2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -642,6 +642,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     return editable;
   }
+  
+  /**
+   * <p>This method returns true if the window is in the middle of closing,
+   * which only happens if it has been approved by vetoableChange.</p>
+   */
+  
+  public boolean isApprovedForClosing()
+  {
+    return closingApproved;
+  }
 
   /**
    * <p>Returns the invid of the object contained in this frame panel.</p>
@@ -889,7 +899,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 						  Date startDate)
   {
     StringBuffer buffer = new StringBuffer();
-    db_field field;
 
     try
       {
@@ -1309,8 +1318,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	println("Creating personae panel()");
       }
-    
-    invid_field p = null;
       
     personae.setLayout(new BorderLayout());
     personae.add("Center", new personaPanel(persona_field, editable, this));

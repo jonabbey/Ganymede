@@ -15,8 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
-   The University of Texas at Austin.
+   Copyright (C) 1996-2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -525,9 +525,42 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    framePanel fp = (framePanel) o;
 
-	    if ((fp.isEditable()) && (fp.getObjectInvid().equals(invid)))
+	    // we may have a view window and an edit window, so we
+	    // need to scan over all editable windows, not just stop
+	    // when we see a non-editable window with the invid we are
+	    // looking for.
+
+	    if (fp.isEditable() && fp.getObjectInvid().equals(invid))
 	      {
-		return true;
+	      	return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
+  
+  /**
+   * Returns true if the window corresponding to the invid exists and is ready to close.
+   */
+
+  public boolean isApprovedForClosing(Invid invid)
+  {
+    Enumeration e = windowList.keys();
+
+    /* -- */
+
+    while (e.hasMoreElements())
+      {
+	Object o = windowList.get(e.nextElement());
+
+	if (o instanceof framePanel)
+	  {
+	    framePanel fp = (framePanel) o;
+
+	    if (fp.getObjectInvid().equals(invid))
+	      {
+	      	return fp.isApprovedForClosing();
 	      }
 	  }
       }
@@ -988,11 +1021,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void refreshTableWindows()
   {
     Object obj;
-    Enumeration enum = windowList.keys();
+    Enumeration en = windowList.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	obj = windowList.get(enum.nextElement());
+	obj = windowList.get(en.nextElement());
 
 	if (obj instanceof gResultTable)
 	  {
