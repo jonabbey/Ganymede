@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.9 $
-# Date: $Date: 1999/01/29 22:07:44 $
+# Version: $Revision: 1.10 $
+# Date: $Date: 1999/07/08 05:01:05 $
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
@@ -18,6 +18,8 @@
 # make
 # make kits
 # make jars
+# cd ../doc
+# ./buildjavadoc
 # cd ..
 # ./distribclean
 #
@@ -52,6 +54,7 @@ echo "Removing custom install scripts"
 
 rm -f installClient*
 rm -f installServer
+rm -f installWeb
 
 # Clean up the src tree.. remove the configured makefile,
 # config.sh and rebuild files

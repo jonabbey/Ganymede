@@ -87,6 +87,10 @@ sure the server won't throw a null pointer exception if the database
 contains a user or admin persona with no password during the login
 process.
 
+If a Ganymede user record has no password set, that user will not be
+able to login to the Ganymede server.  Unlike UNIX, Ganymede never
+lets anyone log in without a password.
+
 7. [ADMIN CONSOLE, SERVER] Reworked admin console, server's admin API
 
 Fixed the admin console so that it will properly log itself out when
