@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,8 +94,8 @@ public class DBWriteLock extends DBLock {
   {
     if (debug)
       {
-	System.err.println("DBWriteLock.establish(): enter");
-	System.err.println("DBWriteLock.establish(): baseSet vector size " + baseSet.size());
+	System.err.println(key + ": DBWriteLock.establish(): enter");
+	System.err.println(key + ": DBWriteLock.establish(): baseSet vector size " + baseSet.size());
       }
 
     done = false;
@@ -109,14 +109,14 @@ public class DBWriteLock extends DBLock {
 
     if (debug)
       {
-	System.err.println("DBWriteLock.establish(): added myself to the DBStore lockHash.");
+	System.err.println(key + ": DBWriteLock.establish(): added myself to the DBStore lockHash.");
       }
 
     this.key = key;
 
     if (debug)
       {
-	System.err.println("DBWriteLock.establish(): entering DBStore synchronized block.");
+	System.err.println(key + ": DBWriteLock.establish(): entering DBStore synchronized block.");
       }
 
     synchronized (lockManager)
@@ -125,7 +125,7 @@ public class DBWriteLock extends DBLock {
 
 	if (debug)
 	  {
-	    System.err.println("DBWriteLock.establish(): entered DBStore synchronized block.");
+	    System.err.println(key + ": DBWriteLock.establish(): entered DBStore synchronized block.");
 	  }
 
 	do
@@ -139,8 +139,8 @@ public class DBWriteLock extends DBLock {
 		  {
 		    if (debug)
 		      {
-			System.err.println("DBWriteLock.establish(): waiting for dumpers on base " + base.object_name);
-			System.err.println("DBWriteLock.establish(): dumperList size: " + base.dumperList.size());
+			System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + base.object_name);
+			System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + base.dumperList.size());
 		      }
  		    okay = false;
 		  }
@@ -162,7 +162,7 @@ public class DBWriteLock extends DBLock {
 
 	if (debug)
 	  {
-	    System.err.println("DBWriteLock.establish(): no dumpers queued.");
+	    System.err.println(key + ": DBWriteLock.establish(): no dumpers queued.");
 	  }
 
 	// add our selves to the ObjectBase write queues
@@ -175,7 +175,7 @@ public class DBWriteLock extends DBLock {
 
 	if (debug)
 	  {
-	    System.err.println("DBWriteLock.establish(): added ourself to the writerList.");
+	    System.err.println(key + ": DBWriteLock.establish(): added ourself to the writerList.");
 	  }
 
 	// spinwait until we can get into all of the ObjectBases
@@ -187,7 +187,7 @@ public class DBWriteLock extends DBLock {
 	  {
 	    if (debug)
 	      {
-		System.err.println("DBWriteLock.establish(): spinning.");
+		System.err.println(key + ": DBWriteLock.establish(): spinning.");
 	      }
 
 	    okay = true;
@@ -202,11 +202,11 @@ public class DBWriteLock extends DBLock {
 		      {
 			if (base.readerList.size() > 0)
 			  {
-			    System.err.println("DBWriteLock.establish(): waiting for readers to release.");
+			    System.err.println(key + ": DBWriteLock.establish(): waiting for readers to release.");
 			  }
 			else if (base.writeInProgress)
 			  {
-			    System.err.println("DBWriteLock.establish(): waiting for writer to release.");
+			    System.err.println(key + ": DBWriteLock.establish(): waiting for writer to release.");
 			  }
 		      }
 		    okay = false;
@@ -241,7 +241,7 @@ public class DBWriteLock extends DBLock {
 
     if (debug)
       {
-	System.err.println("DBWriteLock.establish(): got the lock.");
+	System.err.println(key + ": DBWriteLock.establish(): got the lock.");
       }
 
   }
