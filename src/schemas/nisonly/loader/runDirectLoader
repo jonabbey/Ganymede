@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Ganymede NIS Loader Run Script 
+# Ganymede Loader Run Script 
 # Created: 18 March 1998
-# Ver: $Revision: 1.5 $ %D%
+# Ver: 1.2 98/03/18
 #
 # Jonathan Abbey
 #
@@ -14,27 +14,19 @@ JAVA=/opt/depot/java-1.2b2/bin/java
 
 # Where are the Ganymede jars installed?
 
-JARPATH=/home/broccol/gash2/releases/latest/jars
-
-# Where
-
-SCHEMAPATH=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/nisonly
+JARPATH=/home/broccol/gash2/classes
 
 # Where is the loader tree?
 
-LOADERDIR=$SCHEMAPATH/loader
+LOADERDIR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/nisonly/loader
 
 # Where are the classes for the loader?
 
 LOADERCLASSPATH=$LOADERDIR/classes
 
-# Where are the custom classes?
-
-CUSTOMPATH=$SCHEMAPATH/custom_src/classes
-
 # Set the CLASSPATH for the JVM to use
 
-CLASSPATH=$JARPATH/ganymedeServer.jar:$LOADERCLASSPATH:$CUSTOMPATH
+CLASSPATH=$JARPATH/GanymedeServer.jar:$LOADERCLASSPATH
 
 export CLASSPATH
 
@@ -73,12 +65,6 @@ echo "Copying schema definition file to loader directory"
 
 cp $SCHEMAFILE $DB/loader.db
 
-echo "Running NIS loader"
+echo "Running loader"
 
 $JAVA -noasyncgc -ms32m -mx256m arlut.csd.ganymede.loader.directLoader $PROPERTIES
-
-echo "Copying results"
-
-cp $DB/loader.db $LOADERDIR/ganymede.db
-
-echo "Done"
