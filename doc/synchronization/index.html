@@ -76,43 +76,45 @@
     The target directory will just catch up the next time a
     synchronization occurs.  The inherent redundancy of this approach
     can make the synchronization process very robust, but the downside
-    is that a full state synchronization can be very time consuming.
-    The synchronization process must involve writing out all known
-    data each time any changes are made.  In addition, if it isn't
-    possible to efficiently wipe and reload the target directory
-    service, a process of comparison must be undertaken to calculate
-    what has changed between the data written out for the
-    synchronization requires and the pre-existing configuration of the
-    target directory service.  In some cases, including that of
-    passwords in Active Directory, it may not even be possible to
-    completely read the pre-existing data from the target directory
-    service in order to be able to detect what has changed.  This may
-    mean that more data will need to be sent to the target service
-    than is strictly necessary, even if that same data is already
-    securely (but irretrievably) held in the target service.</p>
+    is that a full state synchronization can be very time consuming.</p>
+
+    <p>In addition, if it isn't possible to efficiently wipe and
+    reload the target directory service, a process of comparison must
+    be undertaken to calculate what has changed between the data
+    written out for the synchronization requires and the pre-existing
+    configuration of the target directory service.  In some cases,
+    including that of passwords in Active Directory, it may not even
+    be possible to completely read the pre-existing data from the
+    target directory service in order to be able to detect what has
+    changed.  This may mean that more data will need to be sent to the
+    target service than is strictly necessary, even if that same data
+    is already securely (but irretrievably) held in the target
+    service.</p>
 
     <p>Synchronizing only the recently applied transactions can be far
     more efficient, assuming the target directory service can accept
-    and apply a set of changes.  Only a very small amount of data
-    needs to be synchronized at each synchronization, and the target
+    and apply a set of changes.  Only a very small amount of data may
+    need to be synchronized at each synchronization, and the target
     directory service doesn't need to erase or reload anything other
     than what actually changed.  This kind of "delta" synchronization,
     however, has some severe shortcomings.  The first problem is that
-    if we are only sending the most recent transactions, we have to
+    if we are only sending the most recent transactions, we must
     absolutely rely on the target directory service to remember all
     previous changes.  If a transaction were to get lost somehow, the
     target directory service would become out of sync with the master
     data held in Ganymede, and later synchronizations might never
-    detect or fix the problem.  Another problem is that if we limit
-    the amount of data we send to the synchronization channel to only
-    that which recently changed, we might fail to provide enough
-    surrounding context to allow the synchronization system to
-    translate the synchronization data into a form suitable to the
-    target directory service.  It wouldn't do, for example, to try and
-    write to a synchronization channel the fact that a user's password
-    changed without also including enough surrounding context to allow
-    the synchronization system to locate the user record to
-    be changed in the target service.</p>
+    detect or fix the problem.</p>
+
+    <p>Another problem is that if we limit the amount of data we send
+    to the synchronization channel to only that which recently
+    changed, we might fail to provide enough surrounding context to
+    allow the synchronization system to translate the synchronization
+    data into a form suitable to the target directory service.  It
+    wouldn't do, for example, to try and write to a synchronization
+    channel the fact that a user's password changed without also
+    including enough surrounding context to allow the synchronization
+    system to locate the user record to be changed in the target
+    service.</p>
 
     <p>As it happens, Ganymede 2.0 provides three distinct systems for
     data synchronization.  Two are based on the full state
@@ -305,10 +307,10 @@
     
     <h3 id="buildertask_whaaaa">What A Builder Task Looks Like</h3>
 
-    <p>What follows is the complete UNIXBuilderTask class from the
-    Ganymede userKit.  It will illustrate a lot of the principles of
-    writing a full-state builder task with the GanymedeBuilderTask
-    class.</p>
+    <p>What follows is a slightly simplified version of the
+    UNIXBuilderTask class from the Ganymede userKit.  It will
+    illustrate a lot of the principles of writing a full-state builder
+    task with the GanymedeBuilderTask class.</p>
 
     <pre class="listing">
 package arlut.csd.ganymede.userKit;
@@ -337,13 +339,11 @@ you'll need to import everything from the
 public class UNIXBuilderTask extends GanymedeBuilderTask {
 
   private String buildScript = null;
-  private String md5passwdFile =  null;
   private String passwdFile = null;
   private String groupFile = null;
 
   // ---
 
-  private Date now = null;
   private boolean backedup = false;
 
   /* -- */
@@ -392,25 +392,13 @@ variable from the GanymedeBuilderTask class.</p>
 
     /* -- */
 
-    // initialize operational variables for the new run
-
-    backedup = false;
-    now = null;
-
     // now see what our current option values are
 
     passwdFile = getOptionValue("passwdFile");
-    md5passwdFile = getOptionValue("md5passwdFile");
 
-    if (passwdFile == null && md5passwdFile == null)
+    if (passwdFile == null)
       {
 	Ganymede.debug("UNIXBuilderTask: error, no passwdFile specified");
-      }
-
-    if (passwdFile != null && passwdFile.equals(md5passwdFile))
-      {
-	Ganymede.debug("UNIXBuilderTask: error, md5passwdFile and passwdFile are the same, skipping md5passwdFile");
-	md5passwdFile = null;
       }
 
     groupFile = getOptionValue("groupFile");
@@ -448,38 +436,7 @@ variable from the GanymedeBuilderTask class.</p>
 		  {
 		    DBObject user = (DBObject) users.nextElement();
 		  
-		    writeUserLine(user, out, false);
-		  }
-	      
-		out.close();
-	      }
-
-	    result = true;
-	  }
-
-	if (md5passwdFile != null) 
-	  {
-	    out = null;
-
-	    try
-	      {
-		out = openOutFile(md5passwdFile, "unix");
-	      }
-	    catch (IOException ex)
-	      {
-		ex.printStackTrace();
-		Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + md5passwdFile + ": " + ex);
-	      }
-	  
-	    if (out != null)
-	      {
-		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-	      
-		while (users.hasMoreElements())
-		  {
-		    DBObject user = (DBObject) users.nextElement();
-		  
-		    writeUserLine(user, out, true);
+		    writeUserLine(user, out);
 		  }
 	      
 		out.close();
@@ -668,11 +625,10 @@ builder script return until it is truly finished with its build.</p>
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
-   * @param useMD5 If true, passwords will be written out in md5 format if possible
    *
    */
 
-  private void writeUserLine(DBObject object, PrintWriter writer, boolean useMD5)
+  private void writeUserLine(DBObject object, PrintWriter writer)
   {
     String username;
     String cryptedPass = null;
@@ -700,20 +656,7 @@ builder script return until it is truly finished with its build.</p>
 
     if (passField != null)
       {
-	if (useMD5)
-	  {
-	    cryptedPass = passField.getMD5CryptText();
-	  }
-
-	// if the Ganymede server doesn't have an MD5 password for
-	// this user, go ahead and devolve to the crypt() password if
-	// available.  This might have been set by rpcpass and the NIS
-	// passwd daemon.
-
-	if (cryptedPass == null)
-	  {
-	    cryptedPass = passField.getUNIXCryptText();
-	  }
+	cryptedPass = passField.getUNIXCryptText();
       }
     else
       {
