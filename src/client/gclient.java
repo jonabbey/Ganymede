@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,14 +46,45 @@ import com.sun.java.swing.*;
 
 public class gclient extends JFrame implements treeCallback,ActionListener {
   
+  // Image numbers
+  final int NUM_IMAGE = 12;
+  
+  final int OPEN_BASE = 0;
+  //  final int OPEN_BASE_DELETE = 1;
+  //final int OPEN_BASE_CREATE = 2;
+  //final int OPEN_BASE_CHANGED = 3;
+  final int CLOSED_BASE = 1;
+  //final int CLOSED_BASE_DELETE = 5;
+  //final int CLOSED_BASE_CREATE = 6;
+  //final int CLOSED_BASE_CHANGED = 7;
+
+  final int OPEN_FIELD = 2;
+  final int OPEN_FIELD_DELETE = 3;
+  final int OPEN_FIELD_CREATE = 4;
+  final int OPEN_FIELD_CHANGED = 5;
+  final int CLOSED_FIELD = 6;
+  final int CLOSED_FIELD_DELETE = 7;
+  final int CLOSED_FIELD_CREATE = 8;
+  final int CLOSED_FIELD_CHANGED = 9;
+
+  final int OPEN_CAT = 10;
+  final int CLOSED_CAT = 11;
+
   final boolean debug = true;
 
   Session session;
   glogin _myglogin;
 
-  Hashtable baseHash = null;	// used to reduce the time required to get listings
-				// of bases and fields.. keys are Bases, values
-				// are vectors of fields
+  Hashtable 
+    baseHash = null,	             // used to reduce the time required to get listings
+                                     // of bases and fields.. keys are Bases, values
+		      	             // are vectors of fields
+    nodeHash = new Hashtable(),      // Hash of objects to their node
+    changedHash = new Hashtable(),   // Hash of objects that might have changed
+    deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
+    createHash = new Hashtable();    // Hash of objects waiting to be created
+                                     // Create and Delete are pending on the Commit button. 
+    
   boolean
     somethingChanged = false;
 
@@ -93,7 +124,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   MenuItem 
     logoutMI,
-    removeAllMI;
+    removeAllMI,
+    rebuildTreeMI;
 
   MenuItem
     roseMI,
@@ -145,12 +177,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     logoutMI.addActionListener(this);
     removeAllMI = new MenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
+    rebuildTreeMI = new MenuItem("Rebuild Tree");
+    rebuildTreeMI.addActionListener(this);
 
     menubarQueryMI = new MenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
     fileMenu.add(menubarQueryMI);
     fileMenu.addSeparator();
+    fileMenu.add(rebuildTreeMI);
     fileMenu.add(removeAllMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
@@ -180,10 +215,39 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     pMenu.add(createMI);
     pMenu.add(queryMI);
 
-    images = new Image[3];
-    images[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
-    images[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
-    images[2] = PackageResources.getImageResource(this, "list.gif", getClass());
+
+    Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
+    Image list = PackageResources.getImageResource(this, "list.gif", getClass());
+    Image redOpenFolder = PackageResources.getImageResource(this, "openfolder-red.gif", getClass());
+    Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
+    
+    Image trash = PackageResources.getImageResource(this, "trash.gif", getClass());
+    Image creation = PackageResources.getImageResource(this, "creation.gif", getClass());
+    Image pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+
+    images = new Image[NUM_IMAGE];
+    images[OPEN_BASE] =  openFolder;
+    //images[OPEN_BASE_DELETE] = openFolder;
+    //images[OPEN_BASE_CREATE] = openFolder;
+    //images[OPEN_BASE_CHANGED] = openFolder;
+    images[CLOSED_BASE ] = closedFolder;
+    //images[CLOSED_BASE_DELETE] = closedFolder;
+    //images[CLOSED_BASE_CREATE] = closedFolder;
+    //images[CLOSED_BASE_CHANGED] = closedFolder;
+    
+    images[OPEN_FIELD] = list;
+    images[OPEN_FIELD_DELETE] = trash;
+    images[OPEN_FIELD_CREATE] = creation;
+    images[OPEN_FIELD_CHANGED] = pencil;
+    images[CLOSED_FIELD] = list;
+    images[CLOSED_FIELD_DELETE] = trash;
+    images[CLOSED_FIELD_CREATE] = creation;
+    images[CLOSED_FIELD_CHANGED] = pencil;
+    
+    images[OPEN_CAT] = redOpenFolder;
+    images[CLOSED_CAT] = redClosedFolder;
+    
 
     for (int j = 0; j < 3; j++)
       {
@@ -196,6 +260,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white, this, images,
 			   null);
+
+    tree.setMinimumWidth(200);
 
     Box leftBox = new Box(tree, "Objects");
 
@@ -383,6 +449,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   }
 
   /**
+   * This clears out the tree and completely rebuilds it.
+   */
+
+  void rebuildTree()
+    {
+      tree.clearTree();
+      try
+	{
+	  buildTree();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not rebuild tree: " + rx);
+	}
+    }
+
+  /**
    *
    * This method builds the initial data structures for the object
    * selection tree, using the base information in the baseHash
@@ -396,54 +479,195 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	System.out.println("Building tree");
       }
-    Base base;
-    BaseNode t;
 
-    /* -- */
+    Category firstCat = session.getRootCategory();
 
-    treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
-    tree.setRoot(typesnode);
+    System.out.println("got root category: " + firstCat.getName());
 
-    Enumeration enum = baseHash.keys();
+    CatTreeNode firstNode = new CatTreeNode(null, firstCat.getName(), firstCat,
+					    null, true, 
+					    OPEN_CAT, CLOSED_CAT, null);
 
-    while (enum.hasMoreElements())
+    tree.setRoot(firstNode);
+
+    try
       {
-	base = (Base) enum.nextElement();
-	t = new BaseNode(typesnode, base.getName(), base, null,true,0,1, pMenu);
-	tree.insertNode(t,false);
-	  
-	refreshObjects(t, false);
-      } 
+	recurseDownCatagories(firstNode);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Cound't recurse down catagories: " + rx);
+      }
+
+    tree.refresh();
+
     if (debug)
       {
 	System.out.println("Done building tree,");
       }
   }
 
+  void recurseDownCatagories(CatTreeNode node) throws RemoteException
+    {
+      Vector
+	children;
+
+      Category c;
+      CategoryNode cNode;
+      treeNode 
+	thisNode,
+	prevNode;
+
+      /* -- */
+      
+      c = node.getCategory();
+
+      node.setText(c.getName());
+
+      children = c.getNodes();
+
+      prevNode = null;
+      thisNode = node.getChild();
+
+      for (int i = 0; i < children.size(); i++)
+	{
+	  // find the CategoryNode at this point in the server's category tree
+	  cNode = (CategoryNode)children.elementAt(i);
+	  
+	  prevNode = insertCategoryNode(cNode, prevNode, node);
+
+	  if (prevNode instanceof CatTreeNode)
+	    {
+	      recurseDownCatagories((CatTreeNode)prevNode);
+	    }
+	}
+    }
+
   /**
    *
-   * This method fully updates the tree, refreshing the object
-   * subtree of each base in the tree.
+   * Helper method for building tree
    *
    */
 
-  void refreshTree()
-  {
-    treeNode root = tree.getRoot();
-    BaseNode child = (BaseNode)root.getChild();
+treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode parentNode) throws RemoteException
+    {
 
-    while (child != null)
+      treeNode newNode = null;
+      
+      if (node instanceof Base)
+	{
+	  Base base = (Base)node;
+	  newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+				 false, 
+				 OPEN_BASE, 
+				 CLOSED_BASE,
+				 pMenu);
+	}
+      else if (node instanceof Category)
+	{
+	  Category category = (Category)node;
+	  newNode = new CatTreeNode(parentNode, category.getName(), category,
+				    prevNode, true, 
+				    OPEN_CAT, 
+				    CLOSED_CAT, 
+				    null);
+	}
+      else
+	{
+	  System.out.println("Unknown instance: " + node);
+	}
+
+      tree.insertNode(newNode, true);
+
+      
+      if (newNode instanceof BaseNode)
+	{
+	  refreshObjects((BaseNode)newNode, false);
+	}
+
+      return newNode;
+    }
+
+  /**
+   *
+   * This method updates the tree for the nodes that might have changed.
+   *
+   * @param committed True if commit was clicked, false if cancel was clicked.
+   */
+
+  void refreshTree(boolean committed) throws RemoteException
+  {
+    // First get rid of deleted nodes
+    Enumeration deleted = deleteHash.keys();
+    while (deleted.hasMoreElements())
       {
-	try
+	ObjectNode node = (ObjectNode)deleteHash.get(deleted.nextElement());
+	if (committed)
 	  {
-	    refreshObjects(child, false);
+	    System.out.println("Deleteing node: " + node.getText());
+	    tree.deleteNode(node, false);
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not refresh tree: " + rx);
+	    System.out.println("Canceling the delete");
+	    // Change icon back
+	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
 	  }
-	child = (BaseNode)child.getNextSibling();
       }
+    
+    deleteHash.clear();
+
+    //
+    // Now change the created nodes
+    //
+
+    Enumeration created = createHash.keys();
+    while (created.hasMoreElements())
+      {
+	Invid invid = (Invid)created.nextElement();
+	ObjectNode node = (ObjectNode)createHash.get(invid);
+	if (committed)
+	  {
+	    System.out.println("Committing created node: " + node.getText());
+	    // change the icon
+	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	    node.setText(session.viewObjectLabel(invid));
+	  }
+	else
+	  {
+	    System.out.println("Canceling created node: " + node.getText());
+	    tree.deleteNode(node, false);
+
+	  }
+      }
+
+    createHash.clear();
+
+    //
+    // Last change the changed nodes.
+    //
+
+    Enumeration changed = changedHash.keys();
+    while (changed.hasMoreElements())
+      {
+	Invid invid = (Invid)changed.nextElement();
+	ObjectNode node = (ObjectNode)changedHash.get(invid);
+	if (committed)
+	  {
+	    System.out.println("Updating node: " + node.getText() + " to " + session.viewObjectLabel(invid));
+	    node.setText(session.viewObjectLabel(invid));
+	  }
+	else
+	  {
+	    System.out.println("Cancelled, no change to object?");
+	    // Don't know what to do here, maybe change back?  then
+	    // don't need the change up there either.
+	  }
+	node.setImages(OPEN_FIELD, CLOSED_FIELD);
+
+      }
+
+    changedHash.clear();
 
     tree.refresh();
   }
@@ -583,10 +807,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    ObjectNode objNode = new ObjectNode(node, 
 						object.getLabel(),
 						object,
-						oldNode, false, 2,2, objectPM);
+						oldNode, false,
+						OPEN_FIELD,
+						CLOSED_FIELD,
+						objectPM);
 	    
 	    tree.insertNode(objNode, false);
-	    
+	    nodeHash.put(object ,objNode);
+
 	    oldNode = objNode;
 	    fNode = (ObjectNode) oldNode.getNextSibling();
 	    
@@ -724,6 +952,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    session.abortTransaction();
 	    somethingChanged = false;
 	    session.openTransaction();
+	    refreshTree(false);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -743,7 +972,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    wp.refreshTableWindows();
 	    session.openTransaction();
 
-	    refreshTree();
 	    System.out.println("Done committing");
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
@@ -752,6 +980,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    throw new RuntimeException("Could not commit transaction" + rx);
 	  }
+	
+	try
+	  {
+	    refreshTree(true);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not refresh tree: " + rx);
+	  }
+
       }
     else if (event.getSource() == menubarQueryMI)
       {
@@ -764,6 +1002,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    wp.closeAll();
 	  }
+      }
+    else if (event.getSource() == rebuildTreeMI)
+      {
+	rebuildTree();
       }
     else if (event.getSource() == logoutMI)
       {
@@ -853,7 +1095,24 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  
 	    try
 	      {
-		wp.addWindow(session.create_db_object(baseN.getBase().getTypeID()), true);
+		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
+		wp.addWindow(obj, true);
+
+		ObjectNode objNode = new ObjectNode(baseN, 
+						    "New Object", 
+						    obj,
+						    null, false,
+						    OPEN_FIELD_CREATE,
+						    CLOSED_FIELD_CREATE,
+						    objectPM);
+		// If the base node is closed, open it.
+		if (!baseN.isOpen())
+		  {
+		    tree.expandNode(baseN, false);
+		  }
+		// Redraw the tree now
+		tree.insertNode(objNode, true);
+		createHash.put(obj.getInvid(), objNode);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -938,9 +1197,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    ObjectNode objectN = (ObjectNode)node;
 	  
 	    try
-	      {		
-		System.out.println("edit invid= " + objectN.getObject().getInvid());
-		wp.addWindow(session.edit_db_object(objectN.getObject().getInvid()), true);
+	      {	
+		Invid invid = objectN.getObject().getInvid();
+		System.out.println("edit invid= " + invid);
+		wp.addWindow(session.edit_db_object(invid), true);
+		changedHash.put(invid, objectN);
+		objectN.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+		tree.refresh();
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -964,6 +1227,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      {
 		System.out.println("Deleting invid= " + objectN.getObject().getInvid());
 		session.remove_db_object(objectN.getObject().getInvid());
+		deleteHash.put(objectN.getObject().getInvid(), objectN);
+		objectN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+		tree.refresh();
+		setStatus("Object will be deleted when commit is clicked.");
 	      }
 	    catch(RemoteException rx)
 	      {
@@ -1066,4 +1333,3 @@ class BaseNode extends arlut.csd.Tree.treeNode {
     }
 
 }
-
