@@ -57,6 +57,19 @@ abstract public class JentryField extends JTextField {
   ///////////////////
 
   /**
+   *
+   * Hack to get a border around us.
+   *
+   */
+
+  public void paint(Graphics g)
+  {
+    super.paint(g);
+    g.setColor(Color.black);
+    g.drawRect(0, 0, getBounds().width-1, getBounds().height-1);
+  }
+
+  /**
    *  returns true if the value in the JentryField has 
    *  been modified.
    */
@@ -65,7 +78,6 @@ abstract public class JentryField extends JTextField {
   {
     return changed;
   }
-
 
   /**
    *  returns a JcomponentAttr object for the JentryField
