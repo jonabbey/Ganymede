@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -167,8 +167,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_code = SchemaConstants.OwnerListField;
 	bf.field_type = FieldType.INVID;
 	bf.field_order = 0;
-	bf.allowedTarget = SchemaConstants.AdminBase;
-	bf.targetField = SchemaConstants.AdminObjectsOwned;
+	bf.allowedTarget = SchemaConstants.OwnerBase;
+	bf.targetField = SchemaConstants.OwnerObjectsOwned;
 	bf.editable = false;
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
