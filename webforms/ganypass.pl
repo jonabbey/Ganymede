@@ -17,7 +17,7 @@ use CGI;
 #####################################################################
 
 $query = new CGI;
-$xml_path = "XMLPATH";
+$xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "xmlclient";
 $web_loc = ".";
 
