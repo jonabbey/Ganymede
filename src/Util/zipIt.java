@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/02/03 23:00:02 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/02/03 23:05:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -161,5 +161,24 @@ public class zipIt {
       {
 	zipOut.closeEntry();
       }
+  }
+
+  /**
+   *
+   * Test rig
+   *
+   */
+
+  public static void main (String args[])
+  {
+    String zipName = args[0];
+    Vector inFiles = new Vector();
+
+    for (int i = 1; i < args.length; i++)
+      {
+	inFiles.addElement(args[i]);
+      }
+
+    createZipFile(zipName, inFiles);
   }
 }
