@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,8 +22,10 @@ import java.util.*;
 
 import gjt.Box;
 
+//import com.sun.java.swing.*
+
 import arlut.csd.Table.*;
-import arlut.csd.Dialog.YesNoDialog;
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,10 +76,52 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     return "Dilbert";
   }
 
+  public void setServerStart(Date date)
+  {
+    frame.startField.setText(date.toString());
+  }
+
+  public void setLastDumpTime(Date date)
+  {
+    if (date == null)
+      {
+	frame.dumpField.setText("no dump since server start");
+      }
+    else
+      {
+	frame.dumpField.setText(date.toString());
+      }
+  }
+
+  public void setTransactionsInJournal(int trans)
+  {
+    frame.journalField.setText("" + trans);
+  }
+
+  public void setObjectsCheckedOut(int objs)
+  {
+    frame.checkedOutField.setText("" + objs);
+  }
+
+  public void setLocksHeld(int locks)
+  {
+    frame.locksField.setText("" + locks);
+  }
+
   public void changeStatus(String status)
   {
     frame.statusArea.append(new Date() + " " + status + "\n");
     frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
+  }
+
+  public void changeAdmins(String adminStatus)
+  {
+    frame.adminField.setText(adminStatus);
+  }
+
+  public void changeState(String state)
+  {
+    frame.stateField.setText(state);
   }
 
   public void changeUsers(Vector entries)
@@ -211,14 +255,37 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
   Panel topPanel = null;
 
-  YesNoDialog shutdownDialog = null;
-  YesNoDialog dumpDialog = null;
-  YesNoDialog killDialog = null;
+  StringDialog
+    shutdownDialog = null,
+    dumpDialog = null,
+    killDialog = null;
 
   String killVictim = null;
 
   Label hostLabel = null;
   TextField hostField = null;
+
+  Label adminLabel = null;
+  TextField adminField = null;
+
+  Label stateLabel = null;
+  TextField stateField = null;
+
+  Label startLabel = null;
+  TextField startField = null;
+
+  Label dumpLabel = null;
+  TextField dumpField = null;
+
+  Label journalLabel = null;
+  TextField journalField = null;
+
+  Label checkedOutLabel = null;
+  TextField checkedOutField = null;
+
+  Label locksLabel = null;
+  TextField locksField = null;
+
   TextArea statusArea = null;
   
   rowTable table = null;
@@ -265,15 +332,15 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     killUserMI = new MenuItem("Kill User");
     popMenu.add(killUserMI);
 
-    shutdownDialog = new YesNoDialog(this,
-				     "Confirm Ganymede Server Shutdown", 
-				     "Are you sure you want to shutdown the Ganymede server?", 
-				     this);
+    shutdownDialog = new StringDialog(this,
+				      "Confirm Ganymede Server Shutdown", 
+				      "Are you sure you want to shutdown the Ganymede server?", 
+				      "Yes", "No");
 
-    dumpDialog = new YesNoDialog(this,
-				 "Ganymede Server Dump",
-				 "Are you sure you want to schedule a full dump of the Ganymede database?", 
-				 this);
+    dumpDialog = new StringDialog(this,
+				  "Ganymede Server Dump",
+				  "Are you sure you want to schedule a full dump of the Ganymede database?", 
+				  "Yes", "No");
 
     //    setBackground(Color.white);
 
@@ -317,16 +384,183 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(hostField, gbc);
     topPanel.add(hostField);
 
-    Box topBox = new Box(topPanel, "Server");
+    //
 
-    //topGBC.anchor = GridBagConstraints.NORTH;
+    adminLabel = new Label("Admin consoles connected to server:");
+
+    adminField = new TextField("", 40);
+    adminField.setEditable(false);
+    adminField.setBackground(SystemColor.text);
+    adminField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(adminLabel, gbc);
+    topPanel.add(adminLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(adminField, gbc);
+    topPanel.add(adminField);
+
+    stateLabel = new Label("Server State:");
+
+    stateField = new TextField("", 40);
+    stateField.setEditable(false);
+    stateField.setBackground(SystemColor.text);
+    stateField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(stateLabel, gbc);
+    topPanel.add(stateLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(stateField, gbc);
+    topPanel.add(stateField);
+
+    startLabel = new Label("Server Start Time:");
+
+    startField = new TextField("", 40);
+    startField.setEditable(false);
+    startField.setBackground(SystemColor.text);
+    startField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(startLabel, gbc);
+    topPanel.add(startLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(startField, gbc);
+    topPanel.add(startField);
+
+    dumpLabel = new Label("Last Dump Time:");
+
+    dumpField = new TextField("", 40);
+    dumpField.setEditable(false);
+    dumpField.setBackground(SystemColor.text);
+    dumpField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(dumpLabel, gbc);
+    topPanel.add(dumpLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(dumpField, gbc);
+    topPanel.add(dumpField);
+
+    journalLabel = new Label("Transactions in Journal:");
+
+    journalField = new TextField("", 40);
+    journalField.setEditable(false);
+    journalField.setBackground(SystemColor.text);
+    journalField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(journalLabel, gbc);
+    topPanel.add(journalLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(journalField, gbc);
+    topPanel.add(journalField);
+
+    checkedOutLabel = new Label("Objects Checked Out:");
+
+    checkedOutField = new TextField("", 40);
+    checkedOutField.setEditable(false);
+    checkedOutField.setBackground(SystemColor.text);
+    checkedOutField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(checkedOutLabel, gbc);
+    topPanel.add(checkedOutLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(checkedOutField, gbc);
+    topPanel.add(checkedOutField);
+
+    locksLabel = new Label("Locks held:");
+
+    locksField = new TextField("", 40);
+    locksField.setEditable(false);
+    locksField.setBackground(SystemColor.text);
+    locksField.setForeground(SystemColor.textText);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(locksLabel, gbc);
+    topPanel.add(locksLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(locksField, gbc);
+    topPanel.add(locksField);
+
     topGBC.fill = GridBagConstraints.HORIZONTAL;
     topGBC.gridwidth = GridBagConstraints.REMAINDER;
     topGBC.gridheight = 1;
     topGBC.weightx = 1.0;
-
     topGBC.weighty = 0;
-
+    
+    Box topBox = new Box(topPanel, "Ganymede Server");
     topGBL.setConstraints(topBox, topGBC);
     add(topBox);
 
@@ -394,6 +628,16 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     /* Get our client hooked up to our server */
 
+    DialogRsrc loginResrc;
+    StringDialog loginDialog;
+
+    loginResrc = new DialogRsrc(this, "Admin Login", "Enter your administrator account name & password");
+    loginResrc.addString("Account:");
+    loginResrc.addPassword("Password:");
+    
+    loginDialog = new StringDialog(loginResrc);
+    Hashtable results = loginDialog.DialogShow();
+
     try
       {
 	admin = new iAdmin(this, server);
@@ -432,41 +676,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
       }
     else if (event.getSource() == dumpMI)
       {
-	dumpDialog.show();
-      }
-    else if (event.getSource() == shutdownMI)
-      {
-	shutdownDialog.show();
-      }
-    else if (event.getSource() == schemaMI)
-      {
-	try
-	  {
-	    admin.pullSchema();
-	  }
-	catch (RemoteException e)
-	  {
-	    admin.forceDisconnect("Couldn't talk to server");
-	  }
-      }
-    else if (event.getSource() == shutdownDialog)
-      {
-	if (shutdownDialog.answeredYes())
-	  {
-	    System.err.println("Affirmative shutdown request");
-	    try
-	      {
-		admin.shutdown();
-	      }
-	    catch (RemoteException e)
-	      {
-		admin.forceDisconnect("Couldn't talk to server");
-	      }
-	  }
-      }
-    else if (event.getSource() == dumpDialog)
-      {
-	if (dumpDialog.answeredYes())
+	if (dumpDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative dump request");
 	    try
@@ -479,28 +689,30 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	      }
 	  }
       }
-    else if (event.getSource() == killDialog)
+    else if (event.getSource() == shutdownMI)
       {
-	if (killDialog.answeredYes())
+	if (shutdownDialog.DialogShow() != null)
 	  {
-	    System.err.println("Affirmative kill request");
-	    if (killVictim != null)
+	    System.err.println("Affirmative shutdown request");
+	    try
 	      {
-		try
-		  {
-		    admin.kill(killVictim);
-		  }
-		catch (RemoteException e)
-		  {
-		    admin.forceDisconnect("Couldn't talk to server");
-		  }
+		admin.shutdown();
 	      }
-	    killVictim = null;
+	    catch (RemoteException ex)
+	      {
+		admin.forceDisconnect("Couldn't talk to server" + ex);
+	      }
 	  }
-	else
+      }
+    else if (event.getSource() == schemaMI)
+      {
+	try
 	  {
-	    System.err.println("Negative dump request");
-	    killVictim = null;
+	    admin.pullSchema();
+	  }
+	catch (RemoteException e)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server");
 	  }
       }
   }
@@ -531,12 +743,33 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     killVictim = (String) key;
 
-    killDialog = new YesNoDialog(this,
-				 "Confirm User Kill",
-				 "Are you sure you want to disconnect user " + key + "?",
-				 this);
+    killDialog = new StringDialog(this,
+				  "Confirm User Kill",
+				  "Are you sure you want to disconnect user " + key + "?",
+				  "Yes", "No");
 
-    killDialog.show();
+    if (killDialog.DialogShow() != null)
+      {
+	System.err.println("Affirmative kill request");
+
+	if (killVictim != null)
+	  {
+	    try
+	      {
+		admin.kill(killVictim);
+	      }
+	    catch (RemoteException ex)
+	      {
+		admin.forceDisconnect("Couldn't talk to server" + ex);
+	      }
+	  }
+	killVictim = null;
+      }
+    else
+      {
+	System.err.println("Negative kill request");
+	killVictim = null;
+      }
   }
 
 }

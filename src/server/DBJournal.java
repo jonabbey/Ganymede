@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,6 +70,7 @@ public class DBJournal implements ObjectStatus {
   DBStore store = null;
   boolean dirty = false;	// dirty is true if the journal has any
 				// transactions written out
+  int transactionsInJournal = 0;
 
   /* -- */
 
@@ -218,6 +219,9 @@ public class DBJournal implements ObjectStatus {
     initialize(jFile);
 
     dirty = false;
+
+    transactionsInJournal = 0;
+    GanymedeAdmin.updateTransCount();
   }
 
   /**
@@ -506,6 +510,9 @@ public class DBJournal implements ObjectStatus {
       {
 	System.err.println("Transaction " + now + " successfully written to Journal.");
       }
+
+    transactionsInJournal++;
+    GanymedeAdmin.updateTransCount();
 
     return true;
   }

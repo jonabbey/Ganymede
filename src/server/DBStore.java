@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,6 +61,11 @@ public class DBStore {
 
   DBJournal journal = null;
 
+  // debugging into
+
+  int objectsCheckedOut = 0;
+  int locksHeld = 0;
+
   /* -- */
 
   /**
@@ -80,6 +85,7 @@ public class DBStore {
     lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
     schemaEditInProgress = false;
+    GanymedeAdmin.setState("Normal Operation");
   }
 
   /**
@@ -352,6 +358,8 @@ public class DBStore {
       {
 	journal.reset();
       }
+
+    GanymedeAdmin.updateLastDump(new Date());
   }
 
   /**
@@ -411,6 +419,49 @@ public class DBStore {
   public DBObjectBase getObjectBase(Short id)
   {
     return (DBObjectBase) objectBases.get(id);
+  }
+
+  /**
+   *
+   * Returns the object definition class for the id class.
+   *
+   * @param id Type id for the base to be returned
+   *
+   */
+
+  public DBObjectBase getObjectBase(short id)
+  {
+    return (DBObjectBase) objectBases.get(new Short(id));
+  }
+
+  /**
+   *
+   * Returns the object definition class for the id class.
+   *
+   * @param baseName Name of the base to be returned
+   *
+   */
+
+  public synchronized DBObjectBase getObjectBase(String baseName)
+  {
+    DBObjectBase base;
+    Enumeration enum;
+
+    /* -- */
+
+    enum = objectBases.elements();
+
+    while (enum.hasMoreElements())
+      {
+	base = (DBObjectBase) enum.nextElement();
+	
+	if (base.getName().equals(baseName))
+	  {
+	    return base;
+	  }
+      }
+
+    return null;
   }
 
   /**
@@ -480,20 +531,20 @@ public class DBStore {
 	b.type_code = getNextBaseID(); // 0
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 1;
+	bf.field_code = 2;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Group";
-	bf.field_order = 1;
+	bf.field_order = 2;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If this boolean is true, this administrator object represents a group of administrators";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 2;
+	bf.field_code = 3;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
-	bf.field_order = 2;
+	bf.field_order = 3;
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
@@ -503,71 +554,71 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 3;
+	bf.field_code = 4;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Password";
 	bf.maxLength = 8;
-	bf.field_order = 3;
+	bf.field_order = 4;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Admin Password";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 4;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Members";
-	bf.array = true;
-	bf.field_order = 4;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "Members of this admin group";
-	bf.allowedTarget = 0;
-	bf.targetField = 5;
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
 	bf.field_code = 5;
 	bf.field_type = FieldType.INVID;
-	bf.field_name = "Groups";
+	bf.field_name = "Members";
 	bf.array = true;
 	bf.field_order = 5;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Admin group this administrative account is a member of";
+	bf.comment = "Members of this admin group";
 	bf.allowedTarget = 0;
-	bf.targetField = 4;
+	bf.targetField = 6;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = 6;
 	bf.field_type = FieldType.INVID;
-	bf.field_name = "User";
+	bf.field_name = "Groups";
+	bf.array = true;
 	bf.field_order = 6;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "If this administrative account is a user admin, the user account";
-	bf.allowedTarget = 1;
-	bf.targetField = 3;
+	bf.comment = "Admin group this administrative account is a member of";
+	bf.allowedTarget = 0;
+	bf.targetField = 5;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = 7;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "User";
+	bf.field_order = 7;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If this administrative account is a user admin, the user account";
+	bf.allowedTarget = 1;
+	bf.targetField = 4;
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 8;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Privileges";
-	bf.field_order = 7;
+	bf.field_order = 8;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 8;
+	bf.field_code = 9;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
 	bf.targetField = 0;	// owner list field
-	bf.field_order = 8;
+	bf.field_order = 9;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
@@ -580,13 +631,13 @@ public class DBStore {
 	b.type_code = getNextBaseID(); // 1
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 1;
+	bf.field_code = 2;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Username";
 	bf.minLength = 2;
 	bf.maxLength = 8;
 	bf.badChars = " :";
-	bf.field_order = 1;
+	bf.field_order = 2;
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
@@ -596,34 +647,112 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 2;
+	bf.field_code = 3;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Password";
 	bf.maxLength = 8;
-	bf.field_order = 2;
+	bf.field_order = 3;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 3;
+	bf.field_code = 4;
 	bf.field_type = FieldType.INVID;
 	bf.allowedTarget = 0;
-	bf.targetField = 4;
+	bf.targetField = 5;
 	bf.field_name = "Admin Role";
-	bf.field_order = 3;
+	bf.field_order = 4;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If this user can act as an administrator, this field points to the admin object for this user";
 	b.fieldHash.put(new Short(bf.field_code), bf);
     
 	setBase(b);
+	
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("remote :" + ex);
       }
+  }
+
+  void initializeObjects()
+  {
+    // manually insert the root (supergash) admin object
+
+    DBSession session = login("supergash");
+
+    session.openTransaction();
+
+//     try
+//       {
+// 	session.openWriteLock();
+//       }
+//     catch (InterruptedException ex)
+//       {
+// 	System.err.println("Couldn't get write lock to create supergash object");
+// 	System.exit(0);
+//       }
+
+    DBEditObject eO =(DBEditObject) session.createDBObject((short) 0); // create a new admin object
+
+    StringDBField s = (StringDBField) eO.getField("Name");
+    s.setValue("supergash");
+    
+    s = (StringDBField) eO.getField("Password");
+    s.setValue(GanymedeConfig.newSGpass); // default supergash password
+    
+    session.commitTransaction();
+  }
+
+  /**
+   *
+   * This method is used to increment the count of checked out objects.
+   *
+   */
+
+  void checkOut()
+  {
+    objectsCheckedOut++;
+    GanymedeAdmin.updateCheckedOut();
+  }
+
+  /**
+   *
+   * This method is used to decrement the count of checked out objects.
+   *
+   */
+
+  void checkIn()
+  {
+    objectsCheckedOut--;
+    GanymedeAdmin.updateCheckedOut();
+  }
+
+  /**
+   *
+   * This method is used to increment the count of held locks
+   *
+   */
+
+  void addLock()
+  {
+    locksHeld++;
+    GanymedeAdmin.updateLocksHeld();
+  }
+
+  /**
+   *
+   * This method is used to decrement the count of held locks
+   *
+   */
+
+  void removeLock()
+  {
+    locksHeld--;
+    GanymedeAdmin.updateLocksHeld();
   }
 
 }

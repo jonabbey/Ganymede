@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ import java.rmi.*;
 import java.rmi.registry.*;
 import java.rmi.server.*;
 import java.io.*;
+import java.util.*;
 
 public class Ganymede {
   
@@ -24,6 +25,7 @@ public class Ganymede {
   public static DBStore db;
   public static String dbFilename;
   public static final boolean debug = true;
+  public static Date startTime = new Date();
 
   /* -- */
 
@@ -101,6 +103,10 @@ public class Ganymede {
 	    
 	    throw new RuntimeException("couldn't initialize journal");
 	  }
+
+	debug("Creating supergash object");
+	db.initializeObjects();
+	debug("supergash object created");
       }
 
     debug("Initializing Security Manager");

@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,14 +40,20 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   private static Vector consoles = new Vector();
   private static Vector badConsoles = new Vector();
+
+  private static String state;
+  private static Date lastDumpDate;
+
+  /* --- */
+
   Admin admin;
   
   /* -- */
 
   /**
    *
-   * This static method is used to report the Ganymede server's general
-   * operational status to all attached admin consoles.
+   * This static method is used to send debug log info to
+   * the consoles.
    *
    */
 
@@ -55,16 +61,21 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   {
     Admin temp;
 
+    /* -- */
+
     for (int i = 0; i < consoles.size(); i++)
       {
 	temp = (Admin) consoles.elementAt(i);
 
 	if (temp == null)
-	  continue;
+	  {
+	    continue;
+	  }
 
 	try
 	  {
 	    temp.changeStatus(status);
+	    temp.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
 	  }
 	catch (RemoteException ex)
 	  {
@@ -73,6 +84,274 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	    System.err.println("Couldn't update Status on an admin console" + ex);
 	    badConsoles.addElement(temp);
 	  }
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   *
+   * This static method is used to send the current transcount
+   * to the consoles.
+   *
+   */
+
+  public static synchronized void updateTransCount()
+  {
+    Admin temp;
+
+    /* -- */
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  {
+	    continue;
+	  }
+
+	updateTransCount(temp);
+      }
+  }
+
+  /**
+   *
+   * This static method is used to send the current transcount
+   * to an individual consoles.
+   *
+   */
+
+  public static void updateTransCount(Admin console)
+  {
+    try
+      {
+	console.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we'll get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update transaction count on an admin console" + ex);
+	badConsoles.addElement(console);
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   *
+   * This static method is used to send the last dump time to
+   * the consoles.
+   *
+   */
+
+  public static void updateLastDump(Date date)
+  {
+    GanymedeAdmin.lastDumpDate = date;
+    updateLastDump();
+  }
+
+  /**
+   *
+   * This method updates the last dump time on a all
+   * consoles.
+   *
+   */
+
+  public static synchronized void updateLastDump()
+  {
+    Admin temp;
+
+    /* -- */
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  {
+	    continue;
+	  }
+
+	updateLastDump(temp);
+      }
+  }
+
+  /**
+   *
+   * This method updates the last dump time on a single
+   * console
+   *
+   */
+
+  public static void updateLastDump(Admin console)
+  {
+    try
+      {
+	console.setLastDumpTime(GanymedeAdmin.lastDumpDate);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we'll get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update dump date on an admin console" + ex);
+	badConsoles.addElement(console);
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   *
+   * This method updates the objects checked out count on all consoles.
+   *
+   */
+
+  public static void updateCheckedOut()
+  {
+    Admin temp;
+
+    /* -- */
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  {
+	    continue;
+	  }
+
+	updateCheckedOut(temp);
+      }
+  }
+
+  /**
+   *
+   * This method updates the objects checked out count on a single
+   * console
+   *
+   */
+
+  public static void updateCheckedOut(Admin console)
+  {
+    try
+      {
+	console.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we'll get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update objects checked out count on an admin console" + ex);
+	badConsoles.addElement(console);
+      }
+
+    detachBadConsoles();
+  }
+
+  public static synchronized void updateLocksHeld()
+  {
+    Admin temp;
+
+    /* -- */
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  {
+	    continue;
+	  }
+
+	updateLocksHeld(temp);
+      }
+  }
+
+  /**
+   *
+   * This method updates the number of locks held on a single
+   * console
+   *
+   */
+
+  public static void updateLocksHeld(Admin console)
+  {
+    try
+      {
+	console.setLocksHeld(Ganymede.db.locksHeld);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we'll get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update locks held on an admin console" + ex);
+	badConsoles.addElement(console);
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   *
+   * This method changes the system state and
+   * sends it out to the consoles
+   *
+   */
+
+  public static void setState(String state)
+  {
+    GanymedeAdmin.state = state;
+    setState();
+  }
+
+  /**
+   *
+   * This method updates the state on all
+   * attached consoles
+   *
+   */
+
+  public static synchronized void setState()
+  {
+    Admin temp;
+
+    /* -- */
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  {
+	    continue;
+	  }
+
+	setState(temp);
+      }
+  }
+
+  /**
+   *
+   * This method updates the state on a single
+   * console
+   *
+   */
+
+  public static void setState(Admin console)
+  {
+    try
+      {
+	console.changeState(GanymedeAdmin.state);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we'll get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update Status on an admin console" + ex);
+	badConsoles.addElement(console);
       }
 
     detachBadConsoles();
@@ -148,6 +427,13 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     this.admin = admin;
 
     consoles.addElement(admin);
+
+    admin.setServerStart(Ganymede.startTime);
+    updateTransCount(admin);
+    updateLastDump(admin);
+    updateCheckedOut(admin);
+    updateLocksHeld(admin);
+    setState(admin);
     
     refreshUsers();
   }
@@ -348,6 +634,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	 Ganymede.db.schemaEditInProgress = true;
 
 	 Ganymede.debug("Ok to create DBSchemaEdit");
+
+	 GanymedeAdmin.setState("Schema Edit In Progress");
 
 	 try
 	   {

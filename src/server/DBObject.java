@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.17 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.18 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -567,6 +567,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     editset.addObject(shadowObject);
     this.editset = editset;
+
+    objectBase.store.checkOut(); // update checked out count
     
     return shadowObject;
   }
@@ -593,6 +595,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     this.editset = null;
     shadowObject = null;
+
+    objectBase.store.checkIn(); // update checked out count
 
     return true;
   }
