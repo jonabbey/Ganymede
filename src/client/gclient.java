@@ -3,10 +3,8 @@
 
    Ganymede client main module
 
-   --
-
    Created: 24 Feb 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -75,7 +73,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Session session;
   glogin _myglogin;
 
-  Hashtable 
+  Hashtable
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
 		      	             // are vectors of fields
@@ -468,10 +466,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   /** 
    * Get the session
    */
+
   public Session getSession()
-    {
-      return session;
-    }
+  {
+    return session;
+  }
 
   /**
    * Change the text in the status bar
@@ -554,17 +553,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    */
 
   void rebuildTree()
-    {
-      tree.clearTree();
-      try
-	{
-	  buildTree();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not rebuild tree: " + rx);
-	}
-    }
+  {
+    tree.clearTree();
+
+    try
+      {
+	buildTree();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not rebuild tree: " + rx);
+      }
+  }
 
   /**
    *
@@ -588,7 +588,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     CatTreeNode firstNode = new CatTreeNode(null, firstCat.getName(), firstCat,
 					    null, true, 
 					    OPEN_CAT, CLOSED_CAT, null);
-
     tree.setRoot(firstNode);
 
     try
@@ -609,40 +608,41 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   }
 
   void recurseDownCatagories(CatTreeNode node) throws RemoteException
-    {
-      Vector
-	children;
+  {
+    Vector
+      children;
 
-      Category c;
-      CategoryNode cNode;
-      treeNode 
-	thisNode,
-	prevNode;
+    Category c;
+    CategoryNode cNode;
 
-      /* -- */
+    treeNode 
+      thisNode,
+      prevNode;
+
+    /* -- */
       
-      c = node.getCategory();
+    c = node.getCategory();
+    
+    node.setText(c.getName());
+    
+    children = c.getNodes();
 
-      node.setText(c.getName());
+    prevNode = null;
+    thisNode = node.getChild();
 
-      children = c.getNodes();
-
-      prevNode = null;
-      thisNode = node.getChild();
-
-      for (int i = 0; i < children.size(); i++)
-	{
-	  // find the CategoryNode at this point in the server's category tree
-	  cNode = (CategoryNode)children.elementAt(i);
+    for (int i = 0; i < children.size(); i++)
+      {
+	// find the CategoryNode at this point in the server's category tree
+	cNode = (CategoryNode)children.elementAt(i);
 	  
-	  prevNode = insertCategoryNode(cNode, prevNode, node);
+	prevNode = insertCategoryNode(cNode, prevNode, node);
 
-	  if (prevNode instanceof CatTreeNode)
-	    {
-	      recurseDownCatagories((CatTreeNode)prevNode);
-	    }
-	}
-    }
+	if (prevNode instanceof CatTreeNode)
+	  {
+	    recurseDownCatagories((CatTreeNode)prevNode);
+	  }
+      }
+  }
 
   /**
    *
@@ -650,44 +650,42 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    *
    */
 
-treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode parentNode) throws RemoteException
-    {
-
-      treeNode newNode = null;
+  treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode parentNode) throws RemoteException
+  {
+    treeNode newNode = null;
       
-      if (node instanceof Base)
-	{
-	  Base base = (Base)node;
-	  newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				 false, 
-				 OPEN_BASE, 
-				 CLOSED_BASE,
-				 pMenu);
-	}
-      else if (node instanceof Category)
-	{
-	  Category category = (Category)node;
-	  newNode = new CatTreeNode(parentNode, category.getName(), category,
-				    prevNode, true, 
-				    OPEN_CAT, 
-				    CLOSED_CAT, 
-				    null);
-	}
-      else
-	{
-	  System.out.println("Unknown instance: " + node);
-	}
+    if (node instanceof Base)
+      {
+	Base base = (Base)node;
+	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+			       true, 
+			       OPEN_BASE, 
+			       CLOSED_BASE,
+			       pMenu);
+      }
+    else if (node instanceof Category)
+      {
+	Category category = (Category)node;
+	newNode = new CatTreeNode(parentNode, category.getName(), category,
+				  prevNode, true, 
+				  OPEN_CAT, 
+				  CLOSED_CAT, 
+				  null);
+      }
+    else
+      {
+	System.out.println("Unknown instance: " + node);
+      }
 
-      tree.insertNode(newNode, true);
-
+    tree.insertNode(newNode, true);
       
-      if (newNode instanceof BaseNode)
-	{
-	  refreshObjects((BaseNode)newNode, false);
-	}
-
-      return newNode;
-    }
+    //    if (newNode instanceof BaseNode)
+    //      {
+    //	refreshObjects((BaseNode)newNode, false);
+    //      }
+    
+    return newNode;
+  }
 
   /**
    *
@@ -699,7 +697,9 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
   void refreshTree(boolean committed) throws RemoteException
   {
     // First get rid of deleted nodes
+
     Enumeration deleted = deleteHash.keys();
+
     while (deleted.hasMoreElements())
       {
 	InvidNode node = (InvidNode)deleteHash.get(deleted.nextElement());
@@ -1004,20 +1004,20 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
       return menuBar;
     }
     */
-  void logout()
-    {
 
-      try
-	{
-	  session.logout();
-	  this.dispose();
-	  _myglogin.enableButtons(true);
-	}
-      catch (RemoteException rx)
-	{
-	  throw new IllegalArgumentException("could not logout: " + rx);
-	}
-    }
+  void logout()
+  {
+    try
+      {
+	session.logout();
+	this.dispose();
+	_myglogin.enableButtons(true);
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("could not logout: " + rx);
+      }
+  }
 
   /*
    * This checks to see if anything has been changed.  Basically, if edit panels are
@@ -1180,6 +1180,32 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 
   // treeCallback methods
 
+  public void treeNodeExpanded(treeNode node)
+  {
+    if (node instanceof BaseNode && !((BaseNode) node).isLoaded())
+      {
+	setStatus("Loading objects for base " + node.getText());
+
+	try
+	  {
+	    refreshObjects((BaseNode)node, true);
+	  }
+	catch (RemoteException ex)
+	  {
+	    setStatus("Remote exception loading objects for base " + node.getText());
+	    throw new RuntimeException("remote exception in trying to fill this base " + ex);
+	  }
+
+	setStatus("Done loading objects for base " + node.getText());
+
+	((BaseNode) node).markLoaded();
+      }
+  }
+
+  public void treeNodeContracted(treeNode node)
+  {
+  }
+
   public void treeNodeSelected(treeNode node)
   {
     validate();
@@ -1192,6 +1218,13 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
   public void treeNodeMenuPerformed(treeNode node,
 				    java.awt.event.ActionEvent event)
   {
+
+    if (node instanceof BaseNode)
+      {
+	// make sure we've got the list updated
+
+	treeNodeExpanded(node);
+      }
     
     if (event.getSource() == createMI)
       {
@@ -1200,7 +1233,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	if (node instanceof BaseNode)
 	  {
 	    BaseNode baseN = (BaseNode)node;
-	  
+
 	    try
 	      {
 		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
@@ -1414,6 +1447,7 @@ class BaseNode extends arlut.csd.Tree.treeNode {
 
   private Base base;
   private Query query;
+  private boolean loaded = false;
 
   /* -- */
 
@@ -1445,5 +1479,19 @@ class BaseNode extends arlut.csd.Tree.treeNode {
     return query;
   }
 
+  public boolean isLoaded()
+  {
+    return loaded;
+  }
+
+  public void markLoaded()
+  {
+    loaded = true;
+  }
+
+  public void markUnLoaded()
+  {
+    loaded = false;
+  }
   
 }
