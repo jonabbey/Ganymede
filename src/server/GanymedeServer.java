@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2000/01/08 03:28:59 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2000/01/13 02:12:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -381,6 +381,47 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
   }
 
+  public synchronized void killAllUsers(String reason)
+  {
+    for (int i = 0; i < sessions.size(); i++)
+      {
+	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+	session.forceOff(reason);
+      }
+  }
+
+  /**
+   * This method is called by the admin console via the {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}
+   * class to kick a specific user off of the server.
+   */
+
+  public synchronized boolean killUser(String username, String reason)
+  {
+    for (int i = 0; i < sessions.size(); i++)
+      {
+	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+
+	if (session.personaName != null)
+	  {
+	    if (session.personaName.equals(username))
+	      {
+		session.forceOff(reason);
+		return true;
+	      }
+	  }
+	else
+	  {
+	    if (session.username.equals(username))
+	      {
+		session.forceOff(reason);
+		return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
+
   /**
    *
    * This method is used by GanymedeSession.login() to find
@@ -569,7 +610,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * @see arlut.csd.ganymede.Server
    */
 
-  public synchronized adminSession admin(Admin admin) throws RemoteException
+  public adminSession admin(Admin admin) throws RemoteException
   {
     String clientName;
     String clientPass;
@@ -591,7 +632,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     // the new persona label field.  This lets us work with old
     // versions of the database or new.  Going forward we'll
     // want to match here against the PersonaLabelField.
-
+    
     // note.. this is a hack for compatibility.. the
     // personalabelfield will always be good, but if it does not
     // exist, we'll go ahead and match against the persona name
@@ -610,9 +651,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 									       QueryDataNode.DEFINED, null))));
     
     userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-
+    
     Vector results = Ganymede.internalSession.internalQuery(userQuery);
-
+    
     for (int i = 0; !found && (i < results.size()); i++)
       {
 	obj = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
@@ -661,8 +702,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	clienthost = "unknown";
       }
-
-
+    
     if (!found)
       {
 	if (Ganymede.log != null)
@@ -676,11 +716,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 						       null,
 						       null));
 	  }
-
+	
 	return null;
       }
 
+    // creating a new GanymedeAdmin can block if we are currently
+    // looping over the connected consoles.. that's why this method
+    // isn't synchronized.
+
     adminSession aSession = new GanymedeAdmin(admin, fullprivs, clientName, clienthost);
+
+    // now Ganymede.debug() will write to the newly attached console,
+    // even though we haven't returned the admin session to the admin
+    // console client
+
     Ganymede.debug("Admin console attached for admin " + clientName + " from: " + clienthost);
 
     if (Ganymede.log != null)
@@ -707,7 +756,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public static synchronized void setShutdown()
   {
     GanymedeServer.shutdown = true;
-    GanymedeAdmin.setStatus("Server going down.. waiting for users to log out");
+    GanymedeAdmin.setState("Server going down.. waiting for users to log out");
   }
 
   /**
@@ -722,7 +771,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     /* -- */
 
-    GanymedeAdmin.setStatus("Server going down.. performing final dump");
+    GanymedeAdmin.setState("Server going down.. performing final dump");
 
     // dump, then shut down.  Our second dump parameter is false,
     // so that we are guaranteed that no client can get a writelock

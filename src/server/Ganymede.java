@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/01/08 03:28:58 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/01/13 02:12:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -823,6 +823,7 @@ public class Ganymede {
       {
 	System.err.println(string);
       }
+
     GanymedeAdmin.setStatus(string);
   }
 
