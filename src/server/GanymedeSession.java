@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,6 +35,10 @@ import java.rmi.server.*;
 
 class GanymedeSession extends UnicastRemoteObject implements Session {
 
+  static final boolean debug = false;
+
+  // -- 
+
   Client client;
 
   boolean logged_in;
@@ -47,8 +51,16 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   DBSession session;
 
+  Date personaTimeStamp;
+  DBObject personaObj;		// our current persona object
   Invid personaInvid;
   Invid userInvid;
+
+  boolean supergashMode = false;
+  boolean beforeversupergash = false; // Be Forever Yamamoto
+
+  PermMatrix personaPerms;
+  PermMatrix defaultPerms;
 
   /* -- */
 
@@ -78,6 +90,11 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     username = "internal";
     clienthost = "internal";
     session = new DBSession(Ganymede.db, this, "internal");
+
+    supergashMode = true;
+    beforeversupergash = true;
+
+    updatePerms();
   }
 
   /**
@@ -161,6 +178,9 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     GanymedeServer.sessions.addElement(this);
     GanymedeAdmin.refreshUsers();
+    updatePerms();
+
+    Ganymede.debug("User " + username + " is " + (supergashMode ? "" : "not ") + "active with supergash privs");
   }
 
   //************************************************************
@@ -356,6 +376,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     if (personaObject == null)
       {
+	Ganymede.debug("Couldn't find persona " + persona + " for user:" + user.getLabel());
 	return false;
       }
 
@@ -363,7 +384,10 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     
     if (pdbf != null && pdbf.matchPlainText(password))
       {
+	Ganymede.debug("Found persona " + persona + " for user:" + user.getLabel());
 	personaInvid = personaObject.getInvid();
+	personaTimeStamp = null;
+	updatePerms();
 	return true;
       }
 
@@ -559,6 +583,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
+    PermEntry perm;
     
     for (int i = 0; i < base.sortedFields.size(); i++)
       {
@@ -568,12 +593,37 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	  {
 	    if (!field.isBuiltIn())
 	      {	    
-		fieldDefs.addElement(field);
+		if (supergashMode)
+		  {
+		    fieldDefs.addElement(field);
+		  }
+		else
+		  {
+		    perm = getPerm(base.getTypeID(), field.getID());
+
+		    if (perm != null && perm.isVisible())
+		      {
+			fieldDefs.addElement(field);
+		      }
+		  }
+
 	      }
 	  }
 	else if (query.permitList.get(field.getKey()) != null)
 	  {
-	    fieldDefs.addElement(field);
+	    if (supergashMode)
+	      {
+		fieldDefs.addElement(field);
+	      }
+	    else
+	      {
+		perm = getPerm(base.getTypeID(), field.getID());
+
+		if (perm != null && perm.isVisible())
+		  {
+		    fieldDefs.addElement(field);
+		  }
+	      }
 	  }
       }
 
@@ -590,7 +640,23 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
-	    result.addRow(obj);
+	    if (supergashMode)
+	      {
+		result.addRow(obj);
+	      } 
+	    else
+	      {
+		perm = getPerm(obj);
+
+		if (perm != null)
+		  {
+		    if ((!query.editableOnly && perm.isVisible()) ||
+			(query.editableOnly && perm.isEditable()))
+		      {
+			result.addRow(obj);
+		      }
+		  }
+	      }
 	  }
       }
 
@@ -627,6 +693,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Enumeration enum;
     Integer key;
     DBObject obj;
+    PermEntry perm;
 
     /* -- */
 
@@ -681,8 +748,28 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
-	    //	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
-	    result.addRow(obj);
+	    if (debug)
+	      {
+	        Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
+	      }
+
+	    if (supergashMode)
+	      {
+		result.addRow(obj);
+	      } 
+	    else
+	      {
+		perm = getPerm(obj);
+
+		if (perm != null)
+		  {
+		    if ((!query.editableOnly && perm.isVisible()) ||
+			(query.editableOnly && perm.isEditable()))
+		      {
+			result.addRow(obj);
+		      }
+		  }
+	      }
 	  }
       }
 
@@ -707,8 +794,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Result
-   *
-   * @see arlut.csd.ganymede.Session
    */
 
   public synchronized Vector internalQuery(Query query)
@@ -835,7 +920,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   public synchronized db_object view_db_object(Invid invid)
   {
     db_object result;
-    Vector baseLock;
 
     /* -- */
 
@@ -854,7 +938,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   public synchronized db_object edit_db_object(Invid invid)
   {
     db_object result;
-    Vector baseLock;
 
     /* -- */
     
@@ -908,6 +991,47 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   
   public synchronized boolean remove_db_object(Invid invid) 
   {
+    if (debug)
+      {
+	Ganymede.debug("Attempting to delete object: " + invid);
+      }
+
+    if ((invid.getType() == SchemaConstants.PermBase) &&
+	(invid.getNum() == SchemaConstants.PermDefaultObj))
+      {
+	setLastError("Can't delete default permissions definitions");
+	return false;
+      }
+
+    if ((invid.getType() == SchemaConstants.PermBase) &&
+	(invid.getNum() == SchemaConstants.PermEndUserObj))
+      {
+	setLastError("Can't delete end user permissions definitions");
+	return false;
+      }
+
+    if ((invid.getType() == SchemaConstants.PersonaBase) &&
+	(invid.getNum() == 0))
+      {
+	setLastError("Can't delete supergash persona");
+	return false;
+      }
+
+    DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
+    DBObject vObj = session.viewDBObject(invid);
+
+    if (vObj == null)
+      {
+	setLastError("Can't delete non-existent object");
+	return false;
+      }
+
+    if (!objBase.objectHook.canRemove(session, vObj))
+      {
+	setLastError("object manager refused deletion");
+	return false;
+      }
+    
     session.deleteDBObject(invid);
     return true;
   }
@@ -929,21 +1053,275 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     return null;
   }
 
+  // **
+  // the following are the non-exported permissions management
+  // **
+
   /**
    *
-   * Convenience method to get access to this session's current
-   * PersonaBase instance.
+   * This method takes the administrator's current
+   * persona, considers the owner groups the administrator
+   * is a member of, checks to see if the object is owned
+   * by that group, and determines the appropriate permission
+   * bits for the object.  getPerm() will or any proprietary
+   * ownership bits with the default permissions to give
+   * an appopriate result.
    *
    */
 
-  DBObject getPersona()
+  final PermEntry getPerm(DBObject object)
   {
-    if (personaInvid != null)
+    if (object == null)
       {
-	return (DBObject) view_db_object(personaInvid);
+	return null;
       }
 
-    return null;
+    // is our current persona an owner of this object in some
+    // fashion?
+
+    if (!personaMatch(object))
+      {
+	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
+	return defaultPerms.getPerm(object.getTypeID());
+      }
+
+    // ok, we know our persona has ownership.. return the
+    // permission entry for this object
+
+    return  personaPerms.getPerm(object.getTypeID());
+  }
+
+  /**
+   *
+   * This method takes the administrator's current
+   * persona's set of appropriate permission matrices,
+   * does a binary OR'ing of the permission bits for
+   * the given base, and returns the effective
+   * permission entry.
+   *
+   */
+
+  final PermEntry getPerm(short baseID)
+  {
+    updatePerms();		// make sure we have personaPerms up to date
+    return personaPerms.getPerm(baseID);
+  }
+
+  /**
+   *
+   * This method takes the administrator's current
+   * persona's set of appropriate permission matrices,
+   * does a binary OR'ing of the permission bits for
+   * the given base/field pair, and returns the effective
+   * permission entry.
+   *
+   */
+
+  final PermEntry getPerm(short baseID, short fieldID)
+  {
+    updatePerms();		// make sure we have personaPerms up to date
+    if (personaPerms != null)
+      {
+	return personaPerms.getPerm(baseID, fieldID);
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  final synchronized void updatePerms()
+  {
+    DBObjectBase personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
+
+    /* -- */
+
+    if (personaTimeStamp == null || personaTimeStamp.before(personaBase.lastChange))
+      {
+	if (personaInvid != null)
+	  {
+	    personaObj = session.viewDBObject(personaInvid);
+	  }
+	else
+	  {
+	    personaObj = null;
+	  }
+
+	DBObject defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
+
+	if (defaultObj != null)
+	  {
+	    defaultPerms = new PermMatrix((PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix));
+	  }
+	else
+	  {
+	    Ganymede.debug("GanymedeSession.updatePerms(): ERROR!  Couldn't find default privs object");
+	  }
+
+	// if we're not locked into supergash mode (for internal sessions, etc.), lets find
+	// out whether we're in supergash mode currently
+
+	if (!beforeversupergash)
+	  {
+	    supergashMode = false;
+
+	    if (personaObj == null)
+	      {
+		personaPerms = new PermMatrix(defaultPerms);
+		return;
+	      }
+	    else
+	      {
+		InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
+		Invid inv;
+		
+		if (idbf != null)
+		  {
+		    Vector vals = idbf.getValues();
+
+		    // loop over the owner groups this persona is a member of, see if it includes
+		    // the supergash owner group
+		    
+		    for (int i = 0; i < vals.size(); i++)
+		      {
+			inv = (Invid) vals.elementAt(i);
+			
+			if (inv.getNum() == SchemaConstants.OwnerSupergash)
+			  {
+			    supergashMode = true;
+			    Ganymede.debug("GanymedeSession.updatePerms(): setting supergashMode to true");
+			    break;
+			  }
+		      }
+		  }
+
+		if (!supergashMode)
+		  {
+		    // since we're not in supergash mode, we need to take into account the
+		    // operational privileges granted us by the default permission matrix
+		    // and all the permission matrices associated with this persona.  Calculate
+		    // the union of all of the applicable permission matrices.
+
+		    personaPerms = new PermMatrix(defaultPerms);
+
+		    idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
+
+		    if (idbf != null)
+		      {
+			Vector vals = idbf.getValues();
+
+			// loop over the owner groups this persona is a member of, see if it includes
+			// the supergash owner group
+
+			PermissionMatrixDBField pmdbf;
+			DBObject pObj;
+		    
+			for (int i = 0; i < vals.size(); i++)
+			  {
+			    inv = (Invid) vals.elementAt(i);
+			    
+			    pObj = session.viewDBObject(inv);
+
+			    //	 Ganymede.debug("GanymedeSession.updatePerms(): adding perms for " + pObj.getLabel());
+
+			    if (pObj != null)
+			      {
+				pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermMatrix);
+
+				if (pmdbf != null)
+				  {
+				    personaPerms = personaPerms.union(pmdbf);
+				  }
+			      }
+			  }
+		      }
+		  }
+	      }
+	  }
+
+	// remember the last time we pulled personaPerms / defaultPerms
+
+	if (personaTimeStamp == null)
+	  {
+	    personaTimeStamp = new Date();
+	  }
+	else
+	  {
+	    personaTimeStamp.setTime(System.currentTimeMillis());
+	  }
+      }
+
+    return;
+  }
+
+  DBObject getPersona()
+  {
+    return personaObj;
+  }
+
+  private final boolean personaMatch(DBObject obj)
+  {
+    InvidDBField inf;
+    boolean found = false;
+    Vector owners, members;
+    DBObject personaObj, ownerObj;
+
+    /* -- */
+
+    if (obj == null || personaInvid == null)
+      {
+	//	Ganymede.debug("Null obj/personaInvid");
+	return false;
+      }
+
+    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
+
+    if (inf == null)
+      {
+	//	Ganymede.debug("Null ownerlistfield in object");
+	return false;
+      }
+    
+    owners = inf.getValues();
+    
+    // we've got the owners for this object.. now, is our persona a member of any
+    // of the owner groups that own this object?
+
+    for (int i = 0; i < owners.size(); i++)
+      {
+	ownerObj = session.viewDBObject((Invid) owners.elementAt(i));
+	
+	if (ownerObj == null)
+	  {
+	    continue;
+	  }
+
+	//	System.err.println("\t" + obj.getLabel() + "is owned by " + ownerObj.getLabel());
+
+	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+
+	if (inf == null)
+	  {
+	    continue;
+	  }
+
+	members = inf.getValues();
+
+	//	System.err.println("\tSeeking invid " + personaInvid);
+
+	for (int j = 0; j < members.size(); j++)
+	  {
+	    //	    System.err.println("\t\tFound invid " + members.elementAt(j));
+
+	    if (personaInvid.equals((Invid)members.elementAt(j)))
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    //    Ganymede.debug("No match");
+    return false;
   }
 
 }
