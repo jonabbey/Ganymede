@@ -1,19 +1,20 @@
 
 /*
-   JstringField.java
+   JpasswordField.java
 
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2002/10/05 05:37:23 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2004/02/05 21:55:11 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   The University of Texas at Austin.
 
    Contact information
 
@@ -41,7 +42,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.JDataComponent;
@@ -54,7 +57,7 @@ import java.awt.event.*;
 import java.rmi.RemoteException;
 
 /*******************************************************************
-                                                      JstringField()
+                                                    JpasswordField()
 *******************************************************************/
 
 /**

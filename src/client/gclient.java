@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.215 $
-   Last Mod Date: $Date: 2004/02/05 21:51:17 $
+   Version: $Revision: 1.216 $
+   Last Mod Date: $Date: 2004/02/05 21:55:19 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    The University of Texas at Austin.
 
    Contact information
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.215 $ $Date: 2004/02/05 21:51:17 $ $Name:  $
+ * @version $Revision: 1.216 $ $Date: 2004/02/05 21:55:19 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
