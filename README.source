@@ -13,9 +13,12 @@ This release of Ganymede includes full sources for everything, with
 the exception of certain classes provided from the ANTLR and GNU
 regexp projects.
 
-By default, the Ganymede distribution  compiled classes for the Ganymede server,
-client, and admin console are held in the top-level jars directory.
-If you want to rebuild the jars from scratch, here's what you do.
+By default, the Ganymede distribution comes without any of the Ganymede
+code compiled into classes and Jar files.  The first time you run configure,
+the Ganymede tree will be built for you and turned into Jar files.
+
+Thereafter, if you want to mess with the source and rebuild, here's
+what you do:
 
 1. cd src
 
@@ -29,12 +32,15 @@ If you want to rebuild the jars from scratch, here's what you do.
 4. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.
 
-5. Finally, if you haven't already, run 'configure' from the Ganymede
+5. If you haven't already, run 'configure' from the Ganymede
    distribution directory to create the install scripts that you will
    use to install the software.
 
-Because Ant is smart about rebuilds, you can easily bring the whole
-system up to date by repeating steps 3 and 4 after modifying any
-Ganymede code.
+6. Copy your new jar files into your server and client jars
+   directories.
 
-Obviously, you can see the src/build.xml file for more details.
+Note that the Ant build file has a lot of possible operations.  To
+find out more about what you can do to the Ganymede source tree with
+Ant, run 'ant help' in the src directory, or read the build.xml file
+in src for more details.
+
