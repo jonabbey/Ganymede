@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -59,7 +59,7 @@ public class JstringField extends JentryField implements KeyListener{
    */
   public JstringField(int columns,
 		      int maxstrlen,
-		      JcomponentAttr valueAttr,
+		      //JcomponentAttr valueAttr,
 		      boolean is_editable,
 		      boolean invisible,
 		      String allowed,
@@ -73,14 +73,16 @@ public class JstringField extends JentryField implements KeyListener{
       }
 
     size = maxstrlen;
-
+    
+    /*
     if (valueAttr == null)
       {
 	throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
       }
 
     this.valueAttr = valueAttr;
-    
+    */
+
     //    setText(null);
 
     setEditable(is_editable);  // will this JstringField be editable or not?
@@ -104,9 +106,9 @@ public class JstringField extends JentryField implements KeyListener{
 	setDisallowedChars(disallowed);
       }
 
-    JcomponentAttr.setAttr(this,valueAttr);
+    //JcomponentAttr.setAttr(this,valueAttr);
 
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
+    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
   
@@ -119,8 +121,8 @@ public class JstringField extends JentryField implements KeyListener{
   public JstringField()
   {
     this(JstringField.DEFAULT_COLS,JstringField.DEFAULT_SIZE,
-	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-			    Color.black,Color.white),
+	 // new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
+	 //		    Color.black,Color.white),
 	 true,
 	 false,
 	 null,
@@ -136,8 +138,8 @@ public class JstringField extends JentryField implements KeyListener{
   public JstringField(int cols, boolean is_editable)
   {
     this(cols,JstringField.DEFAULT_SIZE,
-	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-			    Color.black,Color.white),
+	 //new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
+	 //		    Color.black,Color.white),
 	 is_editable,
 	 false,
 	 null,
@@ -158,14 +160,15 @@ public class JstringField extends JentryField implements KeyListener{
 
   public JstringField(int cols,
 		      int maxstrlen,
-		      JcomponentAttr valueAttr,
+		      //JcomponentAttr valueAttr,
 		      boolean is_editable,
 		      boolean invisible,
 		      String allowed,
 		      String disallowed,
 		      JsetValueCallback callback)
   {
-    this(cols,maxstrlen,valueAttr,is_editable,invisible,allowed,disallowed);
+    //this(cols,maxstrlen,valueAttr,is_editable,invisible,allowed,disallowed);
+    this(cols,maxstrlen,is_editable,invisible,allowed,disallowed);
 
     setCallback(callback);
   }
@@ -351,32 +354,6 @@ public class JstringField extends JentryField implements KeyListener{
       }
     
     return true;
-  }
-
-  /**
-   * When the JstringField loses focus, any changes made to 
-   * the value in the JstringField need to be propogated to the
-   * server.  This method will handle that functionality.
-   *
-   * This method is synchronized to prevent overlapping callbacks
-   * if we are in a threaded environment.
-   *
-   * @param e the FocusEvent that needs to be process
-   */
-
-  public synchronized void processFocusEvent(FocusEvent e)
-  {
-    super.processFocusEvent(e);
-
-    if (debug)
-      {
-	System.err.println("JstringField.processFocusEvent: entering");
-      }
-
-    if (e.getID() == FocusEvent.FOCUS_LOST)
-      {
-	sendCallback();
-      }
   }
 
   /**

@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,6 +28,7 @@ import jdj.PackageResources;
 
 import arlut.csd.JCalendar.*;
 import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.*;
 
 //import oreilly.Dialog.*;
 
@@ -154,9 +155,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    
     setLayout(new BorderLayout());
     
-    valueAttr =  new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.gray);
-   
-    _date = new JstringField(10,10,valueAttr,iseditable,false,"1234567890/",null,this);
+    _date = new JstringField(10,10,iseditable,false,"1234567890/",null,this);
 
     add(_date,"Center");
 
@@ -542,8 +541,6 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 							   _dateformat.format(minDate) + 
 							   " to " +
 							   _dateformat.format(maxDate));
-			_infoD.show();
-		    
 			return retval;
 		      }
 		  }

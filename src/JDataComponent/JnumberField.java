@@ -70,7 +70,7 @@ public class JnumberField extends JentryField {
 
     setEditable(iseditable);  // will this JnumberField be editable or not?
 
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
+    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
 
@@ -352,35 +352,14 @@ public class JnumberField extends JentryField {
     // otherwise, we ignore it
   }
 
-  /************************************************************/
-
   /**
-   *  Handles the events when this component looses or gains focus
+   * overrides JentryField.sendCallback().
    *
-   *
-   *
-   * @param e the FocusEvent that needs to be processed
+   * This is called when the number field loses focus.
    */
-  public synchronized void processFocusEvent(FocusEvent e)
-  {
-    
-    System.out.println("Got a focus event.");
 
-    // When the JnumberField widget looses focus, we must check
-    // to see whether the number, if any, within the input field
-    // is a valid value that falls within the specified valid range.
-    
-    // But first, if nothing in the field changed, then there is
-    // no reason to do anything.  We simply let the focus move
-    // on to another Component
-    
-    super.processFocusEvent(e);
-    
-    if (e.getID() != FocusEvent.FOCUS_LOST)
-      {
-	System.out.println("This wasn't a focus lost.");
-	return;
-      }
+  public void sendCallback()
+  {
     Integer currentValue = getValue();
     if (currentValue == null)
       {
@@ -406,7 +385,10 @@ public class JnumberField extends JentryField {
     
     if ((oldvalue != null) && oldvalue.equals(currentValue))
       {
-	System.out.println("The field was not changed.");
+	if (debug)
+	  {
+	    System.out.println("The field was not changed.");
+	  }
 	return;
       }
     

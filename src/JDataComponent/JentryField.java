@@ -24,7 +24,8 @@ import com.sun.java.swing.text.*;
  *  The subclasses of this class should be used.
  */
 
-abstract public class JentryField extends JTextField {
+abstract public class JentryField extends JTextField implements FocusListener{
+  final boolean debug = false;
 
   public boolean allowCallback = false;
   protected boolean changed = false; 
@@ -40,10 +41,11 @@ abstract public class JentryField extends JTextField {
   public JentryField(int columns) 
   {
     super(columns);
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK);
     setEnabled(true);
     setEditable(true);
+
+    addFocusListener(this);
 
     // disable tab insertion
 
@@ -104,6 +106,12 @@ abstract public class JentryField extends JTextField {
 
     allowCallback = true;
   }
+
+  /**
+   * sendCallback is called when focus is lost.
+   */
+  public abstract void sendCallback();
+    
 
   /**
    *  Stub function that is overriden is subclasses of JentryField
@@ -234,16 +242,12 @@ abstract public class JentryField extends JTextField {
     setValueAttr(valueAttr,repaint);
   } 
 
-  /**
-   *  processes any focus events generated in this component
-   *
-   * @param e the FocusEvent that needs to be processed
-   */
-
-  public void processFocusEvent(FocusEvent e)
+  public void focusLost(FocusEvent e)
   {
-    super.processFocusEvent(e);
+    sendCallback();
   }
+
+  public void focusGained(FocusEvent e) {}
 }
 
 

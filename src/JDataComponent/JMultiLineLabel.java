@@ -5,7 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,6 +74,7 @@ public class JMultiLineLabel extends JTextArea {
 
     this.text = label;
 
+    setEditable(false);
     setOpaque(false);
 
     wrap(40);  // This does a newLabel call

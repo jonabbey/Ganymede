@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,7 +27,7 @@ import arlut.csd.ganymede.*;
 
 public class Loader extends Thread {
 
-  private final boolean debug = false;
+  private boolean debug = true;
 
   private Hashtable 
     baseMap,
@@ -39,6 +39,7 @@ public class Loader extends Thread {
     baseList;
  
   private boolean
+    keepGoing = true,
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
@@ -49,12 +50,14 @@ public class Loader extends Thread {
 
   /* -- */
 
-  public Loader(Session session)
+  public Loader(Session session, boolean debug)
   {
     if (debug)
       {
 	System.out.println("Initializing Loader");
       }
+
+    this.debug = debug;
 
     this.session = session;
   }
@@ -69,10 +72,52 @@ public class Loader extends Thread {
 
     try
       {
-	loadBaseList();
-	loadBaseNames();
-	loadBaseHash();
-	loadBaseMap();
+	if (keepGoing)
+	  {
+	    loadBaseList();
+	  }
+	else
+	  {
+	    System.out.println("**Stopping before baseList is loaded");
+	    // Ok, it's not really loaded, but this basically means that it is finished.
+	    baseListLoaded = true;
+	    notifyAll();
+	  }
+
+	if (keepGoing)
+	  {
+	    loadBaseNames();
+	  }
+	else
+	  {
+	    System.out.println("**Stopping before baseNames are loaded");
+	    baseNamesLoaded = true;
+	    this.notifyAll();
+	  }
+
+	/*
+ 	if (keepGoing)
+	   {
+	     loadBaseHash();
+	   }
+	else 
+	  { 
+	     baseHashLoaded = true;
+	    this.notifyAll();
+	  } 
+	*/ 
+
+	if (keepGoing)
+	  {
+	    loadBaseMap();
+	  }
+	else
+	  {
+	    System.out.println("**Stopping before baseMap is loaded");
+	    baseMapLoaded = true;
+	    this.notifyAll();
+	  }
+
       }
     catch (RemoteException rx)
       {
@@ -94,6 +139,38 @@ public class Loader extends Thread {
   public void clear()
   {
 
+    // First stop loading stuff.
+    keepGoing = false;
+    
+    if (debug)
+      {
+	if( !( baseNamesLoaded && baseListLoaded && baseMapLoaded))
+	  {
+	    System.out.println("***There are not all finished.");
+	  }
+	else
+	  {
+	    System.out.println("***All the hashes are clear.");
+	  }
+      }
+     
+
+    while (! ( baseNamesLoaded && baseListLoaded && baseMapLoaded))
+      {
+	System.out.println("Loader waiting for previous method to stop.");
+	synchronized (this) {
+	  try
+	    {
+	      this.wait();
+	    }
+	  catch (InterruptedException x)
+	    {
+	      throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
+	    }
+	}	  
+
+      }
+
     if (debug)
       {
 	System.out.println("Clearing the loader");
@@ -103,11 +180,11 @@ public class Loader extends Thread {
     baseNamesLoaded = false;
     baseListLoaded = false;
     baseMapLoaded = false;
-    baseHashLoaded = false;
+    //baseHashLoaded = false;
     
     baseList = null;
     baseNames = null;
-    baseHash = null;
+    //baseHash = null;
     baseMap = null;
     baseList = null;
 
@@ -115,6 +192,8 @@ public class Loader extends Thread {
       {
 	System.out.println("Starting to load the loader again");
       }
+
+    keepGoing = true;
 
     Thread t = new Thread(this);
     t.start();
@@ -191,6 +270,9 @@ public class Loader extends Thread {
   }
   public Hashtable getBaseHash()
   {
+    throw new IllegalArgumentException("I don't load no stinking base hash.");
+    /*
+
     while (! baseHashLoaded)
       {
 	System.out.println("Loader: waiting for base hash");
@@ -221,7 +303,7 @@ public class Loader extends Thread {
       }
 
     return baseHash;
-    
+    */    
   }
 
   public Hashtable getBaseMap()
@@ -308,11 +390,20 @@ public class Loader extends Thread {
 
   private synchronized void loadBaseList() throws RemoteException
   {
-    baseList = session.getTypes();
+    baseList = session.getBaseList().getBaseList();
 
     if (debug)
       {
 	System.out.println("Finished loading base list");
+      }
+
+    if (baseList == null)
+      {
+	System.out.println("****** BaseList is null after loading!!!! *****");
+      }
+    else
+      {
+	System.out.println("*** BaseList is not null.");
       }
 
     baseListLoaded = true;
@@ -410,17 +501,20 @@ public class Loader extends Thread {
   {
     Base base;
     Enumeration enum;
+    int size;
+    Vector myBaseList;
 
     /* -- */
 
-    baseMap = new Hashtable(baseHash.size());
-    baseToShort = new Hashtable(baseHash.size());
+    myBaseList = getBaseList();
+    size = myBaseList.size();
 
-    enum = baseHash.keys();
+    baseMap = new Hashtable(size);
+    baseToShort = new Hashtable(size);
 
-    while (enum.hasMoreElements())
+    for (int i = 0; i < size; i++)
       {
-	base = (Base) enum.nextElement();
+	base = (Base) myBaseList.elementAt(i);
 	Short id = new Short(base.getTypeID());
 
 	baseMap.put(id, base);

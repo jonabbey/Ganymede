@@ -265,7 +265,7 @@ public class DialogRsrc {
    */
   public void addPassword(String label, boolean isNew)
   {
-    System.out.println("Adding password field");
+    System.out.println("Adding password field: "  + isNew);
     objects.addElement(new passwordThing(label, isNew));
   }
 

@@ -59,13 +59,13 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     oldvalue = state;
     
     setSelected(state);
-
+    
+    setEnabled(editable);
     isEditable = editable;
 
-    enableEvents(AWTEvent.MOUSE_EVENT_MASK);
     enableEvents(AWTEvent.FOCUS_EVENT_MASK); 
 
-    addItemListener(this);
+    //addItemListener(this);
   }
 
   /** Constructor that creates a basic checkbox with default foreground and background
@@ -73,23 +73,9 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    */
   public JcheckboxField()
   {
+    this(null, false, true);
+    /*
     super();
-    
-    /*    if (font == null)
-      {
-	font = new Font("Helvetica", FONT.plain, 12);
-      }
-    if (fg == null)
-      {
-	fg = Color.black;
-      }
-    if (bg == null)
-      {
-	bg = Color.grey;
-      }
-      */
-
-    System.out.println("Creating new JcomponentAttr");
     
     value = false;
     oldvalue = false;
@@ -99,15 +85,15 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     enableEvents(AWTEvent.MOUSE_EVENT_MASK);
     enableEvents(AWTEvent.FOCUS_EVENT_MASK);
 
-    addItemListener(this);
+    //addItemListener(this);
+    */
   }
   
   /**
    *
    * @param label the label to use for this JcheckboxField
    * @param state the state to which this JcheckboxField is to be set
-   * @param valueAttr JcomponentAttr object used to specify font/foreground/background values
-   * @param parent the component which can use the value of this JcheckboxField
+   * @param callback the component which can use the value of this JcheckboxField
    *
    */
   public JcheckboxField(String label,boolean state,boolean editable,JsetValueCallback callback)
@@ -183,18 +169,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   }
 
   /**
-   * deprecated
-   *
-   */
-
-  public void setLabel(String label)
-  {
-    this.label = label;
-
-    super.setText(label);
-  }
-
-  /**
    * sets the label of this JcheckboxField
    *
    */
@@ -229,33 +203,15 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
     else
       {
-	removeItemListener(this);
+	//removeItemListener(this);
 	super.setSelected(state);
-	addItemListener(this);
+	//addItemListener(this);
       }
 
 
   }
 
-  protected void processMouseEvent(MouseEvent e)
-  {
-    // If this JcheckboxField is not editable, the event gets
-    // consumed here, otherwise we let the parent handle it.
 
-    if (!isEditable) 
-      {
-	e.consume();
-	return;  
-      }
-
-    super.processMouseEvent(e);
-  }
-
-  /**
-   *  Process any focus events that may be generated in this component
-   *  
-   * @param FocusEvent e the FocusEvent that needs to be processed
-   */
   protected void processFocusEvent(FocusEvent e)
   {
     if (!notifyOnFocus)
@@ -273,7 +229,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 	      break;
 	    }
 
-	  value = isSelected();
+ 	  value = isSelected();
 	  notify(value);
 
 	  break;

@@ -189,7 +189,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
   boolean
     stringSelector_loaded = false;
 
-  tStringSelector 
+  StringSelector 
     ss;
 
   boolean
@@ -351,7 +351,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  }
       }
 
-    ss = new tStringSelector(possible, owned, this, editable,100);
+    ss = new StringSelector(possible, owned, this, editable, true, true);
 
     ss.setCallback(this);
     remove(filler);
