@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,8 @@ import java.rmi.*;
  */
 
 public class GanymedeExpirationTask implements Runnable {
+
+  public static final boolean debug = false;
 
   public GanymedeExpirationTask()
   {
@@ -109,7 +111,10 @@ public class GanymedeExpirationTask implements Runnable {
 		continue;
 	      }
 	    
-	    // Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
+	    if (debug)
+	      {
+		Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
+	      }
 
 	    q = new Query(base.getTypeID(), expireNode, false);
 
@@ -123,15 +128,19 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
+		if (debug)
+		  {
+		    Ganymede.debug("Need to inactivate object " + base.getName() + ":" + 
+				   result.toString());
+		  }
+
 		retVal = mySession.inactivate_db_object(invid);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    Ganymede.debug("Expiration task was not able to inactivate object " + 
-				   base.getName() + ":" + mySession.viewObjectLabel(invid));
+				   base.getName() + ":" + result.toString());
 		  }
-
-		// Ganymede.debug("Need to inactivate object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
 	      }
 	  }
 
@@ -143,7 +152,7 @@ public class GanymedeExpirationTask implements Runnable {
 	  {
 	    base = (DBObjectBase) baseEnum.nextElement();
 
-	    // embedded objects are expired with their parents, we don't
+	    // embedded objects are removed with their parents, we don't
 	    // handle them separately
 
 	    if (base.isEmbedded())
@@ -151,7 +160,11 @@ public class GanymedeExpirationTask implements Runnable {
 		continue;
 	      }
 	    
-	    // Ganymede.debug("Sweeping base " + base.getName() + " for objects to be removed");
+	    if (debug)
+	      {
+		Ganymede.debug("Sweeping base " + base.getName() + 
+			       " for objects to be removed");
+	      }
 
 	    q = new Query(base.getTypeID(), removeNode, false);
 
@@ -165,15 +178,19 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
+		if (debug)
+		  {
+		    Ganymede.debug("Need to remove object " + base.getName() + ":" + 
+				   result.toString());
+		  }
+
 		retVal = mySession.remove_db_object(invid);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    Ganymede.debug("Expiration task was not able to remove object " + 
-				   base.getName() + ":" + mySession.viewObjectLabel(invid));
+				   base.getName() + ":" + result.toString());
 		  }
-
-		// Ganymede.debug("Need to remove object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
 	      }
 	  }
 	
