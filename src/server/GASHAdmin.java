@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2002/01/26 06:19:39 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2002/03/01 23:22:01 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1081,8 +1081,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     statusBox.add("South", clearPanel);
     statusBox.setBorder(new TitledBorder("Server Log"));
 
-    topGBL.setConstraints(statusBox, topGBC);
-    getContentPane().add(statusBox);
+    //    topGBL.setConstraints(statusBox, topGBC);
+    //    getContentPane().add(statusBox);
 
     // bottom area, a tab pane with tables for things
 
@@ -1128,8 +1128,14 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     // and put the tab pane into our frame with the
     // same constraints that the text area had
 
-    topGBL.setConstraints(tabPane, topGBC);
-    getContentPane().add(tabPane);
+    //    topGBL.setConstraints(tabPane, topGBC);
+    //    getContentPane().add(tabPane);
+
+    JSplitPane splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
+    splitterPane.setOneTouchExpandable(true);
+
+    topGBL.setConstraints(splitterPane, topGBC);
+    getContentPane().add(splitterPane);
 
     pack();
     show();
