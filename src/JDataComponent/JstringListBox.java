@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.8 $ %D%
+ Version: $Revision: 1.9 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,10 +16,11 @@ package arlut.csd.JDataComponent;
 import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.Vector;
 import arlut.csd.Util.VecQuickSort;
 
-public class JstringListBox extends JList implements ListCellRenderer, ListSelectionListener{ 
+public class JstringListBox extends JList implements ListCellRenderer, ListSelectionListener, MouseListener{ 
 
   static final boolean debug = false;
 
@@ -70,6 +71,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
     this.sorted = sorted;
     
     label.setBackground(Color.white);
+    label.setOpaque(true);
     //model setSize(items.size());
     //System.out.println("Setting size to " + items.size());
 
@@ -192,6 +194,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
       }
     setModel(model);
     
+    addMouseListener(this);
     setCellRenderer(this);
   }
 
@@ -374,6 +377,17 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 						boolean cellHasFocus)
   {
     configureListCellRenderer(value, index);
+    if (isSelected)
+      {
+	label.setBackground(Color.white);
+	label.setForeground(Color.red);
+      }
+    else
+      {
+	label.setBackground(Color.white);
+	label.setForeground(Color.black);
+      }
+
     return label;
   }
 
@@ -389,7 +403,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 	  {
 	    ok = my_parent.setValuePerformed(new JValueObject(this, 
 							      getSelectedIndex(),
-							      JValueObject.INSERT));
+							      JValueObject.ADD));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
@@ -412,4 +426,51 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 	  }
       }
   }
+
+  public void mouseClicked(MouseEvent e)
+  {
+    if (e.getClickCount() == 2)
+      {
+	boolean ok = false;
+
+	int index = locationToIndex(e.getPoint());
+	if (debug)
+	  {
+	    System.out.println("Double clicked on Item " + index);
+	  }
+	try
+	  {
+	    ok = my_parent.setValuePerformed(new JValueObject(this, 
+							      index,
+							      JValueObject.INSERT));
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    throw new RuntimeException("Double click produced: " + rx);
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("setValue from JstringListBox=" + ok);
+	  }
+      }
+  }
+
+  public void mouseEntered(MouseEvent e)
+    {
+
+    }
+  public void mouseExited(MouseEvent e)
+    {
+
+    }
+  public void mousePressed(MouseEvent e)
+    {
+
+    }
+  public void mouseReleased(MouseEvent e)
+    {
+
+    }
+
 }
