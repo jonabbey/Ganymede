@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -152,6 +152,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     my_glogin.init();
     //my_glogin.start();
     my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
+  }
+
+  /**
+   *
+   * This method returns true if the Ganymede client is running
+   * as an applet.
+   *
+   */
+
+  public static boolean isApplet()
+  {
+    return WeAreApplet;
   }
 
   /**
