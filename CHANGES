@@ -82,6 +82,37 @@ visit the directory where they installed the web resources.
 The old Linux and BSD passwd file parsers would break if they
 encountered a user record with a blank password field.
 
+Modified GanymedeServer.login() and GanymedeServer.admin() to make
+sure the server won't throw a null pointer exception if the database
+contains a user or admin persona with no password during the login
+process.
+
+7. [ADMIN CONSOLE, SERVER] Reworked admin console, server's admin API
+
+Fixed the admin console so that it will properly log itself out when
+it is closed through the window system.
+
+In prior versions, the admin console wanted to know the name of the
+supergash account on the server, so that it could preemptively refuse
+to perform certain operations.. this really makes no sense at all, and
+was never needed for security.  The admin console now goes ahead and
+attempts such operations, and depends on the server properly refusing
+the operations.
+
+The install scripts no longer prompt for the supergash account name
+when installing the UNIX and web clients.
+
+Also in previous versions, the server wasn't actually honoring the
+console permissions checkboxes in the admin persona objects.. any
+admin persona could log into the server via the admin console, but no
+one other than supergash could do any control operations.  The admin
+persona console permissions checkboxes now properly control the
+server's response to admin console operations.
+
+Admins other than supergash and monitor will need to log into the
+server via the admin console using their full persona name.. i.e.,
+'broccol:GASH Admin'.
+
 -------------------- Changes from 0.99.2 to 0.99.3 -------------------
 
 RELEASE DATE: June 23, 1999
