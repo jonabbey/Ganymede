@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2001/10/11 23:26:36 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2001/10/31 02:01:31 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.72 $ $Date: 2001/10/11 23:26:36 $ $Name:  $
+ * @version $Revision: 1.73 $ $Date: 2001/10/31 02:01:31 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1514,9 +1514,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
+   * <p>This method is called to force an update on this framePanel.  All
+   * fields will be refreshed and the choice lists reloaded.</p>
+   */
+
+  public void updateContainerPanels()
+  {
+    this.updateContainerPanels(null, null);
+  }
+
+  /**
    * <p>This method is called to force an update on this framePanel in accordance
    * with the rescan instructions encoded in retVal.  The invid passed is the
-   * one we are interested in updating in this method call.</p>
+   * one we are interested in updating in this method call.  If the invid
+   * is null, all contained panels will be forced to update.  Likewise, if
+   * the retVal passed is null, all fields in the container panels will
+   * be refreshed.</p>
    */
 
   public synchronized void updateContainerPanels(Invid invid, ReturnVal retVal)
@@ -1555,7 +1568,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 			       " lookng for: " + invid);
 	  }
 				
-	if (cp.getObjectInvid().equals(invid))
+	if (invid == null || cp.getObjectInvid().equals(invid))
 	  {
 	    if (debug)
 	      {
@@ -1563,7 +1576,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 				   ": " + cp.frame.getTitle());
 	      }
 			
-	    if (retVal.rescanAll(invid))
+	    if (retVal == null || retVal.rescanAll(invid))
 	      {
 		cp.updateAll();
 	      }

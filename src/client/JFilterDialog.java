@@ -7,8 +7,8 @@
    
    Created: 3 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/10/31 01:36:51 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/10/31 02:01:31 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -196,8 +196,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	      {
 		if (changed)
 		  {
-		    gc.clearCaches();
-		    gc.updateTree();
+		    gc.updateAfterFilterChange();
 		  }
 
 		this.setVisible(false);

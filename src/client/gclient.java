@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.194 $
-   Last Mod Date: $Date: 2001/10/31 01:46:13 $
+   Version: $Revision: 1.195 $
+   Last Mod Date: $Date: 2001/10/31 02:01:32 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.194 $ $Date: 2001/10/31 01:46:13 $ $Name:  $
+ * @version $Revision: 1.195 $ $Date: 2001/10/31 02:01:32 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/10/31 01:46:13 $";
+  static String release_date = "$Date: 2001/10/31 02:01:32 $";
   static String release_number = null;
 
   /**
@@ -621,7 +621,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     clearTreeMI.setMnemonic('c');
     clearTreeMI.addActionListener(this);
 
-    filterQueryMI = new JMenuItem("Filter Query");
+    filterQueryMI = new JMenuItem("Set Owner Filter");
     filterQueryMI.setMnemonic('q');
     filterQueryMI.addActionListener(this);
 
@@ -3822,10 +3822,30 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * objects matching the owner list filter are visible.</p>
    */
 
-  public void updateTree()
+  public void updateAfterFilterChange()
   {
-    updateAfterFilterChange(tree.getRoot());
+    clearCaches();
+    updateTreeAfterFilterChange(tree.getRoot());
     tree.refresh();
+
+    Enumeration windows = wp.getWindows();
+
+    // Loop over each window
+    
+    while (windows.hasMoreElements())
+      {
+	Object o = windows.nextElement();
+	
+	if (o instanceof framePanel)
+	  {
+	    framePanel fp = (framePanel)o;
+
+	    if (fp.isEditable())
+	      {
+		fp.updateContainerPanels();
+	      }
+	  }
+      }
   }
 
   /**
@@ -3834,7 +3854,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * to the given node.</p>
    */
 
-  private void updateAfterFilterChange(treeNode node)
+  private void updateTreeAfterFilterChange(treeNode node)
   {
     if (node == null)
       {
@@ -3873,8 +3893,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (node instanceof CatTreeNode)
       {
-	updateAfterFilterChange(node.getChild());
-	updateAfterFilterChange(node.getNextSibling());
+	updateTreeAfterFilterChange(node.getChild());
+	updateTreeAfterFilterChange(node.getNextSibling());
       }
   }
 
