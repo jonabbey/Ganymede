@@ -596,7 +596,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    catch (Throwable ex)
 	      {
 		connectError = ex.getMessage();
-		ex.printStackTrace();
+
+		if (debug)
+		  {
+		    ex.printStackTrace();
+		  }
 	      }
 
 	    try 
