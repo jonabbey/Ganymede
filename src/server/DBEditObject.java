@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.85 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.86 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -49,7 +49,10 @@ import arlut.csd.JDialog.*;
  * synchronized methods in DBEditObject and in subclasses thereof do not
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
- *  
+ *   
+ * @version $Revision: 1.86 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ *
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
@@ -73,17 +76,44 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   protected DBObject original;
   boolean committing;
 
-  protected boolean deleting = false;	// true if the object is in the middle of carrying
-				        // out deletion logic.. consulted by subclasses
-				        // to determine whether they should object to fields
-				        // being set to null
+  /**
+   * true if the object is in the middle of carrying
+   * out deletion logic.. consulted by subclasses
+   * to determine whether they should object to fields
+   * being set to null
+   */
 
-  boolean finalized = false;	// true if this object has been processed
-				// by a DBEditSet's commit logic
+  protected boolean deleting = false;	
+
+  /**
+   * true if this object has been processed
+   * by a DBEditSet's commit logic
+   */
+
+  boolean finalized = false;	
 
   byte status;
-  boolean stored;		// true if the object has a version currently
-				// stored in the DBStore
+
+  /**
+   * true if the object has a version currently
+   * stored in the DBStore
+   */
+
+  boolean stored;		
+
+  /**
+   *
+   * Used as a coordinating signal with InvidDBField to handle
+   * clearing the backlinks field in finalizeRemove().
+   *
+   * Should never ever ever ever be messed with outside this
+   * object.
+   *
+   */
+
+  boolean clearingBackLinks = false;
+
+  /* -- */
 
   /**
    *
@@ -1993,7 +2023,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      {
 		continue;
 	      }
-	    
+
 	    if (field.isVector())
 	      {
 		if (debug)
@@ -2001,34 +2031,49 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    System.err.println("++ Attempting to clear vector field " + field.getName());
 		  }
 
-		while (field.size() > 0)
+		try
 		  {
-		    // if this is an InvidDBField, deleteElement()
-		    // will convert this request into a deletion of
-		    // the embedded object.
-
-		    retVal = field.deleteElement(0); // *sync*
-
-		    if (retVal != null && !retVal.didSucceed())
+		    if (field.getID() == SchemaConstants.BackLinksField)
 		      {
-			session = editset.getSession();
-		    
-			if (session != null)
+			// let the InvidDBField code know that it doesn't need
+			// to wrap unbindAll() with its own checkpoint/rollback.
+
+			clearingBackLinks = true;
+		      }
+
+		    while (field.size() > 0)
+		      {
+			// if this is an InvidDBField, deleteElement()
+			// will convert this request into a deletion of
+			// the embedded object.
+			
+			retVal = field.deleteElement(0); // *sync*
+			
+			if (retVal != null && !retVal.didSucceed())
 			  {
-			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
-						 field.getName());
+			    session = editset.getSession();
+			    
+			    if (session != null)
+			      {
+				session.setLastError("DBEditObject disapproved of deleting element from field " + 
+						     field.getName());
+			      }
+			    
+			    editset.rollback("del" + label); // *sync*
+			    
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject disapproved of deleting element from field " + 
+							      field.getName());
 			  }
-
-			editset.rollback("del" + label); // *sync*
-
-			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject disapproved of deleting element from field " + 
-							  field.getName());
+			else
+			  {
+			    finalResult.unionRescan(retVal);
+			  }
 		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
-		      }
+		  }
+		finally
+		  {
+		    clearingBackLinks = false;
 		  }
 	      }
 	    else
