@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/10/08 01:39:14 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/10/09 00:59:58 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.12 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
+ * @version $Revision: 1.13 $ $Date: 1999/10/09 00:59:58 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -268,7 +268,23 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
   public boolean isConnected()
   {
-    return connected;
+    if (!connected)
+      {
+	return false;
+      }
+
+    boolean test = false;
+
+    try
+      {
+	test = server.up();
+      }
+    catch (Exception ex)
+      {
+	return false;
+      }
+
+    return true;
   }
 
   /**

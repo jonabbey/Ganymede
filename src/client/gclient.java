@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.158 $
-   Last Mod Date: $Date: 1999/08/04 18:39:49 $
+   Version: $Revision: 1.159 $
+   Last Mod Date: $Date: 1999/10/09 00:59:59 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.158 $ $Date: 1999/08/04 18:39:49 $ $Name:  $
+ * @version $Revision: 1.159 $ $Date: 1999/10/09 00:59:59 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/08/04 18:39:49 $";
+  static String release_date = "$Date: 1999/10/09 00:59:59 $";
   static String release_number = null;
 
   // ---
@@ -1058,7 +1058,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     getContentPane().validate();
+  }
 
+  /**
+   *
+   * This method handles the start-up tasks after the gclient
+   * has gotten initialized.  Called by glogin.
+   * 
+   */
+
+  public void start()
+  {
     // If user has multiple personas, ask which to start with.
 
     if ((personae != null)  && personae.size() > 1)
@@ -3570,7 +3580,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     personaDialog = new PersonaDialog(client);
     personaDialog.pack();	// force it to re-center itself.
-    personaDialog.setVisible(true);
+    personaDialog.setVisible(true); // block
   }
 
   /**
@@ -4940,16 +4950,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     new VecQuickSort(v, null).sort();
     
     return v;
-  }
-
-  /** why is this here, Mike??
-
-      Hey, don't blame me.  -Mike
-  */
-
-  public void start() throws Exception 
-  {
-
   }
 }
 

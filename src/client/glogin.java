@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/10/08 01:39:14 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/10/09 01:00:00 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
+ * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -183,6 +183,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   protected Thread my_thread = new Thread(this);
 
   protected boolean connected = false;
+
+  private boolean autologin = false;
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
@@ -511,6 +513,15 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    // we've done our work, remember that.
 	    
 	    my_thread = null;
+
+	    // if the user prompted a re-acquire by hitting the login
+	    // button, go ahead and login.
+
+	    if (autologin)
+	      {
+		autologin = false;
+		connector.doClick();
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -631,7 +642,23 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
     else if (e.getSource() == passwd)
       {
-	connector.doClick();
+	if (!my_client.isConnected() && my_thread == null)
+	  {
+	    // looks like the ClientBase object lost connection to
+	    // the RMI server.. let's try to re-acquire.
+	    
+	    connector.setText("Connecting...");
+	    connector.setEnabled(false);
+	    autologin = true;
+	    connected = false;
+	    my_thread = new Thread(this);
+	    my_thread.start();
+	    return;
+	  }
+	else
+	  {
+	    connector.doClick();
+	  }
       }
     else if (e.getSource() == connector)
       {
@@ -644,6 +671,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    
 	    connector.setText("Connecting...");
 	    connector.setEnabled(false);
+	    autologin = true;	// the user hit enter or the login button.. remember
 	    connected = false;
 	    my_thread = new Thread(this);
 	    my_thread.start();
@@ -739,21 +767,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     passwd.setText("");
 
-    /* At this point, all the login matters have been handled and we have
-       a Session object in our hands.  We now instantiate the main client
-       that will be used to interact with the Ganymede server.*/
-
-    try 
-      {
-	// This will get the ball rolling.
-
-	g_client.start();
-      }
-    catch (Exception e)
-      {
-	// Any exception thrown by glclient will be handled here.
-	System.err.println("Error starting client: " + e);
-      }
+    // now that we've got the g_client reference DeathWatcherThread
+    // will need, have the client do its post-setup initialization,
+    // including perhaps blocking on the persona dialog.
+    
+    g_client.start();
   }
 
   // These are for the ClientListener
@@ -828,7 +846,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
+ * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -861,6 +879,17 @@ class DeathWatcherThread extends Thread {
 	  }
       }
 
+    // if the user was stuck at the modal persona selection dialog,
+    // close it so that we can put our own error message up.
+
+    try
+      {
+	glogin.g_client.getPersonaDialog().setHidden(true);
+      }
+    catch (NullPointerException ex)
+      {
+      }
+
     ExitThread exitThread = new ExitThread(message);
 
     // start up the death timer, which will close all our active
@@ -871,12 +900,8 @@ class DeathWatcherThread extends Thread {
 
     // throw up a modal dialog to get the user's attention
 
-    // note, we really shouldn't use just 'new Date()'.toString() here,
-    // but I'm just that lazy at the moment.
-
-    new JErrorDialog(glogin.g_client, 
-		     "The server is disconnecting us: \n\n" + message + 
-		     "\n\n" + new Date(),
+    new JErrorDialog(glogin.g_client,
+		     "The server is disconnecting us: \n\n" + message,
 		     glogin.g_client.getErrorImage());
 
     // if we get here, the dialog has been put down
@@ -914,7 +939,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
+ * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
  * @author Jonathan Abbey
  */
 
