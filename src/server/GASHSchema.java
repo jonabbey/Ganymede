@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2001/11/17 00:24:09 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2001/11/17 01:00:09 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -186,8 +186,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     super(title);
 
-    enableEvents(AWTEvent.WINDOW_EVENT_MASK); // we want to process window closed events
-
     this.schemaMI = schemaMI;
     this.editor = editor;
 
@@ -274,8 +272,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // Set up button pane
 
     buttonPane = new JPanel();
-
-
 
     okButton = new JButton("ok");
     okButton.addActionListener(this);
@@ -429,6 +425,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	System.out.println("GASHSchema created");
       }
+
+    // along with processWindowEvent(), this method allows us
+    // to properly handle window system close events.
+
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
   }
 
   /**
@@ -1416,13 +1417,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSED)
       {
-	super.processWindowEvent(e);
 	cleanup();
       }
-    else
-      {
-	super.processWindowEvent(e);
-      }
+
+    super.processWindowEvent(e);
   }
 
   /**
