@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2001/05/21 07:21:43 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2001/05/21 07:27:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,6 +93,13 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   static final boolean debug = false;
 
+  /**
+   * <p>The number of simultaneous transactions in progress
+   * that we will size the transactions hash for.</p>
+   */
+
+  static final int TRANSCOUNT = 30;
+
   public static void setDebug(boolean val)
   {
     //    debug = val;
@@ -136,7 +143,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     receive(in);
     uniqueHash = new GHashtable(caseInsensitive); // size?
-    transactions = new Hashtable(); // size?
+    transactions = new Hashtable(TRANSCOUNT);
   }
 
   /**
@@ -152,7 +159,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     this.name = name;
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
-    transactions = new Hashtable(); // size?
+    transactions = new Hashtable(TRANSCOUNT);
   }
 
   /**
