@@ -1,4 +1,4 @@
-Ganymede Release 1.0
+Ganymede Release 1.0.5
 May 31, 2001
 THINGSTODO
 ---------------------------------------------
@@ -115,6 +115,21 @@ server in a timely fashion later, or risk leaving those portions of
 the server locked until such time as a phase 2 order arrives.
 
 I'm not sure how folks handle this problem, generally.
+
+6) Integration of CVS into the backend
+
+Right now, Ganymede is doing a lot of stuff in the server to handle
+archiving of emitted files.  Things like the automatic saving of
+backup copies of a file when a file is emitted by a builder task, and
+the nightly zipping of the day's backup files.
+
+Really, this would be better done by having the backend scripts assume
+the presence of CVS, and to do CVS commits every time new files are
+written out.  This would allow for much more efficient storage of the
+emitted files, and would allow for easy retrieval of the emitted files
+for any given moment in time.
+
+Schema kits should be developed in this direction.
 
 ---
 
