@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -275,30 +275,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (!isVector())
+    if (value == null)
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
-
-	return "PermissionMatrix";
+	return "null";
       }
 
-    String result = "";
-    int size = size();
-
-    for (int i = 0; i < size; i++)
-      {
-	if (!result.equals(""))
-	  {
-	    result = result + ", ";
-	  }
-
-	result = result + "PermissionMatrix";
-      }
-
-    return result;
+    return "PermissionMatrix";
   }
 
   /**
@@ -310,6 +292,42 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public String getDiffString(DBField orig)
+  {
+    PermissionMatrixDBField origP;
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    if (!(orig instanceof PermissionMatrixDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origP = (PermissionMatrixDBField) orig;
+
+    if (!origP.equals(this))
+      {
+	return "\tPermission Matrix Changes.. Descriptive Code Not Yet Implemented";
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
