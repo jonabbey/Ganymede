@@ -879,6 +879,42 @@ for over 10 months.
 The fix was to move one line of code in DBSession up about three
 lines.  Amazing how these little touches matter.
 
+60. [SERVER] Serialized checkpoint logic, removed client access to checkpoint()
+
+In examining the checkpoint and rollback code, I realized that there
+was nothing in the system that would prevent multiple threads from
+attempting to assert and rollback checkpoints on the same transaction.
+This meant that it was in principle possible for the server to
+interleave checkpoint operations, leading to unpredictable and
+incorrect results if multiple threads simultaneously attempted to do
+things like object creation, deletion, and linking within a single
+session's transaction.  I don't believe this does ever happen, in
+practice, but if it ever did it would be confusing and a pain to
+debug.
+
+To avoid this, I put in a system whereby only one thread at a time is
+allowed to have a checkpoint on any given transaction.  If another
+thread attempts to checkpoint a transaction while it is already
+checkpointed by a thread, the thread that is attempting to checkpoint
+will block until the earlier checkpoint is popped or rolled back.
+
+This scheme will guarantee safety of checkpoint operations at the cost
+of an mildly increased risk of deadlock.  To mitigate the deadlock
+risk, I removed the ability for remote clients to access the
+checkpoint() and rollback() methods in the GanymedeSession class, and
+I put a deadlock timeout on the checkpoint block, so if a checkpoint()
+attempt blocks for more than 60 seconds, an exception will be thrown
+and the checkpointing thread will let go.
+
+The loss of client access to checkpoint and rollback doesn't seem to
+be an unreasonable thing to do, as no client code that I have yet seen
+has done anything with the intra-transactional checkpoints.  If
+someone convinces me that it is critical that remote clients be able
+to access intra-transactional checkpoints, I'll need to rework the
+anti-interleaving code to deal with the fact that subsequent RMI calls
+from a single client are not guaranteed to be handled by the same
+thread on the server.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
