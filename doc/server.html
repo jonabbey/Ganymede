@@ -1,162 +1,306 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
-  <head>
-    <title>Ganymede Release 0.96 - Server Overview 29 January 1999</title>
-  </head>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (WinNT; I) [Netscape]">
+   <title>Ganymede Release 0.97 - Server Overview 11 February 1999</title>
+</head>
+<body bgcolor="#FFFFFF">
 
-  <body BGCOLOR="#FFFFFF">
-    <h1>Ganymede Release 0.96 - Server Overview 29 January 1999</h1>
-    <hr>
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.97<br>Server Overview 11 February 1999</FONT></h1>
 
-    <p>The Ganymede server is the heart of the Ganymede system.  The
-       server was designed from the ground up to provide high performance, 
-       high availability, intelligent management of network schema objects.</p>
+<hr>
 
-    <p>In the sections below, we discuss the primary design attributes of the server.</p>
+<p>The Ganymede server is the heart of the Ganymede system. The server
+was designed from the ground up to provide high performance, high availability,
+intelligent management of network schema objects.</p>
 
-    <h2>Object Store</h2>
+<p>In the sections below, we discuss the primary design attributes of the
+server.</p>
 
-    <p>The Ganymede server has a built-in object database implemented using Java
-       hashtables.  This gives the server good performance and multi-threaded safety
-       at the cost of a potentially quite large RAM footprint.  All objects managed
-       by Ganymede are kept in memory while the Ganymede server is running.</p>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Object Store</b></h2></td>
+ </tr>
+</table>
 
-    <p>All objects in the database are identified by a type number/object number pair
-       called an invid, for Invariant ID.  All objects in the database are of a single
-       type, and each object type has its own set of fields defined in the schema, and may
-       be associated with a Java plug-in class to provide intelligent management of objects
-       of that type.  The type space is flat, there is no type inheritance hierarchy.</p>
+<p>The Ganymede server has a built-in object database implemented using Java
+hashtables. This gives the server good performance and multi-threaded safety
+at the cost of a potentially quite large RAM footprint. All objects managed
+by Ganymede are kept in memory while the Ganymede server is running.</p>
 
-    <p>Because the invid is the <i>sine qua non</i> of the object storage system, it defines
-       how many objects can be stored in the Ganymede server.  There can be up to 32,767
-       different types of objects held in the server, and for each type there can be up to
-       2 billion separate objects stored.  The server is designed never to re-use object id's,
-       so that log files can be kept indefinitely that can unambiguously track a specific
-       user across the lifetime of the server.  If 2 billion objects of a type is too small
-       a number, you probably shouldn't be using Ganymede. ;-)  In any case, you are likely
-       to run into performance problems with the RAM based object store long before then.</p> 
+<p>All objects in the database are identified by a type number/object number
+pair called an invid, for Invariant ID. All objects in the database are
+of a single type, and each object type has its own set of fields defined
+in the schema, and may be associated with a Java plug-in class to provide
+intelligent management of objects of that type. The type space is flat,
+there is no type inheritance hierarchy.</p>
 
-    <p>The Ganymede server currently supports eight basic field data types, including:</p>
+<p>Because the invid is the <i>sine qua non</i> of the object storage system,
+it defines how many objects can be stored in the Ganymede server. There
+can be up to 32,767 different types of objects held in the server, and
+for each type there can be up to 2 billion separate objects stored. The
+server is designed never to re-use object id's, so that log files can be
+kept indefinitely that can unambiguously track a specific user across the
+lifetime of the server. If 2 billion objects of a type is too small a number,
+you probably shouldn't be using Ganymede. ;-) In any case, you are likely
+to run into performance problems with the RAM based object store long before
+then.</p>
 
-    <ul>
-     <li>Strings</li>
-     <li>Integral Numbers</li>
-     <li>Passwords (with support for the UNIX crypt format)</li>
-     <li>Dates</li>
-     <li>Booleans</li>
-     <li>Permission Matrices</li>
-     <li>IP addresses (in either IPv4 or IPv6 format)</li>
-     <li>Object References (invid's)</li>
-    </ul>
+<p>The Ganymede server currently supports eight basic field data types,
+including:</p>
 
-    <p>of these, String, IP address, and Object Reference fields can be defined to be
-       vectors, holding up to 32k values.  All other field types can
-       only be stored one per field.</p>
+<ul>
+<li>Strings</li>
 
-    <p>The Object Reference type is used throughout Ganymede to link objects together.  All
-       objects are symmetrically linked, so that the database can be kept up-to-date whenever
-       objects are deleted without having to do a time-consuming sweep of the database.  All
-       object references that the user sees in the client are maintained by these object references,
-       making it possible to rename objects at any time without disrupting links.</p>
+<li>Integral Numbers</li>
 
-    <p>Some object reference fields are 'edit-in-place', which means that the objects referenced by that
-       field are particularly closely bound to the referencing object.An object type must
-       be designated as an 'edit-in-place' or embedded object in order to be referenced by
-       an edit-in-place object reference field.  These embedded objects are treated by the
-       server as being contained within the object referencing them.  An embedded object
-       has a unique parent, and can only be embedded into a single object at a time.  This
-       mechanism is used whenever the needs of a particular schema design can not be met
-       by a simple set of atomic fields.</p>
+<li>Passwords (with support for the UNIX crypt format)</li>
 
-    <h2>Transaction Support</h2>
+<li>Dates</li>
 
-    <p>The Ganymede server is built around a transactional model wherein clients connected
-       to the server check-out objects for editing.  There may be many clients connected
-       to the server simultaneously, but changes made to objects in one transaction will
-       not be visible to other users until the transaction is committed.  In addition,
-       queries issued by clients are guaranteed to be atomic with respect to transactions
-       across the duration of their processing.</p>
+<li>Booleans</li>
 
-    <p>As transactions are committed, they are recorded in a journal file.  This journal file
-       allows the server to recover any transactions that were committed between the time
-       that the server last performed a full database dump and an abnormal shutdown.  Thus,
-       the server is resistant to errors occurring due to a power failure or server crash.</p>
+<li>Permission Matrices</li>
 
-    <p>The transaction commit model is based on two-phase commit logic, enabling custom code
-       to connect transactions issued in Ganymede to external
-       databases to maintain cross-database consistency.</p>
+<li>IP addresses (in either IPv4 or IPv6 format)</li>
 
-    <p>When transactions are committed, the Ganymede scheduler schedules the external build
-       process for execution.  If multiple transactions are committed while the Ganymede
-       scheduler is still executing the previous external build, the Ganymede scheduler
-       will simply initiate another external build when the first build completes.  Thus,
-       multiple transactions made by users may be propagated to the external environment
-       in bulk, depending on the rate that transactions are committed and the time necessary
-       to complete an external build.</p>
-        
-    <h2>Permissions and ownership management</h2>
+<li>Object References (invid's)</li>
+</ul>
 
-    <p>See <a href="permissions/privs.html">the permissions document</a> for a discussion of the Ganymede
-    permissions and ownership model.</p>
+<p>of these, String, IP address, and Object Reference fields can be defined
+to be vectors, holding up to 32k values. All other field types can only
+be stored one per field.</p>
 
-    <h2>Schema editing</h2>
+<p>The Object Reference type is used throughout Ganymede to link objects
+together. All objects are symmetrically linked, so that the database can
+be kept up-to-date whenever objects are deleted without having to do a
+time-consuming sweep of the database. All object references that the user
+sees in the client are maintained by these object references, making it
+possible to rename objects at any time without disrupting links.</p>
 
-    <p>The server has built-in support for redefining the object type/field schema.  See
-    <a href="customization.html">the customization document</a> for a preliminary discussion
-    of the schema editor and the customization possibilities provided by the server.</p>
+<p>Some object reference fields are 'edit-in-place', which means that the
+objects referenced by that field are particularly closely bound to the
+referencing object.An object type must be designated as an 'edit-in-place'
+or embedded object in order to be referenced by an edit-in-place object
+reference field. These embedded objects are treated by the server as being
+contained within the object referencing them. An embedded object has a
+unique parent, and can only be embedded into a single object at a time.
+This mechanism is used whenever the needs of a particular schema design
+can not be met by a simple set of atomic fields.</p>
 
-    <h2>Client communications</h2>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Transaction Support</b></h2></td>
+ </tr>
+</table>
 
-    <p>The Ganymede system depends on the Java RMI system for all client/server communications.
-       All services provided by the Ganymede server to its clients are provided over RMI.  The
-       Ganymede server is capable of returning custom dialogs to the client, either for simple
-       error messages, or as part of a wizard dialog sequence.  In addition, after most
-       operations, the server has the option of returning to the client a list of objects and
-       fields that need to be refreshed.  The server object linking code uses this ability to
-       keep client windows synchronized with changes made that affect multiple objects.
-    </p>
+<p>The Ganymede server is built around a transactional model wherein clients
+connected to the server check-out objects for editing. There may be many
+clients connected to the server simultaneously, but changes made to objects
+in one transaction will not be visible to other users until the transaction
+is committed. In addition, queries issued by clients are guaranteed to
+be atomic with respect to transactions across the duration of their processing.</p>
 
-    <h2>Scheduled Tasks and External Actions</h2>
+<p>As transactions are committed, they are recorded in a journal file.
+This journal file allows the server to recover any transactions that were
+committed between the time that the server last performed a full database
+dump and an abnormal shutdown. Thus, the server is resistant to errors
+occurring due to a power failure or server crash.</p>
 
-    <p>The Ganymede server has a built-in cron-like facility for scheduling various tasks.  
-       As of release 0.96, there is not any way for a Ganymede adopter to load additional
-       periodic tasks, but it is possible to submit tasks to be run when transactions are
-       committed to the object store.  These transactional commit-time tasks emit source files
-       and run scripts on the computer hosting the server to propagate changes to the NIS and
-       DNS maps into the network environment.
-    </p>
+<p>The transaction commit model is based on two-phase commit logic, enabling
+custom code to connect transactions issued in Ganymede to external databases
+to maintain cross-database consistency.</p>
 
-    <p>There a few tasks built in to the Ganymede server by default:</p>
+<p>When transactions are committed, the Ganymede scheduler schedules the
+external build process for execution. If multiple transactions are committed
+while the Ganymede scheduler is still executing the previous external build,
+the Ganymede scheduler will simply initiate another external build when
+the first build completes. Thus, multiple transactions made by users may
+be propagated to the external environment in bulk, depending on the rate
+that transactions are committed and the time necessary to complete an external
+build.</p>
 
-    <ul>
-     <li><p>Database Dumper Task</p>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Permissions and ownership management</b></h2></td>
+ </tr>
+</table>
 
-         <p>Every two hours, Ganymede peforms a full dump of its database, consolidating any
-            transactions made in the journal into the base-level database.</p>
-     </li>
-     <li><p>Expiration Task</p>
+<p>See <a href="file:////Fs1/broccol/ganymede/work/ganymede/doc/permissions/privs.html">the
+permissions document</a> for a discussion of the Ganymede permissions and
+ownership model.</p>
 
-         <p>Once a day, Ganymede scans through all objects in the database to see if any
-            of them have passed their scheduled expiration date.  Such objects are inactivated
-            and scheduled for later removal.</p>
-     </li>
-     <li><p>Warning Task</p>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Schema editing</b></h2></td>
+ </tr>
+</table>
 
-         <p>Once a day, Ganymede scans through the database looking for objects that will
-            be expired or removed within the next month in week increments.  If it finds any,
-            it will send out email to the owner(s) of the objects, advising them that the objects
-            are scheduled for deletion.</p>
-     </li>
-     <li><p>Database Consistency Check</p>
+<p>The server has built-in support for redefining the object type/field schema.
+See <a href="file:////Fs1/broccol/ganymede/work/ganymede/doc/customization.html">the
+customization document</a> for a preliminary discussion of the schema editor
+and the customization possibilities provided by the server.</p>
 
-         <p>Upon demand, Ganymede scans through the database looking for objects that do not
-            have all of their required fields defined, sending a report to the admin console
-            and to the server's stderr.</p>
-     </li>
-    </ul>
-        
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Client communications</b></h2></td>
+ </tr>
+</table>
 
-    <hr>
-    <address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
-  </body>
+<p>The Ganymede system depends on the Java RMI system for all client/server
+communications. All services provided by the Ganymede server to its clients
+are provided over RMI. The Ganymede server is capable of returning custom
+dialogs to the client, either for simple error messages, or as part of
+a wizard dialog sequence. In addition, after most operations, the server
+has the option of returning to the client a list of objects and fields
+that need to be refreshed. The server object linking code uses this ability
+to keep client windows synchronized with changes made that affect multiple
+objects.</p>
+
+<A NAME="servertasks">
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Server Tasks</b></h2></td>
+ </tr>
+</table>
+
+<p>The Ganymede server has a built-in cron-like facility for scheduling various
+tasks. As of release 0.97, Ganymede adopters can register tasks for execution
+on demand from the admin console, on periodic intervals, and on transaction
+commit. These transactional commit-time tasks emit source files and run
+scripts on the computer hosting the server to propagate changes to the
+NIS and DNS maps into the network environment.</p>
+
+<p>Tasks are registered with the Ganymede Scheduler by creating and editing
+Task objects in the database, under 'Admin-Level Objects'. Each task object
+has the following fields availble:</p>
+
+<table BORDER COLS=3 WIDTH="100%">
+
+<tr>
+<th width="25%">Field Name</th>
+<th width="25%">Field Type</th>
+<th width="50%">Description</th>
+</tr>
+
+<tr>
+<td>Task Name</td>
+<td>String</td>
+<td>The name of the task, as it appears in the admin console's task monitor.</td>
+</tr>
+
+<tr>
+<td>Task Class</td>
+<td>String</td>
+<td>The fully package-qualified class name for the Runnable task to be registered in the server.  The
+class named must be available to the server via its CLASSPATH.</td>
+</tr>
+
+<tr>
+<td>Run On Transaction Commit&nbsp;</td>
+<td>Boolean</td>
+<td>If this box is checked, the server will run this task whenever transactions are committed in the server.<br>
+This option is mutually exclusive with the 'Run Periodically' checkbox.</td>
+</tr>
+
+<tr>
+<td>Run Periodically</td>
+<td>Boolean</td>
+<td>If this box is checked, the server will run this task at regular intervals.  This option is mutually
+exclusive with the 'Run On Transaction Commit' checkbox.</td>
+</tr>
+
+<tr>
+<td>Period Unit</td>
+<td>String</td>
+<td>This field can have a value of 'Minutes', 'Hours', 'Days', or 'Weeks', and is used along with
+Period Count to determine how often to run the task.</td>
+</tr>
+
+<tr>
+<td>Period Count</td>
+<td>Numeric</td>
+<td>This field is used to indicate how many period units should pass between invocations of this task.  If
+this field is not set, it will be treated as 1.</td>
+</tr>
+
+<tr>
+<td>Period Anchor</td>
+<td>Date</td>
+<td>This field is used to set an anchor for periodic tasks.  When the anchor is set, the server will
+first run the registered task at the next even multiple of (period count * period unit) after or before
+the anchor date that occurs after the server's start up.<br><br> In other words, if you have a task set to
+run once a day, and you set the period anchor to noon on some random day, the server will run the
+task every day at noon.<br><br>If the Period Anchor is not set on a periodic task, the anchor is
+set to the server's startup time, and the task will be first run (period count * period unit) after
+startup.</td>
+</tr>
+</table>
+
+<p>Here is an example of a registered periodic task, set to run every day at midnight:</p>
+<IMG SRC="gifs/task.gif">
+
+<p>By default, a Ganymede 0.97 server comes with the following tasks pre-registered:</p>
+
+<ul>
+<li>
+Name: Archive Task</li>
+
+<br>Class: arlut.csd.ganymede.dumpAndArchiveTask
+<li>
+Name: Database Consistency Test</li>
+
+<br>Class: arlut.csd.ganymede.GanymedeValidationTask
+<li>
+Name: Database Dumper Task</li>
+
+<br>Class: arlut.csd.ganymede.dumpTask
+<br>Run Periodically: True
+<br>Period Unit: Hours
+<br>Period Count: 2
+<li>
+Name: Expiration Task</li>
+
+<br>Class: arlut.csd.ganymede.GanymedeExpirationTask
+<br>Run Periodically: True
+<br>Period Unit: Days
+<br>Period Count: 1 (or undefined, same thing)
+<br>Period Anchor: Any date, with the time of day set as you like
+<li>
+Name: Warning Task</li>
+
+<br>Class: arlut.csd.ganymede.GanymedeWarningTask
+<br>Run Periodically: True
+<br>Period Unit: Days
+<br>Period Count: 1 (or undefined, same thing)
+<br>Period Anchor: Any date, with the time of day set as you like</ul>
+
+<p>Note that the 'Run On Transaction Commit' and 'Run Periodically' check
+boxes are mutually exclusive choices. You can choose to select neither,
+in which case the task will simply be available for manual execution from
+the admin console's task table.</p>
+
+<p>For tasks with 'Run Periodically' checked, the server uses the Period
+Unit and Period Counter to determine how often to schedule the task, and
+the Period Anchor to determine the time of day and week to base the task
+interval on. If you have set the task to run once a day and have set a
+Period Anchor of midnight on any date, that task will run each day at midnight.
+If you have set the Period Anchor to midnight on a Monday and have set
+the Period Unit to 'Weeks', the server will run the task on Mondays at
+midnight. If Period Count is set to 2, the task will run every other Monday
+at midnight.</p>
+
+<p>If you don't set the Period Anchor for a periodically run task, the
+server will calculate the task intervals from the server start time. In
+the above list, the Database Dumper Task will first be run 2 hours from
+the server's start, and every 2 hours thereafter.</p>
+
+<br>
+<hr>
+<address>
+<a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+
+</body>
 </html>

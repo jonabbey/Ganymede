@@ -5,7 +5,8 @@
   </head>
 
   <body BGCOLOR="#FFFFFF">
-    <h1>Ganymede Release 0.96 - Customization 29 January 1999</h1>
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.97<br>Customization Overview 11 February 1999</FONT></h1>
     <hr>
 
     <p>The Ganymede server has many advantages over the GASH project, including a graphical
@@ -14,7 +15,11 @@
     the authoring of custom classes and the visual editing of the Ganymede server's database
     schema.</p>
 
-    <h2>Schema Editing</h2>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Schema Editing</b></h2></td>
+ </tr>
+</table>
 
     <p>The Ganymede Admin console has as one of its primary functions the ability to edit
     the Ganymede Database Schema.  You can access the schema editor when running the admin
@@ -30,7 +35,11 @@
     and down with the left mouse button to change the order in which fields are displayed in
     the client.</p>
 
-    <h2>Custom plug-ins for object management</h2>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Custom plug-ins for object management</b></h2></td>
+ </tr>
+</table>
 
     <p>You can look at the schema source code included in release 0.96 to see examples
     of custom plug-in objects to manage objects in the server.</p>
@@ -58,17 +67,21 @@
 
     <p>We are also developing a guide to DBEditObject subclass construction <a href="customization/index.html">here</a>.</p>
 
-    <h2>Custom plug-ins for scheduled and on-demand tasks</h2>
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Custom plug-ins for scheduled and on-demand tasks</b></h2></td>
+ </tr>
+</table>
 
     <p>Finally, the server supports the authoring of custom tasks that can be run at regular
     intervals or on demand when a user commits a transaction in the database.</p>
 
     <p><img src="gifs/adminTasks.gif"></p>
 
-    <p>Again, you may wish to consult the javadoc's for documentation on the base class for all
-    plug-in tasks on the server.  Currently, all plug-in tasks are run whenever a transaction
-    is committed by a user.  In the future we will make it easier to plug-in custom tasks to
-    be run at arbitrary times by the server.</p>
+    <p>Again, you may wish to consult the javadoc's for documentation
+    on the recommended base class for builder tasks.  You can read
+    about the server task registration and scheduling mechanism 
+    <a href="server.html#servertasks">here</a>.</p>
 
     <UL>
     <LI><A HREF="javadoc/arlut/csd/ganymede/GanymedeBuilderTask.html">The GanymedeBuilderTask class</A></LI>
