@@ -1783,17 +1783,17 @@ class QueryRow implements ItemListener {
     if (operand instanceof JnumberField)
       {
 	JnumberField numField = (JnumberField) operand;
-	value = numField.getValue();
+	value = numField.getValue(); // Integer
       }
     else if (operand instanceof JfloatField)
       {
 	JfloatField floatField = (JfloatField) operand;
-	value = floatField.getValue();
+	value = floatField.getValue(); // Double
       }
     else if (operand instanceof JdateField)
       {
 	JdateField dateField = (JdateField) operand;
-	value = dateField.getDate();
+	value = dateField.getDate(); // java.util.Date
       }
     else if (operand instanceof JCheckBox)
       {

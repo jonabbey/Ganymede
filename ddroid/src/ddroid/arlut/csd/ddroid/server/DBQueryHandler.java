@@ -693,6 +693,44 @@ public class DBQueryHandler {
 		    return false;	// invalid comparator
 		  }
 	      }
+
+	    // nor can float fields
+
+	    if (value instanceof Double)
+	      {
+		double val1, val2;
+
+		/* -- */
+
+		val1 = ((Double) value).doubleValue();
+		val2 = ((Double) n.value).doubleValue();
+
+		if (n.comparator == QueryDataNode.EQUALS)
+		  {
+		    return (val1 == val2);
+		  }
+		else if (n.comparator == QueryDataNode.LESS)
+		  {
+		    return (val1 < val2);
+		  }
+		else if (n.comparator == QueryDataNode.LESSEQ)
+		  {
+		    return (val1 <= val2);
+		  }
+		else if (n.comparator == QueryDataNode.GREAT)
+		  {
+		    return (val1 > val2);
+		  }
+		else if (n.comparator == QueryDataNode.GREATEQ)
+		  {
+		    return (val1 >= val2);
+		  }
+		else
+		  {
+		    return false;	// invalid comparator
+		  }
+	      }
+
 	  }
 
 	return false;		// wtf?
