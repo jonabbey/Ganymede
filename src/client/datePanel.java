@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     editable;
 
   framePanel
-    parent;
+    fp;
 
   date_field
     field;
@@ -63,12 +63,12 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   String
     label;
 
-  public datePanel(date_field field, String label, boolean editable, framePanel parent)
+  public datePanel(date_field field, String label, boolean editable, framePanel fp)
   {
     this.editable = editable;
     this.field = field;
     this.label = label;
-    this.parent = parent;
+    this.fp = fp;
     
     setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
@@ -185,14 +185,14 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    {
 	      cal.clear();
 	      topLabel.setText(label + " will be cleared after commit.");
-	      parent.parent.getgclient().somethingChanged = true;
+	      fp.wp.getgclient().somethingChanged = true;
 	    }
 	  else
 	    {
-	      parent.parent.parent.setStatus("Server says:  Could not clear date field.");
+	      setStatus("Server says:  Could not clear date field.");
 	      try
 		{
-		  System.err.println("last error: " + parent.parent.parent.getSession().getLastError());
+		  System.err.println("last error: " + fp.wp.gc.getSession().getLastError());
 		}
 	      catch (RemoteException rx)
 		{
@@ -225,10 +225,14 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	}
       if (ok)
 	{
-	  parent.parent.getgclient().somethingChanged = true;
+	  fp.wp.gc.somethingChanged = true;
 	}
       return ok;
     }
 
+  private final void setStatus(String s)
+  {
 
+    fp.wp.gc.setStatus(s);
+  }
 }//datePanel
