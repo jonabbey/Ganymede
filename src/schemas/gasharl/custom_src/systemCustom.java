@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2001/04/11 07:05:43 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2001/04/24 06:05:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -142,7 +142,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (getGSession().enableOversight && getGSession().enableWizards)
       {
-	initializeNets();
+	initializeNets(false);
       }
   }
 
@@ -370,6 +370,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
+    if (netInvid == null)
+      {
+	return false;
+      }
+
     DBObject netObj = getSession().viewDBObject(netInvid);
     String rangeString = (String) netObj.getFieldValueLocal(networkSchema.ALLOCRANGE);
 	
@@ -457,30 +462,57 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  private void initializeNets()
+  private void initializeNets(boolean onlyDoSystemType)
   {
-    DBObject interfaceObj;
-    boolean usingNet = false;
-    Byte[] address;
-
-    /* -- */
-
     if (debug)
       {
 	System.err.println("systemCustom.initializeNets()");
       }
 
-    // what embedded interfaces do we have right now?
+    if (!onlyDoSystemType)
+      {
+	// what embedded interfaces do we have right now?
+	
+	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+	
+	// what networks are available to us?
+	
+	Query netQuery = new Query((short) 267);
+	
+	QueryResult netsEditable = editset.getSession().getGSession().query(netQuery);
+	
+	netsToChooseFrom = netsEditable.getHandles();
+	
+	// add any nets that are already connected to interfaces
 
-    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+	for (int i = 0; i < interfaces.size(); i++)
+	  {
+	    Invid interfaceInvid = (Invid) interfaces.elementAt(i);
+	    DBObject interfaceObj = (DBObject) getSession().viewDBObject(interfaceInvid);
+	    Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+	    DBObject netObj = (DBObject) getSession().viewDBObject(netInvid);
+	    String netLabel = netObj.getLabel();
 
-    // what networks are available to us?
+	    // okay, is this network already in our choice list?
 
-    Query netQuery = new Query((short) 267);
+	    boolean found = false;
 
-    QueryResult netsEditable = editset.getSession().getGSession().query(netQuery);
+	    for (int j = 0; j < netsToChooseFrom.size(); j++)
+	      {
+		ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(j);
 
-    netsToChooseFrom = netsEditable.getHandles();
+		if (handle.getInvid().equals(netInvid))
+		  {
+		    found = true;
+		  }
+	      }
+
+	    if (!found)
+	      {
+		netsToChooseFrom.addElement(new ObjectHandle(netLabel, netInvid, false, false, false, true));
+	      }
+	  }
+      }
 
     // see if we have an attached system type which modifies our IP
     // search pattern
@@ -594,6 +626,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     if (rangeString != null && !rangeString.equals(""))
       {
 	range = new IPv4Range(rangeString);
+
+	if (debug)
+	  {
+	    System.err.println("systemCustom.getIPAddress(): created range from rangeString: " + range);
+	  }
       }
     else
       {
@@ -606,6 +643,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 	
 	range = new IPv4Range(netNum);
+
+	if (debug)
+	  {
+	    System.err.println("systemCustom.getIPAddress(): created range from net number: " + IPDBField.genIPString(netNum) + ": " + range);
+	  }
       }
 
     enum = range.getElements(start, stop);
@@ -615,6 +657,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     while (!found && enum.hasMoreElements())
       {
 	address = (Byte[]) enum.nextElement();
+
+	if (debug)
+	  {
+	    System.err.println("systemCustom checking " + IPDBField.genIPString(address));
+	  }
 
 	if (namespace.reserve(editset, address, true))
 	  {
@@ -629,19 +676,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (debug)
       {
-	System.err.print("systemCustom.getIPAddress(): returning ");
-	
-	for (int j = 0; j < address.length; j++)
-	  {
-	    if (j > 0)
-	      {
-		System.err.print(".");
-	      }
-	    
-	    System.err.print(s2u(address[j].byteValue()));
-	  }
-	
-	System.err.println();
+	System.err.println("systemCustom.getIPAddress(): returning " + IPDBField.genIPString(address));
       }
     
     return address;
@@ -877,7 +912,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 			       getGSession().viewObjectLabel((Invid) value));
 	  }
 	
-	initializeNets();
+	initializeNets(true);
       }
 
     return null;

@@ -4,8 +4,8 @@
    IPv4Range.java
 
    Created: 4 April 2001
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/04/10 21:46:03 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/04/24 06:05:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -186,7 +186,7 @@ public class IPv4Range {
 	    if (range[0][i][0] == u2s(0))
 	      {
 		range[0][i][0] = u2s(1);
-		range[0][i][0] = u2s(254);
+		range[0][i][1] = u2s(254);
 	      }
 	    else
 	      {
@@ -434,10 +434,19 @@ public class IPv4Range {
    * which are equivalent to the 0 to 255 range for IPv4 octets.  These
    * numbers can be converted to the appropriate number for IPv4 by adding
    * 128 to each element.</p>
+   *
+   * <p>If start and stop are both -1, a non-constrained Enumeration
+   * will be return.  If one but not both of start and stop are
+   * -1, an error will result.</p>
    */
 
   public Enumeration getElements(int start, int stop)
   {
+    if (start == -1 && stop == -1)
+      {
+	return new IPv4RangeEnumerator(this);
+      }
+
     return new IPv4RangeEnumerator(this, start, stop);
   }
 
@@ -1020,12 +1029,12 @@ final class IPv4RangeEnumerator implements Enumeration {
   {
     if (start < 0 || start > 255)
       {
-	throw new IllegalArgumentException("start out of range");
+	throw new IllegalArgumentException("start out of range:" + start);
       }
 
     if (stop < 0 || stop > 255)
       {
-	throw new IllegalArgumentException("stop out of range");
+	throw new IllegalArgumentException("stop out of range:" + stop);
       }
 
     byte[][][] tmpRange = v4Range.getByteArray();

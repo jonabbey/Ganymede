@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2001/04/11 07:05:42 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2001/04/24 06:05:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -391,7 +391,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return null;
 	  }
-	
+
 	// if the net is being set to a net that matches what's already
 	// in the address field for some reason, we'll go ahead and ok it
 	
@@ -409,8 +409,25 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	
 	// okay, we didn't match, tell the system object to remember the
 	// address that was formerly associated with the old network value
-	
-	getParentObj().saveAddress((Invid) field.getValueLocal(), address);
+
+	if (field.getValueLocal() != null)
+	  {
+	    getParentObj().saveAddress((Invid) field.getValueLocal(), address);
+	  }
+
+	if (value == null)
+	  {
+	    IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
+
+	    inFinalizeNetChange = true;
+	    ipfield.setValueLocal(null);
+	    inFinalizeNetChange = false;
+
+	    ReturnVal retVal = new ReturnVal(true, true);
+	    retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+	    
+	    return retVal;
+	  }
 
 	// now find a new address for this object based on the network we
 	// are being asked to change to.
