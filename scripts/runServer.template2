@@ -95,9 +95,15 @@ $JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR
 # through the -Xdebug command line option, which can be useful in
 # debugging deadlock conditions.
 #
+# NOTE: Some versions of the 1.2 (and 1.3?) JDK require additional boot classpath
+# information on the invocation line when using -Xdebug to support remote
+# debugging.  You'll need to edit this line to either take out the -Xdebug
+# and -Xbootclasspath options, or you'll need to set the appropriate bootpath
+# for your JDK installation.
+#
 # For JDK 1.2 and 1.3
 
-#$JAVA -Xdebug -Djava.compiler=NONE -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+#$JAVA -Xdebug -Djava.compiler=NONE -Xms32m -Xmx128m -Xbootclasspath:/usr/java1.2/jre/lib/rt.jar:/usr/java1.2/lib/tools.jar arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
 
 #			     ----====----
 

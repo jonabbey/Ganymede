@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2000/11/02 02:41:20 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2000/11/02 05:09:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.131 $ %D%
+ * @version $Revision: 1.132 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1329,7 +1329,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Owner Group";
-	b.classname = "arlut.csd.ganymede.custom.ownerCustom";
+	b.classname = "arlut.csd.ganymede.ownerCustom";
 	b.type_code = (short) SchemaConstants.OwnerBase; // 0
 
 	permCategory.addNodeAfter(b, null);
@@ -1394,7 +1394,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Admin Persona";
-	b.classname = "arlut.csd.ganymede.custom.adminPersonaCustom";
+	b.classname = "arlut.csd.ganymede.adminPersonaCustom";
 	b.type_code = (short) SchemaConstants.PersonaBase; // 1
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1403,10 +1403,7 @@ public final class DBStore {
 	bf.field_code = SchemaConstants.PersonaNameField;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
-	bf.loading = true;
-	bf.setNameSpace("persona");
-	bf.loading = false;
-	bf.comment = "The unique name for this admin persona";
+	bf.comment = "Descriptive label for this admin persona";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1472,6 +1469,16 @@ public final class DBStore {
 	bf.comment = "Where email to this administrator should be sent";
 	b.addFieldToEnd(bf);
 
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.PersonaLabelField;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Label";
+	bf.array = false;
+	bf.loading = true;
+	bf.setNameSpace("persona");
+	bf.loading = false;
+	b.addFieldToEnd(bf);
+
 	b.setLabelField(SchemaConstants.PersonaNameField);
 
 	// link in the class we specified
@@ -1486,7 +1493,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Role";
-	b.classname = "arlut.csd.ganymede.custom.permCustom";
+	b.classname = "arlut.csd.ganymede.permCustom";
 	b.type_code = (short) SchemaConstants.RoleBase; // 2
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1549,7 +1556,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "System Event";
-	b.classname = "arlut.csd.ganymede.custom.eventCustom";
+	b.classname = "arlut.csd.ganymede.eventCustom";
 	b.type_code = (short) SchemaConstants.EventBase;  
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1592,8 +1599,14 @@ public final class DBStore {
 	bf.field_code = SchemaConstants.EventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc Admin";
-
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventMailOwners;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Cc Owners";
+	bf.comment = "If true, mail for this event will always be cc'ed to administrators in the owner group";
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
@@ -1610,7 +1623,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Object Event";
-	b.classname = "arlut.csd.ganymede.custom.objectEventCustom";
+	b.classname = "arlut.csd.ganymede.objectEventCustom";
 	b.type_code = (short) SchemaConstants.ObjectEventBase;  
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1739,7 +1752,7 @@ public final class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Task";
-	b.classname = "arlut.csd.ganymede.custom.taskCustom";
+	b.classname = "arlut.csd.ganymede.taskCustom";
 	b.type_code = (short) SchemaConstants.TaskBase; // 5
 
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1798,7 +1811,13 @@ public final class DBStore {
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.TaskName);
-    
+
+    	// link in the class we specified
+
+	b.createHook();
+
+	// and record the base
+
 	setBase(b);
       }
     catch (RemoteException ex)
@@ -2140,7 +2159,7 @@ public final class DBStore {
     DBEditObject eO = null;
     ReturnVal retVal;
 
-    if (sysEventExists(token))
+    if (session.getGSession().findLabeledObject(token, SchemaConstants.EventBase) != null)
       {
 	return null;
       }
@@ -2181,18 +2200,6 @@ public final class DBStore {
       }
 
     return eO;
-  }
-
-  /**
-   * Convenience method for createSysEventObj().
-   */
-
-  private boolean sysEventExists(String token)
-  {
-    // it's safe to use Ganymede.internalSession here because we'll
-    // only call sysEventExists before we allow login processing
-
-    return (Ganymede.internalSession.findLabeledObject(token, SchemaConstants.EventBase) != null);
   }
 
   /*
