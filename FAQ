@@ -263,18 +263,20 @@ continuously brought back in-process during the build phase after a
 transaction was committed.  Garbage collection should keep everything
 viable, but the i/o overhead would be very much greater.
 
-     If the JVM's heap size is set too small, garbage collection
-activity will increase significantly.  If there is simply too much
-data to fit into the set heap size, an OutOfMemoryError will
-eventually be thrown and the server will be unable to handle new
-logins, new object creation, and such.  With the current design an
-OutOfMemoryError would not cause precipitous data loss.  At the worst,
-the server would have to be shut down, the amount of heap dedicated to
-the jvm increased, and the server re-started.  If the heap size is
-bumping up against the maximum supported by a server-oriented JVM like
-Sun's HotSpot server VM, it would be necessary to export the server's
-data to XML, split the data, and create separate Ganymede servers for
-separate subdomains or separate object types.
+     With the current design, the server should degrade gracefully if
+the heap usage gets to be too much.  As the amount of data loaded into
+the server increases towards the upper limits that can be held in the
+the JVM's maximum allocated heap, garbage collection activity will
+increase significantly.  If there is simply too much data to fit into
+the set heap size, an OutOfMemoryError will eventually be thrown and
+the server will be unable to handle new logins, new object creation,
+and such.  With the current design an OutOfMemoryError would not cause
+precipitous data loss.  At the worst, the server would have to be shut
+down, the amount of heap dedicated to the jvm increased, and the
+server re-started.  If the heap size is bumping up against the maximum
+available on a given machine, it would be necessary to export the
+server's data to XML, split the data, and create separate Ganymede
+servers for separate subdomains or separate object types.
 
    The final word on scalability right now is that you should be sure
 and test with a representative dataset before committing to Ganymede,
@@ -437,6 +439,6 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.14 $
-Last Mod Date: $Date: 2001/01/31 00:52:37 $
+Version: $Revision: 1.15 $
+Last Mod Date: $Date: 2001/01/31 00:54:33 $
 -------------------------------------------------------------------------------
