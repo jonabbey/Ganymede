@@ -12,11 +12,52 @@ RELEASE DATE: ??
 We were having some problems with the nightly expiration task failing
 due to a consistency check failure unrelated to the actual expirations
 at hand.  This was due to the default DBEditObject commitPhase1()
-method calling consistencyCheck on each object involved in the
+method calling consistencyCheck() on each object involved in the
 expiration transaction, despite the expiration task's having elected
 to turn off enableOversight.
 
-2. [SERVER] Turned off passive password capture
+Now, if the GanymedeSession's enableOversight flag is turned off, the
+default commitPhase1() method won't bother to run consistencyCheck(),
+and will simply return a success value.
+
+This comes in handy, as the nightly GanymedeExpirationTask runs with
+enableOversight turned off, so that we can allow object
+expiration/removal that would break a required field or other
+consistency guarantee if need be, rather than having the nightly task
+be blocked from committing its changes if anything would lead to an
+inconsistency.
+
+Note as always that the default DBEditObject commitPhase1() method can
+be overridden with custom logic if it is not desireable to have any
+consistency checks skipped in response to the enableOversight flag
+being reset.  See the next item for more.
+
+2. [SERVER] Made default transaction commit-time consistency check smarter
+
+Previously, the default DBEditObject.commitPhase1() method rejected a
+commit if the object's consistencyCheck() method failed.  Now,
+commitPhase1() goes a step further, and only returns a failure code if
+the object's consistencyCheck() fails, and the consistencyCheck()
+succeeds for the original version of the object going into the
+transaction.
+
+That is, if a user is processing a transaction and happens to involve
+in his working set an object which was previously inconsistent, we
+won't hold it against him and force him to correct the previously
+existing inconsistency.  Instead, we will depend on the
+GanymedeValidationTask to detect such conditions for a knowledgeable
+admin to fix, see the next item.
+
+3. [SERVER] Improved GanymedeValidationTask to run consistencyCheck()
+
+The GanymedeValidationTask scans through the database checking objects
+for consistency.  Previously, however, the only check this task was
+performing was to see if any required fields were missing.  Now, the
+GanymedeValidationTask will also call consistencyCheck() on each
+object, allowing inconsistencies that have creeped in to be easily
+detected on demand.
+
+4. [SERVER] Turned off passive password capture
 
 Turned off passive password capture.  Ganymede stores passwords in a
 variety of hashed forms, strings that can be used for validating a
