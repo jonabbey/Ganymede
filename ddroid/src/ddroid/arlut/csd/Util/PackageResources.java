@@ -62,6 +62,7 @@ import java.awt.Component;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
+import java.io.InputStream;
 import java.net.URL;
 
 /*------------------------------------------------------------------------------
@@ -137,6 +138,57 @@ public class PackageResources {
       }
 
     return url;
+  }
+
+  /**
+   * <p>Loads a generic resource by its filename from either CLASSPATH or a jar file,
+   * depending on how the code calling this method was run.</p>
+   *
+   * @param strResource Filename of resource to be loaded
+   * @param refClass Parent Class, used to find path to image
+   */
+  
+  public static InputStream getPackageResourceAsStream(String strResource, Class refClass) 
+  {
+    ClassLoader cl;
+    String strPackageName, filePackageName, str;
+    int i;
+    InputStream stream;
+    
+    /* -- */
+
+    cl = refClass.getClassLoader();
+    strPackageName = refClass.getName();
+    i = strPackageName.lastIndexOf('.' );
+
+    if (i == -1)
+      {
+	strPackageName = "";
+      }
+    else
+      {
+	strPackageName = strPackageName.substring(0,i);
+      }
+
+    filePackageName = strPackageName.replace('.','/');
+
+    str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
+
+    if (debug)
+      {
+	System.err.println("PackageResources: trying to get str " + str);
+      }
+
+    if (cl == null)
+      {
+	stream = ClassLoader.getSystemResourceAsStream(str);
+      }
+    else
+      {
+	stream = cl.getResourceAsStream(str);
+      }
+
+    return stream;
   }
 
   /**
