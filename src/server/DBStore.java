@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -906,6 +906,25 @@ public class DBStore {
       {
 	this.notifyAll();
       }
+  }
+
+  public synchronized DBNameSpace getNameSpace(String name)
+  {
+    DBNameSpace namespace;
+
+    /* -- */
+
+    for (int i = 0; i < nameSpaces.size(); i++)
+      {
+	namespace = (DBNameSpace) nameSpaces.elementAt(i);
+
+	if (namespace.name.equals(name))
+	  {
+	    return namespace;
+	  }
+      }
+
+    return null;
   }
 
   /**
