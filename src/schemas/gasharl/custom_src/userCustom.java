@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2002/02/28 21:00:10 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2002/06/19 23:19:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -320,7 +320,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	Vector results = getGSession().internalQuery(new Query((short) 277, 
 							       new QueryDataNode(QueryDataNode.EQUALS,
-										 "auto.home.default")));
+										 "auto.home.default"),
+							       false));
 	
 	// if we found auto.home.default, set the new volume entry map
 	// field to point to auto.home.default.

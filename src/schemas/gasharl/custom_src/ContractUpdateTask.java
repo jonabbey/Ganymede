@@ -6,8 +6,8 @@
    
    Created: 9 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/03/10 06:05:46 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2002/06/19 23:19:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ public class ContractUpdateTask implements Runnable {
 
 		if (session != null)
 		  {
-		    Query q = new Query((short) 280, new QueryDataNode((short) 257, QueryDataNode.EQUALS, number));
+		    Query q = new Query((short) 280, new QueryDataNode((short) 257, QueryDataNode.EQUALS, number), false);
 
 		    Vector results = session.internalQuery(q);
 
