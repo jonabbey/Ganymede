@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -580,6 +580,78 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     throw new IllegalArgumentException("Error: createNewEmbeddedObject called on base DBEditObject");
   }
 
+  /**
+   *
+   * This method scans through all fields defined in the DBObjectBase
+   * for this object type and determines if all required fields have
+   * been filled in.  If everything is ok, this method will return
+   * null.  If any required fields are found not to have been filled
+   * out, a ReturnVal will be returned with didSucceed() set to false
+   * and a dialog encoded describing the fields that need to be
+   * filled out before this object can be checked in to the database.
+   * 
+   */
+
+  public final synchronized ReturnVal checkRequiredFields()
+  {
+    Vector fields = new Vector();
+    DBObjectBaseField fieldDef;
+    DBField field;
+    StringBuffer errorBuf = new StringBuffer();
+
+    /* -- */
+
+    // assume that the sortedFields will not be changed
+    // at a time when this method is called.  A reasonable
+    // assumption, as sortedFields is only altered when
+    // the schema is being edited.
+
+    for (int i = 0; i < objectBase.sortedFields.size(); i++)
+      {
+	fieldDef = (DBObjectBaseField) objectBase.sortedFields.elementAt(i);
+
+	// we don't care at this point about built in fields
+
+	if (fieldDef.isBuiltIn())
+	  {
+	    continue;
+	  }
+
+	if (fieldRequired(this, fieldDef.getID()))
+	  {
+	    field = (DBField) getField(fieldDef.getID());
+
+	    if (field == null || !field.isDefined())
+	      {
+		fields.addElement(fieldDef.getName());
+	      }
+	  }
+      }
+
+    // if all required fields checked out, return success
+
+    if (fields.size() == 0)
+      {
+	return null;
+      }
+    
+    errorBuf.append("Error, ");
+    errorBuf.append(objectBase.getName());
+    errorBuf.append(" object ");
+    errorBuf.append(getLabel());
+    errorBuf.append(" has not been completely filled out.  The following fields need ");
+    errorBuf.append("to be filled in before this transaction can be committed:\n\n");
+    
+    for (int i = 0; i < fields.size(); i++)
+      {
+	errorBuf.append((String) fields.elementAt(i));
+	errorBuf.append("\n");
+      }
+
+    return Ganymede.createErrorDialog("Error, required fields not filled in",
+				      errorBuf.toString());
+  }
+
   /* -------------------- pseudo-static Customization hooks -------------------- 
 
 
@@ -734,11 +806,29 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * To be overridden in DBEditObject subclasses.
    *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   *
    */
 
-  public boolean consistencyCheck(DBObject object)
+  public ReturnVal consistencyCheck(DBObject object)
   {
-    return true;
+    return null;
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    return false;
   }
 
   /**
@@ -1874,17 +1964,18 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * in the two-phase commit protocol.  If a particular
    * subclass of DBEditObject does not need to involve outside
    * processes in the full two-phase commit protocol, this
-   * method should not be overridden. <br><br>
+   * method should not be overridden.<br><br>
    *
-   * If this method is overridden, be sure and set
-   * this.committing to true before doing anything else.  Failure
-   * to set committing to true in this method will cause the
-   * two phase commit mechanism to behave unpredictably.
+   * If this method is overridden, be sure and set this.committing to
+   * true before doing anything else.  Failure to set committing to
+   * true in this method will cause the two phase commit mechanism to
+   * behave unpredictably.
    *
-   * @see arlut.csd.ganymede.DBEditSet
+   * @see arlut.csd.ganymede.DBEditSet 
+   *
    */
 
-  public synchronized boolean commitPhase1()
+  public synchronized ReturnVal commitPhase1()
   {
     committing = true;
     return consistencyCheck(this);
@@ -1913,7 +2004,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * process being initiated whose success or failure would not
    * affect the successful commit of this DBEditObject in the
    * Ganymede server, the process invokation should be placed here,
-   * rather than in commitPhase1().
+   * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
    * synchronized.
@@ -1923,7 +2014,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public void commitPhase2()
   {
-    clearTransientFields();
     return;
   }
 
@@ -1937,12 +2027,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * release() should return immediately if isCommitting() is false;<br><br>
    *
    * Subclasses that override this method may wish to make this method 
-   * synchronized.
-   * 
+   * synchronized.<br><br>
+   *
+   * If this method is overridden, be sure and set this.committing to
+   * false as part of your release method.  If this is not done, no
+   * further changes will be possible to this object.
+   *  
    */
 
   public void release()
   {
+    committing = false;
     return;
   }
 
