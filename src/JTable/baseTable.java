@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.40 $ %D%
+  Version: $Revision: 1.41 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.40 $ %D%
+ * @version $Revision: 1.41 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -1111,8 +1111,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	  {
 	    col = (tableCol) cols.elementAt(i);
 	    col.origWidth = newWidth; 
-
-	    // reShape() will calculate the appropriate scaled with for all columns
 	  }
       }
 
@@ -1787,7 +1785,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   {
     if (debug)
       {
-	System.err.println("setBounds()");
+	System.err.println("setBounds(" + x + "," + y + "," + width + "," + height + ")");
       }
     
     super.setBounds(x,y,width,height);
@@ -1927,6 +1925,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    hbar.setValue(0);
 	    this.doLayout();
 	  }
+
 	hbar_visible = true;
 
 	if (debug)
@@ -1941,6 +1940,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    this.remove(hbar);
 	    this.doLayout();
 	  }
+
 	hbar_visible = false;
 
 	if (debug)
@@ -1961,6 +1961,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    vbar.setValue(0);
 	    this.doLayout();
 	  }
+
 	vbar_visible = true;
 
 	if (debug)
@@ -1975,6 +1976,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    this.remove(vbar);
 	    this.doLayout();
 	  }
+
 	vbar_visible = false;
 
 	if (debug)
@@ -1998,6 +2000,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    hbar.setValue(0);
 	    this.doLayout();
 	  }
+
 	hbar_visible = true;
 
 	if (debug)
@@ -2012,6 +2015,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    this.remove(hbar);
 	    this.doLayout();
 	  }
+
 	hbar_visible = false;
 
 	if (debug)
@@ -2030,10 +2034,20 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
-	vbar.setValues(vbar.getValue(),
-		       canvas.getBounds().height - displayRegionFirstLine(),
-		       0,
-		       calcVSize());
+	if (vbar.getValue() > calcVSize() - (canvas.getBounds().height - displayRegionFirstLine()))
+	  {
+	    vbar.setValues(calcVSize() - (canvas.getBounds().height - displayRegionFirstLine()),
+			   canvas.getBounds().height - displayRegionFirstLine(),
+			   0,
+			   calcVSize());
+	  }
+	else
+	  {
+	    vbar.setValues(vbar.getValue(),
+			   canvas.getBounds().height - displayRegionFirstLine(),
+			   0,
+			   calcVSize());
+	  }
 
 	vbar.setUnitIncrement(row_height + hRowLineThickness);    // we want the up/down buttons to go a line at a time
 	    
@@ -2044,10 +2058,22 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     if (hbar_visible && (canvas.getBounds().width != 0))
       {
-	hbar.setValues(hbar.getValue(),
-		       canvas.getBounds().width,
-		       0,
-		       origTotalWidth  + (cols.size() + 1) * vLineThickness);
+	int my_current_width = origTotalWidth  + (cols.size() + 1) * vLineThickness;
+
+	if (hbar.getValue() > my_current_width - canvas.getBounds().width)
+	  {
+	    hbar.setValues(my_current_width - canvas.getBounds().width,
+			   canvas.getBounds().width,
+			   0,
+			   my_current_width);
+	  }
+	else
+	  {
+	    hbar.setValues(hbar.getValue(),
+			   canvas.getBounds().width,
+			   0,
+			   my_current_width);
+	  }
 
 	hbar.setBlockIncrement(canvas.getBounds().width / 2);    
       }
@@ -2478,16 +2504,41 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     int ypos;
     int ypos2;
     int bottomedge;
+
+    /**
+     * The lower bound of the columns visible on the screen.. i.e., index of
+     * the first column at least partially visible.
+     */
+
     int first_col;
+
+    /**
+     * The upper bound of the columns visible on the screen.. i.e., index of
+     * the last column at least partially visible.
+     */
+
     int last_col;
+
+    /**
+     * The lower bound of the rows visible on the screen.. i.e., index of
+     * the first row at least partially visible.
+     */
+
     int first_row;
 
     /**
-     * The upper bound of the rows visible on the screen.. i.e., index of
-     * the last row visible + 1.
+     * The last row visible on the screen, whether rendered or not (if
+     * vertFill).
      */
 
     int last_row;
+
+    /**
+     * The upper bound of the rows visible on the screen.. i.e., index of
+     * the last row at least partially visible.
+     */
+
+    int last_visible_row;
 
     tableCell
       cell = null;		// make compiler happy
@@ -2532,7 +2583,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    System.err.println("height = " + getBounds().height);
 	  }
 
-	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+	backing_rect = new Rectangle(0, 0, getBounds().width, 
+				     getBounds().height);
 
 	int width = getBounds().width;
 	int height = getBounds().height;
@@ -2643,7 +2695,18 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     if (rt.vbar_visible)
       {
+	// we've got a vertical scrollbar, so we must be filled with
+	// visible rows.
+
 	v_offset = rt.vbar.getValue();
+
+	if (debug)
+	  {
+	    System.err.println("v_offset = " + v_offset);
+	    System.err.println("maximum = " + rt.vbar.getMaximum());
+	    System.err.println("calculated bottom edge = " + (v_offset + getBounds().height));
+	    System.err.println("canvas height = " + getBounds().height);
+	  }
 
 	/* what is the first row that we can see?  that is, the first
 	   row whose last line is > v_offset.
@@ -2658,9 +2721,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	tr = (tableRow) rt.rows.elementAt(first_row);
 
-	while (tr.getBottomEdge() < v_offset && first_row < rt.rows.size())
+	while (tr.getBottomEdge() < v_offset && ++first_row < rt.rows.size())
 	  {
-	    tr = (tableRow) rt.rows.elementAt(++first_row);
+	    tr = (tableRow) rt.rows.elementAt(first_row);
 	  }
 
 	if (debug)
@@ -2675,10 +2738,13 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	bottomedge = v_offset + getBounds().height - 1 - rt.displayRegionFirstLine();
 
-	while (last_row < rt.rows.size() && ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
+	while (last_row < (rt.rows.size() - 1) &&
+	       ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
 	  {
 	    last_row++;
 	  }
+
+	last_visible_row = last_row;
 
 	if (debug)
 	  {
@@ -2687,12 +2753,16 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       }
     else
       {
+	// no scroll bar, so everything must be visible
+
 	v_offset = 0;
 	first_row = 0;
 
+	last_visible_row = rt.rows.size() - 1;
+
 	if (!rt.vertFill)
 	  {
-	    last_row = rt.rows.size() - 1;
+	    last_row = last_visible_row;
 	  }
 	else
 	  {
@@ -2741,42 +2811,27 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
 
 	int i;
-
-	if (last_row < rt.rows.size())
+	
+	if (!rt.vbar_visible)
 	  {
-	    for (i = first_row; i <= last_row; i++)
+	    // we have the table partially filled.. handle it
+
+	    for (i = first_row; i <= last_visible_row; i++)
 	      {
 		row = (tableRow) rt.rows.elementAt(i);
-		
+
 		topLine = row.getTopEdge() - v_offset;
-		
+
 		cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
 		bg.setClip(cellRect);
-		
+
 		renderBlitCell(cellRect, bg, j, i, column);
 	      }
-	  }
-	else
-	  {
-	    for (i = first_row; i < rt.rows.size(); i++)
-	      {
-		row = (tableRow) rt.rows.elementAt(i);
-		
-		topLine = row.getTopEdge() - v_offset;
-		
-		cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
-		bg.setClip(cellRect);
-		
-		renderBlitCell(cellRect, bg, j, i, column);
-	      }
-	  }
 
-	// we need to blank out the rest of this column.. this will
-	// only occur if we have fewer rows than we have room to
-	// display, and if we have vertical filling turned on.
+	    // we need to blank out the rest of this column.. this will
+	    // only occur if we have fewer rows than we have room to
+	    // display, and if we have vertical filling turned on.
 
-	if (i < last_row)
-	  {
 	    if (debug)
 	      {
 		System.err.println("Blanking bottom of column " + j);
@@ -2795,7 +2850,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	    if (debug)
 	      {
-		System.err.println("Blanking from " + blankTop + " to the bottom of the canvas");
+		System.err.println("Blanking from " + blankTop +
+				   " to the bottom of the canvas");
 	      }
 
 	    if (column != null && column.attr != null && column.attr.bg != null)
@@ -2806,23 +2862,39 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	      {
 		bg.setColor(rt.tableAttrib.bg);
 	      }
-
+	    
 	    // open up the clip region enough for us to blank the rest of
 	    // this column
-
+	    
 	    bg.setClip(leftEdge, blankTop,
-			column.width, getBounds().height - blankTop);
-
+		       column.width, getBounds().height - blankTop);
+	    
 	    // and do it
-		       
+	    
 	    bg.fillRect(leftEdge, blankTop,
 			column.width, getBounds().height - blankTop);
+	  }
+	else
+	  {
+	    // we have the table fully filled.. render it
+
+	    for (i = first_row; i <= last_row; i++)
+	      {
+		row = (tableRow) rt.rows.elementAt(i);
+		
+		topLine = row.getTopEdge() - v_offset;
+		
+		cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
+		bg.setClip(cellRect);
+		
+		renderBlitCell(cellRect, bg, j, i, column);
+	      }
 	  }
 
 	// and now render the header for this column.  We do this last so that
 	// we will overwrite whatever portion of the first row extends above
 	// the displayRegionFirstLine() demarc.
-
+	
 	cellRect.setBounds(leftEdge, 0, column.width, rt.headerAttrib.height + 1);
 	bg.setClip(cellRect);
 
@@ -2840,7 +2912,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 			  cellRect.y + rt.headerAttrib.baseline);
 	  }
       }
-
+	
     // Draw lines ------------------------------------------------------------
 
     // max out our clip so we can draw the lines
@@ -4199,7 +4271,7 @@ class tableCell {
 
     // if we're empty, don't bother trying to wrap anything
 
-    if (origText == null)
+    if (text == null)
       {
 	return;
       }
