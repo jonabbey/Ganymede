@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -522,6 +522,7 @@ public class DBEditSet {
     // null our vector to speed GC
 
     objects = null;
+    session = null;
 
     return true;
   }
@@ -590,6 +591,7 @@ public class DBEditSet {
       }
 
     objects = null;
+    session = null;
   }
 
   /**
