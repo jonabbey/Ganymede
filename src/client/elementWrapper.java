@@ -17,9 +17,16 @@ import com.sun.java.swing.border.*;
 
 import arlut.csd.JDataComponent.*;
 
+/**
+ * Each object in a vector panel is wrapped in an elementWrapper.  This class
+ * controls the expanding of the element, and the creation of the containerPanel
+ * inside.
+ */
+
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
-  final static boolean debug = false;
+  
+  boolean debug = false;
 
   // class variables
 
@@ -53,11 +60,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   public elementWrapper(String titleText, Component comp, vectorPanel parent, boolean editable)
   {
-    if (debug)
-      {
-	System.out.println("Adding new elementWrapper");
-      }
-
     if (comp == null) 
       {
 	throw new IllegalArgumentException("Error: Component parameter is null");
@@ -66,6 +68,13 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     this.titleText = titleText;
     this.vp = parent;
     this.editable = editable;
+
+    debug = vp.gc.debug;
+
+    if (debug)
+      {
+	System.out.println("Adding new elementWrapper");
+      }
     
     setLayout(new BorderLayout());
     setBorder(vp.wp.eWrapperBorder);
@@ -97,7 +106,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  {
 	    title = new JLabel("Component");
 	  }
-	System.out.println("Adding mouse listener.");
+	System.out.println("Adding mouse listener. in the elementWrapper");
 	title.setForeground(Color.white);
 	title.addMouseListener(this);
 
@@ -155,6 +164,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   public void expand()
   {
+    vp.wp.getgclient().setWaitCursor();;
     System.out.println("expand().");
     if (expanded)
       {
@@ -188,17 +198,17 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
 
     System.out.println("Done with expand().");
-    
+    vp.wp.getgclient().setNormalCursor();;    
   }
 
-  /**
+  /*
    *
    * This method does causes the hierarchy of containers above
    * us to be recalculated from the bottom (us) on up.  Normally
    * the validate process works from the top-most container down,
    * which isn't what we want at all in this context.
    *
-   */
+   *
 
   public void invalidateRight()
   {
@@ -215,6 +225,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
       }
   }
+  */
 
   public void actionPerformed(ActionEvent evt) 
   {

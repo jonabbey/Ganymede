@@ -21,7 +21,7 @@ import com.sun.java.swing.border.*;
 
 public class personaPanel extends JPanel implements ActionListener{
   
-  final static boolean debug = true;
+  boolean debug = true;
 
   framePanel
     fp;
@@ -64,6 +64,7 @@ public class personaPanel extends JPanel implements ActionListener{
     this.fp = fp;
 
     gc = fp.wp.gc;
+    debug = gc.debug;
 
     setLayout(new BorderLayout());
 
@@ -84,7 +85,7 @@ public class personaPanel extends JPanel implements ActionListener{
       }
 
     // Create the middle, content pane
-    middle = new JTabbedPane(JTabbedPane.BOTTOM);
+    middle = new JTabbedPane(JTabbedPane.TOP);
     JPanel middleP = new JPanel(new BorderLayout());
     middleP.setBorder(new TitledBorder("Personas"));
     middleP.add("Center", middle);
@@ -332,6 +333,9 @@ class personaContainer extends JScrollPane implements Runnable{
 						   editable,
 						   pp.fp.getgclient(), pp.fp.getWindowPanel(), 
 						   pp.fp, progressBar);
+
+	    pp.fp.containerPanels.addElement(cp);
+
 	    cp.setBorder(pp.empty);
 	    setViewportView(cp);
 	  }

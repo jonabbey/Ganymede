@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.50 $ %D%
+    Version: $Revision: 1.51 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,9 +34,17 @@ import arlut.csd.Util.VecQuickSort;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * ContainerPanel is the basic building block of the ganymede client.  Each containerPanel
+ * displays a single db_object, and allows the user to edit or view each db_field in the
+ * object.  containerPanel loops through the fields of the object, adding the appropriate
+ * type of input for each field.  This includes text fields, number fields, boolean fields,
+ * and string selector fields(fields that can have multiple values.
+ */
+
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = false;
+  boolean debug = false;
   static final boolean debug_persona = false;
 
   // -- 
@@ -73,9 +81,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   GridBagConstraints
     gbc;
   
-  JViewport
-    vp;
-
   Vector 
     infoVector = null,
     templates = null;
@@ -105,10 +110,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param editable If true, the fields presented will be enabled for editing
    * @param parent   Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
+   * @param frame    framePanel holding this containerPanel(although this cp is not necessarily in the "General" tab)
    *
    */
-  public containerPanel(db_object object, boolean editable, 
-			gclient gc, windowPanel window, framePanel frame)
+  public containerPanel(db_object    object,
+			boolean      editable, 
+			gclient      gc,
+			windowPanel  window,
+			framePanel   frame)
   {
     this(object, editable, gc, window, frame, null, true);
   }
@@ -121,10 +130,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param editable If true, the fields presented will be enabled for editing
    * @param parent   Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
+   * @param frame    framePanel holding this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    */
-  public containerPanel(db_object object, boolean editable, gclient gc, 
-			windowPanel window, framePanel frame, JProgressBar progressBar)
+  public containerPanel(db_object object, 
+			boolean editable, 
+			gclient gc, 
+			windowPanel window, 
+			framePanel frame, 
+			JProgressBar progressBar)
   {
     this(object, editable, gc, window, frame, progressBar, true);
   }
@@ -142,15 +156,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  public containerPanel(db_object object, boolean editable, gclient gc,
-			windowPanel window, framePanel frame, 
-			JProgressBar progressBar, boolean loadNow)
+  public containerPanel(db_object object, 
+			boolean editable, 
+			gclient gc,			
+			windowPanel window, 
+			framePanel frame, 
+			JProgressBar progressBar, 
+			boolean loadNow)
   {
     super(false);
 
     /* -- */
 
     this.gc = gc;
+    debug = gc.debug;
 
     if (object == null)
       {
@@ -353,6 +372,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void stopLoading()
   {
+    System.out.println("Stopping the load");
     if (isLoaded())
       {
 	return;
@@ -366,9 +386,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * Goes through all the components and checks to see if they should be visible,
    * and updates their contents.
    *
-   * !!! This will not currently work, because some of the components (JComboBox)
-   * !!! generate events when setItem is used.  So it will send a bunch of extra
-   * !!! calls.  No good!  -I think I fixed this.  Mike
    */
 
   public void updateAll()
@@ -395,6 +412,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
   public void update(Vector fields)
   {
+    if (debug)
+      {
+	System.out.println("Updating a few fields...");
+      }
+
     for (int i = 0; i < fields.size(); i++)
       {
 	Component c = (Component)shortToComponentHash.get(fields.elementAt(i));
@@ -412,7 +434,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void updateComponent(Component comp)
     {
-      System.out.println("Updating: " + comp);
+      if (debug)
+	{
+	  System.out.println("Updating: " + comp);
+	}
 
       try
 	{
@@ -443,61 +468,84 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    {
 	      ((JComboBox)comp).removeItemListener(this);
 
-	      Object o = field.getValue();
-
-	      if (o instanceof String)
+	      if (debug)
 		{
-		  Vector choiceHandles = null;
-		  Vector choices = null;
-		  string_field s_field = (string_field)field;
+		  System.out.println("Updating the combo box.");
+		}
+	      
+	      //First we need to rebuild to list
 
-		  Object key = s_field.choicesKey();
-
-		  if (key == null)
+	      Vector choiceHandles = null;
+	      
+	      Object key = null;
+	      if (field instanceof string_field)
+		{
+		  key = ((string_field)field).choicesKey();
+		}
+	      else if (field instanceof invid_field)
+		{
+		  key = ((invid_field)field).choicesKey();
+		}
+	      
+	      if (key == null)
+		{
+		  if (debug)
+		    {
+		      System.out.println("key is null, getting new copy, not caching.");
+		    }
+		  if (field instanceof string_field)
+		    {
+		      choiceHandles = ((string_field)field).choices().getListHandles();
+		    }
+		  else if (field instanceof invid_field)
+		    {
+		      choiceHandles = ((invid_field)field).choices().getListHandles();
+		    }
+		}
+	      else
+		{
+		  if (debug)
+		    {
+		      System.out.println("key = " + key);
+		    }
+		  
+		  if (gc.cachedLists.containsList(key))
 		    {
 		      if (debug)
 			{
-			  System.out.println("key is null, getting new copy, not caching.");
+			  System.out.println("key in there, using cached list");
 			}
-
-		      choices = s_field.choices().getLabels();
+		      
+		      choiceHandles = gc.cachedLists.getListHandles(key, false);
+		      
 		    }
 		  else
 		    {
 		      if (debug)
 			{
-			  System.out.println("key = " + key);
+			  System.out.println("It's not in there, downloading a new one.");
 			}
-		
-		      if (gc.cachedLists.containsList(key))
+		      if (field instanceof invid_field)
 			{
-			  if (debug)
-			    {
-			      System.out.println("key in there, using cached list");
-			    }
-
-			  choiceHandles = gc.cachedLists.getListHandles(key, false);
-
-			  choices = new Vector();
-
-			  for (int j = 0; j < choiceHandles.size() ; j++)
-			    {
-			      choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
-			    }
+			  gc.cachedLists.putList(key, ((invid_field)field).choices());
 			}
-		      else
+		      else if (field instanceof string_field)
 			{
-			  if (debug)
-			    {
-			      System.out.println("It's not in there, downloading a new one.");
-			    }
-			  
-			  gc.cachedLists.putList(key, s_field.choices());
-			  choiceHandles = gc.cachedLists.getListHandles(key, false);
-
-			  choices = gc.cachedLists.getLabels(key, false);
+			  gc.cachedLists.putList(key, ((string_field)field).choices());
 			}
-		    }    
+		      choiceHandles = gc.cachedLists.getListHandles(key, false);
+		      
+		    }
+		}
+
+	      Object o = field.getValue();
+
+	      if (o instanceof String)
+		{
+		  if (debug)
+		    {
+		      System.out.println("o is a String");
+		    }
 
 		  JComboBox cb = (JComboBox)comp;
 		  cb.removeAllItems();
@@ -505,9 +553,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  // add choices to combo box.. remember that the choices are
 		  // sorted coming out of the object Cache
 
-		  for (int i = 0; i < choices.size(); i++)
+		  for (int i = 0; i < choiceHandles.size(); i++)
 		    {
-		      cb.addItem((String)choices.elementAt(i));
+		      cb.addItem(((listHandle)choiceHandles.elementAt(i)).getLabel());
 		    }
 		    
 		  cb.addItem("<none>");
@@ -518,6 +566,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		}
 	      else if (o instanceof Invid)
 		{
+		  if (debug)
+		    {
+		      System.out.println("o is an Invid");
+		    }
+
+
+		  JComboBox cb = (JComboBox)comp;
+		  cb.removeAllItems();
+
+		  for (int i = 0; i < choiceHandles.size(); i++)
+		    {
+		      cb.addItem((listHandle)choiceHandles.elementAt(i));
+		    }
+		  
+		  cb.addItem(new listHandle("<none>", null));
+
+
 		  // Still need to rebuild list here.
 		  listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
 		  ((JComboBox)comp).setSelectedItem(lh);
@@ -572,7 +637,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       gc.setNormalCursor();
     }
 
-  /**
+  /*
    *
    * This method does causes the hierarchy of containers above
    * us to be recalculated from the bottom (us) on up.  Normally
@@ -580,7 +645,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * which isn't what we want at all in this context.
    *
    * Don't use this.
-   */
+   *
 
   public void invalidateRight()
   {
@@ -596,387 +661,427 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	c = c.getParent();
       }
   }
+  */
 
   public boolean setValuePerformed(JValueObject v)
   {
-    if (v.getOperationType() == JValueObject.ERROR)
+    try
       {
-	gc.showErrorMessage((String)v.getValue());
-	return true;
-      }
-
-    ReturnVal returnValue = null;
-
-    /* -- */
-
-    if (v.getSource() instanceof JstringField)
-      {
-	if (debug)
+	if (v.getOperationType() == JValueObject.ERROR)
 	  {
-	    System.out.println((String)v.getValue());
+	    gc.showErrorMessage((String)v.getValue());
+	    return true;
 	  }
-	db_field field = (db_field)objectHash.get(v.getSource());
 
-	try
+	ReturnVal returnValue = null;
+
+	/* -- */
+
+	if (v.getSource() instanceof JstringField)
 	  {
 	    if (debug)
 	      {
-		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		System.out.println((String)v.getValue());
+	      }
+	    db_field field = (db_field)objectHash.get(v.getSource());
+
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		  }
+
+		returnValue = field.setValue(v.getValue());
+	      }
+	    catch (RemoteException rx)
+	      {
+		System.out.println("Could not set field value: " + rx);
+		return false;
+	      }
+	  }
+	else if (v.getSource() instanceof JnumberField)
+	  {
+
+	    if (debug)
+	      {
+		System.out.println("Jnumberfirled changed.");
+	      }
+	
+	
+	    db_field field = (db_field)objectHash.get(v.getSource());
+
+	    try
+	      {
+		returnValue = field.setValue(v.getValue());
+	      }
+	    catch (RemoteException rx)
+	      {
+		System.out.println("Could not set field value: " + rx);
+		return false;
 	      }
 
-	    returnValue = field.setValue(v.getValue());
-	  }
-	catch (RemoteException rx)
-	  {
-	    System.out.println("Could not set field value: " + rx);
-	    return false;
-	  }
-      }
-    else if (v.getSource() instanceof JnumberField)
-      {
-
-	System.out.println("Jnumberfirled changed.");
-	
-	
-	db_field field = (db_field)objectHash.get(v.getSource());
-
-	try
-	  {
-	    returnValue = field.setValue(v.getValue());
-	  }
-	catch (RemoteException rx)
-	  {
-	    System.out.println("Could not set field value: " + rx);
-	    return false;
-	  }
-
 	
 
-      }
-    else if (v.getSource() instanceof JpassField)
-      {
-	if (debug)
-	  {
-	    System.out.println((String)v.getValue());
 	  }
-
-	pass_field field = (pass_field)objectHash.get(v.getSource());
-
-	try
+	else if (v.getSource() instanceof JpassField)
 	  {
 	    if (debug)
 	      {
-		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		System.out.println((String)v.getValue());
 	      }
 
-	    returnValue = field.setPlainTextPass((String)v.getValue());
-	  }
-	catch (RemoteException rx)
-	  {
-	    System.out.println("Could not set field value: " + rx);
-	    return false;
-	  }
+	    pass_field field = (pass_field)objectHash.get(v.getSource());
+
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		  }
+
+		returnValue = field.setPlainTextPass((String)v.getValue());
+	      }
+	    catch (RemoteException rx)
+	      {
+		System.out.println("Could not set field value: " + rx);
+		return false;
+	      }
  
-      }
-    else if (v.getSource() instanceof JdateField)
-      {
-	if (debug)
-	  {
-	    System.out.println("date field changed");
 	  }
+	else if (v.getSource() instanceof JdateField)
+	  {
+	    if (debug)
+	      {
+		System.out.println("date field changed");
+	      }
 
-	db_field field = (db_field)objectHash.get(v.getSource());
+	    db_field field = (db_field)objectHash.get(v.getSource());
 
-	try
-	  {
-	    returnValue =  field.setValue(v.getValue());
+	    try
+	      {
+		returnValue =  field.setValue(v.getValue());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("Could not set field value: " + rx);
+	      }
 	  }
-	catch (RemoteException rx)
+	else if (v.getSource() instanceof vectorPanel)
 	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
+	    System.out.println("Something happened in the vector panel");
 	  }
-      }
-    else if (v.getSource() instanceof vectorPanel)
-      {
-	System.out.println("Something happened in the vector panel");
-      }
-    else if (v.getSource() instanceof StringSelector)
-      {
-	if (debug)
+	else if (v.getSource() instanceof StringSelector)
 	  {
-	    System.out.println("value performed from StringSelector");
-	  }
+	    if (debug)
+	      {
+		System.out.println("value performed from StringSelector");
+	      }
 	
-	if (v.getOperationType() == JValueObject.PARAMETER)
-	  {
-	    System.out.println("MenuItem selected in a StringSelector");
-	    String command = (String)v.getParameter();
-
-	    if (command.equals("Edit object"))
+	    if (v.getOperationType() == JValueObject.PARAMETER)
 	      {
-		System.out.println("Edit object: " + v.getValue());
-
-		if (v.getValue() instanceof listHandle)
+		if (debug)
 		  {
-		    Invid invid = (Invid)((listHandle)v.getValue()).getObject();
-		    
-		    gc.editObject(invid);
+		    System.out.println("MenuItem selected in a StringSelector");
 		  }
-		else if (v.getValue() instanceof Invid)
-		  {
-		    System.out.println("It's an invid!");
-		    Invid invid = (Invid)v.getValue();
-		    
-		    gc.editObject(invid);
-		  }
+		String command = (String)v.getParameter();
 
-		returnValue = null;
-	      }
-	    else if (command.equals("View object"))
-	      {
-		System.out.println("View object: " + v.getValue());
-
-		if (v.getValue() instanceof Invid)
+		if (command.equals("Edit object"))
 		  {
-		    Invid invid = (Invid)v.getValue();
-		    
-		    gc.viewObject(invid);
-		  }
-
-		returnValue = null;
-	      }
-	    else if (command.equals("Create new Object"))
-	      {
-		if (objectHash.get(v.getSource()) instanceof invid_field)
-		  {
-		    String label = null;
-		    invid_field field = (invid_field)objectHash.get(v.getSource());
-		    try
+		    if (debug)
 		      {
-			short type = field.getTargetBase();
-			db_object o = gc.createObject(type, false);
+			System.out.println("Edit object: " + v.getValue());
+		      }
 
-			// Find the label field.
-			db_field f = o.getLabelField();
-			if ((f != null) && (f instanceof string_field))
+		    if (v.getValue() instanceof listHandle)
+		      {
+			Invid invid = (Invid)((listHandle)v.getValue()).getObject();
+		    
+			gc.editObject(invid);
+		      }
+		    else if (v.getValue() instanceof Invid)
+		      {
+			if (debug)
 			  {
-			    if (debug)
+			    System.out.println("It's an invid!");
+			  }
+		    
+			Invid invid = (Invid)v.getValue();
+		    
+			gc.editObject(invid);
+		      }
+
+		    returnValue = null;
+		  }
+		else if (command.equals("View object"))
+		  {
+		    if (debug)
+		      {
+			System.out.println("View object: " + v.getValue());
+		      }
+
+		    if (v.getValue() instanceof Invid)
+		      {
+			Invid invid = (Invid)v.getValue();
+		    
+			gc.viewObject(invid);
+		      }
+
+		    returnValue = null;
+		  }
+		else if (command.equals("Create new Object"))
+		  {
+		    if (objectHash.get(v.getSource()) instanceof invid_field)
+		      {
+			String label = null;
+			invid_field field = (invid_field)objectHash.get(v.getSource());
+			try
+			  {
+			    short type = field.getTargetBase();
+			    db_object o = gc.createObject(type, false);
+
+			    // Find the label field.
+			    db_field f = o.getLabelField();
+			    if ((f != null) && (f instanceof string_field))
 			      {
-				System.out.println("Going to get label for this object.");
-			      }
-			    // Set up a label for this object.
-			    DialogRsrc r = new DialogRsrc(gc, "Choose Label for Object", "What would you like to name this object?", "Ok", null);
-			    r.addString("Label:");
+				if (debug)
+				  {
+				    System.out.println("Going to get label for this object.");
+				  }
+				// Set up a label for this object.
+				DialogRsrc r = new DialogRsrc(gc, "Choose Label for Object", "What would you like to name this object?", "Ok", "Cancel");
+				r.addString("Label:");
 			    
-			    StringDialog d = new StringDialog(r);
-			    Hashtable result = d.DialogShow();
-			    ReturnVal setLabel = f.setValue((String)result.get("Label:"));
-
-			    // wizard?
-
-			    setLabel = gc.handleReturnVal(setLabel);
-
-			    if ((setLabel == null) || setLabel.didSucceed())
-			      {
-				label = (String)result.get("Label:");
-
-				if (debug)
+				StringDialog d = new StringDialog(r);
+				Hashtable result = d.DialogShow();
+				if (result == null)
 				  {
-				    System.out.println("The set label worked!");
+				// They pushed cancel.
+				    return false;
+				  }
+			    
+				ReturnVal setLabel = f.setValue((String)result.get("Label:"));
+
+				// wizard?
+
+				setLabel = gc.handleReturnVal(setLabel);
+
+				if ((setLabel == null) || setLabel.didSucceed())
+				  {
+				    label = (String)result.get("Label:");
+
+				    if (debug)
+				      {
+					System.out.println("The set label worked!");
+				      }
+				  }
+				else
+				  {
+				    if (debug)
+				      {
+					System.out.println("set label failed!!!!");
+				      }
 				  }
 			      }
-			    else
-			      {
-				if (debug)
-				  {
-				    System.out.println("set label failed!!!!");
-				  }
-			      }
-			  }
 
-			Invid invid = o.getInvid();
-			returnValue = field.addElement(invid);
+			    Invid invid = o.getInvid();
+			    returnValue = field.addElement(invid);
 
-			gc.showNewlyCreatedObject(o, invid, new Short(type));
+			    gc.showNewlyCreatedObject(o, invid, new Short(type));
 			
-			if ((returnValue == null) || returnValue.didSucceed())
-			  {
-			    if (debug)
+			    if ((returnValue == null) || returnValue.didSucceed())
 			      {
-				System.out.println("--Adding it to the StringSelector");
-			      }
-			    if (label == null)
-			      {
-				((StringSelector)v.getSource()).addNewItem(new listHandle("New item", invid), true);
+				if (debug)
+				  {
+				    System.out.println("--Adding it to the StringSelector");
+				  }
+				if (label == null)
+				  {
+				    ((StringSelector)v.getSource()).addNewItem(new listHandle("New item", invid), true);
+				  }
+				else
+				  {
+				    ((StringSelector)v.getSource()).addNewItem(new listHandle(label, invid), true);
+				  }
 			      }
 			    else
 			      {
-				((StringSelector)v.getSource()).addNewItem(new listHandle(label, invid), true);
+				System.out.println("--Something went wrong, so I am NOT adding it to the StringSelector");
 			      }
 			  }
-			else
+			catch (RemoteException rx)
 			  {
-			    System.out.println("--Something went wrong, so I am NOT adding it to the StringSelector");
+			    throw new RuntimeException("Exception creating new object from SS menu: " + rx);
 			  }
 		      }
-		    catch (RemoteException rx)
+		    else
 		      {
-			throw new RuntimeException("Exception creating new object from SS menu: " + rx);
+			System.out.println("I don't know what this is supposed to be: " + v.getSource());
 		      }
 		  }
 		else
 		  {
-		    System.out.println("I don't know what this is supposed to be: " + v.getSource());
+		    System.out.println("Unknown action command from popup: " + command);
+		  }
+	      }
+
+	    else if (v.getValue() instanceof Invid)
+	      {
+		db_field field = (db_field)objectHash.get(v.getSource());
+
+		if (field == null)
+		  {
+		    throw new RuntimeException("Could not find field in objectHash");
+		  }
+
+		Invid invid = (Invid)v.getValue();
+		int index = v.getIndex();
+
+		try
+		  {
+		    if (v.getOperationType() == JValueObject.ADD)
+		      {
+			if (debug)
+			  {
+			    System.out.println("Adding new value to string selector");
+			  }
+			returnValue = (field.addElement(invid));
+		      }
+		    else if (v.getOperationType() == JValueObject.DELETE)
+		      {
+			if (debug)
+			  {
+			    System.out.println("Removing value from field(strig selector)");
+			  }
+			returnValue = (field.deleteElement(invid));
+		      }
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not change owner field: " + rx);
+		  }
+	      }
+	    else if (v.getValue() instanceof String)
+	      {
+		if (objectHash.get(v.getSource()) instanceof string_field)
+		  {
+		    string_field field = (string_field)objectHash.get(v.getSource());
+		
+		    if (v.getOperationType() == JValueObject.ADD)
+		      {
+			try
+			  {
+			    returnValue = field.addElement((String)v.getValue());
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new RuntimeException("Could not add string to string_field: " + rx);
+			  }
+		      }
+		    else if (v.getOperationType() == JValueObject.DELETE)
+		      {
+			try
+			  {
+			    returnValue = field.deleteElement((String)v.getValue());
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new RuntimeException("Could not remove string from string_field: " + rx);
+			  }
+		      }
+		  }
+		else if (objectHash.get(v.getSource()) instanceof invid_field)
+		  {
+		    invid_field field = (invid_field)objectHash.get(v.getSource());
+
+		
+		    if (v.getOperationType() == JValueObject.ADD)
+		      {
+			System.out.println("I see what's going on here!  You want to add a new Invid, and you want me to make it for you.");
+			return false;
+			/*
+			  try
+			  {
+			  returnValue = field.addElement((String)v.getValue());
+			  }
+			  catch (RemoteException rx)
+			  {
+			  throw new RuntimeException("Could not add string to string_field: " + rx);
+			  }*/
+		      }
+		    else if (v.getOperationType() == JValueObject.DELETE)
+		      {
+			System.out.println("This doesn't make sense, I don't think the SS should be giving me Strings to delete out of an Invid field.");
+			return false;
+		      }
+		
+		  }
+		else
+		  {
+		    throw new IllegalArgumentException("What kind of field is this? : " + objectHash.get(v.getSource()));
 		  }
 	      }
 	    else
 	      {
-		System.out.println("Unknown action command from popup: " + command);
+		System.out.println("Not an Invid in string selector.");
 	      }
 	  }
-
-	else if (v.getValue() instanceof Invid)
+	else if (v.getSource() instanceof JIPField)
 	  {
-	    db_field field = (db_field)objectHash.get(v.getSource());
-
-	    if (field == null)
+	    if (debug)
 	      {
-		throw new RuntimeException("Could not find field in objectHash");
+		System.out.println("ip field changed");
 	      }
 
-	    Invid invid = (Invid)v.getValue();
-	    int index = v.getIndex();
+	    db_field field = (db_field)objectHash.get(v.getSource());
 
 	    try
 	      {
-		if (v.getOperationType() == JValueObject.ADD)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding new value to string selector");
-		      }
-		    returnValue = (field.addElement(invid));
-		  }
-		else if (v.getOperationType() == JValueObject.DELETE)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Removing value from field(strig selector)");
-		      }
-		    returnValue = (field.deleteElement(invid));
-		  }
+		returnValue =  field.setValue(v.getValue());
 	      }
 	    catch (RemoteException rx)
 	      {
-		throw new RuntimeException("Could not change owner field: " + rx);
-	      }
-	  }
-	else if (v.getValue() instanceof String)
-	  {
-	    if (objectHash.get(v.getSource()) instanceof string_field)
-	      {
-		string_field field = (string_field)objectHash.get(v.getSource());
-		
-		if (v.getOperationType() == JValueObject.ADD)
-		  {
-		    try
-		      {
-			returnValue = field.addElement((String)v.getValue());
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not add string to string_field: " + rx);
-		      }
-		  }
-		else if (v.getOperationType() == JValueObject.DELETE)
-		  {
-		    try
-		      {
-			returnValue = field.deleteElement((String)v.getValue());
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not remove string from string_field: " + rx);
-		      }
-		  }
-	      }
-	    else if (objectHash.get(v.getSource()) instanceof invid_field)
-	      {
-		invid_field field = (invid_field)objectHash.get(v.getSource());
-
-		
-		if (v.getOperationType() == JValueObject.ADD)
-		  {
-		    System.out.println("I see what's going on here!  You want to add a new Invid, and you want me to make it for you.");
-		    return false;
-		    /*
-		    try
-		      {
-			returnValue = field.addElement((String)v.getValue());
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not add string to string_field: " + rx);
-			}*/
-		  }
-		else if (v.getOperationType() == JValueObject.DELETE)
-		  {
-		    System.out.println("This doesn't make sense, I don't think the SS should be giving me Strings to delete out of an Invid field.");
-		    return false;
-		  }
-		
-	      }
-	    else
-	      {
-		throw new IllegalArgumentException("What kind of field is this? : " + objectHash.get(v.getSource()));
+		throw new IllegalArgumentException("Could not set ip field value: " + rx);
 	      }
 	  }
 	else
 	  {
-	    System.out.println("Not an Invid in string selector.");
+	    System.out.println("Value performed from unknown source");
 	  }
-      }
-    else if (v.getSource() instanceof JIPField)
-      {
-	if (debug)
+
+	// Check to see if anything needs updating.
+
+	returnValue = gc.handleReturnVal(returnValue);
+
+	if (returnValue == null)  // Success, no need to do anything else
 	  {
-	    System.out.println("ip field changed");
+	    gc.somethingChanged();
+	    return true;
 	  }
 
-	db_field field = (db_field)objectHash.get(v.getSource());
+	checkReturnValForRescan(returnValue);
+    
+	System.out.println("Finished checking, going to return now.");
 
-	try
+	if (returnValue.didSucceed())
 	  {
-	    returnValue =  field.setValue(v.getValue());
+	    System.out.println("Returning true.");
+	    return true;
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new IllegalArgumentException("Could not set ip field value: " + rx);
+	    System.out.println("Returning false.");
+	    return false;
 	  }
       }
-    else
+    catch (IllegalArgumentException e)
       {
-	System.out.println("Value performed from unknown source");
+	System.out.println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
+	return false;
       }
-
-    // Check to see if anything needs updating.
-
-    returnValue = gc.handleReturnVal(returnValue);
-
-    if (returnValue == null)  // Success, no need to do anything else
+    catch (RuntimeException e)
       {
-	gc.somethingChanged();
-	return true;
-      }
-
-    checkReturnValForRescan(returnValue);
-
-    if (returnValue.didSucceed())
-      {
-	return true;
-      }
-    else
-      {
+	System.out.println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
 	return false;
       }
   }
@@ -1068,7 +1173,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 		else if (returnValue.didSucceed())
 		  {
-		    System.out.println("field setValue returned true!!");
+		    if (debug)
+		      {
+			System.out.println("field setValue returned true!!");
+		      }
+
 		    checkReturnValForRescan(returnValue);
 		  }
 		else
@@ -1096,6 +1205,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   void checkReturnValForRescan(ReturnVal rv)
   {
+    if (debug)
+      {
+	System.out.println("=checking return val for rescan");
+      }
+
     if (rv == null)
       {
 	return;
@@ -1103,8 +1217,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (rv.doRescan())
       {
+	if (debug)
+	  {
+	    System.out.println("=doRescan is true");
+	  }
+
 	if (rv.rescanAll())
 	  {
+	    if (debug)
+	      {
+		System.out.println("=rescanAll is true");
+	      }
+
 	    updateAll();
 	  }
 	else 
@@ -1112,7 +1236,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    update(rv.getRescanList());
 	  }
       }
-
+    else if (debug)
+      {
+	System.out.println("=It's not a doRescan");
+      }
   }
 
 
@@ -1204,10 +1331,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     if (debug)
       {
 	System.out.println("Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
-      }
-    else 
-      {
-	System.out.println("Name: " + fieldTemplate.getName());
       }
     
     if (isVector)
@@ -1367,10 +1490,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
-	    if (editable && fieldInfo.isEditable())
-	      {
+	    //	    if (editable && fieldInfo.isEditable())
+	    //{
 		ss.setCallback(this);
-	      }
+		//}
 
 	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
@@ -1386,10 +1509,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
-	    if (editable && fieldInfo.isEditable())
-	      {
+	    //if (editable && fieldInfo.isEditable())
+	    //{
 		ss.setCallback(this);
-	      }
+		//}
 
 	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
@@ -1548,7 +1671,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(createO2);
 
-    System.out.println("Creating StringSelector");
+    if (debug)
+      {
+	System.out.println("Creating StringSelector");
+      }
 
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable && fieldInfo.isEditable(), 
 					   true, true, 160, "Selected", "Available",
@@ -1560,10 +1686,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     objectHash.put(ss, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
-    if (editable && fieldInfo.isEditable())
-      {
+    //if (editable && fieldInfo.isEditable())
+    //  {
 	ss.setCallback(this);
-      }
+	//}
     addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
@@ -1756,9 +1882,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       
 	sf = new JstringField(20,
 			      field.maxSize(),
-			      new JcomponentAttr(null,
-						 new Font("Helvetica",Font.PLAIN,12),
-						 Color.black,Color.white),
+			      //new JcomponentAttr(null,
+			      //			 new Font("Helvetica",Font.PLAIN,12),
+			      //			 Color.black,Color.white),
 			      editable && fieldInfo.isEditable(),
 			      false,
 			      fieldTemplate.getOKChars(),
@@ -1814,9 +1940,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	sf = new JstringField(20,
 			      field.maxSize(),
-			      new JcomponentAttr(null,
-						 new Font("Helvetica",Font.PLAIN,12),
-						 Color.black,Color.white),
+			      //      new JcomponentAttr(null,
+				//		 new Font("Helvetica",Font.PLAIN,12),
+			      //	 Color.black,Color.white),
 			      true,
 			      false,
 			      null,
@@ -1866,10 +1992,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	nf.setValue(value.intValue());
       }
 
+    if (debug)
+      {
+	System.out.println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
+      }
     
     if (editable && fieldInfo.isEditable())
       {
-	System.out.println("Setting callback on number field.");
 	nf.setCallback(this);
       }
 

@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,9 +27,15 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
+
+/**
+ * A framePanel is the interal window holding an object.  This class manages the
+ * tabbed pane, and the creation of each of the panels in the window.
+ */
+
 public class framePanel extends JInternalFrame implements ChangeListener, Runnable {
   
-  final static boolean debug = true;
+  boolean debug = true;
 
   // Indexes for the tabs in the JTabbedPane
   // These numbers have to correspond to the order they are added as tabs,
@@ -80,6 +86,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     personae;
 
   Vector
+    containerPanels = new Vector(), // contains all of the containerPanels
     createdList = new Vector(); // contains the Integers that have been created
 
   date_field
@@ -129,22 +136,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public framePanel(db_object object, boolean editable, windowPanel winP, String title)
     {
-      if (debug)
-	{
-	  System.out.println("Adding new framePanel");
-	}
-    
-      this.title = title;
       this.wp = winP;
+      this.title = title;
       this.object = object;
       this.editable = editable;
+
+      debug = wp.gc.debug;
 
       setStatus("Building window.");
 
       // Window properties
       setMaximizable(true);
       setResizable(true);
-      setClosable(!editable);
+      setClosable(true);
       setIconifiable(true);
 
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
@@ -188,7 +192,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       setTitle(title);
       
-      System.out.println("Creating menu bar");
+
       JMenuBar mb = wp.createMenuBar(editable, object, this);
       setMenuBar(mb);
 
@@ -196,11 +200,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       pane = new JTabbedPane();
       
       // Add the panels to the tabbedPane
-      System.out.println("Adding general_index " + current);
       general = new JScrollPane();
       pane.addTab("General", null, general);
       general_index = current++;
-      System.out.println("general_index=" + general_index);
       owner = new JScrollPane();
       pane.addTab("Owner", null, owner);
       owner_index = current++;
@@ -288,10 +290,28 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       contentPane.add("Center", pane);
 
       contentPane.invalidate();
-      System.out.println("Calling validate in the fp");
       validate();
-      System.out.println("Done Calling validate in the fp");
     }
+
+  public void stopLoading()
+  {
+    if (debug)
+      {
+	System.out.println("Stopping all the containerPAnels.");
+      }
+
+    for (int i = 0; i < containerPanels.size(); i++)
+      {
+	if (debug)
+	  {
+	    System.out.println("Telling a containerPanel to stop loading.");
+	  }
+
+	containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+	cp.stopLoading();
+      }
+  }
+
 
   /**
    * Return the invid of the object contained in this frame panel.
@@ -374,8 +394,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.out.println("Creating general panel");
 	}
       
-      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar);
-
+      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false);
+      containerPanels.addElement(cp);
+      cp.load();
       cp.setBorder(wp.emptyBorder10);
 
       general.setViewportView(cp);
@@ -641,17 +662,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		      System.out.println("Setting notes test to *" + notesText + "*.");
 		    }
 
-		  System.out.println("Adding the noteIcon");
 		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
 		  
 		  pane.setIconAt(notes_index, noteIcon);
 		}
-	      else
+	      else if (debug)
 		{
 		  System.out.println("Empty notes");
 		}
 	    }
-	  else
+	  else if (debug)
 	    {
 	      System.err.println("notes_field is null in framePanel");
 	    }
@@ -688,7 +708,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       if (!createdList.contains(new Integer(index)))
 	{
-	  System.out.println("Creating a new pane.");
+	  System.out.println("Creating a new pane. in stateChanged");
 	  createPanel(index);
 	}
     }
@@ -699,7 +719,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void createPanel(int index)
     {
-      System.out.println("index = " + index + " general_index= " + general_index);
+      wp.gc.setWaitCursor();
+      if (debug)
+	{
+	  System.out.println("index = " + index + " general_index= " + general_index);
+	}
 	
       if (index == general_index)
 	{
@@ -750,7 +774,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
 	}
-      
+
+      wp.gc.setNormalCursor();
     }
 
   // Convienence methods
