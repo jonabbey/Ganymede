@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1812,55 +1812,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   int getDumperSize()
   {
     return dumperList.size();
-  }
-
-  /**
-   *
-   * Dump the headers.. this is used to provide the first-line header
-   * used by GanymedeSession.dump().
-   *
-   */
-
-  public synchronized String dump() 
-  {
-    StringBuffer buffer = new StringBuffer();
-    DBObjectBaseField field;
-    char[] chars;
-
-    /* -- */
-
-    for (int i = 0; i < sortedFields.size(); i++)
-      {
-	field = (DBObjectBaseField) sortedFields.elementAt(i);
-
-	chars = field.getName().toCharArray();
-	    
-	for (int j = 0; j < chars.length; j++)
-	  {
-	    if (chars[j] == '|')
-	      {
-		buffer.append("\\|");
-	      }
-	    else if (chars[j] == '\n')
-	      {
-		buffer.append("\\\n");
-	      }
-	    else if (chars[j] == '\\')
-	      {
-		buffer.append("\\\\");
-	      }
-	    else
-	      {
-		buffer.append(chars[j]);
-	      }
-	  }
-
-	buffer.append("|");
-      }
-
-    buffer.append("\n");
-    
-    return buffer.toString();
   }
 
   private void sortFields()
