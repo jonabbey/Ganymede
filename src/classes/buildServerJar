@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.17 $
-# Date: $Date: 2000/02/19 02:23:02 $
+# Version: $Revision: 1.18 $
+# Date: $Date: 2001/04/23 05:06:55 $
 #
 ############################################################
 
@@ -35,6 +35,13 @@ cd server_classes
 cd arlut/csd
 rm -f Util
 ln -s $TARGETDIR/arlut/csd/Util .
+cd ../..
+
+# We need the arlut.csd.crypto package for our Samba support
+
+cd arlut/csd
+rm -f crypto
+ln -s $TARGETDIR/arlut/csd/crypto .
 cd ../..
 
 # We need one thing from JDataComponent
