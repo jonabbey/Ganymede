@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.23 $ %D%
+ * @version $Revision: 1.24 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -48,6 +48,13 @@ public interface Session extends Remote {
    */
 
   String      getLastError() throws RemoteException;
+
+  /**
+   *
+   * This method logs a client out and closes up any resources
+   * used by the client on the server. 
+   *
+   */
 
   void        logout() throws RemoteException;
 
@@ -66,6 +73,15 @@ public interface Session extends Remote {
    */
 
   void        enableWizards(boolean val) throws RemoteException;
+
+  /**
+   *
+   * This method is used to tell the client where to look
+   * to access the Ganymede help document tree.
+   *
+   */
+
+  String      getHelpBase() throws RemoteException;
 
   /**
    *

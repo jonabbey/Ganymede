@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -438,6 +438,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     this.enableWizards = val;
   }
+
+  /**
+   *
+   * This method is used to tell the client where to look
+   * to access the Ganymede help document tree.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public String getHelpBase()
+  {
+    return Ganymede.helpbaseProperty;
+  }
+
 
   /**
    *
