@@ -1,5 +1,5 @@
-Ganymede Release 1.03
-June 22, 2001
+Ganymede Release 1.04
+July 9, 2001
 CREDITS
 ---------------------------------------------
 
@@ -73,6 +73,14 @@ helping bring the client into fruition.
 
 --
 
+ Deepak Giridharagopal, deepak@arlut.utexas.edu
+
+ Deepak is contributing Java coding and development to the Ganymede
+system.  Deepak just started at ARL, but he has already made
+noticeable improvements to the Ganymede client's GUI.
+
+--
+
  Dan Scott, dscott@arlut.utexas.edu
 
  Dan originated the GASH project, providing strategic vision and
@@ -129,6 +137,7 @@ Chris McCraw, fool@dfw.net - bugzilla testing
 Ido Dubrawsky, ido@globeset.com - testing
 Michael Houle, michael.houle@atcoitek.com - many bug reports
 Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Ganymede 1.0
+Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
 
 --
 

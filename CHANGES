@@ -50,6 +50,9 @@ With this change, it should now be impossible to put the server into a
 state where fields hold data in contradiction to an expressed
 uniqueness constraint.
 
+Thanks to Gaurav Bhargava at Villanova University for reporting
+this bug.
+
 -------------------- Changes from 1.02 to 1.03 -------------------
 
 RELEASE DATE: June 22, 2001
