@@ -90,6 +90,12 @@ public final class Invid implements java.io.Serializable {
   static private InvidAllocator allocator = null;
   static private int counter = 0;
 
+  static final public void printCount()
+  {
+    System.err.println("I've seen " + counter + " invids created.");
+  }
+
+
   /**
    * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
    * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
@@ -99,27 +105,7 @@ public final class Invid implements java.io.Serializable {
   {
     counter++;
 
-    if (allocator == null)
-      {
-	return new Invid(type, num);
-      }
-    else
-      {
-	Invid result = allocator.findInvid(type, num);
-
-	if (result == null)
-	  {
-	    result = new Invid(type, num);
-	  }
-
-	allocator.storeInvid(result);
-	return result;
-      }
-  }
-
-  static final public void printCount()
-  {
-    System.err.println("I've seen " + counter + " invids created.");
+    return new Invid(type, num).intern();
   }
 
   /**
@@ -177,6 +163,7 @@ public final class Invid implements java.io.Serializable {
 
   private short type;
   private int num;
+  private transient boolean interned = false;
 
   // constructors
 
@@ -268,6 +255,40 @@ public final class Invid implements java.io.Serializable {
 				// this is probably ok for our uses, where we
 				// will generally not have multiple types of
 				// invid's in a particular hash.
+  }
+
+  /**
+   * <p>As with java.lang.String, Invids are immutable objects that we
+   * may be able to usefully pool for object re-use.  The result of an
+   * intern method is a single immutable Invid that will be reused
+   * by all other Invid's that point to the same object in the Ganymede
+   * server (if you're calling intern() on the server, that is.)</p>
+   *
+   * <p>If an Invid Allocator has not been set with setAllocator(), intern()
+   * will do nothing, and will return this.</p>
+   */
+
+  public Invid intern()
+  {
+    if (interned || allocator == null)
+      {
+	return this;
+      }
+    else
+      {
+	Invid result = allocator.findInvid(this);
+
+	if (result == null)
+	  {
+	    allocator.storeInvid(this);
+	    this.interned = true;
+	    return this;
+	  }
+	else
+	  {
+	    return result;
+	  }
+      }
   }
 
   // pull the values
