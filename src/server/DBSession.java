@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,6 +94,18 @@ public class DBSession {
       }
 
     this.store = null;
+  }
+
+  /**
+   *
+   * This method is provided so that custom DBEditObject subclasses
+   * can get access to methods on our DBStore.
+   *
+   */
+
+  public DBStore getStore()
+  {
+    return store;
   }
 
   /**
@@ -589,7 +601,7 @@ public class DBSession {
    *
    */
 
-  void setLastError(String error)
+  public void setLastError(String error)
   {
     this.lastError = error;
 
