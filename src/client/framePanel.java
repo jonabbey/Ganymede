@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,7 +15,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.*;
 import java.rmi.*;
-import java.util.Date;
+import java.util.*;
 
 import com.sun.java.swing.*;
 import tablelayout.*;
@@ -30,10 +30,18 @@ public class framePanel extends JInternalFrame {
   JTabbedPane 
     pane;
 
+  // Each tab consists of a JBufferedPanel(with a P at the end of the variable 
+  // name), inside a JScrollPane(without the P).
+  
   JBufferedPane
+    generalP = new JBufferedPane(),
+    datesP = new JBufferedPane();
+  
+  JScrollPane
     general,
     dates,
-    history;
+    history,
+    owner;
 
   Container
     contentPane;
@@ -47,6 +55,15 @@ public class framePanel extends JInternalFrame {
   boolean 
     editable;
 
+  db_object
+    object;
+
+  windowPanel
+    parent;
+
+  String 
+    title;
+
   public framePanel(db_object object, boolean editable, windowPanel parent, String title)
     {
       if (debug)
@@ -54,6 +71,9 @@ public class framePanel extends JInternalFrame {
 	  System.out.println("Adding new framePanel");
 	}
     
+      this.title = title;
+      this.parent = parent;
+      this.object = object;
       this.editable = editable;
   
       // Window properties
@@ -88,52 +108,63 @@ public class framePanel extends JInternalFrame {
 	  throw new RuntimeException("Could not get list of fields in framPanel: " + rx);
 	}
 
-      // First panel is a container panel
-      general = new JBufferedPane();
-      general.setInsets(new Insets(2,2,2,2));
-      general.setLayout(new BorderLayout());
-      general.setBackground(ClientColor.WindowBG);
-      general.add("Center", new containerPanel(object, editable, parent.parent, parent));
-
-      // Second panel contains some dates
-      dates = createDatePanel();
-      dates.add(new JLabel("date stuff"));
-
-      // Third panel is history information
-      history = createHistoryPanel();
-      history.add(new JLabel("history stuff"));
-      
+      // This creates all the panels we need
+      try
+	{
+	  createPanels(object.listFields());
+	}
+      catch (RemoteException rx) 
+	{
+	  throw new RuntimeException("Could not create panels for framePanel: " + rx);
+	}
       // Add the panels to the tabbedPane
       pane.addTab("General", null, general);
       pane.addTab("Dates", null, dates);
       pane.addTab("History", null, history);
+      pane.addTab("Owner", null, owner);
       pane.setSelectedIndex(0);
 
       contentPane.add("Center", pane);
     }
 
-  JBufferedPane createDatePanel() 
+  // This makes 4 scrollPanes: general, dates, history, owner
+  void createPanels(db_field[] fields) throws RemoteException
     {
-      JBufferedPane panel = new JBufferedPane();
-      panel.setLayout(new TableLayout(false));
+      
+      // First panel is a container panel
+      generalP = new JBufferedPane();
+      generalP.setInsets(new Insets(2,2,2,2));
+      generalP.setLayout(new BorderLayout());
+      generalP.setBackground(ClientColor.WindowBG);
+      System.out.println("Adding the container Panel");
+      generalP.add("Center", new containerPanel(object, editable, parent.parent, parent));
+      
+      general = new JScrollPane();
+      general.setViewportView(generalP);
+
+      // Second panel contains some dates
+      // fourth panel is owner list
+      // Make them both on the same pass through
+
+      owner = new JScrollPane();
+      
+      dates = new JScrollPane();
+      dates.setViewportView(datesP);
+      
+      datesP.setInsets(new Insets(5,5,5,5));
+      datesP.setLayout(new TableLayout(false));
       if (fields != null)
 	{
 	  int type = -1;
 	  for (int i = 0; i < fields.length ; i++)
 	    {
-	      try
-		{
-		  type = fields[i].getID();
-		}
-	      catch (RemoteException rx)
-		{
-		  throw new RuntimeException("Can't get type");
-		}
+	      type = fields[i].getID();
+	      
 	      if (type == SchemaConstants.ExpirationField)
 		{
 		  try
 		    {
-		      addDateField(fields[i], panel);
+		      addDateField(fields[i], datesP);
 		    }
 		  catch (RemoteException rx)
 		    {
@@ -142,79 +173,26 @@ public class framePanel extends JInternalFrame {
 		}
 	      else if (type == SchemaConstants.RemovalField)
 		{
-		  try
-		    {
-		      addDateField(fields[i], panel);
-		    }
-		  catch (RemoteException rx)
-		    {
-		      throw new RuntimeException("Could not addDateField: " + rx);
-		    }
-		  
+		  addDateField(fields[i], datesP);
+		}
+	      else if (type == SchemaConstants.OwnerListField)
+		{
+		  owner.setViewportView(new ownerPanel((invid_field)fields[i], editable));
 		}
 	    }
 	}
+
       
-      return panel;
+      // Third panel is history information
+      history = new JScrollPane();
+      history.setViewportView(new historyPanel());
+
+      
+       
     }
 
-  JBufferedPane createHistoryPanel()
-    {
-      JBufferedPane panel = new JBufferedPane();
-      
-      JTextField tf = new JTextField();
-      panel.setLayout(new BorderLayout());
-      panel.add("Center", tf);
-      
-      return panel;
-      
-    }
-  
-  private void addDateField(db_field field, Container panel) throws RemoteException
-  {
-    JdateField df = new JdateField();
-    
-    //objectHash.put(df, field);
-    df.setEditable(editable);
-    
-    try
-      {
-	Date date = ((Date)field.getValue());
-	
-	if (date != null)
-	  {
-	    df.setDate(date);
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get date: " + rx);
-      }
-    
-    // note that we set the callback after we initially set the
-    // date, to avoid having the callback triggered on a listing
 
-    //df.setCallback(this);
-    
-    try
-      {
-	addRow(panel, df, field.getName());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility");
-      }
-    
-  }
-  
-  void addRow(Container parent, Component comp,  String label)
-    {
-      JLabel l = new JLabel(label);
-      comp.setBackground(ClientColor.ComponentBG);
-      parent.add("0 " + row + " lthwHW", l);
-      parent.add("1 " + row + " lthwHW", comp);
-      
-      row++;
-    }
+
+ 
   
 }//framePanel
