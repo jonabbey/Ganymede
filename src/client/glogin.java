@@ -8,12 +8,14 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 package arlut.csd.ganymede.client;
+
+import com.sun.java.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -40,10 +42,10 @@ public class glogin extends java.applet.Applet implements Runnable {
   protected Image ganymede_logo;
   protected TextField username;
   protected TextField passwd;
-  protected Button connector;
-  protected Button _quitButton;
+  protected JButton connector;
+  protected JButton _quitButton;
   protected Label _connectStatus = new Label();
-  protected Panel bPanel;
+  protected JPanel bPanel;
   protected static Frame my_frame = null;
 
   protected static Server  my_server;
@@ -149,17 +151,17 @@ public class glogin extends java.applet.Applet implements Runnable {
     p.add(new FieldWrapper("Password:",passwd));
     
     username.setEnabled(false);
+    username.setText("root");
     passwd.setEnabled(false);
 
-    bPanel = new Panel();
+    bPanel = new JPanel();
     bPanel.setLayout(new BorderLayout());
 
-    _quitButton = new Button("Quit");
+    _quitButton = new JButton("Quit");
 
     _loginHandler = new LoginHandler(this);
 
-    connector = new Button("Login to Server");
-
+    connector = new JButton("Login to Server");
     connector.addActionListener(_loginHandler);
     
     _quitButton.addActionListener(_loginHandler);
@@ -306,6 +308,13 @@ public class glogin extends java.applet.Applet implements Runnable {
 
     System.exit(1);
   }
+
+  public void enableButtons(boolean enabled)
+    {
+      connector.setEnabled(enabled);
+      _quitButton.setEnabled(enabled);
+
+    }
 }  
 
 
