@@ -100,6 +100,7 @@ import java.util.HashMap;
  * @see {@link arlut.csd.ddroid.common.Query Query}
  *
  * @version $Id$
+ * @author Deepak Giridharagopal, deepak@arlut.utexas.edu
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
