@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -576,9 +576,6 @@ public class InvidDBField extends DBField implements invid_field {
 
   synchronized boolean establish(Invid newInvid)
   {
-    int 
-      index = -1;
-
     Invid 
       tmp = null;
 

@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1967,9 +1967,17 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     
     target = targetC.getSelectedItem();
 
+
     try
       {
-	targetBase = owner.getSchemaEdit().getBase(target);
+	if (target.equals("<all>"))
+	  {
+	    targetBase = owner.getSchemaEdit().getBase((short)0);
+	  }
+	else
+	  {
+	    targetBase = owner.getSchemaEdit().getBase(target);
+	  }
 
 	if (targetBase == null)
 	  {
@@ -2205,18 +2213,37 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    else
 	      {
 		Base targetBase = null;
+		String string = null;
 
-		targetBase = se.getBase(targetB);
-
-		if (targetBase == null)
+		if (targetB == -2)
 		  {
-		    throw new Error("targetbase is null when it shouldn't be: server error");
+		    // we're assuming that we've got a known target field in
+		    // all objects bases in the system.. this is mainly for
+		    // the 'owner list' field.. we'll just pick the field from
+		    // the current fieldDef and go with it.
+		    
+		    System.out.println("new 'alltarget' base");
+		    targetC.addItem("<all>");
+		    targetC.select("<all>");
+
+		    string = "<all>";
+
+		    targetBase = se.getBase((short) 0);	// assume the field is present in first base
 		  }
+		else
+		  {
+		    targetBase = se.getBase(targetB);
 
-		String string = targetBase.getName();
-
-		System.out.println("Choosing " + string);
-		targetC.select(string);
+		    if (targetBase == null)
+		      {
+			throw new Error("targetbase is null when it shouldn't be: server error : base id " + targetB);
+		      }
+		    
+		    string = targetBase.getName();
+		    
+		    System.out.println("Choosing " + string);
+		    targetC.select(string);
+		  }
 
 		// regenerate the list of choices in fieldC
 
@@ -2271,6 +2298,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  {
 	    typeC.select("Numeric");
 	    numericShowing = true;
+	  }
+	else if (fieldDef.isPermMatrix())
+	  {
+	    typeC.addItem("Permission Matrix");
+	    typeC.select("Permission Matrix");
 	  }
 
 	//Here is where the editability is checked.
