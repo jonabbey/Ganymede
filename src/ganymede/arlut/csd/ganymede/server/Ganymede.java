@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -291,6 +291,7 @@ public class Ganymede {
   public static String messageDirectoryProperty = null;
   public static String schemaDirectoryProperty = null;
   public static int    registryPortProperty = 1099;
+  public static int    publishedObjectPortProperty = 55555;
   public static String logHelperProperty = null;
   public static boolean softtimeout = false;
   public static int timeoutIdleNoObjs = 15;
@@ -433,7 +434,7 @@ public class Ganymede {
     // to create this before creating our DBStore, as some of the
     // components of DBStore are to be made accessible through RMI
 
-    Ganymede.rmi = new GanymedeRMIManager(55555, useSSL);
+    Ganymede.rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
 
    /* Start up the RMI registry thread. */
     try
@@ -1465,6 +1466,22 @@ public class Ganymede {
 	catch (NumberFormatException ex)
 	  {
 	    System.err.println(ts.l("loadProperties.no_registry_port", registryPort));
+	  }
+      }
+
+    // get the published object port number
+
+    String publishedObjectPort = System.getProperty("ganymede.publishedObjectPort");
+
+    if (publishedObjectPort != null)
+      {
+	try
+	  {
+	    publishedObjectPortProperty = java.lang.Integer.parseInt(publishedObjectPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println(ts.l("loadProperties.no_object_port", publishedObjectPort));
 	  }
       }
 
