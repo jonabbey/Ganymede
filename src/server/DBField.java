@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -222,6 +222,29 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     return definition.getType();
   }
+
+  /**
+   *
+   * Returns the display order for this field from the schema.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public short getDisplayOrder()
+  {
+    return definition.getDisplayOrder();
+  }
+
+  /**
+   *
+   * Returns a String representing the value of this field.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  abstract public String getValueString();
 
   /**
    *
