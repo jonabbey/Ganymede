@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.7 $
-# Date: $Date: 1999/01/29 20:15:23 $
+# Version: $Revision: 1.8 $
+# Date: $Date: 1999/01/29 21:23:09 $
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
@@ -62,12 +62,7 @@ cd doc
 
 find . -name config.sh -exec rm {} \;
 
-cd javadoc
-
-rm -rf *.html
-rm -rf arlut
-
-cd ../..
+cd ..
 
 echo "Cleaning source tree"
 
