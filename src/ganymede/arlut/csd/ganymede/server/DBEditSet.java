@@ -1115,7 +1115,7 @@ public class DBEditSet {
 	commit_lockBases(); // may block
 	commit_verifyNamespaces();
 	commit_handlePhase1();
-	commit_handlePhase2();
+	commit_recordModificationDates();
 	commit_integrateChanges();
 	releaseWriteLock();
 
@@ -1404,10 +1404,10 @@ public class DBEditSet {
   /**
    * <p>This private helper method for the commit() method records
    * the creation/modification timestamp for the vector of
-   * committed objects, then calls commitPhase2() on them.</p>
+   * committed objects.</p>
    */
 
-  private final void commit_handlePhase2()
+  private final void commit_recordModificationDates()
   {
     DateDBField df;
     StringDBField sf;
@@ -1461,26 +1461,6 @@ public class DBEditSet {
 		sf.value = result;
 	      }
 	  }
-
-	// tell the object to go ahead and do any external
-	// commit actions.
-
-	try
-	  {
-	    eObj.commitPhase2();
-	  }
-	catch (Throwable ex)
-	  {
-	    // if we get a runtime exception here, we want to
-	    // go ahead and commit the rest of the objects,
-	    // since we may already have done external actions
-	    // through other objects that have already had
-	    // their commitPhase2() methods called.
-
-	    // just show the trace, don't throw it up
-
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
       }
   }
 
@@ -1498,7 +1478,8 @@ public class DBEditSet {
 
     commit_persistTransaction(); // persist transaction to journal
     commit_writeSyncChannels();	// send the object changes to our builder queues
-    commit_finalizeTransaction(); // write the finalized token to the journal to represent that the sync channels were written
+    commit_finalizeTransaction(); // finalize the journal to represent that the sync channels were successfully written
+    commit_handlePhase2();	// let the DBEditObject handle external actions, once we have finalized the transaction
     commit_logTransaction(fieldsTouched); // log and reabsorb objects
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
@@ -1559,24 +1540,33 @@ public class DBEditSet {
 		sync.writeSync(persistedTransaction, objectList);
 	      }
 	  }
-	catch (IOException ex)
+	catch (Throwable ex)
 	  {
 	    for (int j = 0; j < i; j++)
 	      {
-		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(j);
 		
 		try
 		  {
 		    sync.unSync(persistedTransaction);
 		  }
-		catch (IOException inex)
+		catch (Throwable inex)
 		  {
 		  }
 	      }
 
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-								      ts.l("commit_writeSyncChannels.exception_text",
-									   ex.getMessage())));
+	    if (ex instanceof IOException)
+	      {
+		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+									  ts.l("commit_writeSyncChannels.ioexception_text",
+									       ex.getMessage())));
+	      }
+	    else
+	      {
+		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+									  ts.l("commit_writeSyncChannels.exception_text",
+									       ex.getMessage())));
+	      }
 	  }
       }
   }
@@ -1604,6 +1594,43 @@ public class DBEditSet {
 	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
 								  ts.l("commit_finalizeTransaction.exception_text",
 								       ex.getMessage())));
+      }
+  }
+
+  /**
+   * <p>This private helper method calls {@link
+   * arlut.csd.ganymede.server.DBEditObject#commitPhase2()} on the
+   * DBEditObjects in this transaction, after we have successfully
+   * finalized the transaction to disk.</p>
+   */
+
+  private final void commit_handlePhase2()
+  {
+    DBEditObject eObj;
+
+    /* -- */
+
+    Iterator iter = objects.values().iterator();
+
+    while (iter.hasNext())
+      {
+	eObj = (DBEditObject) iter.next();
+	
+	// tell the object to go ahead and do any external
+	// commit actions.
+
+	try
+	  {
+	    eObj.commitPhase2();
+	  }
+	catch (Throwable ex)
+	  {
+	    // if we get a runtime exception here, there's nothing to
+	    // do for it.. we're locked on course.  log the trace, but
+	    // stay on target.. stay on target..
+
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
       }
   }
 
