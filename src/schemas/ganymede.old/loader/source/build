@@ -1,25 +1,38 @@
 #!/bin/sh
 #
-# Ganymede Loader Build Script
+# Ganymede build script
 #
-###################################################
+# Release: $Name:  $
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/21 23:18:10 $
+#
+############################################################
+
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && builddir=.
+cd $builddir
+
+# Load configuration information
 
 . config.sh
 
 ##################################################
 
-CLASSPATH=${JARDIR}/ganymedeServer.jar:${SCHEMADIR}/custom.jar:$CLASSDIR
+CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
 export CLASSPATH
 
-echo "Compiling Loader files"
+echo "Compiling $COMPNAME Loader files"
 
-cd $SOURCE
-
-$JAVAC -deprecation -d $CLASSDIR *.java
+$JAVAC -deprecation -d $TARGETDIR *.java
 
 echo "Building rmi stubs and skeletons"
 
-$RMIC -d $CLASSDIR arlut.csd.ganymede.loader.directLoaderClient
+$RMIC -d $TARGETDIR arlut.csd.ganymede.loader.directLoaderClient
 
 echo "Done"
 
