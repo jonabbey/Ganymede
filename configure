@@ -18,12 +18,21 @@ if test ! -d $GROOTDIR/src/classes; then
 fi
 export GROOTDIR
 
+# Find perl
+
 GPERL=`which perl5`
 echo "perl one $GPERL"
 if test ! -r $GPERL; then
   GPERL=`which perl`
 fi
 export GPERL
+
+# Find java
+
+GJAVA=`which java`
+GJAVA=`dirname ${GJAVA}`
+echo "Found java dir $GJAVA"
+export GJAVA
 
 #echo "My env is"
 #
