@@ -7,7 +7,7 @@
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br>Release 1.0.12 - 1 March 2004</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br>Release 2.0 dev - ? ? 2005</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
@@ -110,59 +110,36 @@ ways.</p>
     </table> 
 
 <p>The Ganymede system is designed to be easy to install for anyone
-running a Unix or Linux system with Java, Perl, and Bourne Shell
-installed.  Ganymede is designed to work with any version of Java
-equal to or better than 1.1.7, but you will get very much better
-performance if you use Java 1.2.2 or later for the Ganymede server.
-Java 1.3 (or better) with the HotSpot server JVM will give you the
-best performance, and is recommended.  You will need the full Java
-Development Kit (JDK or SDK) on your UNIX server so that you can
+running a Unix or Linux system with Java, Perl, Bourne Shell, and
+Apache Ant installed.  Ganymede 2.0 is designed to work with any
+version of Java equal to or better than 1.4.  You will need the full
+Java Development Kit (JDK or SDK) on your UNIX server so that you can
 compile any custom plug-in classes.</p>
 
-<p>Generally speaking, you should try to use the latest version of
-Java available when running the Ganymede clients on a UNIX-type system
-such as Linux, FreeBSD, Solaris, etc.  However, be aware that Java
-version 1.2 and 1.3 have extremely bad performance when you use X
-Windows to display the clients on a remote display.  Java 1.4 is much
-faster when using networked X Windows, and is recommended.</p>
-
-<p>The Ganymede clients will also run using JDK 1.1.7 and 1.1.8, and
-you may find that this gives you the best performance when using X
-Windows on a remote display.  JDK 1.1 also supports monochrome X
-displays, which later versions of Java do not.  If you have to use a
-1.1 series JDK, you will need to download and install the Swing/JFC
-GUI libraries from Sun, as the Ganymede clients require Swing, and
-Swing is not included with JDK 1.1.  We anticipate that future
-versions of Ganymede will eventually drop support for JDK 1.1,
-however, so we would recommend using a later version of Java if you
-can.</p>
-
 <p>To run the Ganymede clients in a web browser on a desktop PC
-running some version of Windows 95/98/NT/2000/ME/etc., you will want
-to download and install version 1.3 (or better) of the Java Runtime
-Environment (JRE) for Windows.  Version 1.3 and later of the Java
-Runtime Environment for Windows includes support for the Java Plug-In,
-a code module that will allow you to run the latest JVM's inside
-Netscape, Internet Explorer, and Mozilla.</p>
+running some version of Windows, you will want to download and install
+version 1.4 (or better) of the Java Runtime Environment (JRE) for
+Windows.  Version 1.4 and later of the Java Runtime Environment for
+Windows includes support for the Java Plug-In, a code module that will
+allow you to run the latest JVM's inside Netscape, Internet Explorer,
+Mozilla, and Firefox.</p>
 
 <p>You can download any current version of the Java platform for
 Solaris, Linux, and Windows at <a
-href="http://java.sun.com/j2se/">http://java.sun.com/j2se/</a>.
-Versions of Java for a number of other platforms may be found at <a
-href="http://java.sun.com/cgi-bin/java-ports.cgi">http://java.sun.com/cgi-bin/java-ports.cgi</a>.
-The Ganymede server has primarily been developed and tested on Solaris
-and Linux, but the Ganymede clients have been successfully run on
-Solaris, Linux, Windows 95, Windows NT, MacOS 9, OS/2, FreeBSD, AIX,
-HP/UX, and others.</p>
+href="http://java.sun.com/j2se/">http://java.sun.com/j2se/</a>.  The
+Ganymede server has primarily been developed and tested on Solaris and
+Linux, but the Ganymede clients have been successfully run on Solaris,
+Linux, Windows, Mac OS X Jaguar and later, FreeBSD, AIX, HP/UX, and
+others.</p>
 
-<p>In addition to Java, you will need /bin/sh and Perl 5.003 (or
-later) to run the Ganymede installation scripts.  The Ganymede
+<p>As well as Java, you will need /bin/sh, Perl 5.003 (or later), and
+Apache Ant to build and install the Ganymede software.  The Ganymede
 distribution, server and client, is designed to be unpacked and
-installed on a UNIX system with support for symbolic links.  There is
-no installer provided for Windows or Macintosh.  Instead, you have to
-install the clients on the UNIX system and then use a web server to
-publish the clients to your network, using either the Java Plugin or
-the Java Web Start tools.</p>
+installed on a UNIX-style system.  There is no graphical installer
+provided for Windows.  Instead, you have to install the clients on the
+UNIX or Mac OS X system and then use a web server to publish the
+clients to your network, using either the Java Plugin or the Java Web
+Start tools.</p>
 
 <p>By default, Java's security model will not allow a downloaded
 applet to establish a network connection to any system other than the
@@ -173,58 +150,49 @@ Ganymede server and Apache on a dedicated machine rather than
 installing the Ganymede server on your existing web server machine,
 if you are worried about performance.</p>
 
-<p>Note that Ganymede will not work through most firewall
-configurations, as the RMI protocol involves communications on a
-number of high port numbers that are chosen and assigned at runtime.
-In addition, as mentioned in the FAQ, Ganymede 1.0 does not encrypt
-its client/server communications.  This is something that we are
-planning on adding for Ganymede 1.1, which will require Java 1.2 or
-better to run everything.  For now, however, you should plan on keeping
-Ganymede safely behind a firewall.  We have had success at running the
-Ganymede client on both the Cisco and Nortel VPN's.  If you find
-yourself in that situation, send mail to the Ganymede mailing list at
-<a
-href="mailto:ganymede@arlut.utexas.edu">ganymede@arlut.utexas.edu</a>
-and ask for the details.</p>
-
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>2. Configuring the Distribution for Your Site</b></h2></td>
+	<td colspan="1"><h2><b>2. Configuring and Building the Distribution for Your Site</b></h2></td>
       </tr>
     </table> 
 
-<p>The Ganymede distribution comes packaged with all of the Java
-classes for the server and clients pre-compiled and packaged up into
-jar files (located under the <b>jars/</b> directory in the distribution
-directory).  It is not necessary to compile anything in order to
-install the Ganymede server and clients, but you do have to run the <a
+<p>The Ganymede 2.0 distribution comes without any code precompiled
+for you.  In order to get everything compiled and ready for you to
+install, you will need to run the <a
 href="glossary.html#configure">configure</a> script in the
-distribution directory in order to prepare the distribution for
-installation.  The <a href="glossary.html#configure">configure</a>
-script is a custom-written Bourne shell script which searches around
-on your system to find Perl 5 and Java, and then uses that information
-to bootstrap the rest of the installation process.</p>
+distribution directory.  The <a
+href="glossary.html#configure">configure</a> script is a
+custom-written Bourne shell script which searches around on your
+system to find Perl, Java, and the Apache Ant build tol, and then uses
+that information to bootstrap the rest of the configuration
+process.</p>
 
-<p>When you run <a href="glossary.html#configure">configure</a>, it
-will copy a few scripts from the <b>scripts/</b> directory into the
-top-level distribution directory, editing them to set the proper
-location for the Perl interpreter on your system, and otherwise
-setting everything up for you to proceed with installation.  These
-scripts are <a href="glossary.html#installClient">installClient</a>,
-<a href="glossary.html#installWeb">installWeb</a> and <a
+<p>One of the first things <a
+href="glossary.html#configure">configure</a> will do is to build the
+Ganymede software for you, and create the jar files that you will use
+to deploy Ganymede.  When <a
+href="glossary.html#configure">configure</a> compiles Ganymede for
+you, it will create SSL key and certificate material that is unique to
+your installation.  The SSL key is placed into the server's
+ganymedeServer.jar file, and the matching certificate material is
+placed into the client's ganymede.jar and the admin console's
+ganymedeAdmin.jar files.  In this way, your Ganymede client and admin
+console will be tied to your Ganymede server.  By generating unique
+key and certificates for each installation, you can be assured that
+the clients you distribute are talking to your Ganymede server, and
+vice-versa.</p>
+
+<p>After building the Ganymede software, <a
+href="glossary.html#configure">configure</a> will copy a few scripts
+from the <b>scripts/</b> directory into the top-level distribution
+directory, editing them to set the proper location for the Perl
+interpreter on your system, and otherwise setting everything up for
+you to proceed with installation.  These scripts are <a
+href="glossary.html#installClient">installClient</a>, <a
+href="glossary.html#installWeb">installWeb</a> and <a
 href="glossary.html#installServer">installServer</a>.  You will use
 these scripts to install the command-line UNIX clients, the web applet
 clients, and the server itself, respectively.</p>
-    
-<p>In addition, the <a href="glossary.html#configure">configure</a>
-script goes through the <b>src</b> directory and sets up scripts that
-can be used to compile the Ganymede sources.  Generally speaking, you
-should not need to do this, as everything is precompiled in the
-<b>jars</b> directory, but if you want to hack on the Ganymede server
-or clients, <a href="glossary.html#configure">configure</a> sets
-everything up so you can.  See the README.source file in the top-level
-distribution directory for information on building the source tree if
-you want to investigate the source code.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -324,6 +292,14 @@ directory.</p>
         <p>Note that from version 2.0 onwards, the Ganymede server
         handles the RMI registration as part of its normal
         functioning, and no external rmiregistry process need be run.</p>
+</dd>
+
+<dt><b>What port should the Ganymede server use to publish its RMI objects?</b></dt>
+<dd>
+	<p>The answer to this question will control what TCP port
+	number the Ganymede server uses to listen for communications
+	from clients once the clients have logged in.  By default,
+	communications to this port will be SSL encrypted.</p>
 </dd>
 
 <dt><b>What mailhost should Ganymede use to send out diagnostic mail?</b></dt>
@@ -542,12 +518,12 @@ follows:</p>
 ctrl-c, you will only kill off the <code>tail</code> command.  You
 want the server itself to run in the background, undisturbed.</p>
 
-<p>The <b>installServer</b> script is smart enough to try and identify
-the version of Java you are running, and to install a version of
-<a href="glossary.html#runServer">runServer</a> that matches.  If you
-look at <a href="glossary.html#runServer">runServer</a>, however,
-you will see that there are a number of optional command line
-parameters you can provide to tweak the Ganymede server's behavior.</p>
+<p>The <b>installServer</b> script is pre-configured with various
+options to run the Ganymede server smoothly on your system.  If you
+look at <a href="glossary.html#runServer">runServer</a>, however, you
+will see that there are a number of ways you can edit the <a
+href="glossary.html#runServer">runServer</a> script to tweak the
+Ganymede server's behavior.</p>
 
 <p>Of particular interest in this regard are the
 <code>-resetadmin</code> and the <code>debug=xxx</code> parameters.
@@ -956,7 +932,7 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Mon Mar 10 20:10:10 CST 2003
+Last modified: Tue Feb 22 18:49:19 CST 2005
 <!-- hhmts end -->
   </body>
 </html>

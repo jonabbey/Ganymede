@@ -53,14 +53,6 @@ ganymede.maillog=
 ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 
 
-# ganymede.htmldump
-#
-# The filename to dump an html representation of the database schema to when
-# the admin console requests a schema dump.
-
-ganymede.htmldump=/home/broccol/public_html/gash2/design/schema.html
-
-
 # ganymede.subjectprefix
 #
 # A single-quote delimited string that is prepended to the subject line
@@ -123,10 +115,25 @@ ganymede.serverhost=www.arlut.utexas.edu
 
 # ganymede.registryPort
 #
-# The port number of the Java rmi registry daemon handling object
-# bindings for the Ganymede server.
+# The port number to which the Ganymede server will attach its RMI
+# registry.  This port is used to allow the Ganymede client to get
+# references to the Ganymede server's login adjudicator.  Traffic to
+# the registryPort is unencrypted, but also non-sensitive.
 
 ganymede.registryPort=1099
+
+
+# ganymede.publishedObjectPort
+#
+# The port number on which that the Ganymede server will publish
+# server-side RMI objects.  If this is zero, the Ganymede server will
+# pick port number (or numbers) at random.  If this is non-zero, all
+# RMI communications with the Ganymede server will go to this port
+# numbe on the server.  Communications to the publishedObjectPort is
+# very much sensitive, and will be SSL-encrypted, unless you specify
+# the -nossl parameter when you start the Ganymede server.
+
+ganymede.publishedObjectPort=55555
 
 
 # ganymede.rootname
@@ -145,7 +152,7 @@ ganymede.rootname=supergash
 # database/schema file.  This password can also be used if
 # the server is started with a special command line flag.
 
-ganymede.defaultrootpass=dodo
+ganymede.defaultrootpass=
 
 
 # ganymede.monitorname

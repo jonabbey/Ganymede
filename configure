@@ -83,4 +83,20 @@ fi
 
 export GJAVA
 
+# Find ant
+
+guessant=`which ant`
+
+$echo "Where is Apache Ant located? [$guessant] ${nnl}"
+
+read userant
+
+if  test ! -z "$userant"; then
+	GANT=$userant
+    else
+	GANT=$guessant
+fi
+
+export GANT
+
 $GPERL $GROOTDIR/scripts/configurator.perl

@@ -194,20 +194,19 @@ sub copydir{
 $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
-
-# See if there's a user-defined target location
-# for the classes. Otherwise, use default.
-$classdir = $ENV{GCLASSDIR};
-
-if ($classdir eq "") {
-  $classdir = "$rootdir/src/classes";
-} else {
-  # If there is a user-set classes path, make sure it has
-  # the necessary directory structure and support files.
-  &copydir("$rootdir/src/classes","$classdir");
-}
-
 removelastslash($javadir);
+$ant = $ENV{GANT};
+
+if (!-f "$rootdir/jars/ganymedeServer.jar") {
+  chdir("$rootdir/src");
+  $result = system($ant, "jars");
+
+  if ($result != 0) {
+    print "\nError compiling Ganymede.  Aborting configure.\n";
+    exit 1;
+  }
+  chdir("$rootdir");
+}
 
 print "Generating install scripts\n";
 
@@ -215,7 +214,6 @@ write_install("installClient.in", "installClient");
 write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
-if (-f "$rootdir/jars/ganymedeServer.jar") {
 print <<ENDCODA;
 Done.
 
@@ -224,14 +222,5 @@ the installServer, installClient, and installWeb scripts to install
 the Ganymede software.
 
 ENDCODA
-} else {
-print <<ENDCODA2;
-Done.
 
-The Ganymede distribution directory is now configured for compilation.
-You can now cd to the src directory and run 'ant' followed by 'ant
-jars' to compile Ganymede.
-
-ENDCODA2
-}
 exit;

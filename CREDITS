@@ -1,5 +1,5 @@
-Ganymede Release 1.0.13
-?? ?, 2004
+Ganymede Release 2.0 dev
+?? ?, 2005
 CREDITS
 
 Last Revision Changed: $Rev$
@@ -9,11 +9,10 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Ganymede has been under development for over 6 years now, in
-both planning and execution.  The work has primarily been performed in
-the Computer Science Division of The Applied Research Laboratories,
-The University of Texas at Austin, with support from CSD and ARL
-management.
+Ganymede has been under development for 10 years now, in both planning
+and execution.  The work has primarily been performed in the Computer
+Science Division of The Applied Research Laboratories, The University
+of Texas at Austin, with support from CSD and ARL management.
 
 The development of Ganymede has benefited from the direct
 development contributions of the following individuals:
@@ -25,8 +24,30 @@ development contributions of the following individuals:
 Primary architect and coder on the project.  Developed the Ganymede
 server and admin console, the table and tree GUI components used in
 both the admin console and the primary client, the great bulk of the
-project documentation (or lack thereof) as well as all of the CVS and
-build script work.  Answers e-mail.
+project documentation (or lack thereof) as well as much of the
+Subversion and build script work.  Answers e-mail.
+
+--
+
+ Deepak Giridharagopal, deepak@arlut.utexas.edu
+
+Deepak has made extensive contributions to the development of Ganymede
+2.0, including transitioning Ganymede's build system from old Perl
+scripts to using Ant.  Deepak also developed the Jython integration,
+and worked on the nwe Sync Channel software, both in the Ganymede
+client and in the Python Sync Channel servicing code.
+
+--
+
+ Dan Scott, dscott@arlut.utexas.edu
+
+Dan originated the GASH project, providing strategic vision and
+architectural design to solve the essential problem of shared group
+control over the lab's master NIS and DNS databases.  Dan has
+contributed greatly to the higher level design issues in Ganymede, as
+well as providing invaluable user interface design feedback and bug
+reporting.  Neither Ganymede nor GASH could have been developed at all
+without his support.
 
 --
 
@@ -77,26 +98,6 @@ Erik worked on Ganymede from mid 1997 through his departure
 from the lab in December of 1997.  Erik developed the GUI code for the
 permissions editor and the query submission dialog, helping bring the
 client into fruition.
-
---
-
- Deepak Giridharagopal, deepak@arlut.utexas.edu
-
-Deepak is contributing Java coding and development to the Ganymede
-system.  Deepak just started at ARL, but he has already made
-noticeable improvements to the Ganymede client's GUI.
-
---
-
- Dan Scott, dscott@arlut.utexas.edu
-
-Dan originated the GASH project, providing strategic vision and
-architectural design to solve the essential problem of shared group
-control over the lab's master NIS and DNS databases.  Dan has
-contributed greatly to the higher level design issues in Ganymede, as
-well as providing invaluable user interface design feedback and bug
-reporting.  Neither Ganymede nor GASH could have been developed at all
-without his support.
 
 ------
 
@@ -149,6 +150,8 @@ Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Ganymede 1.0
 Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
 Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
 Steve Lemons, steve.lemons@arrisi.com - bug reports
+Fredrik.A.Bergman@ericsson.com - bug reports
+Stefan Bier <bier@fg-networking.de> - bug reports
 
 --
 

@@ -39,7 +39,7 @@ chdir($rootdir);
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","REGISTRYPORT","MAILHOST",
+@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","REGISTRYPORT", "RMIPORT", "MAILHOST",
 	  "RETURNADDR", "SUPERNAME", "SUPERPASS",
 	  "MONITORNAME", "MONITORPASS");
 
@@ -50,6 +50,7 @@ chdir($rootdir);
          "SERVERINSTALL" => "",
          "SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
+	 "RMIPORT" => "55555",
 	 "MAILHOST" => "",
          "RETURNADDR" => "",
          "SUPERNAME" => "supergash",
@@ -62,6 +63,7 @@ chdir($rootdir);
             "SERVERINSTALL" => "Where should the server tree be installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port should the Ganymede server use for its RMI registry?",
+	    "RMIPORT" => "What port should the Ganymede server use to publish its RMI objects?",
 	    "MAILHOST" => "What mailhost should Ganymede use to send out diagnostic mail?\n\t(Leaving this blank will cause Ganymede to not send any emails)",
 	    "RETURNADDR" => "What email address should Ganymede sign on email that it sends out?",
 	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?",
@@ -238,6 +240,7 @@ copy("scripts/signature", "$installdir/db/signature"); print ".";
 		"ganymede.returnaddr" => $vars{"RETURNADDR"},
 		"ganymede.serverhost" => $vars{"SYSTEMNAME"},
 		"ganymede.registryPort" => $vars{"REGISTRYPORT"},
+		"ganymede.publishedObjectPort" => $vars{"RMIPORT"},
 		"ganymede.rootname" => $vars{"SUPERNAME"},
 		"ganymede.defaultrootpass" => $vars{"SUPERPASS"},
 		"ganymede.monitorname" => $vars{"MONITORNAME"},
