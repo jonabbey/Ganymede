@@ -238,6 +238,14 @@ public class DBEditSet {
 
   private boolean mustAbort = false;
 
+  /**
+   * <p>This DBJournalTransaction is used to remember information
+   * about a transaction that we have persisted to the on-disk
+   * journal, but which we have not yet finalized.</p>
+   */
+
+  private DBJournalTransaction persistedTransaction = null;
+
   /* -- */
 
   /**
@@ -331,21 +339,7 @@ public class DBEditSet {
 
   public DBEditObject[] getObjectList()
   {
-    synchronized (objects)
-      {
-	int size = objects.size();
-
-	DBEditObject[] results = new DBEditObject[size];
-	
-	Iterator iter = objects.values().iterator();
-
-	for (int i = 0; i < size; i++)
-	  {
-	    results[i] = (DBEditObject) iter.next();
-	  }
-
-	return results;
-      }
+    return (DBEditObject[]) objects.values().toArray();
   }
 
   /**
@@ -1449,6 +1443,7 @@ public class DBEditSet {
 
     commit_persistTransaction(); // persist transaction to journal
     commit_writeSyncChannels();	// send the object changes to our builder queues
+    commit_finalizeTransaction(); // write the finalized token to the journal to represent that the sync channels were written
     commit_logTransaction(fieldsTouched); // log and reabsorb objects
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
@@ -1467,14 +1462,20 @@ public class DBEditSet {
   {
     try
       {
-	if (!dbStore.journal.writeTransaction(getObjectList()))
+	persistedTransaction = dbStore.journal.writeTransaction(getObjectList());
+
+	if (persistedTransaction == null)
 	  {
+	    // "Couldn''t commit transaction, couldn''t write transaction to disk"
+	    // "Couldn''t commit transaction, the server may have run out of disk space.  Couldn''t write transaction to disk."
 	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
 								      ts.l("commit_persistTransaction.error_text")));
 	  }
       }
     catch (IOException ex)
       {
+	// "Couldn''t commit transaction, IOException caught writing journal"
+	// "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
 	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
 								  ts.l("commit_persistTransaction.exception_text",
 								       ex.getMessage())));
@@ -1499,6 +1500,32 @@ public class DBEditSet {
 								       ex.getMessage())));
       }
     */
+  }
+
+  /**
+   * <p>This private helper method for commit() writes a finalized token
+   * to the on-disk transactions journal, so that we'll know upon restart that
+   * we don't need to reply the transaction to the sync channels.</p>
+   *
+   * <p>Will throw a CommitException if a failure was detected.</p>
+   */
+
+  private final void commit_finalizeTransaction() throws CommitFatalException
+  {
+    try
+      {
+	dbStore.journal.finalizeTransaction(persistedTransaction);
+
+	persistedTransaction = null;
+      }
+    catch (IOException ex)
+      {
+	// "Couldn''t finalize transaction to journal.  IOException caught writing to journal."
+	// "Couldn''t finalize transaction to journal, the server may have run out of disk space.\n\n{0}"
+	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
+								  ts.l("commit_finalizeTransaction.exception_text",
+								       ex.getMessage())));
+      }
   }
 
   /**

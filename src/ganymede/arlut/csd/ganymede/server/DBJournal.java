@@ -113,7 +113,7 @@ public class DBJournal implements ObjectStatus {
 
   static final String id_string = "GJournal";
   static final short major_version = 2;
-  static final short minor_version = 1;
+  static final short minor_version = 2;
 
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
@@ -418,6 +418,7 @@ public class DBJournal implements ObjectStatus {
     DBObjectBase base;
     DBObject obj;
     String status = null;
+    int nextTransactionNumber = 0;
 
     /* - */
 
@@ -462,7 +463,7 @@ public class DBJournal implements ObjectStatus {
 
 	    if (isAtLeast(2,1))
 	      {
-		int nextTransactionNumber = jFile.readInt();
+		nextTransactionNumber = jFile.readInt();
 		Ganymede.db.updateTransactionNumber(nextTransactionNumber);
 	      }
 
@@ -597,6 +598,35 @@ public class DBJournal implements ObjectStatus {
 		throw new IOException(ts.l("load.badclosed"));
 	      }
 
+	    // now we know that we got a transaction successfully
+	    // persisted to the journal.. now let's make sure it was
+	    // finalized so that we know whether or not we need to
+	    // retransmit to the sync channels
+
+	    // at this point, we have already read in the entries from
+	    // the journal.. make sure we don't miss replaying the
+	    // entries to the sync channels due to an IOException
+
+	    if (isAtLeast(2,2))
+	      {
+		boolean success = false;
+
+		try
+		  {
+		    success == ((jFile.readUTF().compareTo(FINALIZE) == 0) &&
+				(jFile.readLong() == transaction_time) &&
+				(jFile.readInt() == nextTransactionNumber));
+		  }
+		catch (IOException ex)
+		  {
+		  }
+
+		if (!success)
+		  {
+		    replay(entries);		    // not finalized!
+		  }
+	      }
+
 	    // "Finished transaction"
 	    status = ts.l("load.finished");
 
@@ -652,29 +682,39 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
+   * <p>The writeTransaction() method performs the work of persisting a
+   * transaction to the DBStore Journal.  writeTransaction() should be
+   * called before the changes are actually finalized in the DBStore
+   * Object Bases.  If writeTransaction() is not able to successfully
+   * write the complete transaction log to the Journal file, an
+   * IOException will be thrown.</p>
    *
-   * The writeTransaction() method actually performs the full work of
-   * writing out a transaction to the DBStore Journal.
-   * writeTransaction() should be called before the changes are
-   * actually finalized in the DBStore Object Bases.  If
-   * writeTransaction() is not able to successfully write the complete
-   * transaction log to the Journal file, an IOException will be
-   * thrown.  The Journal entries are structured so that if a Journal
-   * entry can't be completed, the transaction's whole entry will
-   * be ignored at load time.
+   * <p>Note that writeTransaction() does not mark the transaction in
+   * the on-disk journal file as finalized.  If the server is
+   * abnormally terminated (or if the disk fills) between the time that
+   * writeTransaction() is called and the time that
+   * finalizeTransaction() is called, the server on startup will not consider
+   * the transaction to have been finally put to rest, and the system will attempt
+   * to push the unfinalized change in the journal to the sync channels.</p>
    *
+   * @return On success, a {@link
+   * arlut.csd.ganymede.server.DBJournalTransaction} recording the
+   * transaction's time stamp and integral transaction number is
+   * returned.  This DBJournalTransaction can be passed back to
+   * finalizeTransaction() when writes to the sync channels are
+   * completed.
    */
 
-  public synchronized boolean writeTransaction(DBEditObject[] objects) throws IOException
+  public synchronized DBJournalTransaction writeTransaction(DBEditObject[] objects) throws IOException
   {
     DBEditObject eObj;
-    long transaction_time = 0;
+    DBJournalTransaction transRecord;
     Date now;
 
     /* - */
 
     now = new Date();
-    transaction_time = now.getTime();
+    transRecord = new DBJournalTransaction(now.getTime(), Ganymede.db.getNextTransactionNumber());
 
     if (debug)
       {
@@ -683,8 +723,8 @@ public class DBJournal implements ObjectStatus {
       }
 
     jFile.writeUTF(OPENTRANS);
-    jFile.writeLong(transaction_time);
-    jFile.writeInt(Ganymede.db.getNextTransactionNumber());
+    jFile.writeLong(transRecord.getTime());
+    jFile.writeInt(transRecord.getTransactionNumber());
 
     if (debug)
       {
@@ -761,7 +801,7 @@ public class DBJournal implements ObjectStatus {
     // is used to verify that we completed this write okay.
     
     jFile.writeUTF(CLOSETRANS);
-    jFile.writeLong(transaction_time);
+    jFile.writeLong(transRecord.getTime());
     
     if (debug)
       {
@@ -772,7 +812,28 @@ public class DBJournal implements ObjectStatus {
     transactionsInJournal++;
     GanymedeAdmin.updateTransCount();
     
-    return true;
+    return transRecord;
+  }
+
+  /**
+   *
+   * The finalizeTransaction() method actually performs the full work of
+   * writing out a transaction to the DBStore Journal.
+   * writeTransaction() should be called before the changes are
+   * actually finalized in the DBStore Object Bases.  If
+   * writeTransaction() is not able to successfully write the complete
+   * transaction log to the Journal file, an IOException will be
+   * thrown.  The Journal entries are structured so that if a Journal
+   * entry can't be completed, the transaction's whole entry will
+   * be ignored at load time.
+   *
+   */
+
+  public synchronized void finalizeTransaction(DBJournalTransaction transRecord) throws IOException
+  {
+    jFile.writeUTF(FINALIZE);
+    jFile.writeLong(transRecord.getTime());
+    jFile.writeInt(transRecord.getTransactionNumber());
   }
   
   /**
@@ -832,6 +893,30 @@ public class DBJournal implements ObjectStatus {
       }
   }
 
+  /**
+   * <p>This method is responsible for replaying a non-finalized
+   * transaction to the sync channels.  The entries parameter should
+   * be a Vector of {@link arlut.csd.ganymede.server.JournalEntry}
+   * objects, consisting of the final state of objects that were
+   * changed in the transaction.</p>
+   */
+
+  private void replay(Vector entries)
+  {
+    // XXX
+    // XXX Making this method actually do the replays to the sync channels
+    // XXX would be a keen idea!
+    // XXX
+
+    System.err.println("Error, non-finalized transaction found in journal!");
+
+    for (int i = 0; i < entries.size(); i++)
+      {
+	System.err.println("Object[" + i + "]");
+	printObject(((JournalEntry) entries.elementAt(i)).obj);
+      }
+  }
+
   private void printObject(DBObject obj)
   {
     String objectStr = obj.getPrintString();
@@ -878,7 +963,7 @@ class JournalEntry {
       definition;
 
     DBObject 
-      badObj;
+      oldObject;
 
     DBNameSpaceHandle
       currentHandle;
@@ -895,9 +980,9 @@ class JournalEntry {
       {
 	// delete the object
 	
-	badObj = base.getObject(id);
+	oldObject = base.getObject(id);
 
-	if (badObj == null)
+	if (oldObject == null)
 	  {
 	    Ganymede.debug("Warning.. journal is instructing us to delete an object not in the database");
 	  }
@@ -921,11 +1006,11 @@ class JournalEntry {
 	    // We do need to unregister any backlinks from the DBStore
 	    // backPointers hash structure, however.
 
-	    badObj.unsetBackPointers();
+	    oldObject.unsetBackPointers();
 
 	    // and we need to clear out any namespace pointers
 
-	    db_field[] tempFields = badObj.listFields();
+	    db_field[] tempFields = oldObject.listFields();
 
 	    for (int i = 0; i < tempFields.length; i++)
 	      {
@@ -973,11 +1058,11 @@ class JournalEntry {
 	// First we need to clear any back links from the old version
 	// of the object, if there was any such.
 
-	badObj = base.getObject(id);
+	oldObject = base.getObject(id);
 
-	if (badObj != null)
+	if (oldObject != null)
 	  {
-	    badObj.unsetBackPointers();
+	    oldObject.unsetBackPointers();
 	  }
 
 	// Second, we need to go through and put these values in the namespace.. note that
