@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2001/03/17 06:37:32 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2001/03/19 20:06:20 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,17 @@ package arlut.csd.crypto;
  * <p>The following notes are from the original Samba source code for the
  * smbdes.c module, which this module is adapted from.</p>
  *
- * <hr>
+ * <p>--------------------------------------------------</p>
+ *
+ * <p>Unix SMB/Netbios implementation.<br>
+ * Version 1.9.</p>
+ *
+ * <p>a partial implementation of DES designed for use in the 
+ * SMB authentication protocol</p>
+ *
+ * <p>Copyright (C) Andrew Tridgell 1998</p>
+ *
+ * <p>--------------------------------------------------</p>
  *
  * <p>NOTES:</p>
  *
