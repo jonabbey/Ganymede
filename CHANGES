@@ -51,6 +51,37 @@ sent to the client.  In addition, all setLastEvent()-style
 notification for non-interactive sessions has been turned off, to
 reduce the overhead during XML bulk-loading.
 
+5. [CLIENT] Informative dialogs are no longer modal
+
+The Ganymede GUI client was occasionally freezing up on start-up if
+the user attempted to bring up a toolbar dialog at the same time the
+client was working in the background to bring up the MOTD dialog.
+
+This was a result of the HTML messageDialog class used for the MOTD,
+Credits, and 'About Ganymede' dialogs being configured to lock out any
+other GUI interactions until those dialogs were released.  
+
+I don't think there was ever any compelling reason to make these
+dialogs modal, so I have made them not be so.  There's now a small
+risk that a user might ignore the MOTD dialog without dismissing it,
+but that's a far less serious outcome than having the client lock up.
+
+Thanks to Tom Embleton for bringing this back to my attention.
+
+6. [SERVER] Memory leaks fixed
+
+Once I had the admin console tracking memory usage, I quickly saw that
+Ganymede was leaking memory over time.  At ARL, our heap was starting
+out at about 10 megs, and after 8-9 days, the heap had nearly doubled
+in size.  I ran the Ganymede server through a profiler for a couple of
+weeks and identified a couple of oh-so-easy-to-miss places where bits
+of code were holding on to references to things that were no longer
+needed.  I would *never* have found them if not for the assistance
+of the profiler.
+
+Anyway, I don't yet know how stable Ganymede's memory usage will be
+now, but it should be significantly improved.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
