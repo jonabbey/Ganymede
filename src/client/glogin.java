@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -391,7 +391,6 @@ public class glogin extends JApplet implements Runnable {
 
     connector.setText("Login to server");
     username.setEnabled(true);
-    username.requestFocus();
     passwd.setEnabled(true);
 
     invalidate();
