@@ -8,19 +8,21 @@
 package arlut.csd.Dialog;
 
 import arlut.csd.DataComponent.*;
+import arlut.csd.Dialog.*;
 
 import tablelayout.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import arlut.csd.Dialog.*;
 import java.util.*;
+
+import oreilly.Label.*;
 
 
 //import gjt.ButtonPanel;
 import gjt.*;
 
-public class StringDialog extends Dialog implements ActionListener, setValueCallback {
+public class StringDialog extends Dialog implements ActionListener, setValueCallback, ItemListener {
 
   Hashtable
     componentHash,
@@ -51,12 +53,13 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
       objects = Resource.getObjects();
 
-      Label textLabel = new Label(Resource.getText());
+      MultiLineLabel textLabel = new MultiLineLabel(Resource.getText());
       textBorder = new EtchedBorder(textLabel, 2, 5);
 
-      panel = new Panel();
-      panel.setLayout(new TableLayout(false));
-
+      panel = new InsetPanel();
+      TableLayout table = new TableLayout(false);
+      panel.setLayout(table);
+      table.rowSpacing(10);
      
       
       //add stuff to panel here
@@ -66,13 +69,13 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 	{
 	  for(int i = 0; i < numberOfObjects; ++i) 
 	    {
-	      System.out.println("Dealing with object " + i);
+	      //System.out.println("Dealing with object " + i);
 	      Object element = objects.elementAt(i);
 	      if (element instanceof stringThing)
 		{
-		  System.out.println("Adding a string thing to table");
 		  stringThing st = (stringThing)element;
 		  stringField sf = new stringField();
+		  sf.setEditable(true);
 		  sf.setCallback(this); 
 		  addRow(panel, sf, st.getLabel(), i);
 
@@ -82,7 +85,6 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 		}
 	      else if (element instanceof booleanThing)
 		{
-		  System.out.println("Adding a boolean thing to table");
 		  booleanThing bt = (booleanThing)element;
 		  checkboxField cb = new checkboxField();
 		  cb.setCallback(this);
@@ -95,31 +97,34 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 		}
 	      else if (element instanceof choiceThing)
 		{
-		  System.out.println("Adding a choice thing to table");
 		  choiceThing ct = (choiceThing)element;
 		  Choice ch = new Choice();
 		  //choice.setCallback(this);
 		  //iterate through vector add use choice.add
 		  Vector items = ct.getItems();
-		  int total = items.size();
-		  for (int j = 0; j < total ; ++j)
+		  if (items == null)
 		    {
-		      String str = (String)items.elementAt(j);
-		      ch.add(str);
-
+		      System.out.println("Nothing to add to Choice, empty vector");
 		    }
-		  
-		  addRow(panel, ch, ct.getLabel(), i);
-
-		  componentHash.put(ch, ct.getLabel());
-		  valueHash.put(ct.getLabel(), "");
-
+		  else
+		    {
+		      int total = items.size();
+		      for (int j = 0; j < total ; ++j)
+			{
+			  String str = (String)items.elementAt(j);
+			  ch.add(str);
+			  
+			}
+		      ch.addItemListener(this);
+		      addRow(panel, ch, ct.getLabel(), i);
+		      
+		      componentHash.put(ch, ct.getLabel());
+		      valueHash.put(ct.getLabel(), (String)items.elementAt(0));
+		    }
 		}
 	      else if (element instanceof Separator)
 		{
-		  System.out.println("Adding a Separator");
 		  Separator sep = (Separator)element;
-		  //sep.setInsets(0, 10);
 		  addSeparator(panel, sep, i);
 		}
 	      else
@@ -134,6 +139,9 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 	{
 	  System.out.println("No objects to add to StringDialog");
 	}
+
+
+
 
       buttonPanel = new ButtonPanel();
       OKButton = buttonPanel.add(Resource.OKText);
@@ -202,6 +210,26 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       setVisible(false);
     }
 
+  public void itemStateChanged(ItemEvent e)
+    {
+      Object obj = e.getSource();
+
+      
+
+      if (obj instanceof Choice)
+	{
+	  String label = (String)componentHash.get(obj);
+	  Choice ch = (Choice)obj;
+	  valueHash.put(label, ch.getSelectedItem());
+	  System.out.println(ch.getSelectedItem() + " chosen");
+	}
+      else
+	{
+	  System.out.println("Unknown item type generated action");
+	}
+
+    }
+
   public boolean setValuePerformed(ValueObject v)
     {
       Component comp = v.getSource();
@@ -235,6 +263,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
   void addSeparator(Panel parent, Component comp, int row)
     {
+      
       parent.add("0 " + row + " 2 1 hH", comp);
     }
   
