@@ -222,9 +222,9 @@ other editing, something like the following would be logged:
         New: ADG/OMG - Outgoing Inet Access Only
 
 In this case, the 'Records Deleted' part of the 'ATL - Outgoing Inet
-Access Only' objectchanged log entry is showing that the new name
-for the interface that was deleted, even though when that interface
-was in the ATL network, it had a different name.
+Access Only' objectchanged log entry is showing the new name for the
+interface that was deleted, even though when that interface was in the
+ATL network, it had a different name.
 
 This has been changed so that whenever an object is removed from
 an invid field, the removal will be logged using the object's name
