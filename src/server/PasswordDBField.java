@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -348,7 +348,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * @see arlut.csd.ganymede.pass_field
    */
 
-  public boolean matchPlainText(String text)
+  public synchronized boolean matchPlainText(String text)
   {
     String cryptedText;
 
@@ -379,7 +379,28 @@ public class PasswordDBField extends DBField implements pass_field {
 	    System.err.println("comparison crypted text == " + cryptedText);
 	  }
 
-	return cryptedPass.equals(cryptedText);
+	if (cryptedPass.equals(cryptedText))
+	  {
+	    // If we're set up to keep plaintext copies or our
+	    // encrypted passwords, we're going to go ahead and make a
+	    // note of the plaintext password we just matched to the
+	    // crypt text.  This is really pretty funky, because this
+	    // is being done outside of any transactional context, but
+	    // we're really not changing the *content* of this
+	    // password field, we're just remembering another thing
+	    // about the password we already are keeping.. to wit, the
+	    // actual plain text.  By doing this, Ganymede can accumulate
+	    // plaintext copies of the passwords whenever anyone logs in
+	    // to it (assuming that the schema is set up to have the user's
+	    // password field keep a plaintext copy.)
+
+	    if (definition.isPlainText())
+	      {
+		uncryptedPass = text;
+	      }
+
+	    return true;
+	  }
       }
   }
 
