@@ -6,7 +6,7 @@
    reports from the system log based on specific criteria.
    
    Created: 31 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -540,13 +540,13 @@ public class DBLog {
 		      {
 			found = true;
 		      }
+		  }
 		    
-		    if (transactionID != null)
+		if (transactionID != null)
+		  {
+		    if (transactionID.equals(event.transactionID))
 		      {
-			if (transactionID.equals(event.transactionID))
-			  {
-			    found = true;
-			  }
+			found = true;
 		      }
 		  }
 	      }
