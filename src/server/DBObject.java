@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,27 +21,30 @@ import java.util.*;
                                                                            class
                                                                         DBObject
 
-Class to hold a database object as represented in the DBStore.
-
-Note that we don't include the object type in the object explicitly.. this
-is encoded by the objectBase reference.
-
-A DBObject does not allow its fields to be directly modified by anyone once the
-object is instantiated.  When a user wants to edit an object, he gets a handle
-to it from the DBStore, then calls createShadow to get an editable version
-of the object.  If the user is satisfied with the changes made to the object,
-the user will cause the editSet to commit, which will get a write lock on
-the database, then replace the old version of this object with the modified
-shadow object.  The shadow object field of the replaced object is cleared,
-and then someone else can pull the object out for editing.
-
-Changes made to the shadow object do not affect the original object until
-the transaction is committed;  other processes can examine the current
-contents of the object until commit time.
-
-This is kind of like modern dating.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Class to hold a database object as represented in the DBStore.</p>
+ *
+ * <p>Note that we don't include the object type in the object explicitly.. this
+ * is encoded by the objectBase reference.</p>
+ *
+ * <p>A DBObject does not allow its fields to be directly modified by anyone once the
+ * object is instantiated.  When a user wants to edit an object, he gets a handle
+ * to it from the DBStore, then calls createShadow to get an editable version
+ * of the object.  If the user is satisfied with the changes made to the object,
+ * the user will cause the editSet to commit, which will get a write lock on
+ * the database, then replace the old version of this object with the modified
+ * shadow object.  The shadow object field of the replaced object is cleared,
+ * and then someone else can pull the object out for editing.</p>
+ * 
+ * <p>Changes made to the shadow object do not affect the original object until
+ * the transaction is committed;  other processes can examine the current
+ * contents of the object until commit time.</p>
+ *
+ * <p>This is kind of like modern dating.</p>
+ *
+ */
 
 public class DBObject {
 
@@ -84,6 +87,14 @@ public class DBObject {
     markedAsDeleted = false;
     receive(in);
   }
+  
+  /**
+   *
+   * The emit() method is part of the process of dumping the DBStore
+   * to disk.  emit() dumps an object in its entirety to the
+   * given out stream.
+   *
+   */
 
   void emit(DataOutputStream out) throws IOException
   {
@@ -104,6 +115,65 @@ public class DBObject {
 	((DBField) fields.get(new Integer(key))).emit(out);
       }
   }
+
+  /**
+   *
+   * The emitJournalEntry() method is used to write out a differential
+   * DBStore entry, to be written to the DBStore Journal.  A Journal
+   * entry only contains the fields that changed in the transaction.
+   *
+   */
+
+  void emitJournalEntry(DataOutputStream out) throws IOException
+  {
+    Enumeration enum, enum2;
+    Object key;
+    DBObjectBaseField definition;
+    short type;
+    boolean changed;
+    DBField shadowField, origField;
+
+    /* -- */
+
+    if (shadowObject == null)
+      {
+	return; // this object is not edited
+      }
+
+    enum = shadowObject.fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+
+	if (!fields.contains(key))
+	  {
+	    out.writeShort((short) ((Integer)key).intValue());
+	    ((DBField) fields.get(key)).emit(out);
+	  }
+	else
+	  {
+	    changed = false;	   
+
+	    origField = (DBField) fields.get(key);
+	    shadowField = (DBField) shadowObject.fields.get(key);
+
+	    if (!origField.equals(shadowField))
+	      {
+		out.writeShort((short) ((Integer)key).intValue());
+		((DBField) fields.get(key)).emit(out);
+	      }
+	  }
+      }
+  }
+
+  /**
+   *
+   * The receive() method is part of the process of loading the DBStore
+   * from disk.  receive() reads an object from the given in stream and
+   * instantiates it into the DBStore.
+   *
+   */
 
   void receive(DataInputStream in) throws IOException
   {
