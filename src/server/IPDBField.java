@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -77,7 +77,6 @@ public class IPDBField extends DBField implements ip_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
 
     if (isVector())
@@ -111,8 +110,6 @@ public class IPDBField extends DBField implements ip_field {
 	value = field.value;
 	values = null;
       }
-
-    defined = true;
   }
 
   /**
@@ -131,15 +128,6 @@ public class IPDBField extends DBField implements ip_field {
     this.owner = owner;
     this.definition = definition;
     this.value = value;
-
-    if (value != null)
-      {
-	defined = true;
-      }
-    else
-      {
-	defined = false;
-      }
 
     values = null;
   }
@@ -163,15 +151,12 @@ public class IPDBField extends DBField implements ip_field {
     if (values == null)
       {
 	this.values = new Vector();
-	defined = false;
       }
     else
       {
 	this.values = (Vector) values.clone();
-	defined = true;
       }
 
-    defined = true;
     value = null;
   }
 
@@ -248,8 +233,6 @@ public class IPDBField extends DBField implements ip_field {
 
 	value = element;
       }
-
-    defined = true;
   }
 
 
@@ -385,12 +368,10 @@ public class IPDBField extends DBField implements ip_field {
 	if (bytes != null)
 	  {
 	    this.value = bytes;
-	    defined = true;
 	  }
 	else
 	  {
 	    this.value = null;
-	    defined = false;	// the key
 	  }
 
 	this.newValue = null;
@@ -545,8 +526,6 @@ public class IPDBField extends DBField implements ip_field {
       {
 	values.setElementAt(bytes, index);
 
-	defined = true;
-
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
 	// we'll want to combine with that from our 
@@ -679,7 +658,6 @@ public class IPDBField extends DBField implements ip_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(bytes);
-	defined = true;
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which

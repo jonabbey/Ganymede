@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,7 +58,6 @@ public class NumericDBField extends DBField implements num_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
     values = null;		// numeric fields cannot be arrays
   }
@@ -76,8 +75,6 @@ public class NumericDBField extends DBField implements num_field {
     
     value = field.value;
     values = null;
-
-    defined = true;
   }
 
   /**
@@ -92,7 +89,6 @@ public class NumericDBField extends DBField implements num_field {
     this.definition = definition;
     this.value = new Integer(value);
 
-    defined = true;
     values = null;
   }
 
@@ -120,7 +116,6 @@ public class NumericDBField extends DBField implements num_field {
   void receive(DataInput in) throws IOException
   {
     value = new Integer(in.readInt());
-    defined = true;
   }
 
   // ****

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.96 $ %D%
+   Version: $Revision: 1.97 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.96 $ %D%
+ * @version $Revision: 1.97 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -101,7 +101,6 @@ public final class InvidDBField extends DBField implements invid_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
 
     if (isVector())
@@ -135,8 +134,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	value = field.value;
 	values = null;
       }
-
-    defined = true;
   }
 
   /**
@@ -156,11 +153,6 @@ public final class InvidDBField extends DBField implements invid_field {
     this.owner = owner;
     this.definition = null;
     this.value = value;
-
-    if (value != null)
-      {
-	defined = true;
-      }
 
     values = null;
   }
@@ -185,12 +177,10 @@ public final class InvidDBField extends DBField implements invid_field {
     if (values == null)
       {
 	this.values = new Vector();
-	defined = false;
       }
     else
       {
 	this.values = (Vector) values.clone();
-	defined = (values.size() > 0);
       }
 
     value = null;
@@ -356,19 +346,15 @@ public final class InvidDBField extends DBField implements invid_field {
 		temp = new Invid(in.readShort(), in.readInt());
 		values.addElement(temp);
 	      }
-
-	    defined = true;
 	  }
 	else
 	  {
 	    values = new Vector();
-	    defined = false;
 	  }
       }
     else
       {
 	value = new Invid(in.readShort(), in.readInt());
-	defined = true;
       }
   }
 
@@ -1717,8 +1703,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    values.removeElementAt(index);
 
-	    defined = (values.size() > 0 ? true : false);
-
 	    return retVal;
 	  }
 	else
@@ -1863,7 +1847,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (retVal == null || retVal.didSucceed())
 	  {
 	    values.addElement(newInvid);
-	    defined = true;
 
 	    return retVal;
 	  }
@@ -1926,7 +1909,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (newRetVal == null || newRetVal.didSucceed())
 	  {
 	    value = newInvid;
-	    defined = true;
 
 	    if (retVal != null)
 	      {
@@ -2039,7 +2021,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		continue;
 	      }
 
-	    if (backField == null || !backField.defined)
+	    if (backField == null || !backField.isDefined())
 	      {
 		Ganymede.debug("InvidDBField.test(): Null backField field in targeted field: " + 
 			       objectName + " in field " + getName());
@@ -2126,7 +2108,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return false;
 	      }
 
-	    if (backField == null || !backField.defined)
+	    if (backField == null || !backField.isDefined())
 	      {
 		Ganymede.debug("*** InvidDBField.test(): No proper back-reference field in targeted field: " + 
 			       objectName + ":" + getName());
@@ -2345,15 +2327,6 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	this.value = value;
-
-	if (value == null)
-	  {
-	    defined = false;
-	  }
-	else
-	  {
-	    defined = true;
-	  }
 
 	this.newValue = null;
 
@@ -2670,8 +2643,6 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	values.addElement(value);
 
-	defined = true;		// very important!
-
 	if (checkpoint)
 	  {
 	    eObj.getSession().popCheckpoint(checkkey);
@@ -2845,8 +2816,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    setLastError("InvidDBField debug: successfully added " + newObj);
 	  }
-
-	defined = true;		// very important!
 
 	if (retVal == null)
 	  {
@@ -3051,11 +3020,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 
 	// success
-
-	if (values.size() == 0)
-	  {
-	    defined = false;
-	  }
 
 	if (checkpoint)
 	  {
