@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -176,6 +176,11 @@ public class DBQueryHandler {
 		  {
 		    if (n.arrayOp == n.NONE)
 		      {
+			if (value == null)
+			  {
+			    return false;
+			  }
+
 			return (value.equals(n.value));
 		      }
 		    else
