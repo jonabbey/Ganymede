@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.16 $ %D%
+  Version: $Revision: 1.17 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -572,27 +572,27 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     }
 
 
-  /** 
-   * Paint method draws a little plus box on the bottom right.
-   *
-   */
-  public void paint(Graphics g)
-  {
-    super.paint(g);
-
-    Color color = g.getColor();
-    g.setColor(Color.black);
-    
-    Rectangle bounds = getBounds();
-
-    g.drawRect(bounds.height - 10, bounds.y, bounds.height, bounds.y+10);
-    g.drawLine(bounds.x + 5, bounds.height - 10, bounds.x + 5, bounds.height); 
-
-    g.drawLine(bounds.x, bounds.height - 5, bounds.x + 10, bounds.height - 5); 
-   
-
-    g.setColor(color);
-  }
+  //  /** 
+  //   * Paint method draws a little plus box on the bottom right.
+  //   *
+  //   */
+  //  public void paint(Graphics g)
+  //  {
+  //    super.paint(g);
+  //
+  //    Color color = g.getColor();
+  //    g.setColor(Color.black);
+  //    
+  //    Rectangle bounds = getBounds();
+  //
+  //    g.drawRect(bounds.height - 10, bounds.y, bounds.height, bounds.y+10);
+  //    g.drawLine(bounds.x + 5, bounds.height - 10, bounds.x + 5, bounds.height); 
+  //
+  //    g.drawLine(bounds.x, bounds.height - 5, bounds.x + 10, bounds.height - 5); 
+  //   
+  //
+  //    g.setColor(color);
+  //  }
 
 
   public void addElement(Component c)
