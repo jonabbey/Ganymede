@@ -6,9 +6,10 @@
    X/RFC 2307 LDAP environment by way of LDIF.
    
    Created: 22 March 2004
-   Last Mod Date: $Date$
+
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
+   Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -63,12 +64,12 @@ import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.FileOps;
 
+import arlut.csd.crypto.Base64;
+
 import java.util.*;
 import java.text.*;
 import java.io.*;
 import java.rmi.*;
-
-import net.iharder.xmlizable.Base64;
 
 /*------------------------------------------------------------------------------
                                                                            class
