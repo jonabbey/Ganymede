@@ -47,14 +47,12 @@ public class JnumberField extends JentryField {
    * Base constructor for JnumberField
    * 
    * @param columns number of colums in the JnumberField
-   * @param valueAttr used to determine the foregoudn/background/font for this JnumberField
    * @param is_editable true if this JnumberField is editable
    * @param islimited true if there is a restriction on the range of values
    * @param minsize the minimum limit on the range of values
    * @param maxsize the maximum limit on the range of values
    */ 
   public JnumberField(int columns,
-		     JcomponentAttr valueAttr,
 		     boolean iseditable,
 		     boolean islimited,
 		     int minsize,
@@ -70,14 +68,7 @@ public class JnumberField extends JentryField {
 	minSize = minsize;
       }
 
-    if (valueAttr == null)
-      throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
-
-    this.valueAttr = valueAttr;
-   
     setEditable(iseditable);  // will this JnumberField be editable or not?
-
-    JcomponentAttr.setAttr(this,valueAttr); 
 
     enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
@@ -91,8 +82,6 @@ public class JnumberField extends JentryField {
   public JnumberField()
   {
     this(JnumberField.DEFAULT_COLS,
-	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-			   Color.black,Color.white),
 	 true,
 	 false,
 	 0,Integer.MAX_VALUE);
@@ -101,8 +90,6 @@ public class JnumberField extends JentryField {
   public JnumberField(int width)
   {
     this(width,
-	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-			   Color.black,Color.white),
 	 true,
 	 false,
 	 0,0);
@@ -113,9 +100,6 @@ public class JnumberField extends JentryField {
   * that knows about its parent and can invoke a callback method.
   *  
   * @param columns number of colums in the JnumberField
-  * @param valueAttr used to determine the foregoudn/background/font for this JnumberField
-
-
   * @param is_editable true if this JnumberField is editable
   * @param islimited true if there is a restriction on the range of values
   * @param minsize the minimum limit on the range of values
@@ -126,14 +110,13 @@ public class JnumberField extends JentryField {
   *
   */ 
   public JnumberField(int columns,
-		     JcomponentAttr valueAttr,
 		     boolean iseditable,
 		     boolean limited,
 		     int minsize,
 		     int maxsize,
 		     JsetValueCallback parent)
   {
-    this(columns,valueAttr,iseditable,limited,minsize,maxsize);
+    this(columns,iseditable,limited,minsize,maxsize);
     
     setCallback(parent);
   }
