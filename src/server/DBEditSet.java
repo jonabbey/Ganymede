@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2002/01/14 22:24:12 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2002/01/15 07:13:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1252,9 +1252,8 @@ public class DBEditSet {
 
 				    logEvent("objectchanged",
 					     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-					     "'s embedded " + eObj.getLabel() + " " +
-					     eObj.getTypeDesc() + " object" +
-					     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
+					     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+					     "<" +  eObj.getInvid() + "> was modified.\n\n" +
 					     diff,
 					     (gSession.personaInvid == null ?
 					      gSession.userInvid : gSession.personaInvid),
