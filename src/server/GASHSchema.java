@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -195,12 +195,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 			   null);
     tree.setDrag(this, tree.DRAG_LINE);
 
+    // create object types node
+
     PopupMenu objectMenu = new PopupMenu();
     createObjectMI = new MenuItem("Create Object Type");
     objectMenu.add(createObjectMI);
 
     objects = new treeNode(null, "Object Types", null, true, 0, 1, objectMenu);
     tree.setRoot(objects);
+
+    // create namespaces node
 
     PopupMenu nameSpaceMenu = new PopupMenu("Namespace Menu");
     createNameMI = new MenuItem("Create Namespace");
@@ -285,7 +289,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   public SchemaEdit getSchemaEdit()
     {
       if (editor == null)
-	System.out.println("editor is null in GASHSchema");
+	{
+	  System.out.println("editor is null in GASHSchema");
+	}
+
       return editor;
     }
 
@@ -329,38 +336,38 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     // editor.getBases() returns items in hash order.. sort
     // them by baseID before adding them to tree
 
-    (new QuickSort(bases,  
-		   new arlut.csd.Util.Compare()
-		   {
-		     public int compare(Object a, Object b) 
-		       {
-			 Base aB, bB;
-      
-			 aB = (Base) a;
-			 bB = (Base) b;
+    new QuickSort(bases,  
+		  new arlut.csd.Util.Compare()
+		  {
+		    public int compare(Object a, Object b) 
+		      {
+			Base aB, bB;
+			
+			aB = (Base) a;
+			bB = (Base) b;
 
-			 try
-			   {
-			     if (aB.getTypeID() < bB.getTypeID())
-			       {
-				 return -1;
-			       }
-			     else if (aB.getTypeID() > bB.getTypeID())
-			       {
-				 return 1;
-			       }
-			     else
-			       {
-				 return 0;
-			       }
-			   }
-			 catch (RemoteException ex)
-			   {
-			     throw new RuntimeException("couldn't compare bases " + ex);
-			   }
-		       }
-		   }
-		   )).sort();
+			try
+			  {
+			    if (aB.getTypeID() < bB.getTypeID())
+			      {
+				return -1;
+			      }
+			    else if (aB.getTypeID() > bB.getTypeID())
+			      {
+				return 1;
+			      }
+			    else
+			      {
+				return 0;
+			      }
+			  }
+			catch (RemoteException ex)
+			  {
+			    throw new RuntimeException("couldn't compare bases " + ex);
+			  }
+		      }
+		  }
+		  ).sort();
 
     // now that we've got our bases in order, we need to go
     // through our basenodes in the tree in order, inserting
@@ -603,7 +610,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       tree.expandNode(namespaces, false);
 
     tree.refresh();
- }
+  }
   
 
   void editBase(Base base)
@@ -725,30 +732,14 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	System.out.println("Create namespace chosen");
 
-	//toolkit = Toolkit.getDefaultToolkit();
-
 	Image image = null;
 
-	try
-	  {
-	    image = toolkit.getImage(new URL("http://www.arlut.utexas.edu/~mulvaney/question.gif"));
-	    Util.waitForImage(this, image);
-	  }
-	
-	catch (MalformedURLException e)
-	  {
-	    System.err.println("Bad URL");
-	  }
-
-	
-
+	image = PackageResources.getImageResource(this, "question.gif", getClass());
 
 	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Create", "Cancel", image);
 
 	dialogResource.addString("Namespace:");
 	dialogResource.addBoolean("Case Insensitive:");
-
-	
 
 	StringDialog dialog = new StringDialog(dialogResource);
 	Hashtable results = dialog.DialogShow();
@@ -1116,8 +1107,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	if (deleteFieldDialog.answeredYes())
 	  {
-
-
 	    System.out.println("Answered yes");
 	    if (currentNode == null)
 	      {
@@ -1520,7 +1509,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener,
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new IllegalArgumentException("exception setting label field: " + rx);
+	    throw new RuntimeException("exception setting label field: " + rx);
 	  }
       }
   }
