@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2000/01/08 03:29:02 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2000/06/22 04:56:26 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.42 $ %D%
+ * @version $Revision: 1.43 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -306,6 +306,24 @@ public interface Session extends Remote {
    */
 
   ReturnVal   openTransaction(String description) throws RemoteException;
+
+  /**
+   * <p>This method call initiates a transaction on the server.  This
+   * call must be executed before any objects are modified (created,
+   * edited, inactivated, removed).</p>
+   *
+   * <p>Currently each client can only have one transaction open. It
+   * is an error to call openTransaction() while another transaction
+   * is still open, and an exception will be thrown in this case.</p>
+   *
+   * <p>If interactive is false, processing of the transaction will
+   * take certain shortcuts.  Invid linking will not be checkpointed..
+   * any failure that cannot be safely handled without Invid link
+   * checkpointing will cause the transaction to refuse to commit
+   * when commitTransaction() is called.</p>
+   */
+
+  ReturnVal   openTransaction(String description, boolean interactive) throws RemoteException;
 
   /**
    * <p>This method call causes the server to checkpoint the current state

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2000/03/03 02:04:59 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2000/06/22 04:56:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -196,6 +196,21 @@ public class DBEditSet {
 
   Hashtable noDeleteLocks;
 
+  /**
+   * <p>True if this DBEditSet is operating in interactive mode.</p>
+   */
+
+  private boolean interactive;
+
+  /**
+   * <p>True if this DBEditSet is operating in non-interactive mode
+   * and an unsafe Invid bind operation failed.  In such cases, the
+   * server skipped a checkpoint/rollback and so has no choice but
+   * to condemn the whole transaction.</p>
+   */
+
+  private boolean mustAbort = false;
+
   /* -- */
 
   /**
@@ -204,14 +219,23 @@ public class DBEditSet {
    * @param dbStore The owning DBStore object.
    * @param session The DBStore session owning this transaction.
    * @param description An optional string to identify this transaction
+   * @param interactive If false, this transaction will operate in
+   * non-interactive mode.  Certain Invid operations will be optimized
+   * to avoid doing choice list queries and bind checkpoint
+   * operations.  When a transaction is operating in non-interactive mode,
+   * any failure that cannot be handled cleanly due to the optimizations will
+   * result in the transaction refusing to commit when commitTransaction()
+   * is attempted.  This mode is intended for batch operations.
    *
    */
 
-  public DBEditSet(DBStore dbStore, DBSession session, String description)
+  public DBEditSet(DBStore dbStore, DBSession session, String description,
+		   boolean interactive)
   {
     this.session = session;
     this.dbStore = dbStore;
     this.description = description;
+    this.interactive = interactive;
     objects = new Vector();
     logEvents = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
@@ -226,6 +250,27 @@ public class DBEditSet {
   public DBSession getSession()
   {
     return session;
+  }
+
+  public boolean isInteractive()
+  {
+    return interactive;
+  }
+
+  /**
+   * <p>This method is used in non-interactive transactions.  The Invid linking
+   * logic normally guards Invid binding and unbinding with checkpoint/rollback
+   * to insure safety in case something doesn't complete.  In non-interactive
+   * transactions, InvidDBField bypasses these checks, on the assumption that
+   * a non-interactive client won't be able to deal with a bind failure anyway.
+   * In such cases, the InvidDBField logic will call setMustAbort() to block
+   * the DBSession from ever allowing a transaction commit thereafter, to
+   * insure that the server maintains its consistency.</p>
+   */
+
+  public void setMustAbort()
+  {
+    this.mustAbort = true;
   }
 
   /** 
@@ -869,6 +914,14 @@ public class DBEditSet {
     if (debug)
       {
 	System.err.println(session.key + ": DBEditSet.commit(): entering");
+      }
+
+    if (mustAbort)
+      {
+	release();
+	return Ganymede.createErrorDialog("Forced Transaction Abort",
+					  "The server ran into a non-reversible error while processing this " +
+					  "transaction and forced an abort.");
       }
 
     if (objects == null)

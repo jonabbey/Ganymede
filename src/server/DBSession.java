@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/06/17 00:23:54 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/06/22 04:56:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.84 $ %D%
+ * @version $Revision: 1.85 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -167,6 +167,7 @@ final public class DBSession {
    */
 
   Object key;
+
 
   /* -- */
 
@@ -1466,14 +1467,42 @@ final public class DBSession {
    * @see arlut.csd.ganymede.DBEditObject
    */ 
 
-  public synchronized void openTransaction(String describe)
+  public void openTransaction(String describe)
+  {
+    this.openTransaction(describe, true);
+  }
+
+  /**
+   * <P>openTransaction establishes a transaction context for this session.
+   * When this method returns, the session can call editDBObject() and 
+   * createDBObject() to obtain {@link arlut.csd.ganymede.DBEditObject DBEditObject}s.
+   * Methods can then be called
+   * on the DBEditObjects to make changes to the database.  These changes
+   * are actually performed when and if commitTransaction() is called.</P>
+   *
+   * @param describe An optional string containing a comment to be
+   * stored in the modification history for objects modified by this
+   * transaction.
+   *
+   * @param interactive If false, this transaction will operate in
+   * non-interactive mode.  Certain Invid operations will be optimized
+   * to avoid doing choice list queries and bind checkpoint
+   * operations.  When a transaction is operating in non-interactive mode,
+   * any failure that cannot be handled cleanly due to the optimizations will
+   * result in the transaction refusing to commit when commitTransaction()
+   * is attempted.  This mode is intended for batch operations.
+   *
+   * @see arlut.csd.ganymede.DBEditObject 
+   */
+
+  public synchronized void openTransaction(String describe, boolean interactive)
   {
     if (editSet != null)
       {
 	throw new IllegalArgumentException("transaction already open.");
       }
 
-    editSet = new DBEditSet(store, this, describe);
+    editSet = new DBEditSet(store, this, describe, interactive);
   }
 
   /**
@@ -1635,6 +1664,37 @@ final public class DBSession {
   public boolean isTransactionOpen()
   {
     return (editSet != null);
+  }
+
+  public synchronized boolean isInteractive()
+  {
+    if (editSet == null)
+      {
+	throw new IllegalArgumentException("isInteractive() called with null editSet");
+      }
+
+    return editSet.isInteractive();
+  }
+
+  /**
+   * <p>This method is used in non-interactive transactions.  The Invid linking
+   * logic normally guards Invid binding and unbinding with checkpoint/rollback
+   * to insure safety in case something doesn't complete.  In non-interactive
+   * transactions, InvidDBField bypasses these checks, on the assumption that
+   * a non-interactive client won't be able to deal with a bind failure anyway.
+   * In such cases, the InvidDBField logic will call setMustAbort() to block
+   * the DBSession from ever allowing a transaction commit thereafter, to
+   * insure that the server maintains its consistency.</p>
+   */
+
+  public void setMustAbort()
+  {
+    if (editSet == null)
+      {
+	throw new IllegalArgumentException("isInteractive() called with null editSet");
+      }
+
+    editSet.setMustAbort();
   }
 
   /**

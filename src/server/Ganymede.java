@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2000/06/17 00:23:54 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2000/06/22 04:56:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1274,11 +1274,13 @@ public class Ganymede {
 	success = false;
       }
 
-    if (defaultrootpassProperty == null)
-      {
-	System.err.println("Couldn't get the default rootname password property");
-	success = false;
-      }
+    /*
+     * if (defaultrootpassProperty == null)
+     * {
+     * System.err.println("Couldn't get the default rootpass password property");
+     * success = false;
+     * }
+     */
 
     if (mailHostProperty == null)
       {

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.183 $
-   Last Mod Date: $Date: 2000/06/17 00:23:55 $
+   Version: $Revision: 1.184 $
+   Last Mod Date: $Date: 2000/06/22 04:56:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.183 $ $Date: 2000/06/17 00:23:55 $
+ * @version $Revision: 1.184 $ $Date: 2000/06/22 04:56:25 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1854,22 +1854,46 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal openTransaction(String describe)
+  public ReturnVal openTransaction(String describe)
+  {
+    return this.openTransaction(describe, true);
+  }
+
+  /**
+   * <p>This method call initiates a transaction on the server.  This
+   * call must be executed before any objects are modified (created,
+   * edited, inactivated, removed).</p>
+   *
+   * <p>Currently each client can only have one transaction open.. it
+   * is an error to call openTransaction() while another transaction
+   * is still open, and an error dialog will be returned in that case.</p>
+   *
+   * @param describe An optional string containing a comment to be
+   * stored in the modification history for objects modified by this
+   * transaction.
+   * 
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized ReturnVal openTransaction(String describe, boolean interactive)
   {
     checklogin();
 
-    // the client will perform an openTransaction as soon as it is
-    // ready to talk to the server.  By sending a building message to
-    // the client here, we allow it to set the initial state of the
-    // building/idle icon in the client's display.
+    if (interactive)
+      {
+	// the client will perform an openTransaction as soon as it is
+	// ready to talk to the server.  By sending a building message to
+	// the client here, we allow it to set the initial state of the
+	// building/idle icon in the client's display.
 
-    if (GanymedeServer.building == 1)
-      {
-	sendMessage(ClientMessage.BUILDSTATUS, "building");
-      }
-    else if (GanymedeServer.building == 2)
-      {
-	sendMessage(ClientMessage.BUILDSTATUS, "building2");
+	if (GanymedeServer.building == 1)
+	  {
+	    sendMessage(ClientMessage.BUILDSTATUS, "building");
+	  }
+	else if (GanymedeServer.building == 2)
+	  {
+	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
+	  }
       }
 
     if (session.editSet != null)
@@ -1880,7 +1904,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* - */
 
-    session.openTransaction(username + " on " + describe + ", time = " + new Date()); // *sync* DBSession
+    session.openTransaction(username + " on " + describe + ", time = " + new Date(),
+			    interactive); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
     setLastEvent("openTransaction");

@@ -7,8 +7,8 @@
 
    Created: 9 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/02/10 04:35:36 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/06/22 04:56:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -355,6 +355,18 @@ public class DBLockSync {
   {
     locksHeld++;
     GanymedeAdmin.updateLocksHeld();
+
+    if (false)
+      {
+	try
+	  {
+	    throw new RuntimeException("Added lock");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+      }
   }
 
   /**
@@ -365,6 +377,18 @@ public class DBLockSync {
   {
     locksHeld--;
     GanymedeAdmin.updateLocksHeld();
+
+    if (false)
+      {
+	try
+	  {
+	    throw new RuntimeException("Removed lock");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+      }
 
     if (locksHeld < 0)
       {

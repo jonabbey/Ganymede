@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 2000/06/17 00:23:56 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 2000/06/22 04:56:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.135 $ %D%
+ * @version $Revision: 1.136 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2337,7 +2337,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we are doing bulk-loaded, we don't want to go through the
     // time consuming checkpoint() operation for each invid link.
 
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -2357,6 +2357,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (checkpoint)
 	      {
 		eObj.getSession().rollback(checkkey);
+	      }
+	    else if (!eObj.getSession().isInteractive())
+	      {
+		eObj.getSession().setMustAbort();
 	      }
 
 	    return newRetVal;
@@ -2380,6 +2384,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (checkpoint)
 	      {
 		eObj.getSession().rollback(checkkey);
+	      }
+	    else if (!eObj.getSession().isInteractive())
+	      {
+		eObj.getSession().setMustAbort();
 	      }
 
 	    return newRetVal;
@@ -2426,6 +2434,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    eObj.getSession().rollback(checkkey);
 	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
+	  }
+
 
 	return newRetVal;
       }
@@ -2530,7 +2543,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we are doing bulk-loaded, we don't want to go through the
     // time consuming checkpoint() operation for each invid link.
 
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -2547,6 +2560,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
+	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
 
 	return newRetVal;
@@ -2591,6 +2608,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
+	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
 
 	return newRetVal;
@@ -2694,7 +2715,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we are doing bulk-loaded, we don't want to go through the
     // time consuming checkpoint() operation for each invid link.
 
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -2710,6 +2731,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
+	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
 
 	return newRetVal;
@@ -2750,6 +2775,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
+	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
 
 	return newRetVal;
@@ -2917,7 +2946,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // unless we're doing bulk-loading, checkpoint to make sure we can
     // undo this operation cleanly if it fails in the middle
     
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -3048,6 +3077,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		eObj.getSession().rollback(checkkey);
 	      }
+	  }
+	else if (!success && !eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
       }
   }
@@ -3233,7 +3266,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	DBSession session = eObj.getSession();
 	String ckp_label = eObj.getLabel() + "addEmbed";
 
-	if (eObj.getGSession().enableOversight)
+	if (eObj.getGSession().enableOversight && eObj.getSession().isInteractive())
 	  {
 	    session.checkpoint(ckp_label);
 	    checkpointset = true;
@@ -3271,6 +3304,10 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    session.rollback(ckp_label);
 		    checkpointset = false;
+		  }
+		else if (!session.isInteractive())
+		  {
+		    session.setMustAbort();
 		  }
 
 		return retVal;
@@ -3400,7 +3437,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we are doing bulk-loaded, we don't want to go through the
     // time consuming checkpoint() operation for each invid link.
 
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -3468,6 +3505,10 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    eObj.getSession().rollback(checkkey);
 		  }
+		else if (!eObj.getSession().isInteractive())
+		  {
+		    eObj.getSession().setMustAbort();
+		  }
 
 		return newRetVal;	// go ahead and return our error code
 	      }
@@ -3496,6 +3537,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
+	  }
+	else if (!eObj.getSession().isInteractive())
+	  {
+	    eObj.getSession().setMustAbort();
 	  }
 
 	if (newRetVal.getDialog() != null)
@@ -3591,7 +3636,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we are doing bulk-loaded, we don't want to go through the
     // time consuming checkpoint() operation for each invid link.
 
-    checkpoint = eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
 
     if (checkpoint)
       {
@@ -3695,6 +3740,10 @@ public final class InvidDBField extends DBField implements invid_field {
 		    eObj.getSession().rollback(checkkey);
 		  }
 	      }
+	    else if (!success && !eObj.getSession().isInteractive())
+	      {
+		eObj.getSession().setMustAbort();
+	      }
 	  }
       }
     else			// deleting embedded objects
@@ -3748,6 +3797,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    eObj.getSession().rollback(checkkey);
 		  }
+	      }
+	    else if (!success && !eObj.getSession().isInteractive())
+	      {
+		eObj.getSession().setMustAbort();
 	      }
 	  }
       }
@@ -3881,14 +3934,12 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
    * Returns true if the only valid values for this invid field are in
-   * the QueryRersult returned by choices().  In particular, if mustChoose()
-   * returns true, <none> is not an acceptable choice for this field
-   * after the field's value is initially set.
+   * the QueryRersult returned by choices().  In particular, if
+   * mustChoose() returns true, &lt;none&gt; is not an acceptable
+   * choice for this field after the field's value is initially set.
    *
    * @see arlut.csd.ganymede.invid_field
-   *
    */
 
   public boolean mustChoose()
@@ -4053,7 +4104,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    ok = false;
 
-	    if (qr == null)
+	    if (qr == null && eObj.getSession().isInteractive())
 	      {
 		qr = eObj.obtainChoiceList(this);
 	      }
