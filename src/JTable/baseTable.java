@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.31 $ %D%
+  Version: $Revision: 1.32 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.31 $ %D%
+ * @version $Revision: 1.32 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -2415,7 +2415,19 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	    System.err.println("Trying to create image of size " + width + " x " + height);
 	  }
 
-	backing = createImage(width, height);
+	// In Swing 1.0.2, we get an exception thrown here when we are
+	// called prematurely.. before, we could handle this by just
+	// checking for a null backing, but in 1.1.6/1.0.2 we get an
+	// exception.  Thus, the catch here.
+
+	try
+	  {
+	    backing = createImage(width, height);
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    // do nothing
+	  }
 
 	if (backing == null)
 	  {
