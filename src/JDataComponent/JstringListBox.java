@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2001/07/03 18:08:01 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2001/07/03 21:07:46 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.36 $ $Date: 2001/07/03 18:08:01 $ $Name:  $
+ * @version $Revision: 1.37 $ $Date: 2001/07/03 21:07:46 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -107,13 +107,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    */
 
   private boolean dragOk = false;
-
-  /**
-   * <p>If true, this JstringListBox was loaded with Strings, and should
-   * be sorted as String objects rather than as listHandles.</p>
-   */
-
-  private boolean stringLoaded = false;
 
   /**
    * <p>If true, the JstringListBox will sort items.  This variable is set
@@ -251,8 +244,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	
 	if (items.elementAt(0) instanceof listHandle)
 	  {
-	    stringLoaded = false;
-
 	    for (int i = 0; i < items.size(); i++)
 	      {
 		listHandle handle = (listHandle) items.elementAt(i);
@@ -267,8 +258,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 	else  //It must be a string, or it will throw a ClassCastException
 	  {
-	    stringLoaded = true;
-
 	    for (int i = 0; i < items.size(); i++)
 	      {
 		String s = (String)items.elementAt(i);
@@ -386,19 +375,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	// find the insertion point
 
-	if (!stringLoaded)
+	while ((i < total) && (comparator.compare(lh, model.getElementAt(i))>0))
 	  {
-	    while ((i < total) && (comparator.compare(lh, model.getElementAt(i))>0))
-	      {
-		i++;
-	      }
-	  }
-	else			// compare as strings
-	  {
-	    while ((i < total) && (comparator.compare(lh.toString(), model.getElementAt(i).toString())>0))
-	      {
-		i++;
-	      }
+	    i++;
 	  }
 	    
 	insertHandleAt(lh, i);
