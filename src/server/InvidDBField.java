@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.92 $ %D%
+   Version: $Revision: 1.93 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.92 $ %D%
+ * @version $Revision: 1.93 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -473,23 +473,51 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	String result = "";
 	int size = size();
+
+	if (size == 0)
+	  {
+	    return "";
+	  }
+
+	String entries[] = new String[size];
 	Invid tmp;
 
 	for (int i = 0; i < size; i++)
 	  {
-	    if (i != 0)
-	      {
-		result = result + ", ";
-	      }
-
 	    tmp = this.value(i);
 
-	    result = result + getRemoteLabel(gsession, tmp);
+	    entries[i] = getRemoteLabel(gsession, tmp);
 	  }
 
-	return result;
+	new arlut.csd.Util.QuickSort(entries,
+				     new arlut.csd.Util.Compare()
+				     {
+				       public int compare(Object a, Object b)
+					 {
+					   String aS, bS;
+					   
+					   aS = (String) a;
+					   bS = (String) b;
+					   
+					   return aS.compareTo(bS);
+					 }
+				     }
+				     ).sort();
+
+	StringBuffer result = new StringBuffer();
+
+	for (int i = 0; i < entries.length; i++)
+	  {
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+
+	    result.append(entries[i]);
+	  }
+
+	return result.toString();
       }
   }
 
