@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.2 $
-# $Date: 1999/01/21 16:56:12 $
+# $Revision: 1.3 $
+# $Date: 1999/01/21 17:06:31 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -112,16 +112,16 @@ $success = 1; # Assume success until we find out otherwise
 
 # java command found ok?
 
-if (!-e $vars{"JAVAHOME"}."/bin/java") {
+if (!-e $vars{"JAVAHOME"}."/java") {
   die "*Can't find the java command*\n\nAborting..";
 } else {
-  $teststring=`$vars{"JAVAHOME"}/bin/java -version`;
+  $teststring=`$vars{"JAVAHOME"}/java -version`;
 
   if ($teststring =~ /\"1\.1\./) {
 
       $teststring =~ /(\"[^\"]*\")/;
 
-      die "*Error, ".$vars{"JAVAHOME"}."/bin/java is version $1.\nWe need 1.2 or greater for this install script.*\n\nAborting..";
+      die "*Error, ".$vars{"JAVAHOME"}."/java is version $1.\nWe need 1.2 or greater for this install script.*\n\nAborting..";
   }
 
   print "Found the java command ok\n";
@@ -189,7 +189,7 @@ close OUTPUT;
 
 print "\nCustomizing ganymede script\n";
   
-%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/bin/java",
+%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
 	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
 
@@ -217,7 +217,7 @@ chmod 0750, "$installdir/bin/ganymede";
 
 print "\nCustomizing ganymedeAdmin script\n";
 
-%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/bin/java",
+%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
 	       "CLASSPATH" => "$installdir/jars/ganymedeAdmin.jar");
 
@@ -245,7 +245,7 @@ chmod 0750, "$installdir/bin/ganymedeAdmin";
 
 print "\nCustomizing changePassword script\n";
 
-%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/bin/java",
+%runconvert = ("JAVA" => $vars{"JAVAHOME"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
 	       "JARDIR" => "$installdir/jars");
 
@@ -277,9 +277,9 @@ link("$installdir/bin/changePassword", "$installdir/password/changePassword");
 
 print "\nCustomizing password client build scripts\n";
 
-%buildconvert = ("JAVAC" => $vars{"JAVAHOME"}."/bin/javac",
-		 "RMIC" => $vars{"JAVAHOME"}."/bin/rmic",
-		 "JAR" => $vars{"JAVAHOME"}."/bin/jar",
+%buildconvert = ("JAVAC" => $vars{"JAVAHOME"}."/javac",
+		 "RMIC" => $vars{"JAVAHOME"}."/rmic",
+		 "JAR" => $vars{"JAVAHOME"}."/jar",
 		 "SOURCE" => "$installdir/password",
 		 "CLASSDIR" => "$installdir/password/classes",
 		 "JARDIR" => "$installdir/jars",
