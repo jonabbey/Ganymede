@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
 		      	             // are vectors of fields
-    nodeHash = new Hashtable(),      // Hash of objects to their node
     changedHash = new Hashtable(),   // Hash of objects that might have changed
     deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
     createHash = new Hashtable();    // Hash of objects waiting to be created
@@ -601,7 +600,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
     Enumeration deleted = deleteHash.keys();
     while (deleted.hasMoreElements())
       {
-	ObjectNode node = (ObjectNode)deleteHash.get(deleted.nextElement());
+	InvidNode node = (InvidNode)deleteHash.get(deleted.nextElement());
 	if (committed)
 	  {
 	    System.out.println("Deleteing node: " + node.getText());
@@ -625,7 +624,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
     while (created.hasMoreElements())
       {
 	Invid invid = (Invid)created.nextElement();
-	ObjectNode node = (ObjectNode)createHash.get(invid);
+	InvidNode node = (InvidNode)createHash.get(invid);
 	if (committed)
 	  {
 	    System.out.println("Committing created node: " + node.getText());
@@ -651,7 +650,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
     while (changed.hasMoreElements())
       {
 	Invid invid = (Invid)changed.nextElement();
-	ObjectNode node = (ObjectNode)changedHash.get(invid);
+	InvidNode node = (InvidNode)changedHash.get(invid);
 	if (committed)
 	  {
 	    System.out.println("Updating node: " + node.getText() + " to " + session.viewObjectLabel(invid));
@@ -682,10 +681,11 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
   void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
   {
     Base base;
-    db_object object;
+    Invid invid = null;
+    String label = null;
     Vector vect;
     BaseNode parentNode;
-    ObjectNode oldNode, newNode, fNode;
+    InvidNode oldNode, newNode, fNode;
     int i;
     Result sorted_results[] = null;
     Query _query = null;
@@ -713,7 +713,9 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	  }
 	else
 	  {
-	    Vector unsorted_objects =  session.query(_query);
+	    StringBuffer resultDump =  session.query(_query);
+	    Vector unsorted_objects = parseResultDump(resultDump.toString());
+
 	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
 
 	    if (unsorted_objects.size() > 0)
@@ -777,7 +779,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 
     parentNode = node;
     oldNode = null;
-    fNode = (ObjectNode) node.getChild();
+    fNode = (InvidNode) node.getChild();
     i = 0;
 	
     while ((sorted_results != null) && ((i < sorted_results.length) || (fNode != null)))
@@ -787,46 +789,48 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	
 	if (i < sorted_results.length)
 	  {
-	    object = sorted_results[i].getObject();
+	    invid = sorted_results[i].getInvid();
+	    label = sorted_results[i].toString();
 	    //System.out.println("Dealing with " + object.getLabel());
 	  }
 	else
 	  {
 	    //System.out.println("Object is null");
-	    object = null;
+	    invid = null;
 	  }
 
 	if ((fNode == null) ||
-	    ((object != null) && 
-	     ((object.getLabel().compareTo(fNode.getObject().getLabel())) < 0)))
+	    ((invid != null) && 
+	     ((label.compareTo(fNode.getText())) < 0)))
 	  {
 	    // insert a new object node
 	    //System.out.println("Adding this node");
-	    //newNode = new ObjectNode(parentNode, object.getName(), object,
+	    //newNode = new InvidNode(parentNode, object.getName(), object,
 	    //			    oldNode, false, 2, 2, objectMenu);
-	    ObjectNode objNode = new ObjectNode(node, 
-						object.getLabel(),
-						object,
-						oldNode, false,
-						OPEN_FIELD,
-						CLOSED_FIELD,
-						objectPM);
+
+	    InvidNode objNode = new InvidNode(node, 
+					      label,
+					      invid,
+					      oldNode, false,
+					      OPEN_FIELD,
+					      CLOSED_FIELD,
+					      objectPM);
 	    
 	    tree.insertNode(objNode, false);
-	    nodeHash.put(object ,objNode);
 
 	    oldNode = objNode;
-	    fNode = (ObjectNode) oldNode.getNextSibling();
+	    fNode = (InvidNode) oldNode.getNextSibling();
 	    
 	    i++;
 	  }
-	else if ((object == null) ||
-		 ((object.getLabel().compareTo(fNode.getObject().getLabel())) > 0))
+	else if ((invid == null) ||
+		 ((label.compareTo(fNode.getText())) > 0))
 	  {
 	    // delete a object node
 	    //System.out.println("Removing this node");
 	    // System.err.println("Deleting: " + fNode.getText());
-	    newNode = (ObjectNode) fNode.getNextSibling();
+
+	    newNode = (InvidNode) fNode.getNextSibling();
 	    tree.deleteNode(fNode, false);
 
 	    fNode = newNode;
@@ -834,11 +838,13 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	else
 	  {
 	    //System.out.println("No change for this node");
-	    fNode.setText(object.getLabel());
+
+	    fNode.setText(label);
+
 	    // System.err.println("Setting: " + object.getName());
 
 	    oldNode = fNode;
-	    fNode = (ObjectNode) oldNode.getNextSibling();
+	    fNode = (InvidNode) oldNode.getNextSibling();
 
 	    i++;
 	  }
@@ -1098,18 +1104,21 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
 		wp.addWindow(obj, true);
 
-		ObjectNode objNode = new ObjectNode(baseN, 
-						    "New Object", 
-						    obj,
-						    null, false,
-						    OPEN_FIELD_CREATE,
-						    CLOSED_FIELD_CREATE,
-						    objectPM);
+		InvidNode objNode = new InvidNode(baseN, 
+						  "New Object", 
+						  obj.getInvid(),
+						  null, false,
+						  OPEN_FIELD_CREATE,
+						  CLOSED_FIELD_CREATE,
+						  objectPM);
+
 		// If the base node is closed, open it.
+
 		if (!baseN.isOpen())
 		  {
 		    tree.expandNode(baseN, false);
 		  }
+
 		// Redraw the tree now
 		tree.insertNode(objNode, true);
 		createHash.put(obj.getInvid(), objNode);
@@ -1135,23 +1144,14 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	    try
 	      {
 		Query _query = new Query(baseN.getBase().getTypeID());
-		//		Vector results =  session.query(_query);
+		StringBuffer buffer = session.dump(_query);
 
-		Vector results = session.dump(_query);
-		StringBuffer buffer = new StringBuffer();
-
-		if (results == null)
+		if (buffer == null)
 		  {
 		    System.out.println("results == null");
 		  }
 		else
 		  {
-		    for (int i = 0; i < results.size(); i++)
-		      {
-			buffer.append((String) results.elementAt(i));
-			// System.out.print((String) results.elementAt(i));
-		      }
-
 		    System.out.println();
 
 		    wp.addTableWindow(session, baseN.getQuery(), buffer.toString(), "Query Results");
@@ -1181,13 +1181,13 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
       }
     else if (event.getSource() == objViewMI)
       {
-	if (node instanceof ObjectNode)
+	if (node instanceof InvidNode)
 	  {
-	    ObjectNode objectN = (ObjectNode)node;
+	    InvidNode invidN = (InvidNode)node;
 	  
 	    try
 	      {
-		wp.addWindow(session.view_db_object(objectN.getObject().getInvid()), false);
+		wp.addWindow(session.view_db_object(invidN.getInvid()), false);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1203,17 +1203,15 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
       {
 	System.out.println("objEditMI");
 
-	if (node instanceof ObjectNode)
+	if (node instanceof InvidNode)
 	  {
-	    ObjectNode objectN = (ObjectNode)node;
+	    InvidNode invidN = (InvidNode)node;
 	  
 	    try
 	      {	
-		Invid invid = objectN.getObject().getInvid();
-		System.out.println("edit invid= " + invid);
-		wp.addWindow(session.edit_db_object(invid), true);
-		changedHash.put(invid, objectN);
-		objectN.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+		wp.addWindow(session.edit_db_object(invidN.getInvid()), true);
+		changedHash.put(invidN.getInvid(), invidN);
+		invidN.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
 		tree.refresh();
 	      }
 	    catch (RemoteException rx)
@@ -1230,16 +1228,16 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
       {
 	// Need to change the icon on the tree to an X or something to show that it is deleted
 	System.out.println("Deleting object");
-	if (node instanceof ObjectNode)
+	if (node instanceof InvidNode)
 	  {
-	    ObjectNode objectN = (ObjectNode)node;
+	    InvidNode invidN = (InvidNode)node;
 
 	    try
 	      {
-		System.out.println("Deleting invid= " + objectN.getObject().getInvid());
-		session.remove_db_object(objectN.getObject().getInvid());
-		deleteHash.put(objectN.getObject().getInvid(), objectN);
-		objectN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+		System.out.println("Deleting invid= " + invidN.getInvid());
+		session.remove_db_object(invidN.getInvid());
+		deleteHash.put(invidN.getInvid(), invidN);
+		invidN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
 		tree.refresh();
 		setStatus("Object will be deleted when commit is clicked.");
 	      }
@@ -1270,43 +1268,105 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
   public void start() throws Exception {
 
   }
+
+  private Vector parseResultDump(String buffer)
+  {
+    StringBuffer tempString = new StringBuffer();
+    char[] chars = buffer.toCharArray();
+    int index = 0;
+    Vector results = new Vector();
+    Invid invid;
+
+    /* -- */
+
+    while (index < chars.length)
+      {
+	// first read in the Invid
+
+	tempString.setLength(0); // truncate the buffer
+
+	// System.err.println("Parsing row " + rows++);
+
+	while (chars[index] != '|')
+	  {
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+	    
+	    if (chars[index] == '\n')
+	      {
+		throw new RuntimeException("parse error in row");
+	      }
+	    
+	    tempString.append(chars[index++]);
+	  }
+
+	//	System.err.println("Invid string: " + tempString.toString());
+
+	invid = new Invid(tempString.toString());
+
+	index++;		// skip over |
+
+	// now read in the label
+
+	tempString.setLength(0); // truncate the buffer
+
+	while (chars[index] != '\n')
+	  {
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+
+	    if (chars[index] == '\\')
+	      {
+		index++;
+	      }
+
+	    tempString.append(chars[index++]);
+	  }
+
+	results.addElement(new Result(invid, tempString.toString()));
+
+	index++;		// skip newline
+      }
+
+    return results;
+  }
+
 }
 
 /*---------------------------------------------------------------------
-                                                       Class ObjectNode
+                                                       Class InvidNode
 ---------------------------------------------------------------------*/
 
-class ObjectNode extends arlut.csd.Tree.treeNode {
+class InvidNode extends arlut.csd.Tree.treeNode {
 
-  private db_object object;
+  private Invid invid;
 
-  public ObjectNode(treeNode parent, String text, db_object object, treeNode insertAfter,
+  public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
 		    boolean expandable, int openImage, int closedImage, PopupMenu menu)
-    {
-      super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-      this.object = object;
-    }
+  {
+    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+    this.invid = invid;
+  }
 
-  public db_object getObject()
-    {
-      return object;
-    }
+  public Invid getInvid()
+  {
+    return invid;
+  }
 
   // Can't think of why you would ever want this
-  public void setObject(db_object object)
-    {
-      this.object = object;
-    }
+  public void setInvid(Invid invid)
+  {
+    this.invid = invid;
+  }
     
 }
-
 
 
 /*------------------------------------------------------------------------------
                                                                            Class
                                                                         BaseNode
 
-v------------------------------------------------------------------------------*/
+------------------------------------------------------------------------------*/
 
 class BaseNode extends arlut.csd.Tree.treeNode {
 
@@ -1334,13 +1394,14 @@ class BaseNode extends arlut.csd.Tree.treeNode {
   }
 
   public void setQuery(Query query)
-    {
-      this.query = query;
-    }
+  {
+    this.query = query;
+  }
 
   public Query getQuery()
-    {
-      return query;
-    }
+  {
+    return query;
+  }
 
+  
 }
