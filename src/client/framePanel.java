@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -202,7 +202,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       // windowPanel wants to know if framePanel is changed
       // Maybe this should be replaced with InternalFrameListener?
-      addPropertyChangeListener(getWindowPanel());
+      addInternalFrameListener(getWindowPanel());
       
       // Now setup the framePanel layout
       pane = new JTabbedPane();
@@ -773,12 +773,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     //fileM.add(iconifyMI);
     //fileM.add(closeMI);
 
-    JMenuItem editMI = new JMenuItem("Edit");
-    //editMI.setEnabled(!editable);
-    editMI.addActionListener(this);
-    
-    //editM.add(editMI);
-    fileM.add(editMI);
+    if (!editable)
+      {
+	JMenuItem editMI = new JMenuItem("Edit");
+	editMI.addActionListener(this);
+	
+	fileM.add(editMI);
+	
+      }
 
     if (debug)
       {
