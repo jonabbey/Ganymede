@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/10/11 20:12:26 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2002/01/29 06:00:00 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -14,7 +14,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.JCalendar;
@@ -68,9 +71,8 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
- *
+ * <p>A GUI Calendar for use with the {@link
+ * arlut.csd.JDataComponent.JdateField JdateField} class.</p>
  */
 
 public class JpanelCalendar extends JPanel implements ActionListener, ItemListener {
@@ -408,7 +410,15 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     if (showTime)
       {
 	_tPanel = new JTimePanel(this);
-	_tPanel.setBorder(new TitledBorder("Please choose a time:"));
+
+	if (editable)
+	  {
+	    _tPanel.setBorder(new TitledBorder("Please choose a time:"));
+	  }
+	else
+	  {
+	    _tPanel.setBorder(new TitledBorder("Time:"));
+	  }
 
 	southPanel.add(_tPanel,"Center");
 	
@@ -831,6 +841,15 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>This class represents a single button in the composite {@link
+ * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  Each
+ * day of the month will be represented on-screen by one of these
+ * buttons.  If the calendar is non-editable, the buttens will be
+ * non-responsive when pressed, but will still be used to form the
+ * calendar's display.</p>
+ */
+
 class JdateButton extends JButton implements ActionListener, MouseListener {
 
   JpanelCalendar my_parent = null;
@@ -930,6 +949,13 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
                                                                       JTimePanel
 	
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class displays the time at the bottom of the composite {@link
+ * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  If the
+ * calendar widget is editable, this panel will allow the user to set
+ * the time corresponding with the date shown in the calendar widget.</p>
+ */
 
 class JTimePanel extends JPanel implements JsetValueCallback {
 
@@ -1052,6 +1078,13 @@ class JTimePanel extends JPanel implements JsetValueCallback {
                                                                     JYearChooser
 	
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class displays the year at the top of the composite {@link
+ * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  If the
+ * calendar widget is editable, this panel will allow the user to change
+ * the year corresponding with the date shown in the calendar widget.</p>
+ */
 
 class JYearChooser extends JPanel implements ActionListener {
 
