@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.37 $
-# $Date: 2001/01/31 11:54:55 $
+# $Revision: 1.38 $
+# $Date: 2001/07/14 13:12:10 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -487,7 +487,8 @@ sub identifyjvm {
   $versionString = `$jvm -version 2>&1`;
 
   if (($versionString =~ /1\.2/) ||
-      ($versionString =~ /1\.3/))
+      ($versionString =~ /1\.3/) ||
+      ($versionString =~ /1\.4/))
     {
       return 2;
     }
