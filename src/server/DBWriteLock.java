@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -125,6 +125,8 @@ public class DBWriteLock extends DBLock {
       {
 	while (lockManager.lockHash.containsKey(key))
 	  {
+	    Ganymede.debug("DBWriteLock: Spinning waiting for existing lock with same key to be released");
+
 	    if (abort)
 	      {
 		for (int i = 0; i < baseSet.size(); i++)
