@@ -1710,6 +1710,15 @@ class xInvid {
       }
     else
       {
+	// XXX note that this is very expensive in terms of the
+	// Permanent Generation memory zone when using Sun's HotSpot
+	// VM in 1.4 or 1.5.  We already did this in the Ganymede
+	// DBStore itself to reduce long term heap usage, so this
+	// isn't anything special here, but if you run the Ganymede
+	// server on a VM that can't handle large blocks of interned
+	// Strings, you might want to turn this one off in particular,
+	// along with the StringDBField interning. XXX
+
 	objectId = objectId.intern();
       }
 
