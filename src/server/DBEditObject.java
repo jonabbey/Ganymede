@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.rmi.server.*;
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public final static void setDebug(boolean val)
   {
@@ -1302,9 +1302,121 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * 
    */
 
-  public void release()
+  public synchronized void release()
   {
     return;
+  }
+
+  /**
+   *
+   * This method is used to generate a String describing the difference
+   * between the current state of the DBEditObject and the original
+   * object's state.
+   *
+   */
+
+  public synchronized String diff()
+  {
+    StringBuffer result = new StringBuffer();
+    DBObjectBaseField fieldDef;
+    DBField origField, currentField;
+
+    /* -- */
+
+    // algorithm: iterate over base.sortedFields to find all fields
+    // possibly contained in the object.. for each field, check to
+    // see if the value has changed.  if so, emit a before and after
+    // diff.  if one has a field and the other does not, indicate
+    // the change.
+    //
+    // in the case of vectors, the change description can be a simple
+    // delta (x added, y removed)
+
+    // note that we're counting on objectBase.sortedFields not being
+    // changed while we're iterating here.. this is an ok assumption,
+    // since only the loader and the schema editor will trigger changes
+    // in sortedFields.
+    
+    if (debug)
+      {
+	System.err.println("Entering diff for object " + getLabel());
+      }
+
+    Enumeration enum = objectBase.sortedFields.elements();
+
+    while (enum.hasMoreElements())
+      {
+	fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	// we don't care if certain fields change
+
+	if (fieldDef.getID() == SchemaConstants.CreationDateField ||
+	    fieldDef.getID() == SchemaConstants.CreatorField ||
+	    fieldDef.getID() == SchemaConstants.ModificationDateField ||
+	    fieldDef.getID() == SchemaConstants.ModifierField)
+	  {
+	    continue;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Comparing field " + fieldDef.getName());
+	  }
+
+	origField = (DBField) original.getField(fieldDef.getID());
+	currentField = (DBField) this.getField(fieldDef.getID());
+
+	if ((origField == null || !origField.defined) && 
+	    (currentField == null || !currentField.defined))
+	  {
+	    continue;
+	  }
+
+	if (((origField == null) || !origField.defined) &&
+	    ((currentField != null) && currentField.defined))
+	  {
+	    result.append("Field added: " + fieldDef.getName() + "\nValue: " +
+			  currentField.getValueString() + "\n");
+
+	    if (debug)
+	      {
+		System.err.println("Field added: " + fieldDef.getName() + "\nValue: " +
+				   currentField.getValueString() + "\n");
+	      }
+	  }
+	else if (((currentField == null) || !currentField.defined) &&
+		 ((origField != null) && origField.defined))
+	  {
+	    result.append("Field deleted: " + fieldDef.getName() + "\nValue" +
+			  origField.getValueString() + "\n");
+
+	    if (debug)
+	      {
+		System.err.println("Field deleted: " + fieldDef.getName() + "\nValue" +
+				   origField.getValueString() + "\n");
+	      }
+	  }
+	else
+	  {
+	    String diff = currentField.getDiffString(origField);
+
+	    if (diff != null)
+	      {
+		result.append("Field changed: " + 
+			      fieldDef.getName() + "\n" +
+			      diff);
+
+		if (debug)
+		  {
+		    System.err.println("Field changed: " + 
+				       fieldDef.getName() + "\n" +
+				       diff);
+		  }
+	      }
+	  }
+      }
+
+    return result.toString();
   }
 
   /*----------------------------------------------------------
