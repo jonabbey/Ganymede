@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.218 $
-   Last Mod Date: $Date: 2000/12/12 23:47:20 $
+   Version: $Revision: 1.219 $
+   Last Mod Date: $Date: 2000/12/13 08:40:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.218 $ $Date: 2000/12/12 23:47:20 $
+ * @version $Revision: 1.219 $ $Date: 2000/12/13 08:40:23 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5120,7 +5120,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    DBEditObject eObj = (DBEditObject) enum.nextElement();
 	    
-	    if (eObj.getStatus() == ObjectStatus.CREATING)
+	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
 	      {
 		results.addElement(eObj);
 	      }
