@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/05/17 00:05:59 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/05/19 04:42:20 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -50,7 +50,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -78,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2000/05/17 00:05:59 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/05/19 04:42:20 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -115,8 +117,8 @@ public class xmlclient implements ClientListener {
   public String server_url = null;
   public String propFilename = null;
   public String xmlFilename = null;
-  public String username = null;
-  public String password = null;
+  public String username = "broccol:supergash";
+  public String password = "dodo";
   public boolean disconnectNow = false;
 
   /**
@@ -246,7 +248,11 @@ public class xmlclient implements ClientListener {
 	System.err.println("Ganymede xmlclient: Error, must specify properties");
 	ok = false;
       }
-
+    else
+      {
+	ok = loadProperties(propFilename);
+      }
+    
     String bufferString = ParseArgs.getArg("bufsize", argv);
 
     if (bufferString != null)
@@ -367,7 +373,7 @@ public class xmlclient implements ClientListener {
 	  {
 	    reader.close();
 	  }
-	
+
 	System.exit(0);
       }
   }
@@ -458,8 +464,8 @@ public class xmlclient implements ClientListener {
 
 	if (item instanceof XMLWarning)
 	  {
-	    System.err.println(item);
-	    item = reader.getNextItem();
+	    System.err.println("Warning!: " + item);
+	    item = null;	// trigger retrieval of next, and check for warning
 	  }
       }
 
@@ -519,7 +525,6 @@ public class xmlclient implements ClientListener {
 
   public void processData() throws SAXException
   {
-    ReturnVal attempt = null;
     XMLItem item;
 
     /* -- */
@@ -542,6 +547,10 @@ public class xmlclient implements ClientListener {
 
 	    xmlobject objectRecord = new xmlobject((XMLElement) item);
 
+	    System.err.print(".");
+
+	    //	    System.err.println(item);
+	    
 	    if (mode == null || mode.equals("create"))
 	      {
 		createdObjects.addElement(objectRecord);
@@ -552,24 +561,52 @@ public class xmlclient implements ClientListener {
 	      }
 	    else if (mode.equals("delete"))
 	      {
-		editedObjects.addElement(objectRecord);
+		deletedObjects.addElement(objectRecord);
 	      }
 	    else if (mode.equals("inactivate"))
 	      {
 		inactivatedObjects.addElement(objectRecord);
 	      }
 
+	    //	    System.err.print(">");
 	    storeObject(objectRecord);
+	    //	    System.err.print("<");
 	  }
 
 	item = getNextItem();
       }
 
+    System.err.print("\n\n");
+
     System.err.println("Assembling data");
 
-    System.err.println("Transmitting data");
+    // not sure if there's much assembling to do yet.. eventually i'm
+    // going to have to do the thing with doing invid link-ups, but
+    // that'll really be part of transmitData().
 
-    System.err.println("Committing transaction");
+    if (false)
+      {
+	Enumeration enum = objectStore.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    Short typeId = (Short) enum.nextElement();
+	
+	    System.err.println("\n--------------------------------------------------------------------------------\n\n" +
+			       "Dumping objects of type " + getTypeName(typeId.shortValue()) + "\n");
+
+	    Hashtable idHash = (Hashtable) objectStore.get(typeId);
+
+	    Enumeration enum2 = idHash.elements();
+	
+	    while (enum2.hasMoreElements())
+	      {
+		System.err.println(enum2.nextElement().toString());
+	      }
+	  }
+      }
+
+    transmitData();
 
     System.err.println("/processData");
   }
@@ -582,10 +619,6 @@ public class xmlclient implements ClientListener {
 
   private void connectAsClient()
   {
-    ReturnVal attempt = null;
-
-    /* -- */
-
     // after the ClientBase is constructed, we'll be an active RMI
     // server, so we need to always do System.exit() to shut down the
     // VM, from this point forward
@@ -596,9 +629,16 @@ public class xmlclient implements ClientListener {
       }
     catch (RemoteException ex)
       {
-	System.err.println("Could not connect to server" + ex.getMessage());
+	System.err.println("Could not connect to server: " + server_url + ex.getMessage());
 	System.exit(1);
       }
+    catch (RuntimeException ex)
+      {
+	System.err.println("Could not connect to server: " + server_url + ex.getMessage());
+	System.exit(1);
+      }
+
+    System.err.println("Logging into server");
 
     try
       {
@@ -615,14 +655,25 @@ public class xmlclient implements ClientListener {
     // server and download type and mapping information from the
     // server, in the background
     
-    loader = new Loader(session, true);
+    System.err.println("Creating loader");
+
+    loader = new Loader(session, false);
+
+    System.err.println("Starting loader thread");
+
     loader.start();
 
+    //    System.err.println("Getting baseList from loader");
+
     Vector baseList = loader.getBaseList();
+
+    //    System.err.println("Got baseList from loader");
 
     for (int i = 0; i < baseList.size(); i++)
       {
 	BaseDump base = (BaseDump) baseList.elementAt(i);
+
+	// System.err.println("Getting templateVector for " + base.getName());
 
 	Vector templates = loader.getTemplateVector(base.getTypeID());
 
@@ -637,6 +688,8 @@ public class xmlclient implements ClientListener {
 
 	objectTypes.put(base.getName(), fieldHash);
       }
+
+    System.err.println("Finished downloading object type information from server.");
   }
 
   /**
@@ -747,6 +800,22 @@ public class xmlclient implements ClientListener {
   }
 
   /**
+   * <p>This helper method returns the object type string for an object
+   * type based on its short object type ID number.</p>
+   *
+   * <p>If the named object type cannot be found, a
+   * NullPointerException will be thrown.</p>
+   */
+
+  public String getTypeName(short objectTypeID)
+  {
+    Hashtable baseMap = loader.getBaseMap();
+    BaseDump base = (BaseDump) baseMap.get(new Short(objectTypeID));
+
+    return base.getName();
+  }
+
+  /**
    * <p>This helper method returns a hash of field names to
    * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} based
    * on the underscore-for-space XML encoded object type name.</p>
@@ -773,8 +842,14 @@ public class xmlclient implements ClientListener {
     return (FieldTemplate) fieldHash.get(XMLUtils.XMLDecode(fieldName));
   }
 
+  /**
+   * <p>This method actually does the work of sending our data to the
+   * server.</p>
+   */
+
   private void transmitData()
   {
+    boolean success = true;
     ReturnVal attempt;
 
     /* -- */
@@ -799,6 +874,9 @@ public class xmlclient implements ClientListener {
 
 		return;
 	      }
+
+	    session.enableWizards(false);
+	    session.setDefaultOwner(new Vector()); // XXXX this will need to change
 	  }
 	catch (RemoteException ex)
 	  {
@@ -807,22 +885,73 @@ public class xmlclient implements ClientListener {
 	    return;
 	  }
 
-	try
+	System.err.println("Creating objects");
+
+	for (int i = 0; success && i < createdObjects.size(); i++)
 	  {
-	    attempt = session.commitTransaction(true);
+	    xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+
+	    System.err.println("Creating " + newObject);
+	
+	    attempt = newObject.createOnServer(session);
 
 	    if (attempt != null && !attempt.didSucceed())
 	      {
-		if (attempt.getDialog() != null)
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
 		  {
-		    System.err.println("Ganymede xmlclient: couldn't commit transaction " + username +
-				       ": " + attempt.getDialog().getText());
-		    return;
+		    System.err.println("Error creating " + newObject + ", reason: " + msg);
 		  }
 		else
 		  {
-		    System.err.println("Ganymede xmlclient: couldn't commit transaction " + username);
-		    return;
+		    System.err.println("Error creating " + newObject + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+
+	    attempt = newObject.registerFields(session);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error registering fields for " + newObject + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	System.err.println("Committing transaction");
+
+	try
+	  {
+	    if (success)
+	      {
+		attempt = session.commitTransaction(true);
+
+		if (attempt != null && !attempt.didSucceed())
+		  {
+		    String msg = attempt.getDialogText();
+
+		    if (msg != null)
+		      {
+			System.err.println("Error committing transaction, reason: " + msg);
+		      }
+		    else
+		      {
+			System.err.println("Error committing transaction, no reason given.");
+		      }
 		  }
 	      }
 	  }

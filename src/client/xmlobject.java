@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/05/17 00:06:00 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/05/19 04:42:21 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -47,14 +47,17 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 
 package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.*;
 import org.xml.sax.*;
-
+import java.rmi.*;
+import java.rmi.server.*;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -68,7 +71,7 @@ import java.util.Vector;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2000/05/17 00:06:00 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2000/05/19 04:42:21 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -118,6 +121,13 @@ public class xmlobject {
 
   Vector fields = null;
 
+  /**
+   * <p>Reference to server-side object, if we have already created it/got a reference
+   * to it from the server.</p>
+   */
+
+  db_object objref = null;
+
   /* -- */
 
   /**
@@ -134,7 +144,16 @@ public class xmlobject {
   {
     // handle any attributes in the element
 
-    type = new Short(xmlclient.xc.getTypeNum(openElement.getAttrStr("type")));
+    typeString = openElement.getAttrStr("type");
+
+    try
+      {
+	type = new Short(xmlclient.xc.getTypeNum(typeString));
+      }
+    catch (NullPointerException ex)
+      {
+	System.err.println("\n\nERROR: Unrecognized object type \"" + openElement.getAttrStr("type"));
+      }
 
     id = openElement.getAttrStr("id"); // may be null
 
@@ -166,7 +185,11 @@ public class xmlobject {
 	    // the xmlfield constructor will consume all elements up
 	    // to and including the matching field close element
 
-	    fields.addElement(new xmlfield(this, (XMLElement) nextItem));
+	    xmlfield field = new xmlfield(this, (XMLElement) nextItem);
+
+	    //	    System.err.println("Added new field: " + field.toString());	
+
+	    fields.addElement(field);
 	  }
 	else
 	  {
@@ -176,6 +199,66 @@ public class xmlobject {
 
 	nextItem = xmlclient.xc.getNextItem();
       }
+  }
+
+  /**
+   * <p>This method causes this object to be created on
+   * the server.  Any non-Invid fields will be set on the
+   * server.  Invid fields will be left untouched.. they
+   * will need to be revisited after all objects from
+   * the XML file have been created and the linkages can
+   * be established.</p>
+   *
+   * <p>This method uses the standard {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * return semantics.</p>
+   */
+
+  public ReturnVal createOnServer(Session session)
+  {
+    ReturnVal result;
+
+    /* -- */
+
+    try
+      {
+	result = session.create_db_object(getType());
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
+      }
+    
+    if (result != null && !result.didSucceed())
+      {
+	return result;
+      }
+    else
+      {
+	objref = result.getObject();
+	return null;
+      }
+  }
+
+  public ReturnVal registerFields(Session session)
+  {
+    ReturnVal result = null;
+
+    /* -- */
+
+    for (int i = 0; i < fields.size(); i++)
+      {
+	xmlfield field = (xmlfield) fields.elementAt(i);
+
+	result = field.registerOnServer();
+
+	if (result != null && !result.didSucceed())
+	  {
+	    return result;
+	  }
+      }
+
+    return null;
   }
 
   public short getType()
@@ -200,6 +283,7 @@ public class xmlobject {
 
     result.append("<object type=\"");
     result.append(typeString);
+    result.append("\"");
 
     if (id != null)
       {
@@ -215,7 +299,14 @@ public class xmlobject {
 	result.append("\"");
       }
 
-    result.append(">");
+    result.append(">\n");
+
+    for (int i = 0; i < fields.size(); i++)
+      {
+	result.append("\t" + fields.elementAt(i) + "\n");
+      }
+
+    result.append("</object>");
 
     return result.toString();
   }

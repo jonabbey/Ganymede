@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/05/17 00:05:59 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/05/19 04:42:19 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,13 +65,13 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.19 $ $Date: 2000/05/17 00:05:59 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 2000/05/19 04:42:19 $ $Name:  $
  * @author Mike Mulvaney
  */
 
 public class Loader extends Thread {
 
-  private boolean debug = true;
+  private boolean debug = false;
 
   private Hashtable 
     baseMap,
@@ -127,6 +127,11 @@ public class Loader extends Thread {
     this.debug = debug;
 
     this.session = session;
+
+    if (session == null)
+      {
+	throw new NullPointerException("Null session paramater in Loader constructor");
+      }
   }
 
   public synchronized void run()
@@ -246,6 +251,7 @@ public class Loader extends Thread {
     baseMap = null;
     baseList = null;
     templateHash = null;
+    templateNameHash = null;
 
     if (debug)
       {
@@ -291,15 +297,15 @@ public class Loader extends Thread {
 
   public Vector getBaseList()
   {
-    while (!baseListLoaded)
+    synchronized (this)
       {
-	if (debug)
+	while (!baseListLoaded)
 	  {
-	    System.out.println("Dang, have to wait to get the base list");
-	  }
-
-	synchronized (this)
-	  {
+	    if (debug)
+	      {
+		System.out.println("Dang, have to wait to get the base list");
+	      }
+		
 	    try
 	      {
 		this.wait();
@@ -336,15 +342,15 @@ public class Loader extends Thread {
 
   public Hashtable getBaseNames()
   {
-    while (!baseNamesLoaded)
+    synchronized (this)
       {
-	if (debug)
+	while (!baseNamesLoaded)
 	  {
-	    System.out.println("Dang, have to wait to get the base names list");
-	  }
+	    if (debug)
+	      {
+		System.out.println("Dang, have to wait to get the base names list");
+	      }
 
-	synchronized (this)
-	  {
 	    try
 	      {
 		this.wait();
@@ -355,7 +361,7 @@ public class Loader extends Thread {
 	      }
 	  }
       }
-
+    
     if (debug)
       {
 	if (baseNames == null)
@@ -381,12 +387,12 @@ public class Loader extends Thread {
 
   public Hashtable getBaseMap()
   {
-    while (! baseMapLoaded)
+    synchronized (this)
       {
-	System.out.println("Loader: waiting for base map");
-
-	synchronized (this)
+	while (!baseMapLoaded)
 	  {
+	    System.out.println("Loader: waiting for base map");
+
 	    try
 	      {
 		this.wait();
@@ -428,15 +434,15 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    while (! baseMapLoaded)
+    synchronized (this)
       {
-	if (debug)
+	while (! baseMapLoaded)
 	  {
-	    System.out.println("Loader: waiting for base hash");
-	  }
+	    if (debug)
+	      {
+		System.out.println("Loader: waiting for base hash");
+	      }
 
-	synchronized (this)
-	  {
 	    try
 	      {
 		this.wait();
@@ -477,15 +483,15 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    while (! baseMapLoaded)
+    synchronized (this)
       {
-	if (debug)
+	while (! baseMapLoaded)
 	  {
-	    System.out.println("Loader: waiting for base hash");
-	  }
+	    if (debug)
+	      {
+		System.out.println("Loader: waiting for base hash");
+	      }
 
-	synchronized (this)
-	  {
 	    try
 	      {
 		this.wait();
@@ -497,7 +503,7 @@ public class Loader extends Thread {
 	  }
       }
 
-    if (debug)
+    if (false)
       {
 	if (nameShorts == null)
 	  {
@@ -529,6 +535,11 @@ public class Loader extends Thread {
 
   public FieldTemplate getFieldTemplate(Short objectid, String fieldname)
   {
+    if (templateNameHash == null)
+      {
+	templateNameHash = new Hashtable();
+      }
+
     Hashtable nameHash = (Hashtable) templateNameHash.get(objectid);
 
     if (nameHash == null)
@@ -621,6 +632,11 @@ public class Loader extends Thread {
       {
 	FieldTemplate x = (FieldTemplate) fieldTemplates.elementAt(i);
 	nameHash.put(x.getName(), x);
+      }
+
+    if (templateNameHash == null)
+      {
+	templateNameHash = new Hashtable();
       }
 
     templateNameHash.put(objectId, nameHash);

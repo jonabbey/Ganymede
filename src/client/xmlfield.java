@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/05/17 00:06:00 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/05/19 04:42:20 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -47,16 +47,19 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+*/
 
 package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.*;
-
 import org.xml.sax.*;
 import java.util.*;
 import java.text.*;
+import java.rmi.*;
+import java.rmi.server.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,7 +72,7 @@ import java.text.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2000/05/17 00:06:00 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2000/05/19 04:42:20 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -84,6 +87,12 @@ public class xmlfield implements FieldType {
   
   FieldTemplate fieldDef;
 
+  /**
+   * <p>The xmlobject that contains us.</p>
+   */
+
+  xmlobject owner;
+
   Object value;			// if scalar
   Vector setValues;		// if vector
   Vector delValues;		// if vector
@@ -95,8 +104,13 @@ public class xmlfield implements FieldType {
   {
     XMLItem nextItem;
 
+    /* -- */
+
+    this.owner = owner;
     String name = openElement.getName();
     fieldDef = owner.getFieldDef(name);
+
+    //    System.err.println("parsing " + openElement);
 
     if (fieldDef == null)
       {
@@ -123,7 +137,6 @@ public class xmlfield implements FieldType {
 	if (bValue != null)
 	  {
 	    value = bValue;
-	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.NUMERIC)
@@ -135,19 +148,19 @@ public class xmlfield implements FieldType {
 	if (iValue != null)
 	  {
 	    value = iValue;
-	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.DATE)
       {
 	nextItem = xmlclient.xc.getNextItem();
 
+	// System.err.println("Parsing date for item " + nextItem);
+
 	Date dValue = parseDate(nextItem);
 
 	if (dValue != null)
 	  {
 	    value = dValue;
-	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.STRING)
@@ -155,79 +168,20 @@ public class xmlfield implements FieldType {
 	if (!fieldDef.isArray())
 	  {
 	    value = xmlclient.xc.reader.getFollowingString(openElement, true);
+
+	    // getFollowingString automatically consumes the field
+	    // close element after the string text
+
+	    return;
 	  }
 	else
 	  {
-	    setValues = new Vector();
-	    delValues = new Vector();
-	    addValues = new Vector();
+	    processVectorElements(openElement);
 
-	    Stack modeStack = new Stack();
+	    // processVectorElements automatically consumes the field
+	    // close element after the vector elements
 
-	    modeStack.push("set");
-	    nextItem = xmlclient.xc.getNextItem();
-
-	    while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
-	      {
-		if (nextItem.matches("add") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matches("delete") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("add"))
-		  {
-		    if (modeStack.peek().equals("add"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </add> while parsing a string list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("delete"))
-		  {
-		    if (modeStack.peek().equals("delete"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </delete> while parsing a string list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else
-		  {
-		    String element = parseStringVecItem(nextItem);
-		    
-		    if (element != null)
-		      {
-			if (modeStack.peek().equals("set"))
-			  {
-			    setValues.addElement(element);
-			  }
-			else if (modeStack.peek().equals("add"))
-			  {
-			    addValues.addElement(element);
-			  }
-			else if (modeStack.peek().equals("delete"))
-			  {
-			    delValues.addElement(element);
-			  }
-		      }
-		    
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-	      }
+	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.INVID)
@@ -240,76 +194,12 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
-	    setValues = new Vector();
-	    delValues = new Vector();
-	    addValues = new Vector();
+	    processVectorElements(openElement);
 
-	    Stack modeStack = new Stack();
+	    // processVectorElements automatically consumes the field
+	    // close element after the vector elements
 
-	    modeStack.push("set");
-	    nextItem = xmlclient.xc.getNextItem();
-
-	    while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
-	      {
-		if (nextItem.matches("add") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matches("delete") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("add"))
-		  {
-		    if (modeStack.peek().equals("add"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </add> while parsing an invid list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("delete"))
-		  {
-		    if (modeStack.peek().equals("delete"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </delete> while parsing an invid list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else
-		  {
-		    xInvid invidElement = new xInvid(nextItem);
-		    
-		    if (invidElement != null)
-		      {
-			if (modeStack.peek().equals("set"))
-			  {
-			    setValues.addElement(invidElement);
-			  }
-			else if (modeStack.peek().equals("add"))
-			  {
-			    addValues.addElement(invidElement);
-			  }
-			else if (modeStack.peek().equals("delete"))
-			  {
-			    delValues.addElement(invidElement);
-			  }
-		      }
-		    
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-	      }
+	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.PERMISSIONMATRIX)
@@ -351,7 +241,6 @@ public class xmlfield implements FieldType {
 	  {
 	    xPassword pValue = new xPassword(nextItem);
 	    value = pValue;
-	    return;
 	  }
 	catch (NullPointerException ex)
 	  {
@@ -368,76 +257,12 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
-	    setValues = new Vector();
-	    delValues = new Vector();
-	    addValues = new Vector();
+	    processVectorElements(openElement);
 
-	    Stack modeStack = new Stack();
+	    // processVectorElements automatically consumes the field
+	    // close element after the vector elements
 
-	    modeStack.push("set");
-	    nextItem = xmlclient.xc.getNextItem();
-
-	    while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
-	      {
-		if (nextItem.matches("add") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matches("delete") && !nextItem.isEmpty())
-		  {
-		    modeStack.push("add");
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("add"))
-		  {
-		    if (modeStack.peek().equals("add"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </add> while parsing an invid list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else if (nextItem.matchesClose("delete"))
-		  {
-		    if (modeStack.peek().equals("delete"))
-		      {
-			modeStack.pop();
-		      }
-		    else
-		      {
-			System.err.println("Error, found a mismatched </delete> while parsing an invid list.");
-		      }
-
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-		else
-		  {
-		    String ipString = parseIP(nextItem);
-		    
-		    if (ipString != null)
-		      {
-			if (modeStack.peek().equals("set"))
-			  {
-			    setValues.addElement(ipString);
-			  }
-			else if (modeStack.peek().equals("add"))
-			  {
-			    addValues.addElement(ipString);
-			  }
-			else if (modeStack.peek().equals("delete"))
-			  {
-			    delValues.addElement(ipString);
-			  }
-		      }
-		    
-		    nextItem = xmlclient.xc.getNextItem();
-		  }
-	      }
+	    return;
 	  }
       }
     else if (fieldDef.getType() == FieldType.FLOAT)
@@ -449,7 +274,139 @@ public class xmlfield implements FieldType {
 	if (fValue != null)
 	  {
 	    value = fValue;
-	    return;
+	  }
+      }
+
+    skipToEndField(name);
+  }
+
+  /**
+   * <p>This method is called to process a set of values
+   * for the various kinds of vector fields.  This method
+   * consumes all XMLItems up to and including the field
+   * termination item.</p>
+   */
+
+  private void processVectorElements(XMLElement openElement) throws SAXException
+  {
+    XMLItem nextItem;
+    boolean setMode = false;
+    boolean canDoSetMode = true;
+    Stack modeStack = new Stack();
+
+    /* -- */
+
+    // by default, we add
+
+    modeStack.push("add");
+
+    nextItem = xmlclient.xc.getNextItem();
+
+    while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
+      {
+	if ((nextItem.matches("add") || nextItem.matches("delete")) && !nextItem.isEmpty())
+	  {
+	    if (setMode)
+	      {
+		throw new RuntimeException("xmlclient: error, can't enter " + nextItem.getName() +
+					   " mode with a previous <set> directive in field " + openElement);
+	      }
+		    
+	    canDoSetMode = false;
+		    
+	    modeStack.push(nextItem.getName());
+	  }
+	else if (nextItem.matches("set") && !nextItem.isEmpty())
+	  {
+	    if (canDoSetMode)
+	      {
+		setMode = true;
+		modeStack.push("set");
+	      }
+	    else
+	      {
+		throw new RuntimeException("xmlclient: error, can't enter set" +
+					   " mode with a previous mode directive in field " + openElement);
+	      }
+
+	    nextItem = xmlclient.xc.getNextItem();
+	  }
+	else if (nextItem.matchesClose("add") || nextItem.matchesClose("delete"))
+	  {
+	    if (modeStack.peek().equals(nextItem.getName()))
+	      {
+		modeStack.pop();
+	      }
+	    else
+	      {
+		throw new RuntimeException("Error, found a mismatched </" +
+					   nextItem.getName() + "> while parsing a vector field.");
+	      }
+
+	    nextItem = xmlclient.xc.getNextItem();
+	  }
+	else if (nextItem.matchesClose("set"))
+	  {
+	    // okay.. we're actually not going to do anything
+	    // here, because set mode is really exclusive within
+	    // a field definition
+
+	    nextItem = xmlclient.xc.getNextItem();
+	  }
+	else
+	  {
+	    Object newValue = null;
+
+	    if (fieldDef.getType() == FieldType.STRING)
+	      {
+		newValue = parseStringVecItem(nextItem);
+	      }
+	    else if (fieldDef.getType() == FieldType.INVID)
+	      {
+		newValue = new xInvid(nextItem);
+	      }
+	    else if (fieldDef.getType() == FieldType.IP)
+	      {
+		newValue = parseIP(nextItem);
+	      }
+		    
+	    if (newValue != null)
+	      {
+		if (setMode)
+		  {
+		    if (setValues == null)
+		      {
+			setValues = new Vector();
+		      }
+
+		    setValues.addElement(newValue);
+		  }
+		else if (modeStack.peek().equals("add"))
+		  {
+		    if (addValues == null)
+		      {
+			addValues = new Vector();
+		      }
+
+		    addValues.addElement(newValue);
+		  }
+		else if (modeStack.peek().equals("delete"))
+		  {
+		    if (delValues == null)
+		      {
+			delValues = new Vector();
+		      }
+
+		    delValues.addElement(newValue);
+		  }
+	      }
+	    else
+	      {
+		System.err.println("xmlfield WARNING: couldn't get vector value for " + nextItem +
+				   "in xml field object " + openElement);
+	      }
+		    
+	    nextItem = xmlclient.xc.getNextItem();
 	  }
       }
   }
@@ -464,7 +421,7 @@ public class xmlfield implements FieldType {
   {
     XMLItem nextItem = xmlclient.xc.getNextItem();
     
-    while (!nextItem.matchesClose(name) && !(nextItem instanceof XMLEndDocument))
+    while (!(nextItem.matchesClose(name) || (nextItem instanceof XMLEndDocument)))
       {
 	nextItem = xmlclient.xc.getNextItem();
       }
@@ -647,6 +604,148 @@ public class xmlfield implements FieldType {
 
     return result;
   }
+
+  /**
+   * <p>This method is responsible for propagating this field's data
+   * values to the server.</p>
+   *
+   * <p>Returns a {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * indicating the result of the server
+   * operation.  This result may be null on success, or it may
+   * be an encoded success or failure message in the normal
+   * arlut.csd.ganymede.ReturnVal way.</p>
+   *
+   * <p>This method will throw an exception if the xmlobject that
+   * contains this xmlfield has not established a remote
+   * {@link arlut.csd.ganymede.db_object db_object} reference to
+   * the server through which the editing can be performed.</p>
+   */
+
+  public ReturnVal registerOnServer()
+  {
+    ReturnVal result = null;
+
+    /* -- */
+
+    try
+      {
+	if (fieldDef.isBoolean() || fieldDef.isNumeric() || fieldDef.isDate() ||
+	    fieldDef.isFloat() ||
+	    (!fieldDef.isArray() &&
+	     (fieldDef.isString() || fieldDef.isIP())))
+	  {
+	    // typical scalar, nothing fancy
+
+	    return owner.objref.setFieldValue(fieldDef.getID(), value);
+	  }
+	else if (fieldDef.isArray() && (fieldDef.isString() || fieldDef.isIP()))
+	  {
+	    db_field field = owner.objref.getField(fieldDef.getID());
+
+	    if (setValues != null)
+	      {
+		// need to explicitly delete all elements, then set new ones
+
+		result = field.deleteElements(field.getValues());
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
+
+		return field.addElements(setValues);
+	      }
+	    else if (addValues != null)
+	      {
+		return field.addElements(setValues);
+	      }
+	    else if (delValues != null)
+	      {
+		return field.deleteElements(delValues);
+	      }
+	  }
+	else if (fieldDef.isPassword())
+	  {
+	    xPassword xp = (xPassword) value;
+	    pass_field field = (pass_field) owner.objref.getField(fieldDef.getID());
+
+	    result = field.setPlainTextPass(xp.plaintext);
+
+	    if (result != null && !result.didSucceed())
+	      {
+		return result;
+	      }
+
+	    result = field.setCryptPass(xp.crypttext);
+
+	    if (result != null && !result.didSucceed())
+	      {
+		return result;
+	      }
+
+	    return field.setMD5CryptedPass(xp.md5text);
+	  }
+	else if (fieldDef.isInvid())
+	  {
+	    System.err.println("**** xmlclient can't yet process invid fields");
+	    return new ReturnVal(false);
+	  }
+	else if (fieldDef.isPermMatrix())
+	  {
+	    System.err.println("**** xmlclient can't yet process permission fields");
+	    return new ReturnVal(false);
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>Debug diagnostics</p>
+   */
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    result.append(fieldDef.getName());
+
+    if (value != null)
+      {
+	result.append(", value = ");
+	result.append(value.toString());
+      }
+    else
+      {
+	if (setValues != null)
+	  {
+	    result.append(", setValues = \"");
+	    result.append(arlut.csd.Util.VectorUtils.vectorString(setValues));
+	    result.append("\"");
+	  }
+	else if (delValues != null)
+	  {
+	    result.append(", delValues = \"");
+	    result.append(arlut.csd.Util.VectorUtils.vectorString(delValues));
+	    result.append("\"");
+	  }
+	else if (addValues != null)
+	  {
+	    result.append(", addValues = \"");
+	    result.append(arlut.csd.Util.VectorUtils.vectorString(delValues));
+	    result.append("\"");
+	  }
+      }
+
+    return result.toString();
+  }
 }
 
 /**
@@ -662,6 +761,7 @@ class xInvid {
   short typeId;
   String objectId;
   Invid resolved;
+  int num = -1;
 
   /* -- */
 
@@ -681,10 +781,20 @@ class xInvid {
     String typeString = item.getAttrStr("type");
     objectId = item.getAttrStr("id");
 
-    if (typeString == null || objectId == null)
+    if (typeString == null)
       {
-	System.err.println("Missing or malformed invid attribute in element: " + item);
+	System.err.println("Missing or malformed invid type in element: " + item);
 	throw new NullPointerException("Bad item!");
+      }
+
+    if (objectId == null)
+      {
+	Integer iNum = item.getAttrInt("num");
+
+	if (iNum != null)
+	  {
+	    num = iNum.intValue();
+	  }
       }
 
     try
@@ -716,6 +826,36 @@ class xInvid {
 
     this.objectId = id;
     resolved = null;
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    result.append("<invid type=\"");
+    result.append(xmlclient.xc.getTypeName(typeId));
+    result.append("\" ");
+    
+    if (objectId != null)
+      {
+	result.append("id=\"");
+	result.append(objectId);
+	result.append("\"/>");
+      }
+    else if (num != -1)
+      {
+	result.append("num=\"");
+	result.append(num);
+	result.append("\"/>");
+      }
+    else
+      {
+	result.append("id=\"???\"/>");
+      }
+
+    return result.toString();
   }
 }
 
@@ -755,6 +895,40 @@ class xPassword {
     this.plaintext = plaintext;
     this.crypttext = crypttext;
     this.md5text = md5text;
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    result.append("<password");
+    
+    if (plaintext != null)
+      {
+	result.append(" plaintext=\"");
+	result.append(plaintext);
+	result.append("\"");
+      }
+    
+    if (crypttext != null)
+      {
+	result.append(" crypt=\"");
+	result.append(crypttext);
+	result.append("\"");
+      }
+    
+    if (md5text != null)
+      {
+	result.append(" md5crypt=\"");
+	result.append(md5text);
+	result.append("\"");
+      }
+
+    result.append("/>");
+
+    return result.toString();
   }
 }
 
