@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1002,9 +1002,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// the user has permission to rename the user, they can
 	// automatically execute this change to the home directory.
 
-	sf = (StringDBField) getField(HOMEDIR);
+	if (homedir == null)
+	  {
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
 
-	sf.setValueLocal("/home/" + (String) value);	// ** ARL
+	if (homedir != null)
+	  {
+	    sf = (StringDBField) getField(HOMEDIR);
+	    sf.setValueLocal(homedir + (String) value);
+	  }
 
 	// if we don't have a signature set, set it to the username.
 
