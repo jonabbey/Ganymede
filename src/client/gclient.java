@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,6 +91,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     statusBorderRaised = new CompoundBorder(raisedBorder, emptyBorder5);
 
 
+  private Vector
+    baseList;            // List of base types.  Vector of Bases.
+
   private Hashtable
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
@@ -168,6 +171,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     logoutMI,
     removeAllMI,
     rebuildTreeMI,
+    editObjectMI,
     menubarQueryMI = null;
 
   JMenuItem
@@ -178,14 +182,28 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     windowMenu,
     fileMenu,
     LandFMenu,
-    PersonaMenu;
+    PersonaMenu = null;
 
   PersonaListener
-    personaListener;
+    personaListener = null;
 
   WindowBar
     windowBar;
 
+  JDialog
+    editObjectDialog = null;
+  
+  GridBagLayout
+    editObjectLayout;
+
+  GridBagConstraints
+    editObjectConstraint;
+
+  JTextField
+    editObjectText;
+
+  JComboBox
+    editObjectType;
 
   /* -- */
 
@@ -239,10 +257,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rebuildTreeMI = new JMenuItem("Rebuild Tree");
     rebuildTreeMI.addActionListener(this);
 
+    editObjectMI = new JMenuItem("Edit Object");
+    editObjectMI.addActionListener(this);
+
     menubarQueryMI = new JMenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
     fileMenu.add(menubarQueryMI);
+    fileMenu.add(editObjectMI);
     fileMenu.addSeparator();
     fileMenu.add(rebuildTreeMI);
     fileMenu.add(removeAllMI);
@@ -266,19 +288,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     LandFMenu.add(win95MI);
 
     // Personae menu
-    PersonaMenu = new JMenu("Persona");
-    personaListener = new PersonaListener(session, this);
+    boolean personasExist = false;
     try
       {
 	Vector personae = session.getPersonae();
 	if (personae != null)
 	  {
+	    PersonaMenu = new JMenu("Persona");
+	    personaListener = new PersonaListener(session, this);
+	    
 	    for (int i = 0; i < personae.size(); i++)
 	      {
 		JMenuItem mi = new JMenuItem((String)personae.elementAt(i));
 		mi.addActionListener(personaListener);
 		PersonaMenu.add(mi);
 	      }
+	    personasExist = true;
 	  }
       }
     catch (RemoteException rx)
@@ -289,7 +314,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
     menubar.add(windowMenu);
-    menubar.add(PersonaMenu);
+    if (personasExist)
+      {
+	menubar.add(PersonaMenu);
+      }
     menubar.setBorder(emptyBorder5);
     menubar.setBackground(ClientColor.menu);
     menubar.setForeground(ClientColor.menuText);
@@ -299,7 +327,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     mp.setBorder(raisedBorder);
     mp.setOpaque(true);
     mp.setBackground(ClientColor.menu);
-    //this.setJMenuBar(menubar);
+    //setJMenuBar(menubar);
     add("North", mp);
 
     // Create menus for the tree
@@ -544,7 +572,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    *
    */
 
-  public Hashtable getBaseHash()
+  public final Hashtable getBaseHash()
   {
     if (baseHash == null)
       {
@@ -553,6 +581,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     return baseHash;
   }
+
+  public final Vector getBaseList()
+  {
+    if (baseList == null)
+      {
+	baseList = loader.getBaseList();
+      }
+
+    return baseList;
+  }
+
 
   public Hashtable getBaseMap()
   {
@@ -571,14 +610,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * @param status The text to display
    */
 
-  public void setStatus(String status)
+  public final void setStatus(String status)
   {
     if (debug)
       {
 	System.out.println("Setting status: " + status);
       }
     statusLabel.setText(status);
-    //repaint();
     statusLabel.paintImmediately(statusLabel.getVisibleRect());
   }
 
@@ -675,6 +713,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Cound't recurse down catagories: " + rx);
+      }
+
+    if (debug)
+      {
+	System.out.println("Refreshing tree");
       }
 
     tree.refresh();
@@ -1057,6 +1100,113 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  /**
+   * Show a panel which takes a string, and a combo box of types.
+   *
+   */
+  void editObject()
+  {
+    if (editObjectDialog == null)
+      {
+	editObjectDialog = new JDialog(this, "Edit an object", false);
+
+	editObjectLayout = new GridBagLayout();
+	editObjectConstraint = new GridBagConstraints();
+	
+	editObjectDialog.getContentPane().setLayout(new BorderLayout());
+	JPanel middle = new JPanel(editObjectLayout);
+	editObjectDialog.getContentPane().add(middle, BorderLayout.CENTER);
+	editObjectConstraint.insets = new Insets(4,4,4,4);
+
+	JLabel titleL = new JLabel("Choose and perish:", SwingConstants.CENTER);
+	titleL.setOpaque(true);
+	titleL.setBorder(emptyBorder5);
+	
+	editObjectConstraint.gridx = 0;
+	editObjectConstraint.gridy = 0;
+	editObjectConstraint.gridwidth = 4;
+	editObjectConstraint.fill = GridBagConstraints.HORIZONTAL;
+	editObjectLayout.setConstraints(titleL, editObjectConstraint);
+	middle.add(titleL);
+
+	editObjectConstraint.fill = GridBagConstraints.NONE;
+
+	editObjectType = new JComboBox();
+	Vector bases = getBaseList();
+	Base thisBase = null;
+	try
+	  {
+	    for(int i = 0; i < bases.size(); i++)
+	      {
+		thisBase = (Base)bases.elementAt(i);
+		String name = thisBase.getName();
+		System.out.println("Checking: " + name);
+		if (name.startsWith("Embedded:"))
+		  {
+		    if (debug)
+		      {
+			System.out.println("Skipping embedded field: " + name);
+		      }
+		  }
+		else
+		  {
+		    listHandle lh = new listHandle(name, new Short(thisBase.getTypeID()));
+		    editObjectType.addItem(lh);
+		  }
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get base information");
+	  }
+
+	editObjectConstraint.gridx = 0;
+	editObjectConstraint.gridy = 1;
+	editObjectConstraint.gridwidth = 2;
+	JLabel oType = new JLabel("Object Type:"); 
+	editObjectLayout.setConstraints(oType, editObjectConstraint);
+	middle.add(oType);
+	editObjectConstraint.gridx = 2;
+	editObjectLayout.setConstraints(editObjectType, editObjectConstraint);
+	middle.add(editObjectType);
+	
+	editObjectText = new JTextField(20);
+	JLabel editTextL = new JLabel("Object Name:");
+
+	editObjectConstraint.gridx = 0;
+	editObjectConstraint.gridy = 2;
+	editObjectLayout.setConstraints(editTextL, editObjectConstraint);
+	middle.add(editTextL);
+
+	editObjectConstraint.gridx = 2;
+	editObjectLayout.setConstraints(editObjectText, editObjectConstraint);
+	middle.add(editObjectText);
+	
+	editObjectConstraint.gridx = 2;
+	editObjectConstraint.gridy = 3;
+	editObjectConstraint.gridwidth = 1;
+	JButton ok = new JButton("Ok");
+	ok.setActionCommand("Find Object with this name");
+	ok.addActionListener(this);
+	editObjectLayout.setConstraints(ok, editObjectConstraint);
+	middle.add(ok);
+
+
+	JButton neverMind = new JButton("Cancel");
+	neverMind.setActionCommand("Nevermind finding this object");
+	neverMind.addActionListener(this);
+	editObjectConstraint.gridx = 3;
+	editObjectLayout.setConstraints(neverMind, editObjectConstraint);
+	middle.add(neverMind);
+
+
+      }
+    
+    editObjectDialog.setBounds(150,100, 200,100);
+    editObjectDialog.pack();
+    editObjectDialog.setVisible(true);
+  }
+
   void logout()
   {
     try
@@ -1224,6 +1374,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	rebuildTree();
       }
+    else if (event.getSource() == editObjectMI)
+      {
+	editObject();
+      }
     else if (event.getSource() == logoutMI)
       {
 	if (OKToProceed())
@@ -1251,7 +1405,66 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	setBasic();
       }
+    else if (event.getActionCommand().equals("Find Object with this name"))
+      {
+	System.out.println("Find it!");
+	String string = editObjectText.getText();
+	if (string == null)
+	  {
+	    setStatus("You are going to have to do better than that.");
+	    return;
+	  }
 
+	if (editObjectType == null)
+	  {
+	    System.out.println("edit object type = null");
+	  }
+
+	listHandle lh = (listHandle)editObjectType.getSelectedItem();
+	Short baseID = (Short)lh.getObject();
+
+	if (debug)
+	  {
+	    System.out.println("BaseID == " + baseID);
+	  }
+
+	//QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
+	System.out.println("Looking for: " + string);
+	QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  //Can't access STARTSWITH outside of server package :( need to fix that
+	QueryResult edit_query = null;
+	try
+	  {
+	    edit_query = session.query(new Query(baseID.shortValue(), node, true));
+
+
+	    Vector edit_invids = edit_query.getListHandles();
+	    
+	    if (edit_invids.size() == 1)
+	      {
+		// I don't know if this is enough.  It needs to be added to the changedHash
+		// hash, but i don't know how to find the node right now.  Maybe that node
+		// hasn't even been added yet.  Maybe there should be another hash, of created
+		// nodes, or maybe there already is.
+		wp.addWindow(session.edit_db_object( (Invid)((listHandle)edit_invids.elementAt(0)).getObject()) , true);
+	      }
+	    else if (edit_invids.size() == 0)
+	      {
+		JErrorDialog d = new JErrorDialog(this, "Error finding object", "No object starts with that string.");
+	      }
+	    else
+	      {
+		System.out.println("Too many/too few for now: " + edit_invids.size());
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get query: " + rx);
+	  }
+      }
+    else if (event.getActionCommand().equals("Nevermind finding this object"))
+      {
+	editObjectDialog.setVisible(false);
+      }
     else
       {
 	System.err.println("Unknown action event generated");
