@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2038,7 +2038,7 @@ public class directLoader {
 	  {
 	    iO = (interfaceObj) sysObj.interfaces.elementAt(i);
 
-	    intInvid = ((invid_field) current_field).createNewEmbedded();
+	    intInvid = ((invid_field) current_field).createNewEmbedded().getInvid();
 	    interfaceRef = (DBEditObject) my_client.session.edit_db_object(intInvid);
 
 	    // set the Ethernet Info for this Interface
@@ -2371,7 +2371,7 @@ public class directLoader {
 
 	embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
 
-	embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded());
+	embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded().getInvid());
 
 	// we've got the new map entry, load 'er up
 

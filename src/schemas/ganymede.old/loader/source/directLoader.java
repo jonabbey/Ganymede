@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1921,7 +1921,7 @@ public class directLoader {
 	  {
 	    iO = (interfaceObj) sysObj.interfaces.elementAt(i);
 
-	    intInvid = ((invid_field) current_field).createNewEmbedded();
+	    intInvid = ((invid_field) current_field).createNewEmbedded().getInvid();
 	    interfaceRef = my_client.session.edit_db_object(intInvid);
 
 	    // set the Ethernet Info for this Interface
@@ -1933,7 +1933,7 @@ public class directLoader {
 	    // step 1: create an ip record
 
 	    interfaceField = interfaceRef.getField((short) 257);
-	    ipInvid = ((invid_field) interfaceField).createNewEmbedded();
+	    ipInvid = ((invid_field) interfaceField).createNewEmbedded().getInvid();
 
 	    // we've created an ip record.. let's get an edit reference
 	    // to it
@@ -1952,7 +1952,7 @@ public class directLoader {
 
 		ipField = ipRec.getField((short) 256); // dns record
 
-		dInvid = ((invid_field) ipField).createNewEmbedded();
+		dInvid = ((invid_field) ipField).createNewEmbedded().getInvid();
 
 		// we've created a dns record.. get an edit reference
 
@@ -2260,7 +2260,7 @@ public class directLoader {
 
 	embed_field = (invid_field) user_obj.getField((short) 271); // Map Entries
 
-	embed_obj = my_client.session.edit_db_object(embed_field.createNewEmbedded());
+	embed_obj = my_client.session.edit_db_object(embed_field.createNewEmbedded().getInvid());
 
 	// we've got the new map entry, load 'er up
 
