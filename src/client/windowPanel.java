@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,9 +15,11 @@ package arlut.csd.ganymede.client;
 
 import tablelayout.*;
 import com.sun.java.swing.*;
+import com.sun.java.swing.event.*;
 
 
 import java.awt.*;
+import java.beans.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
@@ -33,10 +35,10 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-public class windowPanel extends JPanel implements ActionListener, InternalFrameListener, JsetValueCallback, ItemListener{
 
+public class windowPanel extends JPanel implements PropertyChangeListener, ActionListener, JsetValueCallback, ItemListener{  
   static final boolean debug = true;
-
+  
   // --
 
   gclient
@@ -140,9 +142,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       w;
 
     JPanel 
-      jpanel;
-
-    JTitledPane 
+      jpanel,
       panel;
 
     TableLayout 
@@ -193,9 +193,12 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
     w = new JInternalFrame();
 
+    w.addPropertyChangeListener(this);
+
     w.setMaxable(true);
     w.setResizable(true);
     w.setClosable(!editable);
+    w.setIconable(true);
 
     // First figure out the title, and put it in the hash
     
@@ -228,7 +231,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       }
 
     w.setTitle(title);
-    w.addFrameListener(this);
+
     w.setLayout(new BorderLayout());
     
     windowList.put(title, w);
@@ -243,7 +246,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     jpanel = new JPanel();
     jpanel.setLayout(new BorderLayout());
 
-    panel = new JTitledPane();
+    panel = new JPanel();
     layout = new TableLayout(false);
     layout.rowSpacing(5);
     panel.setLayout(layout);
@@ -316,12 +319,13 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		switch (type)
 		  {
 		  case -1:
-
+		    
 		    System.err.println("Could not get field information");
-
+		    
 		    break;
-
+		    
 		  case FieldType.STRING:
+		    System.out.println();
 		    try 
 		      {
 			if (((string_field)fields[i]).canChoose())
@@ -363,27 +367,35 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 				// Add a combo box
 
 				JComboBox combo = new JComboBox();
+				//Choice combo = new Choice();
 				Vector choices = ((string_field)fields[i]).choices();
 
 				for (int j = 0; j < choices.size(); j++)
 				  {
 				    combo.addPossibleValue((String)choices.elementAt(j));
+				    //combo.addItem((String)choices.elementAt(j));
+				    System.out.println("Adding " + (String)choices.elementAt(j));
 				  }
+				// This is what's doing it.
 
-				combo.setEditable(editable);
-				combo.addItemListener(this);
+				combo.setMaximumRowCount(4);
+				combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+				combo.setEditable(true);
 				combo.setVisible(true);
 
 				try
 				  {
 				    combo.setCurrentValue(fields[i].getValue());
+				    System.out.println("Setting current value: " + fields[i].getValue());
 				  }
 				catch (RemoteException rx)
 				  {
 				    throw new RuntimeException("Could not get value for field: " + rx);
 				  }
 				
+				combo.addItemListener(this);
 				objectHash.put(combo, fields[i]);
+				System.out.println("Adding to panel");
 				addRow(panel, combo, name, i);
 			      }
 			  }
@@ -638,6 +650,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     if (rt == null)
       {
 	System.out.println("rt == null");
+	parent.setStatus("Could not get the result table.");
       }
     else
       {
@@ -646,7 +659,6 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	rt.setResizable(true);
 	rt.setClosable(true);
 	rt.setMaxable(true);
-	rt.addFrameListener(this);
 
 	if (windowCount > 10)
 	  {
@@ -680,6 +692,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	parent.setStatus("Done.");
       }
+    
   }
 
   /**
@@ -691,10 +704,17 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   {
     Enumeration windows = windowList.keys();      
 
-    while (windows.hasMoreElements())
+    try
       {
-	JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
-	w.close();
+	while (windows.hasMoreElements())
+	  {
+	    JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
+	    w.setClosed(true);
+	  }
+      }
+    catch (java.beans.PropertyVetoException ex)
+      {
+	throw new RuntimeException("beans? " + ex);
       }
   }
 
@@ -728,7 +748,14 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  }
 	else
 	  {
-	    w.close();
+	    try
+	      {
+		w.setClosed(true);
+	      }
+	    catch (java.beans.PropertyVetoException ex)
+	      {
+		throw new RuntimeException("beans? " + ex);
+	      }
 	  }
       }
   }
@@ -753,11 +780,85 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
 	if (w.isClosable())
 	  {
-	    w.close();
+	    try
+	      {
+		w.setClosed(true);
+	      }
+	    catch (java.beans.PropertyVetoException ex)
+	      {
+		throw new RuntimeException("beans? " + ex);
+	      }
 	  }
       }
   }
 
+  public void closeWindow(String title)
+    {
+      JInternalFrame w;
+      Enumeration windows;
+      
+      /* -- */
+      
+      parent.setStatus("Closing a window");
+
+      windows = windowList.keys();
+      
+      while (windows.hasMoreElements())
+	{
+	  w = (JInternalFrame)windowList.get(windows.nextElement());
+	  
+	  if (w.getTitle().equals(title))
+	    {
+	      if (w.isClosable())
+		{
+		  try 
+		    {
+		      w.setClosed(true);
+		    }
+		  catch (java.beans.PropertyVetoException ex)
+		    {
+		      throw new RuntimeException("beans? " + ex);
+		    }
+		}
+	      else
+		{
+		  parent.setStatus("You can't close that window.");
+		}
+	      break;
+	    }
+	}
+      
+      parent.setStatus("Done");
+    }
+
+  public void maxWindow(String title)
+    { 
+      JInternalFrame w;
+      Enumeration windows;
+      
+      /* -- */
+      
+      parent.setStatus("Maxing window");
+      
+      windows = windowList.keys();
+      
+      while (windows.hasMoreElements())
+	{
+	  w = (JInternalFrame)windowList.get(windows.nextElement());
+	  
+	  if (w.getTitle().equals(title))
+	    {
+	      try
+		{
+		  w.setMaxed(true);
+		}
+	      catch (java.beans.PropertyVetoException ex)
+		{
+		  throw new RuntimeException("beans? " + ex);
+		}
+	    }
+	}
+    }
   public Menu updateMenu()
   {
     Enumeration windows;
@@ -937,76 +1038,43 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   }
 
   public void itemStateChanged(ItemEvent e)
-  {
-    System.out.println("Item changed: " + e.getItem());
-  }
+    {
+      System.out.println("Item changed: " + e.getItem());
+    }
 
-  public  void frameDidClose(InternalFrameEvent e)
-  {
-    String oldTitle = e.getInternalFrame().getTitle();
+  // This is for the beans, when a JInternalFrame closes
+  public void propertyChange(java.beans.PropertyChangeEvent event)
+    {
+      //System.out.println("propertyChange: " + event.getSource());
+      //System.out.println("getPropertyName: " + event.getPropertyName());
+      //System.out.println("getNewValue: " + event.getNewValue());
 
-    //System.out.println(" Removing button- " + oldTitle);
+      if ((event.getPropertyName().equals("isClosed")) && ((Boolean)event.getNewValue()).booleanValue())
+	{
+	  //System.out.println("It's isClosed and true");
+	  if (event.getSource() instanceof JInternalFrame)
+	    {
+	      //System.out.println("It's a JInternalFrame");
+	      String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
+	      
+	      if (oldTitle == null)
+		{
+		  System.out.println("Title is null");
+		}
+	      else
+		{
+		  //System.out.println(" Removing button- " + oldTitle);
+		  
+		  windowList.remove(oldTitle);
+		  windowBar.removeButton(oldTitle);
+		  updateMenu();
+		}
+	    }
+	}
 
-    windowList.remove(oldTitle);
-    windowBar.removeButton(oldTitle);
-    updateMenu();
-  }
-
-  public  void frameDidMaximize(InternalFrameEvent e)
-  {
-    System.out.println("frameDidMaximize");
-  }
-
-  public  void frameDidMinimize(InternalFrameEvent e)
-  {
-    System.out.println("frameDidMinimize");
-  }
-
-  public  void frameDidIconify(InternalFrameEvent e)
-  {
-    System.out.println("frameDidIconify");
-  }
-
-  public  void frameDidDeiconify(InternalFrameEvent e)
-  {
-    System.out.println("frameDidDeiconify");
-  }
-   
-  public  void frameDidBecomeMain(InternalFrameEvent e)
-  {
-    System.out.println("frameDidBecomeMain");
-  }
-   
-  public  void frameDidLoseMain(InternalFrameEvent e)
-  {
-    System.out.println("frameDidLoseMain");
-  }
-   
-  public  void frameDidSize(InternalFrameEvent e)
-  {
-    System.out.println("frameDidSize");
-  }
-  
-  public  void frameDidMove(InternalFrameEvent e)
-  {
-    System.out.println("frameDidMove");
-  }
-
-  // Convenience methods
-  void addRow(Panel parent, Component comp,  String label, int row)
-  {
-    JLabel l = new JLabel(label);
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
-  }
-
-  void addRow(JPanel parent, Component comp,  String label, int row)
-  {
-    JLabel l = new JLabel(label);
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
-  }
-
+      
+    }
+ 
   void addRow(JComponent parent, Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
