@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -186,6 +186,7 @@ public final class InvidDBField extends DBField implements invid_field {
     else
       {
 	temp = (Invid) value;
+
 	try
 	  {
 	    out.writeShort(temp.getType());
@@ -193,7 +194,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	catch (NullPointerException ex)
 	  {
-	    System.err.println(getName() + ": void value in emit");
+	    System.err.println(owner.getLabel() + ":" + getName() + ": void value in emit");
+
+	    if (temp == null)
+	      {
+		System.err.println(owner.getLabel() + ":" + getName() + ": field value itself is null");
+	      }
+
 	    throw ex;
 	  }
       }
