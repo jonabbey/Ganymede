@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.74 $ %D%
+   Version: $Revision: 1.75 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1531,7 +1531,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result = new DumpResult(fieldDefs);
 
-    QueryResult temp_result = queryDispatch(query, false, false, null);
+    QueryResult temp_result = queryDispatch(query, false, false, null, null);
 
     if (debug)
       {
@@ -1637,7 +1637,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public QueryResult query(Query query)
   {
     checklogin();
-    return queryDispatch(query, false, true, null);
+    return queryDispatch(query, false, true, null, null);
+  }
+
+  /**
+   *
+   * This method is a server-side method for doing object listing
+   * with support for DBEditObject's lookupLabel method.
+   *
+   * @see arlut.csd.ganymede.Query
+   * @see arlut.csd.ganymede.Result
+   *
+   */
+
+  public QueryResult query(Query query, DBEditObject perspectiveObject)
+  {
+    checklogin();
+    return queryDispatch(query, false, true, null, perspectiveObject);
   }
 
   /**
@@ -1655,7 +1671,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public Vector internalQuery(Query query)
   {
     Vector result = new Vector();
-    QueryResult internalResult = queryDispatch(query, true, false, null);
+    QueryResult internalResult = queryDispatch(query, true, false, null, null);
     Invid key;
     String val;
     Enumeration enum;
@@ -1697,7 +1713,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   public synchronized QueryResult queryDispatch(Query query, boolean internal, 
-						boolean forTransport, DBLock extantLock)
+						boolean forTransport, DBLock extantLock,
+						DBEditObject perspectiveObject)
   {
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
@@ -1793,7 +1810,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (node.fieldId == -2)
 	  {
 	    DBObject resultobject = session.viewDBObject((Invid) node.value);
-	    addResultRow(resultobject, query, result, internal);
+	    addResultRow(resultobject, query, result, internal, perspectiveObject);
 	    return result;
 	  }
 
@@ -1871,7 +1888,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    
 		    // addResultRow() will do our permissions checking for us
 
-		    addResultRow(resultobject, query, result, internal);
+		    addResultRow(resultobject, query, result, internal, perspectiveObject);
 		
 		    if (debug)
 		      {
@@ -1951,7 +1968,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		continue;	// try next match
 	      }
 
-	    addResultRow(obj, query, result, internal);
+	    addResultRow(obj, query, result, internal, perspectiveObject);
 	  }
       }
 
@@ -2021,7 +2038,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			    continue;
 			  }
 
-			addResultRow(obj, query, result, internal);
+			addResultRow(obj, query, result, internal, perspectiveObject);
 		      }
 		  }
 	      }
@@ -2050,7 +2067,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
 
-  private final void addResultRow(DBObject obj, Query query, QueryResult result, boolean internal)
+  private final void addResultRow(DBObject obj, Query query, 
+				  QueryResult result, boolean internal,
+				  DBEditObject perspectiveObject)
   {
     PermEntry perm;
 
@@ -2076,8 +2095,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (debug)
       {
-	Ganymede.debug("Query: " + username + " : adding element " +
-		       obj.getLabel() + ", invid: " + obj.getInvid());
+	if (perspectiveObject == null)
+	  {
+	    Ganymede.debug("Query: " + username + " : adding element " +
+			   obj.getLabel() + ", invid: " + obj.getInvid());
+	  }
+	else
+	  {
+	    Ganymede.debug("Query: " + username + " : adding element " +
+			   perspectiveObject.lookupLabel(obj) + ", invid: " + obj.getInvid());
+	  }
       }
     
     if (internal || !query.filtered || filterMatch(obj))
@@ -2094,8 +2121,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		// nope, go ahead and return the object as we found it in the
 		// main hash
-		
-		result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+
+		if (perspectiveObject == null)
+		  {
+		    result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+		  }
+		else
+		  {
+		    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), perm.isEditable());
+		  }
 	      }
 	    else
 	      {
@@ -2110,7 +2144,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    
 		    if (DBQueryHandler.matches(query, x))
 		      {
-			result.addRow(x.getInvid(), x.getLabel(), true);
+			if (perspectiveObject == null)
+			  {
+			    result.addRow(x.getInvid(), x.getLabel(), true);
+			  }
+			else
+			  {
+			    result.addRow(x.getInvid(), perspectiveObject.lookupLabel(x), true);
+			  }
 			// we must be able to edit it, since it's checked out
 		      }
 		  }
@@ -2122,7 +2163,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // about us having a different version of the object open
 	    // in our transaction
 	    
-	    result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+	    if (perspectiveObject == null)
+	      {
+		result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+	      }
+	    else
+	      {
+		result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), perm.isEditable());
+	      }
 	  }
       }
   }
@@ -2775,6 +2823,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObject localObj;
     InvidDBField inf = null;
     Invid inv = null;
+    int loopcount = 0;
 
     /* -- */
 
@@ -2790,7 +2839,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (inf == null)
 	  {
 	    setLastError("getContainingObj() error.. couldn't find owner of embedded object " + 
-			 object.getLabel());
+			 localObj.getLabel());
 	    localObj = null;
 	    break;
 	  }
@@ -2799,13 +2848,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (inv == null)
 	  {
-	    setLastError("getContainingObj() error <2>.. couldn't find owner of embedded object " + 
-			 object.getLabel());
+	    setLastError("getContainingObj() error <2:" + loopcount + ">.. couldn't find owner of embedded object " + 
+			 localObj.getLabel());
 	    localObj = null;
 	    break;
 	  }
 
 	localObj = session.viewDBObject(inv);
+	loopcount++;
       }
 
     if (localObj == null)
