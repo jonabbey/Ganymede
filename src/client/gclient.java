@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.176 $
-   Last Mod Date: $Date: 2000/10/09 06:11:55 $
+   Version: $Revision: 1.177 $
+   Last Mod Date: $Date: 2000/10/09 06:21:33 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.176 $ $Date: 2000/10/09 06:11:55 $ $Name:  $
+ * @version $Revision: 1.177 $ $Date: 2000/10/09 06:21:33 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/10/09 06:11:55 $";
+  static String release_date = "$Date: 2000/10/09 06:21:33 $";
   static String release_number = null;
 
   // ---
@@ -1084,10 +1084,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    m = session.getMessageHTML("motd", true);
 
+	    // if there wasn't an html motd message, maybe there's a
+	    // txt message?
+
 	    if (m == null)
 	      {
 		m = session.getMessage("motd", true);
 		html = false;
+	      }
+
+	    // if we didn't get any message, fold it up, we're done
+
+	    if (m == null)
+	      {
+		return;
 	      }
 
 	    // and pop up the motd box back on the main GUI thread
