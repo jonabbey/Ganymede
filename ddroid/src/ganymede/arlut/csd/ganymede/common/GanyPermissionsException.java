@@ -1,6 +1,6 @@
 /*
 
-   DDParseException.java
+   GanyPermissionsException.java
  
    Created: 27 August 2004
    Last Mod Date: $Date$
@@ -53,24 +53,24 @@ package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
-								DDParseException
+                                                        GanyPermissionsException
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Ganymede-specific RemoteException subclass that
- * can be thrown by the server if a parse method is called with a
- * string that does not match the parser's grammar.</p>
+ * <p>This is a Ganymede-specific RemoteException subclass that can be
+ * thrown by the server if a method is called which can cause a reject due to
+ * permissions failure.</p>
  */
 
-public class DDParseException extends java.rmi.RemoteException {
+public class GanyPermissionsException extends java.rmi.RemoteException {
 
-  public DDParseException()
+  public GanyPermissionsException()
   {
     super();
   }
 
-  public DDParseException(String s)
+  public GanyPermissionsException(String s)
   {
     super(s);
   }
