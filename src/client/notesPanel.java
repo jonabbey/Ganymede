@@ -5,8 +5,8 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/04/01 22:16:41 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/07/27 02:12:58 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -116,7 +116,22 @@ public class notesPanel extends JPanel implements KeyListener {
     EmptyBorder eb = fp.wp.emptyBorder5;
     TitledBorder tb = new TitledBorder("Notes");
     notesArea.setBorder(new CompoundBorder(tb,eb));
-    notesArea.setEditable(editable);
+    
+    boolean local_editable = editable;
+
+    if (local_editable)
+      {
+	try
+	  {
+	    local_editable = notes_field.isEditable();
+	  }
+	catch (RemoteException ex)
+	  {
+	    local_editable = false;
+	  }
+      }
+
+    notesArea.setEditable(local_editable);
     notesArea.addKeyListener(this);
     
     JScrollPane notesScroll = new JScrollPane(notesArea);

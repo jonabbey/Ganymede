@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2001/07/27 01:44:21 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2001/07/27 02:12:57 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.67 $ $Date: 2001/07/27 01:44:21 $ $Name:  $
+ * @version $Revision: 1.68 $ $Date: 2001/07/27 02:12:57 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -964,7 +964,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     expiration_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    exp_date_panel = new datePanel(exp_field, "Expiration date", editable, this);
+    boolean local_editable = editable;
+
+    if (local_editable)
+      {
+	try
+	  {
+	    local_editable = exp_field.isEditable();
+	  }
+	catch (RemoteException ex)
+	  {
+	    local_editable = false;
+	  }
+      }
+
+    exp_date_panel = new datePanel(exp_field, "Expiration date", local_editable, this);
     expiration_date.setViewportView(exp_date_panel);
     
     createdList.addElement(new Integer(expiration_date_index));
@@ -1008,9 +1022,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
       }
 
+    boolean local_editable = editable;
+
+    if (local_editable)
+      {
+	try
+	  {
+	    local_editable = rem_field.isEditable();
+	  }
+	catch (RemoteException ex)
+	  {
+	    local_editable = false;
+	  }
+      }
+
     removal_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    rem_date_panel = new datePanel(rem_field, "Removal date", editable, this);
+    rem_date_panel = new datePanel(rem_field, "Removal date", local_editable, this);
     removal_date.setViewportView(rem_date_panel);
 	  
     createdList.addElement(new Integer(removal_date_index));
