@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:04:15 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/01/29 20:17:28 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -106,18 +106,19 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JPanel topPanel = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel(false);
 
-    JPanel leftPanel = new JPanel(false);
-    leftPanel.add(new JLabel("Restrict dates:"));
-    selectDate = new JdateField();
-    selectDate.setCallback(this);
-    leftPanel.add(selectDate);
-    
-    buttonPanel.add(leftPanel);
-      
     showHistory = new JButton("Show history");
     showHistory.addActionListener(this);
     
     buttonPanel.add(showHistory);
+
+    JPanel rightPanel = new JPanel(false);
+    rightPanel.add(new JLabel("Since:"));
+    selectDate = new JdateField();
+    selectDate.setCallback(this);
+    rightPanel.add(selectDate);
+    
+    buttonPanel.add(rightPanel);
+
     topPanel.add("North", new datesPanel(creator_field, creation_date_field, 
 					 modifier_field, modification_date_field));
     

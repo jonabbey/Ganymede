@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 1999/01/29 05:08:52 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 1999/01/29 20:17:27 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
