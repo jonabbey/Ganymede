@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/10/26 08:55:48 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/10/26 09:00:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -603,6 +603,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (nextItem instanceof XMLError || nextItem instanceof XMLEndDocument)
 	  {
+	    startingItem.dissolve();
 	    children = null;
 	    return nextItem;
 	  }
