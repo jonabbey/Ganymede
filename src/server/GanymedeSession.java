@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -389,14 +389,15 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    *
    */
 
-  public synchronized StringBuffer dump(Query query)
+  public synchronized DumpResult dump(Query query)
   {
-    StringBuffer buffer = new StringBuffer();
+    DumpResult result;
     DBObjectBase base = null;
     Vector baseLock = new Vector();
     Enumeration enum;
     Integer key;
     DBObject obj;
+
 
     /* -- */
 
@@ -440,7 +441,27 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : got read lock");
 
-    buffer.append(base.dump(this, query.permitList));
+    Vector fieldDefs = new Vector();
+    DBObjectBaseField field;
+    
+    for (int i = 0; i < base.sortedFields.size(); i++)
+      {
+	field = (DBObjectBaseField) base.sortedFields.elementAt(i);
+	
+	if (query.permitList == null)
+	  {
+	    if (!field.isBuiltIn())
+	      {	    
+		fieldDefs.addElement(field);
+	      }
+	  }
+	else if (query.permitList.get(field.getKey()) != null)
+	  {
+	    fieldDefs.addElement(field);
+	  }
+      }
+
+    result = new DumpResult(fieldDefs);
 
     enum = base.objectHash.keys();
 
@@ -453,8 +474,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
-	    //    Ganymede.debug("Dump Query: " + username + " : adding element " + obj.getLabel());
-	    buffer.append(obj.dump(this, query.permitList));
+	    result.addRow(obj);
 	  }
       }
 
@@ -468,7 +488,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : released read lock");
 
-    return buffer;
+    return result;
   }
 
   /**
