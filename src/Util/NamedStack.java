@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/10/02 20:13:07 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/10/02 20:17:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -116,6 +116,30 @@ public class NamedStack {
       }
 
     return handle.getData();
+  }
+
+  public Object elementAt(int index)
+  {
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
+
+    if (handle == null)
+      {
+	return null;
+      }
+
+    return handle.getData();
+  }
+
+  public String nameAt(int index)
+  {
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
+
+    if (handle == null)
+      {
+	return null;
+      }
+
+    return handle.getName();
   }
 
   /**
