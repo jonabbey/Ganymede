@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1725,6 +1725,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	break;
 
       case STRING:
+
 	result = "string <min: " + minLength + ", max:" + maxLength + ">";
 	
 	if (okChars != null)
@@ -1803,7 +1804,6 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 		    throw new RuntimeException("caught remote: " + ex);
 		  }
 	      }
-
 	  }
 	
 	break;
@@ -1838,6 +1838,186 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       {
 	return result;
       }
+  }
+
+  /**
+   *
+   * This method is intended to produce a human readable
+   * representation of this field definition's type attributes.  This
+   * method should not be used programatically to determine this
+   * field's type information.
+   *
+   * This method is only for human elucidation, and the precise
+   * results returned are subject to change at any time.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public String getTypeDescHTML()
+  {
+    String result;
+
+    switch (field_type)
+      {
+      case BOOLEAN:
+	result = "<td>boolean</td>";
+	break;
+
+      case NUMERIC:
+	result = "<td>numeric</td>";
+	break;
+
+      case DATE:
+	result = "<td>date</td>";
+	break;
+
+      case STRING:
+	result = "<td>string</td>";
+	break;
+
+      case INVID:
+	result = "<td>invid</td>";
+	break;
+
+      case PERMISSIONMATRIX:
+	result = "<td>permission matrix</td>";
+	break;
+
+      case PASSWORD:
+	result = "<td>password</td>";
+	break;
+
+      case IP:
+	result = "<td>i.p. field</td>";
+	break;
+
+      default:
+	result = "<td>&lt;&lt;bad type code&gt;&gt;</td>";
+      }
+
+    if (array)
+      {
+	result += "<td>[0.." + (limit-1) + "]</td>";
+      }
+    else
+      {
+	result += "<td><FONT COLOR=\"#FF0000\">N</font></td>";
+      }
+
+    if (namespace != null)
+      {
+	result += "<td>" + namespace.getName() + "</td>";
+      }
+    else
+      {
+	result += "<td><FONT COLOR=\"#FF0000\">N</font></td>";
+      }
+
+    // generate the notes field
+
+    result += "<td>";
+
+    switch (field_type)
+      {
+      case STRING:
+
+	result += "min: " + minLength + ", max: " + maxLength;
+
+	if (okChars != null)
+	  {
+	    result += " okChars: '" + okChars + "'";
+	  }
+
+	if (badChars != null)
+	  {
+	    result += " badChars: '" + badChars + "'";
+	  }
+	
+	if (caseInsensitive)
+	  {
+	    result += " case insensitive"; 
+	  }
+	else
+	  {
+	    result += " case sensitive"; 
+	  }
+
+	break;
+	
+      case INVID:
+
+	if (editInPlace)
+	  {
+	    result += "edit-in-place ";
+	  }
+
+	if (allowedTarget >= 0)
+	  {
+	    DBObjectBase refBase;
+
+	    refBase = base.store.getObjectBase(allowedTarget);
+	    result += "targets [" + refBase.getName() + "] ";
+
+	    if (targetField != -1)
+	      {
+		try
+		  {
+		    result += "reverse link [" + refBase.getField(targetField).getName() + "] ";
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+	      }
+	  }
+	else if (allowedTarget == -1)
+	  {
+	    result += "targets [any]";
+	  }
+	else if (allowedTarget == -2)
+	  {
+	    result += "targets [any] ";
+
+	    // if allowed Target == -2 and targetField != -1, we assume
+	    // that we've got a field that's guaranteed to be present in
+	    // all bases, including our parent.
+	    
+	    if (targetField != -1)
+	      {
+		try
+		  {
+		    result += "reverse link [" + base.getField(targetField).getName() + "] ";
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+	      }
+
+	  }
+	break;
+
+      case PASSWORD:
+
+	if (crypted)
+	  {
+	    result += "crypted";
+	  }
+	break;
+
+      default:
+	break;
+      }
+    
+    result += "</td>";
+    return result;
+  }
+
+  public void printHTML(PrintWriter out)
+  {
+    out.print("<td>" + field_name + "</td><td>" + field_code + "</td>");
+    out.print(getTypeDescHTML());
+    out.println();
   }
 
   public void print(PrintWriter out, String indent)
