@@ -13,6 +13,11 @@ The commitPhase2() method in userCustom for the gasharl schema now
 calls out to 'directory_namer' and 'directory_maker' to handle
 external actions when users are renamed or created.
 
+Added system event types 'userrenamed' and 'usermoved' added to the
+gasharl ganymede.schema file.  Users of the gasharl schema kit should
+generate system event objects for these event types if you want to use
+a ganymede.db file from a previous release of the gasharl schema kit.
+
 2. [CLIENT] Fixed client behavior on catastrophic transaction commit failure
 
 The client wasn't properly getting rid of any edit windows if a
@@ -29,19 +34,175 @@ Using the GanymedeSession query mechanism will very likely bring the
 server into deadlock, as I discovered.  Documented this in the DBEditObject
 subclassing guide, as well as the javadocs for those methods.
 
-4. [SCHEMA] Fixed a lingering wizard registration bug in gasharl schema
+4. [SERVER] Revised GanymediatorWizard spec, logic
 
-The gasharl schema's userCategoryWizard was not properly unregistering
-itself from the client's GanymedeSession when it determined that it
-did not need to run in getStartDialog(), which caused other wizards
-(such as the user rename wizard) to refuse to run, thinking that an
-incompatible active wizard was in progress.
+In 0.99.4 and before, the GanymediatorWizard logic depended on the
+custom wizard author writing a getStartDialog() method that had to
+be smart enough to unregister() itself if no further interaction
+with the user was needed.  It was very, very easy to not do this,
+and so leave the client's GanymedeSession with a registered wizard
+blocking further activities.
 
-It is critical that GanymediatorWizard subclasses' getStartDialog()
-methods unregister() themselves if they decide that they do not wish
-to interact with the user after wizard construction.  I added a
-comment to GanymediatorWizard's getStartDialog() method header to this
-effect.
+To prevent this problem, I have deprecated getStartDialog() in
+favor of a processDialog0() method to start the wizard sequence.  This
+has the advantage that the GanymediatorWizard's respond() method
+will automatically unregister a wizard that no longer needs to talk
+to the user.
+
+This is an incompatible change in the GanymediatorWizard class that
+will break existing wizard-using custom code, but fixing this now
+will make wizard use far more reliable, and it would only be harder
+to fix this later.
+
+I don't expect many (any?) folks outside of ARL have written wizards
+for use with custom schemas yet.  For those who are interested, the
+GanymediatorWizard javadoc header now has some hopefully usable
+documentation on how to do this.
+
+Modified all wizard code in all of the included schema kits (not
+counting the not-maintained ganymede.only schema) to use the modern
+wizard support code.
+
+5. [SERVER] Made transaction commit, abort clear active wizard
+
+Another fix to help keep wizards from getting stuck.. aborting or
+committing a transaction will now clear any wizard from registration
+with the GanymedeSession object.
+
+6. [SERVER] Improved lock system to prevent intra-thread deadlock
+
+Modified the DBSession and DBEditSet lock handling code to help insure
+that the server can't be deadlocked by a thread attempting to
+establish a lock when it already holds one that would cause the new
+lock establish() to deadlock the server.
+
+This should only be an issue in terms of deadlock brought about during
+transaction commit through errors in custom-plugin development.. the
+existing system already prevented deadlocks between threads.  Now the
+server will report an intra-thread lock error rather than simply
+dead-locking.
+
+Note that this deadlock prevention is in the form of an
+InterruptedException being thrown, rather than permissive
+lock-sharing.. the reason for this is that the operations that require
+a read or dump lock (such as a query) will not be able to provide
+transaction-consistent results when called from within a transaction
+commit.
+
+This change is entirely for the purpose of making the server more
+friendly to customizers, and should not have any significant effect on
+normal server operations.
+
+7. [CLIENT] Fixed password handling in dialogs passed to the client
+
+Wizards that asked the client for a new password value (as in the user
+reactivation wizard in the gasharl schema) were not able to get a
+password back because the password field logic in StringDialog and
+JpassField was not working properly.
+
+Wizards can now request a new password from the client properly.
+
+8. [SERVER] Changed dump process to be safer
+
+Previously, the server would dump the database by first renaming the
+old on-disk database to ganymede.db.bak, and then write the current
+in-memory database to ganymede.db.
+
+This meant that if the server was killed while writing out the
+database, there would be an incomplete ganymede.db file in place,
+which would require the admin to manually recover from the
+ganymede.db.bak file.  Things would always be recoverable, but it
+wasn't an automatic process.
+
+Now, the ganymede.db file is not renamed until the server has
+completed dumping out its new dump, which is called ganymede.db.new
+during the dump.
+
+There are still one very narrow opportunity for stopping the server at
+a point in which the server can't recover on its own at restart, but
+the odds of this occuring are infinitesimally low now.. only if the
+server is killed after it has renamed ganymede.db to ganymede.db.bak
+and before it has renamed ganymede.db.new to ganymede.db will the
+server be unable to properly recover on start-up.
+
+This change does slightly increase the amount of disk space needed
+during operations, as the system needs to have enough disk space for
+three versions of ganymede.db at a time during a database dump.
+
+Thanks to Darrell Tippe, <Darrell.Tippe@atcoitek.com>, for reporting
+the problem.
+
+9. [SERVER] Made DBObjectBase explicitly record max object id
+
+The Ganymede server in some cases could erroneously re-use an Invid.
+
+This could occur if an object was deleted, and the server was
+restarted before another object of that type could be created.  The
+server now explicitly records the maximum object id seen for
+each object type in the ganymede.db file.
+
+This change bumps the DBStore revision numbers to
+
+	major: 1
+	minor: 12
+
+10. [SERVER] Seriously Improved Logging, Mailouts Systems
+
+Reworked lots and lots code in DBLog.java, DBEditObject.java, and
+DBEditSet.java to make all of the transaction logging stuff work
+right.
+
+--
+
+Mail-related exceptions will no longer cause transactions to fail to
+commit.. the server will report the mailer error, but continue with
+normal processing.
+
+--
+
+Modified the Qstmp class so that it can queue messages for sending on
+a background thread.. the extensive mail-outs in the revised logging
+system was noticeably slowing down transaction commits.
+
+All e-mail messages sent out by the DBLog class will be done without
+blocking the logging thread.
+
+--
+
+The DBEditSet class now does transactional event logging after a
+transaction's objects have had all of their commitPhase2() methods
+called.  This change makes it possible for a commitPhase2() method to
+send mail out.
+
+--
+
+Added variants of DBSession.viewDBObject() that will automatically
+retrieve the original version of a DBObject that is being deleted by
+the current transaction.  Useful for getting the original version of
+an object during transaction commit from the object's Invid.
+
+--
+
+Added a getLabel() override to DBEditObject.java that will
+automatically return the object's pre-deletion label if the
+object is being deleted and the DBObject getLabel() routine
+returns null.
+
+--
+
+Added standard methods to allow custom objects to identify email
+addresses that should be notified when changes are made to them.
+Useful for making sure that users get cc:'ed on any changes made to
+their account, etc.
+
+These methods are documented in the DBEditObject subclassing guide,
+and are used by the logging system.
+
+11. [CLIENT] Added tooltip support to checkboxes, other GUI field types
+
+A number of the GUI field types supported by the clients were not
+being added to containerPanel with any registered field comments set
+as tooltips.  Fixed.
 
 -------------------- Changes from 0.99.3 to 0.99.4 -------------------
 
