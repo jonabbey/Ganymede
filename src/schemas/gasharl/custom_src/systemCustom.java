@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/11/02 23:42:36 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 1999/11/03 01:25:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -588,6 +588,37 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     // nets are full, we'll remove that network from netsInRoom to
     // mark that net as not being usable for a new address
 
+    // default IP host-byte scan pattern 
+
+    int start = 1;
+    int stop = 254;
+
+    // first see if we have an attached system type which modifies our IP
+    // search pattern
+
+    try
+      {
+	Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
+	DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
+	
+	if (systemTypeInfo != null)
+	  {
+	    start = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
+	    stop = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
+
+	    if (debug)
+	      {
+		System.err.println("systemCustom.getIPAddress(): found start and stop for this type: " + 
+				   start + "->" + stop);
+	      }
+	  }
+      }
+    catch (NullPointerException ex)
+      {
+	System.err.println("systemCustom.getIPAddress(): null pointer exception trying to get system type info");
+      }
+
+
     Enumeration enum = localAddresses.keys();
 
     while (enum.hasMoreElements())
@@ -600,7 +631,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 			       getGSession().viewObjectLabel(netInvid));
 	  }
 
-	address = getIPAddress(netInvid);
+	address = getIPAddress(netInvid, start, stop);
 
 	if (address != null)
 	  {
@@ -732,16 +763,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * @return An IP address if one could be allocated, null otherwise
    */
 
-  private Byte[] getIPAddress(Invid netInvid)
+  private Byte[] getIPAddress(Invid netInvid, int start, int stop)
   {
     // the namespace being used to manage the IP address space
 
     DBNameSpace namespace = Ganymede.db.getNameSpace("IPspace");
-
-    // default IP host-byte scan pattern 
-
-    int start = 1;
-    int stop = 254;
 
     /* -- */
 
@@ -769,31 +795,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
 
     // ok, we've got our net prefix.. try to find an open slot..
-
-    // first see if we have an attached system type which modifies our IP
-    // search pattern
-
-    try
-      {
-	Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
-	DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
-	
-	if (systemTypeInfo != null)
-	  {
-	    start = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
-	    stop = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
-
-	    if (debug)
-	      {
-		System.err.println("systemCustom.getIPAddress(): found start and stop for this type: " + 
-				   start + "->" + stop);
-	      }
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("systemCustom.getIPAddress(): null pointer exception trying to get system type info");
-      }
 
     int i = start;
     address[3] = new Byte(u2s(i));
