@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.53 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.54 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -211,10 +211,13 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   /**
    *
    * This is a view-copy constructor, designed to make a view-only
-   * duplicate of an object from the database.  This view-only object knows who
-   * is looking at it through its GanymedeSession reference, and so can properly
-   * enforce field access permissions.
-   * 
+   * duplicate of an object from the database.  This view-only object
+   * knows who is looking at it through its GanymedeSession reference,
+   * and so can properly enforce field access permissions.<br><br>
+   *
+   * &lt;gSession&gt; may be null, in which case the returned DBObject
+   * will be simply an un-linked fresh copy of &lt;original&gt;.
+   *
    */
 
   public DBObject(DBObject original, GanymedeSession gSession) throws RemoteException
