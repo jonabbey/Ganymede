@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2002/03/13 18:04:51 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2002/03/13 18:10:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -822,16 +822,16 @@ public class DBEditSet {
 	
 	switch (obj.getStatus())
 	  {
-	  case DBEditObject.CREATING:
-	  case DBEditObject.DROPPING:
+	  case ObjectStatus.CREATING:
+	  case ObjectStatus.DROPPING:
 	    obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
 
 	    session.GSession.checkIn();
 	    obj.getBase().store.checkIn(); // update checked out count
 	    break;
 		
-	  case DBEditObject.EDITING:
-	  case DBEditObject.DELETING:
+	  case ObjectStatus.EDITING:
+	  case ObjectStatus.DELETING:
 		
 	    // note that clearShadow updates the checked out count for us.
 		
@@ -1068,8 +1068,8 @@ public class DBEditSet {
       {
 	eObj = (DBEditObject) enum.nextElement();
 
-	if (eObj.getStatus() == DBEditObject.DELETING ||
-	    eObj.getStatus() == DBEditObject.DROPPING)
+	if (eObj.getStatus() == ObjectStatus.DELETING ||
+	    eObj.getStatus() == ObjectStatus.DROPPING)
 	  {
 	    continue;
 	  }
@@ -1185,7 +1185,7 @@ public class DBEditSet {
 	
 	switch (eObj.getStatus())
 	  {
-	  case DBEditObject.CREATING:
+	  case ObjectStatus.CREATING:
 	    
 	    if (!eObj.isEmbedded())
 	      {
@@ -1198,7 +1198,7 @@ public class DBEditSet {
 	    
 	    // * fall-through *
 	    
-	  case DBEditObject.EDITING:
+	  case ObjectStatus.EDITING:
 		    
 	    if (!eObj.isEmbedded())
 	      {
@@ -1257,8 +1257,8 @@ public class DBEditSet {
 
 	switch (eObj.getStatus())
 	  {
-	  case DBEditObject.CREATING:
-	  case DBEditObject.EDITING:
+	  case ObjectStatus.CREATING:
+	  case ObjectStatus.EDITING:
 
 	    // we need to update DBStore.backPointers to take into account
 	    // the changes made to this object.
@@ -1285,7 +1285,7 @@ public class DBEditSet {
 
 	    break;
 
-	  case DBEditObject.DELETING:
+	  case ObjectStatus.DELETING:
 
 	    // we need to update DBStore.backPointers to take into account
 	    // the changes made to this object.
@@ -1311,7 +1311,7 @@ public class DBEditSet {
 	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 
-	  case DBEditObject.DROPPING:
+	  case ObjectStatus.DROPPING:
 
 	    // don't need to update backpointers, since this object was
 	    // created and destroyed within this transaction
@@ -1431,7 +1431,7 @@ public class DBEditSet {
 
     switch (eObj.getStatus())
       {
-      case DBEditObject.EDITING:
+      case ObjectStatus.EDITING:
 
 	invids = new Vector();
 	invids.addElement(eObj.getInvid());
@@ -1511,7 +1511,7 @@ public class DBEditSet {
 		    
 	break;
 
-      case DBEditObject.CREATING:
+      case ObjectStatus.CREATING:
 
 	invids = new Vector();
 	invids.addElement(eObj.getInvid());
@@ -1593,7 +1593,7 @@ public class DBEditSet {
 
 	break;
 
-      case DBEditObject.DELETING:
+      case ObjectStatus.DELETING:
 
 	invids = new Vector();
 	invids.addElement(eObj.getInvid());
@@ -1929,8 +1929,8 @@ public class DBEditSet {
 	
 	switch (eObj.getStatus())
 	  {
-	  case DBEditObject.CREATING:
-	  case DBEditObject.DROPPING:
+	  case ObjectStatus.CREATING:
+	  case ObjectStatus.DROPPING:
 	    eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
 
 	    if (getGSession() != null)
@@ -1941,8 +1941,8 @@ public class DBEditSet {
 	    eObj.getBase().store.checkIn(); // update checked out count
 	    break;
 
-	  case DBEditObject.EDITING:
-	  case DBEditObject.DELETING:
+	  case ObjectStatus.EDITING:
+	  case ObjectStatus.DELETING:
 
 	    // note that clearShadow updates the checked out count for us.
 
