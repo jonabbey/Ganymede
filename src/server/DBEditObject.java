@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.158 $
-   Last Mod Date: $Date: 2001/11/05 21:59:28 $
+   Version: $Revision: 1.159 $
+   Last Mod Date: $Date: 2001/12/04 07:03:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.158 $ $Date: 2001/11/05 21:59:28 $ $Name:  $
+ * @version $Revision: 1.159 $ $Date: 2001/12/04 07:03:35 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1844,15 +1844,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * any vector delete operation, and to take any special actions in
    * reaction to the delete.. if this method returns null or a success
    * code in its ReturnVal, the {@link arlut.csd.ganymede.DBField DBField}
-   * that called us will proceed to
+   * that called us is guaranteed to proceed to
    * make the change to its vector.  If this method returns a
    * non-success code in its ReturnVal, the DBField that called us
    * will not make the change, and the field will be left
    * unchanged.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.</p>
+   * <p>The &lt;field&gt; parameter identifies the field that is requesting
+   * approval for item deletion, and the &lt;index&gt; parameter identifies
+   * the element number that is to be deleted.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
    */
 
   public ReturnVal finalizeDeleteElement(DBField field, int index)
@@ -1861,18 +1866,24 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method allows the DBEditObject to have executive approval of
-   * any vector-vector removal operation, and to take any special actions in
-   * reaction to the removal.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its vector.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
-   * unchanged.</p>
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector-vector removal operation, and to take any special
+   * actions in reaction to the removal.. if this method returns null
+   * or a success code in its ReturnVal, the DBField that called us is
+   * guaranteed to proceed to make the change to its vector.  If this
+   * method returns a non-success code in its ReturnVal, the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.</p>
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the
+   * &lt;valuesToDelete&gt; parameter contains a list of elements to
+   * be deleted.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under standard circumstances, we won't need
+   * to do anything here.</p>
    */
 
   public ReturnVal finalizeDeleteElements(DBField field, Vector valuesToDelete)
@@ -1881,18 +1892,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method allows the DBEditObject to have executive approval of
-   * any vector add operation, and to take any special actions in
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector add operation, and to take any special actions in
    * reaction to the add.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its vector.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
+   * code in its ReturnVal, the DBField that called us is guaranteed
+   * to proceed to make the change to its vector.  If this method
+   * returns a non-success code in its ReturnVal, the DBField that
+   * called us will not make the change, and the field will be left
    * unchanged.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.</p>
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;value&gt;
+   * parameter carries the value to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
    */
 
   public ReturnVal finalizeAddElement(DBField field, Object value)
@@ -1901,18 +1917,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method allows the DBEditObject to have executive approval of
-   * any vector-vector add operation, and to take any special actions in
-   * reaction to the add.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its vector.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
-   * unchanged.</p>
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector-vector add operation, and to take any special
+   * actions in reaction to the add.. if this method returns null or a
+   * success code in its ReturnVal, the DBField that called us is
+   * guaranteed to proceed to make the change to its vector.  If this
+   * method returns a non-success code in its ReturnVal, the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.</p>
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;submittedValues&gt;
+   * parameter carries the values to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
    */
 
   public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
@@ -1921,18 +1942,25 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method allows the DBEditObject to have executive approval of
-   * any vector set operation, and to take any special actions in
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector set operation, and to take any special actions in
    * reaction to the set.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its vector.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
+   * code in its ReturnVal, the DBField that called us is guaranteed
+   * to proceed to make the change to its vector.  If this method
+   * returns a non-success code in its ReturnVal, the DBField that
+   * called us will not make the change, and the field will be left
    * unchanged.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.</p>
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, the &lt;index&gt;
+   * parameter identifies which element in the given vector field is
+   * to be set, and the &lt;value&gt; parameter carries the proposed
+   * new value.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
    */
 
   public ReturnVal finalizeSetElement(DBField field, int index, Object value)
@@ -1941,19 +1969,41 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method allows the DBEditObject to have executive approval of
-   * any scalar set operation, and to take any special actions in
-   * reaction to the set.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its value.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
-   * unchanged.</p>
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including a call to our own verifyNewValue()
-   * method.  Under normal circumstances, we won't need to do anything
-   * here.</p>
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
+   *
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
