@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,38 +39,52 @@ class DBDumpLock extends DBLock {
 
   static final boolean debug = true;
 
-  DBStore lockManager;
-  boolean done, okay;
-  DBObjectBase base;
-  Vector baseSet;
-  Object key;
-  
-  private boolean locked;
+  private Object key;
+  private DBStore lockManager;
+  private Vector baseSet;
+  private boolean 
+    locked = false,
+    abort = false, 
+    inEstablish = false;
 
   /* -- */
+
+  /**
+   *
+   * constructor to get a dump lock on all the object bases
+   *
+   */
 
   public DBDumpLock(DBStore lockManager)
   {
     Enumeration enum;
+    DBObjectBase base;
 
     /* -- */
 
     this.lockManager = lockManager;
     baseSet = new Vector();
 
-    enum = lockManager.objectBases.elements();
-	    
-    while (enum.hasMoreElements())
+    synchronized (lockManager)
       {
-	base = (DBObjectBase) enum.nextElement();
-	baseSet.addElement(base);
-      }    
+	enum = lockManager.objectBases.elements();
+	    
+	while (enum.hasMoreElements())
+	  {
+	    base = (DBObjectBase) enum.nextElement();
+	    baseSet.addElement(base);
+	  }    
+      }
 
     locked = false;
   }
 
-  // constructor to get a dump lock on a subset of the
-  // object bases.
+  /**
+   *
+   * constructor to get a dump lock on a subset of the
+   * object bases.
+   *
+   */
 
   public DBDumpLock(DBStore lockManager, Vector baseSet)
   {
@@ -80,31 +94,64 @@ class DBDumpLock extends DBLock {
     locked = false;
   }
 
+  /**
+   *
+   * Establish a dump lock on bases specified in this DBDumpLock's
+   * constructor.  Can throw InterruptedException if another thread
+   * orders us to abort() while we're waiting for permission to
+   * proceed with reads on the specified baseset.
+   *
+   */
+
   public void establish(Object key) throws InterruptedException
   {
-    done = false;
+    boolean done, okay;
+    DBObjectBase base;
 
-    if (lockManager.lockHash.containsKey(key))
-      {
-	throw new RuntimeException("Error: lock sought by owner of existing lockset.");
-      }
-
-    lockManager.lockHash.put(key, this);
-    this.key = key;
+    /* -- */
 
     synchronized (lockManager)
       {
-	// add ourselves to the ObjectBase dump queues
+	done = false;
+
+	if (lockManager.lockHash.containsKey(key))
+	  {
+	    throw new RuntimeException("Error: lock sought by owner of existing lockset.");
+	  }
+
+	lockManager.lockHash.put(key, this);
+	this.key = key;
+	inEstablish = true;
+
+	// add ourselves to the ObjectBase dump queues..
+	// we don't have to wait for anything to do this.. it's
+	// up to the writers to hold off on adding themselves to
+	// the writerlists until the dumperlist is empty.
 
 	for (int i = 0; i < baseSet.size(); i++)
 	  {
 	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.dumperList.addElement(this);
+	    base.addDumper(this);
 	  }
 
 	while (!done)
 	  {
 	    okay = true;
+
+	    if (abort)
+	      {
+		for (int i = 0; i < baseSet.size(); i++)
+		  {
+		    base = (DBObjectBase) baseSet.elementAt(i);
+		    base.removeDumper(this);
+		  }
+		
+		inEstablish = false;
+		key = null;
+		lockManager.lockHash.remove(key);
+		lockManager.notifyAll();
+		throw new InterruptedException();
+	      }
 
 	    if (lockManager.schemaEditInProgress)
 	      {
@@ -116,12 +163,16 @@ class DBDumpLock extends DBLock {
 		  {
 		    base = (DBObjectBase) baseSet.elementAt(i);
 
-		    if (base.writerList.size() > 0 || base.dumpInProgress)
+		    if (!base.isWriterEmpty() || base.dumpInProgress)
 		      {
 			okay = false;
 		      }
 		  }
 	      }
+
+	    // if okay, we know that none of the bases we're concerned
+	    // with have writers queued or dumps in progress.. we can
+	    // go ahead and lock the bases.
 
 	    if (okay)
 	      {
@@ -142,27 +193,62 @@ class DBDumpLock extends DBLock {
 		  }
 		catch (InterruptedException ex)
 		  {
+		    for (int i = 0; i < baseSet.size(); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+			base.removeDumper(this);
+		      }
+		    lockManager.lockHash.remove(key);
+		    lockManager.notifyAll();
+		    throw ex;
 		  } 
 	      }
 	  }
-      }
 
-    locked = true;
+	inEstablish = false;
+	locked = true;
+	lockManager.notifyAll(); // let a thread trying to release this lock proceed
+
+      } // synchronized (lockManager)
   }
+
+  /**
+   *
+   * Release this lock on all bases locked
+   *
+   */
 
   public void release()
   {
-    if (!locked)
-      {
-	return;
-      }
+    DBObjectBase base;
+
+    /* -- */
 
     synchronized (lockManager)
       {
+	while (inEstablish)
+	  {
+	    try
+	      {
+		lockManager.wait();
+	      } 
+	    catch (InterruptedException ex)
+	      {
+	      }
+	  }
+
+	// note that we have to check locked here or else we might accidentally
+	// release somebody else's lock below
+
+	if (!locked)
+	  {
+	    return;
+	  }
+
 	for (int i = 0; i < baseSet.size(); i++)
 	  {
 	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.dumperList.removeElement(this);
+	    base.removeDumper(this);
 	    base.dumpInProgress = false;
 	    base.currentLock = null;
 	  }
@@ -175,11 +261,35 @@ class DBDumpLock extends DBLock {
       }
   }
 
-  // abort is currently a no-op.. need to implement it
+  /**
+   *
+   * Withdraw this lock.  This method can be called by a thread to
+   * interrupt a lock establish that is blocked waiting to get
+   * access to the appropriate set of DBObjectBase objects.  If
+   * this method is called while another thread is blocked in
+   * establish(), establish() will throw an InterruptedException.
+   *
+   * Once abort() is processed, this lock may never be established.
+   * Any subsequent calls to estabish() will always throw
+   * InterruptedException.
+   *
+   */
 
   public void abort()
   {
+    synchronized (lockManager)
+      {
+	abort = true;
+	lockManager.notifyAll();
+	release();
+      }
   }
+
+  /**
+   *
+   * Returns true if <base> is locked by this lock.
+   *
+   */
 
   boolean isLocked(DBObjectBase base)
   {
@@ -196,6 +306,25 @@ class DBDumpLock extends DBLock {
 	  }
       }
     return false;
+  }
+
+  /**
+   *
+   * Returns the key that this lock is established with,
+   * or null if the lock has not been established.
+   *
+   */
+
+  Object getKey()
+  {
+    if (locked)
+      {
+	return key;
+      }
+    else
+      {
+	return null;
+      }
   }
 
 }
