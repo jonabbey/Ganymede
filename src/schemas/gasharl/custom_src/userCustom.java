@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -244,8 +244,21 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    newObject = getSession().createDBObject(fieldDef.getTargetBase(),
-						    null, null);
+	    retVal = getGSession().create_db_object(fieldDef.getTargetBase());
+
+	    if (retVal == null)
+	      {
+		throw new RuntimeException("error in server, userCustom object got " +
+					   "nothing back from creating an automounter map entry");
+	      }
+
+	    if (!retVal.didSucceed())
+	      {
+		return null;	// failure
+	      }
+
+	    newObject = (DBEditObject) retVal.getObject();
+
 	    return newObject.getInvid();
 	  }
 	else

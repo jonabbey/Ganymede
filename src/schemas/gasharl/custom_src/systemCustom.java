@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -729,6 +729,36 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return true;
       }
 
+    // Whether or not the associated user field is required depends on
+    // the system type.
+
+    if (fieldid == systemSchema.PRIMARYUSER)
+      {
+	try
+	  {
+	    Invid systemType = (Invid) object.getFieldValueLocal(systemSchema.SYSTEMTYPE);
+
+	    // we're PSEUDOSTATIC, so we need to get ahold of the internal session
+	    // so we can look up objects
+	    
+	    DBObject typeObject = internalSession().getSession().viewDBObject(systemType);
+
+	    Boolean userRequired = (Boolean) typeObject.getFieldValueLocal(systemTypeSchema.USERREQ);
+
+	    return userRequired.booleanValue();
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // if we can't get the system type reference, assume that we
+	    // aren't gonna require it.. the user will still
+	    // be prompted to set a system type, and once they go back
+	    // and do that and try to re-commit, they'll hit us again
+	    // and we can make the proper determination at that point.
+
+	    return false;
+	  }
+      }
+
     return false;
   }
 
@@ -1107,6 +1137,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     
     return null;
   }
+
   /**
    *
    * Hook to have this object create a new embedded object
@@ -1128,7 +1159,20 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
+	    ReturnVal retVal = getGSession().create_db_object(fieldDef.getTargetBase());
+
+	    if (retVal == null)
+	      {
+		throw new RuntimeException("error in server, systemCustom object got " +
+					   "nothing back from creating an interface");
+	      }
+
+	    if (!retVal.didSucceed())
+	      {
+		return null;	// failure
+	      }
+
+	    newObject = (DBEditObject) retVal.getObject();
 
 	    return newObject.getInvid();
 	  }
