@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -337,6 +337,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    * Return a copy of this field's permission matrix
    *
+   * @see arlut.csd.ganymede.perm_field
+   *
    */
 
   public PermMatrix getMatrix()
@@ -349,6 +351,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field <fieldID> in base <baseID>
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -362,6 +365,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base <baseID>
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -375,6 +379,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field <field> in base <base>
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -395,6 +400,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base <base>
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -419,6 +425,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * associated with a currently checked-out-for-editing
    * PermissionMatrixDBField.
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix 
    */
 
@@ -450,6 +457,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * associated with a currently checked-out-for-editing
    * PermissionMatrixDBField.
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -481,6 +489,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * associated with a currently checked-out-for-editing
    * PermissionMatrixDBField.
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
@@ -519,6 +528,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * associated with a currently checked-out-for-editing
    * PermissionMatrixDBField.
    *
+   * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
    */
 
