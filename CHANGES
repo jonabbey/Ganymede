@@ -501,6 +501,36 @@ be able to support object renaming easily, but the xml client has a
 greater need for consistency.  With these changes, we should be able
 to offer it as needed.
 
+27. [SERVER] Clarified that Vector fields may not hold duplicates
+
+Previously, certain parts of Ganymede implicitly assumed that
+duplicate values were not allowed in vector fields, but no code made
+sure that duplicates were not introduced into vector fields.  I have
+now introduced code to test and enforce that constraint.
+
+This change may slow down bulk loading, but it will assure that we
+have a consistent semantic for vector fields, and other code in the
+Ganymede server can safely rely on the uniqueness of vector field
+elements.
+
+28. [SERVER] Added GanyPermissionException to server
+
+Several classes in the Ganymede server now throw
+arlut.csd.ganymede.common.GanyPermissionException when permission
+problems are encountered.  This change was to help insure that
+Ganymede server internal code was properly tracking permissions
+failures.
+
+As a result of this change, custom schema kit code written to the
+Ganymede 1.0 series may need to be altered to catch the
+GanyPermissionException, as it is a declared exception that derives
+from RemoteException for compatibility with the client.
+
+In some cases, methods that previously returned ReturnVal to indicate
+permissions failures may now throw GanyPermissionException.  I'm not
+sure that this is entirely accounted for in the client code at this
+writing (10 February 2005).
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
