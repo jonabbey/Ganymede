@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2002/10/05 06:56:14 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2002/10/05 07:18:00 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1020,6 +1020,14 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
     
     addRow();
+
+    // select the right item
+
+    baseChoice.removeItemListener(this);
+
+    baseChoice.setSelectedItem(selectedBase.getName());
+
+    baseChoice.addItemListener(this);
   }
 
   // ***
