@@ -1,14 +1,30 @@
 /*
 
-   rowSelectCallback.java
+  rowSelectCallback.java
 
-   An interface that objects can implement to allow arlut.csd.Table tables
-   to report when a row is selected.
+  An interface that objects can implement to allow arlut.csd.Table tables
+  to report when a row is selected.
 
-   Created: 19 June 1996
-   Version: $Revision: 1.3 $ %D%
-   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
-   Applied Research Laboratories, The University of Texas at Austin
+  Copyright (C) 1997  The University of Texas at Austin.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+  Created: 19 June 1996
+  Version: $Revision: 1.4 $ %D%
+  Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
+  Applied Research Laboratories, The University of Texas at Austin
 
 */
 
