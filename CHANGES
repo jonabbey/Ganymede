@@ -115,7 +115,7 @@ not prompt for verification).  The object deletion verification dialog
 is now more friendly and descriptive.
 
 c) The client now resets its 'default owner chosen' flag when the user
-changes personae.
+changes personae. *** STILL NEED MORE HERE ***
 
 d) The GUI component for scalar invid fields has been very
 significantly revised to make it possible to enter a choice by using
@@ -129,6 +129,10 @@ stuff.
 e) Reworked StringSelector to put the add box on the left, and to
 enable typed choice completion if the only valid choices are listed
 
+f) Changed the layout algorithm for window placement within the client.
+No more client windows being placed partially outside the client's
+display area.
+
 11. [SERVER] Implemented support for object cloning
 
 Since the beginning, I've planned on having a clone_db_object() method
@@ -141,12 +145,18 @@ This involved lots of changes to the server, including DBField and all
 its subclasses, DBEditObject, DBObject, GanymedeSession, and possibly
 other classes.
 
+These changes included making the server's code differentiate between
+inhibiting wizards for the sake of an automated field copy and
+inhibiting oversight for the purpose of loading the database on server
+start, etc.
+
 I still need to document all of this in the DBEditObject subclassing
 guide.
 
 12. [SERVER] Added support for floating point fields
 
-All of the code for this came from John Knutson.
+All of the code for this came from John Knutson
+(johnk@arlut.utexas.edu) here at the laboratory.
 
 This change bumps the DBStore revision numbers to
 
@@ -157,8 +167,8 @@ This change bumps the DBStore revision numbers to
 
 The client was inefficiently and redundantly sorting large choice
 lists, slowing object editing down a great deal.  Now all QueryResult
-objects from the server are automatically sorted on receipt using an
-efficient binary search-based insertion sort.
+objects from the server are automatically sorted one time only, on
+receipt, using an efficient binary insertion sort.
 
 14. [SERVER] Reworked Password fields to support OpenBSD-style MD5 hashing
 
@@ -177,6 +187,64 @@ This change bumps the DBStore revision numbers to
 
 	major: 1
 	minor: 16
+
+15. [CLIENT] Fixed tree filtering
+
+The Ganymede client had a bug in gclient.recurseDownCategories which
+could cause categories to be erroneously omitted from the client's
+tree display in a specific situation.  This was detected by John
+Knutson in regard to a custom schema that he did.
+
+16. [SERVER] Took unnecessary fields out of the DBObject class
+
+I took the 'int id' and 'DBEditSet editset' variables out of the
+DBObject class.  This will save 8 bytes per object in the database in
+memory.  Not a major deal, but every little bit helps, I suppose.
+
+Added methods to compensate for the lack of the redundant, but
+directly accessible variables.
+
+17. [SERVER] Major reworking of object linking
+
+I spent a few days and did major surgery on the Ganymede server's
+handling of non-symmetric object linking.  Previously, if an invid
+field did not point to an explicit field in a remote object, the
+server would automatically maintain the symmetric back pointer in the
+target object's back links field, field 8.
+
+This meant that whenever an object's field was set to point to an
+object, that object had to be exclusively checked out by the server to
+handle the association.  Only one transaction at a time could
+establish such a linking, which could make for a really big and
+unnecessary bottleneck in the server.
+
+Now the server maintains at all time a separate, in-memory hash
+structure for back pointers.  This hash structure is designed to allow
+any number of objects to 'anonymously' link to a given object
+concurrently.  The server maintains a separate system to track
+deletion locking for objects, allowing anyone to forge or remove an
+asymmetric link to a common object, and to allow the common object
+itself to be edited, as long as no one tries to delete that common
+object.
+
+This change can drastically increase performance in cloning objects
+which point to a lot of non-symmetrically linked objects, since those
+targetted objects no longer need to be pulled out of the database for
+editing in order to establish the link.
+
+This change bumps the DBStore revision numbers to
+
+	major: 1
+	minor: 17
+
+18. [SERVER] Server object accounting fix
+
+There was an opportunity for the server's objects checked-out
+accounting to get out of sync if an object creation operation
+was not able to perform custom object initialization.
+
+Now the server's object accounting should be reliable under
+all circumstances.
 
 -------------------- Changes from 0.99.6 to 0.99.7 -------------------
 
