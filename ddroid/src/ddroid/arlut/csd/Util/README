@@ -1,0 +1,14 @@
+README -- arlut.csd.Util
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory contains various utility classes used by the Directory
+Droid server, client, and admin console.
+
+Jonathan Abbey
+7 May 2004
