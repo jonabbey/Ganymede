@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 1999/11/20 00:01:54 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 1999/11/22 20:16:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1117,6 +1117,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     synchronized (Ganymede.db.backPointers)
       {
 	Ganymede.debug("Testing Ganymede backPointers hash structure for validity");
+	Ganymede.debug("Ganymede backPointers hash structure tracking " + Ganymede.db.backPointers.size() +
+		       " invid's.");
 
 	Enumeration keys = Ganymede.db.backPointers.keys();
 
