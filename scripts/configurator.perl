@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.54 $
-# $Date: 2000/12/01 17:57:01 $
+# $Revision: 1.55 $
+# $Date: 2000/12/05 23:52:24 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -91,10 +91,11 @@ sub resolve{
 #
 ######################################################################### 
 sub removelastslash{
-    
-    if ($_[0] =~ /\/$/) {
-	chop $_[0];
-    }
+  if ($_[0] =~ /\/$/) {
+    chop $_[0];
+  }
+
+  return $_[0];
 }
 
 #########################################################################
