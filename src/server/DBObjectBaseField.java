@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2001/07/09 07:29:39 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2001/07/09 07:56:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3846,7 +3846,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		    namespace = oldNamespace;
 		    
 		    return Ganymede.createErrorDialog("Schema Editing Error",
-						      "Can't set namespace " + nameSpaceId + " on field " + base.toString() + " " + toString() +
+						      "Can't set namespace " + nameSpaceId + " on field " + toString() +
 						      " without violating namespace uniqueness constraint on previously registered values.");
 		  }
 	      }
@@ -3858,8 +3858,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    return Ganymede.createErrorDialog("Schema Editing Error",
 					      "**** Unknown namespace id <" + 
-					      nameSpaceId + "> specified for field " + 
-					      base.toString() + ", field: " + toString());
+					      nameSpaceId + "> specified for field " + toString());
 	  }
       }
 
@@ -3938,7 +3937,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		newNamespace.schemaEditUnregister(base.getTypeID(), getID());
 		
 		return Ganymede.createErrorDialog("Schema Editing Error",
-						  "Can't set namespace " + newNamespace.toString() + " on field " + base.toString() + " " + toString() +
+						  "Can't set namespace " + newNamespace.toString() + " on field " + toString() +
 						  " without violating namespace uniqueness constraint on previously registered values.");
 	      }
 	  }
