@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.20 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.21 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -507,15 +507,77 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	return null;
       }
 
-    try
+    // if we are a customized object type, dynamically invoke
+    // the proper check-out constructor for the DBEditObject
+    // subtype.
+
+    if (objectBase.classdef != null)
       {
-	shadowObject = new DBEditObject(this, editset);
+	Constructor c;
+	Class classArray[];
+	Object parameterArray[];
+
+	classArray = new Class[2];
+
+	classArray[0] = this.getClass();
+	classArray[1] = editset.getClass();
+
+	parameterArray = new Object[2];
+
+	parameterArray[0] = this;
+	parameterArray[1] = editset;
+
+	String error_code = null;
+
+	try
+	  {
+	    c = objectBase.classdef.getDeclaredConstructor(classArray);
+	    shadowObject = (DBEditObject) c.newInstance(parameterArray);
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    error_code = "NoSuchMethod Exception";
+	  }
+	catch (SecurityException ex)
+	  {
+	    error_code = "Security Exception";
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	    error_code = "Illegal Access Exception";
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    error_code = "Illegal Argument Exception";
+	  }
+	catch (InstantiationException ex)
+	  {
+	    error_code = "Instantiation Exception";
+	  }
+	catch (InvocationTargetException ex)
+	  {
+	    error_code = "Invocation Target Exception";
+	  }
+
+	if (error_code != null)
+	  {
+	    editset.getSession().setLastError("createNewObject failure: " + error_code +
+					      " in trying to check out custom object");
+	    return null;
+	  }
       }
-    catch (RemoteException ex)
+    else
       {
-	editset.getSession().setLastError("remote exception creating shadow for " + 
-					  getBase().getName() + ": " + getID());
-	return null;
+	try
+	  {
+	    shadowObject = new DBEditObject(this, editset);
+	  }
+	catch (RemoteException ex)
+	  {
+	    editset.getSession().setLastError("remote exception creating shadow for " + 
+					      getBase().getName() + ": " + getID());
+	    return null;
+	  }
       }
 
     editset.addObject(shadowObject);
