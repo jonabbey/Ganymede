@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/10 03:44:04 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/14 05:11:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -122,6 +122,15 @@ public class XMLElement extends XMLItem {
   }
 
   /**
+   * <P>This method returns true if this is an open element.</P>
+   */
+
+  public boolean isOpen()
+  {
+    return !empty;
+  }
+
+  /**
    * <P>This method returns the name of this element.</P>
    */
 
@@ -145,7 +154,7 @@ public class XMLElement extends XMLItem {
    * element has.</P>
    */
 
-  public int getAttributeCount()
+  public int getAttrCount()
   {
     if (attributes == null)
       {
@@ -158,12 +167,31 @@ public class XMLElement extends XMLItem {
   }
 
   /**
+   * <P>This method returns an enumeration of attribute names
+   * present in this element.  getAttrStr() can be used on these
+   * keys in order to get the raw string values associated with
+   * the attribute names.</P>
+   */
+
+  public Enumeration getAttrKeysEnum()
+  {
+    if (attributes == null)
+      {
+	return null;
+      }
+    else
+      {
+	return attributes.keys();
+      }
+  }
+
+  /**
    * <P>This method returns the attribute value for attribute
    * &lt;name&gt;, if any.  If this element does not contain
    * an attribute of the given name, null is returned.</P>
    */
 
-  public String getAttribute(String name)
+  public String getAttrStr(String name)
   {
     if (attributes == null)
       {
@@ -171,6 +199,62 @@ public class XMLElement extends XMLItem {
       }
 
     return (String) attributes.get(name);
+  }
+
+  /**
+   * <P>This method returns the boolean attribute value for attribute
+   * &lt;name&gt;, if any.  For Ganymede's purposes, an attribute
+   * value is true if the attribute is present with a string
+   * value of "1".  If this element does not contain
+   * an attribute of the given name, false is returned.</P>
+   */
+
+  public boolean getAttrBoolean(String name)
+  {
+    if (attributes == null)
+      {
+	return false;
+      }
+
+    String val = (String) attributes.get(name);
+
+    if (val == null)
+      {
+	return false;
+      }
+
+    return val.equals("1");
+  }
+
+  /**
+   * <P>This method returns the Integer attribute value for attribute
+   * &lt;name&gt;, if any.  If this element does not contain
+   * an attribute of the given name, or if the attribute does not
+   * contain an integer value, a null value is returned.</P>
+   */
+
+  public Integer getAttrInt(String name)
+  {
+    if (attributes == null)
+      {
+	return null;
+      }
+
+    String val = (String) attributes.get(name);
+
+    if (val == null || val.equals(""))
+      {
+	return null;
+      }
+
+    try
+      {
+	return new Integer(val);
+      }
+    catch (NumberFormatException ex)
+      {
+	return null;
+      }
   }
 
   public String toString()

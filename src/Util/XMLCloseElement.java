@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/10 03:44:04 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/14 05:11:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,7 +83,7 @@ public class XMLCloseElement extends XMLItem {
    * &lt;name&gt;</P>
    */
 
-  public boolean matches(String name)
+  public boolean matchesClose(String name)
   {
     return name != null && name.equals(this.name);
   }

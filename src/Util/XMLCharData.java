@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/10 03:15:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/14 05:11:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -96,6 +96,10 @@ public class XMLCharData extends XMLItem {
 
   public boolean containsNonWhitespace()
   {
+    // we use the java.lang.Boolean nonEmpty to
+    // cache this test, since the trim operation
+    // can be time intensive
+
     if (nonEmpty == null)
       {
 	if (data.trim().length() != 0)

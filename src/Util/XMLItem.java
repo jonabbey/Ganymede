@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/10 02:02:05 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/14 05:11:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,8 @@
 
 package arlut.csd.Util;
 
+import java.util.Enumeration;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          XMLItem
@@ -60,7 +62,114 @@ package arlut.csd.Util;
 /**
  * <P>Abstract base class for XML data held in the 
  * {@link arlut.csd.Util.XMLReader XMLReader} class's buffer.</P>
+ *
+ * <P>This class implements stubs for most of the methods
+ * in its subclass {@link arlut.csd.Util.XMLElement XMLElement}, so that
+ * the Ganymede server code can process elements without having to constantly
+ * perform cast operations.  The matches() method returns false unless this
+ * XMLItem is actually an XMLElement with the appropriate label,
+ * and the matchesClose() method returns false unless this XMLItem is
+ * actually an {@link arlut.csd.Util.XMLCloseElement XMLCloseElement} with
+ * the appropriate label.</P>
  */
 
 public abstract class XMLItem {
+
+  /**
+   * <P>This method returns true if this item is an
+   * {@link arlut.csd.Util.XMLElement XMLElement} named
+   * &lt;name&gt;, false otherwise.</P>
+   */
+
+  public boolean matches(String name)
+  {
+    return false;
+  }
+
+  /**
+   * <P>This method returns true if this item is an
+   * {@link arlut.csd.Util.XMLCloseElement XMLCloseElement} named
+   * &lt;name&gt;, false otherwise.</P>
+   */
+
+  public boolean matchesClose(String name)
+  {
+    return false;
+  }
+
+  /**
+   * <P>This method returns true if this is an empty element.</P>
+   */
+
+  public boolean isEmpty()
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns true if this is an open element.</P>
+   */
+
+  public boolean isOpen()
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the number of attributes that this
+   * element has.</P>
+   */
+
+  public int getAttrCount()
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns an enumeration of attribute names
+   * present in this element.  getAttrStr() can be used on these
+   * keys in order to get the raw string values associated with
+   * the attribute names.</P>
+   */
+
+  public Enumeration getAttrKeysEnum()
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the attribute value for attribute
+   * &lt;name&gt;, if any.  If this element does not contain
+   * an attribute of the given name, null is returned.</P>
+   */
+
+  public String getAttrStr(String name)
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the boolean attribute value for attribute
+   * &lt;name&gt;, if any.  For Ganymede's purposes, an attribute
+   * value is true if the attribute is present with a string
+   * value of "1".  If this element does not contain
+   * an attribute of the given name, false is returned.</P>
+   */
+
+  public boolean getAttrBoolean(String name)
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the Integer attribute value for attribute
+   * &lt;name&gt;, if any.  If this element does not contain
+   * an attribute of the given name, or if the attribute does not
+   * contain an integer value, a null value is returned.</P>
+   */
+
+  public Integer getAttrInt(String name)
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
 }

@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/03/10 03:44:04 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/03/14 05:11:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,10 +89,20 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private Thread inputThread;
   private boolean done = false;
   private XMLItem pushback;
+  private boolean skipWhiteSpace;
 
   /* -- */
 
-  public XMLReader(String xmlFilename, int bufferSize) throws IOException
+  /**
+   * @param xmlFilename Name of the file to read
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   */
+
+  public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
     parser = new com.jclark.xml.sax.Driver();
     parser.setDocumentHandler(this);
@@ -102,6 +112,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     buffer = new Vector();
     this.bufferSize = bufferSize;
+    this.skipWhiteSpace = skipWhiteSpace;
 
     inputThread = new Thread(this);
 
@@ -165,11 +176,19 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	    if (skipWhiteSpaceChars)
 	      {
+		// if we are skipping all-whitespace XMLCharData, we'll set
+		// finished to false if containsNonWhitespace() returns false.
+
 		if (value instanceof XMLCharData)
 		  {
 		    finished = ((XMLCharData) value).containsNonWhitespace();
 		  }
 	      }
+
+	    // if we've got an open element, see if the very next
+	    // significant item is the matching close item, in which
+	    // case we'll label this XMLElement an empty element and
+	    // consume the matching close element.
 
 	    if (value instanceof XMLElement)
 	      {
@@ -181,17 +200,28 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		  {
 		    XMLCloseElement close = (XMLCloseElement) nextItem;
 
-		    if (close.matches(element.getName()))
+		    if (close.matchesClose(element.getName()))
 		      {
 			element.setEmpty();
-			getNextItem(); // coalesce the next item
+			getNextItem(false); // coalesce the next item
+			
+			if (false)
+			  {
+			    System.err.println("XML Reader.getNextItem(): skipping forward to end of empty element " + 
+					       element);
+			  }
 		      }
 		  }
 	      }
 	  }
 
+	if (false)
+	  {
+	    System.err.println("XMLReader.getNextItem() returning " + value);
+	  }
+
 	return value;
-      }    
+      }
   }
 
   /**
@@ -206,7 +236,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public XMLItem getNextItem()
   {
-    return getNextItem(false);
+    return getNextItem(this.skipWhiteSpace);
   }
 
   /**
@@ -236,7 +266,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       {
 	while (!finished)
 	  {
-	    finished = true;
+	    finished = true;	// unless we eat whitespace
+
+	    // wait until there's data to be had
 
 	    while (!done && pushback == null && buffer.size() == 0)
 	      {
@@ -250,10 +282,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		  }
 	      }
 
+	    // if we're out of data and there will be no more, exit
+
 	    if (done && pushback == null && buffer.size() == 0)
 	      {
 		return null;
 	      }
+
+	    // identify the next value
 
 	    if (pushback != null)
 	      {
@@ -266,11 +302,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	    if (skipWhiteSpaceChars)
 	      {
-		if ((value instanceof XMLCharData) && 
-		    ((XMLCharData) value).containsNonWhitespace())
+		if ((value instanceof XMLCharData) &&
+		    !((XMLCharData) value).containsNonWhitespace())
 		  {
-		    getNextItem();	// skip the whitespace
-		    finished = false;
+		    getNextItem(false);	// consume the whitespace
+		    finished = false; // loop again
 		  }
 	      }
 
@@ -278,19 +314,34 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		XMLElement element = (XMLElement) value;
 
-		XMLItem nextItem = peekNextItem(skipWhiteSpaceChars);
+		XMLItem nextItem;
 
-		if (nextItem != null && nextItem instanceof XMLCloseElement)
+		if (pushback == null)
 		  {
-		    XMLCloseElement close = (XMLCloseElement) nextItem;
+		    nextItem = peekSpecificItem(1);
+		  }
+		else
+		  {
+		    nextItem = peekSpecificItem(0);
+		  }
+		
+		if (nextItem.matchesClose(element.getName()))
+		  {
+		    element.setEmpty();
+		    getNextItem(false); // coalesce the next item
 
-		    if (close.matches(element.getName()))
+		    if (false)
 		      {
-			element.setEmpty();
-			getNextItem(); // coalesce the next item
+			System.err.println("XML Reader.peekNextItem(): skipping forward to end of empty element " + 
+					   element);
 		      }
 		  }
 	      }
+	  } // while (!finished)
+
+	if (false)
+	  {
+	    System.err.println("XMLReader.peekNextItem() returning " + value);
 	  }
 
 	return value;
@@ -309,9 +360,26 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public XMLItem peekNextItem()
   {
-    return peekNextItem(false);
+    return peekNextItem(this.skipWhiteSpace);
   }
 
+  private XMLItem peekSpecificItem(int index)
+  {
+    while (!done && buffer.size() < index + 1)
+      {
+	try
+	  {
+	    buffer.wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+	  }
+      }
+
+    return (XMLItem) buffer.elementAt(index);
+  }
+   
   /**
    * <P>pushbackItem() may be used to push the most recently read XMLItem back
    * onto the XMLReader's buffer.  The XMLReader code guarantees that their
