@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.112 $ %D%
+   Version: $Revision: 1.113 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.112 $ %D%
+ * @version $Revision: 1.113 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2375,6 +2375,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * own lock on the relevant base(s) for the duration of the query.  The extantLock must
    * have any bases that the queryDispatch method determines it needs access to locked, or
    * an IllegalArgumentException will be thrown.
+   * @param perspectiveObject There are occasions when the server will want to do internal
+   * querying in which the label of an object matching the query criteria is synthesized
+   * for use in a particular context.  If non-null, perspectiveObject's lookupLabel()
+   * method will be used to generate the label for a result entry.
    *
    */
 
