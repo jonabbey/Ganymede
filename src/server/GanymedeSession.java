@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.186 $
-   Last Mod Date: $Date: 2000/06/30 04:35:22 $
+   Version: $Revision: 1.187 $
+   Last Mod Date: $Date: 2000/07/07 01:23:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.186 $ $Date: 2000/06/30 04:35:22 $
+ * @version $Revision: 1.187 $ $Date: 2000/07/07 01:23:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2538,8 +2538,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     checklogin();
 
-    Query localquery = new Query(type, 
-				 new QueryDataNode(QueryDataNode.EQUALS, name), 
+    Query localquery = new Query(type,
+				 new QueryDataNode(QueryDataNode.EQUALS, name),
 				 false);
 
     Vector results = internalQuery(localquery);
@@ -3028,7 +3028,35 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    synchronized (ns)
 	      {
-		DBField resultfield = ns.lookup(node.value); // *sync* DBNameSpace
+		DBField resultfield;
+
+		// if we are looking to match against an IP address
+		// field and we were given a String, we need to
+		// convert that String to an array of Bytes before
+		// looking it up in the namespace
+
+		if (fieldDef.isIP() && node.value instanceof String)
+		  {
+		    resultfield = ns.lookup(IPDBField.genIPV4bytes((String) node.value));
+
+		    // it's hard to tell here whether any fields of
+		    // this type will accept IPv6 bytes, so if we
+		    // don't find it as an IPv4 address, look for it
+		    // as an IPv6 address
+
+		    if (resultfield == null)
+		      {
+			resultfield = ns.lookup(IPDBField.genIPV6bytes((String) node.value));
+		      }
+		  }
+		else
+		  {
+		    // we don't allow associating Invid fields with a
+		    // namespace, so we don't try to convert strings
+		    // to invids here for a namespace-optimized lookup
+
+		    resultfield = ns.lookup(node.value); // *sync* DBNameSpace
+		  }
 
 		// note that DBNameSpace.lookup() will always point us
 		// to a field that is currently in the main database,

@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/02/21 22:34:08 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/07/07 01:23:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,7 +75,7 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.24 $ $Date: 2000/02/21 22:34:08 $ $Name:  $
+ * @version $Revision: 1.25 $ $Date: 2000/07/07 01:23:35 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -200,7 +200,16 @@ public class DBQueryHandler {
 		    return false;
 		  }
 	      }
-	    else if (n.fieldId != -1)
+	    else if (n.fieldId == -1)
+	      {
+		value = obj.getLabel();
+
+		if (debug)
+		  {
+		    System.err.println("Doing comparison against object label: " + value);
+		  }
+	      }
+	    else
 	      {
 		field = (DBField) obj.getField(n.fieldId);
 
@@ -219,10 +228,6 @@ public class DBQueryHandler {
 		  {
 		    return false;
 		  }
-	      }
-	    else
-	      {
-		value = obj.getLabel();
 	      }
 
 	    // if we've gotten this far, the field is defined in the
