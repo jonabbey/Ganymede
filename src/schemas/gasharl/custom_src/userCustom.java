@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2001/09/17 20:19:55 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2001/10/11 21:30:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -605,13 +605,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public Vector getEmailTargets(DBObject object)
   {
+    // don't tell this user's email address if this user is in the process
+    // of being created.  this will avoid causing email to be sent to
+    // the newly created account, which would likely bounce at this point
+    // in time
+
+    if (object instanceof DBEditObject)
+      {
+	if (((DBEditObject) object).getStatus() == ObjectStatus.CREATING)
+	  {
+	    return null;
+	  }
+      }
+
     Vector x = new Vector();
 
     /* -- */
 
     // do a union so that we clone the raw DBField vector, and so that
     // we handle any null result
-
+    
     x = VectorUtils.union(x, object.getFieldValuesLocal(userSchema.EMAILTARGET));
     
     return x;
