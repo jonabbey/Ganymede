@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/03/30 20:14:02 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/04/02 02:30:00 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.53 $ $Date: 1999/03/30 20:14:02 $ $Name:  $
+ * @version $Revision: 1.54 $ $Date: 1999/04/02 02:30:00 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -508,6 +508,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     createPanel(general_index);
     showTab(general_index);
 
+    // Under Swing 1.1, making a JTabbedPane a contentPane for an internal
+    // frame causes the JTabbedPane to have some rendering bugs, so we
+    // wrap our JTabbedPane with a generic JPanel to avoid this.
+
     JPanel contentPanel = new JPanel();
     contentPanel.setLayout(new BorderLayout());
     contentPanel.add("Center", pane);
@@ -605,7 +609,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * Note that this might be null.
+   * <p>Used by gclient.commitTransaction to get access to our notes panel.
+   * gclient does this so that it can survey any open notes panels to make
+   * sure that the contents are updated to the server.  This is ugly as
+   * sin, but we don't currently put a change listener on the notes panels,
+   * so it needs to be done.</p>
+   *
+   * <p>This method will often return null if the user hasn't visited the
+   * notes panel tab.</p>
    */
 
   public notesPanel getNotesPanel()
@@ -614,7 +625,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * <p>Refresh the tab that is showing.</p>
+   * <p>Refreshes the tab that is showing.</p>
    *
    * <p>Currently, this only refreshes the general panel.  Other panels
    * will generate a nice dialog telling the user to go away.</p>
@@ -920,10 +931,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   JMenuBar createMenuBar(boolean editable)
   {
-    // Took out the "Edit" menu, that's what all the commented out
-    // stuff is.
-
-    // Adding a menu bar, checking it out
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
     
@@ -989,8 +996,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       }
 
     fileM.addSeparator();
-    //fileM.add(iconifyMI);
-    //fileM.add(closeMI);
 
     if (!editable)
       {
@@ -1022,7 +1027,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     general.getVerticalScrollBar().setUnitIncrement(15);
     general.setViewportView(cp);
-    //general.setViewportView(progressBar);
     createdList.addElement(new Integer(general_index));
     setStatus("Done");
   }
@@ -1052,8 +1056,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     expiration_date.setViewportView(exp_date_panel);
     
     createdList.addElement(new Integer(expiration_date_index));
-    
-    setStatus("Done");
   }
 
   void refresh_expiration_date_panel()
@@ -1101,8 +1103,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  
     createdList.addElement(new Integer(removal_date_index));
 
-    setStatus("Done");
-
     removal_date.invalidate();
     validate();
   }
@@ -1147,8 +1147,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     createdList.addElement(new Integer(owner_index));
 
-    setStatus("Done");
-      
     owner.invalidate();
     validate();
   }
@@ -1184,8 +1182,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
     history.invalidate();
     validate();
-    
-    setStatus("Done");
   }
 
   void create_admin_history_panel()
@@ -1198,8 +1194,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     admin_history.invalidate();
     validate();
-    
-    setStatus("Done");
   }
 
   void create_notes_panel()
@@ -1216,7 +1210,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     notes.setViewportView(my_notesPanel);
 
     createdList.addElement(new Integer(notes_index));
-    setStatus("Done");
     
     notes.invalidate();
     validate();
@@ -1256,8 +1249,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     objects_owned.invalidate();
     validate();
-
-    setStatus("Done");
   }
 
   void create_personae_panel()
@@ -1275,8 +1266,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     personae.invalidate();
     validate();
-    
-    setStatus("Done");
   }
 
   /**
@@ -1684,7 +1673,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * gah!  we need to work around a bug in JDK 1.2/Swing 1.1.1.. bug parade #4176136
+   * <p>This is a vetoableChangeListener implementation method, and is used
+   * to allow the framePanel to intercede in window close attempts for
+   * editable objects.  We use this intercession to explain to the user
+   * what the meaning of closing an edit-object or create-object window
+   * is, and to allow them to think again.</p>
    */
 
   public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException

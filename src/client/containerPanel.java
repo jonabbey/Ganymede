@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 1999/04/01 22:16:38 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 1999/04/02 02:29:59 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.101 $ $Date: 1999/04/01 22:16:38 $ $Name:  $
+ * @version $Revision: 1.102 $ $Date: 1999/04/02 02:29:59 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -113,45 +113,39 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * we are in is closed.
    */
   
-  private boolean 
-    keepLoading = true;
+  private boolean keepLoading = true;
 
   /**
    * Reference to the client's main class, used for some utility functions.
    */
 
-  gclient
-    gc;
+  gclient gc;
 
   /**
    * Remote reference to the server-side object we are viewing or editing.
    */
 
-  private db_object
-    object;
+  private db_object object;
 
   /**
    * Database id for the object we are viewing or editing
    */
 
-  private Invid
-    invid;
+  private Invid invid;
 
   /**
    * Reference to the desktop pane containing the client's internal windows.  Used to access
    * some GUI resources.
    */
 
-  windowPanel
-    winP;
+  windowPanel winP;
 
   /**
    * The window we are contained in, may be null if we are embedded in a 
    * {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
    */
 
-  protected framePanel
-    frame;
+  protected framePanel frame;
 
   /**
    * <p>Vector of Short field id's used to track fields for which
@@ -171,8 +165,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   Vector vectorPanelList = new Vector();
 
-  JComponent 
-    currentlyChangingComponent = null;
+  /**
+   * <p>To help avoid recursive problems, we keep track of any arlut.csd.JDataComponent
+   * GUI components that are currently having their change notification messages
+   * handled, and refuse to try to refresh them reentrantly.</p>
+   */
+
+  JComponent currentlyChangingComponent = null;
 
   /**
    * <p>Hashtable mapping Short field id's to the AWT/Swing GUI component managing
@@ -252,19 +251,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   short type;
 
   /**
-   * <p>This variable is used as a hack so that containerPanel can tell what
-   * sort of context it is being embedded in.  In particular, if context
-   * is a {@link arlut.csd.ganymede.client.personaContainer personaContainer},
-   * the isPersonaPanel variable will be set to true, and the associated
-   * user field will be hid from the user.</p>
-   *
-   * <p>This is a hack to support showing a user's personas in a personas tabbed
-   * pane when viewing or editing that user normally.</p>
-   */
-
-  Object context;
-
-  /**
    * <p>If true, this containerPanel is being displayed in a persona pane in
    * a frame panel, and we'll hide the associated user field, which is implicit
    * when we embedded a persona panel in a framePanel showing a user object.</p>
@@ -273,7 +259,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * particular kind of mandatory Ganymede server object.</p>
    */
 
-   boolean isPersonaPanel = false;
+  boolean isPersonaPanel = false;
 
   GridBagLayout
     gbl = new GridBagLayout();
@@ -419,14 +405,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.frame = frame;
     this.progressBar = progressBar;
     this.isCreating = isCreating;
-    this.context = context;
-
-    frame.containerPanels.addElement(this);
 
     if (context != null && (context instanceof personaContainer))
       {
-	isPersonaPanel = true;
+	this.isPersonaPanel = true;
       }
+
+    frame.containerPanels.addElement(this);
 
     // initialize layout
 
@@ -442,7 +427,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * This method downloads all necessary information from the server
+   * Downloads all necessary information from the server
    * about the object being viewed or edited.  Typically this is called
    * when the containerPanel is initialized by the containerPanel
    * constructor, but we defer loading when we are placed in a vector
@@ -507,6 +492,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	setProgressBar(1);
 
+	// pull static field type information from the client's caches
+
 	templates = gc.getTemplateVector(type);
 
 	if (templates == null)
@@ -530,15 +517,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    throw new RuntimeException("Could not get FieldInfoVector: " + rx);
 	  }
 
+	// keep a copy of the infoVector size so we don't have to
+	// continously call the synchronized infoVector.size()
+	// method during our loops
+
+	infoSize = infoVector.size();
+			
 	// now we know how many fields are actually present in this
 	// object, we can set the max size of the progress bar (plus
 	// how many elements in each vector panel.)
 
-	infoSize = infoVector.size();
-			
 	if (progressBar != null)
 	  {
-	    int totalSize = infoVector.size() + 2;
+	    int totalSize = infoSize + 2;
 
 	    for (int i = 0; i < infoSize; i++)
 	      {
@@ -590,12 +581,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		// If we are a persona panel, hide the associated user field.
 		    
-		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned))
-		    ||  (ID == SchemaConstants.BackLinksField)
-		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded())
-		    || (isPersonaPanel && (type == SchemaConstants.PersonaBase)
-			&& (ID == SchemaConstants.PersonaAssocUser)))
+		if (((type== SchemaConstants.OwnerBase) && 
+		     (ID == SchemaConstants.OwnerObjectsOwned))
+		    || (ID == SchemaConstants.BackLinksField)
+		    || ((type == SchemaConstants.UserBase) && 
+			(ID == SchemaConstants.UserAdminPersonae))
+		    || ((ID == SchemaConstants.ContainerField) && 
+			object.isEmbedded())
+		    || (isPersonaPanel && 
+			(type == SchemaConstants.PersonaBase) &&
+			(ID == SchemaConstants.PersonaAssocUser)))
 		  {
 		    if (debug)
 		      {
@@ -643,22 +638,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	// fields to be updated were added to the updatesWhileLoading
 	// vector.  So call update with that vector now, if it has any
 	// size.
-
-	if (updatesWhileLoading.size() > 0)
+	
+	synchronized (updatesWhileLoading)
 	  {
-	    if (debug)
+	    if (updatesWhileLoading.size() > 0)
 	      {
-		println("Calling update with the updatesWhileLoading vector.");
+		if (debug)
+		  {
+		    println("Calling update with the updatesWhileLoading vector.");
+		  }
+		
+		update(updatesWhileLoading);
 	      }
-
-	    update(updatesWhileLoading);
 	  }
       }
   }
 
-  /**
+  /** 
    * This method is reponsible for cleaning up after this
-   * containerPanel when it is shut down.
+   * containerPanel when it is shut down, particularly to close any
+   * auxiliary windows attached to GUI components contained in this
+   * panel.  
    */
 
   public synchronized void unregister()
@@ -802,16 +802,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     return keepLoading;
   }
 
-  /**
-   * Goes through all the components and checks to see if they should be visible,
-   * and updates their contents.
+  /** 
+   * <p>Goes through all the components and checks to see if they should
+   * be visible, and updates their contents.</p>
+   *
+   * <p>If this containerPanel is attached to an object that is not
+   * being edited, this method will return without doing anything.</p>
    */
 
   public void updateAll()
   {
     // View windows can't be updated.
 
-    if (! editable)
+    if (!editable)
       {
 	return;
       }
@@ -827,27 +830,32 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     gc.setWaitCursor();
 
-    enum = objectHash.keys();
-
-    while (enum.hasMoreElements())
+    try
       {
-	updateComponent((Component)enum.nextElement());
+	enum = objectHash.keys();
+	
+	while (enum.hasMoreElements())
+	  {
+	    updateComponent((Component)enum.nextElement());
+	  }
+	
+	invalidate();
+	frame.validate();
+	
       }
-
-    invalidate();
-    frame.validate();
-
-    if (debug)
+    finally
       {
-	println("Done updating container panel");
+	if (debug)
+	  {
+	    println("Done updating container panel");
+	  }
+	
+	gc.setNormalCursor();
       }
-  
-    gc.setNormalCursor();
   }
 
   /**
-   * This method is used to update a subset of the fields in this
-   * containerPanel.
+   * <p>Updates a subset of the fields in this containerPanel.</p>
    *
    * @param fields Vector of Shorts, field ID's
    */
@@ -877,98 +885,105 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // of all the fields that need to be updated, and call update on
     // them after the load is finished.
 
-    if (!loaded)
+    synchronized(updatesWhileLoading)
       {
-	// If we are not loading yet, then we don't need to worry
-	// about keeping track of the fields.  They will current when
-	// they are first loaded.
-
-	if (loading)
+	if (!loaded)
 	  {
-	    for (int i = 0; i < fields.size(); i++)
+	    // If we are not loading yet, then we don't need to worry
+	    // about keeping track of the fields.  They will current when
+	    // they are first loaded.
+	    
+	    if (loading)
 	      {
-		updatesWhileLoading.addElement(fields.elementAt(i));
+		for (int i = 0; i < fields.size(); i++)
+		  {
+		    updatesWhileLoading.addElement(fields.elementAt(i));
+		  }
 	      }
+	    
+	    return;
 	  }
-
-	return;
       }
 
     gc.setWaitCursor();
 
-    for (int i = 0; i < fields.size(); i++)
+    try
       {
-	Short fieldID = (Short) fields.elementAt(i);
-
-	// if we're not an embedded container panel, check to see if
-	// we should update either the expiration field or the removal
-	// field.
-
-	if (frame != null)
+	for (int i = 0; i < fields.size(); i++)
 	  {
-	    if (fieldID.shortValue() == SchemaConstants.ExpirationField)
-	      {
-		frame.refresh_expiration_date_panel();
-		continue;
-	      }
-	    else if (fieldID.shortValue() == SchemaConstants.RemovalField)
-	      {
-		frame.refresh_removal_date_panel();
-		continue;
-	      }
-	  }
+	    Short fieldID = (Short) fields.elementAt(i);
 
-	c = (Component) shortToComponentHash.get(fieldID);
+	    // if we're not an embedded container panel, check to see if
+	    // we should update either the expiration field or the removal
+	    // field.
 
-	if (c == null)
-	  {
-	    if (debug)
+	    if (frame != null)
 	      {
-		println("Could not find this component: ID = " + (Short)fields.elementAt(i));
-		println("There are " + infoVector.size() + " things in the info vector.");
-		println("There are " + rowHash.size() + " things in the row hash.");
-		println("Working on number " + i + " in the fields vector.");
-		println("Valid ids: ");
-		
-		Enumeration k = shortToComponentHash.keys();
-		
-		while (k.hasMoreElements())
+		if (fieldID.shortValue() == SchemaConstants.ExpirationField)
 		  {
-		    Object next = k.nextElement();
-		    println("   " + next);
+		    frame.refresh_expiration_date_panel();
+		    continue;
+		  }
+		else if (fieldID.shortValue() == SchemaConstants.RemovalField)
+		  {
+		    frame.refresh_removal_date_panel();
+		    continue;
 		  }
 	      }
-	  }
-	else 
-	  {
-	    if (!c.equals(currentlyChangingComponent))
-	      {
-		updateComponent(c);
-	      }
-	    else 
+
+	    c = (Component) shortToComponentHash.get(fieldID);
+
+	    if (c == null)
 	      {
 		if (debug)
 		  {
-		    println("I'm no fool, that's the field you just changed.");
+		    println("Could not find this component: ID = " + (Short)fields.elementAt(i));
+		    println("There are " + infoVector.size() + " things in the info vector.");
+		    println("There are " + rowHash.size() + " things in the row hash.");
+		    println("Working on number " + i + " in the fields vector.");
+		    println("Valid ids: ");
+		
+		    Enumeration k = shortToComponentHash.keys();
+		
+		    while (k.hasMoreElements())
+		      {
+			Object next = k.nextElement();
+			println("   " + next);
+		      }
+		  }
+	      }
+	    else 
+	      {
+		// to avoid refreshing an arlut.csd.JDataComponent
+		// field while that field is waiting for its
+		// setValuePerformed() call to be answered, we won't
+		// force an update of a component that is still trying
+		// to react to a user's manipulation.
+
+		if (!c.equals(currentlyChangingComponent))
+		  {
+		    updateComponent(c);
 		  }
 	      }
 	  }
+
+	invalidate();
+	frame.validate();
+
+	if (debug)
+	  {
+	    println("Done updating container panel");
+	  }
       }
-
-    invalidate();
-    frame.validate();
-
-    if (debug)
+    finally
       {
-	println("Done updating container panel");
+	gc.setNormalCursor();
       }
-
-    gc.setNormalCursor();
   }
 
   /**
-   * This method updates the contents and visibility status of
-   * a component in this containerPanel.
+   * <p>Updates the contents and visibility status of
+   * a component in this containerPanel.</p>
    *
    * @param comp An AWT/Swing component that we need to refresh
    */
@@ -978,6 +993,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     try
       {
 	db_field field = (db_field) objectHash.get(comp);
+
+	// by getting a FieldInfo, we'll save a call to the
+	// server
+
+	FieldInfo currentInfo = field.getFieldInfo();
 
 	if (debug)
 	  {
@@ -994,7 +1014,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	// return.. otherwise, set it visible and update
 	// the value and choices for the field
 
-	if (!field.isVisible())
+	if (!currentInfo.isVisible())
 	  {
 	    setRowVisible(comp, false);
 	    return;
@@ -1008,11 +1028,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // here because JstringField only sends callbacks on
 	    // focus loss
 
-	    ((JstringField)comp).setText((String)field.getValue());
+	    ((JstringField)comp).setText((String)currentInfo.getValue());
 	  }
 	else if (comp instanceof JstringArea)
 	  {
-	    ((JstringArea)comp).setText((String)field.getValue());
+	    ((JstringArea)comp).setText((String)currentInfo.getValue());
 	  }
 	else if (comp instanceof JdateField)
 	  {
@@ -1020,11 +1040,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // here because JdateField only sends callbacks on
 	    // focus loss
 
-	    ((JdateField)comp).setDate((Date)field.getValue());
+	    ((JdateField)comp).setDate((Date)currentInfo.getValue());
 	  }
 	else if (comp instanceof JnumberField)
 	  {
-	    Integer value = (Integer)field.getValue();
+	    Integer value = (Integer)currentInfo.getValue();
 
 	    // we don't need to worry about turning off callbacks
 	    // here because JnumberField only sends callbacks on
@@ -1034,7 +1054,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else if (comp instanceof JCheckBox)
 	  {
-	    Boolean value = (Boolean)field.getValue();
+	    Boolean value = (Boolean)currentInfo.getValue();
 	    JCheckBox cb = (JCheckBox) comp;
 
 	    // make sure we don't trigger a callback here
@@ -1132,6 +1152,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		currentValue = "<none>";
 	      }
+
+	    // create a new model to avoid O(n^2) order time hassles when
+	    // we add items one-by-one to an extant JComboBox
 
 	    cb.setModel(new DefaultComboBoxModel(labels));
 	    cb.setSelectedItem(currentValue);
@@ -1306,12 +1329,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else if (comp instanceof JLabel)
 	  {
-	    ((JLabel)comp).setText((String)field.getValue());
+	    ((JLabel)comp).setText((String)currentInfo.getValue());
 	  }
 	else if (comp instanceof JButton)
 	  {
 	    // This is an invid field, non-editable.
-	    Invid inv = (Invid)((invid_field)field).getValue();
+	    Invid inv = (Invid)currentInfo.getValue();
 	    ((JButton)comp).setText(gc.getSession().viewObjectLabel(inv));
 	  }
 	else if (comp instanceof JpassField)
@@ -1329,7 +1352,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else // must be a string_field
 	      {
-		updateStringStringSelector((StringSelector)comp, (string_field)field);
+		updateStringStringSelector((StringSelector)comp, (string_field)field,
+					   currentInfo);
 	      }
 	  }
 	else if (comp instanceof vectorPanel)
@@ -1343,7 +1367,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		println("Updating JIPField.");
 	      }
 
-	    ((JIPField)comp).setValue((Byte[]) field.getValue());
+	    ((JIPField)comp).setValue((Byte[]) currentInfo.getValue());
 	  }
 	else 
 	  {
@@ -1356,7 +1380,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
   }
 
-  public void updateStringStringSelector(StringSelector ss, string_field field) throws RemoteException
+  /**
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.string_field string_field}
+   * value selector against the current contents of the field on the server.</p>
+   *
+   * @param ss The StringSelector GUI component being updated
+   * @param field The server-side string_field attached to the StringSelector to be updated
+   * @param currentInfo A download of the string_field's current value
+   */
+
+  public void updateStringStringSelector(StringSelector ss, string_field field,
+					 FieldInfo currentInfo) throws RemoteException
   {
     Vector available = null;
     Vector chosen = null;
@@ -1417,10 +1451,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // now find the chosen vector
 
-    chosen = field.getValues();
+    chosen = (Vector) currentInfo.getValue();
 
     ss.update(available, chosen);
   }
+
+  /**
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.invid_field invid_field}
+   * value selector against the current contents of the field on the server.</p>
+   *
+   * @param ss The StringSelector GUI component being updated
+   * @param field The server-side invid_field attached to the StringSelector to be updated
+   */
 
   public void updateInvidStringSelector(StringSelector ss, invid_field field) throws RemoteException
   {
@@ -1499,60 +1541,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * This writes out some information to a file.
-   *
-   * Currently it just saves the labels, and it saves them in random
-   * order(from the hash.)  May need another Vector to keep things in order.
-   */
-
-  public void save(File file)
-  {
-    FileOutputStream fos = null;
-    PrintWriter writer = null;
-    
-    Enumeration comps = rowHash.keys();
-    JLabel label;
-    JComponent c;
-
-    /* -- */
-
-    try
-      {
-	fos = new FileOutputStream(file);
-        writer = new PrintWriter(fos);
-      }
-    catch (java.io.IOException e)
-      {
-	gc.showErrorMessage("Trouble saving", "Could not open the file.");
-	return;
-      }
-    
-    while (comps.hasMoreElements())
-      {
-	c = (JComponent)comps.nextElement();
-	label = (JLabel)rowHash.get(c);
-	
-	writer.print(label.getText() + "\t");
-
-	if (c instanceof JstringField)
-	  {
-	    writer.println(((JstringField)c).getText());
-	  }
-	else if (c instanceof JComboBox)
-	  {
-	    // All JComboBox's just hold strings.
-	    writer.println(((JComboBox)c).getSelectedItem());
-	  }
-	else
-	  {
-	    writer.println(" - Not a JstringField or JComboBox.");
-	  }
-      }
-
-    writer.close();
-  }
-
-  /**
    * <p>This method comprises the JsetValueCallback interface, and is how
    * the customized data-carrying components in this containerPanel
    * notify us when something changes.</p>
@@ -1569,9 +1557,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public boolean setValuePerformed(JValueObject v)
   {
-    // Maybe check to see if gc.cancel has the focus?  That might
-    // work.
-
     ReturnVal returnValue = null;
 
     /* -- */
@@ -1613,7 +1598,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    catch (RemoteException rx)
 	      {
 		println("Could not set field value: " + rx);
-		currentlyChangingComponent = null;
 		return false;
 	      }
 	  }
@@ -1635,13 +1619,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    catch (RemoteException rx)
 	      {
 		println("Could not set field value: " + rx);
-		currentlyChangingComponent = null;
 		return false;
 	      }
  
 	  }
 	else if (v.getSource() instanceof vectorPanel)
 	  {
+	    // no vectorPanel should really ever call this
+	    // method, so wtf?
+
 	    if (debug)
 	      {
 		println("Something happened in the vector panel");
@@ -1683,7 +1669,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    
 		    gc.editObject(invid);
 
-		    currentlyChangingComponent = null;
 		    return true;
 		  }
 		else if (command.equals("View object"))
@@ -1697,7 +1682,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    
 		    gc.viewObject(invid);
 
-		    currentlyChangingComponent = null;
 		    return true;
 		  }
 		else
@@ -1797,7 +1781,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    gc.somethingChanged();
-	    currentlyChangingComponent = null;
 	    return true;
 	  }
 
@@ -1809,7 +1792,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    
 	    gc.somethingChanged();
-	    currentlyChangingComponent = null;
 	    return true;
 	  }
 	else
@@ -1819,38 +1801,36 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		println("didSucceed: Returning false.");
 	      }
 	    
-	    currentlyChangingComponent = null;
 	    return false;
 	  }
       }
     catch (NullPointerException ne)
       {
 	println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
-	currentlyChangingComponent = null;
 	return false;
       }
     catch (IllegalArgumentException e)
       {
 	println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
-	currentlyChangingComponent = null;
 	return false;
       }
     catch (RuntimeException e)
       {
 	println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
-	currentlyChangingComponent = null;
 	return false;
+      }
+    finally
+      {
+	currentlyChangingComponent = null;
       }
   }
 
   /**
-   *
-   * Some of our components, most notably the checkboxes, don't
+   * <p>Some of our components, most notably the checkboxes, don't
    * go through JDataComponent.setValuePerformed(), but instead
-   * give us direct feedback.  Those we take care of here.
+   * give us direct feedback.  Those we take care of here.</p>
    *
    * @see java.awt.event.ActionListener
-   *
    */
 
   public void actionPerformed(ActionEvent e)
@@ -1932,18 +1912,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    throw new RuntimeException("Could not talk to server: " + rx);
 	  }
-
       }
   }
 
   /**
-   *
-   * Some of our components, most notably the JComboBoxes, don't
+   * <p>Some of our components, most notably the JComboBoxes, don't
    * go through JDataComponent.setValuePerformed(), but instead
-   * give us direct feedback.  Those we take care of here.
+   * give us direct feedback.  Those we take care of here.</p>
    *
    * @see java.awt.event.ItemListener
-   *
    */
 
   public void itemStateChanged(ItemEvent e)
@@ -2066,20 +2043,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
   }
 
-  /**
-   *
-   * This private method is used to insert a normal field component.
-   *
+  /** 
+   * <p>All the other addXXX methods used to add GUI components of a
+   * particular type call this to actually register the GUI component
+   * in this containerPanel for display.</p>
    */
 
-  private void addRow(Component comp, int row, String label, boolean visible)
+  private synchronized void addRow(Component comp, int row, String label, boolean visible)
   {
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
-
+    
     gbc.weightx = 0.0;
     gbc.gridx = 0;
     gbc.gridy = row;
@@ -2107,10 +2084,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
-   * This private method toggles the visibility of a field component
-   * and its label in this containerPanel.
-   *
+   * <p>This private method toggles the visibility of a field component
+   * and its label in this containerPanel.</p>
    */
 
   private void setRowVisible(Component comp, boolean b)
@@ -2129,10 +2104,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
-   * Helper method to add a component during constructor operation.  This
-   * is the top-level field component adding method.
-   *
+   * <p>Helper method to add a component during constructor operation.  This
+   * is the top-level field component adding method.</p>
    */
 
   private void addFieldComponent(db_field field, 
@@ -2218,7 +2191,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
-	    addRow( label, templates.indexOf(fieldTemplate), fieldTemplate.getName(), true);
+	    addRow(label, templates.indexOf(fieldTemplate), fieldTemplate.getName(), true);
 	  }
       }
   }
@@ -2287,7 +2260,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    println("Getting QueryResult now");
 		  }
 
-		qr =field.choices();
+		qr = field.choices();
 
 		if (qr != null)
 		  {
@@ -2312,7 +2285,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    StringSelector ss = new StringSelector(null,
 						   (Vector)fieldInfo.getValue(), 
 						   this,
-						   editable && fieldInfo.isEditable(),
+						   true, // editable
 						   false,  // canChoose
 						   false,  // mustChoose
 						   300); // this is double wide because there is no available list
@@ -2330,10 +2303,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    StringSelector ss = new StringSelector(available,
 						   (Vector)fieldInfo.getValue(), 
 						   this,
-						   editable && fieldInfo.isEditable(),
+						   true, // editable
 						   true,   // canChoose
 						   false,  // mustChoose
-						   ((editable && fieldInfo.isEditable()) && (available != null)) ? 150 : 300);
+						   (available != null ? 150 : 300));
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2347,7 +2320,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	StringSelector ss = new StringSelector(null,
 					       (Vector)fieldInfo.getValue(), 
 					       this,
-					       editable && fieldInfo.isEditable(),
+					       false, // not editable
 					       false,   // canChoose
 					       false,  // mustChoose
 					       300); // no availble list, so it is wider
@@ -2358,10 +2331,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
-   * private helper method to instantiate an invid vector in this
-   * container panel
-   *
+   * <p>private helper method to instantiate an invid vector in this
+   * container panel</p>
    */
 
   private void addInvidVector(invid_field field, 
@@ -2432,7 +2403,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      { 
 		if (debug)
 		  {
-		    println("choicse is null");
+		    println("choices is null");
 		  }
 
 		choiceHandles = null;
@@ -2549,16 +2520,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
-  private final void setStatus(String s)
-  {
-    gc.setStatus(s);
-  }
-
   /**
-   *
-   * private helper method to instantiate a vector panel in this
-   * container panel
-   *
+   * <p>private helper method to instantiate a vector panel in this
+   * container panel</p>
    */
 
   private void addVectorPanel(db_field field, 
@@ -2581,21 +2545,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this, isCreating);
+    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), 
+				     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
     objectHash.put(vp, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
 
-    addVectorRow(vp, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+    addVectorRow(vp, templates.indexOf(fieldTemplate), 
+		 fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
-   *
-   * This private helper method is used to insert a vectorPanel into the containerPanel
-   *
+   * <p>This private helper method is used to insert a vectorPanel into the containerPanel</p>
    */
 
-  private void addVectorRow(Component comp, int row, String label, boolean visible)
+  private synchronized void addVectorRow(Component comp, int row, String label, boolean visible)
   {
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
@@ -2612,6 +2576,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     setRowVisible(comp, visible);
   }
 
+  /**
+   * <p>If we contain any {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}s,
+   * they will call this method during loading to let us update our progress bar if
+   * we have it still up.  This is used to let us include the time it will take
+   * to get vector panels loaded in the progress bar time estimate.</p>
+   */
+
   public void vectorElementAdded()
   {
     if (progressBar != null)
@@ -2623,10 +2594,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>private helper method to instantiate a scalar string field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a string field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addStringField(string_field field, FieldInfo fieldInfo, 
@@ -2700,21 +2673,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    
 	JComboBox combo = new JComboBox(choices);
 
-	/*
-	 * Look at the try/catch around setSelected.  IF that works, get rid of this stuff.
-	 *
-	// if the current value wasn't in the choice, add it in now
-	if (currentChoice != null)
-	  {
-	  if (!combo.contains(currentChoice))
-	      {
-		combo.addItem(currentChoice);
-	      }
-	  }
-	  *
-	  *
-	  */
-  
 	combo.setMaximumRowCount(8);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
 
@@ -2738,25 +2696,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    combo.addItem("<none>");
 	    combo.setSelectedItem("<none>");
-
-	    /*
-	     * Currently, string_fields aren't smart enough to
-	     * tell us whether or not they should allow
-	     * <none>, so we leave it in.  the
-	     * stringComboNoneListener could be used here, if
-	     * the string_fields had some kind of allowNone()
-	     * method.
-	     *
-	     if (mustChoose)
-	      {
-	        combo.addItemListener(new stringComboNoneListener(combo));
-	        if (debug)
-	          {
-	            println("Adding new stringComboNoneListener");
-	          }
-	      }
-	    */
-	    
 	  }
 	else
 	  {
@@ -2785,14 +2724,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	objectHash.put(combo, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
 	    
-	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-	    	    
+	addRow(combo, templates.indexOf(fieldTemplate), 
+	       fieldTemplate.getName(), fieldInfo.isVisible());
       }
     else if (fieldTemplate.isMultiLine())
       {
-	// This gets a JstringArea
 	JstringArea sa = new JstringArea(6, 40);
-	sa.setEditable(fieldInfo.isEditable());		
+	sa.setEditable(editable && fieldInfo.isEditable());		
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
 	sa.setCallback(this);
@@ -2816,7 +2754,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sa.setToolTipText(comment);
 	  }
 
-	addRow( sa, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow(sa, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
     else
       {
@@ -2851,15 +2789,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sf.setToolTipText(comment);
 	  }
 
-	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
   /**
+   * <p>private helper method to instantiate a password field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a password field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addPasswordField(pass_field field, 
@@ -2881,8 +2821,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    pf.setCallback(this);
 	  }
 	  
-	addRow( pf, templates.indexOf(fieldTemplate), field.getName(), field.isVisible());
-	
+	addRow(pf, templates.indexOf(fieldTemplate), field.getName(), field.isVisible());
       }
     else
       {
@@ -2911,16 +2850,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sf.setToolTipText(comment);
 	  }
 	
-	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-	
+	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
   /**
+   * <p>private helper method to instantiate a numeric field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a numeric field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addNumericField(db_field field, 
@@ -2944,11 +2884,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	nf.setValue(value.intValue());
       }
 
-    if (debug)
-      {
-	println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
-      }
-    
     if (editable && fieldInfo.isEditable())
       {
 	nf.setCallback(this);
@@ -2964,14 +2899,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	nf.setToolTipText(comment);
       }
     
-    addRow( nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow(nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
+   * <p>private helper method to instantiate a date field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a date field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addDateField(db_field field, 
@@ -3010,10 +2947,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>private helper method to instantiate a boolean field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a boolean field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addBooleanField(db_field field, FieldInfo fieldInfo, 
@@ -3049,10 +2988,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>private helper method to instantiate a permission matrix field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a permission matrix field in this
-   * container panel
-   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addPermissionField(db_field field, FieldInfo fieldInfo,
@@ -3079,10 +3020,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>private helper method to instantiate a scalar invid field in this
+   * container panel</p>
    *
-   * private helper method to instantiate a scalar invid field in this
-   * container panel
-   * 
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
   private void addInvidField(invid_field field, 
@@ -3120,9 +3063,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (fieldInfo.getValue() != null)
 	  {
-	    final Invid thisInvid = (Invid)fieldInfo.getValue();
+	    final Invid thisInvid = (Invid) fieldInfo.getValue();
 	    
-	    String label = (String)gc.getSession().viewObjectLabel(thisInvid);
+	    String label = (String) gc.getSession().viewObjectLabel(thisInvid);
 
 	    if (label == null)
 	      {
@@ -3272,7 +3215,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		//break;
 	      }
 	  }
- 	      
 
 	if (!found)
 	  {
@@ -3285,11 +3227,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	combo.addItem(noneHandle);
       }
-
-    /*
-     *
-     *
-     */
 
     combo.setMaximumRowCount(12);
     combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
@@ -3344,11 +3281,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     combo.setAllowNone(!mustChoose);
 
-    // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+    // We get the itemStateChanged straight from the JComboBox in the
+    // JInvidChooser, so we need to save an association between the
+    // combobox and the field
     
     invidChooserHash.put(combo.getCombo(), field); 
     
-    // The update method still need to be able to find this JInvidChooser.
+    // The update method still need to be able to find the field from
+    // the JInvidChooser, so we save it in objectHash, too.
     
     objectHash.put(combo, field); 
     
@@ -3359,14 +3299,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	println("Adding to panel");
       }
     
-    addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow(combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
+   * <p>private helper method to instantiate an ip address field in this
+   * container panel</p>
    *
-   * private helper method to instantiate an ip field in this
-   * container panel
-   * 
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field 
    */
 
   private void addIPField(ip_field field, 
@@ -3420,84 +3362,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	   fieldInfo.isVisible());
   }
 
-  //
-  //
-  //  STATIC convenience methods
-  //
-  //
+  /**
+   * <p>Convenience method.</p>
+   */
 
-  public static boolean comboBoxContains(JComboBox combo, Object o)
+  private final void setStatus(String s)
   {
-    boolean found = false;
-
-    /* -- */
-
-    for (int i = 0; i < combo.getItemCount(); i++)
-      {
-	if (combo.getItemAt(i).equals(o))
-	  {
-	    found = true;
-	    break;
-	  }
-      }
-
-    return found;	
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                         stringComboNoneListener
-
-------------------------------------------------------------------------------*/
-
-/**
- * Simple item listener to remove the <none> from a JComboBox of strings
- *
- * For some choices, after the initial value is set, the <none> should
- * be gone.
- * 
- */
-
-class stringComboNoneListener implements ItemListener {
-
-  private final boolean debug = false;
-
-  JComboBox combo;
-  
-  public stringComboNoneListener(JComboBox combo)
-  {
-    this.combo = combo;
-  }
-
-  public void itemStateChanged(ItemEvent e)
-  {
-    if (e.getStateChange() == ItemEvent.DESELECTED)
-      {
-	Object item = combo.getSelectedItem();
-
-	if (item == null)
-	  {
-	    // If <none> is not already in there, add it
-
-	    if (!containerPanel.comboBoxContains(combo, "<none>"))
-	      {
-		combo.addItem("<none>");
-	      }
-
-	    combo.setSelectedItem("<none>");
-	  }
-	else if (item.equals("<none>"))
-	  {
-	    combo.removeItem("<none>");
-
-	    if (debug)
-	      {
-		System.out.println("stringComboNoneListener: I'm outta here!");
-	      }
-
-	    combo.removeItemListener(this);
-	  }
-      }
+    gc.setStatus(s);
   }
 }

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.147 $
-   Last Mod Date: $Date: 1999/04/01 22:16:40 $
+   Version: $Revision: 1.148 $
+   Last Mod Date: $Date: 1999/04/02 02:30:00 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,13 +87,13 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.147 $ $Date: 1999/04/01 22:16:40 $ $Name:  $
+ * @version $Revision: 1.148 $ $Date: 1999/04/02 02:30:00 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
 public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback, WindowListener {
 
-  public static boolean debug = true;
+  public static boolean debug = false;
 
   /**
    * we're only going to have one gclient at a time per running client (singleton pattern).
@@ -507,7 +507,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * active.  If a wizard is active, don't allow the window to close.
    */
 
-  private boolean wizardActive = false;
+  private int wizardActive = 0;
 
   /* -- */
 
@@ -541,7 +541,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     client = this;
 
-    debug = g.debug;
+    if (!debug)
+      {
+	debug = g.debug;
+      }
 
     if (debug)
       {
@@ -1322,8 +1325,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * directly.</p>
    */
 
-  public synchronized final Vector getBaseList()
+  public final synchronized Vector getBaseList()
   {
+    if (debug)
+      {
+	System.err.println("Entering getBaseList");
+      }
+
     if (baseList == null)
       {
 	baseList = loader.getBaseList();
@@ -1425,7 +1433,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     final String fStatus = status;
-
+    
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
 	statusLabel.setText(fStatus);
@@ -1767,9 +1775,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * called to determine the ultimate success or failure of any operation
    * which returns ReturnVal, because a wizard sequence may determine the
    * ultimate result.</p>
+   *
+   * <p>This method should not be synchronized, since handleReturnVal
+   * may pop up modal (thread-blocking) dialogs, and if we we
+   * synchronize this, some Swing or AWT code seems to block on our
+   * synchronization when we do pop-up dialogs.  It's not any of my
+   * code, so I assume that AWT tries to synchronize on the frame when
+   * parenting a new dialog.</p> 
    */
 
-  public synchronized ReturnVal handleReturnVal(ReturnVal retVal)
+  public ReturnVal handleReturnVal(ReturnVal retVal)
   {
     Hashtable dialogResults;
 
@@ -1780,90 +1795,95 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	System.err.println("** gclient: Entering handleReturnVal");
       }
 
-    wizardActive = true;
+    wizardActive++;
 
-    while ((retVal != null) && (retVal.getDialog() != null))
+    try
       {
-	if (debug)
-	  {
-	    System.err.println("** gclient: retrieving dialog");
-	  }
-
-	JDialogBuff jdialog = retVal.getDialog();
-
-	if (debug)
-	  {
-	    System.err.println("** gclient: extracting dialog");
-	  }
-
-	DialogRsrc resource = jdialog.extractDialogRsrc(this);
-
-	if (debug)
-	  {
-	    System.err.println("** gclient: constructing dialog");
-	  }
-
-	StringDialog dialog = new StringDialog(resource);
-
-	if (debug)
-	  {
-	    System.err.println("** gclient: displaying dialog");
-	  }
-
-	setWaitCursor();
-
-	try
-	  {
-	    // display the Dialog sent to us by the server, get the
-	    // result of the user's interaction with it.
-	    
-	    dialogResults = dialog.DialogShow();
-	  }
-	finally
-	  {
-	    setNormalCursor();
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("** gclient: dialog done");
-	  }
-
-	if (retVal.getCallback() != null)
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Sending result to callback: " + dialogResults);
-		  }
-
-		// send the dialog results to the server
-
-		retVal = retVal.getCallback().respond(dialogResults);
-
-		if (debug)
-		  {
-		    System.out.println("Received result from callback.");
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
-	      }
-	  }
-	else
+	while ((retVal != null) && (retVal.getDialog() != null))
 	  {
 	    if (debug)
 	      {
-		System.out.println("No callback, breaking");
+		System.err.println("** gclient: retrieving dialog");
 	      }
 
-	    break;		// we're done
+	    JDialogBuff jdialog = retVal.getDialog();
+
+	    if (debug)
+	      {
+		System.err.println("** gclient: extracting dialog");
+	      }
+
+	    DialogRsrc resource = jdialog.extractDialogRsrc(this);
+
+	    if (debug)
+	      {
+		System.err.println("** gclient: constructing dialog");
+	      }
+
+	    StringDialog dialog = new StringDialog(resource);
+
+	    if (debug)
+	      {
+		System.err.println("** gclient: displaying dialog");
+	      }
+
+	    setWaitCursor();
+
+	    try
+	      {
+		// display the Dialog sent to us by the server, get the
+		// result of the user's interaction with it.
+	    
+		dialogResults = dialog.DialogShow();
+	      }
+	    finally
+	      {
+		setNormalCursor();
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("** gclient: dialog done");
+	      }
+
+	    if (retVal.getCallback() != null)
+	      {
+		try
+		  {
+		    if (debug)
+		      {
+			System.out.println("Sending result to callback: " + dialogResults);
+		      }
+
+		    // send the dialog results to the server
+
+		    retVal = retVal.getCallback().respond(dialogResults);
+
+		    if (debug)
+		      {
+			System.out.println("Received result from callback.");
+		      }
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+		  }
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("No callback, breaking");
+		  }
+
+		break;		// we're done
+	      }
 	  }
       }
-
-    wizardActive = false;
+    finally
+      {
+	wizardActive--;
+      }
     
     if (debug)
       {
@@ -3679,7 +3699,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   boolean OKToProceed()
   {
-    if (wizardActive)
+    if (wizardActive > 0)
       {
 	if (debug)
 	  {
