@@ -152,6 +152,12 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
       }
   }
 
+  public void setText(String text)
+  {
+    field1.setText(text);
+    field2.setText(text);
+  }
+  
   public void actionPerformed(ActionEvent e)
   {
     DialogRsrc dr = new DialogRsrc(frame, "Set Password", "Enter your new password, twice");

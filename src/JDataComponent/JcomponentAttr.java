@@ -93,10 +93,10 @@ public class JcomponentAttr {
   void setAttr(JcomponentAttr attributes)
   {
     if (this.c == null)
-      throw new NullPointerException();
+      return;
 
     if (attributes == null)
-      throw new IllegalArgumentException("Invalid Paramter: attributes is null");
+      return;
 
     this.c.setFont(attributes.font);
     this.c.setForeground(attributes.fg);
@@ -111,10 +111,11 @@ public class JcomponentAttr {
   public static void setAttr(Component c,JcomponentAttr attributes)
   {
     if (c == null)
-      throw new IllegalArgumentException("Invalid Paramter: component handle is null");
+      return;
     
     if (attributes == null)
-      throw new IllegalArgumentException("Invalid Paramter: attributes handle is null");
+      return;
+
     c.setFont(attributes.font);
     c.setForeground(attributes.fg);
     c.setBackground(attributes.bg);

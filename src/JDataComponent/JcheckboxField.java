@@ -169,7 +169,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    */
   public boolean getValue()
   {
-    return value;
+    return isSelected();
   }
 
   /**
