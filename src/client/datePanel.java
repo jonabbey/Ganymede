@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -230,13 +230,14 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	if (field != null)
 	  {
 	    this.name = field.getName();
+
 	    Date d = (Date) field.getValue();
 
 	    //  progressBar.setValue(5);
 
 	    if (d != null)
 	      {
-		noneditable_dateLabel = new JLabel(this.getName() + " is set to: " + d.toString());
+		noneditable_dateLabel = new JLabel(this.name + " is set to: " + d.toString());
 	      }
 	    else
 	      {
@@ -296,24 +297,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    topLabel.setText(label + " will be cleared after commit.");
 	    fp.wp.getgclient().somethingChanged();
 	    Invid invid = fp.getObjectInvid();
-
-	    try
-	      {
-		int type = field.getType();
-
-		if (type == SchemaConstants.ExpirationField)
-		  {
-		    fp.wp.getgclient().addToExpireHash(invid);
-		  }
-		else if (type == SchemaConstants.RemovalField)
-		  {
-		    fp.wp.getgclient().addToRemoveHash(invid);		
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not tell the gclient: " + rx);
-	      }
 	  }
 	else
 	  {
@@ -357,26 +340,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	if (ok)
 	  {
 	    topLabel.setText(label + ": " + dateformat.format(d));
-
-	    Invid invid = fp.getObjectInvid();
-
-	    try
-	      {
-		int type = field.getType();
-
-		if (type == SchemaConstants.ExpirationField)
-		  {
-		    fp.wp.getgclient().addToExpireHash(invid);
-		  }
-		else if (type == SchemaConstants.RemovalField)
-		  {
-		    fp.wp.getgclient().addToRemoveHash(invid);		
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not tell the client: " + rx);
-	      }
 	  }
       }
 
@@ -403,7 +366,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
     if (newDate != null)
       {
-	newLabel = this.name + " is set to: " + newDate.toString();
+	newLabel = label + ": " + dateformat.format(newDate);
       }
     else
       {
@@ -437,6 +400,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     try
       {
 	Date date = ((Date)field.getValue());
+	int type = field.getType();
+	Invid invid = fp.getObjectInvid();
 
 	if (debug)
 	  {
