@@ -3,15 +3,15 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2004/02/05 22:05:14 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2004/03/03 06:43:55 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    The University of Texas at Austin.
 
    Contact information
@@ -73,7 +73,7 @@ public class JstringArea extends JTextArea implements FocusListener {
   private boolean processingCallback = false;
 
   String
-    value = null,
+    value = null,		// last known value, used in comparisons to see if we need to do full callback
     allowedChars = null,
     disallowedChars = null;
 
@@ -114,6 +114,12 @@ public class JstringArea extends JTextArea implements FocusListener {
   public boolean getChanged()
   {
     return changed;
+  }
+
+  public void setText(String s)
+  {
+    value = s;
+    super.setText(s);
   }
 
   public void setAllowedChars(String s)
@@ -190,19 +196,26 @@ public class JstringArea extends JTextArea implements FocusListener {
 	
 	    changed = !value.equals(str);
 	  }
-	else
+	else			// value == null
 	  {
 	    if (debug)
 	      {
 		System.err.println("JstringArea.sendCallback: old value == null");
 	      }
-	
-	    changed = true;
+
+	    if (str == null || str.equals(""))
+	      {
+		changed = false;
+	      }
+	    else
+	      {
+		changed = true;
+	      }
 	  }
 
 	if (debug)
 	  {
-	    System.err.println("JstringArea.sendCallback(): str == " + str);
+	    System.err.println("JstringArea.sendCallback(): str == '" + str + "', value == '" + value + "'");
 	  }
     
 	if (!changed)
@@ -229,8 +242,15 @@ public class JstringArea extends JTextArea implements FocusListener {
 	      {
 		System.err.println("JstringArea.sendCallback: making callback");
 	      }
-	
-	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+
+	    if (str.equals(""))
+	      {
+		b = my_parent.setValuePerformed(new JValueObject(this, null, JValueObject.SET));
+	      }
+	    else
+	      {
+		b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	      }
 	  }
 	catch (RemoteException re)
 	  {
@@ -270,10 +290,17 @@ public class JstringArea extends JTextArea implements FocusListener {
 	  {
 	    if (debug)
 	      {
-		System.err.println("JstringArea.sendCallback: setValue accepted");
+		System.err.println("JstringArea.sendCallback: setValue('" + str + "') accepted");
 	      }
 
-	    value = str;
+	    if (str != null && str.equals(""))
+	      {
+		value = null;
+	      }
+	    else
+	      {
+		value = str;
+	      }
 		
 	    changed = false;
 	  }
@@ -371,7 +398,7 @@ public class JstringArea extends JTextArea implements FocusListener {
   {
     if (debug)
       {
-	System.out.println("JentryField: focusLost");
+	System.out.println("JstringArea: focusLost");
       }
 
     sendCallback();
