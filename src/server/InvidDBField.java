@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2000/02/11 07:17:01 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2000/03/07 23:04:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.120 $ %D%
+ * @version $Revision: 1.121 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3649,11 +3649,11 @@ public final class InvidDBField extends DBField implements invid_field {
     // via a rescan command in a ReturnVal from the server,
     // so we need to clear the qr cache
 
-    qr = null;
-
     eObj = (DBEditObject) owner;
 
-    return eObj.obtainChoiceList(this);
+    qr = eObj.obtainChoiceList(this);
+
+    return qr;
   }
 
   /**

@@ -8,18 +8,20 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/11/02 23:43:00 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/03/07 23:04:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -499,6 +501,27 @@ public class QueryResult implements java.io.Serializable {
   public void append(QueryResult result)
   {
     buffer.append(result.buffer.toString());
+    unpacked = false;
+
+    Enumeration enum = result.invidHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	Object key = enum.nextElement();
+	Object val = result.invidHash.get(key);
+
+	this.invidHash.put(key, val);
+      }
+
+    enum = result.labelHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	Object key = enum.nextElement();
+	Object val = result.labelHash.get(key);
+
+	this.labelHash.put(key, val);
+      }
   }
 
   /**
