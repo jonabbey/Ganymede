@@ -21,12 +21,12 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.12 $ %D%
+  Version: $Revision: 1.13 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
 */
-package arlut.csd.Table;
+package arlut.csd.JTable;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -45,7 +45,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.12 $ %D% 
+ * @version $Revision: 1.13 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {

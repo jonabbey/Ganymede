@@ -20,7 +20,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 5 June 1996
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +30,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
-import arlut.csd.Table.*;
+import arlut.csd.JTable.*;
 
 /*------------------------------------------------------------------------------
                                                                     public class
@@ -38,7 +38,7 @@ import arlut.csd.Table.*;
 
 ------------------------------------------------------------------------------*/
 
-public class testTable extends Applet implements arlut.csd.Table.rowSelectCallback, ActionListener {
+public class testTable extends Applet implements arlut.csd.JTable.rowSelectCallback, ActionListener {
 
   static final boolean debug = false;
   static testTable applet = null;
@@ -49,7 +49,7 @@ public class testTable extends Applet implements arlut.csd.Table.rowSelectCallba
 
   /* - */
 
-  arlut.csd.Table.rowTable table;
+  arlut.csd.JTable.rowTable table;
 
   testBorder tBorder = null;
   TextField statusField = null;
@@ -140,7 +140,7 @@ public class testTable extends Applet implements arlut.csd.Table.rowSelectCallba
 	System.err.println("testTable constructor: constructing gridTable");
       }
 
-    table = new arlut.csd.Table.rowTable(colWidths, headers, this, null);
+    table = new arlut.csd.JTable.rowTable(colWidths, headers, this, null);
 
     if (debug)
       {

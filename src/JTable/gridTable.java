@@ -21,12 +21,12 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 17 June 1996
-  Version: $Revision: 1.5 $ %D%
+  Version: $Revision: 1.6 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
 */
-package arlut.csd.Table;
+package arlut.csd.JTable;
 
 import java.awt.*;
 import java.util.*;
@@ -44,7 +44,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.5 $ %D% 
+ * @version $Revision: 1.6 $ %D% 
  */
 
 public class gridTable extends baseTable {
