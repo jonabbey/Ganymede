@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,10 +119,8 @@ public class DBReadLock extends DBLock {
 
 		if (debug)
 		  {
-		    Ganymede.debug("DBReadLock (" + key + "):  added this to lockHash vector");
-		  }
-		else
-		  {
+		    // Ganymede.debug("DBReadLock (" + key + "):  added this to lockHash vector");
+
 		    System.err.println("DBReadLock (" + key + "):  added this to lockHash vector");
 		  }
 	      }
@@ -132,10 +130,8 @@ public class DBReadLock extends DBLock {
 
 		if (debug)
 		  {
-		    Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
-		  }
-		else
-		  {
+		    // Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
+
 		    System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
 		  }
 		
@@ -151,10 +147,8 @@ public class DBReadLock extends DBLock {
 
 	    if (debug)
 	      {
-		Ganymede.debug("DBReadLock (" + key + "):  initialized lockHash vector");
-	      }
-	    else
-	      {
+		// Ganymede.debug("DBReadLock (" + key + "):  initialized lockHash vector");
+
 		System.err.println("DBReadLock (" + key + "):  initialized lockHash vector");
 	      }
 	  }
@@ -171,10 +165,8 @@ public class DBReadLock extends DBLock {
 
 	    if (debug)
 	      {
-		Ganymede.debug("DBReadLock (" + key + "):  looping to get establish permission");
-	      }
-	    else
-	      {
+		// Ganymede.debug("DBReadLock (" + key + "):  looping to get establish permission");
+
 		System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
 	      }
 
@@ -190,10 +182,8 @@ public class DBReadLock extends DBLock {
 
 		if (debug)
 		  {
-		    Ganymede.debug("DBReadLock (" + key + "):  aborting before permission granted");
-		  }
-		else
-		  {
+		    // Ganymede.debug("DBReadLock (" + key + "):  aborting before permission granted");
+
 		    System.err.println("DBReadLock (" + key + "):  aborting before permission granted");
 		  }
 
@@ -241,10 +231,8 @@ public class DBReadLock extends DBLock {
 	      {
 		if (debug)
 		  {
-		    Ganymede.debug("DBReadLock (" + key + "):  waiting on lockManager");
-		  }
-		else
-		  {
+		    // Ganymede.debug("DBReadLock (" + key + "):  waiting on lockManager");
+
 		    System.err.println("DBReadLock (" + key + "):  waiting on lockManager");
 		  }
 		 
@@ -254,10 +242,8 @@ public class DBReadLock extends DBLock {
 
 		    if (debug)
 		      {
-			Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockManager");
-		      }
-		    else
-		      {
+			// Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockManager");
+
 			System.err.println("DBReadLock (" + key + "):  done waiting on lockManager");
 		      }
 		  }
@@ -265,10 +251,8 @@ public class DBReadLock extends DBLock {
 		  {
 		    if (debug)
 		      {
-			Ganymede.debug("DBReadLock (" + key + "):  interrupted exception");
-		      }
-		    else
-		      {
+			// Ganymede.debug("DBReadLock (" + key + "):  interrupted exception");
+
 			System.err.println("DBReadLock (" + key + "):  interrupted exception");
 		      }
 
@@ -294,10 +278,8 @@ public class DBReadLock extends DBLock {
 
 	if (debug)
 	  {
-	    Ganymede.debug("DBReadLock (" + key + "):  read lock established");
-	  }
-	else
-	  {
+	    // Ganymede.debug("DBReadLock (" + key + "):  read lock established");
+
 	    System.err.println("DBReadLock (" + key + "):  read lock established");
 	  }
       }	// synchronized (lockManager)
@@ -317,10 +299,8 @@ public class DBReadLock extends DBLock {
 
     if (debug)
       {
-	Ganymede.debug("DBReadLock (" + key + "):  attempting release");
-      }
-    else
-      {
+	// Ganymede.debug("DBReadLock (" + key + "):  attempting release");
+
 	System.err.println("DBReadLock (" + key + "):  attempting release");
       }
 
@@ -330,10 +310,8 @@ public class DBReadLock extends DBLock {
 	  {
 	    if (debug)
 	      {
-		Ganymede.debug("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
-	      }
-	    else
-	      {
+		// Ganymede.debug("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
+
 		System.err.println("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
 	      }
 
@@ -350,10 +328,8 @@ public class DBReadLock extends DBLock {
 	  {
 	    if (debug)
 	      {
-		Ganymede.debug("DBReadLock (" + key + "):  release() not locked, returning");
-	      }
-	    else
-	      {
+		// Ganymede.debug("DBReadLock (" + key + "):  release() not locked, returning");
+
 		System.err.println("DBReadLock (" + key + "):  release() not locked, returning");
 	      }
 
@@ -374,10 +350,8 @@ public class DBReadLock extends DBLock {
 
 	if (debug)
 	  {
-	    Ganymede.debug("DBReadLock (" + key + "):  release() released");
-	  }
-	else
-	  {
+	    // Ganymede.debug("DBReadLock (" + key + "):  release() released");
+
 	    System.err.println("DBReadLock (" + key + "):  release() released");
 	  }
 
