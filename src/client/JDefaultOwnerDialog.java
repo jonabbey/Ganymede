@@ -6,8 +6,8 @@
    
    Created: ??
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/02/11 07:09:26 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2001/07/05 22:25:51 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -90,7 +90,8 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
       getContentPane().add("North", new JLabel("Select default owner for new objects"));
 
       // Maybe I should use null instead of chosen?
-      StringSelector ss = new StringSelector(available, chosen, this, true, true, true);
+      StringSelector ss = new StringSelector(this, true, true, true);
+      ss.update(available, true, null, chosen, true, null);
       ss.setCallback(this);
       getContentPane().add("Center", ss);
 

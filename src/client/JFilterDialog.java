@@ -7,8 +7,8 @@
    
    Created: 3 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/11 07:09:26 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/07/05 22:25:52 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	throw new RuntimeException("Could not get Owner groups: " + rx);
       }
     
-    StringSelector ss = new StringSelector(available, filter, this, true, true, true);
+    StringSelector ss = new StringSelector(this, true, true, true);
+    ss.update(available, true, null, filter, true, null);
     ss.setCallback(this);
 
     getContentPane().add("Center", ss);

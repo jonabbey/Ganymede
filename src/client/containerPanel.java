@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2001/07/03 22:14:50 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2001/07/05 22:25:52 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.124 $ $Date: 2001/07/03 22:14:50 $ $Name:  $
+ * @version $Revision: 1.125 $ $Date: 2001/07/05 22:25:52 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1881,17 +1881,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     catch (NullPointerException ne)
       {
-	println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
+	ne.printStackTrace();
 	return false;
       }
     catch (IllegalArgumentException e)
       {
-	println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
+	e.printStackTrace();
 	return false;
       }
     catch (RuntimeException e)
       {
-	println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
+	e.printStackTrace();
 	return false;
       }
     finally
@@ -2370,13 +2370,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (list == null)
 	  {
-	    StringSelector ss = new StringSelector(null,
-						   (Vector)fieldInfo.getValue(), 
-						   this,
+	    StringSelector ss = new StringSelector(this,
 						   true, // editable
-						   false,  // canChoose
-						   false,  // mustChoose
-						   300); // this is double wide because there is no available list
+						   false, // canChoose
+						   false); // mustChoose
+
+	    ss.setCellWidth(300);
+	    ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
 
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
@@ -2395,13 +2395,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else
 	  {
 	    Vector available = list.getLabels(false);
-	    StringSelector ss = new StringSelector(available,
-						   (Vector)fieldInfo.getValue(), 
-						   this,
+	    StringSelector ss = new StringSelector(this,
 						   true, // editable
 						   true,   // canChoose
-						   false,  // mustChoose
-						   (available != null ? 150 : 300));
+						   false);  // mustChoose
+	    ss.setCellWidth(available != null ? 150 : 300);
+	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
+
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2419,13 +2419,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else  //not editable, don't need whole list of things
       {
-	StringSelector ss = new StringSelector(null,
-					       (Vector)fieldInfo.getValue(), 
-					       this,
+	StringSelector ss = new StringSelector(this,
 					       false, // not editable
 					       false,   // canChoose
-					       false,  // mustChoose
-					       300); // no availble list, so it is wider
+					       false);  // mustChoose
+	ss.setCellWidth(300);
+	ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
+
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2610,13 +2610,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	println("Creating StringSelector");
       }
 
-    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, 
+    StringSelector ss = new StringSelector(this, 
 					   editable && fieldInfo.isEditable(), 
-					   true, true, 
-					   ((choiceHandles != null) && 
-					    (editable && fieldInfo.isEditable())) ? 150 : 300,
-					   "Members", "Available",
-					   invidTablePopup, invidTablePopup2);
+					   true, true);
+
+    ss.setCellWidth(editable && fieldInfo.isEditable() ? 150: 300);
+    ss.update(choiceHandles, true, null, valueHandles, true, null);
+    ss.setPopups(invidTablePopup, invidTablePopup2);
+
     if (choiceHandles == null)
       {
 	ss.setButtonText("Create");

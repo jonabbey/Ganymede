@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 2001/07/03 22:14:51 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 2001/07/05 22:25:53 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2153,12 +2153,7 @@ class OptionsPanel extends JPanel {
 
     // create and load the StringSelector for the built in fields
       
-    builtInSelector = new StringSelector( builtInItems_Vect, 
-					  new Vector(), 
-					  builtInPanel,
-					  true, true, true, 0,
-					  "Members",
-					  "Available", null, null );
+    builtInSelector = new StringSelector(builtInPanel, true, true, true);
     
     Vector builtInHandles = new Vector(builtInItems_Vect.size());
 
@@ -2176,12 +2171,7 @@ class OptionsPanel extends JPanel {
 
     // create and load the StringSelector for the custom fields
 
-    customSelector = new StringSelector( new Vector(),
-					 customItems_Vect, 
-					 customPanel,
-					 true, true, true, 0,
-					 "Members",
-					 "Available", null, null );
+    customSelector = new StringSelector(customPanel, true, true, true);
 
     Vector customHandles = new Vector(customItems_Vect.size());
 

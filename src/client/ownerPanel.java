@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/09/26 05:23:14 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2001/07/05 22:25:52 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.JDialog.*;
  * the client.  This panel is created in association with the "Owners"
  * tab in framePanel.</p>
  *
- * @version $Revision: 1.27 $ $Date: 2000/09/26 05:23:14 $ $Name:  $
+ * @version $Revision: 1.28 $ $Date: 2001/07/05 22:25:52 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -309,13 +309,12 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	System.out.println("ownerPanel: creating string selector");
       }
 
-    StringSelector ss = new StringSelector(availableOwners, 
-					   currentOwners, 
-					   this, editable, 
-					   true, true, 10,
-					   "Owners", "Owner Groups",
-					   invidTablePopup,
-					   invidTablePopup2);
+    StringSelector ss = new StringSelector(this, editable, true, true);
+    
+    ss.setCellWidth(0);
+    ss.setTitles("Owners", "Owner Groups");
+    ss.setPopups(invidTablePopup, invidTablePopup2);
+    ss.update(availableOwners, true, null, currentOwners, true, null);
     ss.setCallback(this);
 
     return ss;

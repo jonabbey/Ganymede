@@ -7,8 +7,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/02/11 07:09:31 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2001/07/05 22:25:52 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -445,10 +445,12 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(editO2);
 
-    ss = new StringSelector(possible, owned, this, editable, true, true,
-			    (possible != null && editable) ? 150 : 300,
-			    "Selected", "Available",
-			    invidTablePopup, invidTablePopup2);
+    ss = new StringSelector(this, editable, true, true);
+
+    ss.update(possible, true, null, owned, true, null);
+    ss.setCellWidth((possible != null && editable) ? 150 : 300);
+    ss.setTitles("Selected", "Available");
+    ss.setPopups(invidTablePopup, invidTablePopup2);
 
     if (debug)
       {
