@@ -1,5 +1,5 @@
-Ganymede Release 1.03
-June 22, 2001
+Ganymede Release 1.0.5
+July 27, 2001
 README
 ---------------------------------------------
 
@@ -38,7 +38,7 @@ Things you will need:
   JDK 1.3 on UNIX thus far only seems to support 8 and 24 bit color
   displays and performs poorly on remote displays.  For this reason,
   the Ganymede client and admin console are designed to be able to
-  work with JDK 1.1.7 as well as 1.3.
+  work with JDK 1.1.7 as well as 1.2, 1.3, or the 1.4 beta.
 
   If you intend to use the Ganymede clients with a 1.1 series JDK, you
   will need to download Swing 1.1 (or later) from Sun.  Swing 1.1.1
@@ -50,23 +50,20 @@ Things you will need:
   built to use the javax version of the Swing libraries.  Probably 
   the best thing to do is to install the latest JDK 1.3 package, which
   includes an up-to-date Swing.  Most of the client testing on the
-  current release has been performed with JDK 1.1.8 on Solaris and
-  JDK 1.3 on Windows.
+  current release has been performed with JDK 1.1.8 on Solaris,
+  JDK 1.4 beta on Linux, and JDK 1.3 on Windows.
 
   Lots of bugs in Swing and JDK have been fixed in JDK 1.3.. get it
-  if you can.
+  or the 1.4 beta if you can.
 
   Perl 5 to run the install scripts.
 
-  Note that the HTML for the Ganymede client and admin pages have not
-  yet been updated to prompt the user to go to a 1.2 specific plug-in
-  page. Users without any version of the Java plugin installed may or
-  may not be directed to the right page for downloading.
-
   If you want to run the Ganymede client or admin console on a Win32
   machine, download the latest version of the Java Runtime Environment
-  (1.3.0 at this writing) from
-  http://java.sun.com/products/plugin/
+  (1.3.0 at this writing) from http://java.sun.com/products/plugin/.
+  You can also use Sun's Java Web Start product at
+  http://java.sun.com/products/javawebstart/ if you would prefer
+  not to have to run the clients from within a web browser.
   
 --
 
