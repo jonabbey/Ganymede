@@ -297,11 +297,15 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     // table layout
     
     Rectangle r = Resource.frame.getBounds();
-    System.out.println("Bounds: " + r);
+
+    if (debug)
+      {
+	System.out.println("Bounds: " + r);
+      }
+
     int width = getPreferredSize().width;
     int height = getPreferredSize().height;
 
-    
     setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
     pack();
   }
@@ -339,12 +343,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     if (e.getSource() == OKButton)
       {
 	//System.out.println("OKButton clicked, returning Hashtable");
-
       }
     else
       {
 	//System.out.println("CancelButton clicked, returning null Hashtable");
-
 
 	valueHash = null;
       }
@@ -402,11 +404,13 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     else if (comp instanceof JcheckboxField)
       {
 	String label = (String)componentHash.get(comp);
+
 	if (label == null)
 	  {
 	    System.out.println("in setValuePerformed from JcheckboxField: label = null");
 	    return true;
 	  }
+
 	JcheckboxField cbf = (JcheckboxField)comp;
 	Boolean answer = new Boolean(cbf.getValue());
 	valueHash.put(label, answer);
