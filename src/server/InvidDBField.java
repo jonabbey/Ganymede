@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -263,17 +263,27 @@ public final class InvidDBField extends DBField implements invid_field {
     return (Invid) values.elementAt(index);
   }
 
+  /**
+   *
+   * This method returns a text encoded value for this InvidDBField
+   * without checking permissions.<br><br>
+   *
+   * This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the getLabel()
+   * logic for DBObject, which is invoked from GanymedeSession.getPerm().<br><br>
+   *
+   * If this method checked permissions and the getPerm() method
+   * failed for some reason and tried to report the failure using
+   * object.getLabel(), as it does at present, the server could get
+   * into an infinite loop.
+   *
+   */
+
   public synchronized String getValueString()
   {
     GanymedeSession gsession = null;
 
     /* -- */
-
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field " + getName() +
-					   " in object " + owner.getLabel());
-      }
 
     // where will we go to look up the label for our target(s)?
 
@@ -303,6 +313,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 
 	Invid localInvid = (Invid) this.value();
+
+	// XXX note: we don't use our owner's lookupLabel() method
+	// for scalar invid values.. 
 
 	if (gsession != null)
 	  {
@@ -1584,16 +1597,12 @@ public final class InvidDBField extends DBField implements invid_field {
 	// Wizard check
 	
 	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	if (newRetVal != null)
 	  {
-	    // we're not done.. return the next wizard dialog, or the failure code
-	    
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -1729,13 +1738,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -1846,13 +1853,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -1972,11 +1977,23 @@ public final class InvidDBField extends DBField implements invid_field {
     // object's binding recorded.  We'll have to do the bidirectional
     // binding ourselves, in two steps.
 
-    if (embeddedObj.setFieldValue(SchemaConstants.ContainerField, // *sync* DBField
-				  owner.getInvid()) != null)
+    // we have to use setFieldValueLocal() here because the
+    // permissions system uses the ContainerField to determine rights
+    // to modify the field.. since we are just now setting the
+    // container, the permissions system will fail if we don't bypass
+    // it by using the local variant.
+
+    if (embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
+				       owner.getInvid()) != null)
       {
 	setLastError("Couldn't bind reverse pointer");
 	return null;
+      }
+    else if (debug)
+      {
+	InvidDBField invf = (InvidDBField)  embeddedObj.getField(SchemaConstants.ContainerField);
+	System.err.println("-- Created a new embedded object in " + owner.getLabel() + 
+			   ", set it's container pointer to " + invf.getValueString());
       }
 
     // finish the binding.  Note that we are directly modifying values
@@ -2040,6 +2057,7 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid remote;
     ReturnVal retVal = null, newRetVal;
+    String checkKey;
 
     /* -- */
 
@@ -2063,6 +2081,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     remote = (Invid) values.elementAt(index);
 
+    checkKey = "del" + remote.toString();
+
     eObj = (DBEditObject) owner;
 
     if (!local)
@@ -2071,30 +2091,52 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
 	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
       }
 
-    newRetVal = unbind(remote, local);
+    // ok, we're going to handle it.  Checkpoint
+    // so we can easily undo any changes that we make
+    // if we have to return failure.
 
-    if (newRetVal != null && !newRetVal.didSucceed())
+    if (debug)
       {
-	return newRetVal;
+	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkKey);
+      }
+
+    eObj.getSession().checkpoint(checkKey);
+
+    if (debug)
+      {
+	System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkKey);
+      }
+
+    // if we are an edit in place object, we don't want to do an
+    // unbinding.. we'll do a deleteDBObject() below, instead.  The
+    // reason for this is that the deleteDBObject() code requires that
+    // the SchemaConstants.ContainerField field be intact to properly
+    // check permissions for embedded objects.
+
+    if (!getFieldDef().isEditInPlace())
+      {
+	newRetVal = unbind(remote, local);
+
+	if (newRetVal != null && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
       }
 
     if (eObj.finalizeDeleteElement(this, index))
       {
 	values.removeElementAt(index);
 
-	// if we are an editInPlace field, unlinking
-	// this object means that we should go ahead
-	// and delete the object.
+	// if we are an editInPlace field, unlinking this object means
+	// that we should go ahead and delete the object.
 
 	if (getFieldDef().isEditInPlace())
 	  {
@@ -2103,23 +2145,23 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
+	    eObj.getSession().rollback(checkKey);
 	    return retVal;	// go ahead and return our error code
 	  }
 
-	if (values.size() > 0)
-	  {
-	    return retVal;
-	  }
-	else
+	// success
+
+	if (values.size() == 0)
 	  {
 	    defined = false;
-
-	    return retVal;
 	  }
+
+	eObj.getSession().popCheckpoint(checkKey);
+	return retVal;
       }
     else
       {
-	bind(null, remote, local);
+	eObj.getSession().rollback(checkKey);
 
 	return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
 					  "Couldn't finalize\n" + getLastError());
@@ -2162,7 +2204,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Returns a StringBuffer encoded list of the current values
+   * Returns a QueryResult encoded list of the current values
    * stored in this field.
    *
    * @see arlut.csd.ganymede.invid_field
@@ -2204,10 +2246,11 @@ public final class InvidDBField extends DBField implements invid_field {
     for (int i = 0; i < values.size(); i++)
       {
 	invid = (Invid) values.elementAt(i);
-	
+
 	if (gsession != null)
 	  {
-	    label = gsession.viewObjectLabel(invid);
+	    object = gsession.getSession().viewDBObject(invid);
+	    label = owner.lookupLabel(object);
 	  }
 	else
 	  {
