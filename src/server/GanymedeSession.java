@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -393,7 +393,14 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public String viewObjectLabel(Invid invid)
   {
-    return session.viewDBObject(invid).getLabel();
+    try
+      {
+	return session.viewDBObject(invid).getLabel();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
   }
 
   /**
