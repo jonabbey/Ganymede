@@ -1204,15 +1204,15 @@ need to move to an incremental model for synchronization.</p>
     <p>The &lt;before&gt; and &lt;after&gt; elements contain one
     &lt;object&gt; element each.  These &lt;object&gt; elements are
     identical to the <a
-    href="../xml/data.html#OBJECT"><b>&lt;object&gt;</b></a> elements
+    href="../xml/data.html#OBJECT">&lt;object&gt;</a> elements
     as they are used with the <a
-    href="../xml.html"><b>xmlclient</b></a>, except that the <code
+    href="../glossary.html#xmlclient">xmlclient</a>, except that the <code
     class="attribute">oid</code> attribute has been added.  The <code
     class="attribute">oid</code> attribute may be useful to your Sync
     Channel service program as a foreign key, constant against object
     renames.  In the same way, the <code class="attribute">oid</code>
     attribute is added to the <a
-    href="../xml/data.html#INVID"><b>&lt;invid&gt;</b></a> element,
+    href="../xml/data.html#INVID">&lt;invid&gt;</a> element,
     strictly to act as a reliable reference in the face of object
     renames.</p>
 
@@ -1222,14 +1222,15 @@ need to move to an incremental model for synchronization.</p>
     configured to write.  This will usually just be fields that have
     changed.</p>
 
-    <p>(There is yet a third difference, having to do with how
-    embedded objects are handled.  In <a
-    href="../xml.html"><b>xmlclient</b></a>'s normal output, embedded
-    objects are embedded in place, while in Sync Channel output,
-    embedded object trees are simply represented as flat lists of <a
-    href="../xml/data.html#INVID"><b>&lt;invid&gt;</b></a> elements.
-    This is pretty obscure, but if you're dealing with embedded
-    objects in your Ganymede schema, you'll see what we mean.)</p>
+    <p class="note">There is yet a third difference, having to do with
+    how embedded objects are handled.  In <a
+    href="../glossary.html#xmlclient">xmlclient</a>'s normal output,
+    embedded objects are embedded in place, while in Sync Channel
+    output, embedded object trees are simply represented as flat lists
+    of <a href="../xml/data.html#INVID">&lt;invid&gt;</b></a>
+    elements.  This is pretty obscure, but if you're dealing with
+    embedded objects in your Ganymede schema, you'll see what we
+    mean.</p>
 
     <p>If a field did change during the transaction, its before state
     will be written in the &lt;before&gt; element, and its after state

@@ -38,6 +38,16 @@
 
  p.address { font-family: Arial, Helvetica; font-style: italic; }
 
+ p.note { 
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin: auto;
+    border: 1px solid #666;
+    padding: 0.7em;
+    color: red;
+    width: 80%;
+ }
+
  pre.listing { 
     margin-top: 1em;
     margin-bottom: 1em;
@@ -48,6 +58,15 @@
     font-size: 75%;
  }
 
+ xmp.listing { 
+    margin-top: 1em;
+    margin-bottom: 1em;
+    border: 1px solid #666;
+    background-color: #eee;
+    padding: 0.7em;
+    color: navy;
+    font-size: 75%;
+ }
 }
 
 
@@ -65,6 +84,14 @@
   }
 
   pre.listing { 
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
+
+  xmp.listing { 
     white-space: pre-wrap;       /* css-3 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
     white-space: -pre-wrap;      /* Opera 4-6 */

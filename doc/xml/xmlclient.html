@@ -1,7 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>XML Client</title>
+    <link rel="stylesheet" type="text/css" href="../stylesheets/ganymede.css"/>
+    <title>XML Client<br/>Release 2.0 dev - ? ? 2005<br/>$Rev: 6477 $</title>
   </head>
 
   <BODY BGCOLOR="#FFFFFF">
@@ -21,7 +22,7 @@
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] &lt;xmlfile&gt;</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dump</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpschema</li>
-	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata [sync=channel]</li>
     </ol></p>
 
     <p>Running xmlclient with a file name for a parameter will cause
@@ -31,6 +32,14 @@
     The <code>-dumpschema</code> option dumps out just the schema
     definition information, and the <code>-dumpdata</code> option
     dumps out just the data objects.</p>
+
+    <p>If you use the <code>-dumpdata</code> option, there is an
+    optional <code>sync</code> parameter that you can use to limit the
+    kind of data that is written.  If you set the sync parameter to
+    the name of a registered <a
+    href="../synchronization/index.html#xml_full_state">Sync
+    Channel</a>, the xmlclient will only write out data required for
+    that Sync Channel..  </p>
 
     <p>The xmlclient assumes that it is being run by the supergash
     account by default.  Only supergash-level admins are allowed to
@@ -58,6 +67,10 @@
       <dt><code>xmlclient schema.xml</code></dt>
       <dd><p>This example will load the schema.xml file and send its contents to the server, prompting
 	for the supergash password if the schema.xml file does not specify username and password.</p></dd>
+
+      <dt><code>xmlclient -dumpdata sync=Users > user_sync.xml</code></dt>
+      <dd><p>This example will dump all data from the Users Sync
+      Channel to the user_sync.xml file.</p></dd>
     </dl>
     
     <p>See the <a href="index.html" target="_top">Ganymede XML Guide</a> for complete details on
@@ -65,9 +78,10 @@
 
     <hr>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
+    <p class="address">$Date: 2005-03-27 10:23:46 -0600 (Sun, 27 Mar 2005) $, $Rev: 6477 $, $Author: broccol $</p>
 <!-- Created: Wed Jun  6 13:32:19 CDT 2001 -->
 <!-- hhmts start -->
-Last modified: Fri Jul 27 22:03:38 CDT 2001
+Last modified: Sun Mar 27 10:45:50 Central Standard Time 2005
 <!-- hhmts end -->
   </body>
 </html>
