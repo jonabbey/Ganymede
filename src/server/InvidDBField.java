@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.88 $ %D%
+   Version: $Revision: 1.89 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.88 $ %D%
+ * @version $Revision: 1.89 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1523,7 +1523,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	    
 	    if (tmp.equals(newInvid))
 	      {
-		return null;	// already linked
+		return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
+						  "The backfield pointer in scalar invid field " + getName() +
+						  " in object " + getOwner().getLabel() + 
+						  "refused the pointer binding because it already points " +
+						  "back to the object requesting binding.  This sugests that " +
+						  "multiple fields in the originating object " + newInvid + 
+						  " are trying to link to one scalar field in we, the target, which " +
+						  "can't work.  If one of the fields in " + newInvid + " is ever " +
+						  "cleared or changed, we'll be cleared and the reflexive relationship " +
+						  "will be broken.\n\nHave your adopter check the schema.");
 	      }
 
 	    retVal = unbind(tmp, local);
