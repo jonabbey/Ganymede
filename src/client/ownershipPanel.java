@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/04/14 19:04:40 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/07/26 22:19:53 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -320,7 +320,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
     try
       {
 	QueryResult qResult;
-	db_object object = parent.parent.object;
+	db_object object = parent.parent.getObject();
 
 	// go back to the framePanel to get the invid
 

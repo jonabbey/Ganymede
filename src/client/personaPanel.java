@@ -6,8 +6,8 @@
    
    Created: 6 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/03/12 20:39:36 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/07/26 22:19:53 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -275,7 +275,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    
 	    // Tell the user about the persona
 
-	    fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
+	    fp.getObject().getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
 
 	    // Tell the persona about the user
 
@@ -359,7 +359,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  {
 	    Invid user = fp.getObjectInvid();
 
-	    retVal = fp.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
+	    retVal = fp.getObject().getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
 
 	    removed = (retVal == null) ? true : retVal.didSucceed();
 

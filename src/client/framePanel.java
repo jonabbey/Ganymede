@@ -1,12 +1,12 @@
- /*
+/*
 
    framePanel.java
 
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/05/26 23:17:14 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/07/26 22:19:51 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.56 $ $Date: 1999/05/26 23:17:14 $ $Name:  $
+ * @version $Revision: 1.57 $ $Date: 1999/07/26 22:19:51 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -252,7 +252,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    */
 
   db_object
-    object;
+    server_object;
 
   /**
    * Reference to the desktop pane containing the client's internal windows.  Used to access
@@ -302,7 +302,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   public framePanel(db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
   {
     this.wp = winP;
-    this.object = object;
+    this.server_object = object;
     this.editable = editable;
     this.gc = winP.gc;
     this.isCreating = isCreating;
@@ -410,7 +410,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     try
       {
-	id = object.getTypeID();
+	id = getObject().getTypeID();
 
 	if (id == SchemaConstants.OwnerBase)
 	  {
@@ -430,7 +430,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
 	else if (id == SchemaConstants.UserBase)
 	  {
-	    persona_field = (invid_field)object.getField(SchemaConstants.UserAdminPersonae);
+	    persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
 	     
 	    // If the field is null, then that means that the aren't
 	    // any personas, and this is jsut a view window, so we
@@ -459,7 +459,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     try
       {
-	notes_field = (string_field)object.getField(SchemaConstants.NotesField);
+	notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
       }
     catch (RemoteException rx)
       {
@@ -487,8 +487,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     try
       {
-	exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
-	rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
+	rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
 	  
 	if ((exp_field != null) && (exp_field.getValue() != null))
 	  {
@@ -600,7 +600,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	try
 	  {
-	    invid = object.getInvid();
+	    invid = getObject().getInvid();
 	  }
 	catch (RemoteException rx)
 	  {
@@ -652,70 +652,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 					  "the general panel at this time.");
 	  }
       }
-  }
-    
-  /**
-   * <p>Print a nasty-looking image of the frame.</p>
-   *
-   * <p>This hardly works.</p>
-   */
-
-  public void printObject()
-  {
-    PrintJob j = Toolkit.getDefaultToolkit().getPrintJob(getgclient(), 
-							 "Print window", 
-							 new Properties());
-    if (j == null)
-      {
-	if (debug)
-	  {
-	    println("Cancelled");
-	  }
-
-	return;
-      }
-
-    Graphics page = j.getGraphics();
-
-    int index = pane.getSelectedIndex();
-
-    if (index < 0)
-      {
-	if (debug)
-	  {
-	    println("No pane selected?");
-	  }
-      }
-    else
-      {
-	if (debug)
-	  {
-	    println("Printing " + index);
-	  }
-
-	// The thinking here is that some components other than the
-	// scrollpane might be a little bit smarter about what they
-	// should be printing.
-
-	if (pane.getComponentAt(index) instanceof JScrollPane)
-	  {
-	    if (debug)
-	      {
-		println("Printing out the contents of the ScrollPane.");
-	      }
-
-	    JScrollPane sp = (JScrollPane)pane.getComponentAt(index);
-	    sp.getViewport().getView().print(page);
-	  }
-	else if (debug)
-	  {
-	    println("The selected index is not a scrollpane.");
-	    showErrorMessage("The current selection cannot be printed.");
-	  }
-      }
-
-    page.dispose();
-    j.end();
   }
 
   /**
@@ -883,7 +819,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	for (int i = 0; i < templates.size();  ++i)
 	  {
 	    template = (FieldTemplate)templates.elementAt(i);
-	    field = object.getField(template.getID());
+	    field = getObject().getField(template.getID());
 
 	    if (field != null)
 	      {
@@ -937,75 +873,51 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     menuBar.setBorderPainted(true);
     
     JMenu fileM = new JMenu("File");
-
     menuBar.add(fileM);
 
-    JMenu deleteM = new JMenu("Delete");
-    JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
-    deleteM.add(reallyDeleteMI);
-    reallyDeleteMI.setActionCommand("ReallyDelete");
-    reallyDeleteMI.addActionListener(this);
-      
-    JMenuItem inactivateMI = new JMenuItem("Inactivate");
-    inactivateMI.addActionListener(this);
-
-    JMenuItem refreshMI = new JMenuItem("Refresh");
-    refreshMI.addActionListener(this);
-
-    JMenuItem setExpirationMI = null;
-    JMenuItem setRemovalMI = null;
-
-    if (editable)
+    if (!editable)
       {
-	setExpirationMI = new JMenuItem("Set Expiration Date");
-	setExpirationMI.addActionListener(this);
-	
-        setRemovalMI = new JMenuItem("Set Removal Date");
-	setRemovalMI.addActionListener(this);
+	JMenuItem refreshMI = new JMenuItem("Refresh");
+	refreshMI.addActionListener(this);
+	refreshMI.setToolTipText("Update this window with the current state of this object in the database");
+	fileM.add(refreshMI);
       }
 
-    JMenuItem printMI = new JMenuItem("Print");
-    printMI.addActionListener(this);
-
-    JMenuItem saveMI = null;
     if (!gc.isApplet())
       {
-	saveMI = new JMenuItem("Save");
+	JMenuItem saveMI = new JMenuItem("Save");
 	saveMI.addActionListener(this);
+	saveMI.setToolTipText("Saves a text dump of this object's state and history to disk");
+	fileM.add(saveMI);
       }
 
     JMenuItem mailMI = new JMenuItem("Mail to...");
     mailMI.addActionListener(this);
-    
-
-    fileM.add(inactivateMI);
-    fileM.add(deleteM);
-    fileM.addSeparator();
-    fileM.add(printMI);
-
-    if (!gc.isApplet())
-      {
-	fileM.add(saveMI);
-      }
+    mailMI.setToolTipText("Mails a text dump of this object's state and history");
     fileM.add(mailMI);
 
-    fileM.add(refreshMI);
     if (editable)
       {
 	fileM.addSeparator();
-	fileM.add(setExpirationMI);
+
+	try
+	  {
+	    if (getObject().canInactivate())
+	      {
+		JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
+		setExpirationMI.addActionListener(this);
+		setExpirationMI.setToolTipText("Set a date for this object to be inactivated");
+		fileM.add(setExpirationMI);
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+
+        JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
+	setRemovalMI.addActionListener(this);
+	setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
 	fileM.add(setRemovalMI);
-      }
-
-    fileM.addSeparator();
-
-    if (!editable)
-      {
-	JMenuItem editMI = new JMenuItem("Edit");
-	editMI.addActionListener(this);
-	
-	fileM.add(editMI);
-	
       }
 
     if (debug)
@@ -1023,7 +935,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Creating general panel");
       }
     
-    containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false, isCreating, null);
+    containerPanel cp = new containerPanel(getObject(), editable, wp.gc, wp, 
+					   this, progressBar, false, isCreating, null);
     cp.load();
     cp.setBorder(wp.emptyBorder10);
     
@@ -1044,7 +957,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	try
 	  {
-	    exp_field = (date_field) object.getField(SchemaConstants.ExpirationField);
+	    exp_field = (date_field) getObject().getField(SchemaConstants.ExpirationField);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -1090,7 +1003,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	try
 	  {
-	    rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	    rem_field = (date_field) getObject().getField(SchemaConstants.RemovalField);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -1139,7 +1052,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	owner.getVerticalScrollBar().setUnitIncrement(15);
 
-	invid_field invf = (invid_field) object.getField(SchemaConstants.OwnerListField);
+	invid_field invf = (invid_field) getObject().getField(SchemaConstants.OwnerListField);
 	owner.setViewportView(new ownerPanel(invf, editable, this));
       }
     catch (RemoteException rx)
@@ -1159,10 +1072,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     try
       {
-	creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
-	creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
-	modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
-	modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
+	creation_date_field = (date_field) getObject().getField(SchemaConstants.CreationDateField);
+	creator_field = (string_field) getObject().getField(SchemaConstants.CreatorField);
+	modification_date_field = (date_field) getObject().getField(SchemaConstants.ModificationDateField);
+	modifier_field = (string_field) getObject().getField(SchemaConstants.ModifierField);
       }
     catch (RemoteException rx)
       {
@@ -1228,7 +1141,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     try
       {
-	oo = (invid_field)object.getField(SchemaConstants.OwnerObjectsOwned);
+	oo = (invid_field) getObject().getField(SchemaConstants.OwnerObjectsOwned);
       }
     catch (RemoteException rx)
       {
@@ -1378,16 +1291,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Menu item action: " + e.getActionCommand());
       }
     
-    if (e.getActionCommand().equals("Edit"))
-      {
-	if (debug)
-	  {
-	    println("edit button clicked");
-	  }
-
-	gc.editObject(getObjectInvid());
-      }
-    else if (e.getActionCommand().equals("Save"))
+    if (e.getActionCommand().equals("Save"))
       {
 	if (debug)
 	  {
@@ -1400,88 +1304,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	sendMail();
       }
-    else if (e.getActionCommand().equals("ReallyDelete"))
-      {
-	if (debug)
-	  {
-	    println("Deleting object");
-	  }
-
-	if (gc.deleteObject(getObjectInvid()))
-	  {
-	    try
-	      {
-		setClosed(true);
-	      }
-	    catch (PropertyVetoException ex)
-	      {
-		throw new RuntimeException("JInternalFrame will not close: " + ex);
-	      }
-	  }
-	else
-	  {
-	    showErrorMessage("Error", "Could not delete object.");
-	  }
-      }
-    else if (e.getActionCommand().equals("Close"))
-      {
-	try
-	  {
-	    if (debug)
-	      {
-		System.err.println("Processing close action command");
-	      }
-
-	    setClosed(true);
-	  }
-	catch (PropertyVetoException ex)
-	  {
-	    throw new RuntimeException("JInternalFrame will not close: " + ex);
-	  }
-      }
-    else if (e.getActionCommand().equals("Iconify"))
-      {
-	try
-	  {
-	    setIcon(true);
-	  }
-	catch (PropertyVetoException ex)
-	  {
-	    throw new RuntimeException("JInternalFrame will not change icon: " + ex);
-	  }
-      }
-    else if (e.getActionCommand().equals("Print"))
-      {
-	printObject();
-      }
     else if (e.getActionCommand().equals("Refresh"))
       {
 	refresh();
-      }
-    else if (e.getActionCommand().equals("Inactivate"))
-      {
-	boolean success = gc.inactivateObject(getObjectInvid());
-	
-	if (success)
-	  {
-	    if (debug)
-	      {
-		System.err.println("removing window after inactivation");
-	      }
-
-	    try
-	      {
-		setClosed(true);
-	      }
-	    catch (PropertyVetoException ex)
-	      {
-		throw new RuntimeException("JInternalFrame will not close: " + ex);
-	      }		
-	  }
-	else
-	  {
-	    showErrorMessage("Could not inactivate object.");
-	  }
       }
     else if (e.getActionCommand().equals("Set Expiration Date"))
       {
@@ -1495,7 +1320,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       }
     else
       {
-	System.err.println("Unknow action event: " + e);
+	System.err.println("Unknown action event: " + e);
       }
   }
 
@@ -1587,6 +1412,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   final windowPanel getWindowPanel()
   {
     return wp;
+  }
+
+  final db_object getObject()
+  {
+    return this.server_object;
   }
 
   private final void setStatus(String status)

@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/06/19 03:20:57 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/07/26 22:19:52 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
+ * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -186,6 +186,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
+
+  Image errorImage = null;
 
   protected Image ganymede_logo;
   protected JTextField username;
@@ -635,7 +637,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "RMI Error: Couldn't log into server: \n" +
-					      ex.getMessage());
+					      ex.getMessage(),
+					      getErrorImage());
 	    
 	    connector.setEnabled(true);
 	    _quitButton.setEnabled(true);
@@ -646,7 +649,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	catch (NullPointerException ex)
 	  {
 	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "Error: Didn't get server reference.  Please Quit and Restart");
+					      "Error: Didn't get server reference.  Please Quit and Restart",
+					      getErrorImage());
 	    
 	    connector.setEnabled(true);
 	    _quitButton.setEnabled(true);
@@ -657,7 +661,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	catch (Exception ex) 
 	  {
 	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "Error: " + ex.getMessage());
+					      "Error: " + ex.getMessage(),
+					      getErrorImage());
 
 	    connector.setEnabled(true);
 	    _quitButton.setEnabled(true);
@@ -752,7 +757,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	System.out.println(e.getMessage());
       }
 
-    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
+    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
   }
 
   /**
@@ -769,6 +774,23 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     catch (NullPointerException ex)
       {
       }
+  }
+
+  /**
+   * <p>Loads and returns the error Image for use in client dialogs.</p>
+   * 
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().</p>
+   */
+
+  public final Image getErrorImage()
+  {
+    if (errorImage == null)
+      {
+	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+      }
+    
+    return errorImage;
   }
 }
 
@@ -791,7 +813,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
+ * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -876,7 +898,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
+ * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
  * @author Jonathan Abbey
  */
 
