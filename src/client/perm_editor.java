@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -374,7 +374,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	    createOK = viewOK = editOK = deleteOK = true;
 	  }
 
-	myPermRow = new PermRow(base, enabled);
+	myPermRow = new PermRow(base, null, enabled);
 	myPermRow.viewOK = viewOK;
 	myPermRow.createOK = createOK;
 	myPermRow.editOK = editOK;
@@ -459,7 +459,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	      }
 
 
-	    myPermRow = new PermRow(template, visibleField);
+	    myPermRow = new PermRow(base, template, visibleField);
 	    myPermRow.viewOK = viewOK;
 	    myPermRow.createOK = createOK;
 	    myPermRow.editOK = editOK;
@@ -646,25 +646,90 @@ class BPermTableModel extends AbstractTableModel {
 	
       case 1:
 	myRow.visible = (Boolean)value;
+	if (myRow.field == null) {
+	  setBaseChildren(row, col, value);
+
+	  if (myRow.creatable.booleanValue()) {
+	    setBaseChildren(row, col+1, value);
+	  }
+
+	  if (myRow.editable.booleanValue()) {
+	    setBaseChildren(row, col+2, value);
+	  }
+
+	}
 	break;
 	
       case 2:
 	myRow.creatable = (Boolean)value;
+	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
+	  setBaseChildren(row, col, value);
+	}
 	break;
 
       case 3:
 	myRow.editable = (Boolean)value;
+	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
+	  setBaseChildren(row, col, value);
+	}
 	break;
 	
       case 4:
 	myRow.deletable = (Boolean)value;
+	//	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
+	//	  setBaseChildren(row, col, value);
+	//}
 	break;
 	
       default:
+
 	// do nothing;
       }
+	  fireTableDataChanged();
+
     }
-  }  
+
+  }
+
+  public void setBaseChildren(int row, int col, Object boolValue) {
+    Boolean value = (Boolean)boolValue;
+    PermRow baseRow = (PermRow) rows.elementAt(row);
+
+    for (int i = row+1; i<=rows.size(); i++) {
+      PermRow myRow = (PermRow) rows.elementAt(i);
+      if (myRow.field == null) {
+	break;
+      } else {
+	
+	switch(col) {
+	case 1:
+	  myRow.visible = value;
+	  break;
+	case 2:
+	  myRow.creatable = value;
+	  break;
+	case 3:
+	  myRow.editable = value;
+	  break;
+	case 4:
+	  myRow.deletable = value;
+	  break;
+	default:
+	  // do nothing
+	}
+	if (col == 1) {
+	  myRow.enabled = value.booleanValue();
+	  if (!myRow.enabled) {
+	    myRow.visible = new Boolean(false);
+	    myRow.creatable = new Boolean(false);
+	    myRow.editable = new Boolean(false);
+	    myRow.deletable = new Boolean(false);
+	  
+	  }
+	}
+      }
+    }
+  }
 }
 
 class StringRenderer extends JLabel
@@ -769,8 +834,14 @@ class PermRow {
   boolean createOK, viewOK, editOK, deleteOK;
   boolean enabled;
 
-  public PermRow(Object reference, boolean enabled) {
-    this.reference = reference;
+  public PermRow(BaseDump base, FieldTemplate field, boolean enabled) {
+    if (field == null) {   
+      this.reference = base;
+    } else {
+      this.reference = field;
+    }
     this.enabled = enabled;
+    this.base = base;
+    this.field = field;
   }
 }
