@@ -178,7 +178,7 @@ public class JMultiLineLabel extends JTextArea {
    * <p>We're pretending to be a label, so please don't give us focus.</p>
    */
 
-  public boolean isFocusTraversable()
+  public boolean isFocusable()
   {
     return false;
   }
