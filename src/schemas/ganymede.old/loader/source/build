@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Ganymede Loader Build Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+CLASSPATH=${JARDIR}/ganymedeServer.jar:${SCHEMADIR}/custom.jar:$CLASSDIR
+export CLASSPATH
+
+echo "Compiling Loader files"
+
+cd $SOURCE
+
+$JAVAC -deprecation -d $CLASSDIR *.java
+
+echo "Building rmi stubs and skeletons"
+
+$RMIC -d $CLASSDIR arlut.csd.ganymede.loader.directLoaderClient
+
+echo "Done"
+
