@@ -56,17 +56,21 @@
 package arlut.csd.ddroid.server;
 
 import java.io.IOException;
+import java.rmi.NoSuchObjectException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.Util.TranslationService;
+import arlut.csd.ddroid.common.RMISSLClientSocketFactory;
+import arlut.csd.ddroid.common.RMISSLServerSocketFactory;
 import arlut.csd.ddroid.rmi.Server;
 import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.Util.TranslationService;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,4 +86,97 @@ import arlut.csd.ddroid.rmi.adminSession;
 
 public class GanymedeRMIManager {
 
+  private boolean useSSL = false;
+  private RMISSLServerSocketFactory ssf = null;
+  private RMISSLClientSocketFactory csf = null;
+  private int port = 0;
+
+  /**
+   * <p>Constructor for the GanymedeRMIManager.  If the defaultPort is
+   * 0, the port number for exported objects will be chosen at random
+   * by the RMI runtime.  Any other value will force all objects to be
+   * published on a constant port, useful for specifying single port access
+   * through a firewall.</p>
+   *
+   * <p>If useSSL is true, all objects exported by this GanymedeRMIManager
+   * will be using the arlut.csd.ddroid.common.RMISSLServerSocketFactory
+   * and arlut.csd.ddroid.common.RMISSLClientSocketFactory socket
+   * factories.</p>
+   */
+
+  public GanymedeRMIManager(int defaultPort, boolean useSSL)
+  {
+    this.port = defaultPort;
+
+    if (useSSL)
+      {
+	this.useSSL = true;
+
+	// let's keep our SSL sockets open for 2 minutes even in the face
+	// of idle connections, as opposed to the 15 second default.
+
+	System.getProperties().setProperty("sun.rmi.transport.connectionTimeout", "120000");
+	this.csf = new RMISSLClientSocketFactory();
+	this.ssf = new RMISSLServerSocketFactory();
+      }
+  }
+
+  /**
+   * <p>Exports the referenced Remote interface-implementing object
+   * for remote access through RMI.  Returns true on success, or false
+   * if the underlying exportObject() call threw a RemoteException.</p>
+   */
+
+  public boolean publishObject(Remote obj)
+  {
+    if (useSSL)
+      {
+	try
+	  {
+	    UnicastRemoteObject.exportObject(obj, this.port, this.csf, this.ssf);
+	  }
+	catch (RemoteException ex)
+	  {
+	    return false;
+	  }
+      }
+    else
+      {
+	try
+	  {
+	    UnicastRemoteObject.exportObject(obj, this.port);
+	  }
+	catch (RemoteException ex)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>Removes the Remote obj reference from remote accessiblity.  Once this
+   * call returns, the obj will not receive any more remote RMI calls.  If
+   * force is true, the object will be unpublished even if there are pending
+   * calls on it.</p>
+   *
+   * <p>Returns true on successful unpublish, or false if there was
+   * some problem.</p>
+   */
+
+  public boolean unpublishObject(Remote obj, boolean force)
+  {
+    boolean success = false;
+
+    try
+      {
+	success = UnicastRemoteObject.unexportObject(obj, force);
+      }
+    catch (NoSuchObjectException ex)
+      {
+      }
+
+    return success;
+  }
 }
