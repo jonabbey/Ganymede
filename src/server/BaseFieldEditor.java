@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/06/05 22:28:00 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2001/06/05 22:56:09 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -262,7 +262,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     regexpS.setCallback(this);
     addRow(editPanel, regexpS, "Regular Expression:", rowcount++);
 
-    regexpDescS = new JstringField(20, 100, true, false, null, null);
+    regexpDescS = new JstringField(20, 400, true, false, null, null);
     regexpDescS.setCallback(this);
     addRow(editPanel, regexpDescS, "RegExp Description:", rowcount++);
    
