@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/12/04 03:52:21 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/12/04 04:06:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -110,7 +110,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private XMLElement halfElement;
   private boolean skipWhiteSpace;
   private PrintWriter err;
-  private CircleBuffer circleBuffer = new CircleBuffer(10);
+  private CircleBuffer circleBuffer = new CircleBuffer(30);
 
   /* -- */
 
