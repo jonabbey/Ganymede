@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/07/13 21:33:11 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/07/25 03:46:33 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.20 $ $Date: 2000/07/13 21:33:11 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 2000/07/25 03:46:33 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -155,6 +155,8 @@ public class xmlfield implements FieldType {
 	      {
 		value = bValue;
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
     else if (fieldDef.getType() == FieldType.NUMERIC)
@@ -174,6 +176,8 @@ public class xmlfield implements FieldType {
 	      {
 		value = iValue;
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
     else if (fieldDef.getType() == FieldType.DATE)
@@ -201,18 +205,42 @@ public class xmlfield implements FieldType {
 	      {
 		value = dValue;
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
     else if (fieldDef.getType() == FieldType.STRING)
       {
 	if (!fieldDef.isArray())
 	  {
-	    value = xmlclient.xc.reader.getFollowingString(openElement, true);
+	    nextItem = xmlclient.xc.reader.peekNextItem();
 
-	    // getFollowingString automatically consumes the field
-	    // close element after the string text
+	    if (nextItem.matchesClose(elementName))
+	      {
+		nextItem = xmlclient.xc.getNextItem(); // consume it
 
-	    return;
+		value = null;
+		return;
+	      }
+	    else if (nextItem.matches("string"))
+	      {
+		// we've got a <string>-encoded scalar rather than
+		// free-standing plain text
+
+		nextItem = xmlclient.xc.getNextItem(); // consume it
+		value = parseStringVecItem(nextItem);
+
+		// fall through to skipToEndField() below
+	      }
+	    else
+	      {
+		value = xmlclient.xc.reader.getFollowingString(openElement, true);
+
+		// getFollowingString automatically consumes the field
+		// close element after the string text
+		
+		return;
+	      }
 	  }
 	else
 	  {
@@ -242,6 +270,8 @@ public class xmlfield implements FieldType {
 		// an <invid>
 
 		value = new xInvid(nextItem);
+
+		// fall through to skipToEndField()
 	      }
 	  }
 	else
@@ -288,6 +318,8 @@ public class xmlfield implements FieldType {
 	      {
 		throw new RuntimeException("Ran into end of XML file while processing permission field " + elementName);
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
     else if (fieldDef.getType() == FieldType.PASSWORD)
@@ -309,6 +341,8 @@ public class xmlfield implements FieldType {
 	      {
 		ex.printStackTrace();
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
     else if (fieldDef.getType() == FieldType.IP)
@@ -325,6 +359,8 @@ public class xmlfield implements FieldType {
 	    else
 	      {
 		value = parseIP(nextItem);
+
+		// fall through to skipToEndField()
 	      }
 	  }
 	else
@@ -354,6 +390,8 @@ public class xmlfield implements FieldType {
 	      {
 		value = fValue;
 	      }
+
+	    // fall through to skipToEndField()
 	  }
       }
 
