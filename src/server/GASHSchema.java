@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2002/01/12 16:37:29 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2004/03/03 06:47:03 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -696,6 +696,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   
   void editBase(BaseNode node)
   {
+    if (showingField)
+      {
+	fe.switchAway();
+      }
+
     be.editBase(node);
     card.show(attribCardPane,"base");
     showingBase = true;
@@ -708,6 +713,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   void editField(FieldNode node)
   {
+    if (showingField)
+      {
+	fe.switchAway();
+      }
+
     if (debug)
       {
 	System.err.println("in GASHSchema.editField");
@@ -728,6 +738,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   void editNameSpace(SpaceNode node)
   {
+    if (showingField)
+      {
+	fe.switchAway();
+      }
+
     ne.editNameSpace(node);
     card.show(attribCardPane, "name");
     showingBase = false;
@@ -745,6 +760,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   void editCategory(CatTreeNode node)
   {
+    if (showingField)
+      {
+	fe.switchAway();
+      }
+
     ce.editCategory(node);
     card.show(attribCardPane, "category");
 
@@ -770,7 +790,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
   }
-
 
   // treeCallback methods
 
@@ -819,6 +838,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else
       {
+	if (showingField)
+	  {
+	    fe.switchAway();
+	  }
+
+	showingBase = false;
+	showingField = false;
+
 	card.show(attribCardPane, "empty");
 
 	// if we switch back to the field editor
