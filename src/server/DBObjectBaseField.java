@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -472,6 +472,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    *   static final short DATE = 2;
    *   static final short STRING = 3;
    *   static final short INVID = 4;
+   *   static final short PERMISSIONMATRIX = 5;
    *
    * @see arlut.csd.ganymede.DBStore
    * @see arlut.csd.ganymede.BaseField
@@ -568,6 +569,19 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   {
     return (field_type == INVID);
   }
+
+  /**
+   * 
+   * Returns true if this field is of permission matrix type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isPermMatrix()
+  {
+    return (field_type == PERMISSIONMATRIX);
+  }
+  
 
   /**
    *
@@ -1525,6 +1539,9 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       case INVID:
 	result = "invid";
 	break;
+
+      case PERMISSIONMATRIX:
+	result = "permission matrix";
 
       default:
 	result = "<<bad type code>>";
