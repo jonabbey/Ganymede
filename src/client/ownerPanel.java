@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,12 +18,13 @@ import java.rmi.*;
 import java.util.*;
 
 import com.sun.java.swing.*;
-import tablelayout.*;
+import com.sun.java.swing.border.*;
+
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
-public class ownerPanel extends JBufferedPane implements JsetValueCallback {
+public class ownerPanel extends JPanel implements JsetValueCallback {
 
   private final static boolean debug = false;
 
@@ -43,42 +44,50 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 	  System.out.println("=-=-=-=-=- Adding ownerPanel");
 	}
 
-      if (field == null)
+      if (field != null)
 	{
-	  throw new RuntimeException("null field passed to ownerPanel constructor");
-	}
-      
-      try
-	{
-	  if (field.getType() == SchemaConstants.OwnerListField)
+	  try
 	    {
-	      throw new RuntimeException("Non-ownerListField passed to ownerPanel constructor");
+	      if (field.getType() == SchemaConstants.OwnerListField)
+		{
+		  throw new RuntimeException("Non-ownerListField passed to ownerPanel constructor");
+		}
 	    }
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get type in ownerPanel constuctor: " + rx);
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not get type in ownerPanel constuctor: " + rx);
+	    }
 	}
 
       this.editable = editable;
       this.field = field;
       this.parent = parent;
 
-      setInsets(new Insets(5,5,5,5));
-      
-      try
+      setLayout(new BorderLayout());
+
+      setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+      if (field == null)
 	{
-	  stringSelector ownerList = createInvidSelector(field);
-	  ownerList.setBorderStyle(0);
-	  add(ownerList);
+	  JLabel l = new JLabel("There is no owner for this object.");
+	  add("Center", l);
 	}
-      catch (RemoteException rx)
+      else
 	{
-	  throw new RuntimeException("Could not addDateField: " + rx);
+	  try
+	    {
+	      tStringSelector ownerList = createInvidSelector(field);
+	      ownerList.setBorder(new LineBorder(Color.black));
+	      ownerList.setVisibleRowCount(-1);
+	      add("Center", ownerList);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not addDateField: " + rx);
+	    }
 	}
     }
 
-  private stringSelector createInvidSelector(invid_field field) throws RemoteException
+  private tStringSelector createInvidSelector(invid_field field) throws RemoteException
   {
     QueryResult
       results,
@@ -89,12 +98,14 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
       choiceHandles = null;
 
     /* -- */
+    if (debug)
+      {
+	System.out.println("Adding StringSelector, its a vector of invids!");
+      }
 
-    System.out.println("Adding StringSelector, its a vector of invids!");
-    
     results = field.encodedValues();
     valueHandles = new Vector();
-
+ 
     if (editable)
       {
 	choiceResults = field.choices();
@@ -114,7 +125,7 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 	  }
       }
 
-    stringSelector ss = new stringSelector(choiceHandles, valueHandles, this, editable);
+    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, 100);
     ss.setCallback(this);
     return ss;
   }
@@ -122,9 +133,13 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
   public boolean setValuePerformed(JValueObject o)
     {
       boolean returnValue = false;
-      if (o.getSource() instanceof stringSelector)
+      if (o.getSource() instanceof tStringSelector)
 	{
-	  if (o.getValue() instanceof Invid)
+	  if (o.getOperationType() == JValueObject.ERROR)
+	    {
+	      parent.getgclient().setStatus((String)o.getValue());
+	    }
+	  else if (o.getValue() instanceof Invid)
 	    {
 	      Invid invid = (Invid)o.getValue();
 	      int index = o.getIndex();
@@ -136,7 +151,7 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 		    }
 		  else if (o.getOperationType() == JValueObject.DELETE)
 		    {
-		      returnValue = field.deleteElement(index);
+		      returnValue = field.deleteElement(invid);
 		    }
 		}
 	      catch (RemoteException rx)
