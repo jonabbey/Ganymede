@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -437,7 +437,7 @@ public class DBEditSet {
     Enumeration enum;
     DBObjectBase base;
     Object key;
-    DBEditObject eObj;
+    DBEditObject eObj, eObj2;
     ReturnVal retVal = null;
 
     Date modDate = new Date();
@@ -678,8 +678,8 @@ public class DBEditSet {
 		
 		for (int j = 0; j < i; j++)
 		  {
-		    eObj = (DBEditObject) objects.elementAt(i);
-		    eObj.release(); // undo committing flag
+		    eObj2 = (DBEditObject) objects.elementAt(j);
+		    eObj2.release(); // undo committing flag
 		  }
 		
 		releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
@@ -706,8 +706,8 @@ public class DBEditSet {
 
 		for (int j = 0; j <= i; j++)
 		  {
-		    eObj = (DBEditObject) objects.elementAt(i);
-		    eObj.release(); // undo committing flag
+		    eObj2 = (DBEditObject) objects.elementAt(j);
+		    eObj2.release(); // undo committing flag
 		  }
 	    
 		releaseWriteLock("transaction commit rejected in phase 1");
