@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.59 $
-# $Date: 2002/04/03 01:55:55 $
+# $Revision: 1.60 $
+# $Date: 2004/03/20 02:34:12 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -130,6 +130,8 @@ classfiles:
 	\@cd $rootdir/src/jcrypt; \\
 	./build
 	\@cd $rootdir/src/crypto; \\
+	./build
+	\@cd $rootdir/src/jug; \\
 	./build
 	\@cd $rootdir/src/md5; \\
 	./build
