@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/03/23 06:19:43 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/06/25 22:02:13 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -70,30 +70,32 @@ import arlut.csd.Util.PackageResources;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>A two-paneled GUI component for adding or removing strings and/or labeled objects
  * from a list, with an optional list of available strings and/or objects to choose
  * from.</p>
  *
- * <p>StringSelector consists of one or (optionally) two
- * {@link arlut.csd.JDataComponent.JstringListBox JstringListBox} panels and allows
- * the user to move values back and forth between the two panels.  Pop-up menus can
- * be attached to each panel, allowing the user to command the client to view or
- * edit objects referenced in either panel.  Objects in both panels are sorted alphabetically
- * by label.</p>
+ * <p>StringSelector consists of one or (optionally) two {@link
+ * arlut.csd.JDataComponent.JstringListBox JstringListBox} panels and
+ * allows the user to move values back and forth between the two
+ * panels.  Pop-up menus can be attached to each panel, allowing the
+ * user to command the client to view or edit objects referenced in
+ * either panel.  Objects in both panels are sorted alphabetically by
+ * label.</p>
  *
- * <p>The setCallback() method takes an object implementing the 
- * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback} interface
- * in order to provide live notification of changes performed by the user.  The
- * JsetValueCallback implementation is given the opportunity to approve any change
- * made by the user before the GUI is updated to show the change.  The JsetValueCallback
- * interface is also used to pass pop-up menu commands to the client.</p>
+ * <p>The setCallback() method takes an object implementing the {@link
+ * arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
+ * interface in order to provide live notification of changes
+ * performed by the user.  The JsetValueCallback implementation is
+ * given the opportunity to approve any change made by the user before
+ * the GUI is updated to show the change.  The JsetValueCallback
+ * interface is also used to pass pop-up menu commands to the
+ * client.</p>
  *
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.18 $ $Date: 1999/03/23 06:19:43 $ $Name:  $
- * @author Mike Mulvaney, Jonathan Abbey
+ * @version $Revision: 1.19 $ $Date: 1999/06/25 22:02:13 $ $Name:  $
+ * @author Mike Mulvaney, Jonathan Abbey 
  */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
@@ -293,8 +295,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     lists = new JPanel();
     lists.setLayout(gbl);
 
-    //    lists.setLayout(new FlowLayout());
-
     // Set up the inPanel, which holds the in list and button
 
     // chosen is a vector of listhandles or Strings.  If it is
@@ -348,7 +348,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (editable)
       {
-	remove = new JButton("remove >>");
+	if (canChoose && (available != null))
+	  {
+	    remove = new JButton("remove >>");
+	  }
+	else
+	  {
+	    remove = new JButton("remove");
+	  }
+
 	remove.setEnabled(false);
 	remove.setOpaque(true);
 	remove.setActionCommand("Remove");
@@ -444,23 +452,22 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     add("Center", lists);
 
-    custom = new JstringField();
-    custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
-    custom.addActionListener(new ActionListener() 
-			     {
-			       public void actionPerformed(ActionEvent e)
-				 {
-				   addCustom.doClick();
-				 }
-			     });
-
-
-    JPanel customP = new JPanel();
-    customP.setLayout(new BorderLayout());
-    customP.add("Center", custom);
-
     if (editable)
       {
+	custom = new JstringField();
+	custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
+	custom.addActionListener(new ActionListener() 
+				 {
+				   public void actionPerformed(ActionEvent e)
+				     {
+				       addCustom.doClick();
+				     }
+				 });
+
+	JPanel customP = new JPanel();
+	customP.setLayout(new BorderLayout());
+	customP.add("Center", custom);
+
 	if (!(mustChoose && out == null))
 	  {
 	    addCustom = new JButton("Add");
@@ -494,9 +501,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 							 }
 						     });
 	  }
+
+	add("South", customP);
       }
-    
-    add("South", customP);
 
     invalidate();
     parent.validate();
@@ -510,11 +517,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   // Public methods ------------------------------------------------------------
 
   /**
-   * True if StringSelector is editable.
+   * <P>Returns true if this StringSelector is editable.</P>
    *
-   * Non-editable StringSelector's only have the chosen list.
+   * <P>Non-editable StringSelector's only have the chosen list.
    * Editable StringSelector's have both the chosen and available
-   * lists.
+   * lists.</P>
    */
 
   public boolean isEditable()
@@ -596,7 +603,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * This doesn't work anymore.
+   * @deprecated This doesn't work anymore.
    */
 
   public void setVisibleRowCount(int numRows)
@@ -686,11 +693,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <P>Sets the data for the out box.</P>
    *
-   * Sets the data for the out box.
-   *
-   * I'm not sure if this will work well.
-   *
+   * <P>I'm not sure if this will work well.</P>
    */
 
   public void setAvailableData(Vector available)
@@ -707,9 +712,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * Sets the data for the in box.
+   * <P>Sets the data for the in box.</P>
    *
-   * Use with caution, it might not work at all.
+   * <P>Use with caution, it might not work at all.</P>
    */
   
   public void setChosenData(Vector chosen)
@@ -912,8 +917,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 	    
-	    invalidate();
-	    parent.validate();
+	    validate();
 	  }
       }
   }
@@ -1125,6 +1129,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	out.addItem(item);
       }
 
+    remove.setEnabled(false);
+
     in.invalidate();
 
     if (out != null)
@@ -1133,8 +1139,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     invalidate();
-
-    //parent.validate();
 
     if (parent.getParent() != null)
       {
@@ -1190,7 +1194,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    remove.doClick();
 	    return true;
 	  }
-	else
+	else if (o.getOperationType() == JValueObject.ADD)		// selection
 	  {
 	    if (add != null)
 	      {
@@ -1204,7 +1208,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    if (out != null)
 	      {
-		out.setSelectedValue(null, false);
+		out.clearSelection();
 	      }
 	    
 	    return true;
@@ -1217,11 +1221,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    add.doClick();
 	    return true;
 	  }
-	else
+	else if (o.getOperationType() == JValueObject.ADD)
 	  {
 	    add.setEnabled(true);
 	    remove.setEnabled(false);
-	    in.setSelectedValue(null, false);
+	    in.clearSelection();
 
 	    return true;
 	  }
