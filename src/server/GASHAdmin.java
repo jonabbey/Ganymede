@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,9 +24,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-//import java.awt.PopupMenu;
-//import java.awt.SystemColor;
-//import java.awt.MenuItem;
+import java.awt.TextField;
 import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
@@ -1245,8 +1243,8 @@ public class GASHAdmin extends JApplet {
   
   static Image admin_logo = null;
 
-  final private JTextField username = new JTextField();
-  final private JPasswordField password = new JPasswordField();
+  final private TextField username = new TextField();
+  final private TextField password = new TextField();
   final public JButton quitButton = new JButton("Quit");
   final public JButton loginButton = new JButton("Login");
 
@@ -1375,6 +1373,7 @@ public class GASHAdmin extends JApplet {
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(password, gbc);
+    password.setEchoChar('*');
     panel.add(password);
     
 
