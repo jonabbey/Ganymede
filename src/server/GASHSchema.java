@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -165,10 +165,10 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     emptyPane = new Panel();
     emptyPane.setBackground(bgColor);
 
+    attribCardPane.add("empty", emptyPane);
     attribCardPane.add("base", baseEditPane);
     attribCardPane.add("field", fieldEditPane);
     attribCardPane.add("name", namespaceEditPane);
-    attribCardPane.add("empty", emptyPane);
 
     attribButtonPane = new Panel();
     attribButtonPane.setBackground(bgColor);
@@ -693,6 +693,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   public void treeNodeUnSelected(treeNode node)
   {
+    card.show(attribCardPane, "empty");
+    // attribCardPane.show(emptyPane);
+    //    attribCardPane.select(emptyPane);
     System.out.println("node " + node.getText() + " unselected");
   }
 
