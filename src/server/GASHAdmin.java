@@ -5,13 +5,13 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package gash;
+package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.rmi.server.*;
