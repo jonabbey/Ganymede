@@ -2061,7 +2061,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		System.err.println("gclient.handleReturnVal(): extracting dialog");
 	      }
 
-	    DialogRsrc resource = jdialog.extractDialogRsrc(this);
+	    DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
 
 	    if (debug)
 	      {
@@ -3080,7 +3080,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 					 "than manually editing it.\n\nCan I go ahead and shift you over " +
 					 "to the server's reactivation wizard?",
 					 "Yes, Reactivate", "No, I want to Edit it!",
-					 "question.gif");
+					 "question.gif", null);
 
 	StringDialog verifyDialog = new StringDialog(rsrc);
 

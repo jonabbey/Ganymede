@@ -671,7 +671,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     finally
       {
-	adminPanel.quitButton.setEnabled(true);
+	if (adminPanel.quitButton != null)
+	  {
+	    adminPanel.quitButton.setEnabled(true);
+	  }
+
 	adminPanel.loginButton.setEnabled(true);
 	setVisible(false);
 
@@ -871,7 +875,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	if (!waitForUsers && success)
 	  {
-	    adminPanel.quitButton.setEnabled(true);
+	    if (adminPanel.quitButton != null)
+	      {
+		adminPanel.quitButton.setEnabled(true);
+	      }
+
 	    adminPanel.loginButton.setEnabled(true);
 	    setVisible(false);
 		

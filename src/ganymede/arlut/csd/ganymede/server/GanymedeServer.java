@@ -1004,7 +1004,8 @@ public class GanymedeServer implements Server {
 						       null));
 	  }
 	
-	return null;
+	return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
+					  ts.l("admin.baduserpass"));
       }
       
     if (validationResult == 1)

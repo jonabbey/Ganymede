@@ -80,8 +80,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.ganymede.rmi.Server;
 
@@ -141,17 +143,23 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   static int registryPortProperty = 1099;
   static String url = null;
 
-  protected boolean connected = false;
-
   static Server server = null;	// remote reference
   static Image admin_logo = null;
 
   JTextField username = null;
   JPasswordField password = null;
-  JButton quitButton = new JButton("Quit");
+  JButton quitButton;
   JButton loginButton= null;
 
   Image errorImage = null;
+
+  char spinAry[] = {'/','-', '\\', '|'};
+  int spindex = 0;
+
+  String loginError = null;
+
+  private booleanSemaphore connecting = new booleanSemaphore(false);
+  private booleanSemaphore connected = new booleanSemaphore(false);
 
   /* -- */
 
@@ -328,6 +336,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx = 1.0;
     gbl.setConstraints(username, gbc);
+    username.setEnabled(false);
     username.addActionListener(this);
     panel.add(username);
 
@@ -345,6 +354,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
     gbc.weightx = 1.0;
+    password.setEnabled(false);
+    password.addActionListener(this);
 
     gbl.setConstraints(password, gbc);
     panel.add(password);
@@ -357,13 +368,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbl.setConstraints(buttonPanel, gbc);
     panel.add(buttonPanel);
 
-    loginButton = new JButton("Connecting...");
+    loginButton = new JButton("Connecting... " + spinAry[spindex]);
     loginButton.setOpaque(true);
+    loginButton.setEnabled(true);
+    loginButton.addActionListener(this);
 
     buttonPanel.add(loginButton, "Center");
 
     if (!WeAreApplet)
       {
+	quitButton = new JButton("Quit");
+
 	quitButton.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e)
 	    {
@@ -384,77 +399,129 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public void run() 
   {
-    if (connected)
-      {
-	return;
-      }
 
     int try_number = 0;
-    
-    while (!connected)
+
+    /* -- */
+
+    if (connecting.set(true))
       {
-	if (try_number++ > 5)
-	  {
-	    System.err.println("I've tried five times to connect, but I can't do it.  Maybe the server is down?");
-
-	    break;
-	  }
-
-	try
-	  {
-	    Remote obj = Naming.lookup(GASHAdmin.url);
-
-	    if (obj instanceof Server)
-	      {
-		server = (Server) obj;
-		server.up();	// RMI call to verify our connection
-	      }
-
-	    connected = true;
-	  }
-	catch (NotBoundException ex)
-	  {
-	    System.err.println("RMI: Couldn't bind to server object\n" + ex );
-	  }
-	catch (java.rmi.UnknownHostException ex)
-	  {
-	    System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
-	  }
-	catch (RemoteException ex)
-	  {
-	    ex.printStackTrace();
-	    System.err.println("RMI: RemoteException during lookup.\n" + ex);
-	  }
-	catch (java.net.MalformedURLException ex)
-	  {
-	    System.err.println("RMI: Malformed URL " + GASHAdmin.url );
-	  }
-	catch (Throwable ex)
-	  {
-	    ex.printStackTrace();
-	  }
-	
-	try 
-	  {
-	    // Wait for 1 sec before retrying to connect to server
-	    Thread.sleep(1000);
-	  }
-	catch (InterruptedException e) 
-	  {
-	  }
+	return;			// we already have a thread running
       }
 
-    if (connected)
+    try
       {
-	loginButton.setText("Login to server");
-	loginButton.addActionListener(this);
-	username.setEnabled(true);
-	password.setEnabled(true);
-	password.addActionListener(this);
+	if (connected.isSet())
+	  {
+	    return;
+	  }
+    
+	while (!connected.isSet())
+	  {
+	    if (try_number++ > 20)
+	      {
+		break;
+	      }
+
+	    try
+	      {
+		Remote obj = Naming.lookup(GASHAdmin.url);
+		
+		if (obj instanceof Server)
+		  {
+		    server = (Server) obj;
+		    server.up();	// RMI call to verify our connection
+		  }
+
+		connected.set(true);
+		break;
+	      }
+	    catch (Throwable ex)
+	      {
+		loginError = ex.getMessage();
+	      }
+	    
+	    try 
+	      {
+		spindex++;
+		
+		if (spindex >= spinAry.length)
+		  {
+		    spindex = 0;
+		  }
+		
+		try
+		  {
+		    final GASHAdmin localLoginBox = this;
+		    
+		    SwingUtilities.invokeAndWait(new Runnable()
+		      {
+			public void run()
+			{
+			  localLoginBox.loginButton.setText("Connecting... " + spinAry[spindex]);
+			}
+		      });
+		  }
+		catch (Exception ex)
+		  {
+		    ex.printStackTrace();
+		  }
+		
+		// Wait for 1/4 sec before retrying to connect to server
+		
+		Thread.sleep(250);
+	      }
+	    catch (InterruptedException e) 
+	      {
+	      }
+	  }
 	
-	username.requestFocus();
-	invalidate();
-	validate();
+	if (connected.isSet())
+	  {
+	    final GASHAdmin localLoginBox = this;
+	    
+	    SwingUtilities.invokeLater(new Runnable() 
+	      {
+		public void run()
+		{
+		  localLoginBox.loginButton.setText("Login to server");
+		  localLoginBox.username.setEnabled(true);
+		  localLoginBox.password.setEnabled(true);
+		  
+		  localLoginBox.username.requestFocus();
+		  invalidate();
+		  validate();
+		}
+	      });
+	  }
+	else
+	  {
+	    new StringDialog(frame,
+			     "Login error",
+			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + loginError,
+			     "OK", null,
+			     getErrorImage()).DialogShow();
+	    
+	    final GASHAdmin localLoginBox = this;
+	    
+	    SwingUtilities.invokeLater(new Runnable() 
+	      {
+		public void run()
+		{
+		  localLoginBox.loginButton.setText("Connect");
+		  localLoginBox.username.setEnabled(false);
+		  localLoginBox.password.setEnabled(false);
+		  
+		  localLoginBox.username.requestFocus();
+		  invalidate();
+		  validate();
+		}
+	      });
+	  }
+      }
+    finally
+      {
+	connecting.set(false);
       }
   }
 
@@ -470,22 +537,26 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       }
     else if (e.getSource() == loginButton)
       {
-	if (!connected)
+	// if we haven't got a good RMI connection, try to spawn
+	// another thread.  Note that the run() method starts off by
+	// testing the connecting booleanSemaphore, so we won't allow
+	// multiple connection threads to be running concurrently, no
+	// matter how many times the user presses the login button
+	// while waiting for a connection
+
+	if (!connected.isSet())
 	  {
+	    new Thread(this).start();
 	    return;
 	  }
-
-	boolean success = false;
 
 	try
 	  {
 	    adminDispatch = new GASHAdminDispatch(server);
-	    success = adminDispatch.connect(username.getText(), 
-					    new String(password.getPassword()));
 
-	    if (!success)
+	    if (!adminDispatch.connect(username.getText(), 
+				       new String(password.getPassword())))
 	      {
-		password.setText("");
 		return;
 	      }
 	  }
@@ -497,13 +568,19 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 			     rx.getMessage(),
 			     "OK", null,
 			     getErrorImage()).DialogShow();
+
+	    connected.set(false);
+
+	    loginButton.setText("Connecting... " + spinAry[spindex]);
+	    new Thread(this).start();
+	    return;
 	  }
-	catch (IllegalArgumentException ex)
+	catch (Exception ex)
 	  {
 	    new StringDialog(new JFrame(),
 			     "Couldn't log in to the Ganymede Server",
-			     "Couldn't log in to the Ganymede server.\n\nBad username/password or " +
-			     "insufficient permissions to run the Ganymede admin console.",
+			     "Exception caught during login attempt.\n\n.This condition may be due to a software error.\n\n" +
+			     "Exception: " + ex.getMessage(),
 			     "OK", null, 
 			     getErrorImage()).DialogShow();
 	    
@@ -682,12 +759,35 @@ class GASHAdminLoginFrame extends JFrame {
 
   protected void processWindowEvent(WindowEvent e) 
   {
+    // Since this frame holds the admin console's login box, we want
+    // to be sure not to close it unless the admin console is already
+    // disconnected.. if the main admin console window is running, the
+    // quit button will be disabled, and we'll keep the admin console
+    // login box.
+
+    // It might, in theory, make sense to allow the login box to close
+    // independent of the main console window, but in the case where
+    // we run in a web browser as an applet, we need that login box
+    // applet to keep running so the browser doesn't terminate.  Since
+    // we run as an applet hosted within an application frame in the
+    // application case, we still need to be able to respond to the
+    // destroy() call.. we'd need to distinguish the destroy() case
+    // when we are running as an application from the destroy() case
+    // when we are running as an applet.  Easier just not to allow
+    // closing the login box when running as an application.
+
+    // If you the reader feel like changing this, be my guest.  -- jon
+
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
 	if (debug)
 	  {
 	    System.out.println("Window closing");
 	  }
+
+	// it's safe to assume that adminLogin.quitButton is not null,
+	// because we would not have created a GASHAdminLoginFrame if
+	// we weren't running as an application.
 
 	if (adminLogin.quitButton.isEnabled())
 	  {

@@ -2250,7 +2250,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    System.err.println("GASHSchema.handleReturnVal(): extracting dialog");
 	  }
 
-	DialogRsrc resource = jdialog.extractDialogRsrc(this);
+	DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
 
 	if (debug)
 	  {

@@ -122,28 +122,24 @@ class GASHAdminDispatch implements Runnable {
 
   public boolean connect(String name, String pass) throws RemoteException
   { 
-    try
-      {
-	ReturnVal retVal = handleReturnVal(server.admin(name, pass));
+    ReturnVal retVal = handleReturnVal(server.admin(name, pass));
 
-	if (retVal.didSucceed())
-	  {
-	    aSession = retVal.getAdminSession();
-
-	    if (aSession == null)
-	      {
-		throw new IllegalArgumentException();
-	      }
-	  }
-	else
-	  {
-	    return false;
-	  }
-      }
-    catch (NullPointerException ex)
+    if (retVal == null || !retVal.didSucceed())
       {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
 	return false;
+      }
+
+    aSession = retVal.getAdminSession();
+
+    // if we get a null session despite having a
+    // success-encoding ReturnVal, throw an exception.  The
+    // server *should* pass back a proper error report in the
+    // ReturnVal, and this NullPointerException should
+    // never be thrown.
+	
+    if (aSession == null)
+      {
+	throw new NullPointerException("Bad null valued admin session received from server");
       }
 
     if (debug)
@@ -945,6 +941,15 @@ class GASHAdminDispatch implements Runnable {
     if (debug)
       {
 	System.err.println("GASHAdminDispatch.handleReturnVal(): Entering");
+
+	try
+	  {
+	    throw new RuntimeException("TRACE");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
       }
 
     while ((retVal != null) && (retVal.getDialog() != null))
@@ -963,11 +968,21 @@ class GASHAdminDispatch implements Runnable {
 
 	if (frame == null)
 	  {
-	    resource = jdialog.extractDialogRsrc(new JFrame());
+	    if (debug)
+	      {
+		System.err.println("GASHAdminDispatch.handleReturnVal(): null frame");
+	      }
+
+	    resource = jdialog.extractDialogRsrc(new JFrame(), this.getClass());
 	  }
 	else
 	  {
-	    resource = jdialog.extractDialogRsrc(frame);
+	    if (debug)
+	      {
+		System.err.println("GASHAdminDispatch.handleReturnVal(): good frame");
+	      }
+
+	    resource = jdialog.extractDialogRsrc(frame, null);
 	  }
 
 	if (debug)
