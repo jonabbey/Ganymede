@@ -1,5 +1,5 @@
 /*
- * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5TestSuite.java,v 1.2 2002/03/16 01:46:39 broccol Exp $
+ * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5TestSuite.java,v 1.3 2002/03/16 02:01:58 broccol Exp $
  *
  * MD5 test suite in Java JDK Beta-2
  * written Santeri Paavolainen, Helsinki Finland 1996
@@ -34,6 +34,9 @@
  * option.
  *
  * $Log: MD5TestSuite.java,v $
+ * Revision 1.3  2002/03/16 02:01:58  broccol
+ * More packaging to make javac 1.4 happier
+ *
  * Revision 1.2  2002/03/16 01:46:39  broccol
  * Moved the MD5 classes into the md5 package to make 1.4 javac happy
  *
@@ -50,7 +53,6 @@
 
 package md5;
 
-import MD5InputStream;
 import java.io.*;
 
 class MD5TestSuite {
