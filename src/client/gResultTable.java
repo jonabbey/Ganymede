@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,7 +44,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   /* -- */
 
-  public gResultTable(windowPanel parent, Session session, Query query, Vector results) throws RemoteException
+  public gResultTable(windowPanel parent, Session session, Query query, String results) throws RemoteException
   {
     super();			// JInternalFrame init
 
@@ -83,137 +83,103 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void refreshQuery()
   {
+    StringBuffer buffer = null;
+
+    /* -- */
+
     Vector results = null;
 
     if (query != null)
       {
 	try
 	  {
-	    results = session.query(query);
+	    buffer = session.dump(query);
 	  }
 	catch (RemoteException ex)
 	  {
 	    throw new RuntimeException("caught remote exception in refreshQuery " + ex);
 	  }
 
-	if (results != null)
+	if (buffer == null)
 	  {
-	    loadResults(results);
+	    System.err.println("null query dump result");
+	  }
+	else
+	  {
+	    loadResults(buffer.toString());
 	  }
       }
   }
 
-  public void loadResults(Vector results)
+  public void loadResults(String results)
   {
-    int i, j;
-    db_field[] fields;
-    db_object obj;
-    Hashtable fieldsPresent = new Hashtable();
-    Result result;
-    Enumeration enum;
     boolean firstTime = true;
+    Vector headerVect = new Vector();
+    String[] headers;
+    int [] colWidths;
+    int index = 0;
+    char[] chars;
+    StringBuffer tempString = null;
+    Invid invid;
+    int col;
+    int rows = 0;
 
     /* -- */
 
-    System.err.println("result size = " + results.size());
+    System.err.println("result size = " + results.length());
+
+    chars = results.toCharArray();
+
+    // read in the header definition line
+
+    System.err.println("Reading in header line");
     
-    for (i = 0; i < results.size(); i++)
+    while (chars[index] != '\n')
       {
-	try
+	tempString = new StringBuffer();
+
+	while (chars[index] != '|')
 	  {
-	    fields = ((Result) results.elementAt(i)).getObject().listFields();
-
-	    System.err.println("result " + i + ", fields length = " + fields.length);
-
-	    for (j = 0; j < fields.length; j++)
+	    if (chars[index] == '\n')
 	      {
-		System.err.println("field: " + fields[j].getName());
-		if (!fieldsPresent.containsKey(fields[j].getName()))
-		  {
-		    fieldsPresent.put(fields[j].getName(), fields[j]);
-		  }
+		throw new RuntimeException("parse error in header list");
 	      }
+
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+
+	    if (chars[index] == '\\')
+	      {
+		index++;
+	      }
+
+	    tempString.append(chars[index++]);
 	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote " + ex);
-	  }
+
+	index++;		// skip past |
+
+	System.err.println("Header[" + headerVect.size() + "]: " + tempString.toString());
+
+	headerVect.addElement(tempString.toString());
       }
 
-    fields = new db_field[fieldsPresent.size()];
+    index++;			// skip past \n
 
-    System.err.println("fieldsPresent.size == " + fieldsPresent.size());
-
-    enum = fieldsPresent.elements();
-
-    i = 0;
-    while (enum.hasMoreElements())
-      {
-	fields[i++] = (db_field) enum.nextElement();
-      }
-	
-    // sort the fields by display order.. perhaps this should be done for us on
-    // the server?
-
-    (new QuickSort(fields,  
-		   new arlut.csd.Util.Compare()
-		   {
-		     public int compare(Object a, Object b) 
-		       {
-			 db_field aF, bF;
-			 
-			 aF = (db_field) a;
-			 bF = (db_field) b;
-			     
-			 try
-			   {
-			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
-			       {
-				 return -1;
-			       }
-			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
-			       {
-				 return 1;
-			       }
-			     else
-			       {
-				 return 0;
-			       }
-			   }
-			 catch (RemoteException ex)
-			   {
-			     throw new RuntimeException("couldn't compare fields " + ex);
-			   }
-		       }
-		   }
-		   )
-    ).sort();
+    headers = new String[headerVect.size()];
     
-    // build up our headers.. note that here we're assuming that our first result will
-    // have all the fields that any of the results do.. this is not really a valid
-    // assumption.  To do it right, we'd need to check the Base for this object type
-    // and get a list of field names that we can reasonably expect to see in the
-    // result list.. 
-    
-    String[] headers = new String[fields.length];
-    int [] colWidths = new int[fields.length];
-    Hashtable colMap = new Hashtable();
-
-    System.err.println("Found " + fields.length + " fields");
-
-    for (i = 0; i < fields.length; i++)
+    for (int i = 0; i < headers.length; i++)
       {
-	try
-	  {
-	    colMap.put(new Short(fields[i].getDisplayOrder()), new Short((short) i));
-	    headers[i] = fields[i].getName();
-	    colWidths[i] = 50;
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote " + ex);
-	  }
+	headers[i] = (String) headerVect.elementAt(i);
       }
+
+    colWidths = new int[headerVect.size()];
+
+    for (int i = 0; i < colWidths.length; i++)
+      {
+	colWidths[i] = 50;
+      }
+
+    // now we can initialize the table
     
     if (table == null)
       {
@@ -226,32 +192,82 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	firstTime = false;
       }
 
-    enum = results.elements();
+    // now read in all the result lines
 
-    while (enum.hasMoreElements())
+    while (index < chars.length)
       {
-	result = (Result) enum.nextElement();
+	// first read in the Invid
 
-	obj = result.getObject();
+	tempString = new StringBuffer();
 
-	table.newRow(obj);
+	// System.err.println("Parsing row " + rows++);
 
-	try
+	while (chars[index] != '|')
 	  {
-	    fields = obj.listFields();
-
-	    for (i = 0; i < fields.length; i++)
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+	    
+	    if (chars[index] == '\n')
 	      {
-		table.setCellText(obj, 
-				  ((Short) colMap.get(new Short(fields[i].getDisplayOrder()))).shortValue(), 
-				  fields[i].getValueString(), false);
+		throw new RuntimeException("parse error in row");
+	      }
+	    
+	    tempString.append(chars[index++]);
+	  }
+
+	//	System.err.println("Invid string: " + tempString.toString());
+
+	invid = new Invid(tempString.toString());
+
+	table.newRow(invid);
+
+	index++;		// skip over |
+
+	// now read in the fields
+
+	col = 0;
+
+	while (chars[index] != '\n')
+	  {
+	    tempString = new StringBuffer();
+
+	    while (chars[index] != '|')
+	      {
+		// if we have a backslashed character, take the backslashed char
+		// as a literal
+
+		if (chars[index] == '\n')
+		  {
+		    throw new RuntimeException("parse error in header list");
+		  }
+
+		if (chars[index] == '\\')
+		  {
+		    index++;
+		  }
+
+		tempString.append(chars[index++]);
+	      }
+
+	    index++;		// skip |
+
+	    //	    System.err.println("val: " + tempString.toString());
+
+	    if (tempString.toString() == null)
+	      {
+		table.setCellText(invid, col++, "", false);
+	      }
+	    else
+	      {
+		table.setCellText(invid, col++, tempString.toString(), false);
 	      }
 	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote " + ex);
-	  }
+
+	index++; // skip newline
       }
+
+    // the first time we're called, the table will not be visible, so we
+    // don't want to refresh it here..
 
     if (!firstTime)
       {
@@ -275,7 +291,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     if (event.getSource() == viewMI)
       {
-	parent.addWindow((db_object)key);
+	try
+	  {
+	    parent.addWindow(session.view_db_object((Invid) key));
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("remote exception viewing table row " + ex);
+	  }
       }
     else if (event.getSource() == editMI)
       {
@@ -283,10 +306,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	try
 	  {
-	    eObj = session.edit_db_object(((db_object) key).getInvid());
+	    eObj = session.edit_db_object((Invid) key);
 	  }
 	catch (RemoteException ex)
 	  {
+	    throw new RuntimeException("remote exception editing table row " + ex);
 	  }
 	
 	if (eObj != null)
