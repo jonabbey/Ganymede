@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2002/08/21 06:58:51 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2003/02/11 02:29:57 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,13 +74,13 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.22 $ $Date: 2002/08/21 06:58:51 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 2003/02/11 02:29:57 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlfield implements FieldType {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   /**
    * <p>Formatter that we use for generating and parsing date fields</p>
