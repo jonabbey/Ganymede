@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,7 @@ public class Ganymede {
   public static String logFilename = "db/log";
   public static DBLog log = null;
   public static CategoryTransport catTransport = null;
+  public static BaseListTransport baseTransport = null;
   public static Vector builderTasks = new Vector();
   
   /* -- */
@@ -166,6 +167,9 @@ public class Ganymede {
       {
 	debug("Creating internal Ganymede Session");
 	internalSession = new GanymedeSession();
+
+	debug("Creating master BaseListTransport object");
+	Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
       }
     catch (RemoteException ex)
       {
