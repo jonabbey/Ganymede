@@ -7,8 +7,8 @@
    
    Created: 25 September 2002
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2004/03/20 03:45:45 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2004/03/20 03:46:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -191,7 +191,7 @@ public class GUIDGeneratorTask implements Runnable {
       }
   }
 
-  public void createGUIDs()
+  public boolean createGUIDs()
   {
     Vector users = mySession.getObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
