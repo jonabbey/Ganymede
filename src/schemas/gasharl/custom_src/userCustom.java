@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2003/07/31 22:54:50 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2003/08/02 00:10:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -427,7 +427,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case SIGNATURE:
       case EMAILTARGET:
       case PASSWORDCHANGETIME:
-      case SOCIALSECURITY:
 	return false;
       }
     
@@ -767,7 +766,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // Whether or not the Badge number field is required depends on
     // the user category.
 
-    if (fieldid == userSchema.BADGE || fieldid == userSchema.SOCIALSECURITY)
+    if (fieldid == userSchema.BADGE)
       {
 	boolean needIdentifier = false;
 
@@ -793,30 +792,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return false;
 	  }
 
-	// if we think we need an identifier, only require this one if
-	// the other one isn't set
-
-	if (needIdentifier)
-	  {
-	    if (fieldid == userSchema.BADGE)
-	      {
-		String x = (String) object.getFieldValueLocal(userSchema.SOCIALSECURITY);
-
-		if (x == null || x.equals(""))
-		  {
-		    return true;
-		  }
-	      }
-	    else
-	      {
-		String x = (String) object.getFieldValueLocal(userSchema.BADGE);
-
-		if (x == null || x.equals(""))
-		  {
-		    return true;
-		  }
-	      }
-	  }
+	return needIdentifier;
       }
 
     return false;
