@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -250,7 +250,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-	Ganymede.debug(buildScript + " doesn't exist, not running external NIS build script");
+	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
       }
 
     return true;
@@ -258,7 +258,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   // ***
   //
-  // The following private methods are used to support the NIS builder logic.
+  // The following private methods are used to support the GASH builder logic.
   //
   // ***
 
@@ -308,7 +308,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a line to the passwd NIS source file.
+   * This method writes out a line to the user_info GASH source file.
    *
    * The lines in this file look like the following.
    *
@@ -413,7 +413,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (result.length() > 1024)
       {
 	System.err.println("GASHBuilder.writeGroupLine(): Warning!  user " + 
-			   username + " overflows the NIS line length!");
+			   username + " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
@@ -421,7 +421,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a line to the passwd NIS source file.
+   * This method writes out a line to the group_info GASH source file.
    *
    * The lines in this file look like the following.
    *
@@ -501,7 +501,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (result.length() > 1024)
       {
 	System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " + 
-			   groupname + " overflows the NIS line length!");
+			   groupname + " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
@@ -948,7 +948,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   
   /**
    *
-   * This method writes out a user alias line to the aliases_info NIS source file.<br><br>
+   * This method writes out a user alias line to the aliases_info GASH source file.<br><br>
    *
    * The user alias lines in this file look like the following:<br><br>
    *
@@ -1021,7 +1021,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the aliases_info NIS source file.<br><br>
+   * This method writes out a mail list alias line to the aliases_info GASH source file.<br><br>
    *
    * The mail list lines in this file look like the following:<br><br>
    *
@@ -1089,7 +1089,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the aliases_info NIS source file.<br><br>
+   * This method writes out a mail list alias line to the aliases_info GASH source file.<br><br>
    *
    * The mail list lines in this file look like the following:<br><br>
    *
