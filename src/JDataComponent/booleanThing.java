@@ -2,7 +2,7 @@
    Resource class for use with StringDialog.java
 */
 
-package arlut.csd.Dialog;
+package arlut.csd.JDialog;
 
 import java.lang.String;
 
