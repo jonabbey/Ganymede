@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,9 @@ import java.rmi.*;
 
 public class mapEntryCustom extends DBEditObject implements SchemaConstants, mapEntrySchema {
 
-  PermEntry noEditPerm = new PermEntry(true, false, false, false);
+  static PermEntry noEditPerm = new PermEntry(true, false, false, false);
+
+  // ---
 
   /**
    *
