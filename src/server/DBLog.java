@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2002/06/14 03:33:11 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2002/06/14 03:39:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -784,7 +784,7 @@ public class DBLog {
 	      {
 		mailer.sendmsg(returnAddr,
 			       mailout.addresses,
-			       Ganymede.subjectPrefixProperty + " Transaction Log",
+			       Ganymede.subjectPrefixProperty + "Transaction Log",
 			       description);
 	      }
 	    catch (IOException ex)
