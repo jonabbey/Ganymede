@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import java.rmi.*;
 
 public class DBEditSet {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   Vector
     objects = null,
@@ -340,24 +340,36 @@ public class DBEditSet {
 	    eObj = (DBEditObject) objects.elementAt(i);
 	    eObj.clearTransientFields();
 
-	    if (eObj.getStatus() == DBEditObject.EDITING)
+	    // we'll want to log the before/after state of any objects
+	    // edited by this transaction
+
+	    if (Ganymede.log != null)
 	      {
-		invids = new Vector();
-		invids.addElement(eObj.getInvid());
-		
-		System.err.println("Logging event for " + eObj.getLabel());
-		
-		String diff = eObj.diff();
-		
-		System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
-		
-		logEvents.addElement(new DBLogEvent("objectchanged",
-						    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
-						    (gSession.personaInvid == null ?
-						     gSession.userInvid : gSession.personaInvid),
-						    gSession.username,
-						    invids,
-						    null));
+		if (eObj.getStatus() == DBEditObject.EDITING)
+		  {
+		    invids = new Vector();
+		    invids.addElement(eObj.getInvid());
+		   
+		    if (debug)
+		      {
+			System.err.println("Logging event for " + eObj.getLabel());
+		      }
+		    
+		    String diff = eObj.diff();
+		    
+		    if (debug)
+		      {
+			System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
+		      }
+		    
+		    logEvents.addElement(new DBLogEvent("objectchanged",
+							eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+							(gSession.personaInvid == null ?
+							 gSession.userInvid : gSession.personaInvid),
+							gSession.username,
+							invids,
+							null));
+		  }
 	      }
 	  }
 
@@ -452,6 +464,7 @@ public class DBEditSet {
 	  {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.EDITING:
+
 	    try
 	      {
 		base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
