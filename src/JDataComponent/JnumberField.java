@@ -4,8 +4,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2002/10/05 05:38:25 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2002/10/05 07:26:45 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -109,9 +109,6 @@ public class JnumberField extends JentryField {
       }
 
     setEditable(iseditable);  // will this JnumberField be editable or not?
-
-    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
 
   /**

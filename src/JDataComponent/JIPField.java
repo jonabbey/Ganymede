@@ -6,8 +6,8 @@
    
    Created: 13 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2002/10/05 05:38:24 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/10/05 07:26:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,8 +112,6 @@ public class JIPField extends JentryField {
     //    setText(null);
 
     setEditable(is_editable);  // will this JIPField be editable or not?
-
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
   
   /**

@@ -4,8 +4,8 @@
    
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2002/10/05 05:38:24 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2002/10/05 07:26:45 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney, John Knutson
 
    -----------------------------------------------------------------------
@@ -112,9 +112,6 @@ public class JfloatField extends JentryField {
       }
     
     setEditable(iseditable);  // will this JfloatField be editable or not?
-    
-    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
 
   /**
