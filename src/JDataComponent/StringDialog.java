@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/07/15 01:06:04 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2000/10/10 02:18:44 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.53 $ $Date: 1999/07/15 01:06:04 $ $Name:  $
+ * @version $Revision: 1.54 $ $Date: 2000/10/10 02:18:44 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -734,7 +734,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	valueHash = null;
       }
 
-    // pop up down so that DialogShow() can proceed to completion.
+    // pop down so that DialogShow() can proceed to completion.
 
     done = true;
 
