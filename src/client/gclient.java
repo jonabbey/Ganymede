@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -254,8 +254,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightButtonP.setLayout(new RowLayout());
 
     // Taskbar to track windows
-    WindowBar windowBar = new WindowBar(wp, rightP);
-    wp.addWindowBar(windowBar);
+    //WindowBar windowBar = new WindowBar(wp, rightP);
+    //wp.addWindowBar(windowBar);
 
     commit = new JButton("Commit");
     commit.setToolTipText("Click this to commit all changes to database");
@@ -266,7 +266,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     leftButtonP.add(commit);
     leftButtonP.add(cancel);
-    rightButtonP.add(windowBar);
+    //rightButtonP.add(windowBar);
    
     add("Center",rightP);
 
@@ -926,8 +926,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    ObjectNode objectN = (ObjectNode)node;
 	  
 	    try
-	      {
-		
+	      {		
 		System.out.println("edit invid= " + objectN.getObject().getInvid());
 		wp.addWindow(session.edit_db_object(objectN.getObject().getInvid()), true);
 	      }
