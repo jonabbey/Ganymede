@@ -3,15 +3,15 @@
 
    This is a text client for the Ganymede server.  This client is
    designed to take the filename for an XML file on the command line,
-   load the file, parse it, then connect to the server and attempt to
-   transfer the objects specified in the XML file to the server using
-   the standard Ganymede RMI API.
+   load the file, parse it, then connect to the server and transfer
+   the file to the server for server-side integration into the Ganymede
+   database.
 
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/10/07 07:37:40 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/10/26 03:42:53 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -76,11 +76,11 @@ import org.xml.sax.*;
 /**
  * <p>This is a text client for the Ganymede server.  This client is
  * designed to take the filename for an XML file on the command line,
- * load the file, parse it, then connect to the server and attempt to
- * transfer the objects specified in the XML file to the server using
- * the standard Ganymede RMI API.</p>
+ * load the file, parse it, then connect to the server and transfer
+ * the file to the server for server-side integration into the Ganymede
+ * database.</p>
  *
- * @version $Revision: 1.30 $ $Date: 2000/10/07 07:37:40 $ $Name:  $
+ * @version $Revision: 1.31 $ $Date: 2000/10/26 03:42:53 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -111,6 +111,7 @@ public final class xmlclient implements ClientListener {
   public String password = null;
   private boolean dumpSchema = false;
   private boolean dumpData = false;
+  private boolean doTest = false;
 
   /**
    * RMI reference to a Ganymede server
@@ -179,6 +180,12 @@ public final class xmlclient implements ClientListener {
 	      {
 		System.exit(1);
 	      }
+	  }
+
+	if (xc.doTest)
+	  {
+	    xc.runTest();
+	    System.exit(0);
 	  }
 
 	if (xc.doEverything(true))
@@ -259,6 +266,11 @@ public final class xmlclient implements ClientListener {
       {
 	dumpData = true;
 	return;
+      }
+    
+    if (ParseArgs.switchExists("test", argv))
+      {
+	doTest = true;
       }
 
     xmlFilename = argv[argv.length-1];
@@ -360,6 +372,53 @@ public final class xmlclient implements ClientListener {
     session.logout();
 
     return (retVal == null || retVal.didSucceed());
+  }
+
+  /**
+   * Simple test rig for XMLReader.getNextTree().
+   */
+
+  public void runTest()
+  {
+    try
+      {
+	reader = new XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+
+	XMLItem startDocument = getNextItem();
+
+	if (!(startDocument instanceof XMLStartDocument))
+	  {
+	    System.err.println("XML parser error: first element " + startDocument + 
+			       " not XMLStartDocument");
+	    return;
+	  }
+
+	XMLItem docElement = reader.getNextTree();
+
+	if (!docElement.matches("ganymede"))
+	  {
+	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
+	    System.err.println("Unrecognized XML element: " + docElement);
+	    return;
+	  }
+	else
+	  {
+	    docElement.debugPrintTree(0);
+	  }
+      }
+    catch (Exception ex)
+      {
+	ex.printStackTrace();
+
+	return;
+      }
+    finally
+      {
+	if (reader != null)
+	  {
+	    reader.close();
+	  }
+      }
   }
 
   /**
@@ -752,7 +811,8 @@ public final class xmlclient implements ClientListener {
 
 /**
  * This class is used to act as a receiver of server-transmitted XML materials
- * by the XML client.
+ * by the XML client.  The server talks to this receiver when the xmlclient
+ * is given the -dumpschema or -dumpdata command line parameters.
  */
 
 class xmlclientPrintReceiver implements FileReceiver {
