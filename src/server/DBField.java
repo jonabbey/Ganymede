@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1327,11 +1327,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 					   getName());
       }
 
+    if (value == null)
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
+					  "Could not delete null value from field " + getName());
+      }
+
     if (values.indexOf(value) == -1)
       {
 	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
 					  "Could not delete value " + value +
-					  ", not present in field");
+					  ", not present in field " + getName());
       }
 
     return deleteElement(values.indexOf(value), local);	// *sync* DBNameSpace possible
