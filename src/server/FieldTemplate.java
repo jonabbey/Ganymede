@@ -6,7 +6,7 @@
    information defining a field.
    
    Created: 5 November 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,6 +29,10 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   short type;
   short fieldID;
   boolean vector;
+
+  // built in?
+
+  boolean builtIn;
 
   // array attributes
 
@@ -70,6 +74,8 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
       {
 	limit = fieldDef.getMaxArraySize();
       }
+
+    builtIn = fieldDef.isBuiltIn();
 
     switch (type)
       {
@@ -123,6 +129,11 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   public boolean isArray()
   {
     return vector;
+  }
+
+  public boolean isBuiltIn()
+  {
+    return builtIn;
   }
 
   public boolean isLabeled()
