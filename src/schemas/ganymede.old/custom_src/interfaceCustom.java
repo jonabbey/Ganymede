@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,7 +89,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     DBField field, field2;
     DBObject ipObj, dnsObj;
     String result = null;
-    Invid invid;
+    Invid invid = null;
 
     /* -- */
 
@@ -107,11 +107,19 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	return field.getValueString();
       }
 
-    invid = (Invid) field.getElement(0); // get the primary I.P. address object
+    if (field.size() > 0)
+      {
+	invid = (Invid) field.getElement(0); // get the primary I.P. address object
+      }
 
     if (invid == null)
       {
 	field = (DBField) object.getField((short) 256); // get the Ethernet address
+
+	if (field == null)
+	  {
+	    return "interface " + getInvid();
+	  }
 	
 	return field.getValueString();
       }
