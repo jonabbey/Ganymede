@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,9 +59,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   Category category;	// what type of object is this?
   int displayOrder = 0;
 
+  private boolean embedded;
+
   // runtime data
 
   Vector sortedFields;		// field dictionary, sorted in displayOrder
+  Hashtable containingHash;	// The hash listing us by object type
+				// id.. we can iterate over the elements of
+				// this hash to determine whether a proposed name
+				// is acceptable.
+  
   Hashtable fieldHash;		// field dictionary
   Hashtable objectHash;		// objects in our objectBase
   int object_count;
@@ -94,7 +101,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  public DBObjectBase(DBStore store) throws RemoteException
+  public DBObjectBase(DBStore store, boolean embedded) throws RemoteException
   {
     super();			// initialize UnicastRemoteObject
 
@@ -103,6 +110,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     /* -- */
 
     this.store = store;
+    this.containingHash = store.objectBases;
 
     writerList = new Vector();
     readerList = new Vector();
@@ -125,47 +133,73 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     save = true;		// by default, we'll want to keep this
     changed = false;
 
-    /* Set up our 0 field, the owner list. */
+    this.embedded = embedded;
 
-    bf = new DBObjectBaseField(this);
+    if (embedded)
+      {
+	/* Set up our 0 field, the containing object owning us */
 
-    bf.field_name = "Owner list";
-    bf.field_code = SchemaConstants.OwnerListField;
-    bf.field_type = FieldType.INVID;
-    bf.field_order = 0;
-    bf.allowedTarget = SchemaConstants.AdminBase;
-    bf.targetField = SchemaConstants.AdminObjectsOwned;
-    bf.editable = false;
-    bf.removable = false;
-    bf.array = true;
+	bf = new DBObjectBaseField(this);
 
-    fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
+	bf.field_name = "Owner";
+	bf.field_code = SchemaConstants.OwnerListField;
+	bf.field_type = FieldType.INVID;
+	bf.field_order = 0;
+	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
+	bf.targetField = -1;	// procedure for handling deletion and what not..
+	bf.editable = false;
+	bf.removable = false;
+	bf.array = false;
 
-    /* And our 1 field, the expiration date. */
+	fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
 
-    bf = new DBObjectBaseField(this);
+	// note that we won't have an expiration date or removal date
+	// for an embedded object
+      }
+    else
+      {
+	/* Set up our 0 field, the owner list. */
+
+	bf = new DBObjectBaseField(this);
+
+	bf.field_name = "Owner list";
+	bf.field_code = SchemaConstants.OwnerListField;
+	bf.field_type = FieldType.INVID;
+	bf.field_order = 0;
+	bf.allowedTarget = SchemaConstants.AdminBase;
+	bf.targetField = SchemaConstants.AdminObjectsOwned;
+	bf.editable = false;
+	bf.removable = false;
+	bf.array = true;
+
+	fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
+
+	/* And our 1 field, the expiration date. */
+
+	bf = new DBObjectBaseField(this);
     
-    bf.field_name = "Expiration Date";
-    bf.field_code = SchemaConstants.ExpirationField;
-    bf.field_type = FieldType.DATE;
-    bf.field_order = 1;
-    bf.editable = false;
-    bf.removable = false;
+	bf.field_name = "Expiration Date";
+	bf.field_code = SchemaConstants.ExpirationField;
+	bf.field_type = FieldType.DATE;
+	bf.field_order = 1;
+	bf.editable = false;
+	bf.removable = false;
 
-    fieldHash.put(new Short(SchemaConstants.ExpirationField), bf);
+	fieldHash.put(new Short(SchemaConstants.ExpirationField), bf);
 
-    /* And our 2 field, the expiration date. */
+	/* And our 2 field, the expiration date. */
 
-    bf = new DBObjectBaseField(this);
+	bf = new DBObjectBaseField(this);
     
-    bf.field_name = "Removal Date";
-    bf.field_code = SchemaConstants.RemovalField;
-    bf.field_type = FieldType.DATE;
-    bf.field_order = 2;
-    bf.editable = false;
-    bf.removable = false;
+	bf.field_name = "Removal Date";
+	bf.field_code = SchemaConstants.RemovalField;
+	bf.field_type = FieldType.DATE;
+	bf.field_order = 2;
+	bf.editable = false;
+	bf.removable = false;
 
-    fieldHash.put(new Short(SchemaConstants.RemovalField), bf);
+	fieldHash.put(new Short(SchemaConstants.RemovalField), bf);
+      }
 
     objectHook = this.createHook();
   }
@@ -177,9 +211,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  public DBObjectBase(DBStore store, short id, DBSchemaEdit editor) throws RemoteException
+  public DBObjectBase(DBStore store, short id, boolean embedded,
+		      DBSchemaEdit editor) throws RemoteException
   {
-    this(store);
+    this(store, embedded);
     type_code = id;
     this.editor = editor;
   }
@@ -193,7 +228,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
   {
-    this(store);
+    this(store, false);		// assume not embedded, we'll correct that in receive()
+				// if we have to
     receive(in);
 
     // need to recreate objectHook now that we have loaded our classdef info
@@ -211,7 +247,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
   {
-    this(original.store);
+    this(original.store, original.embedded);
     this.editor = editor;
 
     DBObjectBaseField bf;
@@ -225,6 +261,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	category = original.category;
 	type_code = original.type_code;
 	displayOrder = original.displayOrder;
+	embedded = original.embedded;
     
 	// make copies of all the old field definitions
 	// for this object type, and save them into our
@@ -262,6 +299,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	lastChange = new Date();
       }
+  }
+
+  void setContainingHash(Hashtable ht)
+  {
+    this.containingHash = ht;
   }
 
   synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
@@ -307,6 +349,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if ((store.major_version >= 1) && (store.minor_version >= 4))
       {
 	out.writeInt(displayOrder);	// added at file version 1.4
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 5))
+      {
+	out.writeBoolean(embedded);	// added at file version 1.5
       }
 
     if (dumpObjects)
@@ -441,7 +488,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	category = null;
       }
 
-    if ((store.major_version >= 1) && (store.minor_version >= 4))
+    if ((store.file_major >= 1) && (store.file_minor >= 4))
       {
 	displayOrder = in.readInt();	// added at file version 1.4
 
@@ -453,6 +500,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     else
       {
 	displayOrder = 0;
+      }
+
+    if ((store.file_major >= 1) && (store.file_minor >= 5))
+      {
+	embedded = in.readBoolean(); // added at file version 1.5
       }
 
     // read in the objects belonging to this ObjectBase
@@ -484,6 +536,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
       }
+  }
+
+  /**
+   *
+   * This method returns true if this object base is for
+   * an embedded object.  Embedded objects do not have
+   * their own expiration and removal dates, do not have
+   * history trails, and can be only owned by a single
+   * object, not by a list of administrators.
+   *
+   */
+
+  public boolean isEmbedded()
+  {
+    return embedded;
   }
 
   /**
@@ -744,15 +811,43 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized void setName(String newName)
+  public synchronized boolean setName(String newName)
   {
+    String myNewName;
+
+    if (isEmbedded() && !newName.startsWith("Embedded: "))
+      {
+	myNewName = "Embedded: " + newName;
+      }
+    else
+      {
+	myNewName = newName;
+      }
+
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in an schema editing context");
       }
 
-    object_name = newName;
+    synchronized (containingHash)
+      {
+	Enumeration enum = containingHash.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    DBObjectBase base = (DBObjectBase) enum.nextElement();
+
+	    if (!base.equals(this) && base.object_name.equals(myNewName))
+	      {
+		return false;
+	      }
+	  }
+      }
+
+    object_name = myNewName;
     changed = true;
+
+    return true;
   }
 
   /**
@@ -1287,7 +1382,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    id = 0;
+    id = 3;			// 0, 1, and 2 are reserved
 
     enum = fieldHash.elements();
 
@@ -1541,8 +1636,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    *
-   * Dump the headers
-   *
+   * Dump the headers.. this is used to provide the first-line header
+   * used by GanymedeSession.dump().
    *
    */
 

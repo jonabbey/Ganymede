@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -174,6 +174,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    oldBase = (DBObjectBase) node;
 	    newBase = new DBObjectBase(oldBase, editor); // a new copy, with the same objects under it
 	    baseHash.put(newBase.getKey(), newBase);
+
+	    // let the base know what hash to check for name collisions
+
+	    newBase.setContainingHash(baseHash);
 
 	    if (debug)
 	      {

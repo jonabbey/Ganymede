@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,6 +70,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     createCategoryMI = null,
     deleteCategoryMI = null,
     createObjectMI = null,
+    createInternalObjectMI = null,
     deleteObjectMI = null,
     createNameMI = null,
     deleteNameMI = null,
@@ -135,7 +136,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     //
     
     setLayout(new BorderLayout());
-
 
     attribPane = new Panel();
     attribPane.setBackground(bgColor);
@@ -226,12 +226,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     //
     //
 
-    treeImages = new Image[4];
+    treeImages = new Image[5];
 
     treeImages[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     treeImages[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
     treeImages[2] = PackageResources.getImageResource(this, "list.gif", getClass());
     treeImages[3] = PackageResources.getImageResource(this, "i043.gif", getClass());
+    treeImages[4] = PackageResources.getImageResource(this, "transredlist.gif", getClass());
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, SystemColor.window, this, treeImages,
@@ -272,10 +273,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     createCategoryMI = new MenuItem("Create Category");
     deleteCategoryMI = new MenuItem("Delete Category");
     createObjectMI = new MenuItem("Create Object Type");
+    createInternalObjectMI = new MenuItem("Create Embedded Object Type");
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
     categoryMenu.add(createObjectMI);
+    categoryMenu.add(createInternalObjectMI);
 
     // namespace menu
 
@@ -429,8 +432,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	Base base = (Base) node;
 
-	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-			       false, 2, 2, baseMenu);
+	if (base.isEmbedded())
+	  {
+	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+				   false, 4, 4, baseMenu);
+	  }
+	else
+	  {
+	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+				   false, 2, 2, baseMenu);
+	  }
       }
     else if (node instanceof Category)
       {
@@ -865,10 +876,34 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    CatTreeNode cNode = (CatTreeNode) node;
 	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category);
+	    Base newBase = editor.createNewBase(category, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
 					    null, false, 2, 2, baseMenu);
+
+	    tree.insertNode(newNode, false);
+
+	    tree.expandNode(node, false);
+
+	    refreshFields(newNode, true);
+
+	    editBase(newNode);
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't create new base." + ex);
+	  }
+      }
+    else if (event.getSource() == createInternalObjectMI)
+      {
+	try
+	  {
+	    CatTreeNode cNode = (CatTreeNode) node;
+	    Category category = cNode.getCategory();
+	    Base newBase = editor.createNewBase(category, true);
+	    
+	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
+					    null, false, 4, 4, baseMenu);
 
 	    tree.insertNode(newNode, false);
 
@@ -1999,7 +2034,7 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 
     try
       {
-	bases = se.getBases();
+	bases = se.getBases(); // we want to find all fields that refer to this namespace
       }
     catch (RemoteException rx)
       {

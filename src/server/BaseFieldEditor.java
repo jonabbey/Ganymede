@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -336,6 +336,18 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  {
 	    setRowVisible(fieldC, true);
 	  }
+
+	try
+	  {
+	    if (fieldDef.isEditInPlace())
+	      {
+		setRowVisible(fieldC, false);
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
       }
     else
       {
@@ -412,7 +424,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     try
       {
-	baseList = owner.getSchemaEdit().getBases();
+	baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
       }
     catch (RemoteException rx)
       {
@@ -455,7 +467,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     /* -- */
     
     target = targetC.getSelectedItem();
-
 
     try
       {

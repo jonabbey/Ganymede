@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -80,6 +80,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	maxId = store.maxBaseId;
 	newBases = new Hashtable();
+
+	// this DBBaseCategory constructor recursively copies the bases referenced
+	// from store.rootCategory into newBases
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
@@ -194,6 +197,105 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    *
    * Returns a list of bases from the current (non-committed) state of the system.
    *
+   *
+   * @param embedded If true, getBases() will only show bases that are intended
+   * for embedding in other objects.  If false, getBases() will only show bases
+   * that are not to be embedded.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public synchronized Base[] getBases(boolean embedded)
+  {
+    Base[] bases;
+    Enumeration enum;
+    int i = 0;
+    int size = 0;
+    Base base;
+
+    /* -- */
+
+    enum = newBases.elements();
+
+    while (enum.hasMoreElements())
+      {
+	base = (Base) enum.nextElement();
+
+	if (embedded)
+	  {
+	    try
+	      {
+		if (base.isEmbedded())
+		  {
+		    size++;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+	  }
+	else
+	  {
+	    try
+	      {
+		if (!base.isEmbedded())
+		  {
+		    size++;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+	  }
+      }
+
+    bases = new Base[size];
+    enum = newBases.elements();
+
+    while (enum.hasMoreElements())
+      {
+	base = (Base) enum.nextElement();
+
+	if (embedded)
+	  {
+	    try
+	      {
+		if (base.isEmbedded())
+		  {
+		    bases[i++] = base;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+	  }
+	else
+	  {
+	    try
+	      {
+		if (!base.isEmbedded())
+		  {
+		    bases[i++] = base;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+	  }
+      }
+
+    return bases;
+  }
+
+  /**
+   *
+   * Returns a list of bases from the current (non-committed) state of the system.
+   *
    * @see arlut.csd.ganymede.SchemaEdit
    *
    */
@@ -203,10 +305,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     Base[] bases;
     Enumeration enum;
     int i = 0;
+    int size = 0;
+    Base base;
 
     /* -- */
 
-    bases = new Base[newBases.size()];
+    size = newBases.size();
+    bases = new Base[size];
     enum = newBases.elements();
 
     while (enum.hasMoreElements())
@@ -271,7 +376,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public synchronized Base createNewBase(Category category)
+  public synchronized Base createNewBase(Category category, boolean embedded)
   {
     DBObjectBase base;
     DBBaseCategory localCat = null;
@@ -292,7 +397,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     try
       {
-	base = new DBObjectBase(store, ++maxId, this);
+	base = new DBObjectBase(store, ++maxId, embedded, this);
       }
     catch (RemoteException ex)
       {
@@ -599,7 +704,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// ** need to unlink old objectBases / rootCategory for GC here? **
 
 	store.maxBaseId = maxId;
-	store.objectBases = newBases;
+	store.objectBases = newBases; // all the bases already have containingHash pointing to newBases
 	store.rootCategory = rootCategory;
 
 	Ganymede.debug("DBSchemaEdit: iterating over namespaces");
@@ -645,6 +750,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     if (!locked)
       {
 	throw new RuntimeException("already released/committed");
+      }
+
+    // tell all the bases who they should look at for
+    // future name change validations
+
+    Enumeration enum = store.objectBases.elements();
+    while (enum.hasMoreElements())
+      {
+	base = (DBObjectBase) enum.nextElement();
+
+	base.setContainingHash(store.objectBases);
       }
 
     synchronized (store)

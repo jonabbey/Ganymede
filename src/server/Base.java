@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,8 @@ public interface Base extends CategoryNode, Remote {
 
   public boolean isRemovable() throws RemoteException;
 
+  public boolean isEmbedded() throws RemoteException;
+
   public String getName() throws RemoteException;
   public String getClassName() throws RemoteException;
   public short getTypeID() throws RemoteException;
@@ -49,7 +51,7 @@ public interface Base extends CategoryNode, Remote {
   // the following methods are only valid when the Base reference
   // is obtained from a SchemaEdit reference.
 
-  public void setName(String newName) throws RemoteException;
+  public boolean setName(String newName) throws RemoteException;
   public void setClassName(String newName) throws RemoteException;
 
   public void setLabelField(String fieldName) throws RemoteException;

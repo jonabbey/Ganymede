@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -281,9 +281,16 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
       {
 	if (source == nameS)
 	  {
-	    base.setName(val);
-	    baseNode.setText(val);
-	    owner.tree.refresh();
+	    if (base.setName(val))
+	      {
+		baseNode.setText(base.getName());
+		nameS.setText(baseNode.getText());
+		owner.tree.refresh();
+	      }
+	    else
+	      {
+		return false;
+	      }
 	  }
 	else if (source == classS)
 	  {

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 4;
+  static final byte minor_version = 5;
 
   static final boolean debug = true;
 
@@ -859,7 +859,7 @@ public class DBStore {
 	ns = new DBNameSpace("access", true);
 	nameSpaces.addElement(ns);
 
-	b = new DBObjectBase(this);
+	b = new DBObjectBase(this, false);
 	b.object_name = "Admin";
 	b.type_code = getNextBaseID(); // 0
 	b.displayOrder = 0;
@@ -959,7 +959,7 @@ public class DBStore {
 
 	setBase(b);
 
-	b = new DBObjectBase(this);
+	b = new DBObjectBase(this, false);
 	b.object_name = "Access Set";
 	b.type_code = getNextBaseID(); // 1 (SchemaConstants.PermBase)
 	b.displayOrder = 1;
@@ -996,7 +996,7 @@ public class DBStore {
 	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
 	rootCategory.addNode(userCategory, false, false);
 
-	b = new DBObjectBase(this);
+	b = new DBObjectBase(this, false);
 	b.object_name = "User";
 	b.type_code = getNextBaseID(); // 2
 	b.displayOrder = 2;
