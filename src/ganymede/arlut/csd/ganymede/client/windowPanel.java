@@ -454,7 +454,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		    }
 		  catch (Throwable ex)
 		    {
-		      gc.processException(ex);
+		      gc.processExceptionRethrow(ex);
 		      return null;
 		    }
 		}
@@ -489,6 +489,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	setSelectedWindow(w);
 	
 	updateWindowMenu();
+      }
+    catch (Throwable ex)
+      {
+	gc.processException(ex);
       }
     finally
       {
