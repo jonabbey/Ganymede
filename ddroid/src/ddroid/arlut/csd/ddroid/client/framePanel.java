@@ -413,8 +413,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     setContentPane(progressPanel);
     
-    Thread loadingThread = new Thread(this);
-    loadingThread.start();
+    // Thread loadingThread = new Thread(this);
+    // loadingThread.start();
+
+    run();
   }
 
   /**
