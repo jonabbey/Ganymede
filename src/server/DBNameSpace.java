@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,25 +21,29 @@ import java.util.*;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      DBNameSpace
-DBNameSpaces are the objects used to coordinate unique valued fields across
-various EditSets that would possibly want to modify fields constrained
-to have a unique value.
-
-Several different fields in different DBObjectBase's can point to the
-same DBNameSpace.  All such fields thus share a common name space.
-
-DBNameSpace is designed to coordinate transactional access in conjunction with
-DBEditSet's and DBEditObject's.
-
-When an object is pulled out from editing, it can't affect any other object,
-except through the acquisition of values in unique contraint fields.  Such
-an acquisition must be atomic and immediate, unlike normal DBEditObject
-processing where nothing in the database is actually changed until the
-DBEditSet is committed.
-
-The actual acquisition logic is in the DBEditObject's setValue method.
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>DBNameSpaces are the objects used to coordinate unique valued fields across
+ * various EditSets that would possibly want to modify fields constrained
+ * to have a unique value.</p>
+ *
+ * <p>Several different fields in different DBObjectBase's can point to the
+ * same DBNameSpace.  All such fields thus share a common name space.</p>
+ *
+ * <p>DBNameSpace is designed to coordinate transactional access in conjunction with
+ * DBEditSet's and DBEditObject's.</p>
+ *
+ * <p>When an object is pulled out from editing, it can't affect any other object,
+ * except through the acquisition of values in unique contraint fields.  Such
+ * an acquisition must be atomic and immediate, unlike normal DBEditObject
+ * processing where nothing in the database is actually changed until the
+ * DBEditSet is committed.</p>
+ *
+ * <p>The actual acquisition logic is in the DBEditObject's setValue method.</p>
+ *
+ */
 
 class DBNameSpace {
 
@@ -66,16 +70,25 @@ class DBNameSpace {
   /*----------------------------------------------------------------------------
                                                                           method
                                                                         lookup()
-  
-  This method allows the namespace to be used as a unique valued search index.
-
-  Note that this lookup only works for precise equality lookup.. i.e., strings
-  must be the same capitalization and the whole works.
-
-  As well, this method is really probably useful in the context of a DBReadLock,
-  but we're not doing anything to enforce this requirement at this point.
 
   ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>This method allows the namespace to be used as a unique valued 
+   * search index.</p>
+   *
+   * <p>Note that this lookup only works for precise equality lookup.. i.e., 
+   * strings must be the same capitalization and the whole works.</p>
+   *
+   * <p>As well, this method is really probably useful in the context of
+   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * at this point.</p>
+   *
+   * @param value The value to search for in the namespace hash.
+   *
+   */
+
   public synchronized DBField lookup(Object value)
   {
     DBNameSpaceHandle handle;
@@ -99,19 +112,28 @@ class DBNameSpace {
                                                                           method
                                                                       testmark()
 
-  This method tests to see whether a value in the namespace can be marked as
-  in use.  Such a marking is done to allow an editset to have the ability
-  to juggle values in namespace associated fields without allowing another
-  editset to acquire a value needed if the editset transaction is aborted.
-
-  For array db fields, all elements in the array should be testmark'ed
-  in the context of a synchronized block on the namespace before going back
-  and marking each value (while still in the synchronized block on the
-  namespace).. this ensures that we won't mark several values in an array
-  before discovering that one of the values in a DBArrayField is already
-  taken
-
   ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>This method tests to see whether a value in the namespace can
+   * be marked as in use.  Such a marking is done to allow an editset
+   * to have the ability to juggle values in namespace associated
+   * fields without allowing another editset to acquire a value
+   * needed if the editset transaction is aborted.</p>
+   *
+   * <p>For array db fields, all elements in the array should be
+   * testmark'ed in the context of a synchronized block on the
+   * namespace before going back and marking each value (while still
+   * in the synchronized block on the * namespace).. this ensures
+   * that we won't mark several values in an array before discovering
+   * that one of the values in a DBArrayField is already taken.</p>
+   *
+   * @param editSet The transaction testing permission to claim value.
+   * @param value The unique value desired by editSet.
+   * 
+   */
+
   public synchronized boolean testmark(DBEditSet editSet, Object value)
   {
     DBNameSpaceHandle handle;
@@ -144,14 +166,22 @@ class DBNameSpace {
                                                                           method
                                                                           mark()
 
-  This method marks a value as being used in this namespace.  Marked
-  values are held in editSet's, which are free to shuffle these
-  reserved values around during processing.  The inuse and original
-  fields in the namespace object are used during unique value searches
-  to do direct hash lookups without getting confused by any shuffling
-  being performed by a current thread.
-
   ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>This method marks a value as being used in this namespace.  Marked
+   * values are held in editSet's, which are free to shuffle these
+   * reserved values around during processing.  The inuse and original
+   * fields in the namespace object are used during unique value searches
+   * to do direct hash lookups without getting confused by any shuffling
+   * being performed by a current thread.</p>
+   *
+   * @param editset The transaction claiming the unique value <value>
+   * @param value The unique value that transaction editset is attempting to claim
+   * @param field The DBField which will take the unique value.  Used to provide an index.
+   *  
+   */
 
   synchronized public boolean mark(DBEditSet editSet, Object value, DBField field)
   {
@@ -227,19 +257,29 @@ class DBNameSpace {
                                                                           method
                                                                     testunmark()
 
-  This method tests to see whether a value in the namespace can be marked as
-  not in use.  Such a marking is done to allow an editset to have the ability
-  to juggle values in namespace associated fields without allowing another
-  editset to acquire a value needed if the editset transaction is aborted.
-
-  For array db fields, all elements in the array should be testunmark'ed
-  in the context of a synchronized block on the namespace before actually
-  unmarking all the values.  See the comments in testmark() for the logic
-  here.  Note that testunmark() is less useful than testmark() because
-  we really aren't expecting anything to prevent us from unmarking()
-  something.
-
   ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   *  <p>This method tests to see whether a value in the namespace can
+   *  be marked as not in use.  Such a marking is done to allow an
+   *  editset to have the ability to juggle values in namespace
+   *  associated fields without allowing another editset to acquire a
+   *  value needed if the editset transaction is aborted.</p>
+   *
+   *  <p>For array db fields, all elements in the array should be
+   *  testunmark'ed in the context of a synchronized block on the
+   *  namespace before actually unmarking all the values.  See the
+   *  comments in testmark() for the logic here.  Note that
+   *  testunmark() is less useful than testmark() because we really
+   *  aren't expecting anything to prevent us from unmarking()
+   *  something.</p>
+   *
+   * @param editSet The transaction that is determining whether value can be freed.
+   * @param value The unique value being tested.
+   *
+   */
+
   public synchronized boolean testunmark(DBEditSet editSet, Object value)
   {
     DBNameSpaceHandle handle;
@@ -276,11 +316,18 @@ class DBNameSpace {
                                                                           method
                                                                         unmark()
 
-  Used to mark a value as not used in the namespace.  Unmarked values are not
-  available for other threads / editset's until commit is called on this
-  namespace on behalf of this editset.
-
   ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>Used to mark a value as not used in the namespace.  Unmarked
+   * values are not available for other threads / editset's until
+   * commit is called on this namespace on behalf of this editset.</p>
+   *
+   * @param editSet The transaction that is freeing value.
+   * @param value The unique value being tentatively marked as unused.
+   * 
+   */
 
   public synchronized boolean unmark(DBEditSet editSet, Object value)
   {
@@ -343,10 +390,16 @@ class DBNameSpace {
   /*----------------------------------------------------------------------------
                                                                           method
                                                                          abort()
-  Method to revert an editSet's namespace modifications to its
-  original state.  Used when a transaction is rolled back.
 
   ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>Method to revert an editSet's namespace modifications to its
+   * original state.  Used when a transaction is rolled back.</p>
+   *
+   * @param editSet The transaction whose claimed values in this namespace need to be freed.
+   *
+   */
 
   public synchronized void abort(DBEditSet editSet)
   {
@@ -398,12 +451,15 @@ class DBNameSpace {
   /*----------------------------------------------------------------------------
                                                                           method
                                                                         commit()
-
-  Method to put the editSet's current namespace modifications into
-  final effect and to make any abandoned values available for other
-  namespaces.
-
   ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>Method to put the editSet's current namespace modifications into
+   * final effect and to make any abandoned values available for other
+   * namespaces.</p>
+   *
+   * @param editSet The transaction being committed.
+   */
 
   public synchronized void commit(DBEditSet editSet)
   {
@@ -487,15 +543,22 @@ class DBNameSpace {
                                                                            class
                                                                DBNameSpaceHandle
 
-This class is intended to be the targets of elements of a name space's unique
-value hash.  The fields in this class are used to keep track of who currently
-'owns' a given value, and whether or not there is actually any field in the
-namespace that really contains that value.
-
-This class will be manipulated by the DBNameSpace class and by the
-DBEditObject class.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ *<p>This class is intended to be the targets of elements of a name
+ *space's unique value hash.  The fields in this class are used to
+ *keep track of who currently 'owns' a given value, and whether or not
+ *there is actually any field in the namespace that really contains
+ *that value.</p>
+ *
+ *
+ *<p>This class will be manipulated by the DBNameSpace class and by the
+ *DBEditObject class.</p>
+ *
+ * /
+
 
 class DBNameSpaceHandle {
 
