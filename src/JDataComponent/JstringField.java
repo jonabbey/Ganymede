@@ -2,11 +2,17 @@
 /*
    JstringField.java
 
+   This class defines an entry field that is capable of handling
+   strings.  It is also possible to restrict the characters which are
+   accepted by this gui component.  Furthermore, the maximum size of
+   the string that can be entered into this JstringField can be
+   preset.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.JDataComponent;
@@ -18,9 +24,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.rmi.RemoteException;
 
-/*******************************************************************
-                                                      JstringField()
-*******************************************************************/
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    JstringField
+
+------------------------------------------------------------------------------*/
 
 /**
  * <p>This class defines an entry field that is capable of handling
@@ -36,6 +45,8 @@ public class JstringField extends JentryField implements KeyListener{
 
   public static int DEFAULT_COLS = 15;
   public static int DEFAULT_SIZE = 4096;
+
+  // ---
   
   private int size = DEFAULT_SIZE;
 
@@ -43,10 +54,11 @@ public class JstringField extends JentryField implements KeyListener{
   private String allowedChars = null;
   private String disallowedChars = null;
 
-
   private boolean 
     addedKeyListener = false, 
     incrementalCallback = false;
+
+  /* -- */
 
   /**  Constructors ***/
 
@@ -84,7 +96,6 @@ public class JstringField extends JentryField implements KeyListener{
       {
 	setDisallowedChars(disallowed);
       }
-
   }
   
   /**
@@ -146,8 +157,15 @@ public class JstringField extends JentryField implements KeyListener{
  // JstringField methods
 
   /**
-   * deprecated
+   *
+   * This method is used to turn on an incremental callback.. that is,
+   * this JstringField will attempt to verify the validity of each
+   * keystroke entered with the JsetValueCallback as it is entered.
+   *
+   * @deprecated An old bit of functionality, never used, not tested.
+   *
    */
+
   public void setIncrementalCallback(boolean callbackOn)
   {
     if (!allowCallback)
@@ -173,7 +191,6 @@ public class JstringField extends JentryField implements KeyListener{
       {
 	incrementalCallback = false;
       }
-
   }
 
   /**
@@ -191,6 +208,7 @@ public class JstringField extends JentryField implements KeyListener{
 
     boolean editable = isEditable();
     setEditable(true);
+
     if (str == null) 
       {
 	if (debug)
@@ -231,6 +249,7 @@ public class JstringField extends JentryField implements KeyListener{
 	
 	changed = true;
       }
+
     setEditable(editable);
   }
 
@@ -330,7 +349,6 @@ public class JstringField extends JentryField implements KeyListener{
    * @param ch the character which is being tested for its validity
    */
 
-  //private final boolean isAllowed(char ch)
   public boolean isAllowed(char ch)
   {
     if (debug)
@@ -479,9 +497,14 @@ public class JstringField extends JentryField implements KeyListener{
   
   public void keyPressed(KeyEvent e) {}
   public void keyReleased(KeyEvent e) {}
+
   public void keyTyped(KeyEvent e)
   {
-    System.out.println("In keyTyped");
+    if (debug)
+      {
+	System.out.println("In keyTyped");
+      }
+ 
     if (incrementalCallback && allowCallback)
       {
 	try
