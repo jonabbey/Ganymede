@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.18 $
-# $Date: 1999/01/19 22:32:05 $
+# $Revision: 1.19 $
+# $Date: 1999/01/19 23:21:58 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -142,10 +142,6 @@ schemakits:
 	\@cd $rootdir/src/schemas/nisonly/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@echo "Compiling NextGeneration schema kit"
-	\@cd $rootdir/src/schemas/ganymede.old/custom_src; \\
-	build; \\
-	buildCustomJar
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
@@ -158,7 +154,14 @@ cleanconfig:
 	\@echo "Removed all config files.. re-run $rootdir/configure to regenerate."
 
 jars:
-	\@buildJars
+	\@echo "Building server, client, and admin jar files"
+	\@cd $rootdir/src/classes; \\
+	\@buildJar; \\
+	\@buildAdminJar; \\
+	\@buildServerJar; \\
+	\@cp *.jar $rootdir/jars; \\
+	\@echo "Finished generating jars in $rootdir/jars"
+
 ENDMAKEFILE
 
     close(MAKEFILE);
