@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1517,6 +1517,53 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     return result;
+  }
+
+  /**
+   *
+   * This is a method to allow code in the server to quickly and
+   * safely get a full list of objects in an object base.
+   *
+   * @return a Vector of DBObject references.
+   * 
+   */
+
+  public synchronized Vector getObjects(short baseid)
+  {
+    Vector bases = new Vector();
+    Vector results = new Vector();
+    DBLock readLock = null;
+    DBObjectBase base;
+    Enumeration enum;
+
+    /* -- */
+
+    base = Ganymede.db.getObjectBase(baseid);
+    bases.addElement(base);
+
+    try
+      {
+	readLock = session.openReadLock(bases);
+      }
+    catch (InterruptedException ex)
+      {
+      }
+
+    if (readLock == null || !readLock.isLocked())
+      {
+	return null;
+      }
+
+    enum = base.objectHash.elements();
+
+    while (enum.hasMoreElements() && readLock.isLocked())
+      {
+	results.addElement(enum.nextElement());
+      }
+
+    session.releaseLock(readLock);
+
+    return results;
   }
 
   /**
