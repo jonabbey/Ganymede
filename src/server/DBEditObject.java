@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -149,11 +149,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    
 	    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
-	    if (!instantiateNewField(fieldDef.getID()))
+	    // check for permission to create a particular field
+
+	    if (!checkNewField(fieldDef.getID()))
 	      {
 		continue;
 	      }
-		
+
 	    switch (fieldDef.getType())
 	      {
 	      case BOOLEAN:
@@ -187,7 +189,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      case IP:
 		tmp = new IPDBField(this, fieldDef);
 		break;
-
 	      }
 
 	    if (tmp != null)
@@ -195,7 +196,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		fields.put(key, tmp);
 	      }
 	  }
-      }        
+      }
   }
 
   /**
@@ -311,7 +312,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      {
 		fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
-		if (!instantiateNewField(fieldDef.getID()))
+		if (!checkNewField(fieldDef.getID()))
 		  {
 		    continue;
 		  }
@@ -773,6 +774,35 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * This method is used to make sure that the built-in fields that
+   * the server assumes will always be present in any editable object
+   * will be in place.
+   * 
+   * This method checks with instantiateNewField() if the field id is
+   * not one of those that is needfull.  If instantiateNewField() approves
+   * the creation of a new field, checkNewField() will check to see if
+   * the GanymedeSession's permissions permit the field creation.
+   *
+   */
+
+  public final boolean checkNewField(short fieldID)
+  {
+    if (fieldID <= 8)
+      {
+	return true;		// we always allow the built in fields
+      }
+
+    if (instantiateNewField(fieldID))
+      {
+	return gSession.getPerm(this, fieldID).isCreatable();
+      }
+    else
+      {
+	return false;
+      }
+  }
+
+  /**
    *
    * This method provides a hook that can be used to indicate whether
    * a field that is defined in this object's field dictionary
@@ -806,7 +836,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean instantiateNewField(short fieldID)
   {
-    return true;
+    if (fieldID <= 8)
+      {
+	return true;		// we always allow the built in fields
+      }
+
+    return gSession.getPerm(this, fieldID).isCreatable();
   }
 
   /**
@@ -1706,10 +1741,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * between the current state of the DBEditObject and the original
    * object's state.
    *
+   * @return null if no difference was found
+   *
    */
 
   public synchronized String diff()
   {
+    boolean diffFound = false;
     StringBuffer result = new StringBuffer();
     DBObjectBaseField fieldDef;
     DBField origField, currentField;
@@ -1771,6 +1809,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    result.append("Field added: " + fieldDef.getName() + "\nValue: " +
 			  currentField.getValueString() + "\n");
 
+	    diffFound = true;
+
 	    if (debug)
 	      {
 		System.err.println("Field added: " + fieldDef.getName() + "\nValue: " +
@@ -1783,6 +1823,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    result.append("Field deleted: " + fieldDef.getName() + "\nValue: " +
 			  origField.getValueString() + "\n");
+
+	    diffFound = true;
 
 	    if (debug)
 	      {
@@ -1800,6 +1842,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			      fieldDef.getName() + "\n" +
 			      diff);
 
+		diffFound = true;
+
 		if (debug)
 		  {
 		    System.err.println("Field changed: " + 
@@ -1810,7 +1854,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  }
       }
 
-    return result.toString();
+    if (diffFound)
+      {
+	return result.toString();
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /*----------------------------------------------------------
