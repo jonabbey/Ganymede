@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 4 June 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,19 @@ public class tableAttr {
       }
     else
       {
-	fontMetric = c.getFontMetrics(font);
+	try
+	  {
+	    fontMetric = c.getFontMetrics(font);
+	  }
+	catch (NullPointerException ex)
+	  {
+	    System.err.println("font null ptr");
+	    System.err.println("c = " + c);
+	    System.err.println("font = " + font);
+	    baseline=0;
+	    height=0;
+	    return;
+	  }
 	baseline = fontMetric.getMaxAscent();
 	height = baseline + fontMetric.getMaxDescent();
       }
