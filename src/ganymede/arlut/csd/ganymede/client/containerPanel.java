@@ -654,9 +654,19 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		    continue;
 		  }
 
-		// and do the work.
+		// and do the work.  If we're read only, we don't want
+		// to bother showing fields that are undefined.  In
+		// fact, we should only see undefined fields if we are
+		// viewing an object that has been checked out for
+		// editing by the current transaction.  Normally, when
+		// we view an object from the server and a read-only
+		// copy is created for us, fields without values
+		// simply aren't part of the object.
 
-		addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
+		if (editable || fieldInfo.isDefined())
+		  {
+		    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
+		  }
 	      }
 	    catch (Exception ex)
 	      {

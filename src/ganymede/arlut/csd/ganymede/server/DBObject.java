@@ -1427,6 +1427,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Get read-only Vector of DBFieldInfo objects for the custom
    * DBFields contained in this object, in display order.</p>
    *
+   * <p>This method is called by the client so as to download all of
+   * the field values in an object in a single remote method call.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
