@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -184,8 +184,20 @@ public class JstringField extends JentryField implements KeyListener{
 
   public void setText(String str)
   {
+    if (debug)
+      {
+	System.out.println("JstringField: setText() in JstringField");
+      }
+
+    boolean editable = isEditable();
+    setEditable(true);
     if (str == null) 
       {
+	if (debug)
+	  {
+	    System.out.println("JstringField: String is null.");
+	  }
+
 	value = new String("");
 	
 	super.setText("");
@@ -208,12 +220,18 @@ public class JstringField extends JentryField implements KeyListener{
 	      }
 	  }
 
+	if (debug)
+	  {
+	    System.out.println("JstringField: Calling super.setText(" + str + ")");
+	  }
+
 	super.setText(str); 
 
 	value = str;
 	
 	changed = true;
       }
+    setEditable(editable);
   }
 
   /**
@@ -313,18 +331,21 @@ public class JstringField extends JentryField implements KeyListener{
    */
 
   //private final boolean isAllowed(char ch)
-  private boolean isAllowed(char ch)
+  public boolean isAllowed(char ch)
   {
-    System.out.println("JstringField.isAllowed()");
-    
+    if (debug)
+      {
+	System.out.println("JstringField.isAllowed()");
+      }
+
     if ((getText() != null) && (getText().length() >= size))
       {
-	System.out.println("That string is too large.");
+	if (debug)
+	  {
+	    System.out.println("That string is too large.");
+	  }
+
 	return false;
-      }
-    else
-      {
-	System.out.println("It's ok: length = " + getText().length() + " and that is under: " + size);
       }
 
     if (disallowedChars != null)
