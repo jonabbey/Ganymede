@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -335,12 +335,23 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   }
 
   /**
-   *
-   * Hook to allow intelligent generation of labels for DBObjects
+   * <p>Hook to allow intelligent generation of labels for DBObjects
    * of this type.  Subclasses of DBEditObject should override
    * this method to provide for custom generation of the
-   * object's label type
+   * object's label type</p>
    *
+   * <p>If you override this method to define a custom labelHook method
+   * for a DBEditObject subclass, you _must_ also override the
+   * {@link arlut.csd.ganymede.server.DBEditObject#useLabelHook()}
+   * method to return true.</p>
+   *
+   * <p>If you can affirmatively declare that the labels returned by
+   * getLabelHook() will always be unique among objects of this type,
+   * you should be sure to override
+   * {@link arlut.csd.ganymede.server.DBEditObject#labelHookGuaranteedUnique()}
+   * so that it returns true in your DBEditObject subclass.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public String getLabelHook(DBObject object)

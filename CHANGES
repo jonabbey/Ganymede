@@ -456,6 +456,51 @@ with the 'A' name.  If the name 'A' is not unlinked from the old
 account A by the time the xmlclient's transaction commits, however, an
 exception will be reported and the transaction will be canceled.
 
+26. [SERVER, XML] Rectified label handling for objects in XML
+
+A number of pieces in the server have been tweaked to better assure
+useful and consistent naming in the xmlclient's dumps and loads.
+Formerly, if the server tried to dump out objects whose labels were
+not guaranteed to be unique, the server would synthesize a unique
+label that could not be used upon later loading to retrieve the
+object.  This made it difficult to impossible to properly address such
+objects.
+
+Several changes have been made to ameliorate this solution.
+
+First, the algorithm used to synthesize a unique label when no
+guaranteed unique label is available has been standardized, and the
+GanymedeSession class' query mechanism has been elaborated to allow
+for high speed lookups using these synthesized unique labels.
+
+Second, the DBEditObject 'plug-in' class has had a new
+labelHookGuaranteedUnique() method which a plug-in subclass can use to
+affirmatively decalre that the custom label produced by getLabelHook()
+is guaranteed unique.  If a subclass provides a guaranteed unique
+label, that label will be used in the xmlclient, and will be properly
+found by the GanymedeSession query system when XML changes are loaded
+back into the server with the xmlclient.
+
+Thirdly, the logic for determining the best and most reliable label
+for invid and object elements in the xmlclient's dump output has been
+put into the DBObject class' new getXMLLabel() method.  That method is
+responsible for considering the known uniqueness constraints on the
+specified label generation mechanism, and selecting the most specific
+unique label possible.
+
+These changes should make the xmlclient more reliable in loading xml
+segments with reliable addressing, though if an object type does not
+provide unique labels, the synthesized object labels will only be
+portable so long as the desired object has the same invid number in
+the server as was assumed in the generation of the input to xmlclient.
+
+This is all made rather complicated by the degree of freedom that I
+designed into Ganymede, allowing objects to have synthetic, non-unique
+labels.  I wanted all references done through reliable invid's and to
+be able to support object renaming easily, but the xml client has a
+greater need for consistency.  With these changes, we should be able
+to offer it as needed.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004

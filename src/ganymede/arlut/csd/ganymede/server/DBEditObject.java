@@ -1372,6 +1372,32 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * <p>This method should be defined to return true in DBEditObject
+   * subclasses which provide a {@link
+   * arlut.csd.ganymede.server.DBEditObject#getLabelHook()} method
+   * that is guaranteed to return a label value which is both unique
+   * across all objects of this type and persistent across multiple
+   * calls to get this object type's label.</p>
+   *
+   * <p>If a subclass doesn't override this method, the labels
+   * produced by getLabelHook() method will not be considered adequate
+   * for unique naming in xml dumps and etc., and we will default to
+   * using a label synthesized from the object base type name and the
+   * object id number derived from the object's invid.</p>
+   *
+   * <p>If a DBEditObject subclass does not override {@link
+   * arlut.csd.ganymede.server.DBEditObject#useLabelHook()} to
+   * return true, this method has no effect.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean labelHookGuaranteedUnique()
+  {
+    return false;		// by default, no labelhook
+  }
+
+  /**
    * <p>Hook to allow intelligent generation of labels for DBObjects
    * of this type.  Subclasses of DBEditObject should override
    * this method to provide for custom generation of the
@@ -1379,7 +1405,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * <p>If you override this method to define a custom labelHook method
    * for a DBEditObject subclass, you _must_ also override the
-   * useLabelHook() method to return true.</p>
+   * {@link arlut.csd.ganymede.server.DBEditObject#useLabelHook()}
+   * method to return true.</p>
+   *
+   * <p>If you can affirmatively declare that the labels returned by
+   * getLabelHook() will always be unique among objects of this type,
+   * you should be sure to override
+   * {@link arlut.csd.ganymede.server.DBEditObject#labelHookGuaranteedUnique()}
+   * so that it returns true in your DBEditObject subclass.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */

@@ -783,6 +783,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * and getValueString() are both synchronized on subcomponents of DBObject,
    * so this method should be adequately safe as written.</P>
    *
+   * <P>Note that while you probably should seek to do so, it is not
+   * necessarily guaranteed that the label returned by getLabel() will
+   * be unique amongst all objects of the same type as this object.
+   * The labels will be unique if a namespace-constrained label field
+   * is assigned in the schema editor, or if the DBEditObject plug-in
+   * class for this object type has a getLabelHook() method defined
+   * and has overridden labelHookGuaranteedUnique() to return true,
+   * thus affirmatively declaring that the labels returned by
+   * getLabelHook() will always be unique.</P>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
@@ -805,11 +815,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	if (val == -1)
 	  {
-	    // if we have no label field and no get label hook, we'll
-	    // return a guaranteed unique label based on our invid
-	    // number
-
-	    return getTypeName() + "[" + getID() + "]";
+	    return getDefaultUniqueLabel();
 	  }
 	else
 	  {
@@ -817,7 +823,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	    DBField f = (DBField) getField(val);
 
-	    if (f != null)
+	    if (f != null && f.isDefined())
 	      {
 		// Ganymede.debug("Got field " + f);
 
@@ -826,19 +832,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		// without bothering with permission checking
 		// for this common case.
 
-		if (!f.isDefined())
-		  {
-		    return getTypeName() + "[" + getID() + "]";
-		  }
-		else
-		  {
-		    return f.getValueString();
-		  }
+		return f.getValueString();
 	      }
 	    else
 	      {
-		// Ganymede.debug("Couldn't find field " + val);
-		return "<" + getTypeName() + ":" + getID() + ">";
+		return getDefaultUniqueLabel();
 	      }
 	  }
       }
@@ -846,6 +844,59 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	return result;
       }
+  }
+
+  /**
+   * <p>This method returns a guaranteed unique label for this object,
+   * for use in xml dumps.  The returned string will be one of three
+   * things.. it will either be 1) the contents of the label field, if
+   * this object type has a defined label field and that label field
+   * is namespace constrained, or 2) the custom label synthesized by this
+   * object type's DBObjectBase's getObjectHook() plug-in's getLabelHook(),
+   * if and only if the plug-in overrides labelHookGuaranteedUnique() to
+   * return true, or 3) the output of getDefaultUniqueLabel(), which is a simple
+   * fixed format that provides a combination of the type name and the invid
+   * object number for this object.</p>
+   *
+   * <p>In any of these cases, the label will be guaranteed to be
+   * persistent and unique for the purposes of the xml dumping, and
+   * findable using the GanymedeSession class' internalQuery
+   * mechanism.</p>
+   */
+
+  public final String getXMLLabel()
+  {
+    DBField labelField = (DBField) getLabelField();
+    String result = null;
+
+    if ((labelField != null && labelField.getNameSpace() != null) ||
+	(objectBase.getObjectHook().useLabelHook() && objectBase.getObjectHook().labelHookGuaranteedUnique()))
+      {
+	result = getLabel();
+      }
+
+    // we shouldn't get a null or empty string from the above, but
+    // just in case, fall back to our known good (if invid-dependent)
+    // label
+
+    if (result == null || result.equals(""))
+      {
+	result = getDefaultUniqueLabel();
+      }
+
+    return result;
+  }
+
+  /**
+   * <p>This method returns a guaranteed unique label for this object.
+   * The format of this string is not arbitrary.. the GanymedeSession
+   * internalQuery() mechanism has special logic for doing optimized
+   * lookups with this format.
+   */
+
+  public final String getDefaultUniqueLabel()
+  {
+    return getTypeName() + "[" + getID() + "]";
   }
 
   /**
@@ -1206,24 +1257,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-
-    DBField labelField = (DBField) getLabelField();
-
-    // we want to guarantee that every object we dump has a unique id,
-    // even if that id is not a proper label, so that we can load
-    // this object cleanly in a from-scratch server, and so that
-    // we can do unambiguous cross-referencing within the xml file we're
-    // dumping
-
-    if (labelField != null && labelField.getNameSpace() != null)
-      {
-	xmlOut.attribute("id", getLabel());
-      }
-    else
-      {
-	xmlOut.attribute("id", getTypeName() + "[" + getID() + "]");
-      }
-
+    xmlOut.attribute("id", getXMLLabel());
     xmlOut.indentOut();
 
     // by using getFieldVector(), we get the fields in display

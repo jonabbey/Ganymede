@@ -3192,7 +3192,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    // we're looking for the label of an object
 
-	    if (base.getObjectHook().useLabelHook())
+	    if (base.getObjectHook().useLabelHook() && base.getObjectHook().labelHookGuaranteedUnique())
 	      {
 		scanUsingLabelHook = true;
 	      }
@@ -3205,10 +3205,62 @@ final public class GanymedeSession implements Session, Unreferenced {
 		else
 		  {
 		    // this object type has no label field and no
-		    // getLabelHook() label method, so we can't
-		    // reliably scan for it
-		    
-		    return null;
+		    // getLabelHook() label method that guarantees
+		    // uniqueness.. see if the value we're matching
+		    // against fits the pattern of an automatically
+		    // generated label, and if so do a direct look up
+		    // for it, if we can
+
+		    // otherwise we give up
+
+		    if (!(node.value instanceof String))
+		      {
+			return null;
+		      }
+
+		    String testLabel = (String) node.value;
+
+		    if (testLabel == null || !testLabel.endsWith("]"))
+		      {
+			return null;
+		      }
+
+		    int braceIndex = testLabel.lastIndexOf('[');
+
+		    if (braceIndex == -1)
+		      {
+			// bad string pattern, we can't match against
+			// the automatic label
+
+			return null;
+		      }
+
+		    // now we expect that we've got a number.. look
+		    // for the last '[', and take the chars between it
+		    // and the last ']' as an invid number to pull
+
+		    String numberString = testLabel.substring(braceIndex+1, testLabel.length()-1);
+
+		    int index = 0;
+
+		    try
+		      {
+			index = Integer.parseInt(numberString);
+		      }
+		    catch (NumberFormatException ex)
+		      {
+			return null; // bad number == bad label == give up
+		      }
+
+		    DBObject resultobject = session.viewDBObject(Invid.createInvid(base.getTypeID(), index));
+
+		    if (resultobject == null || !testLabel.equals(resultobject.getLabel()))
+		      {
+			return null;
+		      }
+
+		    addResultRow(resultobject, query, result, internal, perspectiveObject);
+		    return result;
 		  }
 	      }
 	  }

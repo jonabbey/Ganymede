@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -474,23 +474,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	xmlOut.startElement("invid");
 	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
-
-	// if the object that we are targetting has a label field
-	// which is handled by a namespace, we can use the object's
-	// name with a # as a temporary label.  Otherwise, we'll have
-	// to use the object number as a temporary label.
-
-	targetField = (DBField) target.getLabelField();
-
-	if (targetField != null && targetField.getNameSpace() != null)
-	  {
-	    xmlOut.attribute("id", Ganymede.internalSession.viewObjectLabel(invid));
-	  }
-	else
-	  {
-	    xmlOut.attribute("id", target.getTypeName() + "[" + invid.getNum() + "]");
-	  }
-    
+	xmlOut.attribute("id", target.getXMLLabel());
 	xmlOut.endElement("invid");
       }
   }
