@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.71 $ %D%
+    Version: $Revision: 1.72 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -200,7 +200,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (object == null)
       {
-	System.err.println("null object passed to containerPanel");
+	printErr("null object passed to containerPanel");
 	setStatus("Could not get object.  Someone else might be editing it.  Try again at a later time.");
 	return;
       }
@@ -253,13 +253,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (loaded)
       {
-	System.err.println("Container panel is already loaded!");
+	printErr("Container panel is already loaded!");
 	return;
       }
 
     if (debug)
       {
-	System.out.println("Loading container panel");
+	println("Loading container panel");
       }
     
     try
@@ -284,7 +284,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Getting list of fields");
+	    println("Getting list of fields");
 	  }
     
 	try
@@ -349,7 +349,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Entering big loop");
+	    println("Entering big loop");
 	  }
       
 	for (int i = 0; i < infoSize; i++)
@@ -385,7 +385,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println("Skipping a special field: " + fieldTemplate.getName());
+			println("Skipping a special field: " + fieldTemplate.getName());
 		      }
 
 		    continue;
@@ -403,7 +403,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
 	if (debug)
 	  {
-	    System.out.println("Done with loop");
+	    println("Done with loop");
 	  }
 
 	setStatus("Finished loading containerPanel");
@@ -422,7 +422,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Calling update with the updatesWhileLoading vector.");
+		println("Calling update with the updatesWhileLoading vector.");
 	      }
 
 	    update(updatesWhileLoading);
@@ -484,6 +484,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   public final gclient getgclient()
   {
     return gc;
+  }
+
+  /** 
+   *
+   * Use this to print stuff out, so we know it is from the containerPanel
+   */
+  private final void println(String s)
+  {
+    System.out.println("containerPanel: " + s);
+  }
+
+  private final void printErr(String s)
+  {
+    System.err.println("containerPanel err: " + s);
   }
 
   /**
@@ -573,7 +587,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Updating container panel");
+	println("Updating container panel");
       }
 
     gc.setWaitCursor();
@@ -590,7 +604,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Done updating container panel");
+	println("Done updating container panel");
       }
   
     gc.setNormalCursor();
@@ -622,7 +636,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Updating a few fields...");
+	println("Updating a few fields...");
       }
 
     // If the containerPanel is not loaded, then we need to keep track
@@ -654,18 +668,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Could not find this component: ID = " + (Short)fields.elementAt(i));
-		System.out.println("There are " + infoVector.size() + " things in the info vector.");
-		System.out.println("There are " + rowHash.size() + " things in the row hash.");
-		System.out.println("Working on number " + i + " in the fields vector.");
-		System.out.println("Valid ids: ");
+		println("Could not find this component: ID = " + (Short)fields.elementAt(i));
+		println("There are " + infoVector.size() + " things in the info vector.");
+		println("There are " + rowHash.size() + " things in the row hash.");
+		println("Working on number " + i + " in the fields vector.");
+		println("Valid ids: ");
 		
 		Enumeration k = shortToComponentHash.keys();
 		
 		while (k.hasMoreElements())
 		  {
 		    Object next = k.nextElement();
-		    System.out.println("   " + next);
+		    println("   " + next);
 		  }
 	      }
 	  }
@@ -679,7 +693,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("I'm no fool, that's the field you just changed.");
+		    println("I'm no fool, that's the field you just changed.");
 		  }
 	      }
 	  }
@@ -690,7 +704,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Done updating container panel");
+	println("Done updating container panel");
       }
 
     gc.setNormalCursor();
@@ -713,12 +727,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Updating " + field.getName() + " " + comp); 
+	    println("Updating " + field.getName() + " " + comp); 
 	  }
 	
 	if (field == null)
 	  {
-	    System.out.println("-----Field is null, skipping.");
+	    println("-----Field is null, skipping.");
 	    return;
 	  }
 
@@ -789,7 +803,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		System.out.println("Updating the combo box.");
+		println("Updating the combo box.");
 	      }
 
 	    // First we need to rebuild the list of choices
@@ -812,14 +826,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("key = " + key);
+		    println("key = " + key);
 		  }
 		  
 		if (gc.cachedLists.containsList(key))
 		  {
 		    if (debug)
 		      {
-			System.out.println("key in there, using cached list");
+			println("key in there, using cached list");
 		      }
 		      
 		    choiceHandles = gc.cachedLists.getListHandles(key, false);
@@ -828,7 +842,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println("It's not in there, downloading a new one.");
+			println("It's not in there, downloading a new one.");
 		      }
 		      
 		    QueryResult choicesV = sf.choices();
@@ -851,7 +865,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // remove all the current values, add the choices that we
 	    // just got
 
-	    cb.removeAllItems();
+	    if (cb.getItemCount() > 0)
+	      {
+		cb.removeAllItems();
+	      }
 
 	    // add choices to combo box.. remember that the choices are
 	    // sorted coming out of the object Cache
@@ -882,7 +899,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println(" selected is null");
+			println(" selected is null");
 		      }
 
 		    cb.setSelectedItem("<none>");
@@ -907,7 +924,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		     *
 		    if (debug) 
 		      {
-			System.out.println("Adding new stringComboNoneListener"); 
+			println("Adding new stringComboNoneListener"); 
 		      }
 		    
 		    cb.addItemListener(new stringComboNoneListener(cb));
@@ -918,7 +935,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println(" setting selected to : " + o);
+		    println(" setting selected to : " + o);
 		  }
 
 		cb.setSelectedItem(o);
@@ -946,7 +963,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		System.out.println("Updating the combo box.");
+		println("Updating the combo box.");
 	      }
 	      
 	    // First we need to rebuild the list of choices
@@ -961,7 +978,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("key is null, getting new copy, not caching.");
+		    println("key is null, getting new copy, not caching.");
 		  }
 		
 		QueryResult qr = invf.choices();
@@ -975,14 +992,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("key = " + key);
+		    println("key = " + key);
 		  }
 		  
 		if (gc.cachedLists.containsList(key))
 		  {
 		    if (debug)
 		      {
-			System.out.println("key in there, using cached list");
+			println("key in there, using cached list");
 		      }
 		      
 		    choiceHandles = gc.cachedLists.getListHandles(key, false);
@@ -991,7 +1008,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println("It's not in there, downloading a new one.");
+			println("It's not in there, downloading a new one.");
 		      }
 		      
 		    QueryResult choicesV = invf.choices();
@@ -1013,16 +1030,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		System.out.println("Removing all items.");
+		println("Removing all items.");
 	      }
 
-	    chooser.removeAllItems();
+	    if (chooser.getItemCount() > 0)
+	      {
+		chooser.removeAllItems();
+	      }
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
 	      {
 		if (debug)
 		  {
-		    System.out.println("Adding item " + (listHandle)choiceHandles.elementAt(i));
+		    println("Adding item " + (listHandle)choiceHandles.elementAt(i));
 		  }
 
 		chooser.addItem((listHandle)choiceHandles.elementAt(i));
@@ -1090,7 +1110,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Passfield, ingnoring");
+		println("Passfield, ingnoring");
 	      }
 	  }
 	else if (comp instanceof StringSelector)
@@ -1112,7 +1132,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Updating JIPField.");
+		println("Updating JIPField.");
 	      }
 	    
 	    ((JIPField)comp).setValue((Byte[]) field.getValue());
@@ -1120,7 +1140,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else 
 	  {
-	    System.err.println("field of unknown type: " + comp);
+	    printErr("field of unknown type: " + comp);
 	  }
       }
     catch (RemoteException rx)
@@ -1159,7 +1179,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("key in there, using cached list");
+		    println("key in there, using cached list");
 		  }
 	    
 		available = gc.cachedLists.getListHandles(key, false);
@@ -1168,7 +1188,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's not in there, downloading a new one.");
+		    println("It's not in there, downloading a new one.");
 		  }
 	    
 		QueryResult choicesV = field.choices();
@@ -1225,7 +1245,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("key in there, using cached list");
+		    println("key in there, using cached list");
 		  }
 	    
 		available = gc.cachedLists.getListHandles(key, false);
@@ -1234,7 +1254,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's not in there, downloading a new one.");
+		    println("It's not in there, downloading a new one.");
 		  }
 	    
 		QueryResult choicesV = field.choices();
@@ -1268,7 +1288,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     catch (Exception e)
       {
-	System.out.println("Caught exception updating StringSelector: " + e);
+	println("Caught exception updating StringSelector: " + e);
       }
   }
 
@@ -1382,14 +1402,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		    println(field.getTypeDesc() + " trying to set to " + v.getValue());
 		  }
 
 		returnValue = field.setValue(v.getValue());
 	      }
 	    catch (RemoteException rx)
 	      {
-		System.out.println("Could not set field value: " + rx);
+		println("Could not set field value: " + rx);
 		currentlyChangingComponent = null;
 		return false;
 	      }
@@ -1404,14 +1424,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+		    println(field.getTypeDesc() + " trying to set to " + v.getValue());
 		  }
 
 		returnValue = field.setPlainTextPass((String)v.getValue());
 	      }
 	    catch (RemoteException rx)
 	      {
-		System.out.println("Could not set field value: " + rx);
+		println("Could not set field value: " + rx);
 		currentlyChangingComponent = null;
 		return false;
 	      }
@@ -1421,7 +1441,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Something happened in the vector panel");
+		println("Something happened in the vector panel");
 	      }
 	  }
 	else if (v.getSource() instanceof StringSelector)
@@ -1432,7 +1452,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		System.out.println("value performed from StringSelector");
+		println("value performed from StringSelector");
 	      }
 
 	    // a StringSelector data component could be feeding us any of a
@@ -1444,7 +1464,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("MenuItem selected in a StringSelector");
+		    println("MenuItem selected in a StringSelector");
 		  }
 
 		String command = (String) v.getParameter();
@@ -1453,7 +1473,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println("Edit object: " + v.getValue());
+			println("Edit object: " + v.getValue());
 		      }
 
 		    Invid invid = (Invid) v.getValue();
@@ -1467,7 +1487,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			System.out.println("View object: " + v.getValue());
+			println("View object: " + v.getValue());
 		      }
 
 		    Invid invid = (Invid) v.getValue();
@@ -1523,7 +1543,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			    if (debug)
 			      {
-				System.out.println("Going to get label for this object.");
+				println("Going to get label for this object.");
 			      }
 
 			    // ask the user what label they want for this object
@@ -1553,14 +1573,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				
 				if (debug)
 				  {
-				    System.out.println("The set label worked!");
+				    println("The set label worked!");
 				  }
 			      }
 			    else
 			      {
 				if (debug)
 				  {
-				    System.out.println("set label failed!!!!");
+				    println("set label failed!!!!");
 				  }
 			      }
 			  }
@@ -1589,7 +1609,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			  {
 			    if (debug)
 			      {
-				System.out.println("Newly created object could not be linked!!!!");
+				println("Newly created object could not be linked!!!!");
 			      }
 
 			    // well, the object did get created, but
@@ -1613,7 +1633,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 		else
 		  {
-		    System.out.println("Unknown action command from popup: " + command);
+		    println("Unknown action command from popup: " + command);
 		  }
 	      }
 	    else if (v.getValue() instanceof Invid)
@@ -1636,7 +1656,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      {
 			if (debug)
 			  {
-			    System.out.println("Adding new value to string selector");
+			    println("Adding new value to string selector");
 			  }
 
 			returnValue = field.addElement(v.getValue());
@@ -1645,7 +1665,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      {
 			if (debug)
 			  {
-			    System.out.println("Removing value from field(strig selector)");
+			    println("Removing value from field(strig selector)");
 			  }
 
 			returnValue = field.deleteElement(v.getValue());
@@ -1688,12 +1708,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else
 	      {
-		System.out.println("Not an Invid in string selector.");
+		println("Not an Invid in string selector.");
 	      }
 	  }
 	else
 	  {
-	    System.out.println("Value performed from unknown source");
+	    println("Value performed from unknown source");
 	  }
 
 	// Handle any wizards or error dialogs
@@ -1704,7 +1724,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("retVal is null: returning true");
+		println("retVal is null: returning true");
 	      }
 
 	    gc.somethingChanged();
@@ -1716,7 +1736,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("didSucceed: Returning true.");
+		println("didSucceed: Returning true.");
 	      }
 	    
 	    // whatever happened, it may have caused other fields in this object
@@ -1732,7 +1752,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("didSucceed: Returning false.");
+		println("didSucceed: Returning false.");
 	      }
 	    
 	    currentlyChangingComponent = null;
@@ -1741,19 +1761,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     catch (NullPointerException ne)
       {
-	System.out.println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
+	println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
 	currentlyChangingComponent = null;
 	return false;
       }
     catch (IllegalArgumentException e)
       {
-	System.out.println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
+	println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
 	currentlyChangingComponent = null;
 	return false;
       }
     catch (RuntimeException e)
       {
-	System.out.println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
+	println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
 	currentlyChangingComponent = null;
 	return false;
       }
@@ -1842,7 +1862,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	// An exception was thrown, most likely from the server.  We need to revert the check box.
 
-	System.out.println("Exception occured in containerPanel.actionPerformed: " + ex);
+	println("Exception occured in containerPanel.actionPerformed: " + ex);
 
 	try
 	  {
@@ -1881,7 +1901,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Item changed: " + e.getItem());
+	println("Item changed: " + e.getItem());
       }
 
     // We don't care about deselect reports
@@ -1925,7 +1945,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (field == null)
 		  {
-		    System.out.println("Field is null.");
+		    println("Field is null.");
 		  }
 	      }
 
@@ -1946,14 +1966,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		System.out.println("field setValue returned true");
+		println("field setValue returned true");
 	      }
 	  }
 	else if (returnValue.didSucceed())
 	  {
 	    if (debug)
 	      {
-		System.out.println("field setValue returned true!!");
+		println("field setValue returned true!!");
 	      }
 
 	    gc.somethingChanged();
@@ -2001,7 +2021,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("=checking return val for rescan");
+	println("=checking return val for rescan");
       }
 
     if (rv == null)
@@ -2016,7 +2036,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("=doRescan is true");
+	println("=doRescan is true");
       }
     
     // getRescanList returns null if we asre supposed to rescan all
@@ -2024,7 +2044,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    System.out.println("=rescanAll is true");
+	    println("=rescanAll is true");
 	  }
 	
 	updateAll();
@@ -2124,7 +2144,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
+	println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
       }
 
     if (isVector)
@@ -2149,7 +2169,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	switch (fieldType)
 	  {
 	  case -1:
-	    System.err.println("**** Could not get field information");
+	    printErr("**** Could not get field information");
 	    break;
 		      
 	  case FieldType.STRING:
@@ -2208,12 +2228,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Adding StringSelector, its a vector of strings!");
+	println("Adding StringSelector, its a vector of strings!");
       }
 
     if (field == null)
       {
-	System.out.println("Hey, this is a null field! " + fieldTemplate.getName());
+	println("Hey, this is a null field! " + fieldTemplate.getName());
 	return;
       }
 
@@ -2223,7 +2243,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
 	if (debug)
 	  {
-	    System.out.println("Getting choicesKey()");
+	    println("Getting choicesKey()");
 	  }
 
 	Object id = field.choicesKey();
@@ -2232,7 +2252,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Key is null, Getting choices");
+		println("Key is null, Getting choices");
 	      }
 
 	    qr = field.choices();
@@ -2252,7 +2272,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {	
 		if (debug)
 		  {
-		    System.out.println("Getting QueryResult now");
+		    println("Getting QueryResult now");
 		  }
 
 		qr =field.choices();
@@ -2269,7 +2289,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+		println("Stopping containerPanel in the midst of loading a StringSelector");
 	      }
 
 	    gc.containerPanelFinished(this);
@@ -2352,7 +2372,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Adding StringSelector, its a vector of invids!");
+	println("Adding StringSelector, its a vector of invids!");
       }
 
     QueryResult qres = field.encodedValues();
@@ -2365,7 +2385,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	    println("Stopping containerPanel in the midst of loading a StringSelector");
 	  }
 
 	gc.containerPanelFinished(this);
@@ -2380,7 +2400,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key is null, downloading new copy");
+		println("key is null, downloading new copy");
 	      }
 
 	    QueryResult choices = field.choices();
@@ -2393,7 +2413,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      { 
 		if (debug)
 		  {
-		    System.out.println("choicse is null");
+		    println("choicse is null");
 		  }
 
 		choiceHandles = null;
@@ -2403,14 +2423,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key= " + key);
+		println("key= " + key);
 	      }
 
 	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's in there, using cached list");
+		    println("It's in there, using cached list");
 		  }
 
 		choiceHandles = gc.cachedLists.getListHandles(key, false);
@@ -2419,7 +2439,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's not in there, downloading anew.");
+		    println("It's not in there, downloading anew.");
 		  }
 
 		QueryResult qr = field.choices();
@@ -2443,7 +2463,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    
 		    for (int i = 0; i < choiceHandles.size(); i++)
 		      {
-			System.out.println(" choices: " + (listHandle)choiceHandles.elementAt(i));
+			println(" choices: " + (listHandle)choiceHandles.elementAt(i));
 		      }
 		    
 		    System.out.println();
@@ -2455,7 +2475,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       { 
 	if (debug)
 	  {
-	    System.out.println("Not editable, not downloading choices");
+	    println("Not editable, not downloading choices");
 	  }
       }
 
@@ -2478,7 +2498,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Creating StringSelector");
+	println("Creating StringSelector");
       }
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable && fieldInfo.isEditable(), 
 					   true, true, 
@@ -2523,11 +2543,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (isEditInPlace)
 	  {
-	    System.out.println("Adding editInPlace vector panel");
+	    println("Adding editInPlace vector panel");
 	  }
 	else
 	  {
-	    System.out.println("Adding normal vector panel");
+	    println("Adding normal vector panel");
 	  }
       }
 
@@ -2597,7 +2617,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    System.out.println("You can choose");
+	    println("You can choose");
 	  }
 	    
 	Vector choiceHandles = null;
@@ -2609,7 +2629,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key is null, getting new copy.");
+		println("key is null, getting new copy.");
 	      }
 
 	    choices = field.choices().getLabels();
@@ -2618,14 +2638,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key = " + key);
+		println("key = " + key);
 	      }
 		
 	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
-		    System.out.println("key in there, using cached list");
+		    println("key in there, using cached list");
 		  }
 		
 		list = gc.cachedLists.getList(key);
@@ -2634,7 +2654,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's not in there, downloading a new one.");
+		    println("It's not in there, downloading a new one.");
 		  }
 		
 		gc.cachedLists.putList(key, field.choices());
@@ -2683,7 +2703,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Setting current value to <none>, because the current choice is null. " + currentChoice);
+		println("Setting current value to <none>, because the current choice is null. " + currentChoice);
 	      }	  
 	    combo.addItem("<none>");
 	    combo.setSelectedItem("<none>");
@@ -2702,7 +2722,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	        combo.addItemListener(new stringComboNoneListener(combo));
 	        if (debug)
 	          {
-	            System.out.println("Adding new stringComboNoneListener");
+	            println("Adding new stringComboNoneListener");
 	          }
 	      }
 	    */
@@ -2712,7 +2732,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Setting current value: " + currentChoice);
+		println("Setting current value: " + currentChoice);
 	      }	  
 
 	    try
@@ -2721,7 +2741,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    catch (IllegalArgumentException e)
 	      {
-		System.out.println("IllegalArgumentException: current choice is not in the string selection combobox.  Adding it now.");
+		println("IllegalArgumentException: current choice is not in the string selection combobox.  Adding it now.");
 		combo.addItem(currentChoice);
 		combo.setSelectedItem(currentChoice);
 	      }
@@ -2862,7 +2882,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("Adding numeric field");
+	println("Adding numeric field");
       }
       
     JnumberField nf = new JnumberField();
@@ -2880,7 +2900,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
+	println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
       }
     
     if (editable && fieldInfo.isEditable())
@@ -2958,7 +2978,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    System.out.println("Null pointer setting selected choice: " + ex);
+	    println("Null pointer setting selected choice: " + ex);
 	  }
       }
 
@@ -2977,7 +2997,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("Adding perm matrix");
+	println("Adding perm matrix");
       }
 
     // note that the permissions editor does its own callbacks to
@@ -2988,7 +3008,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     perm_button pb = new perm_button((perm_field) field,
 				     editable && fieldInfo.isEditable(),
 				     gc,
-				     false);
+				     false,
+				     fieldTemplate.getName());
     
     addRow( pb, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
@@ -3004,7 +3025,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   private void addInvidField(invid_field field, 
 			     FieldInfo fieldInfo, 
 			     FieldTemplate fieldTemplate) throws RemoteException
-  {
+    {
     objectList list;
 
     /* -- */
@@ -3015,7 +3036,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
 	if (debug)
 	  {
-	    System.out.println("Hey, " + fieldTemplate.getName() +
+	    println("Hey, " + fieldTemplate.getName() +
 			       " is edit in place but not a vector, what gives?");
 	  }
 
@@ -3038,7 +3059,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key is null, not using cache");
+		println("key is null, not using cache");
 	      }
 
 	    list = new objectList(field.choices());
@@ -3048,14 +3069,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key = " + key);
+		println("key = " + key);
 	      }
 
 	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
-		    System.out.println("Got it from the cachedLists");
+		    println("Got it from the cachedLists");
 		  }
 
 		list = gc.cachedLists.getList(key);
@@ -3064,7 +3085,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's not in there, downloading a new one.");
+		    println("It's not in there, downloading a new one.");
 		  }
 
 		gc.cachedLists.putList(key, field.choices());
@@ -3079,7 +3100,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
+	    println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
 	  }
 	
 	listHandle currentListHandle = null;
@@ -3102,11 +3123,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	choices = gc.sortListHandleVector(choices);
 	combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
 
-	if (!mustChoose)
-	  {
-	    combo.addItem(noneHandle);
-	  }
-	
 	// Find currentListHandle
 
 	// Make sure the current choice is in the chooser, if there is
@@ -3120,22 +3136,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		if (thisChoice.getObject() == null)
 		  {
-		    System.err.println("***>>> hey!  thisChoice (" + thisChoice + ") has a null object!");
+		    println("Current object " + thisChoice + " is null.");
 		  }
-		else
+
+		if (currentChoice.equals(thisChoice.getObject()))
 		  {
-		    if (thisChoice.getObject().equals(currentChoice))
+		    if (debug)
 		      {
-			if (debug)
-			  {
-			    System.out.println("Found the current object in the list!");
-			  }
-			currentListHandle = thisChoice;
-			found = true;
-			break;
+			println("Found the current object in the list!");
 		      }
+		    currentListHandle = thisChoice;
+		    found = true;
+		    //break;
 		  }
- 	      }
+	      }
+ 	      
 
  	    if (!found)
  	      {
@@ -3143,6 +3158,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
  		combo.addItem(currentListHandle);
  	      }
  	  }
+
+	if (!mustChoose)
+	  {
+	    combo.addItem(noneHandle);
+	  }
+	
 
 	 /*
 	  *
@@ -3158,7 +3179,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("setting current choice: " + currentChoiceLabel);
+		println("setting current choice: " + currentChoiceLabel);
 	      }
 
 	    try
@@ -3167,7 +3188,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    catch (IllegalArgumentException e)
 	      {
-		System.out.println("IllegalArgumentException: current handle not in the list, adding it now.");
+		println("IllegalArgumentException: current handle not in the list, adding it now.");
 		combo.addItem(currentListHandle);
 		combo.setSelectedItem(currentListHandle);
 	      }
@@ -3176,7 +3197,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("currentChoice is null");
+		println("currentChoice is null");
 	      }
 
 	    // If the field is must choose, we wouldn't have added the
@@ -3185,7 +3206,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("Adding noneHandle, because the currentchoice is null.");
+		    println("Adding noneHandle, because the currentchoice is null.");
 		  }
 
 		combo.addItem(noneHandle);
@@ -3209,13 +3230,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Adding to panel");
+	    println("Adding to panel");
 	  }
 	
 	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	
-      }
-    else //It's not editable, so add a button
+  }
+  else //It's not editable, so add a button
       {
 	if (fieldInfo.getValue() != null)
 	  {
@@ -3230,7 +3251,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("-you don't have permission to view this object.");
+		    println("-you don't have permission to view this object.");
 		  }
 
 		label = "Permission denied!";
@@ -3283,7 +3304,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Adding IP field");
+	println("Adding IP field");
       }
 
     try
@@ -3376,4 +3397,6 @@ class stringComboNoneListener implements ItemListener {
 	  }
       }
   }
+
+
 }
