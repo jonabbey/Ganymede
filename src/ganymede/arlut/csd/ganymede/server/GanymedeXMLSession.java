@@ -962,12 +962,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    // make sure we have a case-sensitive attribute, just to
 	    // get in the user's face a bit so he doesn't have the
-	    // system doing something unexpected
+	    // system doing something unexpected without warning
 
 	    if (_space.getAttrStr("case-sensitive") == null)
 	      {
-		err.println("Error, namespace item " + _space + " has no case-sensitive attribute.");
-		return false;
+		err.println("Warning, namespace item " + _space + " has no case-sensitive attribute. " +
+			    _space + " will not be case sensitive.");
 	      }
 
 	    boolean _sensitive = _space.getAttrBoolean("case-sensitive");
