@@ -9,8 +9,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:05:49 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/03/25 08:19:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,6 +58,16 @@ import arlut.csd.JDataComponent.listHandle;
                                                                     ObjectHandle
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class is used to group information about objects.  It is
+ * used in the {@link arlut.csd.ganymede.QueryResult QueryResult}
+ * class to keep things organized, and on the client to keep
+ * track of the status of objects on the server.</p>
+ *
+ * @version $Revision: 1.10 $ $Date: 1999/03/25 08:19:52 $ $Name:  $
+ * @author Jonathan Abbey
+ */
 
 public class ObjectHandle implements Cloneable {
 
