@@ -16,7 +16,7 @@ import java.awt.Component;
 
 public class LAFMenu extends JMenu implements ActionListener{
 
-  private final boolean debug = true;
+  private final boolean debug = false;
 
   JsetValueCallback my_parent;
 
@@ -47,7 +47,10 @@ public class LAFMenu extends JMenu implements ActionListener{
       {
 	JCheckBoxMenuItem mi = new JCheckBoxMenuItem(info[i].getName());
 	mi.setActionCommand(info[i].getClassName());
-	System.out.println(info[i].getClassName());
+	if (debug)
+	  {
+	    System.out.println(info[i].getClassName());
+	  }
 	group.add(mi);
 	//mi.setEnabled(info[i].isSupportedLookAndFeel());
 	mi.addActionListener(this);
