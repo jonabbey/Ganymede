@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2001/07/30 03:42:00 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2002/01/11 23:01:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,7 +72,11 @@ import arlut.csd.Util.*;
 
 /**
  * <p>This class manages recording events in the system log and generating
- * reports from the system log based on specific criteria.</p>
+ * reports from the system log based on specific criteria.  The DBLog class
+ * is responsible for logging events to an on-disk file, for emailing
+ * notification of events to users, admins, and other interested parties,
+ * and for scanning through a Ganymede log file for events pertaining to
+ * a designated object invid.</p>
  *
  * <p>Most of the methods in this class must be synchronized, both to keep the
  * logfile itself orderly, and to allow the various log-processing methods
@@ -87,9 +91,12 @@ public class DBLog {
   // -- 
 
   String logFileName = null;
-  File logFile = null;
   FileOutputStream logStream = null;
   PrintWriter logWriter = null;
+
+  String mailFilename = null;
+  FileOutputStream mailLogStream = null;
+  PrintWriter mailLogWriter = null;
 
   /**
    *
@@ -188,7 +195,17 @@ public class DBLog {
 
   /* -- */
 
-  public DBLog(String filename, GanymedeSession gSession) throws IOException
+  /**
+   * <p>Constructor for a Ganymede log object.</p>
+   *
+   * @param filename Filename for an on-disk log file.  Must point to a valid file
+   * @param mailFilename Filename for an optional mail events log file.  May be null or empty if
+   * no disk-logging of advisory email events is desired.
+   * @param gSession GanymedeSession reference used to allow DBLog code to do queries
+   * on the Ganymede database
+   */
+
+  public DBLog(String filename, String mailFilename, GanymedeSession gSession) throws IOException
   {
     // get the signature to append to mail messages
 
@@ -201,6 +218,15 @@ public class DBLog {
     logWriter = new PrintWriter(logStream, true); // auto-flush on newline
 
     logWriter.println();	// emit newline to terminate any incomplete entry
+
+    if (mailFilename != null && !mailFilename.equals(""))
+      {
+	this.mailFilename = mailFilename;
+	mailLogStream = new FileOutputStream(mailFilename, true); // append
+	mailLogWriter = new PrintWriter(mailLogStream, false); // no critical need for auto-flush
+
+	mailLogWriter.println();	// emit newline to terminate any incomplete entry
+      }
 
     // now we need to initialize our hash of DBObjects so that we can do
     // speedy lookup of event codes without having to synchronize on
@@ -230,6 +256,12 @@ public class DBLog {
     logWriter.close();
     logStream.close();
 
+    if (mailLogStream != null)
+      {
+	mailLogWriter.close();
+	mailLogStream.close();
+      }
+
     mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
 
     closed = true;
@@ -237,6 +269,11 @@ public class DBLog {
     if (debug)
       {
 	System.err.println("DBLog:" + logFileName + " closed.");
+
+	if (mailFilename != null)
+	  {
+	    System.err.println("DBLog:" + mailFilename + " closed.");
+	  }
       }
   }
 
@@ -346,23 +383,28 @@ public class DBLog {
 
     calculateMailTargets(event, session, null, mailToObjects, mailToOwners);
 
-    // As long as we're not processing a generic mailout, log the
-    // event to the log file, and look up the system event code
+    currentTime.setTime(System.currentTimeMillis());
 
-    if (!event.eventClassToken.equals("mailout"))
+    // If we're processing a generic mailout, log the mail message to a mail log
+    // if we're keeping one, otherwise skip logging
+
+    if (event.eventClassToken.equals("mailout") && mailLogWriter != null)
       {
-	currentTime.setTime(System.currentTimeMillis());
+	event.writeEntry(mailLogWriter, currentTime, null);
+      }
+    else
+      {
 	event.writeEntry(logWriter, currentTime, null);
 
 	type = (systemEventType) sysEventCodes.get(event.eventClassToken);
-
+	
 	if (type == null)
 	  {
 	    Ganymede.debug("Error in DBLog.mailNotify(): unrecognized eventClassToken: " + 
 			   event.eventClassToken);
 	    return;
 	  }
-
+	
 	if (!type.mail)
 	  {
 	    Ganymede.debug("Logic error in DBLog.mailNotify():  eventClassToken not configured for mail delivery: " + 
@@ -370,7 +412,7 @@ public class DBLog {
 	    return;
 	  }
       }
-    
+
     if (debug)
       {
 	System.err.println("Attempting to email log event " + event.eventClassToken);

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2001/12/05 20:27:35 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2002/01/11 23:01:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -226,6 +226,7 @@ public class Ganymede {
   public static String dbFilename = null;
   public static String journalProperty = null;
   public static String logProperty = null;
+  public static String mailLogProperty = null;
   public static String htmlProperty = null;
   public static String serverHostProperty = null;
   public static String rootname = null;
@@ -282,7 +283,7 @@ public class Ganymede {
 
   public static void main(String argv[]) 
   {
-    File dataFile, logFile;
+    File dataFile;
     String propFilename = null;
 
     /* -- */
@@ -485,7 +486,7 @@ public class Ganymede {
 
     try
       {
-	log = new DBLog(logProperty, internalSession);
+	log = new DBLog(logProperty, mailLogProperty, internalSession);
       }
     catch (IOException ex)
       {
@@ -1148,6 +1149,7 @@ public class Ganymede {
     dbFilename = System.getProperty("ganymede.database");
     journalProperty = System.getProperty("ganymede.journal");
     logProperty = System.getProperty("ganymede.log");
+    mailLogProperty = System.getProperty("ganymede.maillog");
     htmlProperty = System.getProperty("ganymede.htmldump");
     serverHostProperty = System.getProperty("ganymede.serverhost");
     rootname = System.getProperty("ganymede.rootname");
