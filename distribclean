@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.1 $
-# Date: $Date: 1999/01/22 01:29:58 $
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/22 01:44:51 $
 #
 ############################################################
 
@@ -52,6 +52,7 @@ find . -name rebuild -exec rm {} \;
 cd classes
 
 rm -f *.class
+rm -f *.jar
 
 # Remove all the class files from under arlut.. note that
 # we're deliberately leaving the gnu classes in place,
@@ -62,7 +63,7 @@ find arlut -name \*.class -exec rm {} \;
 
 # Remove the configured sync_tree files.
 
-find classes/arlut -name sync_tree\* -exec rm {} \;
+find arlut -name sync_tree\* -exec rm {} \;
 
 cd $GROOTDIR
 
