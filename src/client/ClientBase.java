@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/05/28 02:47:51 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/10/08 01:39:14 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.11 $ $Date: 1999/05/28 02:47:51 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -135,6 +135,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 	if (obj instanceof Server)
 	  {
 	    server = (Server) obj;
+	    boolean test = server.up();
 	  }
       }
     catch (NotBoundException ex)
@@ -213,6 +214,8 @@ public class ClientBase extends UnicastRemoteObject implements Client {
       }
     catch (NullPointerException ex)
       {
+	connected = false;
+
 	if (debug)
 	  {
 	    System.err.println("Error: Didn't get server reference.  Exiting now.");
@@ -222,6 +225,8 @@ public class ClientBase extends UnicastRemoteObject implements Client {
       }
     catch (Exception ex)
       {
+	connected = false;
+
 	if (debug)
 	  {
 	    System.err.println("Got some other exception: " + ex);

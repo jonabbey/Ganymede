@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/07/26 22:34:48 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 1999/10/08 01:39:14 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
+ * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -476,6 +476,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	return;
       }
 
+    connector.setText("Connecting...");
+    username.setEnabled(false);
+    passwd.setEnabled(false);
+
     int try_number = 0;
     
     while (!connected)
@@ -483,13 +487,30 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	if (try_number++ > 10)
 	  {
 	    System.out.println("I've tried ten times to connect, but I can't do it.  Maybe the server is down.");
-	    break;
+	    connector.setEnabled(true);
+	    connector.setText("Attempt to reconnect");
+	    my_thread = null;
+	    return;
 	  }
 
 	try
 	  {
 	    my_client = new ClientBase(server_url, this);  // Exception will happen here
+
+	    connector.setText("Login to server");
 	    connected = true;
+	    connector.setEnabled(true);
+	    setNormalCursor();
+
+	    username.setEnabled(true);
+	    passwd.setEnabled(true);
+	    
+	    invalidate();
+	    validate();
+	    
+	    // we've done our work, remember that.
+	    
+	    my_thread = null;
 	  }
 	catch (RemoteException rx)
 	  {
@@ -508,13 +529,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      }
 	  }
       }
-
-    connector.setText("Login to server");
-    username.setEnabled(true);
-    passwd.setEnabled(true);
-
-    invalidate();
-    validate();
   }
 
   /**
@@ -623,6 +637,19 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	setWaitCursor();
 
+	if (!my_client.isConnected() && my_thread == null)
+	  {
+	    // looks like the ClientBase object lost connection to
+	    // the RMI server.. let's try to re-acquire.
+	    
+	    connector.setText("Connecting...");
+	    connector.setEnabled(false);
+	    connected = false;
+	    my_thread = new Thread(this);
+	    my_thread.start();
+	    return;
+	  }
+
 	String uname = username.getText().trim();
 	String pword = new String(passwd.getPassword());
 
@@ -633,44 +660,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    my_session = my_client.login(uname, pword);
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
 	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "RMI Error: Couldn't log into server: \n" +
+					      "Couldn't log into server: \n" +
 					      ex.getMessage(),
 					      getErrorImage());
+	  }
 	    
-	    connector.setEnabled(true);
-	    _quitButton.setEnabled(true);
-
-	    setNormalCursor();
-	    return;
-	  }
-	catch (NullPointerException ex)
-	  {
-	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "Error: Didn't get server reference.  Please Quit and Restart",
-					      getErrorImage());
-	    
-	    connector.setEnabled(true);
-	    _quitButton.setEnabled(true);
-
-	    setNormalCursor();	    
-	    return;
-	  }
-	catch (Exception ex) 
-	  {
-	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "Error: " + ex.getMessage(),
-					      getErrorImage());
-
-	    connector.setEnabled(true);
-	    _quitButton.setEnabled(true);
-
-	    setNormalCursor();
-	    return;
-	  }
-
 	connector.setEnabled(false);
 	_quitButton.setEnabled(false);
 
@@ -682,10 +679,26 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    // This means that the user was not able to log into the server properly.
 
-	    // We re-enable the "Login to server" button so that the user can try again.
+	    if (!my_client.isConnected() && my_thread == null)
+	      {
+		// looks like the ClientBase object lost connection to
+		// the RMI server.. let's try to re-acquire.
 
-	    connector.setEnabled(true);
-	    _quitButton.setEnabled(true);
+		connector.setText("Connecting...");
+		connector.setEnabled(false);
+		connected = false;
+		my_thread = new Thread(this);
+		my_thread.start();
+	      }
+	    else
+	      {
+		// We are connected to the server.. bad password?
+		// re-enable the "Login to server" button so that the
+		// user can try again.
+
+		connector.setEnabled(true);
+		_quitButton.setEnabled(true);
+	      }
 	  }
 
 	setNormalCursor();
@@ -757,6 +770,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	System.out.println(e.getMessage());
       }
 
+    // constructing a JErrorDialog causes it to be shown.
+
     JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
   }
 
@@ -813,7 +828,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
+ * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -899,7 +914,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
+ * @version $Revision: 1.60 $ $Date: 1999/10/08 01:39:14 $ $Name:  $
  * @author Jonathan Abbey
  */
 
