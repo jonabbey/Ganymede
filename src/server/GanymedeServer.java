@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/04/01 22:17:50 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/04/17 03:28:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -188,7 +188,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// versions of the database or new.  Going forward we'll
 	// want to match here against the PersonaLabelField.
 
-	root = new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName);
+	root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
+			       new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName));
 
 	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
