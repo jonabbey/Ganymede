@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,10 +39,6 @@ import java.util.*;
  */
 
 public class Query implements java.io.Serializable {
-
-  static final boolean debug = true;
-
-  // ---
 
   /**
    *
@@ -127,6 +123,21 @@ public class Query implements java.io.Serializable {
    */
 
   Hashtable permitList = null;
+
+  /**
+   *
+   * A Vector of Query's that can be associated with this query.<br><br>
+   * 
+   * This vector is used to allow the inclusion of queries on embedded objects..
+   * If linkedQueries != null, the server will issue a second (third, fourth)
+   * query, returning the intersection of the results.<br><br>
+   *
+   * It does no good to have linkedQueries that do not map back to the same
+   * result object type.
+   * 
+   */
+
+  Vector linkedQueries = null;
 
   /* -- */
 
@@ -292,6 +303,34 @@ public class Query implements java.io.Serializable {
       }
 
     permitList.put(new Short(id), this);
+  }
+
+  /**
+   *
+   * This method allows the client to add a list of subordinate queries
+   * to this query.  The queries attached to this query *will not*
+   * have their subordinate queries processed.<br><br>
+   * 
+   * Queries added with this method are used to allow queries to
+   * include checks on embedded objects.<br><br>
+   *
+   * It does no good to pass queries to addQuery that do not have
+   * the same return type as this query.
+   *   */
+
+  public void addQuery(Query query)
+  {
+    if (query.returnType != this.returnType)
+      {
+	throw new IllegalArgumentException("Couldn't add an incompatible query");
+      }
+
+    if (linkedQueries == null)
+      {
+	linkedQueries = new Vector();
+      }
+
+    linkedQueries.addElement(query);
   }
 }
 
