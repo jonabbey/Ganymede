@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2002/04/10 05:17:39 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2002/04/10 05:21:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -425,8 +425,13 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	  {
 	    totalLength += (((String) value).length() + 2); // need a comma and space
 	  }
+
+	if (totalLength >= 1024)
+	  {
+	    return false;
+	  }
       }
 
-    return(totalLength < 1024);
+    return true;
   }
 }
