@@ -417,11 +417,13 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method uploads non-Invid field information contained in
-   * this object up to the Ganymede server.</p>
-   *
-   * <p>This method skips any Invid fields, which will need to be resolved
-   * in a second pass.</p> 
+   * <p>This method uploads field information contained in this object
+   * up to the Ganymede server.  Unfortunately, we can't necessarily
+   * upload all the field information all at once, as we have to
+   * create all the objects and set enough information into them that
+   * they can properly be addressed, before we can set all the invid
+   * fields.  The mode paramater controls this, allowing this method
+   * to be called in multiple passes.</p>
    *
    * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
    */

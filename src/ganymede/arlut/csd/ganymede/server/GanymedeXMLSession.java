@@ -2495,6 +2495,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
       }
 
+    // XXX hm.. what happens here if we created an object in the
+    // createdObjects vector (or edited it in the editedObjects
+    // vector) which is meant to link to an embedded object?  since
+    // we're not registering the embedded objects until we get to this
+    // point, it seems that we'd have a problem, there.. ?? XXX
+
     for (int i = 0; success && i < embeddedObjects.size(); i++)
       {
 	xmlobject object = (xmlobject) embeddedObjects.elementAt(i);
