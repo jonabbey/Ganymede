@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 2000/10/10 02:18:44 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 2001/09/17 20:58:45 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.54 $ $Date: 2000/10/10 02:18:44 $ $Name:  $
+ * @version $Revision: 1.55 $ $Date: 2001/09/17 20:58:45 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -571,6 +571,11 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 		if (ct.getSelectedItem() != null)
 		  {
+		    if (!items.contains(ct.getSelectedItem()))
+		      {
+			ch.addItem(ct.getSelectedItem());
+		      }
+
 		    ch.setSelectedItem(ct.getSelectedItem());
 		  }
 
