@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.157 $
-   Last Mod Date: $Date: 1999/10/29 17:58:13 $
+   Version: $Revision: 1.158 $
+   Last Mod Date: $Date: 1999/10/29 18:45:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.157 $ %D%
+ * @version $Revision: 1.158 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3411,7 +3411,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal view_db_object(Invid invid)
+  public synchronized ReturnVal view_db_object(Invid invid)
   {
     ReturnVal result;
     db_object objref;
@@ -3506,7 +3506,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal edit_db_object(Invid invid)
+  public synchronized ReturnVal edit_db_object(Invid invid)
   {
     ReturnVal result;
     db_object objref;
@@ -3648,7 +3648,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public ReturnVal create_db_object(short type, boolean embedded)
+  public synchronized ReturnVal create_db_object(short type, boolean embedded)
   {
     DBObject newObj;
     ReturnVal retVal;
@@ -3827,11 +3827,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal clone_db_object(Invid invid)
+  public synchronized ReturnVal clone_db_object(Invid invid)
   {
     DBObject vObj;
     DBEditObject newObj;
     ReturnVal retVal;
+    boolean save_wizard = this.enableWizards;
 
     /* -- */
 
@@ -3843,34 +3844,43 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error, the client attempted to clone a null invid.");
       }
 
-    retVal = view_db_object(invid); // get a copy customized for per-field visibility
-
-    if (!retVal.didSucceed())
+    enableWizards(false);
+    
+    try
       {
+	retVal = view_db_object(invid); // get a copy customized for per-field visibility
+
+	if (!retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	vObj = (DBObject) retVal.getObject();
+
+	retVal = create_db_object(invid.getType());
+
+	if (!retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	newObj = (DBEditObject) retVal.getObject();
+
+	retVal = newObj.cloneFromObject(session, vObj, false);
+
+	if (!retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	retVal.setObject(newObj);
+
 	return retVal;
       }
-
-    vObj = (DBObject) retVal.getObject();
-
-    retVal = create_db_object(invid.getType());
-
-    if (!retVal.didSucceed())
+    finally
       {
-	return retVal;
+	enableWizards(save_wizard);
       }
-
-    newObj = (DBEditObject) retVal.getObject();
-
-    retVal = newObj.cloneFromObject(session, vObj, false);
-
-    if (!retVal.didSucceed())
-      {
-	return retVal;
-      }
-
-    retVal.setObject(newObj);
-
-    return retVal;
   }
 
   /**

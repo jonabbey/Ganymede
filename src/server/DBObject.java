@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 1999/10/29 16:14:06 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 1999/10/29 18:45:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.80 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.81 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1336,6 +1336,7 @@ public class DBObject implements db_object, FieldType, Remote {
     return results;
   }
 
+
   /**
    * <p>Get read-only access to a field from this object.</p>
    *
@@ -1872,6 +1873,71 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     return f.getValuesLocal();
+  }
+
+  /**
+   * <p>Get a sorted list of DBFields contained in this object.</p>
+   *
+   * <p>This is a server-side only operation.</p>
+   */
+
+  synchronized public Vector getFieldVector(boolean customOnly)
+  {
+    Vector results = new Vector();
+    Enumeration enum;
+    DBField field;
+
+    /* -- */
+
+    enum = fields.elements();
+    
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+
+	if (!(field.isBuiltIn() && customOnly))
+	  {
+	    try
+	      {
+		results.addElement(field);
+	      }
+	    catch (IllegalArgumentException ex)
+	      {
+		// oops, we don't have permission to view this field..
+		// skip it.
+	      }
+	  }
+      }
+
+    // sort by display order
+
+    (new VecQuickSort(results,
+		      new arlut.csd.Util.Compare()
+		      {
+			public int compare(Object a, Object b)
+			  {
+			    DBField aF, bF;
+
+			    aF = (DBField) a;
+			    bF = (DBField) b;
+
+			    if (aF.getDisplayOrder() < bF.getDisplayOrder())
+			      {
+				return -1;
+			      }
+			    else if (aF.getDisplayOrder() > bF.getDisplayOrder())
+			      {
+				return 1;
+			      }
+			    else
+			      {
+				return 0;
+			      }
+		       }
+		   }
+		   )).sort();
+
+    return results;
   }
 
   /**

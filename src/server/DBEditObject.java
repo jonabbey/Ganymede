@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 1999/10/29 16:14:04 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 1999/10/29 18:45:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.119 $ $Date: 1999/10/29 16:14:04 $ $Name:  $
+ * @version $Revision: 1.120 $ $Date: 1999/10/29 18:45:12 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1549,7 +1549,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
     ReturnVal retVal;
-    Enumeration origFields;
+    Vector origFields;
     DBField origField;
     DBField newField;
     boolean problem = false;
@@ -1563,11 +1563,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					  "Can't clone an object of the wrong type.  This is an internal error.");
       }
 
-    origFields = origObj.fields.elements();
+    origFields = origObj.getFieldVector(true);
 
-    while (origFields.hasMoreElements())
+    for (int i = 0; i < origFields.size(); i++)
       {
-	origField = (DBField) origFields.nextElement();
+	origField = (DBField) origFields.elementAt(i);
 
 	if (canCloneField(session, origObj, origField))
 	  {
