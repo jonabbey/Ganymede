@@ -2421,6 +2421,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal validatePasswordChoice(String password, boolean asRoot)
   {
+    // just a safety check in case someone tries to use the xmlclient
+    // to give us an empty/null plaintext password
+
+    if (password == null || password.equals(""))
+      {
+	if (deleting)
+	  {
+	    return null;	// okay
+	  }
+
+	return Ganymede.createErrorDialog("Password Error",
+					  "Empty passwords are not allowed in ARL user accounts.");
+      }
+
     String resultString = null;
     String validatorName = "/opt/bin/ganypassValidate";
 
