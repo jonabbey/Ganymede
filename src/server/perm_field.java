@@ -5,7 +5,7 @@
    Client-side interface to the PermissionMatrixDBField class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,10 +27,10 @@ public interface perm_field extends db_field {
   public PermEntry getPerm(short baseID) throws RemoteException;
   public PermEntry getPerm(Base base, BaseField field) throws RemoteException;
   public PermEntry getPerm(Base base) throws RemoteException;
-  public void setPerm(short baseID, short fieldID, PermEntry entry) throws RemoteException;
-  public void setPerm(short baseID, PermEntry entry) throws RemoteException;
-  public void setDefaultFieldsPerm(short baseID, PermEntry entry) throws RemoteException;
-  public void setPerm(Base base, BaseField field, PermEntry entry) throws RemoteException;
-  public void setPerm(Base base, PermEntry entry) throws RemoteException;
-  public void setDefaultFieldsPerm(Base base, PermEntry entry) throws RemoteException;
+  public ReturnVal setPerm(short baseID, short fieldID, PermEntry entry) throws RemoteException;
+  public ReturnVal setPerm(short baseID, PermEntry entry) throws RemoteException;
+  public ReturnVal setDefaultFieldsPerm(short baseID, PermEntry entry) throws RemoteException;
+  public ReturnVal setPerm(Base base, BaseField field, PermEntry entry) throws RemoteException;
+  public ReturnVal setPerm(Base base, PermEntry entry) throws RemoteException;
+  public ReturnVal setDefaultFieldsPerm(Base base, PermEntry entry) throws RemoteException;
 }
