@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2278,6 +2278,29 @@ public final class InvidDBField extends DBField implements invid_field {
   public boolean excludeSelected(db_field x)
   {
     return ((DBEditObject) owner).excludeSelected(x, this);    
+  }
+
+  /**
+   *
+   * Returns true if the only valid values for this invid field are in
+   * the QueryRersult returned by choices().  In particular, if mustChoose()
+   * returns true, <none> is not an acceptable choice for this field
+   * after the field's value is initially set.
+   *
+   * @see arlut.csd.ganymede.invid_field
+   *
+   */
+
+  public boolean mustChoose()
+  {
+    if (owner instanceof DBEditObject)
+      {
+	return ((DBEditObject) owner).mustChoose(this);
+      }
+    else
+      {
+	throw new IllegalArgumentException("can't call mustChoose on an invid field in a non-editable context.");
+      }
   }
 
   /**

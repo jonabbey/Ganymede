@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 14 November 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,17 @@ public interface invid_field extends db_field {
   // for this field.
 
   QueryResult encodedValues() throws RemoteException;
+
+  /**
+   *
+   * Returns true if the only valid values for this invid field are in
+   * the QueryResult returned by choices().  In particular, if mustChoose()
+   * returns true, <none> is not an acceptable choice for this field
+   * after the field's value is initially set.
+   *
+   */
+
+  boolean mustChoose() throws RemoteException;
   QueryResult choices() throws RemoteException;
 
   /**
