@@ -6,8 +6,8 @@
    
    Created: 15 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/03/15 22:22:54 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/10/07 17:38:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,4 +68,8 @@ public interface contractSchema {
   final static short CONTRACTSTOP=259;
   final static short CONTRACTDESCRIP=260;
   final static short CONTRACTGROUPS=261;
+  final static short CONTRACTSTATUS=262;
+  final static short CONTRACTLAB=263;
+  final static short CONTRACTRESEARCHUNIT=264;
+  final static short CONTRACTUTNUMBER=265;
 }
