@@ -27,9 +27,9 @@ Note that this fix will still leave those dedicated threads stuck in
 the JVM trying to finish reading from a socket from the (presumably
 dead) client.  I can't do much about this other than wait for Sun to
 fix their RMI implementation so that RMI reads on a socket will
-eventually time out.  In my experience, threads hanging due to
-a partial socket read is reasonably rare, so I'm not overly
-worried about hanging disconnect threads.
+eventually time out.  In my experience, threads hanging due to a
+partial socket read is reasonably rare, so I'm not overly worried
+about hanging disconnect threads clogging up the server.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
