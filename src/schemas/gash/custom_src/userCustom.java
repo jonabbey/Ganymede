@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,7 +43,7 @@ import java.rmi.*;
 
 public class userCustom extends DBEditObject implements SchemaConstants, userSchema {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
@@ -1431,7 +1431,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// up their mail spool, etc., etc.
 
 	createUserExternals();
-
 	break;
 
       case DELETING:
@@ -1460,36 +1459,63 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	Vector newEntries = getFieldValuesLocal(userSchema.VOLUMES);
 	Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
 
-	Hashtable newVolumes = new Hashtable(newEntries.size() + 1, 1.0f);
-	Hashtable oldVolumes = new Hashtable(oldEntries.size() + 1, 1.0f);
+	int newSize;
+	int oldSize;
+
+	if (newEntries != null)
+	  {
+	    newSize = newEntries.size() + 1;
+	  }
+	else
+	  {
+	    newSize = 0;
+	  }
+
+	if (oldEntries != null)
+	  {
+	    oldSize = oldEntries.size() + 1;
+	  }
+	else
+	  {
+	    oldSize = 0;
+	  }
+
+	Hashtable newVolumes = new Hashtable(newSize, 1.0f);
+	Hashtable oldVolumes = new Hashtable(oldSize, 1.0f);
 
 	Vector addedVolumes = new Vector();
 	Vector deletedVolumes = new Vector();
 
-	for (int i = 0; i < oldEntries.size(); i++)
+	if (oldEntries != null)
 	  {
-	    mapInvid = (Invid) oldEntries.elementAt(i);
-	    mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
-
-	    volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
-	    volumeName = gSession.viewObjectLabel(volumeId);
-
-	    oldVolumes.put(volumeId, volumeName);
+	    for (int i = 0; i < oldEntries.size(); i++)
+	      {
+		mapInvid = (Invid) oldEntries.elementAt(i);
+		mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
+		
+		volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
+		volumeName = gSession.viewObjectLabel(volumeId);
+		
+		oldVolumes.put(volumeId, volumeName);
+	      }
 	  }
 
-	for (int i = 0; i < newEntries.size(); i++)
+	if (newEntries != null)
 	  {
-	    mapInvid = (Invid) newEntries.elementAt(i);
-	    mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
-
-	    volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
-	    volumeName = gSession.viewObjectLabel(volumeId);
-
-	    newVolumes.put(volumeId, volumeName);
-
-	    if (!oldVolumes.containsKey(volumeId))
+	    for (int i = 0; i < newEntries.size(); i++)
 	      {
-		addedVolumes.addElement(volumeName);
+		mapInvid = (Invid) newEntries.elementAt(i);
+		mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
+		
+		volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
+		volumeName = gSession.viewObjectLabel(volumeId);
+		
+		newVolumes.put(volumeId, volumeName);
+		
+		if (!oldVolumes.containsKey(volumeId))
+		  {
+		    addedVolumes.addElement(volumeName);
+		  }
 	      }
 	  }
 
