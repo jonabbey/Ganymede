@@ -343,7 +343,8 @@ public class xmlobject {
    * on the server.</p>
    *
    * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * return semantics.</p> */
+   * return semantics.</p>
+   */
 
   public ReturnVal editOnServer(Session session) throws NotLoggedInException
   {
@@ -357,14 +358,32 @@ public class xmlobject {
 
     if (objref != null)
       {
-	throw new RuntimeException("Error, have already edited this xmlobject: " +
-				   this.toString());
+	return Ganymede.createErrorDialog("GanymedeXMLServer",
+					  "Error, have already edited this xmlobject: " + this.toString());
       }
 
     localInvid = getInvid();
 
     if (localInvid != null)
       {
+	// also, make sure that the GanymedeSession/DBStore hasn't
+	// already checked this object out for editing/creation for
+	// us.. this is subtly different than the check above, because
+	// there is nothing else to prevent two xmlobjects from being
+	// created that will get mapped to the same invid in the
+	// DBStore, due to case-insensitivity and so forth.
+
+	objref = ((GanymedeSession) session).session.viewDBObject(localInvid);
+
+	if (objref != null)
+	  {
+	    if (objref instanceof DBEditObject)
+	      {
+		return Ganymede.createErrorDialog("GanymedeXMLServer",
+						  "Error, have already edited this object: " + ((DBEditObject) objref).toString());
+	      }
+	  }
+
 	try
 	  {
 	    result = session.edit_db_object(localInvid);
