@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.68 $ %D%
+    Version: $Revision: 1.69 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -73,6 +73,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   Vector
     updatesWhileLoading = new Vector(),
     vectorPanelList = new Vector();
+
+  JComponent 
+    currentlyChangingComponent = null;
 
   Hashtable
     shortToComponentHash = new Hashtable(),	// maps field id's to AWT/Swing component
@@ -558,6 +561,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void updateAll()
   {
+    // View windows can't be updated.
+    if (! editable)
+      {
+	return;
+      }
+
     Enumeration enum;
 
     /* -- */
@@ -597,6 +606,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void update(Vector fields)
   {
+    if (! editable)
+      {
+	return;
+      }
+
     Component c;
 
     /* -- */
@@ -633,7 +647,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (c == null)
 	  {
-	    //if (debug)
+	    if (debug)
 	      {
 		System.out.println("Could not find this component: ID = " + (Short)fields.elementAt(i));
 		System.out.println("There are " + infoVector.size() + " things in the info vector.");
@@ -650,9 +664,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 	  }
-	else
+	else 
 	  {
-	    updateComponent(c);
+	    if (! c.equals(currentlyChangingComponent))
+	      {
+		updateComponent(c);
+	      }
+	    else 
+	      {
+		if (debug)
+		  {
+		    System.out.println("I'm no fool, that's the field you just changed.");
+		  }
+	      }
 	  }
       }
 
@@ -1316,6 +1340,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public boolean setValuePerformed(JValueObject v)
   {
+
+    // Maybe check to see if gc.cancel has the focus?  That might
+    // work.
+
     ReturnVal returnValue = null;
 
     /* -- */
@@ -1325,6 +1353,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	gc.showErrorMessage((String)v.getValue());
 	return true;
       }
+
+    currentlyChangingComponent = (JComponent)v.getSource();
 
     try
       {
@@ -1355,6 +1385,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    catch (RemoteException rx)
 	      {
 		System.out.println("Could not set field value: " + rx);
+		currentlyChangingComponent = null;
 		return false;
 	      }
 	  }
@@ -1376,6 +1407,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    catch (RemoteException rx)
 	      {
 		System.out.println("Could not set field value: " + rx);
+		currentlyChangingComponent = null;
 		return false;
 	      }
  
@@ -1423,6 +1455,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    
 		    gc.editObject(invid);
 
+		    currentlyChangingComponent = null;
 		    return true;
 		  }
 		else if (command.equals("View object"))
@@ -1436,6 +1469,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    
 		    gc.viewObject(invid);
 
+		    currentlyChangingComponent = null;
 		    return true;
 		  }
 		else if (command.equals("Create new Object"))
@@ -1462,6 +1496,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			if (type < 0)
 			  {
+			    currentlyChangingComponent = null;
 			    return false;
 			  }
 
@@ -1498,6 +1533,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			    if (result == null)
 			      {
+				currentlyChangingComponent = null;
 				return false; // They pushed cancel.
 			      }
 			    
@@ -1555,6 +1591,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			    // the operation as a whole didn't
 			    // succeed, so we'll return false
 
+			    currentlyChangingComponent = null;
 			    return false;
 			  }
 			else
@@ -1666,6 +1703,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    gc.somethingChanged();
+	    currentlyChangingComponent = null;
 	    return true;
 	  }
 
@@ -1682,6 +1720,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    checkReturnValForRescan(returnValue);
 
 	    gc.somethingChanged();
+	    currentlyChangingComponent = null;
 	    return true;
 	  }
 	else
@@ -1690,23 +1729,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("didSucceed: Returning false.");
 	      }
-
+	    
+	    currentlyChangingComponent = null;
 	    return false;
 	  }
       }
     catch (NullPointerException ne)
       {
 	System.out.println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
+	currentlyChangingComponent = null;
 	return false;
       }
     catch (IllegalArgumentException e)
       {
 	System.out.println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
+	currentlyChangingComponent = null;
 	return false;
       }
     catch (RuntimeException e)
       {
 	System.out.println("RuntimeException in containerPanel.setValuePerformed:\n " + e);
+	currentlyChangingComponent = null;
 	return false;
       }
   }
@@ -1961,30 +2004,29 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    if (rv.doRescan())
+    if (!rv.doRescan())
+      {
+	return;
+      }
+
+    if (debug)
+      {
+	System.out.println("=doRescan is true");
+      }
+    
+    // getRescanList returns null if we asre supposed to rescan all
+    if (rv.rescanAll(getObjectInvid()))
       {
 	if (debug)
 	  {
-	    System.out.println("=doRescan is true");
+	    System.out.println("=rescanAll is true");
 	  }
-
-	if (rv.rescanAll())
-	  {
-	    if (debug)
-	      {
-		System.out.println("=rescanAll is true");
-	      }
-
-	    updateAll();
-	  }
-	else 
-	  {
-	    update(rv.getRescanList());
-	  }
+	
+	updateAll();
       }
-    else if (debug)
+    else 
       {
-	System.out.println("=It's not a doRescan");
+	update(rv.getRescanList(getObjectInvid()));
       }
   }
 
