@@ -90,6 +90,46 @@ This entails a slightly incompatible change in the RMI API between the
 client and the server, so the Ganymede 1.0.8 and later clients should
 not be used with a 1.0.7 or earlier server.
 
+6. [SERVER] Fixed nullPointerException throw on empty regexp string
+
+Fixed a couple of places in DBQueryHandler that could result in a
+null or empty string being passed down to the gnu.regexp.re constructor.
+
+7. [XML/SERVER] Improved semantics of XML vector field handling
+
+Previously, the default mode for vector fields in Ganymede's XML
+support was "add".  That is, the following XML snippet will
+cause "jonabbey" to be added to the Aliases field in the broccol
+user object.
+
+<object type="User" id="broccol">
+  <Aliases>
+     <string val="jonabbey"/>
+  </Aliases>
+</object>
+
+This is true even if "jonabbey" was already listed in the Aliases
+field.
+
+Now, a new vector field mode has been added, "addIfNotPresent".
+This mode will now be the default when a vector handling mode
+is not specified.  In other words, the above snippet is equivalent
+to
+
+<object type="User" id="broccol">
+  <Aliases>
+     <addIfNotPresent>
+       <string val="jonabbey"/>
+     </addIfNotPresent>
+  </Aliases>
+</object>
+
+Note that "add" mode for Invid fields was always handled as if it were
+"addIfNotPresent", as the InvidDBField.addElements() method
+automatically filters out duplicates.
+
+I have updated the XML docs to reflect this change.
+
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
 RELEASE DATE: October 11, 2001
