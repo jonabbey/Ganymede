@@ -1030,6 +1030,14 @@ everything in the Ganymede client and admin console are based on Swing,
 switching the pop-ups to Swing should keep things consistent and
 working on various platforms.
 
+73. [ADMIN CONSOLE] Fixed console deadlocks on Linux
+
+I was being sloppy with my GUI thread handling in the admin console..
+updates from the server were not being painted on the GUI thread,
+which was leading to swift lockups when running the admin console on
+the Linux 1.3 JDK.  I fixed this, the admin console should run fine
+in any Java environment now.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
