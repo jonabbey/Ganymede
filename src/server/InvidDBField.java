@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.99 $ %D%
+   Version: $Revision: 1.100 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.99 $ %D%
+ * @version $Revision: 1.100 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -2751,7 +2751,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	return Ganymede.createErrorDialog("Couldn't create new embedded object",
 					  "An error occurred in trying to create a new embedded object in the " +
-					  getName() + " field.");
+					  getName() + " field.\n\nThis may be due to a permissions problem");
       }
 
     // now we need to do the binding as appropriate.
