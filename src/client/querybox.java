@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -369,42 +369,40 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    getEmbedded(EIPfields, template.getName(), null, Embedded);
 	    EIPfields.removeElement(template);
 	  }
-	else
+
+	// ignore containing objects and the like...
+	
+	if (template.getID() == SchemaConstants.OwnerListField ||
+	    template.getID() == SchemaConstants.BackLinksField)
 	  {
-	    // ignore containing objects and the like...
-
-	    if (template.getID() == SchemaConstants.OwnerListField ||
-		template.getID() == SchemaConstants.BackLinksField)
-	      {
-		continue;
-	      }
-
-	    String name = template.getName();
-
-	    // Keep a shortcut for our later fieldname parsing
-	    // This was Erik's idea.. 
-	    
-	    mapEmbeddedToField(name, name);
-
-	    // And keep a map from the elaborated field name to
-	    // the field template.
-
-	    mapNameToTemplate(name, template);
-
-	    // and to the base
-
-	    mapNameToId(name, new Short(selectedBase.getTypeID()));
-
-	    // and finally add to fieldChoices
-
-	    if (debug)
-	      {
-		System.err.println("querybox: adding field " + name + " to choices for base " + 
-				   baseName);
-	      }
-
-	    fieldChoices.addElement(name);
+	    continue;
 	  }
+
+	String name = template.getName();
+
+	// Keep a shortcut for our later fieldname parsing
+	// This was Erik's idea.. 
+	    
+	mapEmbeddedToField(name, name);
+
+	// And keep a map from the elaborated field name to
+	// the field template.
+	
+	mapNameToTemplate(name, template);
+	
+	// and to the base
+	
+	mapNameToId(name, new Short(selectedBase.getTypeID()));
+	
+	// and finally add to fieldChoices
+	
+	if (debug)
+	  {
+	    System.err.println("querybox: adding field " + name + " to choices for base " + 
+			       baseName);
+	  }
+	
+	fieldChoices.addElement(name);
       }
     
     // If we wound up with any embedded (edit-in-place) fields from
@@ -476,36 +474,34 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       { 
 	tempField = (FieldTemplate) fields.elementAt(j);
 	      
-	if (!tempField.isEditInPlace())
-	  {	 
-	    if (tempField.getID() != SchemaConstants.OwnerListField &&
-		tempField.getID() != SchemaConstants.BackLinksField)
-	      {
-		// ignore containing objects and the like...
+	if (tempField.getID() != SchemaConstants.OwnerListField &&
+	    tempField.getID() != SchemaConstants.BackLinksField)
+	  {
+	    // ignore containing objects and the like...
 
-		myName = tempField.getName();
-		myName = basePrefix + "/" + myName;  // slap on the prefix
+	    myName = tempField.getName();
+	    myName = basePrefix + "/" + myName;  // slap on the prefix
 
-		// save the embedded information in our Embedded vector
+	    // save the embedded information in our Embedded vector
 
-		Embedded.addElement(myName);
+	    Embedded.addElement(myName);
 		
-		mapNameToTemplate(myName, tempField);
+	    mapNameToTemplate(myName, tempField);
 		   
-		// Also, save the information on the target base
-		// in a hashtable
+	    // Also, save the information on the target base
+	    // in a hashtable
 		      
-		// the ID will be used in creating the query for the 
-		// edit-in-place
+	    // the ID will be used in creating the query for the 
+	    // edit-in-place
 		    
-		// if tempIDobj isn't null, then we've got 
-		// something beneath an edit in place. Add the
-		// id of the lowest level base to the baseIDHash
+	    // if tempIDobj isn't null, then we've got 
+	    // something beneath an edit in place. Add the
+	    // id of the lowest level base to the baseIDHash
 
-		mapNameToId(myName, lowestBase);
-	      }
+	    mapNameToId(myName, lowestBase);
 	  }
-	else
+
+	if (tempField.isEditInPlace())
 	  {
 	    // since it does refer to an embedded, call
 	    // getEmbedded again, with tempID's templateVector,
@@ -569,6 +565,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    return null;
 	  }
 
+	// We have a hash of base names because of our need to enable
+	// querying on fields in embedded objects.  We basically send
+	// a set of queries to the server, one per base that we're
+	// interested in.  The primary query that we send to the server
+	// specifies the return type we're interested in.
+
 	if (baseQueries.get(myBaseName) == null)
 	  {
 	    baseQVec = new Vector();
@@ -594,6 +596,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	myNode = (QueryNode) baseQVec.elementAt(0);
 
+	// if baseQVec has more than one element, And in the remainder
+	// of the query nodes for this base.
+
 	for (int i = 1; i < baseQVec.size(); i++)
 	  {
 	    myNode = new QueryAndNode(myNode, (QueryNode) baseQVec.elementAt(i));
@@ -603,8 +608,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    result = new Query(myBaseName, myNode, editOnly);
 	    result.setReturnType(returnType);
-	    
-	    System.err.println("Creating primary Query on base " + myBaseName);
+	   
+	    if (debug)
+	      {
+		System.err.println("Creating primary Query on base " + myBaseName);
+	      }
 	  }
 	else
 	  {
@@ -613,7 +621,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	    result.addQuery(adjunctQuery);
 
-	    System.err.println("Creating adjunct Query on base " + myBaseName);
+	    if (debug)
+	      {
+		System.err.println("Creating adjunct Query on base " + myBaseName);
+	      }
 	  }
       }
 
@@ -901,7 +912,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 class QueryRow implements ItemListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
@@ -1112,7 +1123,13 @@ class QueryRow implements ItemListener {
 
     compareChoice.removeAllItems();
 
-    if (field.isArray())
+    if (field.isEditInPlace())
+      {
+	compareChoice.addItem("Length <");
+	compareChoice.addItem("Length >");
+	compareChoice.addItem("Length ==");
+      }
+    else if (field.isArray())
       {
 	compareChoice.addItem("Contain");
 	compareChoice.addItem("Length <");
@@ -1428,8 +1445,6 @@ class QueryRow implements ItemListener {
   {
     QueryNode myNode;
     Object value = null;
-
-    boolean editInPlace;
     Short baseID;
 
     String localFieldName = parent.getFieldFromEmbedded(fieldName);
@@ -1473,6 +1488,7 @@ class QueryRow implements ItemListener {
 
     String operator = (String) compareChoice.getSelectedItem();
     byte opValue = QueryDataNode.NONE;
+    byte arrayOp = QueryDataNode.NONE;
     
     if (field.isArray())
       {
@@ -1482,28 +1498,28 @@ class QueryRow implements ItemListener {
 	  } 
 	else if (operator.equals("Length =="))
 	  {
-	    opValue = QueryDataNode.LENGTHEQ;
+	    arrayOp = QueryDataNode.LENGTHEQ;
 	  } 
 	else if (operator.equals("Length >"))
 	  {
-	    opValue = QueryDataNode.LENGTHGR;
+	    arrayOp = QueryDataNode.LENGTHGR;
 	  } 
 	else if (operator.equals("Length <"))
 	  {
-	    opValue = QueryDataNode.LENGTHLE;
+	    arrayOp = QueryDataNode.LENGTHLE;
 	  }
 	else if (operator.equals("Defined"))
 	  {
 	    opValue = QueryDataNode.DEFINED;
 	  }
 
-	if (opValue == 0)
+	if (opValue == QueryDataNode.NONE && arrayOp == QueryDataNode.NONE)
 	  {
 	    System.err.println("QueryRow.getQueryNode(): Unknown array comparator");
 	    return null;
 	  }
-	    
-	myNode = new QueryDataNode(localFieldName, opValue, value);
+
+	myNode = new QueryDataNode(localFieldName, opValue, arrayOp, value);
 
 	if (debug)
 	  {
@@ -1703,7 +1719,7 @@ class QueryRow implements ItemListener {
 
 class OptionsPanel extends JPanel {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
