@@ -6,15 +6,15 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/02/11 07:09:30 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/01/12 22:43:53 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -337,7 +337,7 @@ class datesPanel extends JPanel {
     String modifier = null;
     Date mod_date = null;
     
-    SimpleDateFormat dateformat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+    SimpleDateFormat dateformat = new SimpleDateFormat();
 
     /* -- */
     
