@@ -11,7 +11,7 @@
    StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -280,7 +280,7 @@ public class DBLog {
 
     // the signature is pre-wrapped
 	
-    message = message + signature;
+    message = message + "\n\n" + signature;
 
     // get our list of recipients from the event's enumerated list of recipients
     // and the event code's address list.
@@ -368,7 +368,7 @@ public class DBLog {
 
 	message = arlut.csd.Util.WordWrap.wrap(message, 78);
 	
-	message = message + signature;
+	message = message + "\n\n" + signature;
 
 	// get our list of recipients
 
@@ -426,9 +426,10 @@ public class DBLog {
    */
 
   public synchronized void logTransaction(Vector logEvents, String adminName, 
-					  Invid admin)
+					  Invid admin, DBEditSet transaction)
   {
     String transactionID;
+    String transdescrip = transaction.description;
     boolean found;
     DBLogEvent event;
     Enumeration enum;
@@ -476,7 +477,7 @@ public class DBLog {
     // write out a start-of-transaction line to the log
 
     new DBLogEvent("starttransaction",
-		   "Start Transaction",
+		   "Start Transaction: " + transdescrip,
 		   admin,
 		   adminName,
 		   objects,
@@ -497,7 +498,7 @@ public class DBLog {
 	// first, if we have a recognizable object-specific event happening,
 	// send out the notification for it.
 
-	sendObjectMail(event);
+	sendObjectMail(event, transdescrip);
 
 	// now, go ahead and add to the mail buffers we are prepping
 	// to describe this whole transaction
@@ -519,7 +520,7 @@ public class DBLog {
     // write out an end-of-transaction line to the log
 
     new DBLogEvent("finishtransaction",
-		   "Finish Transaction",
+		   "Finish Transaction: " + transdescrip,
 		   admin,
 		   adminName,
 		   null,
@@ -534,7 +535,7 @@ public class DBLog {
       {
 	MailOut mailout = (MailOut) enum.nextElement();
 	String description = arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + 
-	  "\n" + signature;
+	  "\n\n" + signature;
 
 	if (debug)
 	  {
@@ -749,7 +750,7 @@ public class DBLog {
    *
    */
 
-  private void sendObjectMail(DBLogEvent event)
+  private void sendObjectMail(DBLogEvent event, String transdescrip)
   {
     if (event == null || event.objects == null || event.objects.size() != 1)
       {
@@ -764,14 +765,19 @@ public class DBLog {
 
     /* -- */
 
-    if (eventRec == null)
-      {
-	return;
-      }
-
     if (debug)
       {
-	System.err.println("DBLog.sendObjectMail(): processing object Event " + eventRec.token);
+	System.err.println("DBLog.sendObjectMail(): processing object Event " + key);
+      }
+
+    if (eventRec == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("DBLog.sendObjectMail(): couldn't find objectEventType " + key);
+	  }
+
+	return;
       }
 
     // ok.  now we've got an objectEventType, so we will want to send out
@@ -813,11 +819,11 @@ public class DBLog {
 	title = "Ganymede: " + eventRec.token;
       }
 
-    String message = eventRec.description + "\n\n" + event.description;
+    String message = transdescrip + "\n\n" + eventRec.description + "\n\n" + event.description;
 
     message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-    message = message + signature;
+    message = message + "\n\n" + signature;
 
     try
       {
@@ -949,6 +955,11 @@ public class DBLog {
 
 	if (!eventBase.getTimeStamp().after(objEventCodesTimeStamp))
 	  {
+	    if (debug)
+	      {
+		System.err.println("updateObjEventCodeHash(): exiting, no work done..");
+	      }
+
 	    return;
 	  }
       }
@@ -991,6 +1002,11 @@ public class DBLog {
     else
       {
 	objEventCodesTimeStamp.setTime(System.currentTimeMillis());
+      }
+
+    if (debug)
+      {
+	System.err.println("updateObjEventCodeHash(): exiting..");
       }
   }
 
@@ -1163,8 +1179,21 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.calculateOwnerAddresses(): returning ");
+	System.err.print("DBLog.calculateOwnerAddresses(): returning ");
+
+	for (int i = 0; i < results.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		System.err.print(", ");
+	      }
+
+	    System.err.print(results.elementAt(i));
+	  }
+
+	System.err.println();
       }
+
 
     return results;
   }
@@ -1192,7 +1221,7 @@ public class DBLog {
       {
 	if (debug)
 	  {
-	    System.err.println("calculateOwnerGroupAddresses(): Couldn't look up owner group " + 
+	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " + 
 			       ownerInvid.toString());
 	  }
 	
@@ -1234,13 +1263,30 @@ public class DBLog {
       {
 	if (debug)
 	  {
-	    System.err.println("calculateOwnerGroupAddresses(): No external mail list defined for owner group " + 
+	    System.err.println("getOwnerGroupAddresses(): No external mail list defined for owner group " + 
 			       ownerInvid.toString());
 	  }
       }
     else
       {
 	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
+      }
+
+    if (debug)
+      {
+	System.err.print("getOwnerGroupAddresses(): returning: ");
+
+	for (int i = 0; i < result.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		System.err.print(", ");
+	      }
+
+	    System.err.print(result.elementAt(i));
+	  }
+
+	System.err.println();
       }
 
     return result;
