@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.265 $
-   Last Mod Date: $Date: 2003/03/12 02:53:05 $
+   Version: $Revision: 1.266 $
+   Last Mod Date: $Date: 2003/07/03 21:36:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.265 $ $Date: 2003/03/12 02:53:05 $
+ * @version $Revision: 1.266 $ $Date: 2003/07/03 21:36:35 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1712,9 +1712,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	ownerInvidItem = (Invid) ownerInvids.elementAt(i);
 
-	// this check is actually redundant, as the InvidDBField link logic
-	// would catch such for us, but it makes a nice couplet with the
-	// getNum() check below, so I'll leave it here.
+	// this check is actually redundant, as the InvidDBField link
+	// logic would catch such for us, but it makes a nice couplet
+	// with the getNum() check below, so I'll leave it here.
 	
 	if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
 	  {
