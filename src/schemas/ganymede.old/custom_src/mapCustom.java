@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,7 +108,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	return false;
       }
 
-    if (fieldID == mapSchema.ENTRIES)
+    if (fieldID == mapSchema.MAPENTRIES)
       {
 	return true;
       }
