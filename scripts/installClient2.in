@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.5 $
-# $Date: 1999/01/21 17:24:59 $
+# $Revision: 1.6 $
+# $Date: 1999/01/29 23:08:52 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -159,7 +159,7 @@ link("$installdir/jars/ganymede.jar", "$installdir/html/hotjava/ganymede.jar"); 
 copy("jars/ganymedeAdmin.jar", "$installdir/jars/ganymedeAdmin.jar"); print ".";
 link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/activator/ganymedeAdmin.jar"); print ".";
 link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/hotjava/ganymedeAdmin.jar"); print ".";
-copy("password/password.jar", "$installdir/jars/password.jar"); print ".";
+copy("jars/password.jar", "$installdir/jars/password.jar"); print ".";
 link("$installdir/jars/password.jar", "$installdir/html/activator/password.jar"); print ".";
 link("$installdir/jars/password.jar", "$installdir/html/hotjava/password.jar"); print ".";
 copydir("password", "$installdir/password"); print ".";
@@ -287,7 +287,7 @@ print "\nCustomizing password client build scripts\n";
 		 "SOURCE" => "$installdir/password",
 		 "CLASSDIR" => "$installdir/password/classes",
 		 "JARDIR" => "$installdir/jars",
-		 "TARGETJAR" => "$installdir/password/password.jar");
+		 "TARGETJAR" => "$installdir/jars/password.jar");
 
 open INPUT, "scripts/passwordconfig.sh.template" or die "Couldn't open password build config template!";
 open OUTPUT, ">$installdir/password/config.sh" or die "Couldn't write password build config";
