@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.168 $
-   Last Mod Date: $Date: 2000/02/11 07:09:29 $
+   Version: $Revision: 1.169 $
+   Last Mod Date: $Date: 2000/02/16 11:31:12 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.168 $ $Date: 2000/02/11 07:09:29 $ $Name:  $
+ * @version $Revision: 1.169 $ $Date: 2000/02/16 11:31:12 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/02/11 07:09:29 $";
+  static String release_date = "$Date: 2000/02/16 11:31:12 $";
   static String release_number = null;
 
   // ---
@@ -336,6 +336,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   private boolean
+    building = false,
     toolToggle = true,
     showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
@@ -353,6 +354,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     ownerGroups = null;  // Vector of owner groups
 
   // Dialog and GUI objects
+
 
   JToolBar 
     toolBar;
@@ -378,12 +380,22 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     commit,
     cancel;
 
+  final JPanel
+    statusPanel = new JPanel(new BorderLayout());
+
   /**
    * Status field at the bottom of the client.
    */
   
   final JTextField
     statusLabel = new JTextField();
+
+  /**
+   * Build status field at the bottom of the client.
+   */
+
+  final JLabel
+    buildLabel = new JLabel();
 
   /**
    * The client's GUI tree component.
@@ -417,6 +429,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     newToolbarIcon,
     ganymede_logo,
     createDialogImage;
+
+  ImageIcon
+    buildIcon, idleIcon;
 
   /**
    * JDesktopPane on the right side of the client's display, contains
@@ -829,6 +844,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
     queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
     cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
+    buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build.gif", getClass()));
+    idleIcon = new ImageIcon(PackageResources.getImageResource(this, "idle.gif", getClass()));
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
@@ -995,10 +1012,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     statusThread = new StatusClearThread(statusLabel);
     statusThread.start();
 
-    JLabel l = new JLabel("Status: ");
+    if (building)
+      {
+	buildLabel.setIcon(buildIcon);
+      }
+    else
+      {
+	buildLabel.setIcon(idleIcon);
+      }
+
     JPanel lP = new JPanel(new BorderLayout());
     lP.setBorder(statusBorder);
-    lP.add("Center", l);
+    lP.add("Center", buildLabel);
 
     bottomBar.add("West", lP);
     bottomBar.add("Center", statusLabel);
@@ -1007,21 +1032,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     mainPanel.add("South", bottomBar);
 
     setStatus("Starting up");
-
-    try
-      {
-	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
-	rv = handleReturnVal(rv);
-
-	if ((rv != null) && (!rv.didSucceed()))
-	  {
-	    throw new RuntimeException("Could not open transaction.");
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not open transaction: " + rx);
-      }
 
     // Since we're logged in and have a session established, create the
     // background loader thread to read in object and field type information
@@ -1094,6 +1104,24 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void start()
   {
+    // open an initial transaction, in case the user doesn't change
+    // personae
+
+    try
+      {
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
+	rv = handleReturnVal(rv);
+
+	if ((rv != null) && (!rv.didSucceed()))
+	  {
+	    throw new RuntimeException("Could not open transaction.");
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not open transaction: " + rx);
+      }
+
     // If user has multiple personas, ask which to start with.
 
     if ((personae != null)  && personae.size() > 1)
@@ -1534,6 +1562,37 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     });
 
     statusThread.setClock(timeToLive);
+  }
+
+  /**
+   * <p>Sets text in the build status bar</p>
+   *
+   * @param status The text to display
+   */
+
+  public final void setBuildStatus(String status)
+  {
+    if (debug)
+      {
+	System.out.println("Setting build status: " + status);
+      }
+
+    building = (status != null) && status.equals("building");
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	if (building)
+	  {
+	    buildLabel.setIcon(buildIcon);
+	  }
+	else
+	  {
+	    buildLabel.setIcon(idleIcon);
+	  }
+
+	buildLabel.validate();
+      }
+    });
   }
 
   /**

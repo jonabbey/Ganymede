@@ -9,18 +9,20 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/10/09 00:59:58 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/02/16 11:31:10 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -69,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.13 $ $Date: 1999/10/09 00:59:58 $ $Name:  $
+ * @version $Revision: 1.14 $ $Date: 2000/02/16 11:31:10 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -367,6 +369,24 @@ public class ClientBase extends UnicastRemoteObject implements Client {
     for (int i = 0; i < listeners.size(); i++)
       {
 	((ClientListener)listeners.elementAt(i)).disconnected(e);
+      }
+  }
+
+  /**
+   * <p>Allows the server to send an asynchronous message to the
+   * client..  Used by the server to tell the client when a build
+   * is/is not being performed on the server.</P> 
+   *
+   * @see arlut.csd.ganymede.Client
+   */
+
+  public synchronized void sendMessage(int messageType, String status)
+  {
+    ClientEvent e = new ClientEvent(messageType, status);
+
+    for (int i = 0; i < listeners.size(); i++)
+      {
+	((ClientListener)listeners.elementAt(i)).messageReceived(e);
       }
   }
 

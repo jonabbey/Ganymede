@@ -8,18 +8,20 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:08 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/02/16 11:31:11 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -57,15 +59,20 @@ package arlut.csd.ganymede.client;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * An event object to pass information from the ClientBase class to
- * users thereof. Currently, this only has support for a message
- * String, but it is here in case we need some other types in there.
- *
+ * <P>An event object to pass information from the {@link
+ * arlut.csd.ganymede.client.ClientBase ClientBase} class to users
+ * thereof. Currently, this only has support for a message String and
+ * integer message type, but it is here in case we need some other
+ * types in there.</P>
  */
 
 public class ClientEvent {
 
+  final public static int ERROR = 0;
+  final public static int BUILDSTATUS = 1;
+
+
+  int type;
   private String message;
 
   /* -- */
@@ -73,6 +80,24 @@ public class ClientEvent {
   public ClientEvent(String message)
   {
     this.message = message;
+    this.type = ERROR;		// this used to be the only kind
+  }
+
+  public ClientEvent(int type, String message)
+  {
+    this.type = type;
+    this.message = message;
+  }
+
+  /**
+   *
+   * Returns the message type for this event.
+   *
+   */
+
+  public int getType()
+  {
+    return type;
   }
 
   /**

@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/10/13 19:59:56 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2000/02/16 11:31:13 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -19,10 +19,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -86,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
+ * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -813,7 +815,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // constructing a JErrorDialog causes it to be shown.
 
-    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
+    if (e.getType() == e.ERROR)
+      {
+	JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
+      }
+    else if (e.getType() == e.BUILDSTATUS)
+      {
+	if (g_client != null)
+	  {
+	    g_client.setBuildStatus(e.getMessage());
+	  }
+      }
   }
 
   /**
@@ -869,7 +881,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
+ * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -962,7 +974,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
+ * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
  * @author Jonathan Abbey
  */
 
