@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Ganymede BSD Customization Build Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+CLASSPATH=${JARDIR}/ganymedeServer.jar:$CLASSDIR
+export CLASSPATH
+
+echo "Compiling BSD Customization files"
+
+cd $SOURCE
+
+$JAVAC -deprecation -d $CLASSDIR *.java
+
+echo "Done"
+
