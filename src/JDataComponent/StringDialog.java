@@ -89,7 +89,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 
   public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel)
   {
-    this(new DialogRsrc(frame, Title, Text, OK, Cancel, null));
+    this(new DialogRsrc(frame, Title, Text, OK, Cancel, (Image) null));
   }
   
 
