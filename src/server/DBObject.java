@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 2001/06/05 07:57:36 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 2001/06/07 17:03:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.127 $ $Date: 2001/06/05 07:57:36 $
+ * @version $Revision: 1.128 $ $Date: 2001/06/07 17:03:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1399,7 +1399,7 @@ public class DBObject implements db_object, FieldType, Remote {
 		continue;
 	      }
 	    
-	    fieldVect.add(field);
+	    fieldVect.addElement(field);
 	  }
       }
 
