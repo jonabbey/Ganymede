@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/03/04 00:55:46 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/03/20 20:47:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -684,7 +684,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
     
 	    if (username != null && signature != null && socSecurity != null && 
-		category != null && category.equals(normalCategory))
+		category != null && category.equals(normalCategory) && !user.isInactivated())
 	      {
 		for (int i = 0; i < socSecurity.length(); i++)
 		  {
@@ -700,7 +700,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    // we've got more than one entry with the same
 		    // social security number.. that should only
-		    // happen if one of the users is an GASH admin.
+		    // happen if one of the users is an GASH admin, or
+		    // if one is inactivated.
 
 		    DBObject oldUser = (DBObject) map.get(socBuffer.toString());
 
