@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -459,17 +459,6 @@ public class GanymedeScheduler extends Thread {
     else
       {
 	handle.enable();
-
-	while (handle.startTime.getTime() < System.currentTimeMillis() &&
-	       handle.reschedule())
-	  {
-	    // we're looping on handle.reschedule() to get the next time
-	    // we're going to run
-	  }
-
-	// let the scheduler know that this task is up for running now
-
-	scheduleTask(handle);
 
 	updateTaskInfo(true);
 	return true;
