@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,9 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
-
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -45,7 +47,7 @@ import java.util.*;
  *
  */
 
-class DBNameSpace {
+class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 
   static boolean debug = true;
 
@@ -59,6 +61,12 @@ class DBNameSpace {
   Hashtable uniqueHash;		// index of values used in the current namespace
   Hashtable reserved;		// index of editSet's currently actively modifying
 				// values in this namespace
+
+  // used during editing
+
+  DBSchemaEdit editor;
+  DBNameSpace original;
+
   /* -- */
 
   // constructors
@@ -69,9 +77,28 @@ class DBNameSpace {
    *
    */
 
-  public DBNameSpace(DataInput in) throws IOException
+  public DBNameSpace(DataInput in) throws IOException, RemoteException
   {
     receive(in);
+    uniqueHash = new GHashtable(caseInsensitive); // size?
+    reserved = new Hashtable();	// size?
+
+    editor = null;
+    original = null;
+  }
+
+  /**
+   *
+   * Copy constructor, used during Schema Editing
+   *
+   */
+
+  public DBNameSpace(DBSchemaEdit editor, DBNameSpace original) throws RemoteException
+  {
+    this.editor = editor;
+    this.original = original;
+    this.name = original.name;
+    this.caseInsensitive = original.caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     reserved = new Hashtable();	// size?
   }
@@ -81,17 +108,21 @@ class DBNameSpace {
    * Create a new DBNameSpace object with specified name and
    * case sensitivity.
    *
+   * @param editor DBSchemaEdit object managing the schema changes, or null if none
    * @param name Name for this name space
    * @param caseInsensitive If true, case is disregarded in this namespace
    *
    */
 
-  public DBNameSpace(String name, boolean caseInsensitive)
+  public DBNameSpace(DBSchemaEdit editor, String name, boolean caseInsensitive) throws RemoteException
   {
+    this.editor = editor;
     this.name = name;
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     reserved = new Hashtable();	// size?
+
+    original = null;
   }
 
   /**
@@ -118,14 +149,70 @@ class DBNameSpace {
     out.writeBoolean(caseInsensitive);
   }
 
-  public String name()
+  /**
+   *
+   * Returns the name of this namespace.
+   *
+   * @see arlut.csd.ganymede.NameSpace
+   */
+
+  public String getName()
   {
     return name;
   }
 
+  /**
+   *
+   * Sets the name of this namespace.  Returns false
+   * if the name is already taken by another namespace
+   *
+   * @see arlut.csd.ganymede.NameSpace
+   */
+
+  public boolean setName(String newName)
+  {
+    // need to make sure this new name isn't in conflict
+    // with existing names
+
+    name = newName;
+    return true;
+  }
+
+  /**
+   *
+   * Returns true if case is to be disregarded in comparing
+   * entries in namespace managed fields.
+   *
+   * @see arlut.csd.ganymede.NameSpace
+   */
+
   public boolean isCaseInsensitive()
   {
     return caseInsensitive;
+  }
+
+  /**
+   *
+   * Turns case sensitivity on/off.  If b is true, case is be
+   * disregarded in comparing entries in namespace managed fields.
+   *
+   * @see arlut.csd.ganymede.NameSpace 
+   */
+
+  public void setInsensitive(boolean b)
+  {
+    if (b == caseInsensitive)
+      {
+	return;
+      }
+
+    // if we are changing our case sensitivity, we need to construct
+    // a new GHashtable of the appropriate case sensitivity and copy
+    // over the old hashtable entries.. this loop should check for
+    // membership before inserting a new value in the case that
+    // we are changing from case insensitivity to case sensitivity
+
+    caseInsensitive = b;
   }
 
   /*----------------------------------------------------------------------------

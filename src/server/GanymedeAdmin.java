@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -299,6 +299,65 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     Ganymede.debug("Database dumped");
 
     return true;
+  }
+
+  /**
+   *
+   * lock the server and edit the schema
+   *
+   */
+
+  public SchemaEdit editSchema()
+  {
+    Enumeration enum;
+    DBObjectBase base;
+
+    /* -- */
+
+    Ganymede.debug("entering editSchema");
+
+    synchronized (Ganymede.db)
+      {
+	Ganymede.debug("entering editSchema synchronization block");
+
+	 if (Ganymede.db.schemaEditInProgress)
+	   {
+	     Ganymede.debug("Can't edit Schema, edit already in progress. ");
+	     return null;
+	   }
+
+	 Ganymede.debug("Schema edit not in progress");
+
+	 enum = Ganymede.db.objectBases.elements();
+
+	 if (enum != null)
+	   {
+	     while (enum.hasMoreElements())
+	       {
+		 base = (DBObjectBase) enum.nextElement();
+		 if (base.currentLock != null)
+		   {
+		     Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
+		     return null;
+		   }
+	       }
+	   }
+
+	 // should be okay
+
+	 Ganymede.db.schemaEditInProgress = true;
+
+	 Ganymede.debug("Ok to create DBSchemaEdit");
+
+	 try
+	   {
+	     return new DBSchemaEdit(admin);
+	   }
+	 catch (RemoteException ex)
+	   {
+	     return null;
+	   }
+      }
   }
 
   // This is a private convenience function, it's purpose is to clean out
