@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.80 $ %D%
+   Version: $Revision: 1.81 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2654,11 +2654,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!getPerm(vObj).isDeletable())
       {
-	setLastError("Don't have permission to inactivate object" + vObj.getLabel());
+	setLastError("Don't have permission to inactivate " + 
+		     vObj.getTypeName() + " " + vObj.getLabel());
 
 	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-					  "Don't have permission to inactivate object" +
-					  vObj.getLabel());
+					  "Don't have permission to inactivate " +
+					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
     eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
