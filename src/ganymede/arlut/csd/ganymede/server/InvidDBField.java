@@ -496,8 +496,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    xmlOut.attribute("oid", invid.toString());
 
-	    String extras[] = ((DBEditObject) getOwner()).getForeignSyncKeys(invid, getOwner(),
-									     target, xmlOut.getSyncChannelName());
+	    DBEditObject hook = getOwner().getBase().getObjectHook();
+
+	    String extras[] = hook.getForeignSyncKeys(invid, getOwner(),
+						      target, xmlOut.getSyncChannelName());
 
 	    if (extras != null && extras.length > 0)
 	      {
