@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -40,10 +40,8 @@ public class DBEditSet {
 
   static final boolean debug = true;
 
-  Vector 
-    objectsChanged = null, 
-    objectsCreated = null, 
-    objectsDeleted = null;
+  Vector
+    objects = null;
 
   Hashtable basesModified;
 
@@ -64,82 +62,70 @@ public class DBEditSet {
   {
     this.session = session;
     this.dbStore = dbStore;
-    objectsChanged = new Vector();
-    objectsCreated = new Vector();
-    objectsDeleted = new Vector();
+    objects = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
   }
 
   /**
    *
-   * Method to associate a newly created object with this
-   * transaction.  If a created object is not associated with
-   * a transaction, it cannot be integrated into the DBStore
-   * object hash.
+   * Method to find a DBObject / DBEditObject if it has
+   * previously been checked out to this EditSet in some
+   * fashion.
+   *
+   */
+
+  public synchronized DBObject findObject(DBObject object)
+  {
+    return findObject(object.getInvid());
+  }
+
+  /**
+   *
+   * Method to find a DBObject / DBEditObject if it has
+   * previously been checked out to this EditSet in some
+   * fashion.  This method is used to allow consistency
+   * check code in the DBEditObjects to get a transaction
+   * consistent view of the system as it stands with the
+   * transaction's changes made.
+   *
+   */
+
+  public synchronized DBObject findObject(Invid invid)
+  {
+    Enumeration enum;
+    DBObject obj;
+
+    /* -- */
+
+    enum = object.elements();
+
+    while (enum.hasMoreElements())
+      {
+	obj = (DBObject) enum.nextElement();
+	if (obj.getInvid().equals(invid))
+	  {
+	    return obj;
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   *
+   * Method to associate a DBEditObject with this transaction.
    *
    * @param object The newly created DBEditObject.
    *
    */
 
-  public synchronized void addCreatedObject(DBEditObject object)
+  public synchronized void addObject(DBEditObject object)
   {
-    if (!objectsCreated.contains(object))
+    if (!objects.contains(object))
       {
-	objectsCreated.addElement(object);
+	objects.addElement(object);
 
 	// just need something to mark the slot in the hash table,
-	basesModified.put(object.objectBase, this);	
-      }
-  }
-
-  /**
-   *
-   * Method to associate a shadow object pulled from the DBStore with
-   * this transaction.  If a shadow object is not associated with a
-   * transaction, it cannot be re-integrated into the DBStore object
-   * hash.
-   *
-   * @param object A shadow created from a DBObject.
-   *
-   * @see csd.DBStore.DBObject
-   * 
-   */
-
-  public synchronized void addChangedObject(DBEditObject object)
-  {
-    if (!objectsChanged.contains(object))
-      {
-	objectsChanged.addElement(object);
-
-	// just need something to mark the slot in the hash table,
-	basesModified.put(object.objectBase, this);	
-      }
-  }
-
-  /**
-   *
-   * <p>Method to associate an object marked for deletion (via
-   * DBObject.  mark()) with this transaction.  It is an error to mark
-   * an object for deletion and not then record that fact in a
-   * transaction with addDeletedObject().</p>
-   *
-   * <p>The object recorded as deleted in care of this transaction
-   * will only be deleted if this transaction is committed.</p>
-   *
-   * @param object The DBObject marked for death by this transaction.
-   *
-   * @see csd.DBStore.DBObject#markAsDeleted()
-   * @see csd.DBStore.DBObject
-   *  
-   */
-
-  public synchronized void addDeletedObject(DBObject object)
-  {
-    if (!objectsDeleted.contains(object))
-      {
-	objectsDeleted.addElement(object);
-
-	// just need something to mark the slot in the  hash table,
 	basesModified.put(object.objectBase, this);	
       }
   }
@@ -169,7 +155,12 @@ public class DBEditSet {
 
     if (debug)
       {
-	System.err.println("DBEditSet.commit(): entering");
+	System.err.println(session.key + ": DBEditSet.commit(): entering");
+      }
+
+    if (objects == null)
+      {
+	throw new RuntimeException("already committed or released");
       }
 
     baseSet = new Vector();
@@ -182,21 +173,39 @@ public class DBEditSet {
 
     if (debug)
       {
-	System.err.println("DBEditSet.commit(): acquiring write lock");
+	System.err.println(session.key + ": DBEditSet.commit(): acquiring write lock");
       }
 
     wLock = new DBWriteLock(dbStore, baseSet);
-
+    
     if (debug)
       {
-	System.err.println("DBEditSet.commit(): created write lock");
+	System.err.println(session.key + ": DBEditSet.commit(): created write lock");
       }
 
-    wLock.establish(session);	// wait for write lock
+    wLock.establish(session.key);	// wait for write lock
+
+    // This yield is here to allow me to verify that the locking logic
+    // works properly.
+
+    Thread.yield();
 
     if (debug)
       {
-	System.err.println("DBEditSet.commit(): established write lock");
+	System.err.println(session.key + ": DBEditSet.commit(): established write lock");
+      }
+
+    // verify phase one of our commit protocol
+
+    for (int i = 0; i < objects.size(); i++)
+      {
+	eObj = (DBEditObject) objects.elementAt(i);
+
+	if (!eObj.commitPhase1())
+	  {
+	    release();
+	    return false;
+	  }
       }
 
     // write this transaction out to the Journal
@@ -215,46 +224,51 @@ public class DBEditSet {
 	// the transaction, we are probably out of space on the filesystem
 	// with the journal/dbstore file.
 
+	// log this condition somehow
+
 	release();
 	return false;
       }
 
-    // and make the changes in our in-memory hashes.
+    // phase one complete, go ahead and have all our
+    // objects do their 2nd level commit processes
 
-    for (int i = 0; i < objectsCreated.size(); i++)
+    for (int i = 0; i < objects.size(); i++)
       {
-	eObj = (DBEditObject) objectsCreated.elementAt(i);
+	eObj = (DBEditObject) objects.elementAt(i);
+
+	eObj.commitPhase2();
+      }
+
+    // and make the changes in our in-memory hashes..
+
+    // create new, non-editable versions of our newly created objects
+    // and insert them into the appropriate slots in our DBStore
+
+    for (int i = 0; i < objects.size(); i++)
+      {
+	eObj = (DBEditObject) objects.elementAt(i);
 
 	base = eObj.objectBase;
 
 	// Create a new DBObject from our DBEditObject and insert
 	// into the object hash
 
-	base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
-      }
+	switch (eObj.getStatus())
+	  {
+	  case DBEditObject.CREATING:
+	  case DBEditObject.EDITING:
+	    base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+	    break;
 
-    for (int i = 0; i < objectsChanged.size(); i++)
-      {
-	eObj = (DBEditObject) objectsChanged.elementAt(i);
+	  case DBEditObject.DELETING:
+	    base.objectHash.remove(new Integer(obj.id));	    
+	    break;
 
-	base = eObj.objectBase;
-
-	// Create a new DBObject from our DBEditObject and insert
-	// into the object hash.  This unlinks our old DBObject
-	// from the hash, making it available for garbage collection
-	// and freeing us from having to worry about it's shadow
-	// object field.
-
-	base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
-      }
-
-    for (int i = 0; i < objectsDeleted.size(); i++)
-      {
-	obj = (DBObject) objectsDeleted.elementAt(i);
-
-	base = obj.objectBase;
-
-	base.objectHash.remove(new Integer(obj.id));
+	  case DBEditObject.DROPPING:
+	    // just forget about it
+	    break;
+	  }
       }
 
     // confirm all namespace modifications associated with this editset
@@ -268,9 +282,9 @@ public class DBEditSet {
 
     wLock.release();
 
-    objectsCreated = null;
-    objectsChanged = null;
-    objectsDeleted = null;
+    // null our vector to speed GC
+
+    objects = null;
 
     return true;
   }
@@ -292,19 +306,35 @@ public class DBEditSet {
 
   public synchronized void release()
   {
-    while (objectsCreated.size() > 0)
+    DBEditObject eObj;
+
+    /* -- */
+
+    if (objects == null)
       {
-	releaseCreatedObject((DBEditObject) objectsCreated.firstElement());
+	throw new RuntimeException("already committed or released");
       }
 
-    while (objectsChanged.size() > 0)
+    while (objects.size() > 0)
       {
-	releaseChangedObject((DBEditObject) objectsChanged.firstElement());
-      }
+	eObj = (DBEditObject) objects.firstElement();
+	eObj.release();
+	
+	switch (eObj.getStatus())
+	  {
+	  case DBEditObject.CREATING:
+	  case DBEditObject.DROPPING:
+	    break;
 
-    while (objectsDeleted.size() > 0)
-      {
-	releaseDeletedObject((DBEditObject) objectsDeleted.firstElement());
+	  case DBEditObject.EDITING:
+	  case DBEditObject.DELETING:
+	    if (!eObj.original.clearShadow(this))
+	      {
+		throw new RuntimeException("editset ownership synchronization error");
+	      }
+	    break;
+	  }
+	objects.removeElement(eObj);
       }
 
     basesModified.clear();
@@ -315,54 +345,7 @@ public class DBEditSet {
       {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).abort(this);
       }
+
+    objects = null;
   }
-
-  /*--------------------------------------------------------------------
-    
-    private convenience methods
-
-    note that in the release methods, we don't clear anything out of
-    the basesModified hash.  It's not worth keeping track of whether
-    or not a given object was the only object in the editset that was
-    part of the DBObjectBase in question.
-
-    These are private because they don't handle the namespace
-    implications of releasing a modified object from the transaction.
-
-    For the time being, we don't allow an object to be taken out of
-    a transaction without aborting the whole transaction.
-
-  --------------------------------------------------------------------*/
-
-  private synchronized void releaseCreatedObject(DBEditObject object)
-  {
-    objectsCreated.removeElement(object);
-  }
-
-  private synchronized void releaseChangedObject(DBEditObject object)
-  {
-    if (objectsChanged.contains(object))
-      {
-	objectsChanged.removeElement(object);
-	if (!object.original.clearShadow(this))
-	  {
-	    throw new RuntimeException("editset ownership synchronization error");
-	  }
-      }
-
-    object.original.shadowObject = null;
-  }
-
-  private synchronized void releaseDeletedObject(DBObject object)
-  {
-    if (objectsDeleted.contains(object))
-      {
-	objectsDeleted.removeElement(object);
-	if (!object.clearDeletionMark(this))
-	  {
-	    throw new RuntimeException("editset ownership synchronization error");
-	  }
-      }
-  }
-
 }
