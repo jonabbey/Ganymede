@@ -7,10 +7,10 @@
    
    Created: 8 September 1998
 
-   Last Mod Date: $Date: 2004-12-07 22:22:12 -0600 (Tue, 07 Dec 2004) $
-   Last Revision Changed: $Rev: 5915 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: http://db1.arlut.utexas.edu/svn/ganymede/trunk/userKit/src/userKit/arlut/csd/ganymede/userKit/UNIXBuilderTask.java $
+   Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin.
 
    Contact information
