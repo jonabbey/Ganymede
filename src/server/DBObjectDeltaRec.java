@@ -12,7 +12,7 @@
    changes made to vector fields in a non-exclusive check-out context.
    
    Created: 11 June 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,6 +22,7 @@ package arlut.csd.ganymede;
 
 import java.util.*;
 import java.io.*;
+import java.rmi.RemoteException;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -72,9 +73,9 @@ public class DBObjectDeltaRec implements FieldType {
 					   ((newObj == null) ? " new " : ""));
       }
 
-    if (oldObj.getTypeID() != newObj.getTypeID())
+    if (!oldObj.getInvid().equals(newObj.getInvid()))
       {
-	throw new IllegalArgumentException("Old and New object types don't match");
+	throw new IllegalArgumentException("Old and New object id's don't match");
       }
 
     /* - */
@@ -156,7 +157,8 @@ public class DBObjectDeltaRec implements FieldType {
 
 	// ok.. at this point, we've got a vector and we need to compute
 	// what has been added and what has been taken away from the
-	// original vector.
+	// original vector... best way to do that is to use a couple
+	// of hashes so we can do this in linear time
 
 	fieldDeltaRec deltaRec = new fieldDeltaRec(fieldDef.getID());
 
@@ -164,11 +166,31 @@ public class DBObjectDeltaRec implements FieldType {
 	Vector newValues = currentField.values;
 	Object compareValue;
 
+	Hashtable oldHash = new Hashtable(oldValues.size()+1, 1.0f);
+
 	for (int i = 0; i < oldValues.size(); i++)
 	  {
 	    compareValue = oldValues.elementAt(i);
 
-	    if (!newValues.contains(compareValue))
+	    oldHash.put(compareValue, compareValue);
+	  }
+
+	Hashtable newHash = new Hashtable(newValues.size()+1, 1.0f);
+
+	for (int i = 0; i < newValues.size(); i++)
+	  {
+	    compareValue = newValues.elementAt(i);
+
+	    newHash.put(compareValue, compareValue);
+	  }
+
+	// and do the compare
+
+	for (int i = 0; i < oldValues.size(); i++)
+	  {
+	    compareValue = oldValues.elementAt(i);
+
+	    if (!newHash.containsKey(compareValue))
 	      {
 		deltaRec.delValue(compareValue);
 	      }
@@ -177,8 +199,8 @@ public class DBObjectDeltaRec implements FieldType {
 	for (int i = 0; i < newValues.size(); i++)
 	  {
 	    compareValue = newValues.elementAt(i);
-
-	    if (!oldValues.contains(compareValue))
+	    
+	    if (!oldHash.containsKey(compareValue))
 	      {
 		deltaRec.addValue(compareValue);
 	      }
@@ -371,6 +393,80 @@ public class DBObjectDeltaRec implements FieldType {
   public DBObjectDeltaRec(DBSession owner, DBObject original)
   {
     this.owner = owner;
+    this.invid = original.getInvid();
+  }
+
+  /**
+   *
+   * This method is used to add a value to a field vector
+   * when this DBObjectDeltaRec was created for a non-exclusive
+   * vector field edit.
+   *
+   */
+
+  public void addVecValue(short fieldcode, Object value)
+  {
+    if (owner == null)
+      {
+	throw new IllegalArgumentException("This DBObjectDeltaRec wasn't created for a vector edit");
+      }
+
+    /* - */
+
+    fieldDeltaRec fieldRec;
+
+    /* -- */
+
+    fieldRec = getFieldRec(fieldcode);
+    fieldRec.addValue(value);
+  }
+
+  /**
+   *
+   * This method is used to remove a value from a field vector
+   * when this DBObjectDeltaRec was created for a non-exclusive
+   * vector field edit.
+   *
+   */
+
+  public void delVecValue(short fieldcode, Object value)
+  {
+    if (owner == null)
+      {
+	throw new IllegalArgumentException("This DBObjectDeltaRec wasn't created for a vector edit");
+      }
+
+    /* - */
+
+    fieldDeltaRec fieldRec;
+
+    /* -- */
+
+    fieldRec = getFieldRec(fieldcode);
+    fieldRec.delValue(value);
+  }
+
+  private fieldDeltaRec getFieldRec(short fieldcode)
+  {
+    fieldDeltaRec result;
+
+    /* -- */
+
+    for (int i = 0; i < fieldRecs.size(); i++)
+      {
+	result = (fieldDeltaRec) fieldRecs.elementAt(i);
+
+	if (result.fieldcode == fieldcode)
+	  {
+	    return result;
+	  }
+      }
+
+    result = new fieldDeltaRec(fieldcode);
+
+    fieldRecs.addElement(result);
+
+    return result;
   }
 
   /**
@@ -478,6 +574,139 @@ public class DBObjectDeltaRec implements FieldType {
 		      }
 		  }
 	      }
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method takes an object in its original state, and returns a
+   * new copy of the object with the changes emboddied in this
+   * DBObjectDeltaRec applied to it.
+   *
+   */
+
+  public DBObject applyDelta(DBObject original)
+  {
+    if (!original.getInvid().equals(invid))
+      {
+	throw new IllegalArgumentException("Error, object identity mismatch");
+      }
+
+    /* - */
+
+    DBObject copy;
+    fieldDeltaRec fieldRec;
+
+    /* -- */
+
+    try
+      {
+	copy = new DBObject(original, null);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Error, RMI system failure: " + ex.getMessage());
+      }
+
+    // now process the fieldDeltaRec's.
+
+    for (int i = 0; i < fieldRecs.size(); i++)
+      {
+	fieldRec = (fieldDeltaRec) fieldRecs.elementAt(i);
+
+	// are we clearing this field?
+
+	if (!fieldRec.vector && fieldRec.scalarValue == null)
+	  {
+	    copy.fields.removeNoSync(fieldRec.fieldcode);
+
+	    continue;
+	  }
+
+	// are we doing a replace?
+
+	if (!fieldRec.vector)
+	  {
+	    fieldRec.scalarValue.setOwner(copy);
+	    copy.fields.putNoSync(fieldRec.scalarValue);
+
+	    continue;
+	  }
+
+	// ok, we must be doing a vector mod
+
+	// remember that we are intentionally bypassing the DBField's
+	// add/remove logic, as we assume that this DBObjectDeltaRec
+	// was generated as a result of a properly checked operation.
+
+	// Also, since we know that only string, invid, and IP fields
+	// can be vectors, we don't have to worry about the password
+	// and permission matrix special-case logic.
+
+	DBField field = (DBField) copy.getField(fieldRec.fieldcode);
+
+	for (int j = 0; j < fieldRec.addValues.size(); j++)
+	  {
+	    field.values.addElement(fieldRec.addValues.elementAt(j));
+	  }
+
+	for (int j = 0; j < fieldRec.delValues.size(); j++)
+	  {
+	    field.values.removeElement(fieldRec.delValues.elementAt(j));
+	  }
+      }
+
+    return copy;
+  }
+
+  /**
+   *
+   * This method is used when an object that was checked out for
+   * shared editing is being converted to an exclusive edit.
+   *
+   * Note that this method is only intended to do vector ops.
+   *
+   */
+
+  public void updateObject(DBEditObject eObj)
+  {
+    fieldDeltaRec fieldRec = null;
+
+    /* -- */
+
+    for (int i = 0; i < fieldRecs.size(); i++)
+      {
+	fieldRec = (fieldDeltaRec) fieldRecs.elementAt(i);
+	
+	// are we clearing this field?
+	
+	if (!fieldRec.vector && fieldRec.scalarValue == null)
+	  {
+	    throw new RuntimeException("Error, field clearing record updating object");
+	  }
+
+	// are we doing a replace?
+
+	if (!fieldRec.vector)
+	  {
+	    throw new RuntimeException("Error, field replace record updating object");
+	  }
+
+	// ok, good, we're doing a vector mod.. note that if we've
+	// gotten to this point, we're assuming that we've already
+	// been ok'ed for this
+
+	DBField field = (DBField) eObj.getField(fieldRec.fieldcode);
+
+	for (int j = 0; j < fieldRec.addValues.size(); j++)
+	  {
+	    field.values.addElement(fieldRec.addValues.elementAt(j));
+	  }
+
+	for (int j = 0; j < fieldRec.delValues.size(); j++)
+	  {
+	    field.values.removeElement(fieldRec.delValues.elementAt(j));
 	  }
       }
   }
