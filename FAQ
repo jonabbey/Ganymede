@@ -175,6 +175,12 @@ at all?  Where does it break?  Ask questions, send mail to the
 Ganymede mailing list (ganymede@arlut.utexas.edu).  Code development
 is like a child's brain, it needs input.
 
+   If you haven't seen it, look on the Ganymede web page
+(http://www.arlut.utexas.edu/gash2/) for the 1998 LISA paper we wrote
+on Ganymede.  It provides a very good conceptual and technical
+overview.  It's not so good as an operational manual, but we're
+struggling to get more operational documentation written.
+
 9) How can I help?
 
    Send in bug reports and success reports, to
@@ -184,3 +190,8 @@ issue, it's likely people on the list will be interested and have
 something to say about it as well.
 
    For the feedback is the life.
+
+10) Where's the Ganymede web site?
+
+    http://www.arlut.utexas.edu/gash2/
+
