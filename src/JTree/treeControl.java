@@ -27,7 +27,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.4 $ %D%
+  Version: $Revision: 1.5 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import com.sun.java.swing.*;
  * an outline display.  </p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.4 $ %D%
+ * @version $Revision: 1.5 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -72,7 +72,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   public static final int DRAG_ICON = 1;
   public static final int DRAG_LINE = 2;
 
-  /* - */
+  // ---
 
   // general tree datastructures
 
@@ -2035,14 +2035,13 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     row = (e.getY() + v_offset) / ctrl.row_height;
 
-    if (drawLine)
-      {
-	ctrl.dCallback.dragLineRelease(ctrl.dragNode, ctrl.dragAboveNode, ctrl.dragBelowNode);
-      }
-
     if (dragSelected)
       {
 	ctrl.dCallback.iconDragDrop(ctrl.dragNode, ctrl.dragOverNode);
+      }
+    else if (drawLine)
+      {
+	ctrl.dCallback.dragLineRelease(ctrl.dragNode, ctrl.dragAboveNode, ctrl.dragBelowNode);
       }
 
     drawLine = false;
@@ -2102,7 +2101,10 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     row = (e.getY() + v_offset) / ctrl.row_height;
 
-    //    System.err.println("Dragging over row " + row);
+    if (debug)
+      {
+	System.err.println("Dragging over row " + row);
+      }
 
     try
       {
@@ -2122,8 +2124,10 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	return;
       }
 
-    //    System.err.println("Dragging over Node: " + n.getText()); 
-
+    if (debug)
+      {
+	System.err.println("Dragging over Node: " + n.getText()); 
+      }
     
     // **
     //   Check for drag start
@@ -2211,6 +2215,25 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 		
 		ctrl.oldNode = n;
 	      }
+	    else
+	      {
+		if (dragSelected)
+		  {
+		    if (debug)
+		      {
+			System.err.println("** still dragging over selected node " + n.getText());
+		      }
+
+		    drawLine = false;
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.err.println("** still dragging over unselected node " + n.getText());
+		      }
+		  }
+	      }
 	  }
 
 	// okay, we've done determinations on dragging the icon onto a row
@@ -2244,7 +2267,6 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 		      {
 			System.err.println("belowNode is " + belowNode.getText());
 		      }
-		    
 		  }
 		catch (ArrayIndexOutOfBoundsException ex)
 		  {
@@ -2296,6 +2318,7 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	      {
 		System.err.println("hiBound for node " + n.getText() + " is " + hiBound);
 		System.err.println("loBound for node " + n.getText() + " is " + loBound);
+		System.err.println("(spriteLoc.y == " + spriteLoc.y + ")");
 	      }
 
 	    if (!dragSelected ||
@@ -2303,6 +2326,15 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	      {
 		if (debug)
 		  {
+		    if (dragSelected)
+		      {
+			System.err.println("dragSelected is true.. mixed mode check");
+		      }
+		    else
+		      {
+			System.err.println("dragSelected is false.. just tweening");
+		      }
+
 		    System.err.println("Checking for dragLineTween");
 		  }
 
@@ -2314,7 +2346,7 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 		      }
 
 		    drawLine = true;
-		    dragSelected = false;
+		    //		    dragSelected = false;
 
 		    if (ctrl.dragOverNode != null)
 		      {
