@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.84 $ %D%
+    Version: $Revision: 1.85 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2458,19 +2458,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // ss is canChoose, mustChoose
     JPopupMenu invidTablePopup = new JPopupMenu();
-    JMenuItem editO = new JMenuItem("Edit object");
     JMenuItem viewO = new JMenuItem("View object");
+    JMenuItem editO = new JMenuItem("Edit object");
     JMenuItem createO = new JMenuItem("Create new Object");
-    invidTablePopup.add(editO);
     invidTablePopup.add(viewO);
+    invidTablePopup.add(editO);
     invidTablePopup.add(createO);
     
     JPopupMenu invidTablePopup2 = new JPopupMenu();
-    JMenuItem editO2 = new JMenuItem("Edit object");
     JMenuItem viewO2 = new JMenuItem("View object");
+    JMenuItem editO2 = new JMenuItem("Edit object");
     JMenuItem createO2 = new JMenuItem("Create new Object");
-    invidTablePopup2.add(editO2);
     invidTablePopup2.add(viewO2);
+    invidTablePopup2.add(editO2);
     invidTablePopup2.add(createO2);
 
     if (debug)
