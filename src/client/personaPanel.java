@@ -1,12 +1,15 @@
 /*
- personaPanel.java
 
- a panel for handling User's personae.
- 
- Module by: Mike Mulvaney
- Created: 10/6/97
+   personaPanel.java
 
- */
+   a panel for handling User's personae.
+   
+   Created: 6 October 1997
+   Version: $Revision: 1.18 $ %D%
+   Module By: Mike Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -21,9 +24,15 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    personaPanel
+
+------------------------------------------------------------------------------*/
+
 public class personaPanel extends JPanel implements ActionListener, ChangeListener{
   
-  boolean debug = true;
+  boolean debug = false;
 
   framePanel
     fp;
@@ -100,6 +109,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     // Create the middle, content pane
     middle = new JTabbedPane(JTabbedPane.TOP);
+
     JPanel middleP = new JPanel(new BorderLayout());
     middleP.setBorder(new TitledBorder("Personas"));
     middleP.add("Center", middle);
@@ -121,15 +131,18 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
       {
 	personaContainer pc = null;
 	boolean thisOneEditable = false;
+
 	try
 	  {
 	    thisOneEditable = editable && field.isEditable();
 
 	    Invid thisInvid = (Invid)personas.elementAt(i);
+
 	    if (thisOneEditable)
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(thisInvid));
 		db_object ob = rv.getObject();
+
 		if (ob == null)
 		  {
 		    if (debug)
@@ -158,6 +171,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
 		db_object ob = rv.getObject();
+
 		if (ob == null)
 		  {
 		    System.out.println("Whoa, got a null object(view), skipping.");
@@ -181,9 +195,6 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	Thread t = new Thread(pc);
 	t.start();
-
-	
-
       }
 
     // Show the first one(will just be a progress bar for now)
@@ -228,8 +239,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    gc.somethingChanged();
 	    
 	    // Tell the user about the persona
+
 	    fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
+
 	    // Tell the persona about the user
+
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
 	    
 	    personaContainer pc = new personaContainer(newObject.getInvid(), index, editable, this, newObject);
@@ -240,8 +254,6 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    panels.put(new Integer(index), pc);
 	    //Thread t = new Thread(pc);
 	    //t.start();
-
-
 
 	    pc.waitForLoad();
 	    
@@ -265,7 +277,6 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  }
 
 	gc.setNormalCursor();
-
       }
     else if (e.getActionCommand().equals("Delete"))
       {
@@ -274,13 +285,19 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	boolean deleted = false;
 
 	personaContainer pc = (personaContainer)panels.get(new Integer(middle.getSelectedIndex()));
+
 	Invid invid = pc.getInvid();
 
-	if (invid == null) {
-	  throw new NullPointerException("invid is null");
-	}
+	if (invid == null) 
+	  {
+	    throw new NullPointerException("invid is null");
+	  }
 
-	StringDialog d = new StringDialog(gc, "Confirm deletion", "Are you sure you want to delete persona " + middle.getTitleAt(middle.getSelectedIndex()) + "?", true);
+	StringDialog d = new StringDialog(gc, 
+					  "Confirm deletion",
+					  "Are you sure you want to delete persona " + 
+					  middle.getTitleAt(middle.getSelectedIndex()) + "?",
+					  true);
 
 	gc.setNormalCursor();
 
@@ -290,6 +307,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      {
 		System.out.println("Cancelled.");
 	      }
+
 	    return;
 	  }
 
@@ -355,9 +373,14 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	if (deleted && removed)
 	  {
-	    System.out.println("Selected number: " + middle.getSelectedIndex());
-	    System.out.println("Deleting number: " + pc.index);
+	    if (debug)
+	      {
+		System.out.println("Selected number: " + middle.getSelectedIndex());
+		System.out.println("Deleting number: " + pc.index);
+	      }
+
 	    middle.removeTabAt(pc.index);
+
 	    //middle.invalidate();
 	    //validate();
 	  }
@@ -370,13 +393,13 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  }
 	
 	gc.setNormalCursor();
-
       }
   }
 
   public void stateChanged(ChangeEvent e)
   {
     personaContainer pc = (personaContainer)middle.getSelectedComponent();
+
     if (delete != null)
       {
 	delete.setEnabled(pc.isEditable());
@@ -392,11 +415,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 /**
  * Make sure you add this tab to a JTabbedPane BEFORE you call run()!
- *
  */
+
 class personaContainer extends JScrollPane implements Runnable{
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
   
   boolean loaded = false;
 
@@ -425,7 +448,6 @@ class personaContainer extends JScrollPane implements Runnable{
   db_object object;
 
   /* -- */
-
 
   public personaContainer(Invid invid, int index, boolean editable, personaPanel pp, db_object object)
   {
@@ -465,6 +487,7 @@ class personaContainer extends JScrollPane implements Runnable{
     try
       {
 	String label = object.getLabel();
+
 	if ((label != null) && (!label.equals("null")))
 	  {
 	    pp.middle.setTitleAt(index, label);
@@ -502,7 +525,7 @@ class personaContainer extends JScrollPane implements Runnable{
   {
     long startTime = System.currentTimeMillis();
 
-    while (! loaded)
+    while (!loaded)
       {
 	try
 	  {
@@ -515,7 +538,8 @@ class personaContainer extends JScrollPane implements Runnable{
 
 	    if (System.currentTimeMillis() - startTime > 200000)
 	      {
-		System.out.println("Something went wrong loading the persona panel.  The wait for load thread was taking too long, so I gave up on it.");
+		System.out.println("Something went wrong loading the persona panel. " +
+				   " The wait for load thread was taking too long, so I gave up on it.");
 		break;
 	      }
 	  }
