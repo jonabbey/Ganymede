@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.81 $ %D%
+    Version: $Revision: 1.82 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -911,7 +911,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    boolean mustChoose = sf.mustChoose();
 
-
 	    String currentValue = (String) sf.getValue();
 
 	    if (!mustChoose || currentValue == null)
@@ -926,6 +925,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    cb.setModel(new DefaultComboBoxModel(labels));
 	    cb.setSelectedItem(currentValue);
+
+	    if (debug)
+	      {
+		System.err.println("setting currentvalue in JComboBox to " + currentValue);
+	      }
 
 	    // put us back on as an item listener so we are live for updates
 	    // from the user again
@@ -949,7 +953,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (debug)
 	      {
-		println("Updating the combo box.");
+		println("Updating the InvidChooser.");
 	      }
 	      
 	    // First we need to rebuild the list of choices
@@ -1017,11 +1021,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // reset the combo box.
 
 	    Invid currentValue = (Invid) invf.getValue();
+	    String currentLabel = invf.getValueString();
+	    listHandle currentValueHandle = new listHandle(currentLabel, currentValue);
 	    listHandle currentHandle = null;
 
 	    if (debug)
 	      {
 		System.err.println("containerPanel.updateComponent(): updating invid chooser combo box");
+		System.err.println("containerPanel.updateComponent(): searching for value " + currentValue);
 	      }
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
@@ -1037,6 +1044,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    currentHandle = null;
 		  }
 	      }
+
+	    // in many cases, the list of choices may not include the
+	    // current value held in an invid field.  In this case,
+	    // we need to synthesize a handle for the current value
+
+	    if (currentHandle == null && currentValue != null)
+	      {
+		choiceHandles.addElement(currentValueHandle);
+		currentHandle = currentValueHandle;
+	      }
+
+	    // now we need to decide whether we should allow the user
+	    // to set this field back to the <none> selection.
 
 	    mustChoose = invf.mustChoose();
 
@@ -1057,6 +1077,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    else
 	      {
 		chooser.setVectorContents(choiceHandles, currentHandle);
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("setting currentvalue in JInvidChooser to " + currentHandle);
 	      }
 
 	    // put us back on as an item listener so we are live for updates
@@ -1103,9 +1128,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		println("Updating JIPField.");
 	      }
-	    
-	    ((JIPField)comp).setValue((Byte[]) field.getValue());
 
+	    ((JIPField)comp).setValue((Byte[]) field.getValue());
 	  }
 	else 
 	  {
@@ -1116,9 +1140,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	throw new RuntimeException("Could not check visibility in updateComponent: " + rx);
       }
-    
   }
-
 
   public void updateStringStringSelector(StringSelector ss, string_field field) throws RemoteException
   {
