@@ -6,7 +6,7 @@
   <BODY BGCOLOR="#FFFFFF">
 
     <IMG SRC="ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede">
-    <H1><FONT FACE="Arial,Helvetica">DBEditObject Subclass Customization Guide</FONT></H1>
+    <H1><FONT FACE="Arial,Helvetica">DBEditObject Subclass Customization Guide<br>Ganymede Release 2.0dev - ? ? 2005<br/>$Rev: 6254 $</FONT></H1>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -90,12 +90,12 @@
 
     <p>
       When the Ganymede server package has been installed, you will
-      see a 'schema' directory under the installation directory.
-      Under that is a 'custom_src' directory.  This directory contains
-      build scripts 'build' and 'buildCustomJar' and, if you chose one
-      of the pre-configured schema, it will contain a set of
-      <b>.java</b> files.  These files are the source code for classes
-      that fit into three general categories:
+      typically see a 'schema' directory under the installation
+      directory.  Under that is a 'custom_src' directory.  This
+      directory contains build scripts 'build' and 'buildCustomJar'
+      and, if you chose one of the pre-configured schema, it will
+      contain a set of <b>.java</b> files.  These files are the source
+      code for classes that fit into three general categories:
     </p>
       
     <ul>
@@ -160,8 +160,9 @@
       the 'Edit Schema' menu item.  Once the schema editor window
       appears, click on the object type you want to manage with your
       new class, and enter the fully qualified name (package name and
-      class name) of the class in the 'Class name:' field, as shown
-      below.
+      class name) of the class in the 'Name' box in the 'Class
+      Information' field, as shown below.  Then click on the 'Set'
+      button to register your class change with the server.
     </p>
 
     <img src="schema.gif">
@@ -173,6 +174,14 @@
       database), start the server back up, and your class will be
       managing the object type.
     </p>
+
+    <p>Note that the reason that the schema editor includes both a
+    'Name' box and an 'Option String' box is that if you set the Name
+    of the class to be
+    <code>arlut.csd.ganymede.server.JythonEditObjectFactory</code>,
+    and the Option String for the class to be a URI providing a
+    location where a Python source file may be found, the DBEditObject
+    subclass can actually be implemented in Jython. (XXX link to Ganymede/Jython docs) </p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
