@@ -163,7 +163,7 @@ public class DBLog {
    *
    */
 
-  Qsmtp mailer;
+  Qsmtp mailer = null;
 
   /**
    *
@@ -184,9 +184,11 @@ public class DBLog {
    * no disk-logging of advisory email events is desired.
    * @param gSession GanymedeSession reference used to allow DBLog code to do queries
    * on the Directory Droid database
+   * @param suppressEmail A boolean that indicates whether we should switch off the sending of
+   * emails
    */
 
-  public DBLog(DBLogController logController, DBLogController mailController, GanymedeSession gSession) throws IOException
+  public DBLog(DBLogController logController, DBLogController mailController, GanymedeSession gSession, boolean suppressEmail) throws IOException
   {
     this.gSession = gSession;
     this.logController = logController;
@@ -206,11 +208,15 @@ public class DBLog {
 
     // initalize our mailer
 
-    mailer = new Qsmtp(Ganymede.mailHostProperty);
+    if (!suppressEmail)
+      {
+      	mailer = new Qsmtp(Ganymede.mailHostProperty);
+      	
+      	// run the Qsmtp mailer in non-blocking mode
 
-    // run the Qsmtp mailer in non-blocking mode
+      	mailer.goThreaded();
+      }
 
-    mailer.goThreaded();
   }
 
   /**
@@ -226,9 +232,8 @@ public class DBLog {
     if (mailController != null)
       {
 	mailController.close();
+	mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
       }
-
-    mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
 
     closed = true;
   }
@@ -371,81 +376,84 @@ public class DBLog {
 	  }
       }
 
-    if (debug)
+    if (mailer != null)
       {
-	System.err.println("Attempting to email log event " + event.eventClassToken);
-      }
-
-    // prepare our message, word wrap it
-
-    String message;
-
-    if (type == null)
-      {
-	message = event.description + "\n\n";
-      }
-    else
-      {
-	message = type.description + "\n\n" + event.description + "\n\n";
-      }
-
-    if (description != null)
-      {
-	message = message + description + "\n\n";
-      }
+        if (debug)
+          {
+    	    System.err.println("Attempting to email log event " + event.eventClassToken);
+          }
+        
+        // prepare our message, word wrap it
+        
+        String message;
     
-    message = arlut.csd.Util.WordWrap.wrap(message, 78);
-
-    // the signature is pre-wrapped
-	
-    message = message + signature;
-
-    // get our list of recipients from the event's enumerated list of recipients
-    // and the event code's address list.
-
-    Vector emailList;
-
-    if (type == null)
-      {
-	emailList = event.notifyVect;
-      }
-    else
-      {
-	emailList = VectorUtils.union(event.notifyVect, type.addressVect);
-      }
-
-    String titleString;
-
-    if (type == null)
-      {
-	titleString = Ganymede.subjectPrefixProperty + title;
-      }
-    else
-      {
-	if (title == null)
-	  {
-	    titleString = Ganymede.subjectPrefixProperty + type.name;
-	  }
-	else
-	  {
-	    titleString = Ganymede.subjectPrefixProperty + title;
-	  }
-      }
-
-    // and now..
+        if (type == null)
+          {
+    	    message = event.description + "\n\n";
+          }
+        else
+          {
+    	    message = type.description + "\n\n" + event.description + "\n\n";
+          }
     
-    try
-      {
-	// bombs away!
-
-	mailer.sendmsg(Ganymede.returnaddrProperty,
-		       emailList,
-		       titleString,
-		       message);
-      }
-    catch (IOException ex)
-      {
-	Ganymede.debug("DBLog.mailNotify(): mailer error " + ex);
+        if (description != null)
+          {
+    	    message = message + description + "\n\n";
+          }
+        
+        message = arlut.csd.Util.WordWrap.wrap(message, 78);
+    
+        // the signature is pre-wrapped
+    	
+        message = message + signature;
+    
+        // get our list of recipients from the event's enumerated list of recipients
+        // and the event code's address list.
+    
+        Vector emailList;
+    
+        if (type == null)
+          {
+    	    emailList = event.notifyVect;
+          }
+        else
+          {
+    	    emailList = VectorUtils.union(event.notifyVect, type.addressVect);
+          }
+    
+        String titleString;
+    
+        if (type == null)
+          {
+            titleString = Ganymede.subjectPrefixProperty + title;
+          }
+        else
+          {
+            if (title == null)
+              {
+                titleString = Ganymede.subjectPrefixProperty + type.name;
+              }
+            else
+              {
+                titleString = Ganymede.subjectPrefixProperty + title;
+              }
+          }
+        
+        // and now..
+        
+        try 
+          {
+            // bombs away!
+          
+            mailer.sendmsg(Ganymede.returnaddrProperty,
+                           emailList,
+                           titleString,
+                           message);
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug("DBLog.mailNotify(): mailer error " + ex);
+          }
       }
 
     if (debug)
@@ -636,9 +644,10 @@ public class DBLog {
 
 	    logController.writeEvent(event);
 	  }
-	else
+	else if (mailer != null)
 	  {
-	    // we've got a generic transactional mail event, process
+	    // we've got a generic transactional mail event and we're
+	    // allowed to send out emails, so we can process
 	    // it.. note that we don't lump it with the transaction
 	    // summary.
 
@@ -714,14 +723,17 @@ public class DBLog {
 
     // send out object event mail to anyone who has signed up for it
 
-    sendObjectMail(returnAddr, adminName, objectOuts, currentTime);
+    if (mailer != null) 
+      {
+      	sendObjectMail(returnAddr, adminName, objectOuts, currentTime);
+      }
 
     objectOuts.clear();
 
     // send out the transaction summaries if the starttransaction
     // system event has the mail checkbox turned on.
 
-    if (transactionType.mail)
+    if (mailer != null && transactionType.mail)
       {
 	enum = mailOuts.elements();
 
@@ -803,6 +815,12 @@ public class DBLog {
 
     /* -- */
 
+    // If we're suppressing sending out all email, then do a no-op
+    if (mailer == null)
+      {
+      	return emailList;
+      }
+    
     updateSysEventCodeHash();
     
     type = (systemEventType) sysEventCodes.get(event.eventClassToken);

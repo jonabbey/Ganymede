@@ -270,17 +270,11 @@ chmod 0640, "$installdir/ganymede.properties";
 
 print "\nCustomizing Directory Droid runServer script\n";
 
-# first we need to determine if we are running java 1.1 or java 1.2 or greater
-
 $version = &identifyjvm($vars{"JVM"}."/java");
 
-if ($version == 2) {
-  $template = "scripts/runServer.template2";
-} elsif ($version == 1) {
-  $template = "scripts/runServer.template";
-} else {
+$template = "scripts/runServer.template2";
+if ($version != 2) {
   print "\nWarning, couldn't locate/verify " . $vars{"JVM"} . "/java.  Installing a Java 1.2+ configured runServer script.\n";
-  $template = "scripts/runServer.template2";
 }
 
 # now we need to configure and install the runServer script

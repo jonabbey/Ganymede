@@ -219,7 +219,7 @@ public class GUIDGeneratorTask implements Runnable {
 
 	    if (!guidField.isDefined())
 	      {
-		UUID uuid = gen.generateTimeBasedUUID(myAddress);
+		org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
 		String uuidString = uuid.toString();
 
 		retVal = guidField.setValueLocal(uuidString);

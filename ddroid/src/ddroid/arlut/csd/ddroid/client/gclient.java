@@ -3406,15 +3406,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			 getErrorImage());
 	return; 
       }
+    
+  
+    // we can delete objects if they are newly created.. the server has support
+    // for discarding newly created objects, in fact
 
-    if (wp.isOpenForEdit(invid))
+    if (wp.isOpenForEdit(invid) && !wp.isApprovedForClosing(invid))
       {	
 	showErrorMessage("Object being edited",
 			 "You are currently editing " + getObjectTitle(invid) + ".  I can't delete this object while you are editing it.",
 			 getErrorImage());
 	return;
       }
-
+    
     if (showDialog)
       {
 	StringDialog d = new StringDialog(this, "Verify deletion", 

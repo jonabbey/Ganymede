@@ -2276,6 +2276,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public void sendMail(String address, String subject, StringBuffer body) throws NotLoggedInException
   {
+    // If the server has been told to not send out any emails, then just bail
+    // out.
+    if (Ganymede.suppressEmail)
+      {
+      	return;
+      }
+    
     checklogin();
 
     /* - */
@@ -2371,6 +2378,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws NotLoggedInException
   {
+    // If the server has been told to not send out any emails, then just bail
+    // out.
+    if (Ganymede.suppressEmail)
+      {
+      	return;
+      }
+    
     checklogin();
 
     /* - */

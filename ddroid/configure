@@ -83,35 +83,4 @@ fi
 
 export GJAVA
 
-# Find swing libraries
-
-guessswing="/opt/depot/swing-1.1.1"
-
-$echo "Where are the Swing jar files located (only needed for JDK 1.1)? [$guessswing] ${nnl}"
-
-read userswing
-
-if  test ! -z "$userswing"; then
-	GSWING=$userswing
-    else
-	GSWING=$guessswing
-fi
-
-export GSWING
-
-# If we are in develop mode, ask where we want to put the generated
-# class files.. this is so we can build the sources in the CVS tree
-# while placing the .class files into another location out of the
-# tree.
-
-if [ "$1" = "-develop" ]
-    then
-    $echo "Where should the class files be located? ${nnl}"
-    read GCLASSDIR
-fi
-
-# echo $GCLASSDIR
-export GCLASSDIR
-
-
 $GPERL $GROOTDIR/scripts/configurator.perl

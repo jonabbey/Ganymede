@@ -146,6 +146,12 @@ public class Ganymede {
    */
 
   public static boolean logInfoDialogs = true;
+  
+  /**
+   * <p>If true, the DBLog class will not send out any email.</p>
+   */
+  
+  public static boolean suppressEmail = false;
 
   /**
    * <p>We keep the server's start time for display in the
@@ -306,21 +312,38 @@ public class Ganymede {
   {
     File dataFile;
     String propFilename = null;
+    String useDirectory = null;
 
     /* -- */
 
     ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.Ganymede");
-
+        
     propFilename = ParseArgs.getArg("properties", argv);
+    
+    debugFilename = ParseArgs.getArg("debug", argv);
+
+    /* If the "usedirectory" option is set, then use the supplied directory name 
+     * as the base path to the properties file (which is assumed to be 
+     * "ganymede.properties" and the debug log (assumed to be debug.log).
+     */
+    useDirectory = ParseArgs.getArg("usedirectory", argv);
+    if (useDirectory != null)
+      {
+        String fileSeparator = System.getProperty("file.separator");
+        
+        if (propFilename == null)
+          propFilename = useDirectory + fileSeparator + "ganymede.properties";
+        
+        if (debugFilename == null)
+          debugFilename = useDirectory + fileSeparator + "debug.log";
+      }
 
     if (propFilename == null)
       {
-	System.err.println(ts.l("main.cmd_line_error"));
- 	System.err.println(ts.l("main.cmd_line_usage"));
-	return;
+        System.err.println(ts.l("main.cmd_line_error"));
+        System.err.println(ts.l("main.cmd_line_usage"));
+        return;
       }
-
-    debugFilename = ParseArgs.getArg("debug", argv);
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
 
@@ -505,6 +528,11 @@ public class Ganymede {
       }
 
     // set up the log
+    
+    /* Check the email "master switch". If it's set to true, then
+     * we won't actually send any emails out.
+     */
+    suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
 
     try
       {
@@ -512,13 +540,15 @@ public class Ganymede {
 	  {
 	    log = new DBLog(new DBLogFileController(logProperty), 
 			    new DBLogFileController(mailLogProperty), 
-			    internalSession);
+			    internalSession,
+			    suppressEmail);
 	  }
 	else
 	  {
 	    log = new DBLog(new DBLogFileController(logProperty), 
 			    null,
-			    internalSession);
+			    internalSession,
+			    suppressEmail);
 	  }
       }
     catch (IOException ex)

@@ -392,7 +392,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   private String generateGUID()
   {
     UUIDGenerator gen = UUIDGenerator.getInstance();
-    UUID guid = gen.generateTimeBasedUUID(new EthernetAddress("8:0:20:fd:6b:7")); // csdsun9
+    org.doomdark.uuid.UUID guid = gen.generateTimeBasedUUID(new EthernetAddress("8:0:20:fd:6b:7")); // csdsun9
 
     return guid.toString();
   }

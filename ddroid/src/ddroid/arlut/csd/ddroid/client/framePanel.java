@@ -636,6 +636,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   {
     return editable;
   }
+  
+  /**
+   * <p>This method returns true if the window is in the middle of closing,
+   * which only happens if it has been approved by
+   * 
+   * @return
+   */
+  
+  public boolean isApprovedForClosing()
+  {
+    return closingApproved;
+  }
 
   /**
    * <p>Returns the invid of the object contained in this frame panel.</p>

@@ -515,9 +515,37 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    framePanel fp = (framePanel) o;
 
-	    if ((fp.isEditable()) && (fp.getObjectInvid().equals(invid)))
+	    if (fp.getObjectInvid().equals(invid))
 	      {
-		return true;
+	      	return fp.isEditable();
+	      }
+	  }
+      }
+
+    return false;
+  }
+  
+  /**
+   * Returns true if a creating window is open for this object.
+   */
+
+  public boolean isApprovedForClosing(Invid invid)
+  {
+    Enumeration e = windowList.keys();
+
+    /* -- */
+
+    while (e.hasMoreElements())
+      {
+	Object o = windowList.get(e.nextElement());
+
+	if (o instanceof framePanel)
+	  {
+	    framePanel fp = (framePanel) o;
+
+	    if (fp.getObjectInvid().equals(invid))
+	      {
+	      	return fp.isApprovedForClosing();
 	      }
 	  }
       }

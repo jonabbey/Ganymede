@@ -26,23 +26,20 @@ chdir($rootdir);
 # the user, including:
 #
 # Where is the jvm (java command)?
-# Where is Swing installed at?
 # Where should the client tree be placed?
 # What system is the server running on?
 # What superuser name is desired?
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","REGISTRYPORT", "CLIENTINSTALL");
+@steps = ("JVM", "SYSTEMNAME","REGISTRYPORT", "CLIENTINSTALL");
 
 %vars = ("JVM" => "<#JAVADIR#>",
-	 "SWINGJARS" => "<#SWINGDIR#>",
          "SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
          "CLIENTINSTALL" => "");
 
 %descrip = ("JVM" => "Where are the Java binaries installed?",
-	    "SWINGJARS" => "Where are the Swing 1.1 jar files installed at?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Directory Droid running on?",
             "CLIENTINSTALL" => "Where should the client binaries be installed?");
@@ -90,12 +87,6 @@ foreach $step (@steps) {
 
   while (!$success) {
 
-    if ($step eq "SWINGJARS" && $version == 2) {
-      #print "Identified " . $vars{JVM} . "/java as Java 1.2 or higher, don't need Swing location\n";
-      $success = 1;
-      next;
-    }
-
     print $descrip{$step};
     print " [$vars{$step}] ";
 
@@ -108,18 +99,13 @@ foreach $step (@steps) {
     }
 
     if ($vars{$step}eq "") {
-      if ($step eq "SWINGJARS") {
-	print "*No location provided for Swing Jars.. can't install command-line scripts.*\n";
-      } else {
-	$success = 0;
-	print "*You must provide a value for this field*\n";
-      }
+      $success = 0;
+      print "*You must provide a value for this field*\n";
     } else {
       $success = 1;
     }
 
     if (($step eq "CLIENTINSTALL") ||
-	($step eq "SWINGJARS") ||
 	($step eq "JVM")) {
 
       $vars{$step} = &canonify($vars{$step});
@@ -147,12 +133,6 @@ print <<ENDCONFIG;
 Testing configuration information
 
 ENDCONFIG
-
-if ($version == 1 && !-e $vars{"SWINGJARS"}."/swingall.jar") {
-  die "Can't find the swingall jar ".$vars{"SWINGJARS"}."/swingall.jar";
-} elsif ($version == 1) {
-  print "Found the swing jar ok\n";
-}
 
 # can we make the client install directory?
 
@@ -244,7 +224,7 @@ print "\nCustomizing ddroid script\n";
 if ($version == 1) {
   %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 		 "PROPERTIES" => $installdir."/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ddroid.jar");
+		 "CLASSPATH" => $vars{"SWINGJARS"}."$installdir/jars/ddroid.jar");
 
   $template = "scripts/ddroid.template";
 
@@ -311,7 +291,7 @@ print "\nCustomizing ddroidAdmin script\n";
 if ($version == 1) {
   %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 		 "PROPERTIES" => "$installdir/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ddroidAdmin.jar");
+		 "CLASSPATH" => "$installdir/jars/ddroidAdmin.jar");
 
   $template = "scripts/ddroidAdmin.template";
 } else {

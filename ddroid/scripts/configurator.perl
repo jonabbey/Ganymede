@@ -194,17 +194,6 @@ sub copydir{
 $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
-$swingdir = $ENV{GSWING};
-
-# if we have a swingall.jar file, set the $swingjar
-# string which will be appended into the config files
-# built
-
-if (-f "$swingdir/swingall.jar") {
-  $swingjar = ":$swingdir/swingall.jar";
-} else {
-  $swingjar = "";
-}
 
 # See if there's a user-defined target location
 # for the classes. Otherwise, use default.
@@ -219,7 +208,6 @@ if ($classdir eq "") {
 }
 
 removelastslash($javadir);
-removelastslash($swingdir);
 
 print "Generating install scripts\n";
 
