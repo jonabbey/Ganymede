@@ -56,7 +56,7 @@ localization resource files:
         SyncRunner             GASHAdmin
         GASHAdminFrame         fieldoption_button
         fieldoption_editor     GanymedeValidationTask
-        xmlclient
+        xmlclient              DBObjectBaseField
 
 The default, American English versions of these localization files are
 simply called <classname>.properties.  When the Ganymede server is run
@@ -350,7 +350,7 @@ safely on the namespace-constrained data loaded in the server.  The
 admin console's schema editor still does not allow changing the case
 sensitivity of a namespace, but the xmlclient may be used to do this.
 
-19. [SERVER] Fixed a bug that made newly define object types inaccessible
+19. [SERVER] Fixed a bug that made newly defined object types inaccessible
 
 Oops!  We weren't properly updating the baseTransport cache after
 schema editing.  This resulted in a failure whenever we tried to use
@@ -397,7 +397,7 @@ occuring strings, again to reduce memory usage.
 
 The Ganymede object id pointer class, arlut.csd.ganymede.common.Invid,
 has been modified slightly to make its constructors private, in order
-to force wanting to create Invids to go through the Invid class'
+to force code wanting to create Invids to go through the Invid class'
 static factory method, createInvid().  The purpose of this is to allow
 for intelligent re-use of Invid objects on the server, so that the
 server will only need to keep one copy of any given Invid.  This has
@@ -566,7 +566,7 @@ and syncChannelCustom classes.  I call it the 'Sync Channel' system.
 The Sync Channel system is based on tracking the changes made to the
 Ganymede data store.  When a change is made, the Ganymede transaction
 commit logic examines all Sync Channels registered in the server,
-looking to see if any of them are interested in the object and fields
+looking to see if any of them are interested in the objects and fields
 that have changed.  If any Sync Channel is so interested, that Sync
 Channel will write out an XML description of the transaction with
 respect to the objects and fields that the Sync Channel cares about.
@@ -628,6 +628,23 @@ Use is simple, just type
                                                                                                                                                              
 and Ganymede will dump out all data that fits the Systems Sync Channel
 constraint.
+
+32. [SERVER] Ripped out the old schema printing logic
+
+The Ganymede server, from way back when, included logic for printing
+its schema definitions in a readable form to HTML or plain text.  All
+of that code really became redundant when the xmlclient was
+introduced, so I have gone through and removed it.  The Ganymede
+server will no longer support the ganymede.htmldump property, and will
+no longer support dumping the schema to an HTML page on server
+startup.
+
+If anyone is interested in generating a schema web page from the
+xmlclient -dumpschema output, that should just be an XLST script away.
+
+Getting rid of that old code helps reduce the maintenance burden on
+Ganymede, as I don't have to change schema printing logic in three
+places anymore.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
