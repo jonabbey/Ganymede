@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2001/06/29 21:26:11 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2001/06/29 23:04:51 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2154,18 +2154,18 @@ class OptionsPanel extends JPanel {
     builtInSelector = new StringSelector( builtInItems_Vect, 
 					  new Vector(), 
 					  builtInPanel,
-					  true,
+					  true, true, true, 0,
 					  "Members",
-					  "Available" );
+					  "Available", null, null );
 
     builtInSelector.update(builtInItems_Vect, false, new Vector(), false);
 
     customSelector = new StringSelector( new Vector(),
 					 customItems_Vect, 
 					 customPanel,
-					 true,
+					 true, true, true, 0,
 					 "Members",
-					 "Available" );
+					 "Available", null, null );
 
     customSelector.update(new Vector(), false, customItems_Vect, false);
 
