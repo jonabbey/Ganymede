@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2002/03/15 03:14:58 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2002/03/15 03:32:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.Util.booleanSemaphore;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.107 $ %D%
+ * @version $Revision: 1.108 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -168,15 +168,6 @@ final public class DBSession {
    */
 
   Object key;
-
-  /**
-   * <p>This flag will be set to true if this session is busy
-   * trying to commit or abandon a transaction, and no new objects
-   * should be editable by this transaction.</p>
-   */
-
-  private booleanSemaphore terminatingSemaphore = new booleanSemaphore(false);
-
 
   /* -- */
 
@@ -289,11 +280,6 @@ final public class DBSession {
     if (editSet == null)
       {
 	throw new RuntimeException("createDBObject called outside of a transaction");
-      }
-
-    if (isTerminating())
-      {
-	throw new RuntimeException("createDBObject called during transaction commit/abort");
       }
 
     base = store.getObjectBase(object_type);
@@ -614,11 +600,6 @@ final public class DBSession {
 	throw new RuntimeException("editDBObject called outside of a transaction");
       }
 
-    if (isTerminating())
-      {
-	throw new RuntimeException("editDBObject called during transaction commit/abort");
-      }
-
     obj = viewDBObject(baseID, objectID);
 
     if (obj == null)
@@ -858,7 +839,7 @@ final public class DBSession {
    * @param objectID id of the object to be deleted
    */
 
-  public ReturnVal deleteDBObject(short baseID, int objectID)
+  public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
   {
     DBObject obj;
     DBEditObject eObj;
@@ -868,11 +849,6 @@ final public class DBSession {
     if (editSet == null)
       {
 	throw new RuntimeException("deleteDBObject called outside of a transaction");
-      }
-
-    if (isTerminating())
-      {
-	throw new RuntimeException("deleteDBObject called during transaction commit/abort");
       }
 
     obj = viewDBObject(baseID, objectID);
@@ -931,11 +907,6 @@ final public class DBSession {
 	throw new RuntimeException("deleteDBObject called outside of a transaction");
       }
 
-    if (isTerminating())
-      {
-	throw new RuntimeException("deleteDBObject called during transaction commit/abort");
-      }
-
     key = "del" + eObj.getLabel();
 
     switch (eObj.getStatus())
@@ -979,7 +950,20 @@ final public class DBSession {
 	return null;
       }
 
-    retVal = eObj.remove();
+    try
+      {
+	retVal = eObj.remove();
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+
+	rollback(key);
+
+	return Ganymede.createErrorDialog("Server: Error in DBSession.deleteDBObject()",
+					  "Error.. exception thrown while deleting " + 
+					  eObj + ": " + ex.getMessage());
+      }
 
     // the remove logic can entirely bypass our normal finalize logic
 
@@ -1046,11 +1030,6 @@ final public class DBSession {
 	throw new RuntimeException("inactivateDBObject called outside of a transaction");
       }
 
-    if (isTerminating())
-      {
-	throw new RuntimeException("inactivateDBObject called during transaction commit/abort");
-      }
-
     key = "inactivate" + eObj.getLabel();
 
     switch (eObj.getStatus())
@@ -1072,7 +1051,22 @@ final public class DBSession {
 	System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
       }
 
-    retVal = eObj.inactivate();
+    try
+      {
+	retVal = eObj.inactivate();
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+
+	// oops, irredeemable failure.  rollback.
+
+	eObj.finalizeInactivate(false);
+
+	return Ganymede.createErrorDialog("Server: Error in DBSession.inactivateDBObject()",
+					  "Error.. exception thrown while inactivating " + 
+					  eObj + ": " + ex.getMessage());
+      }
 
     if (debug)
       {
@@ -1133,11 +1127,6 @@ final public class DBSession {
 	throw new RuntimeException("reactivateDBObject called outside of a transaction");
       }
 
-    if (isTerminating())
-      {
-	throw new RuntimeException("reactivateDBObject called during transaction commit/abort");
-      }
-
     key = "reactivate" + eObj.getLabel();
 
     switch (eObj.getStatus())
@@ -1159,7 +1148,22 @@ final public class DBSession {
 
     System.err.println("DBSession.reactivateDBObject(): Calling eObj.reactivate()");
 
-    retVal = eObj.reactivate();
+    try
+      {
+	retVal = eObj.reactivate();
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+
+	// oops, irredeemable failure.  rollback.
+
+	rollback(key);
+
+	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
+					  "Error.. exception thrown while reactivating " + 
+					  eObj + ": " + ex.getMessage());
+      }
 
     System.err.println("DBSession.reactivateDBObject(): Got back from eObj.reactivate()");
 
@@ -1338,15 +1342,7 @@ final public class DBSession {
 
   public final void checkpoint(String name)
   {
-    if (isTerminating())
-      {
-	throw new RuntimeException("checkpoint called during transaction commit/abort");
-      }
-
-    if (editSet != null)
-      {
-	editSet.checkpoint(name); // *synchronized*
-      }
+    editSet.checkpoint(name); // *synchronized*
   }
 
   /**
@@ -1357,19 +1353,11 @@ final public class DBSession {
 
   public final boolean popCheckpoint(String name)
   {
-    if (isTerminating())
-      {
-	throw new RuntimeException("popCheckpoint called during transaction commit/abort");
-      }
-
     DBCheckPoint point = null;
 
     /* -- */
 
-    if (editSet != null)
-      {
-	point = editSet.popCheckpoint(name); // *synchronized*
-      }
+    point = editSet.popCheckpoint(name); // *synchronized*
 
     return (point != null);
   }
@@ -1382,17 +1370,7 @@ final public class DBSession {
 
   public final boolean rollback(String name)
   {
-    if (isTerminating())
-      {
-	throw new RuntimeException("rollback called during transaction commit/abort");
-      }
-
-    if (editSet != null)
-      {
-	return editSet.rollback(name); // *synchronized*
-      }
-
-    return false;
+    return editSet.rollback(name); // *synchronized*
   }
 
   /**
@@ -1630,7 +1608,7 @@ final public class DBSession {
    * and {@link arlut.csd.ganymede.DBSession#commitTransaction() commitTransaction()}.</P>
    */
 
-  public void releaseAllLocks()
+  private void releaseAllLocks()
   {
     DBLock lock;
     Enumeration enum = lockVect.elements();
@@ -1702,8 +1680,6 @@ final public class DBSession {
       }
 
     editSet = new DBEditSet(store, this, describe, interactive);
-
-    terminatingSemaphore.set(false);
   }
 
   /**
@@ -1744,61 +1720,46 @@ final public class DBSession {
 	System.err.println(key + ": entering commitTransaction");
       }
 
-    // test and set
-
-    if (terminatingSemaphore.set(true))
-      {
-	return Ganymede.createErrorDialog("Commit Error",
-					  "Error, this transaction is already being committed or aborted");
-      }
-
     if (editSet == null)
       {
 	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
-    try
+    // we can't commit a transaction with locks held, because that
+    // might lead to deadlock.  we release all locks now, then when we
+    // call editSet.commit(), that will attempt to establish whatever
+    // write locks we need, for the duration of the commit() call.
+    
+    releaseAllLocks();
+    
+    if (debug)
       {
-	// we can't commit a transaction with locks held, because that
-	// might lead to deadlock.  we release all locks now, then when we
-	// call editSet.commit(), that will attempt to establish whatever
-	// write locks we need, for the duration of the commit() call.
+	System.err.println(key + ": commiting editset");
+      }
+    
+    retVal = editSet.commit(); // *synchronized*
+    
+    if (retVal == null || retVal.didSucceed())
+      {
+	Ganymede.debug(key + ": committed transaction " + editSet.description);
+	editSet = null;
+      }
+    else
+      {
+	// The DBEditSet.commit() method will set retVal.doNormalProcessing true
+	// if the problem that prevented commit was transient.. i.e., missing
+	// fields, lock not available, etc.
 	
-	releaseAllLocks();
+	// If we had an IO error or some unexpected exception or the
+	// like, doNormalProcessing will be false, and the transaction
+	// will have been wiped out by the commit logic.  In this case,
+	// there's nothing that can be done, the transaction is dead
+	// and gone.
 	
-	if (debug)
+	if (!retVal.doNormalProcessing)
 	  {
-	    System.err.println(key + ": commiting editset");
-	  }
-
-	retVal = editSet.commit(); // *synchronized*
-	
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    Ganymede.debug(key + ": committed transaction " + editSet.description);
 	    editSet = null;
 	  }
-	else
-	  {
-	    // The DBEditSet.commit() method will set retVal.doNormalProcessing true
-	    // if the problem that prevented commit was transient.. i.e., missing
-	    // fields, lock not available, etc.
-	    
-	    // If we had an IO error or some unexpected exception or the
-	    // like, doNormalProcessing will be false, and the transaction
-	    // will have been wiped out by the commit logic.  In this case,
-	    // there's nothing that can be done, the transaction is dead
-	    // and gone.
-	    
-	    if (!retVal.doNormalProcessing)
-	      {
-		editSet = null;
-	      }
-	  }
-      }
-    finally
-      {
-	terminatingSemaphore.set(false);
       }
 
     return retVal;		// later on we'll figure out how to do this right
@@ -1831,8 +1792,6 @@ final public class DBSession {
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
       }
-
-    terminatingSemaphore.set(true);
 
     if (!editSet.abort())
       {
@@ -1873,16 +1832,6 @@ final public class DBSession {
       }
 
     return editSet.isInteractive();
-  }
-
-  /**
-   * <p>This method returns true if this session is in the middle of committing
-   * or aborting this session's transaction.</p>
-   */
-
-  public boolean isTerminating()
-  {
-    return terminatingSemaphore.isSet();
   }
 
   /**
