@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,6 +50,13 @@ import arlut.csd.JDialog.*;
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   static boolean debug = false;
+
+  public final static int FIRSTOP = 0;
+  public final static int SETVAL = 1;
+  public final static int SETELEMENT = 2;
+  public final static int ADDELEMENT = 3;
+  public final static int DELELEMENT = 4;
+  public final static int LASTOP = 4;
 
   public final static void setDebug(boolean val)
   {
@@ -220,6 +227,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     committing = false;
     stored = true;
     status = EDITING;
+
+    gSession = getSession().getGSession();
 
     fields = new Hashtable();
 
@@ -461,6 +470,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	fields.remove(enum.nextElement());
       }
+  }
+
+  /**
+   *
+   * This is the hook that DBEditObject subclasses use to interpose wizards.
+   *
+   */
+
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  {
+    return null;		// by default, we just ok whatever
   }
 
   /**

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -523,6 +523,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal setValue(Object value)
   {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -538,6 +540,11 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	throw new IllegalArgumentException("scalar method called on a vector field");
       }
 
+    if (this.value == value)
+      {
+	return retVal;		// no change
+      }
+
     if (!verifyNewValue(value))
       {
 	// we need a better way of getting the information up from verifyNewValue, since
@@ -548,6 +555,21 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     eObj = (DBEditObject) owner;
+
+    // Wizard check
+
+    newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+
+    if ((newRetVal != null) && !newRetVal.didSucceed())
+      {
+	// we're not done.. return the next wizard dialog, or the failure code
+
+	return newRetVal;
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
 
     // check to see if we can do the namespace manipulations implied by this
     // operation
@@ -595,7 +617,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    defined = false;	// the key
 	  }
 
-	return null;		// success
+	return retVal;		// success
       }
     else
       {
@@ -686,6 +708,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   
   public ReturnVal setElement(int index, Object value)
   {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -713,6 +737,19 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     eObj = (DBEditObject) owner;
+
+    // Wizard check
+
+    newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+
+    if ((newRetVal != null) && !newRetVal.didSucceed())
+      {
+	return newRetVal;
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
 
     // check to see if we can do the namespace manipulations implied by this
     // operation
@@ -744,7 +781,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	defined = true;
 	
-	return null;
+	return retVal;
       }
     else
       {
@@ -778,6 +815,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal addElement(Object value)
   {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -811,6 +850,19 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
+    // Wizard check
+
+    newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+
+    if ((newRetVal != null) && !newRetVal.didSucceed())
+      {
+	return newRetVal;
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
+
     ns = getNameSpace();
 
     if (ns != null)
@@ -828,7 +880,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	values.addElement(value);
 	defined = true;
-	return null;
+	return retVal;
       } 
     else
       {
@@ -858,6 +910,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal deleteElement(int index)
   {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -880,6 +934,19 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
+    // Wizard check
+
+    newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+
+    if ((newRetVal != null) && !newRetVal.didSucceed())
+      {
+	return newRetVal;
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
+
     ns = getNameSpace();
 
     if (ns != null)
@@ -893,7 +960,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	defined = (values.size() > 0);
 
-	return null;
+	return retVal;
       }
     else
       {
