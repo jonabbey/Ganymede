@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/02/04 01:25:42 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/02/16 19:15:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -288,7 +288,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = path + "gashbuilder";
+	buildScript = System.getProperty("ganymede.builder.scriptlocation");
+	buildScript = PathComplete.completePath(buildScript);
+	buildScript = buildScript + "gashbuilder";
       }
 
     file = new File(buildScript);

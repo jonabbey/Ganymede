@@ -6,8 +6,8 @@
    
    Created: 18 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/02/04 01:26:54 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/02/16 19:15:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,7 +210,9 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = path + "nisbuilder";
+	buildScript = System.getProperty("ganymede.builder.scriptlocation");
+	buildScript = PathComplete.completePath(buildScript);
+	buildScript = buildScript + "nisbuilder";
       }
 
     file = new File(buildScript);

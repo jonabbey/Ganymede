@@ -7,8 +7,8 @@
    
    Created: 8 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/02/04 01:26:29 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/02/16 19:15:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -212,7 +212,9 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = path + "linux_builder";
+	buildScript = System.getProperty("ganymede.builder.scriptlocation");
+	buildScript = PathComplete.completePath(buildScript);
+	buildScript = buildScript + "linux_builder";
       }
 
     file = new File(buildScript);
