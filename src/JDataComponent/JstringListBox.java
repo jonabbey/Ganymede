@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.10 $ %D%
+ Version: $Revision: 1.11 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,9 +20,9 @@ import java.awt.event.*;
 import java.util.Vector;
 import arlut.csd.Util.VecQuickSort;
 
-public class JstringListBox extends JList implements ListCellRenderer, ListSelectionListener, MouseListener{ 
+public class JstringListBox extends JList implements ListSelectionListener, MouseListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
 
@@ -32,14 +32,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
   DefaultListModel 
     model = new DefaultListModel();
 
-  JLabel 
-    label = new JLabel();
-
-  Dimension
-    cellDimension;
-
   boolean
-    heightSet = false,
     sorted,
     allowCallback = false;
 
@@ -74,9 +67,6 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
   {
     this.sorted = sorted;
     
-    label.setBackground(Color.white);
-    label.setOpaque(true);
-
     //model setSize(items.size());
     //System.out.println("Setting size to " + items.size());
 
@@ -200,10 +190,14 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
     setModel(model);
     
     addMouseListener(this);
-    setCellRenderer(this);
 
-    setPrototypeCellValue(items.elementAt(0));
+    // let it know that we want 
+
+    setPrototypeCellValue("This is just used to calculate cell height");
     setFixedCellWidth(-1);
+
+    System.err.println("cell height is " + getFixedCellHeight());
+    System.err.println("cell width is " + getFixedCellWidth());
   }
 
   public void setSize(int size)
@@ -347,59 +341,6 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
   public listHandle getSelectedHandle()
   {
     return (listHandle)model.elementAt(getSelectedIndex());
-  }
-
-  // These two set up how the label is drawn.
-
-  public void configureListCellRenderer(Object value, int index)
-  {
-    if (label == null)
-      {
-	if (debug)
-	  {
-	    System.out.println("label is null!");
-	  }
-	return;
-      }
-
-    if ((listHandle)model.elementAt(index) == null)
-      {
-	if (debug)
-	  {
-	    System.out.println("element at " + index + " is null");
-	  }
-	return;
-      }
-
-    if (debug)
-      {
-	System.out.println("element at" + index + " is " + ((listHandle)model.elementAt(index)).getLabel());
-      }
-
-    label.setText("");
-    label.setText(((listHandle)model.elementAt(index)).getLabel());
-  }
-
-  public Component getListCellRendererComponent(JList list,
-						Object value,
-						int index,
-						boolean isSelected,
-						boolean cellHasFocus)
-  {
-    configureListCellRenderer(value, index);
-
-    if (isSelected)
-      {
-	label.setBackground(Color.blue);
-	label.setForeground(Color.white);
-      }
-    else
-      {
-	label.setBackground(Color.white);
-	label.setForeground(Color.black);
-      }
-
-    return label;
   }
 
   // For the ListSelectionListener
