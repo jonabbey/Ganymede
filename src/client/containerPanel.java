@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.27 $ %D%
+    Version: $Revision: 1.28 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
   
@@ -85,8 +85,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   JProgressBar
     progressBar;
 
-  public boolean
+  boolean
+    isEmbedded,
     loaded = false;
+
+  short 
+    type;
+
   
   /* -- */
 
@@ -165,6 +170,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Container panel is already loaded!");
 	return;
       }
+    if (debug)
+      {
+	System.out.println("Loading container panel");
+      }
 
     objectHash = new Hashtable();
     rowHash = new Hashtable();
@@ -186,11 +195,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     panel.setLayout(gbl);
       
     // Get the list of fields
+
+    if (debug)
+      {
+	System.out.println("Getting list of fields");
+      }
     
     try
       {
 	// get all the custom fields
-	fields = object.listFields(true);
+	fields = object.listFields(true);  // Could this use the baseHash?
+	type = object.getTypeID();
+	isEmbedded = object.isEmbedded();
+	
       }
     catch (RemoteException rx)
       {
@@ -220,23 +237,22 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		short ID = fields[i].getID();
-		short type = object.getTypeID();
-		
-		// Skip some fields.  custom panels hold the built ins, and a few others.
 
+		FieldInfo fieldInfo = fields[i].getFieldInfo();
+		// Skip some fields.  custom panels hold the built ins, and a few others.
+		short ID = fieldInfo.getFieldID();
 		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
 		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
+		    || ((ID == SchemaConstants.ContainerField) && isEmbedded))
 		  {
 		    if (debug)
 		      {
-			System.out.println("Skipping a special field: " + fields[i].getName());
+			System.out.println("Skipping a special field: " + fieldInfo.getName());
 		      }
 		  }
 		else
 		  {
-		    addFieldComponent(fields[i]);
+		    addFieldComponent(fields[i], fieldInfo);
 		  }
 	      }
 	    catch (RemoteException ex)
@@ -356,7 +372,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     while ((c != null) && !(c instanceof JViewport))
       {
-	//System.out.println("doLayout on " + c);
+	System.out.println("contianer panel doLayout on " + c);
 
 	c.doLayout();
 	c = c.getParent();
@@ -713,7 +729,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     row++;
 
-    setRowVisible(comp, visible);
+    //setRowVisible(comp, visible);
   }
   
   void addRow(Component comp,  String label, boolean visible)
@@ -743,7 +759,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     row++;
 
-    setRowVisible(comp, visible);
+    //setRowVisible(comp, visible);
   }
 
   void setRowVisible(Component comp, boolean b)
@@ -767,9 +783,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addFieldComponent(db_field field) throws RemoteException
+  private void addFieldComponent(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
-    short type;
+    short fieldType;
     String name = null;
     boolean isVector;
     boolean isEditInPlace;
@@ -781,92 +797,76 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	throw new IllegalArgumentException("null field");
       }
 
-    type = field.getType();
-    name = field.getName();
-    isVector = field.isVector();
-    isEditInPlace = field.isEditInPlace();
+    fieldType = fieldInfo.getType();
+    //name = fieldInfo.getName();
+    isVector = fieldInfo.isVector();
+
 
     if (debug)
       {
-	System.out.println("Name: " + name + "Field type desc: " + type);
+	System.out.println("Name: " + fieldInfo.getName() + "Field type desc: " + fieldType);
       }
     
     if (isVector)
       {
-	if (type == FieldType.STRING)
+	if (fieldType == FieldType.STRING)
 	  {
-	    addStringVector((string_field) field);
+	    addStringVector((string_field) field, fieldInfo);
 	  }
-	else if (type == FieldType.INVID && !isEditInPlace)
+	else if (fieldType == FieldType.INVID && !fieldInfo.isEditInPlace())
 	  {
-	    addInvidVector((invid_field) field);
+	    addInvidVector((invid_field) field, fieldInfo);
 	  }
 	else			// generic vector
 	  {
-	    addVectorPanel(field);
+	    addVectorPanel(field, fieldInfo);
 	  }
-      }
-    else if (type == FieldType.INVID && isEditInPlace)
-      {
-	try
-	  {
-	    if (debug)
-	      {
-		System.out.println("Hey, " + field.getName() + " is edit in place but not a vector, what gives?");
-	      }
-	    addRow(new JLabel("edit in place non-vector"), name, field.isVisible());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Couldn't even check the name: " + rx);
-	  }
-
       }
     else
       {
 	// plain old component
 
-	switch (type)
+	switch (fieldType)
 	  {
 	  case -1:
 	    System.err.println("Could not get field information");
 	    break;
 		      
 	  case FieldType.STRING:
-	    addStringField((string_field) field);
+	    addStringField((string_field) field, fieldInfo);
 	    break;
 		      
 	  case FieldType.PASSWORD:
-	    addPasswordField((pass_field) field);
+	    addPasswordField((pass_field) field, fieldInfo);
 	    break;
 		      
 	  case FieldType.NUMERIC:
-	    addNumericField(field);
+	    addNumericField(field, fieldInfo);
 	    break;
 		      
 	  case FieldType.DATE:
-	    addDateField(field);
+	    addDateField(field, fieldInfo);
 	    break;
 		      
 	  case FieldType.BOOLEAN:
-	    addBooleanField(field);
+	    addBooleanField(field, fieldInfo);
 	    break;
 		      
 	  case FieldType.PERMISSIONMATRIX:
-	    addPermissionField(field);
+	    addPermissionField(field, fieldInfo);
 	    break;
 		      
 	  case FieldType.INVID:
-	    addInvidField((invid_field)field);
+	    addInvidField((invid_field)field, fieldInfo);
 	    break;
 
 	  case FieldType.IP:
-	    addIPField((ip_field) field);
+	    addIPField((ip_field) field, fieldInfo);
 	    break;
 		      
 	  default:
-	    JLabel label = new JLabel("(Unknown)Field type ID = " + type);
-	    addRow( label, name, true);
+	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
+	    addRow( label, fieldInfo.getName(), true);
 	  }
       }
   }
@@ -878,7 +878,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringVector(string_field field) throws RemoteException
+  private void addStringVector(string_field field, FieldInfo fieldInfo) throws RemoteException
   {
     if (debug)
       {
@@ -887,61 +887,95 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (field == null)
       {
-	System.out.println("Hey, this is a null field! " + field.getName());
+	System.out.println("Hey, this is a null field! " + fieldInfo.getName());
 
       }
 
-    QueryResult qr = null;
-
-
-    Object id = field.choicesKey();
-    if (id == null)
+    if (editable)
       {
-	qr = field.choices();
-      }
-    else
-      {
-	if (parent.cachedLists.containsKey(id))
+	QueryResult qr = null;
+	
+	if (debug)
 	  {
-	    qr = (QueryResult)parent.cachedLists.get(id);
+	    System.out.println("Getting choicesKey()");
+	  }
+	Object id = field.choicesKey();
+	if (id == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Getting choices");
+	      }
+	    qr = field.choices();
 	  }
 	else
-	  {	
-	    qr =field.choices();
-	    if (qr != null)
+	  {
+	    if (parent.cachedLists.containsKey(id))
 	      {
-		parent.cachedLists.put(id, qr);
+		qr = (QueryResult)parent.cachedLists.get(id);
+	      }
+	    else
+	      {	
+		if (debug)
+		  {
+		    System.out.println("Getting QueryResult now");
+		  }
+
+		qr =field.choices();
+		if (qr != null)
+		  {
+		    parent.cachedLists.put(id, qr);
+		  }
 	      }
 	  }
-      }
     
 
 
-    if (qr == null)
-      {
-	tStringSelector ss = new tStringSelector(null,
-						 field.getValues(), 
-						 this,
-						 editable,
-						 false,  //canChoose
-						 false,  //mustChoose
-						 100);
-	objectHash.put(ss, field);
-	ss.setCallback(this);
-	addRow( ss, field.getName(), field.isVisible()); 
+	if (qr == null)
+	  {
+	    tStringSelector ss = new tStringSelector(null,
+						     field.getValues(), 
+						     this,
+						     editable,
+						     false,  //canChoose
+						     false,  //mustChoose
+						     100);
+	    objectHash.put(ss, field);
+	    if (editable)
+	      {
+		ss.setCallback(this);
+	      }
+	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+	  }
+	else
+	  {
+	    tStringSelector ss = new tStringSelector(qr.getLabels(),
+						     field.getValues(), 
+						     this,
+						     editable,
+						     true,   //canChoose
+						     false,  //mustChoose
+						     100);
+	    objectHash.put(ss, field);
+	    if (editable)
+	      {
+		ss.setCallback(this);
+	      }
+
+	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+	  }
       }
-    else
+    else  //not editable, don't need whole list of things
       {
-	tStringSelector ss = new tStringSelector(qr.getLabels(),
-						 field.getValues(), 
-						 this,
-						 editable,
-						 true,   //canChoose
-						 false,  //mustChoose
-						 100);
-	objectHash.put(ss, field);
-	ss.setCallback(this);
-	addRow( ss, field.getName(), field.isVisible()); 
+	    tStringSelector ss = new tStringSelector(null,
+						     field.getValues(), 
+						     this,
+						     editable,
+						     false,   //canChoose
+						     false,  //mustChoose
+						     100);
+	    objectHash.put(ss, field);
+	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
       }
   }
 
@@ -952,7 +986,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addInvidVector(invid_field field) throws RemoteException
+  private void addInvidVector(invid_field field, FieldInfo fieldInfo) throws RemoteException
   {
     QueryResult
       valueResults = null,
@@ -1010,34 +1044,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
-
-    // This is taken out, because we use getListHandles() now, 
-
-    /*
-    for (int i = 0; i < valueResults.size(); i++)
-      {
-	valueHandles.addElement(new listHandle(valueResults.getLabel(i), 
-					       valueResults.getInvid(i)));
-      }
-
-     if (editable)
-      {
-	if (choiceResults != null)
+    else
+      { 
+	if (debug)
 	  {
-	    for (int i = 0; i < choiceResults.size(); i++)
-	      {
-		choiceHandles.addElement(new listHandle(choiceResults.getLabel(i),
-							choiceResults.getInvid(i)));
-	      }
+	    System.out.println("Not editable, not downloading choices");
 	  }
-      }*/
+      }
 
     // ss is canChoose, mustChoose
 
     tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 100);
     objectHash.put(ss, field);
-    ss.setCallback(this);
-    addRow( ss, field.getName(), field.isVisible()); 
+    if (editable)
+      {
+	ss.setCallback(this);
+      }
+    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
   }
 
   /**
@@ -1047,9 +1070,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addVectorPanel(db_field field) throws RemoteException
+  private void addVectorPanel(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
-    boolean isEditInPlace = field.isEditInPlace();
+    boolean isEditInPlace = fieldInfo.isEditInPlace();
 
     /* -- */
 
@@ -1068,14 +1091,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
     
 
-    try
-      {
-	addVectorRow( vp, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility");
-      }
+    addVectorRow( vp, fieldInfo.getName(), fieldInfo.isVisible());
+    
   }
 
   /**
@@ -1085,7 +1102,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringField(string_field field) throws RemoteException
+  private void addStringField(string_field field, FieldInfo fieldInfo) throws RemoteException
   {
     JstringField
       sf;
@@ -1102,8 +1119,52 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    
 	    JComboBox combo = new JComboBox();
-	    
-	    Vector choices = field.choices().getLabels();
+
+	    Vector choiceHandles = null;
+	    Vector choices = null;
+
+	    Object key = field.choicesKey();
+	    if (key == null)
+	      {
+		if (debug)
+		  {
+		    System.out.println("key is null, getting new copy.");
+		  }
+		choices = field.choices().getLabels();
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("key = " + key);
+		  }
+		
+		if (parent.cachedLists.containsKey(key))
+		  {
+		    if (debug)
+		      {
+			System.out.println("key in there, using cached list");
+		      }
+		    choiceHandles = (Vector)parent.cachedLists.get(key);
+
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.out.println("It's not in there, downloading a new one.");
+		      }
+		    choiceHandles = field.choices().getListHandles();
+		    parent.cachedLists.put(key, choiceHandles);
+
+		  }
+
+		for (int j = 0; j < choiceHandles.size() ; j++)
+		  {
+		    choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
+		  }		
+	      }    
+
 	    String currentChoice = (String) field.getValue();
 	    boolean found = false;
 	    
@@ -1148,22 +1209,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("Setting current value: " + currentChoice);
 	      }	  
 
-	    combo.addItemListener(this); // register callback
+	    if (editable)
+	      {
+		combo.addItemListener(this); // register callback
+	      }
+
 	    objectHash.put(combo, field);
 	    if (debug)
 	      {
 		System.out.println("Adding to panel");
 	      }
 	    
-	    try
-	      {
-		addRow( combo, field.getName(), field.isVisible());
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not check visibility");
-	      }
-	    
+	    addRow( combo, fieldInfo.getName(), fieldInfo.isVisible());
+	    	    
 	  }
 	else
 	  {
@@ -1190,30 +1248,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not get value for field: " + rx);
 	      }
-			    
-	    sf.setCallback(this);
+			
+	    if (editable)
+	      {
+		sf.setCallback(this);
+	      }
+
 	    sf.setEditable(editable);
 
-	    try
-	      {
-		sf.setToolTipText(field.getComment());
+	    sf.setToolTipText(fieldInfo.getComment());
 
-		// System.out.println("Setting tool tip to " + field.getComment());
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get tool tip text: " + rx);
-	      }
-					    
-
-	    try
-	      {
-		addRow( sf, field.getName(), field.isVisible());
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not check visibility: " + rx);
-	      }
+	    addRow( sf, fieldInfo.getName(), fieldInfo.isVisible());
 	  }
       }
     catch (RemoteException rx)
@@ -1229,7 +1274,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPasswordField(pass_field field) throws RemoteException
+  private void addPasswordField(pass_field field, FieldInfo fieldInfo) throws RemoteException
   {
     JstringField sf;
 
@@ -1239,17 +1284,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	JpassField pf = new JpassField(parent, true, 10, 8, editable);
 	objectHash.put(pf, field);
-			  
-	pf.setCallback(this);
-			  
-	try
+			
+	if (editable)
 	  {
-	    addRow( pf, field.getName(), field.isVisible());
+	    pf.setCallback(this);
 	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not check visibility");
-	  }
+	  
+	addRow( pf, field.getName(), field.isVisible());
+	
       }
     else
       {
@@ -1278,25 +1320,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	sf.setEditable(false);
 
-	try
-	  {
-	    sf.setToolTipText(field.getComment());
-	    
-	    // System.out.println("Setting tool tip to " + field.getComment());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get tool tip text: " + rx);
-	  }
-		
-	try
-	  {
-	    addRow( sf, field.getName(), field.isVisible());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not check visibility");
-	  }
+	sf.setToolTipText(fieldInfo.getComment());
+	
+	addRow( sf, fieldInfo.getName(), fieldInfo.isVisible());
+	
       }
   }
 
@@ -1307,9 +1334,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addNumericField(db_field field) throws RemoteException
+  private void addNumericField(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
-    // It's not a choice
     if (debug)
       {
 	System.out.println("Adding numeric field");
@@ -1333,30 +1359,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	throw new RuntimeException("Could not get value for field: " + rx);
       }
-			    
-    nf.setCallback(this);
+    
+    if (editable)
+      {
+	nf.setCallback(this);
+      }
+
     nf.setEditable(editable);
     nf.setColumns(20);
     
-    try
-      {
-	nf.setToolTipText(field.getComment());
-	
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get tool tip text: " + rx);
-      }
+    nf.setToolTipText(fieldInfo.getComment());
     
-    
-    try
-      {
-	addRow( nf, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility: " + rx);
-      }
+    addRow( nf, fieldInfo.getName(), fieldInfo.isVisible());
+  
     
   }
 
@@ -1367,7 +1382,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addDateField(db_field field) throws RemoteException
+  private void addDateField(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
     JdateField df = new JdateField();
 		      
@@ -1391,16 +1406,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // note that we set the callback after we initially set the
     // date, to avoid having the callback triggered on a listing
 
-    df.setCallback(this);
+    if (editable)
+      {
+	df.setCallback(this);
+      }
 
-    try
-      {
-	addRow( df, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility");
-      }
+    addRow( df, fieldInfo.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -1410,14 +1421,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addBooleanField(db_field field) throws RemoteException
+  private void addBooleanField(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
     //JcheckboxField cb = new JcheckboxField();
 
     JCheckBox cb = new JCheckBox();
     objectHash.put(cb, field);
     cb.setEnabled(editable);
-    cb.addActionListener(this);	// register callback
+    if (editable)
+      {
+	cb.addActionListener(this);	// register callback
+      }
 
     try
       {
@@ -1435,14 +1449,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    try
-      {
-	addRow( cb, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility");
-      }
+    addRow( cb, fieldInfo.getName(), fieldInfo.isVisible());
+    
   }
 
   /**
@@ -1452,7 +1460,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPermissionField(db_field field) throws RemoteException
+  private void addPermissionField(db_field field, FieldInfo fieldInfo) throws RemoteException
   {
     if (debug)
       {
@@ -1465,14 +1473,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     perm_button pb = new perm_button((perm_field) field,
 				     editable,
 				     parent.getBaseHash());
-    try
-      {
-	addRow( pb, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility");
-      }
+    
+    addRow( pb, fieldInfo.getName(), fieldInfo.isVisible());
+    
   }
 
   /**
@@ -1482,11 +1485,58 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addInvidField(invid_field field) throws RemoteException
+  private void addInvidField(invid_field field, FieldInfo fieldInfo) throws RemoteException
   {
-    if (editable && field.isEditable())
+    if (fieldInfo.isEditInPlace())
       {
-	Vector choices = field.choices().getListHandles();
+	if (debug)
+	  {
+	    System.out.println("Hey, " + fieldInfo.getName() + " is edit in place but not a vector, what gives?");
+	  }
+	addRow(new JLabel("edit in place non-vector"), fieldInfo.getName(), fieldInfo.isVisible());
+	return;
+      }
+
+    if (editable && fieldInfo.isEditable())
+      {
+	Object key = field.choicesKey();
+	
+	Vector choices = null;
+
+	if (key == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("key is null");
+	      }
+
+	    choices = field.choices().getListHandles();
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("key = " + key);
+	      }
+
+	    if (parent.cachedLists.containsKey(key))
+	      {
+		if (debug)
+		  {
+		    System.out.println("Got it from the cachedLists");
+		  }
+		choices = (Vector)parent.cachedLists.get(key);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("Damn, it's not in there, downloading a new one.");
+		  }
+		choices = field.choices().getListHandles();
+		parent.cachedLists.put(key, choices);
+	      }
+	  }
         Invid currentChoice = (Invid) field.getValue();
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
@@ -1554,7 +1604,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    combo.setSelectedItem(noneHandle);
 	  }	  
 
-	combo.addItemListener(this); // register callback
+	if (editable)
+	  {
+	    combo.addItemListener(this); // register callback
+	  }
+
 	objectHash.put(combo, field);
 
 	if (debug)
@@ -1562,25 +1616,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding to panel");
 	  }
 	
-	try
-	  {
-	    addRow( combo, field.getName(), field.isVisible());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not check visibility");
-	  }
+	addRow( combo, fieldInfo.getName(), fieldInfo.isVisible());
+	
       }
     else
       {
 	if (field.getValue() != null)
 	  {
 	    String label = (String)parent.getSession().view_db_object((Invid)field.getValue()).getLabel();
-	    addRow( new JLabel(label), field.getName(), field.isVisible());
+	    JstringField sf = new JstringField(20, false);
+	    sf.setText(label);
+	    addRow(sf, fieldInfo.getName(), fieldInfo.isVisible());
 	  }
 	else
 	  {
-	    addRow( new JLabel("null invid"), field.getName(), field.isVisible());
+	    addRow( new JTextField("null invid"), fieldInfo.getName(), fieldInfo.isVisible());
 	  }
       }
   }
@@ -1592,7 +1642,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addIPField(ip_field field) throws RemoteException
+  private void addIPField(ip_field field, FieldInfo fieldInfo) throws RemoteException
   {
     JIPField
       ipf;
@@ -1632,25 +1682,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
     ipf.setCallback(this);
 
-    try
-      {
-	ipf.setToolTipText(field.getComment());
-	    
-	// System.out.println("Setting tool tip to " + field.getComment());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get tool tip text: " + rx);
-      }
-	
-    try
-      {
-	addRow( ipf, field.getName(), field.isVisible());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check visibility: " + rx);
-      }
+    ipf.setToolTipText(fieldInfo.getComment());
+		
+    addRow( ipf, fieldInfo.getName(), fieldInfo.isVisible());
+    
   }
 
   /**
