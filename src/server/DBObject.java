@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,14 +53,14 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.54 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.55 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
 
 public class DBObject extends UnicastRemoteObject implements db_object, FieldType {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public static void setDebug(boolean val)
   {
@@ -522,9 +522,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * type of the object represented by this DBObject object and
    * will choose how to restrict the fields emitted in order
    * to not leave spare invid links in place that are typically
-   * not to be emitted in a schema dump.
+   * not to be emitted in a schema dump.<br><br>
    *
-   * This method is really of a piece with DBObjectBase.partialEmit().
+   * This method is really of a piece with DBObjectBase.partialEmit().<br><br>
    *
    * And, this method is really a hack.  I intend to ditch this as
    * soon as possible and replace it with a separate cleaner executable
@@ -731,7 +731,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	if (definition == null)
 	  {
 	    System.err.println("What the heck?  Null definition for " + 
-			       objectBase.getName() + ", fieldcode = " + fieldcode);
+			       objectBase.getName() + ", fieldcode = " + fieldcode +
+			       ", " + i + "th field in object");
+	  }
+	else
+	  {
+	    //	    System.err.println("Reading " + definition.getName() + " " + definition.getTypeDesc());
 	  }
 
 	type = definition.getType();
@@ -810,7 +815,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	
 	// now add the field to our fields table
 
-	fields.putNoSyncNoRemove(tmp);
+	if (tmp.defined)
+	  {
+	    fields.putNoSyncNoRemove(tmp);
+	  }
+	else
+	  {
+	    System.err.println("%%% Loader skipping " + definition.getName());
+	  }
       }
   }
 
@@ -1499,7 +1511,10 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   /**
    *
    * This method is used to correct this object's base and basefield
-   * pointers when the base changes.
+   * pointers when the base changes.  This happens when the schema is
+   * edited.. this method is called on all objects under a
+   * DBObjectBase to make the object point and its fields point to the
+   * new version of the DBObjectBase and DBObjectBaseFields.
    *
    */
 
