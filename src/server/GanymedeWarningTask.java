@@ -8,15 +8,15 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/02/21 19:50:25 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/10/13 00:49:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -61,11 +61,27 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This is a Ganymede server task, for use with the {@link
+ * arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
+ * 
+ * <p>The standard GanymedeWarningTask class scans through all objects
+ * in the database and mails out warnings for those objects that are
+ * going to expire on this day one, two, or three weeks in the future,
+ * as well as those objects that are going to expire within the
+ * following 24 hours.  The email messages sent are based on the
+ * server's Object Events configuration settings, and will also be
+ * sent to the list of email addresses returned by the {@link
+ * arlut.csd.ganymede.DBEditObject#getEmailTargets(arlut.csd.ganymede.DBObject)
+ * getEmailTargets()} customization method in each object's {@link
+ * arlut.csd.ganymede.DBEditObject DBEditObject} customization class,
+ * if any such is defined.</p>
  *
- * This class goes through all objects in the database and sends
- * out any warnings for objects that are going to expire within
- * a whole number of weeks in the future.
+ * <p>GanymedeWarningTask must not be run more than once a day by the
+ * GanymedeScheduler, or else users and admins may receive redundant warnings.</p>
  *
+ * <p>The GanymedeWarningTask is paired with the
+ * standard {@link arlut.csd.ganymede.GanymedeExpirationTask GanymedeExpirationTask} task,
+ * which handles the actual expiration and removal of database objects.</p>
  */
 
 public class GanymedeWarningTask implements Runnable {

@@ -7,15 +7,15 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/06/29 05:03:09 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/10/13 00:49:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -60,10 +60,20 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This is a Ganymede server task, for use with the {@link
+ * arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
+ * 
+ * <p>The GanymedeExpirationTask scans through all objects in the
+ * database and handles expiration and/or removal for any object whose Expiration
+ * or Removal timestamps have passed.</p>
  *
- * This class goes through all objects in the database and processes
- * any expirations or removals.
+ * <p>GanymedeExpirationTask is designed to be run once a day by the
+ * GanymedeScheduler, but running it more often won't hurt anything.</p>
  *
+ * <p>The standard GanymedeExpirationTask is paired with the
+ * standard {@link arlut.csd.ganymede.GanymedeWarningTask GanymedeWarningTask} task,
+ * which sends out email warning of expirations and removals to occur in the
+ * near future.</p>
  */
 
 public class GanymedeExpirationTask implements Runnable {
