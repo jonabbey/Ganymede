@@ -9,7 +9,7 @@
    preset.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -353,16 +353,6 @@ public class JstringField extends JentryField implements KeyListener{
 	System.out.println("JstringField.isAllowed()");
       }
 
-    if ((getText() != null) && (getText().length() > size))
-      {
-	if (debug)
-	  {
-	    System.out.println("That string is too large.");
-	  }
-
-	return false;
-      }
-
     if (disallowedChars != null)
       {
 	if (disallowedChars.indexOf(ch) != -1)
@@ -373,7 +363,6 @@ public class JstringField extends JentryField implements KeyListener{
 	      }
 
 	    return false;
-	    
 	  }
       }
     
