@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -355,22 +355,25 @@ public class IPDBField extends DBField implements ip_field {
       {
 	unmark(this.value);	// our old value
 
-	if (!mark(bytes))
+	if (bytes != null)
 	  {
-	    if (this.value != null)
+	    if (!mark(bytes))
 	      {
-		mark(this.value); // we aren't clearing the old value after all
-	      }
+		if (this.value != null)
+		  {
+		    mark(this.value); // we aren't clearing the old value after all
+		  }
 
-	    if (bytes.length > 4)
-	      {
-		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						  "IP address already in use : " + genIPV6string(bytes));
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						  "IP address already in use : " + genIPV4string(bytes));
+		if (bytes.length > 4)
+		  {
+		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						      "IP address already in use : " + genIPV6string(bytes));
+		  }
+		else
+		  {
+		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						      "IP address already in use : " + genIPV4string(bytes));
+		  }
 	      }
 	  }
       }
@@ -512,19 +515,22 @@ public class IPDBField extends DBField implements ip_field {
       {
 	unmark(values.elementAt(index));
 
-	if (!mark(bytes))
+	if (bytes != null)
 	  {
-	    mark(values.elementAt(index)); // we aren't clearing the old value after all
-
-	    if (bytes.length > 4)
+	    if (!mark(bytes))
 	      {
-		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						  "IP address already in use : " + genIPV6string(bytes));
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						  "IP address already in use : " + genIPV4string(bytes));
+		mark(values.elementAt(index)); // we aren't clearing the old value after all
+		
+		if (bytes.length > 4)
+		  {
+		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						      "IP address already in use : " + genIPV6string(bytes));
+		  }
+		else
+		  {
+		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						      "IP address already in use : " + genIPV4string(bytes));
+		  }
 	      }
 	  }
       }
