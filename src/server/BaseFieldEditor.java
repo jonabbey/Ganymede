@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,10 +23,7 @@ import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
-//import java.awt.*;
 import java.awt.event.*;
-//import java.net.*;
-//import java.applet.*;
 import java.util.*;
 
 import jdj.PackageResources;
@@ -488,7 +485,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  }
 	else
 	  {
-	    fields = targetBase.getFields();
+	    fields = targetBase.getFields(true);
 	  }
       }
     catch (RemoteException rx)
