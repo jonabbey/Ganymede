@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1273,7 +1273,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
                                                                        GASHAdmin
 
 ------------------------------------------------------------------------------*/
-public class GASHAdmin extends JApplet {
+
+public class GASHAdmin extends JApplet implements ActionListener {
 
   static GASHAdmin applet = null;
   static GASHAdminFrame frame = null;
@@ -1287,8 +1288,8 @@ public class GASHAdmin extends JApplet {
   
   static Image admin_logo = null;
 
-  final private TextField username = new TextField();
-  final private TextField password = new TextField();
+  final private JTextField username = new JTextField();
+  final private JPasswordField password = new JPasswordField();
   final public JButton quitButton = new JButton("Quit");
   final public JButton loginButton = new JButton("Login");
 
@@ -1404,9 +1405,16 @@ public class GASHAdmin extends JApplet {
 	panel.add(image);
       }
 
+    JLabel label = new JLabel("Ganymede Admin Console");
+    gbc.gridy = 1;
+    gbl.setConstraints(label, gbc);
+    panel.add(label);
+
+    gbc.ipady = 2;
+
     gbc.fill = GridBagConstraints.NONE;
     JLabel ul = new JLabel("Username:");
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbl.setConstraints(ul, gbc);
     panel.add(ul);
@@ -1414,10 +1422,11 @@ public class GASHAdmin extends JApplet {
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(username, gbc);
+    username.addActionListener(this);
     panel.add(username);
 
     JLabel pl = new JLabel("Password:");
-    gbc.gridy = 2;
+    gbc.gridy = 3;
     gbc.gridx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbl.setConstraints(pl, gbc);
@@ -1426,50 +1435,18 @@ public class GASHAdmin extends JApplet {
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(password, gbc);
-    password.setEchoChar('*');
+    password.addActionListener(this);
     panel.add(password);
     
     gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridy = 4;
 
     gbc.gridwidth = 2;
     JPanel buttonPanel = new JPanel(new BorderLayout());
     gbl.setConstraints(buttonPanel, gbc);
     panel.add(buttonPanel);
     
-    loginButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e)
-	{
-	  iAdmin admin = applet.login(username.getText(), password.getText());      
-	  if (admin != null)
-	    {
-	      username.setText("");
-	      password.setText("");
-	      quitButton.setEnabled(false);
-	      loginButton.setEnabled(false);
-	      frame = new GASHAdminFrame("Ganymede Admin Console", WeAreApplet, applet);
-
-	      // Now that the frame is completely initialized, tie the iAdmin object
-	      // to the frame, and vice-versa.
-
-	      frame.admin = admin;
-	      admin.setFrame(frame);
-
-	      try
-		{
-		  admin.refreshMe();
-		}
-	      catch (RemoteException rx)
-		{
-		  System.out.println("Problem trying to refresh: " + rx);
-		}
-	    }
-	  else
-	    {
-	      password.setText("");
-	      System.out.println("Could not get admin.");
-	    }
-	}});
+    loginButton.addActionListener(this);
 
     quitButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e)
@@ -1484,6 +1461,51 @@ public class GASHAdmin extends JApplet {
     buttonPanel.add("East", quitButton);
    
     return panel;
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    if (e.getSource() == username)
+      {
+	password.requestFocus();
+      }
+    else if (e.getSource() == password)
+      {
+	loginButton.doClick();
+      }
+    else if (e.getSource() == loginButton)
+      {
+	iAdmin admin = applet.login(username.getText(), password.getText());
+
+	if (admin != null)
+	  {
+	    username.setText("");
+	    password.setText("");
+	    quitButton.setEnabled(false);
+	    loginButton.setEnabled(false);
+	    frame = new GASHAdminFrame("Ganymede Admin Console", WeAreApplet, applet);
+	  
+	    // Now that the frame is completely initialized, tie the iAdmin object
+	    // to the frame, and vice-versa.
+	  
+	    frame.admin = admin;
+	    admin.setFrame(frame);
+	  
+	    try
+	      {
+		admin.refreshMe();
+	      }
+	    catch (RemoteException rx)
+	      {
+		System.out.println("Problem trying to refresh: " + rx);
+	      }
+	  }
+	else
+	  {
+	    password.setText("");
+	    System.out.println("Could not get admin.");
+	  }
+      }
   }
 
   public iAdmin login(String username, String password)
