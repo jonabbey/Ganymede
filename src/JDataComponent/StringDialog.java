@@ -5,10 +5,9 @@
 
 */
 
-package arlut.csd.Dialog;
+package arlut.csd.JDialog;
 
-import arlut.csd.DataComponent.*;
-import arlut.csd.Dialog.*;
+import arlut.csd.JDataComponent.*;
 
 import tablelayout.*;
 
@@ -18,13 +17,19 @@ import java.util.*;
 
 import oreilly.Label.*;
 
+import com.sun.java.swing.*;
+
 import gjt.ImageCanvas;
 
-
-//import gjt.ButtonPanel;
 import gjt.*;
 
-public class StringDialog extends Dialog implements ActionListener, setValueCallback, ItemListener {
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    StringDialog
+
+------------------------------------------------------------------------------*/
+
+public class StringDialog extends Dialog implements ActionListener, JsetValueCallback, ItemListener {
 
   Hashtable
     componentHash,
@@ -36,18 +41,32 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   ImageCanvas
     imageCanvas;
 
-  Button OKButton;
-  Button CancelButton;
-  Panel panel;
+  JButton 
+    OKButton,
+    CancelButton;
+
+  JPanel 
+    panel,
+    textPanel,
+    mainPanel,
+    buttonPanel;
+
+  JLabel
+    textLabel;
+
   EtchedBorder panelBorder;
   EtchedBorder textBorder;
   EtchedBorder mainBorder;
-  ButtonPanel buttonPanel;
-  Panel mainPanel;
+
   TableLayout table;
   Image image;
 
   Vector objects;
+
+  public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel)
+  {
+    this (frame, Title, Text, "Ok", ShowCancel ? "Cancel" : null, null);
+  }
 
   /**
    * Simple constructor for a small dialog box
@@ -58,9 +77,9 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    *
    */
   public StringDialog(Frame frame, String Title, String Text)
-    {
-      this(frame, Title, Text, "Ok", "Cancel", null);
-    }
+  {
+    this(frame, Title, Text, "Ok", "Cancel", null);
+  }
 
  /**
    * Simple constructor for a small dialog box
@@ -74,9 +93,9 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    */
 
   public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel)
-    {
-      this(new DialogRsrc(frame, Title, Text, OK, Cancel, null));
-    }
+  {
+    this(new DialogRsrc(frame, Title, Text, OK, Cancel, null));
+  }
   
 
  /**
@@ -90,9 +109,9 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    * @param image Image to display next to text
    */
   public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
-    {
-      this(new DialogRsrc(frame, Title, Text, OK, Cancel, image));
-    }
+  {
+    this(new DialogRsrc(frame, Title, Text, OK, Cancel, image));
+  }
 
   /**
    * Constructor for more complicated StringDialog.
@@ -100,182 +119,178 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    *@param Resource Sets resource for Dialog box.
    */
   public StringDialog(DialogRsrc Resource) 
-    {
+  {
+    super(Resource.frame, Resource.title, true);
       
-      super(Resource.frame, Resource.title, true);
+    componentHash = new Hashtable();
+    valueHash = new Hashtable();
+
+    objects = Resource.getObjects();
+
+    // Set up the text box at the top
+
+    textPanel = new JPanel();
+    textPanel.setLayout(new BorderLayout());
+
+    textLabel = new JLabel(Resource.getText());
       
-      componentHash = new Hashtable();
-      valueHash = new Hashtable();
-
-      objects = Resource.getObjects();
-
-
-      //Set up the text box at the top
-      Panel textPanel = new Panel();
-      textPanel.setLayout(new BorderLayout());
-      MultiLineLabel textLabel = new MultiLineLabel(Resource.getText());
+    textPanel.add("Center", textLabel);
       
-      textPanel.add("Center", textLabel);
+    textBorder = new EtchedBorder(textPanel, 2, 5);
       
-      textBorder = new EtchedBorder(textPanel, 2, 5);
+    image = Resource.getImage();
+
+    if (image != null)
+      {
+	//	System.out.println("add image");
+	imageCanvas = new ImageCanvas(image);
+	textPanel.add("West", imageCanvas);
+      }
+
+    buttonPanel = new JPanel();
+
+    OKButton = new JButton(Resource.OKText);
+    OKButton.addActionListener(this);
+    buttonPanel.add(OKButton);
+
+    // if cancel is null, don't put it on there
+
+    if (Resource.CancelText != null)
+      {
+	CancelButton = new JButton(Resource.CancelText);
+	CancelButton.addActionListener(this);
+	buttonPanel.add(CancelButton);
+      }
+
+    mainPanel = new JPanel();
+
+    mainPanel.setLayout(new BorderLayout());
+    mainPanel.add("North", textBorder);
       
-      image = Resource.getImage();
-      if (image != null)
-	{
-	  System.out.println("add image");
-	  imageCanvas = new ImageCanvas(image);
-	  textPanel.add("West", imageCanvas);
-	}
+    mainPanel.add("South", buttonPanel);
+    this.setSize(600, 600);
 
-      buttonPanel = new ButtonPanel();
-      OKButton = buttonPanel.add(Resource.OKText);
-      OKButton.addActionListener(this);
-
-      //if cancel is null, don't put it on there
-      if (Resource.CancelText != null)
-	{
-	  CancelButton = buttonPanel.add(Resource.CancelText);
-	  CancelButton.addActionListener(this);
-	}
-
-      OKButton.addActionListener(this);
-
-
-      //EtchedBorder panelBorder = new EtchedBorder(panel, 2, 5);
+    mainBorder = new EtchedBorder(mainPanel, 3, 10);
       
-      mainPanel = new Panel();
+    add(mainBorder);
 
-      
-      mainPanel.setLayout(new BorderLayout());
-      mainPanel.add("North", textBorder);
-      
-      mainPanel.add("South", buttonPanel);
-      this.setSize(600, 600);
+    // add stuff to panel here
 
-      mainBorder = new EtchedBorder(mainPanel, 3, 10);
-      
-      add(mainBorder);
+    if (objects != null)
+      {
+	// System.out.println("objects != null");
+	
+	int numberOfObjects = objects.size();
 
-
-      //add stuff to panel here
-      if (objects != null)
-	{
-	  System.out.println("objects != null");
-	  
-	  int numberOfObjects = objects.size();
-	  if (numberOfObjects > 0) 
-	    {
-	      System.out.println("objects.size() > 0"); 
-	      panel = new InsetPanel();
-	      table = new TableLayout(false);
-	      panel.setLayout(table);
-	      table.rowSpacing(10);
+	if (numberOfObjects > 0) 
+	  {
+	    // System.out.println("objects.size() > 0"); 
+	    panel = new InsetPanel();
+	    table = new TableLayout(false);
+	    panel.setLayout(table);
+	    table.rowSpacing(10);
 	      
-	      mainPanel.add("Center", panel); 
+	    mainPanel.add("Center", panel); 
 	      
-	      for(int i = 0; i < numberOfObjects; ++i) 
-		{
-		  Object element = objects.elementAt(i);
-		  if (element instanceof stringThing)
-		    {
-		      stringThing st = (stringThing)element;
-		      stringField sf = new stringField();
-		      sf.setEditable(true);
-		      sf.setCallback(this); 
-		      addRow(panel, sf, st.getLabel(), i);
-		      
-		      componentHash.put(sf, st.getLabel());
-		      valueHash.put(st.getLabel(), "");
-		      
-		    }
-		  else if (element instanceof passwordThing)
-		    {
-		      passwordThing pt = (passwordThing)element;
-		      stringField sf = new stringField();
-		      sf.setEchoChar('*');
-		      sf.setEditable(true);
-		      sf.setCallback(this); 
-		      addRow(panel, sf, pt.getLabel(), i);
-		      
-		      componentHash.put(sf, pt.getLabel());
-		      valueHash.put(pt.getLabel(), "");
+	    for (int i = 0; i < numberOfObjects; ++i) 
+	      {
+		Object element = objects.elementAt(i);
 
+		if (element instanceof stringThing)
+		  {
+		    stringThing st = (stringThing)element;
+		    JstringField sf = new JstringField();
+		    sf.setEditable(true);
+		    sf.setCallback(this); 
+		    addRow(panel, sf, st.getLabel(), i);
+		      
+		    componentHash.put(sf, st.getLabel());
+		    valueHash.put(st.getLabel(), "");
+		      
+		  }
+		else if (element instanceof passwordThing)
+		  {
+		    passwordThing pt = (passwordThing)element;
+		    JstringField sf = new JstringField();
+		    //		    sf.setEchoChar('*');
+		    sf.setEditable(true);
+		    sf.addActionListener(this); 
+		    addRow(panel, sf, pt.getLabel(), i);
+		      
+		    componentHash.put(sf, pt.getLabel());
+		    valueHash.put(pt.getLabel(), "");
+		  }
+		else if (element instanceof booleanThing)
+		  {
+		    booleanThing bt = (booleanThing)element;
+		    JcheckboxField cb = new JcheckboxField();
+		    cb.setCallback(this);
+		    cb.setSelected(bt.getDefault().booleanValue());
+		    addRow(panel, cb, bt.getLabel(), i);
+		      
+		    componentHash.put(cb, bt.getLabel());
+		    valueHash.put(bt.getLabel(), bt.getDefault());
+		      
+		  }
+		else if (element instanceof choiceThing)
+		  {
+		    choiceThing ct = (choiceThing)element;
+		    Choice ch = new Choice();
+		    Vector items = ct.getItems();
 
-		    }
-		  else if (element instanceof booleanThing)
-		    {
-		      booleanThing bt = (booleanThing)element;
-		      checkboxField cb = new checkboxField();
-		      cb.setCallback(this);
-		      cb.setState(bt.getDefault().booleanValue());
-		      addRow(panel, cb, bt.getLabel(), i);
-		      
-		      componentHash.put(cb, bt.getLabel());
-		      valueHash.put(bt.getLabel(), bt.getDefault());
-		      
-		    }
-		  else if (element instanceof choiceThing)
-		    {
-		      choiceThing ct = (choiceThing)element;
-		      Choice ch = new Choice();
-		      Vector items = ct.getItems();
-		      if (items == null)
-			{
-			  System.out.println("Nothing to add to Choice, empty vector");
-			}
-		      else
-			{
-			  int total = items.size();
-			  for (int j = 0; j < total ; ++j)
-			    {
-			      String str = (String)items.elementAt(j);
-			      ch.add(str);
+		    if (items == null)
+		      {
+			System.out.println("Nothing to add to Choice, empty vector");
+		      }
+		    else
+		      {
+			int total = items.size();
+
+			for (int j = 0; j < total ; ++j)
+			  {
+			    String str = (String)items.elementAt(j);
+			    ch.add(str);
 			      
-			    }
-			  ch.addItemListener(this);
-			  addRow(panel, ch, ct.getLabel(), i);
-			  
-			  componentHash.put(ch, ct.getLabel());
-			  valueHash.put(ct.getLabel(), (String)items.elementAt(0));
-			}
-		    }
-		  else if (element instanceof Separator)
-		    {
-		      Separator sep = (Separator)element;
-		      addSeparator(panel, sep, i);
-		    }
-		  else
-		    {
-		      System.out.println("Item " + i + " is of unknown type");
-		    }
-		  
-		}
-	      
-	    }
-	  else 
-	    {
-	      System.out.println("No objects to add to StringDialog");
-	    }
-	}
-      else
-	{
-	  System.out.println("null objects vector");
-	}
+			  }
 
-    
+			ch.addItemListener(this);
+			addRow(panel, ch, ct.getLabel(), i);
+			  
+			componentHash.put(ch, ct.getLabel());
+			valueHash.put(ct.getLabel(), (String)items.elementAt(0));
+		      }
+		  }
+		else if (element instanceof Separator)
+		  {
+		    Separator sep = (Separator)element;
+		    addSeparator(panel, sep, i);
+		  }
+		else
+		  {
+		    System.out.println("Item " + i + " is of unknown type");
+		  }
+	      }
+	  }
+	else 
+	  {
+	    System.out.println("No objects to add to StringDialog");
+	  }
+      }
+    else
+      {
+	System.out.println("null objects vector");
+      }
 
       //Having problems with setting the prefered size of the 
       // table layout
       pack();
-     
-      
     }
 
 
   public void setVisible(boolean b)
-    {
-      super.setVisible(b);
-    }
+  {
+    super.setVisible(b);
+  }
 
   /**
    * Display the dialog box.
@@ -285,115 +300,93 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    */
 
   public Hashtable DialogShow()
-    {
-      pack();
-      if (image != null)
-	{
-	  imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
-	}
-      repaint();
-      show();
+  {
+    pack();
+
+    if (image != null)
+      {
+	imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
+      }
+
+    repaint();
+    show();
       
-      this.dispose();
+    this.dispose();
+    
+    return valueHash;
+  }
 
-      return valueHash;
-    }
-  /*
-  public void paint(Graphics g)
-    {
-      System.out.println("Painting");
-      if (image != null)
-	{
-	  System.out.println("image != null");
-	  imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
-	  Graphics ig = imageCanvas.getGraphics();
-	  ig.drawImage(image, 0, 0, null);
-	}
-      else
-	{
-	  System.out.println("image == null");
-	}
-    }
-
-  public void update(Graphics g)
-    {
-      paint(g);
-    }
-    */
   public  void actionPerformed(ActionEvent e)
-    {
-      System.out.println("There was some action performed in StringDialog");
-      if (e.getSource() == OKButton)
-	{
-	  //System.out.println("OKButton clicked, returning Hashtable");
+  {
+    //    System.out.println("There was some action performed in StringDialog");
 
-	}
-      else
-	{
-	  //System.out.println("CancelButton clicked, returning null Hashtable");
+    if (e.getSource() == OKButton)
+      {
+	//System.out.println("OKButton clicked, returning Hashtable");
+
+      }
+    else
+      {
+	//System.out.println("CancelButton clicked, returning null Hashtable");
 
 
-	  valueHash = null;
-	}
+	valueHash = null;
+      }
 
-      setVisible(false);
-    }
+    setVisible(false);
+  }
 
   public void itemStateChanged(ItemEvent e)
-    {
-      Object obj = e.getSource();
+  {
+    Object obj = e.getSource();
 
-      
+    if (obj instanceof Choice)
+      {
+	String label = (String)componentHash.get(obj);
+	Choice ch = (Choice)obj;
+	valueHash.put(label, ch.getSelectedItem());
+	System.out.println(ch.getSelectedItem() + " chosen");
+      }
+    else
+      {
+	System.out.println("Unknown item type generated action");
+      }
+  }
 
-      if (obj instanceof Choice)
-	{
-	  String label = (String)componentHash.get(obj);
-	  Choice ch = (Choice)obj;
-	  valueHash.put(label, ch.getSelectedItem());
-	  System.out.println(ch.getSelectedItem() + " chosen");
-	}
-      else
-	{
-	  System.out.println("Unknown item type generated action");
-	}
+  public boolean setValuePerformed(JValueObject v)
+  {
+    Component comp = v.getSource();
 
-    }
+    if (comp instanceof JstringField)
+      {
+	String label = (String)componentHash.get(comp);
+	JstringField sf = (JstringField)comp;
+	valueHash.put(label, sf.getText());
+      }
+    else if (comp instanceof JcheckboxField)
+      {
+	String label = (String)componentHash.get(comp);
+	JcheckboxField cbf = (JcheckboxField)comp;
+	Boolean answer = new Boolean(cbf.getValue());
+	valueHash.put(label, answer);
+      }
+    return true;
+  }
 
-  public boolean setValuePerformed(ValueObject v)
-    {
-      Component comp = v.getSource();
-
-      if (comp instanceof stringField)
-	{
-	  String label = (String)componentHash.get(comp);
-	  stringField sf = (stringField)comp;
-	  valueHash.put(label, sf.getText());
-	}
-      else if (comp instanceof checkboxField)
-	{
-	  String label = (String)componentHash.get(comp);
-	  checkboxField cbf = (checkboxField)comp;
-	  Boolean answer = new Boolean(cbf.getValue());
-	  valueHash.put(label, answer);
-	}
-      return true;
-    }
-
-  void addRow(Panel parent, Component comp,  String label, int row)
-    {
-      Label l = new Label(label);
+  void addRow(JPanel parent, Component comp,  String label, int row)
+  {
+    Label l = new Label(label);
     
-      parent.add("0 " + row + " rhwHW", l);
-      parent.add("1 " + row + " lhH", comp);
-      parent.invalidate();
-    }
+    parent.add("0 " + row + " rhwHW", l);
+    parent.add("1 " + row + " lhH", comp);
+    parent.invalidate();
+  }
 
-  void addSeparator(Panel parent, Component comp, int row)
-    {
-      
-      parent.add("0 " + row + " 2 1 hH", comp);
-    }
+  void addSeparator(JPanel parent, Component comp, int row)
+  {
+    parent.add("0 " + row + " 2 1 hH", comp);
+  }
   
-}//StringDialog
+} // JStringDialog
 
 
