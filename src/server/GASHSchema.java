@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -633,7 +633,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   void editField(FieldNode node)
   {
     System.err.println("in GASHSchema.editField");
-    fe.editField(node);
+    fe.editField(node, false);
     card.show(attribCardPane, "field");
     showingBase = false;
     showingField = true;
