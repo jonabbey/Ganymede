@@ -1,0 +1,78 @@
+Ganymede Developer Release 4d
+September 8, 1998
+BSD README
+----------------------------
+
+The schema classes and source code found in this directory implement a
+database definition for holding basic BSD 4.4-compatible
+passwd/group information
+
+1) custom.jar
+
+   This java class archive contains all the custom code for a set
+   of plug-in objects that we have created to provide 
+   intelligence concerning the BSD 4.4-compatible passwd/group data
+   structures to the Ganymede database.
+
+2) The source code for the plug-in classes that are contained in
+   custom.jar
+
+3) A ganymede.schema file in the custom_src directory.  This file
+   contains the object definitions for the passwd/group objects that
+   our BSD schema operates on.  This file was copied into
+   db/ganymede.db by the installServer.perl script at server install
+   time.
+
+4) A loader directory that contains the code necessary to load a
+   Ganymede database from BSD-compatible passwd/group files.
+
+   The following BSD/etc files are supported:
+
+     master.passwd (the expanded password file from BSD 4.4)
+     group
+
+   Your copies of the above files should be placed in the input
+   directory.  You can then run the runDirectLoader script
+   to generate the file loader/db/ganymede.db.  This file will
+   contain all the information from your BSD files.
+
+   Note that unlike the GASH schema, the BSD loader code has no way
+   of identifying or setting up privileged administrators.  If you
+   use the BSD schema, you will wind up needing to log in to Ganymede
+   with the superuser accout (default username: supergash, pass:
+   newpass).
+
+   Once you have logged in with supergash, you can create new owner
+   groups and permission objects, then edit your admin user accounts
+   to give them admin personae to work with.
+
+NOTE: The master.passwd handling code assumes that the gcos field will
+be compatible with FreeBSD style formatting:
+
+ukiyo:8ACND9YVABCDA:2607:666:Ukiyo:0:0:Ukiyo the Cat,23a Some Place ,officeph,homeph:/usr/home/ukiyo:/usr/local/bin/bash
+
+If you are using another version of UNIX, you may need to edit
+custom_src/BSDBuilderTask.java and loader/source/User.java to make the
+bsd custom code write and read your gcos field variant appropriately.
+
+Please see the file doc/privs.html for details on how ownership,
+permissions, and admin personae work in Ganymede. 
+
+Builder Notes
+-------------
+
+Whenever transactions are committed, the BSDBuilderTask by default
+will write revised copies of passwd, master.passwd, and group to
+<installdir>/db/out.  BSDBuilderTask will then try to run a script
+called <installdir>/db/out/bsd_builder.  We have provided a sample
+script that might be appropriate for you, called bsd_builder.sample.
+
+If you want to use bsd_builder.sample, copy it to
+<installdir>/db/out/bsd_builder, and the BSDBuilderTask will run it
+after it writes out the passwd, master.passwd, and group files.
+
+Note that while the BSDBuilderTask writes out a copy of passwd that
+matches up with the master.passwd file it writes, the runDirectLoader
+code does not look for nor handle a 'passwd' file in
+<installdir>/schema/loader/input.  All of the data is taken from
+master.passwd when you first load the database.
