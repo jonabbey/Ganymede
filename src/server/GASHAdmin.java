@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2000/11/23 02:35:52 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2000/12/10 09:45:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -59,6 +59,7 @@ import java.applet.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.io.*;
 import java.util.*;
 
@@ -1587,10 +1588,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     serverStart = date;
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.startField.setText(date.toString());
+	return;
       }
+
+    final Date lDate = date;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.startField.setText(lDate.toString());
+      }
+    });
   }
 
   /**
@@ -1605,17 +1614,25 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.setLastDumpTime()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	if (date == null)
+	return;
+      }
+
+    final Date lDate = date;
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	if (lDate == null)
 	  {
 	    frame.dumpField.setText("no dump since server start");
 	  }
 	else
 	  {
-	    frame.dumpField.setText(date.toString());
+	    frame.dumpField.setText(lDate.toString());
 	  }
       }
+    });
   }
 
   /**
@@ -1630,10 +1647,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.setTransactionsInJournal()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.journalField.setText("" + trans);
+	return;
       }
+
+    final int lTrans = trans;
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.journalField.setText("" + lTrans);
+      }
+    });
   }
 
   /**
@@ -1648,10 +1673,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.setObjectsCheckedOut()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.checkedOutField.setText("" + objs);
+	return;
       }
+
+    final int lObjs = objs;
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.checkedOutField.setText("" + lObjs);
+      }
+    });
   }
 
   /**
@@ -1666,10 +1699,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.setLocksHeld()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.locksField.setText("" + locks);
+	return;
       }
+
+    final int lLocks = locks;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.locksField.setText("" + lLocks);
+      }
+    });
   }
 
   /**
@@ -1687,11 +1728,19 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.changeStatus()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.statusArea.append(status);
+	return;
+      }
+
+    final String lStatus = status;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.statusArea.append(lStatus);
 	frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
       }
+    });
   }
 
   /**
@@ -1706,10 +1755,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.changeAdmins()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.adminField.setText(adminStatus);
+	return;
       }
+
+    final String lAdminStatus = adminStatus;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.adminField.setText(lAdminStatus);
+      }
+    });
   }
 
   /**
@@ -1724,10 +1781,18 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("GASHAdmin.changeState()");
       }
 
-    if (frame != null)
+    if (frame == null)
       {
-	frame.stateField.setText(state);
+	return;
       }
+
+    final String lState = state;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.stateField.setText(lState);
+      }
+    });
   }
 
   /**
@@ -1780,9 +1845,26 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
       }
 
-    // And refresh our table
+    // And refresh our table.. we'll wait until this succeeds so we
+    // don't get the server sending us more updates before the table
+    // finishes drawing
 
-    frame.table.refreshTable();
+    try
+      {
+	SwingUtilities.invokeAndWait(new Runnable() {
+	  public void run() {
+	    frame.table.refreshTable();
+	  }
+	});
+      }
+    catch (InvocationTargetException ite)
+      {
+	ite.printStackTrace();
+      }
+    catch (InterruptedException ie)
+      {
+	ie.printStackTrace();
+      }
   }
 
   /**
@@ -1923,9 +2005,26 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	tasksKnown = taskNames;
       }
 
-    // And refresh our table
+    // And refresh our table.. we'll wait until this succeeds so we
+    // don't get the server sending us more updates before the table
+    // finishes drawing
 
-    frame.taskTable.refreshTable();
+    try
+      {
+	SwingUtilities.invokeAndWait(new Runnable() {
+	  public void run() {
+	    frame.taskTable.refreshTable();
+	  }
+	});
+      }
+    catch (InvocationTargetException ite)
+      {
+	ite.printStackTrace();
+      }
+    catch (InterruptedException ie)
+      {
+	ie.printStackTrace();
+      }
   }
 
   public void disconnect() throws RemoteException
