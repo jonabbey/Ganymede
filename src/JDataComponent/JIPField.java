@@ -6,8 +6,8 @@
    
    Created: 13 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/01/22 18:03:56 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/04/07 00:06:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,6 +90,8 @@ public class JIPField extends JentryField {
   String value;
   boolean allowV6;
 
+  private boolean processingCallback = false;
+
   /**  Constructors ***/
 
  /**
@@ -161,9 +163,10 @@ public class JIPField extends JentryField {
   }
 
   /**
-   *  returns the character located at position n in the JIPField value
+   * Sets the IP value held in this JIPField, without triggering a callback
+   * update.
    *
-   * @param n position in the JIPField value from which to retrieve character
+   * @param bytes IP v4 or v6 address in byte array form
    */
 
   public void setValue(Byte[] bytes)
@@ -188,6 +191,10 @@ public class JIPField extends JentryField {
     return;
   }
 
+  /**
+   * Returns the current IP value held in this JIPField.
+   */
+
   public Byte[] getValue()
   {
     String str;
@@ -195,6 +202,11 @@ public class JIPField extends JentryField {
     /* -- */
 
     str = getText();
+
+    if (str == null || str.equals(""))
+      {
+	return null;
+      }
 
     if (str.indexOf(':') != -1)
       {
@@ -217,7 +229,6 @@ public class JIPField extends JentryField {
    * When the JIPField looses focus, any changes made to 
    * the value in the JIPField need to be propogated to the
    * server.  This method will handle that functionality.
-   *
    */
 
   public void sendCallback()
@@ -227,121 +238,138 @@ public class JIPField extends JentryField {
 
     /* -- */
 
-    // if nothing in the JIPField has changed,
-    // we don't need to worry about this event.
-    
-    str = getText();
-    
-    if (value == null || !value.equals(str))
+    synchronized (this)
       {
-	try
+	if (processingCallback)
 	  {
-	    if (str.indexOf(':') != -1)
-	      {
-		if (allowV6)
-		  {
-		    bytes = genIPV6bytes(str);
-		  }
-		else
-		  {
-		    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
-		  }
-	      }
-	    else
-	      {
-		bytes = genIPV4bytes(str);
-	      }
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    reportError(ex.getMessage());
 	    return;
 	  }
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.println("JIPField.processFocusEvent: no change, ignoring");
-	  }
 	
-	return;
+	processingCallback = true;
       }
+
+    try
+      {
+	// if nothing in the JIPField has changed,
+	// we don't need to worry about this event.
     
-    if (allowCallback) 
-      {
-	boolean b = false;
-	
-	try 
+	str = getText();
+    
+	if (value == null || !value.equals(str))
 	  {
-	    if (debug)
+	    try
 	      {
-		System.err.println("JIPField.processFocusEvent: making callback");
-	      }
-	    
-	    b = my_parent.setValuePerformed(new JValueObject(this, bytes));
-	  }
-	catch (RemoteException re)
-	  {
-	    throw new RuntimeException("failure in callback dispatch: " + re); 
-	  }
-	
-	if (!b) 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JIPField.processFocusEvent: setValue rejected");
-		
-		if (value == null)
+		if (str.indexOf(':') != -1)
 		  {
-		    System.err.println("JIPField.processFocusEvent: resetting to empty string");
+		    if (allowV6)
+		      {
+			bytes = genIPV6bytes(str);
+		      }
+		    else
+		      {
+			throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
+		      }
 		  }
 		else
 		  {
-		    System.err.println("JIPField.processFocusEvent: resetting to " + value);
+		    bytes = genIPV4bytes(str);
 		  }
 	      }
-	    
-	    if (value == null)
+	    catch (IllegalArgumentException ex)
 	      {
-		setText("");
+		reportError(ex.getMessage());
+		return;
 	      }
-	    else
-	      {
-		setText(value);
-	      }
-	    
-	    changed = false;
 	  }
-	else 
+	else
 	  {
 	    if (debug)
 	      {
-		System.err.println("JIPField.processFocusEvent: setValue accepted");
+		System.err.println("JIPField.processFocusEvent: no change, ignoring");
 	      }
-	    
-	    if (bytes == null)
-	      {
-		value = "";
-		setText(value);
-	      }
-	    else if (bytes.length == 4)
-	      {
-		value = genIPV4string(bytes);
-		setText(value);
-	      }
-	    else if (bytes.length == 16)
-	      {
-		value = genIPV6string(bytes);
-		setText(value);
-	      }
-	    else
-	      {
-		throw new RuntimeException("JIPField: bad bytes calculated");
-	      }
-	    
-	    changed = true;
+	
+	    return;
 	  }
+    
+	if (allowCallback) 
+	  {
+	    boolean b = false;
+	
+	    try 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JIPField.processFocusEvent: making callback");
+		  }
+	    
+		b = my_parent.setValuePerformed(new JValueObject(this, bytes));
+	      }
+	    catch (RemoteException re)
+	      {
+		throw new RuntimeException("failure in callback dispatch: " + re); 
+	      }
+	
+	    if (!b) 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JIPField.processFocusEvent: setValue rejected");
+		
+		    if (value == null)
+		      {
+			System.err.println("JIPField.processFocusEvent: resetting to empty string");
+		      }
+		    else
+		      {
+			System.err.println("JIPField.processFocusEvent: resetting to " + value);
+		      }
+		  }
+	    
+		if (value == null)
+		  {
+		    setText("");
+		  }
+		else
+		  {
+		    setText(value);
+		  }
+	    
+		changed = false;
+	      }
+	    else 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JIPField.processFocusEvent: setValue accepted");
+		  }
+	    
+		if (bytes == null)
+		  {
+		    value = "";
+		    setText(value);
+		  }
+		else if (bytes.length == 4)
+		  {
+		    value = genIPV4string(bytes);
+		    setText(value);
+		  }
+		else if (bytes.length == 16)
+		  {
+		    value = genIPV6string(bytes);
+		    setText(value);
+		  }
+		else
+		  {
+		    throw new RuntimeException("JIPField: bad bytes calculated");
+		  }
+	    
+		changed = true;
+	      }
+	  }
+      }
+    finally
+      {
+	processingCallback = false;
       }
   }
 
