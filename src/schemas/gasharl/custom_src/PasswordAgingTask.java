@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/08/01 18:31:30 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/08/06 15:36:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -334,7 +334,7 @@ public class PasswordAgingTask implements Runnable {
 	// then we blow it away
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, -4);
+	upperBound.add(Calendar.DATE, -3);
 
 	if (passwordTime.before(upperBound.getTime()))
 	  {
