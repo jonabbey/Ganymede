@@ -87,9 +87,6 @@ RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3
 
 # ------------------------------------------------------------------ #
 
-# Below this point we have a few choices of invocation lines that
-# actually run your JVM on the Ganymede server..
-#
 # The minimum requirements to invoke the Ganymede server is to
 # run the jvm on the arlut.csd.ganymede.server.Ganymede class file, with a
 # command line parameter thereafter of usedirectory=$INSTALLDIR to give
@@ -157,15 +154,9 @@ RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3
 # Ganymede server, to avoid allowing Ganymede account
 # and password names from going over unprotected telnet.
 #
-# The -resetadmin, -forcelocalhost, -suppressEmail, telnet, and
-# -logrmi or logrmi=XXX parameters should be placed on the invocation
-# line after arlut.csd.ganymede.server.Ganymede.
-#
-# Other options included below include the -Xms32m and -Xmx256m jvm
-# options, which force a minimum heap size of 32 megabytes and a
-# maximum heap size of 256 megabytes.  If you are running an unusally
-# large Ganymede installation, you may want to increase the
-# maximum heap size to something greater than 256 megabytes.
+# The -resetadmin, -forcelocalhost, -suppressEmail, -nossl, telnet,
+# and -logrmi or logrmi=XXX parameters should be placed on the
+# invocation line after arlut.csd.ganymede.server.Ganymede.
 
 # ------------------------------------------------------------------ #
 
