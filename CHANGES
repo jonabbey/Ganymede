@@ -23,6 +23,11 @@ That doesn't mean that the server will be able to behave well with 2
 billion items in a String field, but there at least won't be an
 artificial cap of 32k items anymore.
 
+This is an incompatible change with versions 1.0.7 and earlier of
+the Ganymede server.  ganymede.db and journal files written
+by Ganymede 1.0.8 and later won't be readable by Ganymede 1.0.7 and
+earlier.
+
 2. [SERVER] Fixed scheduler to allow enabling/disabling of on demand tasks
 
 The Ganymede scheduler code to handle task enabling/disabling from the
