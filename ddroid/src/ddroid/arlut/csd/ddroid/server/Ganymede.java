@@ -73,7 +73,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.LogStream;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
 import java.util.Properties;
@@ -469,16 +468,6 @@ public class Ganymede {
 	try
 	  {
 	    RemoteServer.setLog(new FileOutputStream(debugFilename));
-
-	    System.getProperties().put("java.rmi.server.logCalls", "true");
-
-	    System.getProperties().put("java.rmi.server.proxy.logLevel", "verbose");
-	    FileOutputStream fos1 = new FileOutputStream(debugFilename + ".proxy");
-	    LogStream.log("proxy").setOutputStream(fos1);
-
-	    System.getProperties().put("java.rmi.server.tcp.logLevel", "verbose");
-	    FileOutputStream fos2 = new FileOutputStream(debugFilename + ".tcp");
-	    LogStream.log("tcp").setOutputStream(fos2);
 	  }
 	catch (IOException ex)
 	  {
