@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2002/01/12 17:04:16 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2002/01/12 17:24:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -218,6 +218,8 @@ public class DBLog {
     logWriter = new PrintWriter(logStream, true); // auto-flush on newline
 
     logWriter.println();	// emit newline to terminate any incomplete entry
+
+    // if the user wants to log mailout events, set up the mail log
 
     if (mailFilename != null && !mailFilename.equals(""))
       {
