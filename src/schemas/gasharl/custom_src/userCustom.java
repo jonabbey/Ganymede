@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2001/06/26 06:29:02 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2001/06/26 17:46:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2270,6 +2270,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    catch (IOException ex)
 	      {
 	      }
+
+	    // maybe if we destroy the process explicitly we'll get better memory
+	    // usage characteristics?
+
+	    process.destroy();
 	  }
       }
     else
