@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,6 +190,15 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.kill(username);
   }
 
+  // ------------------------------------------------------------
+  // convenience methods for our GASHAdminFrame
+  // ------------------------------------------------------------
+
+  void killAll() throws RemoteException
+  {
+    aSession.killAll();
+  }
+
   void shutdown() throws RemoteException
   {
     if (!adminName.equals("supergash"))
@@ -273,6 +282,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   MenuItem dumpMI = null;
   MenuItem schemaMI = null;
   MenuItem shutdownMI = null;
+  MenuItem killAllMI = null;
 
   PopupMenu popMenu = null;
   MenuItem killUserMI = null;
@@ -335,6 +345,9 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     shutdownMI = new MenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
 
+    killAllMI = new MenuItem("Kill Off All Users");
+    killAllMI.addActionListener(this);
+
     schemaMI = new MenuItem("Edit Schema");
     schemaMI.addActionListener(this);
 
@@ -343,6 +356,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     controlMenu.add(dumpMI);
     controlMenu.add(shutdownMI);
+    controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
     controlMenu.addSeparator();
     controlMenu.add(quitMI);
@@ -669,6 +683,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	controlMenu.remove(dumpMI);
 	controlMenu.remove(shutdownMI);
 	controlMenu.remove(schemaMI);
+	controlMenu.remove(killAllMI);
       }
 
     try
@@ -737,6 +752,33 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	      {
 		admin.forceDisconnect("Couldn't talk to server" + ex);
 	      }
+	  }
+      }
+    else if (event.getSource() == killAllMI)
+      {
+	DialogRsrc killAllDLGR;
+	StringDialog killAllDLG;
+
+	killAllDLGR = new DialogRsrc(this,
+				     "Are you sure you want to log out all users?", 
+				     "Enter your administrator account name & password",
+				     "Hell Yes", "No", question);
+    
+	killAllDLG = new StringDialog(killAllDLGR);
+	Hashtable results = killAllDLG.DialogShow();
+	
+	if (results == null)
+	  {
+	    return;
+	  }
+
+	try
+	  {
+	    admin.killAll();
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
 	  }
       }
     else if (event.getSource() == schemaMI)
