@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,8 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 public class PermissionMatrixDBField extends DBField implements perm_field {
+
+  static final boolean debug = false;
 
   private Hashtable matrix;
 
@@ -82,11 +84,57 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     super();			// initialize UnicastRemoteObject
 
+    // --
+
+    Object key;
+    PermEntry entry;
+
+    /* -- */
+
     value = values = null;
+
+    if (debug)
+      {
+	System.err.println("PermissionMatrixDBField: Copy constructor");
+      }
 
     this.definition = field.definition;
     this.owner = owner;
-    this.matrix = (Hashtable) field.matrix.clone();
+    this.matrix = new Hashtable(field.matrix.size());
+
+    Enumeration enum = field.matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+
+	if (debug)
+	  {
+	    System.err.print("PermissionMatrixDBField: copying ");
+
+	    if (key instanceof DBObjectBase)
+	      {
+		System.err.print("base " + ((DBObjectBase) key).getName());
+	      }
+	    else if (key instanceof DBObjectBaseField)
+	      {
+		System.err.print("basefield " + ((DBObjectBaseField) key).getName());
+	      }
+	    else
+	      {
+		System.err.print("unrecognized key");
+	      }
+	  }
+
+	entry = new PermEntry((PermEntry) field.matrix.get(key));
+
+	if (debug)
+	  {
+	    System.err.println(" contents: " + entry);
+	  }
+
+	this.matrix.put(key, entry);
+      }
 
     defined = true;
   }
@@ -342,6 +390,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("not an editable field");
       }
 
+    if (debug)
+      {
+	System.err.println("PermissionMatrixDBField: base " + baseID + ", field " + fieldID + " set to " + entry);
+      }
+
     defined = true;
   }
 
@@ -368,6 +421,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("not an editable field");
       }
 
+    if (debug)
+      {
+	System.err.println("PermissionMatrixDBField: base " + baseID + " set to " + entry);
+      }
+
     defined = true;
   }
 
@@ -390,6 +448,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	try
 	  {
 	    matrix.put(matrixEntry(base.getTypeID(), field.getID()), entry);
+
+	    if (debug)
+	      {
+		System.err.println("PermissionMatrixDBField: base " + base.getName() + 
+				   ", field " + field.getName() + " set to " + entry);
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -422,6 +486,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	try
 	  {
 	    matrix.put(matrixEntry(base.getTypeID()), entry);
+
+	    if (debug)
+	      {
+		System.err.println("PermissionMatrixDBField: base " + base.getName() + 
+				   " set to " + entry);
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
