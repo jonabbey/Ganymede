@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -514,6 +514,10 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : got read lock");
 
+    // our dump is going to have both invid's and labels
+
+    result.append("inv\n");
+
     enum = base.objectHash.keys();
 
     // need to check in here to see if we've had the lock yanked
@@ -683,21 +687,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     /* -- */
 
-    //    baseLock = new Vector();
-    //    baseLock.addElement(session.store.getObjectBase(invid.getType()));
-    //
-    //    try
-    //      {
-    //	session.openReadLock(baseLock);	// wait for it
-    //      }
-    //    catch (InterruptedException ex)
-    //      {
-    //	return null;		// we're probably being booted off
-    //      }
-    
     result = session.viewDBObject(invid);
-
-    // session.releaseReadLock();
 
     return result;
   }
@@ -715,22 +705,8 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Vector baseLock;
 
     /* -- */
-
-    //    baseLock = new Vector();
-    //    baseLock.addElement(session.store.getObjectBase(invid.getType()));
-    //
-    //    try
-    //      {
-    //	session.openReadLock(baseLock);	// wait for it
-    //      }
-    //    catch (InterruptedException ex)
-    //      {
-    //	return null;		// we're probably being booted off
-    //      }
     
     result = session.editDBObject(invid);
-
-    //    session.releaseReadLock();
 
     return result;
   }
