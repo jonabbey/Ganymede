@@ -7,8 +7,8 @@
 
    Created: 9 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/06/22 04:56:23 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2002/01/28 22:06:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,7 +83,7 @@ public class DBLockSync {
    * to have several distinct reader locks), a Vector of DBLocks.</P>
    */
 
-  Hashtable lockHash;
+  private Hashtable lockHash;
 
   /**
    * A count of how many {@link arlut.csd.ganymede.DBLock DBLocks} are
@@ -91,7 +91,7 @@ public class DBLockSync {
    * in this DBStore.
    */
 
-  int locksHeld = 0;
+  private int locksHeld = 0;
 
   /* -- */
 
