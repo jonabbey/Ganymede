@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -912,7 +912,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  {
 	    framePanel fp = (framePanel)Windows.get(MI);
 
-	    boolean success = gc.inactivateObject(fp.invid);
+	    boolean success = gc.inactivateObject(fp.getObjectInvid());
 
 	    if (success)
 	      {
