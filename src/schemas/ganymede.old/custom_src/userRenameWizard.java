@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -199,7 +199,7 @@ public class userRenameWizard extends GanymediatorWizard {
 
 	if (retVal == null)
 	  {
-	    retVal = new ReturnVal(true); // should cause DBField.setValue() to proceed
+	    retVal = new ReturnVal(true);
 	    dialog = new JDialogBuff("User Rename Performed",
 				     "OK, User renamed.",
 				     "Thanks",
