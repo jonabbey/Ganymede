@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-July ??, 2000
+August ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: July ??
+RELEASE DATE: August ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -791,6 +791,14 @@ transaction commit.
 
 This change will make committing large transactions a good deal
 faster, and will make failed commit attempts even faster than that.
+
+51. [SERVER] Improved startup sequence
+
+The server now intelligently checks to make sure that no server is
+already running at the same host and port, rather than simply ignoring
+the warning from the RMI rebind process.  The server will now decline
+to start up if another server is answering the phone at the same
+address.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
