@@ -1243,9 +1243,11 @@ public class Ganymede {
   }
 
   /**
-   * This method schedules all registered builder tasks for
-   * execution.  This method will be called when a user commits a
-   * transaction.
+   * This method schedules all registered builder tasks and Sync
+   * Runners for execution.  This method will be called when a user
+   * commits a transaction.  If a given task is already running, the
+   * scheduler will make a note that it needs to be rescheduled on
+   * completion.
    */
 
   static void runBuilderTasks()
