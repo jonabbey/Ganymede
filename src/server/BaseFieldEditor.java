@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -103,7 +103,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     dateShowing,
     stringShowing,
     referenceShowing,
-    passwordShowing;
+    passwordShowing,
+    ipShowing;
 
   /* -- */
 
@@ -163,6 +164,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     typeC.add("String");
     typeC.add("Object Reference");
     typeC.add("Password");
+    typeC.add("I.P.");
     typeC.addItemListener(this);
 
     //choose the one that is the default
@@ -225,6 +227,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     stringShowing = false;
     referenceShowing = false;
     passwordShowing = false;
+    ipShowing = false;
 
     add(editPanel);
   }
@@ -544,6 +547,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     stringShowing = false;
     referenceShowing = false;
     passwordShowing = false;
+    ipShowing = false;
 
     try
       {
@@ -576,6 +580,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  {
 	    passwordShowing = true;
 	    fieldDef.setType(FieldType.PASSWORD);
+	  }
+	else if (selectedItem.equalsIgnoreCase("I.P."))
+	  {
+	    ipShowing = true;
+	    fieldDef.setType(FieldType.IP);
 	  }
       }
     catch (RemoteException ex)
@@ -632,6 +641,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     stringShowing = false;
     referenceShowing = false;
     passwordShowing = false;
+    ipShowing = false;
 
     System.out.println(" before try");
     try
@@ -689,6 +699,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	    passwordShowing = true;
 
 	    cryptedCF.setState(fieldDef.isCrypted());
+	  }
+	else if (fieldDef.isIP())
+	  {
+	    typeC.select("I.P.");
+	    ipShowing = true;
 	  }
 	else if (fieldDef.isBoolean())
 	  {
