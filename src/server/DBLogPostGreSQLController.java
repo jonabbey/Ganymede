@@ -8,8 +8,8 @@
    
    Created: 26 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/02/27 03:23:29 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/02/27 03:35:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.sql.Timestamp;
  * arlut.csd.ganymede.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2003/02/27 03:23:29 $
+ * @version $Revision: 1.2 $ $Date: 2003/02/27 03:35:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -99,12 +99,30 @@ public class DBLogPostGreSQLController implements DBLogController {
    * and finishTransaction, yo.
    */
 
-  String transactionID;
-  Vector transInvids;
+  String transactionID = null;
+  Vector transInvids = null;
 
-  public DBLogPostGreSQLController(String hostname, String databaseName,
-				   String username, String password)
+  public DBLogPostGreSQLController(String hostname,
+				   String databaseName,
+				   String username, 
+				   String password) throws ClassNotFoundException, SQLException
   {
+    String url;
+
+    /* -- */
+
+    Class.forName("org.postgresql.Driver");
+    
+    if (hostname == null)
+      {
+	url = "jdbc:postgresql:" + databaseName;
+      }
+    else
+      {
+	url = "jdbc:postgresql://" + hostname + "/" + databaseName;
+      }
+
+    con = DriverManager.getConnection(url, username, password);
   } 
 
   /**
@@ -116,8 +134,6 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   public void writeEvent(DBLogEvent event)
   {
-
-
     if (con == null)
       {
 	throw new IllegalArgumentException("no connection to postgres database");
@@ -358,12 +374,10 @@ public class DBLogPostGreSQLController implements DBLogController {
       }
     catch (SQLException ex)
       {
-	System.err.println("********************");
-	System.err.println("SQLException in retrieveHistory: " + ex.getMessage());
-	System.err.println("** SQLState: " + ex.getSQLState());
-	System.err.println("** SQL Error Code: " + ex.getErrorCode());
-	ex.printStackTrace();
-	System.err.println("********************");
+	Ganymede.debug("SQLException in retrieveHistory: " + ex.getMessage());
+	Ganymede.debug("** SQLState: " + ex.getSQLState());
+	Ganymede.debug("** SQL Error Code: " + ex.getErrorCode());
+	Ganymede.debug(Ganymede.stackTrace(ex));
 	return buffer;
       }
 
@@ -431,5 +445,17 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   public void close()
   {
+    if (con != null)
+      {
+	try
+	  {
+	    con.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+
+	con = null;
+      }
   }
 }
