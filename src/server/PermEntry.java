@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2001/05/07 05:57:53 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/05/07 06:10:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -195,6 +195,14 @@ public class PermEntry implements java.io.Serializable {
   private boolean create;
   private boolean delete;
 
+  // transient fields are initialized to 0 or false when objects
+  // are deserialized, so we can use indexSet to differentiate
+  // between index being zero because we have no permissions and
+  // index being zero because of deserialization
+   
+  private transient byte index;
+  private transient boolean indexSet;
+
   /* -- */
 
   public PermEntry(boolean visible, boolean editable, boolean create, boolean delete)
@@ -203,6 +211,9 @@ public class PermEntry implements java.io.Serializable {
     this.editable = editable;
     this.create = create;
     this.delete = delete;
+
+    calcIndex();
+    indexSet = true;
   }
 
   public PermEntry(DataInput in) throws IOException
@@ -216,6 +227,9 @@ public class PermEntry implements java.io.Serializable {
     this.editable = orig.editable;
     this.create = orig.create;
     this.delete = orig.delete;
+
+    calcIndex();
+    indexSet = true;
   }
 
   public boolean equals(Object obj)
@@ -273,6 +287,9 @@ public class PermEntry implements java.io.Serializable {
       {
 	delete = false;
       }
+
+    calcIndex();
+    indexSet = true;
   }
 
   /**
@@ -336,7 +353,13 @@ public class PermEntry implements java.io.Serializable {
 
   public byte indexNum()
   {
-    return calcIndex();
+    if (!indexSet)
+      {
+	calcIndex();
+	indexSet = true;
+      }
+
+    return index;
   }
 
   /**
@@ -498,10 +521,10 @@ public class PermEntry implements java.io.Serializable {
     return result.toString();
   }
 
-  private byte calcIndex()
+  private synchronized void calcIndex()
   {
-    byte index = 0;
-    
+    index = 0;
+
     if (visible)
       {
 	index++;
@@ -521,7 +544,5 @@ public class PermEntry implements java.io.Serializable {
       {
 	index += 8;
       }
-
-    return index;
   }
 }
