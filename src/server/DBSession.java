@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -136,6 +136,10 @@ public class DBSession {
   {
     DBObjectBase base;
     DBEditObject e_object;
+    DateDBField df;
+    StringDBField sf;
+    Date modDate = new Date();
+    String result;
 
     /* -- */
 
@@ -147,6 +151,41 @@ public class DBSession {
     base = (DBObjectBase) store.objectBases.get(new Short(object_type));
 
     e_object = base.createNewObject(editSet);
+
+    if (!base.isEmbedded())
+      {
+	// set creator info to something non-null
+
+	df = (DateDBField) e_object.getField(SchemaConstants.CreationDateField);
+	df.setValue(modDate);
+
+	sf = (StringDBField) e_object.getField(SchemaConstants.CreatorField);
+
+	result = getID();
+
+	if (editSet.description != null)
+	  {
+	    result += ": " + editSet.description;
+	  }
+
+	sf.setValue(result);
+
+	// set modifier info to something non-null
+
+	df = (DateDBField) e_object.getField(SchemaConstants.ModificationDateField);
+	df.setValue(modDate);
+
+	sf = (StringDBField) e_object.getField(SchemaConstants.ModifierField);
+
+	result = getID();
+
+	if (editSet.description != null)
+	  {
+	    result += ": " + editSet.description;
+	  }
+
+	sf.setValue(result);
+      }
 
     return e_object;
   }
