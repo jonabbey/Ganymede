@@ -22,4 +22,10 @@ echo "Running Ganymede Client"
 
 export CLASSPATH
 
-$JAVA -mx32m arlut.csd.ganymede.client.glogin properties=$PROPERTIES
+# For Java 1.1
+
+$JAVA -mx48m arlut.csd.ganymede.client.glogin properties=$PROPERTIES
+
+# For Java 1.2/1.3
+
+#$JAVA -Xmx48m arlut.csd.ganymede.client.glogin properties=$PROPERTIES

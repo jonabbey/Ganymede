@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Ganymede admin console script 
+# Ganymede client script
 #
-###############################
+########################
 
 ## This section is customized by the client install script
 
@@ -11,21 +11,21 @@
 # script
 
 JAVA=/opt/bin/java
-CLASSPATH=/v/site/packages/ganymede/etc/ganymedeAdmin.jar:/v/site/packages/swing-1.0/swingall.jar
+CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar:/v/site/packages/swing-1.0/swingall.jar
 PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
 ############################################### 
 
 trap "echo Aborted" 2
 
-echo "Running Ganymede Admin Console"
+echo "Running Ganymede Client"
 
 export CLASSPATH
 
 # For Java 1.1
 
-$JAVA -mx32m arlut.csd.ganymede.GASHAdmin $PROPERTIES
+#$JAVA -mx48m arlut.csd.ganymede.client.glogin properties=$PROPERTIES
 
-# For Java 1.2
+# For Java 1.2/1.3
 
-#$JAVA -Xmx32m arlut.csd.ganymede.GASHAdmin $PROPERTIES
+$JAVA -Xmx48m arlut.csd.ganymede.client.glogin properties=$PROPERTIES

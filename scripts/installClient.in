@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.14 $
-# $Date: 2000/09/09 00:28:46 $
+# $Revision: 1.15 $
+# $Date: 2000/10/10 04:46:08 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -31,7 +31,7 @@ use File::Copy;
          "REGISTRYPORT" => "1099",
          "CLIENTINSTALL" => "");
 
-%descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
+%descrip = ("JVM" => "Where are the Java binaries installed?",
 	    "SWINGJARS" => "Where are the Swing 1.1 jar files installed at?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
@@ -79,6 +79,12 @@ foreach $step (@steps) {
   $success = 0;
 
   while (!$success) {
+
+    if ($step eq "SWINGJARS" && $version == 2) {
+      print "Identified " . $vars{JVM} . "/java as Java 1.2 or higher, don't need Swing location\n";
+      next;
+    }
+
     print $descrip{$step};
     print " [$vars{$step}] ";
 
@@ -110,6 +116,14 @@ foreach $step (@steps) {
 	$success = 0;
       }
     }
+
+    if ($step eq "JVM") {
+      $version = &identifyjvm($vars{"JVM"}."/java");
+
+      if ($version == 0) {
+	die "*Can't find the java command*\n\nAborting..";
+      }
+    }
   }
 }
 
@@ -121,17 +135,7 @@ Testing configuration information
 
 ENDCONFIG
 
-# java command found ok?
-
-if (!-e $vars{"JVM"}."/java") {
-  die "*Can't find the java command*\n\nAborting..";
-} else {
-  print "Found the java command ok\n";
-}
-
-# swing jars found?
-
-if (!-e $vars{"SWINGJARS"}."/swingall.jar") {
+if ($version == 1 && !-e $vars{"SWINGJARS"}."/swingall.jar") {
   die "Can't find the swingall jar ".$vars{"SWINGJARS"}."/swingall.jar";
 } else {
   print "Found the swing jar ok\n";
@@ -193,12 +197,23 @@ close OUTPUT;
 # Copy and process the ganymede script into place
 
 print "\nCustomizing ganymede script\n";
+
+if ($version == 1) {
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => $installdir."/client.properties",
+		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:".$installdir."/jars/ganymede.jar");
+
+  $template = "scripts/ganymede.template";
+
+} else {
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => $installdir."/client.properties",
+		 "CLASSPATH" => $installdir."/jars/ganymede.jar");
+
+  $template = "scripts/ganymede.template2";
+}
   
-%runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "PROPERTIES" => $installdir."/client.properties",
-	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:".$installdir."/jars/ganymede.jar");
-  
-open INPUT, "scripts/ganymede.template" or die "Couldn't open ganymede template!";
+open INPUT, "$template" or die "Couldn't open $template!";
 open OUTPUT, ">".$installdir."/bin/ganymede" or die "Couldn't write ganymede";
   
 while (<INPUT>) {
@@ -221,7 +236,7 @@ chmod 0750, "$installdir/bin/ganymede";
 # Copy and process the xmlclient script into place
 
 print "\nCustomizing xmlclient script\n";
-  
+
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
 	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
@@ -250,11 +265,21 @@ chmod 0750, "$installdir/bin/xmlclient";
 
 print "\nCustomizing ganymedeAdmin script\n";
 
-%runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymedeAdmin.jar");
+if ($version == 1) {
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => "$installdir/client.properties",
+		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymedeAdmin.jar");
 
-open INPUT, "scripts/ganymedeAdmin.template" or die "Couldn't open ganymedeAdmin template!";
+  $template = "scripts/ganymedeAdmin.template";
+} else {
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => "$installdir/client.properties",
+		 "CLASSPATH" => $installdir/jars/ganymedeAdmin.jar");
+
+  $template = "scripts/ganymedeAdmin.template2";
+}
+
+open INPUT, "$template" or die "Couldn't open $template!";
 open OUTPUT, ">$installdir/bin/ganymedeAdmin" or die "Couldn't write ganymedeAdmin";
 
 while (<INPUT>) {
@@ -280,7 +305,7 @@ print "\nCustomizing rpcpass script\n";
   
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
+	       "CLASSPATH" => $installdir/jars/ganymede.jar");
   
 open INPUT, "scripts/rpcpass.template" or die "Couldn't open rpcpass template!";
 open OUTPUT, ">$installdir/bin/rpcpass" or die "Couldn't write rpcpass";
@@ -434,3 +459,35 @@ sub removelastslash{
 	chop $_[0];
     }
 }
+
+######################################################################### 
+#
+#                                                             identifyjvm
+# input: filename of the jvm executable
+#
+# returns: 0 if the jvm couldn't be tested, 1 if it was JDK 1.1 based,
+# 2 if it was 1.2 or 1.3 based
+#
+#
+######################################################################### 
+sub identifyjvm {
+  my ($jvm) = @_;
+  my $versionString;
+
+  if (!-f $jvm) {
+    return 0;
+  }
+
+  $versionString = `$jvm -version`;
+
+  if (($versionString =~ /1\.2/) ||
+      ($versionString =~ /1\.3/))
+    {
+      return 2;
+    }
+  else
+    {
+      return 1;
+    }
+}
+
