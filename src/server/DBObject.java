@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2001/04/17 03:53:01 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2001/05/21 07:21:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.121 $ $Date: 2001/04/17 03:53:01 $
+ * @version $Revision: 1.122 $ $Date: 2001/05/21 07:21:43 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1009,28 +1009,28 @@ public class DBObject implements db_object, FieldType, Remote {
 
 		for (int j = 0; j < tmp.size(); j++)
 		  {
-		    if (definition.namespace.uniqueHash.containsKey(tmp.key(j)))
+		    if (definition.namespace.containsKey(tmp.key(j)))
 		      {
 			throw new RuntimeException("Duplicate unique value detected in vector field: " + 
 						   tmp.key(j));
 		      } 
 
-		    definition.namespace.uniqueHash.put(tmp.key(j), 
-							new DBNameSpaceHandle(null, true, tmp));
+		    definition.namespace.putHandle(tmp.key(j), 
+						   new DBNameSpaceHandle(null, true, tmp));
 		  }
 	      }
 	    else
 	      {
 		// mark the scalar value in the namespace
 		
-		if (definition.namespace.uniqueHash.containsKey(tmp.key()))
+		if (definition.namespace.containsKey(tmp.key()))
 		  {
 		    throw new RuntimeException("Duplicate unique value detected in scalar field: " + 
 					       tmp.key());
 		  }
 
-		definition.namespace.uniqueHash.put(tmp.key(), 
-						    new DBNameSpaceHandle(null, true, tmp));
+		definition.namespace.putHandle(tmp.key(), 
+					       new DBNameSpaceHandle(null, true, tmp));
 	      }
 	  }
 	

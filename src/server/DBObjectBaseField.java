@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2001/03/24 07:42:23 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2001/05/21 07:21:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3553,7 +3553,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (namespace != null)
       {
-	return namespace.name;
+	return namespace.getName();
       }
     else
       {

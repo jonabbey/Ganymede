@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2001/03/03 07:31:42 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2001/05/21 07:21:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -98,18 +98,29 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     //    debug = val;
   }
 
-  boolean caseInsensitive;	// treat differently-cased Strings as the same for key?
-  String    name;		// the name of this namespace
-  Hashtable uniqueHash;		// index of values used in the current namespace
-  Hashtable reserved;		// index of editSet's currently actively modifying
-				// values in this namespace
-
   /**
-   * Hashtable mapping DBEditSet keys to Hashtables mapping
-   * name strings to DBNameSpaceCkPoint objects
+   * <p>treat differently-cased Strings as the same for key?</p>
    */
 
-  Hashtable checkpoints = new Hashtable();
+  private boolean caseInsensitive;
+
+  /**
+   * <p>the name of this namespace</p>
+   */
+
+  private String    name;
+
+  /**
+   * <p>index of values used in the current namespace</p>
+   */
+
+  private Hashtable uniqueHash;
+
+  /**
+   * <p>Index of DBEditSet's currently actively modifying values in this namespace.</p>
+   */
+
+  private Hashtable transactions;
 
   /* -- */
 
@@ -125,7 +136,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     receive(in);
     uniqueHash = new GHashtable(caseInsensitive); // size?
-    reserved = new Hashtable();	// size?
+    transactions = new Hashtable(); // size?
   }
 
   /**
@@ -141,7 +152,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     this.name = name;
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
-    reserved = new Hashtable();	// size?
+    transactions = new Hashtable(); // size?
   }
 
   /**
@@ -251,6 +262,39 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     // right now, of course, we do none of this
 
     caseInsensitive = b;
+  }
+
+  public synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
+  {
+    DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
+
+    if (transRecord == null)
+      {
+	transRecord = new DBNameSpaceTransaction(transaction);
+	transactions.put(transaction, transRecord);
+      }
+
+    return transRecord;
+  }
+
+  public boolean containsKey(Object value)
+  {
+    return uniqueHash.containsKey(value);
+  }
+
+  public DBNameSpaceHandle getHandle(Object value)
+  {
+    return (DBNameSpaceHandle) uniqueHash.get(value);
+  }
+
+  public void putHandle(Object value, DBNameSpaceHandle handle)
+  {
+    uniqueHash.put(value, handle);
+  }
+  
+  public void clearHandle(Object value)
+  {
+    uniqueHash.remove(value);
   }
 
   /*----------------------------------------------------------------------------
@@ -412,8 +456,9 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	    handle.inuse = true;
 	    handle.shadowField = field;
 
-	    // we don't have to make a note in reserved since
-	    // we already have this value noted in the editset
+	    // we don't have to have the transaction record remember
+	    // the value since we should already have this value noted
+	    // in the editset
 	  }
       }
     else
@@ -741,19 +786,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void checkpoint(DBEditSet editSet, String name)
   {
-    NamedStack transpoints;
-
-    /* -- */
-
-    transpoints = (NamedStack) checkpoints.get(editSet);
-
-    if (transpoints == null)
-      {
-	transpoints = new NamedStack();
-	checkpoints.put(editSet, transpoints);
-      }
-
-    transpoints.push(name, new DBNameSpaceCkPoint(this, editSet));
+    getTransactionRecord(editSet).pushCheckpoint(name, new DBNameSpaceCkPoint(this, editSet));
   }
 
   /*----------------------------------------------------------------------------
@@ -778,26 +811,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void popCheckpoint(DBEditSet editSet, String name)
   {
-    NamedStack transpoints;
-
-    /* -- */
-
-    transpoints = (NamedStack) checkpoints.get(editSet);
-
-    if (transpoints == null)
-      {
-	return;
-      }
-
-    DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) transpoints.pop(name);
-
-    if (point == null)
-      {
-	System.err.println("DBNameSpace.popCheckpoint: couldn't find checkpoint for " + name);
-	System.err.println("In transaction " + editSet.description);
-	System.err.println("\nCurrently registered checkpoints:");
-	System.err.println(transpoints.toString());
-      }
+    getTransactionRecord(editSet).popCheckpoint(name);
   }
 
   /*----------------------------------------------------------------------------
@@ -820,130 +834,98 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean rollback(DBEditSet editSet, String name)
   {
-    Object value1, value2;
-    Vector currentVals, elementsToRemove;
-    NamedStack transpoints;
+    Object value;
+    Vector elementsToRemove = new Vector();
+    DBNameSpaceTransaction tRecord; 
     DBNameSpaceCkPoint point;
-    DBNameSpaceHandle handle1, handle2;
+    DBNameSpaceHandle handle;
+    Enumeration enum;
 
     /* -- */
 
-    transpoints = (NamedStack) checkpoints.get(editSet);
-
-    if (transpoints == null)
-      {
-	System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
-	System.err.println("DBNameSpace.rollback(): no checkpoints found for transaction");
-	return false;
-      }
+    tRecord = getTransactionRecord(editSet);
 
     // try to pop off the named checkpoint we're looking for
 
-    point = (DBNameSpaceCkPoint) transpoints.pop(name);
+    point = tRecord.popCheckpoint(name);
 
     if (point == null)
       {
 	System.err.println("DBNameSpace.rollback(): couldn't find checkpoint for " + name);
 	System.err.println("In transaction " + editSet.description);
 	System.err.println("\nCurrently registered checkpoints:");
-	System.err.println(transpoints.toString());
+	System.err.println(tRecord.getCheckpointStack());
 	return false;
       }
 
     // now we need to set about reconstituting the state of the
     // namespace for the values that were recorded at the time the
-    // point was established
+    // point was established.  Once a DBNameSpace reserves a value on
+    // behalf of a transaction, it won't be forgotten no matter what
+    // happens, so we don't need to worry about values that were
+    // reserved in the checkpoint that are not reserved anymore; we'll
+    // just iterate over the values that are currently reserved for
+    // the transaction, and check them against the checkpoint we are
+    // reverting to.
 
-    // first we need to see what the current state is
+    enum = tRecord.getReservedEnum();
 
-    currentVals = (Vector) reserved.get(editSet);
-
-    if (currentVals == null)
+    while (enum.hasMoreElements())
       {
-	if (point.values.size() != 0)
+	value = enum.nextElement();
+	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+	// ok, we've got a value that is in our current reserved list.
+	// Now, was it in our checkpoint?
+
+	if (!point.containsValue(value))
 	  {
-	    System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
-	    System.err.println("In transaction " + editSet.description);
-	    System.err.println("DBNameSpace.rollback(): no values held for transaction in namespace");
-	    return false;
-	  }
-	else
-	  {
-	    return true;	// no work to be done here
-	  }
-      }
-
-    // ok, now we need to take the state of currentVals and roll it back
-    // to the state we had at time point.
-
-    elementsToRemove = new Vector();
-
-    for (int i = 0; i < currentVals.size(); i++)
-      {
-	value1 = currentVals.elementAt(i);
-	handle1 = (DBNameSpaceHandle) uniqueHash.get(value1);
-
-	// ok, we've got a value.  Now, is it in our checkpoint?
-
-	value2 = point.values.contains(value1) ? value1 : null;
-
-	// ok, at this point, value2 == null if the chkpoint
-	// didn't have the value reserved.  In this case,
-	// we'll want to revert this handle back to the
-	// virgin, unallocated state.
-
-	if (value2 == null)
-	  {
-	    // if the handle was originally in the namespace,
-	    // clear the shadowfield. if the handle wasn't in the
-	    // namespace, take it out.
-	    
-	    if (handle1.original)
+	    if (handle.original)
 	      {
 		// remember, shadowField is just for our use while
 		// we're manipulating a namespace allocation within a
-		// transaction.  we're not screwing with handle.field
-		// here, which is still left standing so that the
-		// namespace-optimized query mechanism in
-		// GanymedeSession can track down the field bound to
-		// the namespace value.
+		// transaction.  we're not screwing with
+		// handle.fieldInvid or handle.fieldId here, which are
+		// still left standing so that the namespace-optimized
+		// query mechanism in GanymedeSession can track down
+		// the field bound to the namespace value.
 
-		handle1.shadowField = null;
-		handle1.owner = null;
-		handle1.inuse = true;
+		handle.shadowField = null;
+		handle.owner = null;
+		handle.inuse = true;
 	      }
 	    else
 	      {
-		uniqueHash.remove(value1);
-		elementsToRemove.addElement(value1);
+		// the value was not reserved in the namespace before
+		// this transaction allocated it, so we can just
+		// forget it entirely, and allow other transactions to
+		// use it.
+
+		uniqueHash.remove(value);
 	      }
+
+	    elementsToRemove.addElement(value);
 	  }
 	else
 	  {
-	    // the checkpoint had value2 reserved.. we need to
-	    // re-instantiate the association with value2 with the
-	    // handle from the checkpoint.
+	    // the checkpoint did have value reserved.  we need to
+	    // revert the DBNameSpaceHandle for that value to that
+	    // stored in the checkpoint.
 
-	    handle2 = (DBNameSpaceHandle) point.uniqueHash.get(value2);
-
-	    uniqueHash.put(value2, handle2);
+	    uniqueHash.put(value, point.getValueHandle(value));
 	  }
       }
 
     // now clean out the vector of values for this editset, removing
-    // any values that are being freed up by this rollback.
+    // any values that are being freed up by this rollback.  Note
+    // that we have to use the elementsToRemove vector and do the
+    // forgetting in a separate loop to avoid screwing with the
+    // enumeration we were using.
 
     for (int i = 0; i < elementsToRemove.size(); i++)
       {
-	value1 = elementsToRemove.elementAt(i);
-	currentVals.removeElement(value1);
+	tRecord.forget(elementsToRemove.elementAt(i));
       }
-
-    // that should be all we have to do, since once a value in the name space
-    // is attached to a transaction, it remains attached until the transaction
-    // is committed or released, to facilitate field-value swaps.  We'll never
-    // encounter a value in our checkpoint that isn't still attached to our
-    // namespace in the present.
 
     return true;
   }
@@ -964,36 +946,26 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void abort(DBEditSet editSet)
   {
-    Vector valueVect;
+    DBNameSpaceTransaction tRecord;
+    Enumeration enum;
+    Object value;
     DBNameSpaceHandle handle;
 
     /* -- */
 
-    // if we don't have any namespace values reserved for this
-    // editSet, just return
+    tRecord = getTransactionRecord(editSet);
 
-    if (!reserved.containsKey(editSet))
-      {
-	// very important!  else we will have DBEditSet's loitering!
-
-	checkpoints.remove(editSet);
-	return;
-      }
-
-    // get the vector of namespace values used by this editset
-
-    valueVect = (Vector) reserved.get(editSet);
+    enum = tRecord.getReservedEnum();
 
     // loop over the values in the namespace that were changed or affected
-    // by this editset
+    // by this editset, and revert them to their checked-in status, or
+    // get rid of them entirely if they weren't allocated in this namespace
+    // before this transaction allocated them
 
-    for (int i = 0; i < valueVect.size(); i++)
+    while (enum.hasMoreElements())
       {
-	handle = (DBNameSpaceHandle) uniqueHash.get(valueVect.elementAt(i));
-
-	// if the handle was originally in the namespace,
-	// clear the shadowfield. if the handle wasn't in the
-	// namespace, take it out.
+	value = enum.nextElement();
+	handle = getHandle(value);
 
 	if (handle.original)
 	  {
@@ -1003,14 +975,15 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	  }
 	else
 	  {
-	    uniqueHash.remove(valueVect.elementAt(i));
+	    uniqueHash.remove(value);
 	  }
       }
 
-    // we're done with this editSet
+    // we're done with this transaction
 
-    reserved.remove(editSet);
-    checkpoints.remove(editSet);
+    tRecord.cleanup();
+
+    transactions.remove(editSet);
   }
 
   /*----------------------------------------------------------------------------
@@ -1033,65 +1006,45 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void commit(DBEditSet editSet)
   {
-    Vector valueVect;
+    DBNameSpaceTransaction tRecord;
+    Enumeration enum;
+    Object value;
     DBNameSpaceHandle handle;
 
     /* -- */
 
-    // if we don't have any namespace values reserved for this
-    // editSet, just return
+    tRecord = getTransactionRecord(editSet);
 
-    if (!reserved.containsKey(editSet))
+    enum = tRecord.getReservedEnum();
+
+    // loop over the values in the namespace that were changed or
+    // affected by this editset, and commit them into the database,
+    // copying the shadowField DBField into the handle's permanent
+    // field pointer, or getting rid of them entirely if they are not
+    // in use anymore
+
+    while (enum.hasMoreElements())
       {
-	// very important!  else we will have DBEditSet's loitering!
-
-	checkpoints.remove(editSet);
-	return;
-      }
-
-    // get the vector of namespace values used by this editset
-
-    valueVect = (Vector) reserved.get(editSet);
-
-    // loop over the values in the namespace that were changes or affected
-    // by this editset
-
-    if (debug)
-      {
-	System.err.println("namespace valueVect.size: " + valueVect.size());
-      }
-
-    for (int i = 0; i < valueVect.size(); i++)
-      {
-	handle = (DBNameSpaceHandle) uniqueHash.get(valueVect.elementAt(i));
-
-	if (handle == null)
-	  {
-	    System.err.println("error, element(" + i + ") " + valueVect.elementAt(i) + " isn't in unique hash");
-	  }
+	value = enum.nextElement();
+	handle = getHandle(value);
 
 	if (handle.inuse)
 	  {
-	    // if the transaction wishes to retain this value, update
-	    // our handle to go along with the new order
-
 	    handle.owner = null;
 	    handle.setField(handle.shadowField);
 	    handle.shadowField = null;
 	  }
 	else
 	  {
-	    // this value will be floating free and easy, unused and
-	    // unloved.  forget about it.
-
-	    uniqueHash.remove(valueVect.elementAt(i));
+	    uniqueHash.remove(value);
 	  }
       }
 
-    // we're done with this editSet
+    // we're done with this transaction
 
-    reserved.remove(editSet);
-    checkpoints.remove(editSet);
+    tRecord.cleanup();
+
+    transactions.remove(editSet);
   }  
 
   /*----------------------------------------------------------------------------
@@ -1105,21 +1058,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   ----------------------------------------------------------------------------*/
   private void remember(DBEditSet editSet, Object value)
   {
-    Vector tmpvect;
-
-    /* -- */
-
-    if (!reserved.containsKey(editSet))
-      {
-	tmpvect = new Vector();
-	tmpvect.addElement(value);
-	reserved.put(editSet, tmpvect);
-      }
-    else
-      {
-	tmpvect = (Vector) reserved.get(editSet);
-	tmpvect.addElement(value);
-      }
+    getTransactionRecord(editSet).remember(value);
   }
 
   /*----------------------------------------------------------------------------
@@ -1145,6 +1084,148 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                          DBNameSpaceTransaction
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>This class holds information associated with an active transaction (a
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet}) in care of a 
+ * {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}.</p>
+ */
+
+class DBNameSpaceTransaction {
+
+  private NamedStack checkpointStack;
+  private Hashtable reservedValues;
+  private DBEditSet transaction;
+
+  /* -- */
+
+  DBNameSpaceTransaction(DBEditSet transaction)
+  {
+    this.transaction = transaction;
+    this.reservedValues = new Hashtable();
+    this.checkpointStack = new NamedStack();
+  }
+
+  public synchronized void remember(Object value)
+  {
+    if (reservedValues.containsKey(value))
+      {
+	try
+	  {
+	    throw new RuntimeException("DBNameSpaceTransaction.remember(): transaction " + transaction +
+				       " already contains value " + value);
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
+
+	return;
+      }
+
+    reservedValues.put(value, value);
+  }
+
+  public synchronized void forget(Object value)
+  {
+    if (!reservedValues.containsKey(value))
+      {
+	try
+	  {
+	    throw new RuntimeException("DBNameSpaceTransaction.forget(): transaction " + transaction +
+				       " does not contain value " + value);
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
+
+	return;
+      }
+    
+    reservedValues.remove(value);
+  }
+
+  /**
+   * <p>This method dissolves everything referenced by this DBNameSpaceTransaction,
+   * in order to facilitate speedy garbage collection.</p>
+   */
+
+  public synchronized void cleanup()
+  {
+    if (checkpointStack != null)
+      {
+	DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
+
+	while (ckpoint != null)
+	  {
+	    ckpoint.cleanup();
+
+	    ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
+	  }
+
+	checkpointStack = null;
+      }
+
+    if (reservedValues != null)
+      {
+	reservedValues.clear();
+	reservedValues = null;
+      }
+
+    transaction = null;
+  }
+
+  public Enumeration getReservedEnum()
+  {
+    return reservedValues.elements();
+  }
+
+  public Hashtable getReservedHash()
+  {
+    return reservedValues;
+  }
+
+  public DBEditSet getDBEditSet()
+  {
+    return transaction;
+  }
+
+  public void pushCheckpoint(String name, DBNameSpaceCkPoint cPoint)
+  {
+    checkpointStack.push(name, cPoint);
+  }
+
+  public DBNameSpaceCkPoint popCheckpoint(String name)
+  {
+    DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) checkpointStack.pop(name);
+
+    if (point == null)
+      {
+	try
+	  {
+	    throw new RuntimeException("DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+				       " does not contain a checkpoint named " + name);
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
+      }
+
+    return point;
+  }
+
+  public NamedStack getCheckpointStack()
+  {
+    return checkpointStack;
+  }
+}
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1154,37 +1235,80 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
 class DBNameSpaceCkPoint {
 
-  Vector values = new Vector();
-  Hashtable uniqueHash = new Hashtable();
+  Hashtable reserved;
+  Hashtable uniqueHash;
 
   /* -- */
 
   DBNameSpaceCkPoint(DBNameSpace space, DBEditSet transaction)
   {
-    Object value;
-    Vector tempVect;
+    DBNameSpaceTransaction tRecord = space.getTransactionRecord(transaction);
 
-    /* -- */
+    reserved = tRecord.getReservedHash();
 
-    tempVect = (Vector) space.reserved.get(transaction);
-
-    // if we got a non-null value, we'll go ahead and
-    // clone the vector preparatory to making a copy
-    // of the relevant subset of space.uniqueHash,
-    // else we'll leave it as an empty vector
-    
-    if (tempVect != null)
+    if (reserved != null)
       {
-	values = (Vector) tempVect.clone();
+	// clone the hash to avoid sync problems with other threads
+
+	reserved = (Hashtable) reserved.clone();
+
+	// size a hashtable for the elements we need to retain
+
+	uniqueHash = new Hashtable(reserved.size(), 1.0f);
+	
+	// now copy our hash to preserve the namespace handles
+	
+	Enumeration enum = reserved.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    Object value = enum.nextElement();
+		
+	    DBNameSpaceHandle handle = space.getHandle(value);
+		
+	    handle = (DBNameSpaceHandle) handle.clone();
+		
+	    uniqueHash.put(value, handle);
+	  }
+      }
+  }
+
+  public boolean containsValue(Object value)
+  {
+    return reserved.containsKey(value);
+  }
+
+  public DBNameSpaceHandle getValueHandle(Object value)
+  {
+    return (DBNameSpaceHandle) uniqueHash.get(value);
+  }
+
+  /**
+   * <p>This method dissolves everything referenced by this DBNameSpaceCkPoint
+   * in order to facilitate speedy garbage collection.</p>
+   */
+
+  public synchronized void cleanup()
+  {
+    if (reserved != null)
+      {
+	reserved.clear();
+	reserved = null;
       }
 
-    // now copy our hash to preserve the namespace handles
-    
-    for (int i = 0; i < values.size(); i++)
+    if (uniqueHash != null)
       {
-	value = values.elementAt(i);
+	Enumeration enum = uniqueHash.elements();
 
-	uniqueHash.put(value, space.uniqueHash.get(value));
+	while (enum.hasMoreElements())
+	  {
+	    DBNameSpaceHandle handle = (DBNameSpaceHandle) enum.nextElement();
+
+	    handle.cleanup();
+	  }
+
+	uniqueHash.clear();
+	uniqueHash = null;
       }
   }
 }

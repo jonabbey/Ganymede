@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 2001/03/21 15:11:32 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 2001/05/21 07:21:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.141 $ %D%
+ * @version $Revision: 1.142 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1228,7 +1228,7 @@ public final class DBStore {
 	  {
 	    namespace = (DBNameSpace) nameSpaces.elementAt(i);
 	    
-	    if (namespace.name.equals(name))
+	    if (namespace.getName().equals(name))
 	      {
 		return namespace;
 	      }

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/03/03 07:19:36 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/05/21 07:21:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,7 @@ import java.rmi.server.Unreferenced;
  * DBEditObject class.</p>
  */
 
-class DBNameSpaceHandle {
+class DBNameSpaceHandle implements Cloneable {
 
   /**
    * if this value is currently being shuffled
@@ -172,5 +172,26 @@ class DBNameSpaceHandle {
 	fieldInvid = null;
 	fieldId = -1;
       }
+  }
+
+  public Object clone()
+  {
+    // we should be clonable
+
+    try
+      {
+	return super.clone();
+      }
+    catch (CloneNotSupportedException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
+  }
+
+  public void cleanup()
+  {
+    owner = null;
+    fieldInvid = null;
+    shadowField = null;
   }
 }

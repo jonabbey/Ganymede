@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/01/12 01:47:40 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/05/21 07:21:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -758,26 +758,26 @@ class JournalEntry {
 		      {
 			for (int j = 0; j < _field.size(); j++)
 			  {
-			    currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(_field.key(j));
+			    currentHandle = definition.namespace.getHandle(_field.key(j));
 
 			    if (currentHandle.getField(Ganymede.internalSession) != _field)
 			      {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
 
-			    definition.namespace.uniqueHash.remove(_field.key(j));
+			    definition.namespace.clearHandle(_field.key(j));
 			  }
 		      }
 		    else
 		      {
-			currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(_field.key());
+			currentHandle = definition.namespace.getHandle(_field.key());
 
 			if (currentHandle.getField(Ganymede.internalSession) != _field)
 			  {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
 
-			definition.namespace.uniqueHash.remove(_field.key());
+			definition.namespace.clearHandle(_field.key());
 		      }
 		  }
 	      }
@@ -826,14 +826,14 @@ class JournalEntry {
 
 		    for (int j = 0; j < _field.size(); j++)
 		      {
-			definition.namespace.uniqueHash.put(_field.key(j), 
-							    new DBNameSpaceHandle(null, true, _field));
+			definition.namespace.putHandle(_field.key(j), 
+						       new DBNameSpaceHandle(null, true, _field));
 		      }
 		  }
 		else
 		  {
 		    // mark the scalar value in the namespace
-		    definition.namespace.uniqueHash.put(_field.key(), new DBNameSpaceHandle(null, true, _field));
+		    definition.namespace.putHandle(_field.key(), new DBNameSpaceHandle(null, true, _field));
 		  }
 	      }
 	  }
