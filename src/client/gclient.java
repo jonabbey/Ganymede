@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -283,6 +283,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     setSize(800, 600);
     show();
   }
+
+  /** 
+   * Get the session
+   */
+  public Session getSession()
+    {
+      return session;
+    }
 
   /**
    * Change the text in the status bar
