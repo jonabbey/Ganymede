@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/01/27 21:49:36 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 1999/01/27 23:04:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -411,7 +411,7 @@ public class Ganymede {
 
     scheduler.addDailyAction(12, 0, new GanymedeWarningTask(), "Warning Task");
 
-    scheduler.addDailyAction(1, 0, new GanymedeValidationTask(), "Database Consistency Check Task");
+    scheduler.addActionOnDemand(new GanymedeValidationTask(), "Database Consistency Check");
 
     // and install the builder tasks listed in the database
 
