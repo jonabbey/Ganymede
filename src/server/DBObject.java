@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.36 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.37 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -78,6 +78,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   protected DBEditSet editset;	// transaction that this object has been checked out in
 				// care of.
 
+  protected GanymedeSession gSession; // if this object is being viewed by a particular
+				      // Ganymede Session, we record that here
+
   Invid myInvid = null;
 
   /* -- */
@@ -91,6 +94,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public DBObject() throws RemoteException
   {
     customizer = true;
+    gSession = null;
   }
 
   /**
@@ -114,6 +118,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     editset = null;
 
     myInvid = new Invid(objectBase.type_code, id);
+    gSession = null;
   }
 
   /**
@@ -128,6 +133,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     this(objectBase);
     this.id = id;
     myInvid = new Invid(objectBase.type_code, id);
+    gSession = null;
   }
 
   /**
@@ -143,6 +149,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     shadowObject = null;
     editset = null;
     receive(in, journalProcessing);
+    gSession = null;
   }
 
   /**
@@ -197,6 +204,115 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    Ganymede.debug("DBObject check-in: rejecting undefined field " + field.getName());
 	  }
       }
+
+    gSession = null;
+  }
+
+  /**
+   *
+   * This is a view-copy constructor, designed to make a view-only
+   * duplicate of an object from the database.  This view-only object knows who
+   * is looking at it through its GanymedeSession reference, and so can properly
+   * enforce field access permissions.
+   * 
+   */
+
+  public DBObject(DBObject original, GanymedeSession gSession) throws RemoteException
+  {
+    Enumeration enum;
+    DBField field, copy;
+    Object key;
+
+    /* -- */
+
+    objectBase = original.objectBase;
+    id = original.id;
+    myInvid = original.myInvid;
+
+    shadowObject = null;
+    editset = null;
+
+    fields = new Hashtable();
+
+    // put any defined fields into the object we're going
+    // to commit back into our DBStore
+
+    enum = original.fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	field = (DBField) original.fields.get(key);
+
+	switch (field.getType())
+	  {
+	  case BOOLEAN:
+	    copy = new BooleanDBField(this, (BooleanDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case NUMERIC:
+	    copy = new NumericDBField(this, (NumericDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case DATE:
+	    copy = new DateDBField(this, (DateDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case STRING:
+	    copy = new StringDBField(this, (StringDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case INVID:
+	    copy = new InvidDBField(this, (InvidDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case PERMISSIONMATRIX:
+	    copy = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+	    
+	  case PASSWORD:
+	    copy = new PasswordDBField(this, (PasswordDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+
+	  case IP:
+	    copy = new IPDBField(this, (IPDBField) field);
+
+	    copy.setOwner(this);
+	    fields.put(key, copy);
+
+	    break;
+	  }
+      }
+
+    this.gSession = gSession;
   }
 
   /**
@@ -787,37 +903,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public Vector getFieldTemplateVector()
-  {
-    Vector results = new Vector();
-    Enumeration enum;
-    DBObjectBaseField fieldDef;
-
-    /* -- */
-
-    synchronized (objectBase)
-      {
-	enum = objectBase.sortedFields.elements();;
-	
-	while (enum.hasMoreElements())
-	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
-
-	    results.addElement(fieldDef.template);
-	  }
-      }
-
-    return results;
-  }
-
-
-  /**
-   *
-   * <p>Get read-only list of DBFields contained in this object.</p>
-   *
-   * @see arlut.csd.ganymede.db_object
-   */
-
   synchronized public Vector getFieldInfoVector(boolean customOnly)
   {
     Vector results = new Vector();
@@ -885,11 +970,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     f = (DBField) fields.get(new Short(id));
 
-    //    if (f == null)
-    //      {
-    //	Ganymede.debug("Couldn't find field " + id);
-    //      }
-
     return f;
   }
 
@@ -914,6 +994,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     while (enum.hasMoreElements())
       {
 	field = (DBField) enum.nextElement();
+
 	if (field.getName().equalsIgnoreCase(fieldname))
 	  {
 	    return field;
