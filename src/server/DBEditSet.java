@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2001/02/13 07:03:48 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2001/02/14 06:55:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1747,8 +1747,6 @@ public class DBEditSet {
 	  }
       }
 
-    objects.clear();
-
     // undo all namespace modifications associated with this editset
 
     // we don't synchronize on dbStore, the odds are zip that a
@@ -1766,18 +1764,27 @@ public class DBEditSet {
 
     // and help out garbage collection some
 
+    objects.clear();
     objects = null;
-    session = null;
-    basesModified.clear();
-    logEvents.removeAllElements();
 
-    // clear checkpoints
+    logEvents.removeAllElements();
+    logEvents = null;
+
+    basesModified.clear();
+    basesModified = null;
+
+    dbStore = null;
+    session = null;
+
+    description = null;
 
     checkpoints.removeAllElements();
+    checkpoints = null;
+
+    currentCheckpointThread = null;
 
     // wake up any sleepy heads
 
-    this.currentCheckpointThread = null;
     this.notifyAll();
   }
 

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.230 $
-   Last Mod Date: $Date: 2001/02/09 03:36:19 $
+   Version: $Revision: 1.231 $
+   Last Mod Date: $Date: 2001/02/14 06:55:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.230 $ $Date: 2001/02/09 03:36:19 $
+ * @version $Revision: 1.231 $ $Date: 2001/02/14 06:55:46 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1189,6 +1189,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     synchronized (this)
       {
+	// we'll do all of our active cleanup in a try clause, so we
+	// can wipe out references to aid GC in a finally clause
+
 	try
 	  {
 	    if (client == null)
@@ -1204,6 +1207,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    this.client = null;
 
 	    this.clientProxy.shutdown();
+	    this.clientProxy = null;
 
 	    // logout the client, abort any DBSession transaction going
 
@@ -1279,17 +1283,32 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    // help the garbage collector
 
-	    ownerList = null;
+	    connecttime = null;
+	    lastActionTime = null;
+	    // skip username.. we'll do it below
+	    // skip userInvid.. we'll do it below
+	    clienthost = null;
+	    lastError = null;
+	    status = null;
+	    lastEvent = null;
+	    session = null;
+	    wizard = null;
+	    personaBase = null;
+	    permTimeStamp = null;
 	    personaObj = null;
+	    personaName = null;
+	    // skip personaInvid.. we'll do it below
 	    permBase = null;
-	    defaultObj = null;
-	    newObjectOwnerInvids = null;
-	    visibilityFilterInvids = null;
 	    personaPerms = null;
 	    defaultPerms = null;
 	    delegatablePersonaPerms = null;
 	    delegatableDefaultPerms = null;
-	    lastError = null;
+	    defaultObj = null;
+	    newObjectOwnerInvids = null;
+	    visibilityFilterInvids = null;
+	    ownerList = null;
+	    userInfo = null;
+	    xSession = null;
 	  }
 
 	// guess we're still running.  Remember the last time this
@@ -1305,6 +1324,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 
 	Ganymede.debug(username + " logged off");
+
+	userInvid = null;
+	personaInvid = null;
+	username = null;
       }
   }
 
