@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -358,7 +358,7 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized boolean containsInvid(Invid invid)
   {
-    return invidHash.contains(invid);
+    return invidHash.containsKey(invid);
   }
 
   /**
