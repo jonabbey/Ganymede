@@ -62,7 +62,7 @@ chdir($rootdir);
             "SERVERINSTALL" => "Where should the server tree be installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port should the RMI registry supporting Directory Droid run on?",
-	    "MAILHOST" => "What mailhost should Directory Droid use to send out diagnostic mail?",
+	    "MAILHOST" => "What mailhost should Directory Droid use to send out diagnostic mail?\n\t(Leaving this blank will cause Directory Droid to not send any emails)",
 	    "RETURNADDR" => "What email address should Directory Droid sign on email that it sends out?",
 	    "SUPERNAME" => "What name do you want the Directory Droid superuser account to have?",
 	    "SUPERPASS" => "What password do you want the superuser account to have?",

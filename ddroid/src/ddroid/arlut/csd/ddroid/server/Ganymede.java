@@ -529,10 +529,26 @@ public class Ganymede {
 
     // set up the log
     
-    /* Check the email "master switch". If it's set to true, then
-     * we won't actually send any emails out.
+    /* suppressEmail is the email "master switch". If it's set to true, 
+     * then we won't actually send any emails out.
      */
-    suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
+     
+    /* First, we check to see if there is a designated mail host. If not,
+     * then we automatically turn off the sending of emails.
+     */
+     
+    if (mailHostProperty == null || mailHostProperty.equals(""))
+      {
+      	suppressEmail = true;
+      }
+    else
+      {
+      	/* We have a valid mail host, but check to see if a command-line
+      	 * argument has instructed us to suppress mailouts anyways.
+      	 */
+      
+      	suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
+      }
 
     try
       {
@@ -1176,10 +1192,10 @@ public class Ganymede {
     // since we don't require the user to keep their password in the
     // server's properties file unless they want to reset it
 
-    if (mailHostProperty == null)
+    if (mailHostProperty == null ||
+        mailHostProperty.equals(""))
       {
 	System.err.println(ts.l("loadProperties.no_mail_host"));
-	success = false;
       }
 
     if (returnaddrProperty == null)
