@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/02/02 19:32:55 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/02/02 19:39:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.10 $ $Date: 2000/02/02 19:32:55 $
+ * @version $Revision: 1.11 $ $Date: 2000/02/02 19:39:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -282,11 +282,21 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeStatus(String status, boolean timeLabelled) throws RemoteException
   {
-    adminEvent event;
-    StringBuffer stampedLineBuffer = new StringBuffer();
-    String stampedLine;
+    StringBuffer stampedLineBuffer;
+    adminEvent newLogEvent;
 
     /* -- */
+
+    if (done)
+      {
+	// we have to throw a remote exception, since that's what
+	// the GanymedeAdmin code expects to receive as a signal
+	// that an admin console needs to be dropped
+
+	throw new RemoteException("serverAdminProxy: console disconnected");
+      }
+
+    stampedLineBuffer = new StringBuffer();
 
     if (!timeLabelled)
       {
@@ -302,15 +312,6 @@ public class serverAdminProxy implements Admin, Runnable {
 
     synchronized (eventBuffer)
       {
-	if (done)
-	  {
-	    // we have to throw a remote exception, since that's what
-	    // the GanymedeAdmin code expects to receive as a signal
-	    // that an admin console needs to be dropped
-
-	    throw new RemoteException("serverAdminProxy: console disconnected");
-	  }
-
 	// if we have another changeStatus event in the eventBuffer,
 	// go ahead and append the new log entry directly to its
 	// StringBuffer
@@ -327,7 +328,7 @@ public class serverAdminProxy implements Admin, Runnable {
 	// if we didn't find an event to append to, go ahead and add a
 	// new CHANGESTATUS log update event to the eventBuffer
 
-	adminEvent newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, stampedLineBuffer);
+	newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, stampedLineBuffer);
 
 	// queue the log evennt
 
@@ -452,17 +453,17 @@ public class serverAdminProxy implements Admin, Runnable {
 
   private void addEvent(adminEvent newEvent) throws RemoteException
   {
+    if (done)
+      {
+	// we have to throw a remote exception, since that's what
+	// the GanymedeAdmin code expects to receive as a signal
+	// that an admin console needs to be dropped
+
+	throw new RemoteException("serverAdminProxy: console disconnected");
+      }
+
     synchronized (eventBuffer)
       {
-	if (done)
-	  {
-	    // we have to throw a remote exception, since that's what
-	    // the GanymedeAdmin code expects to receive as a signal
-	    // that an admin console needs to be dropped
-
-	    throw new RemoteException("serverAdminProxy: console disconnected");
-	  }
-
 	if (eventBuffer.size() >= maxBufferSize)
 	  {
 	    throwOverflow();
@@ -470,7 +471,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
 	eventBuffer.addElement(newEvent);
 	
-	eventBuffer.notify();
+	eventBuffer.notify();	// wake up commThread
       }
   }
 
@@ -487,18 +488,18 @@ public class serverAdminProxy implements Admin, Runnable {
     adminEvent oldEvent;
 
     /* -- */
+    
+    if (done)
+      {
+	// we have to throw a remote exception, since that's what
+	// the GanymedeAdmin code expects to receive as a signal
+	// that an admin console needs to be dropped
+
+	throw new RemoteException("serverAdminProxy: console disconnected");
+      }
 
     synchronized (eventBuffer)
       {
-	if (done)
-	  {
-	    // we have to throw a remote exception, since that's what
-	    // the GanymedeAdmin code expects to receive as a signal
-	    // that an admin console needs to be dropped
-
-	    throw new RemoteException("serverAdminProxy: console disconnected");
-	  }
-
 	// if we have an instance of this event on our eventBuffer,
 	// update its parameter with the new event's info.
 
@@ -523,7 +524,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
 	lookUp[newEvent.method] = newEvent;
 
-	eventBuffer.notify();
+	eventBuffer.notify();	// wake up commThread
       }
   }
 
