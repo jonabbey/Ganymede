@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -179,6 +179,32 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
     
     return result;
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate whether a given field can only
+   * choose from a choice provided by obtainChoiceList()
+   *
+   */
+
+  public boolean mustChoose(DBField field)
+  {
+    // Don't force the IPNET field to be chosen from the choices()
+    // list, since the custom finalizeSetValue logic in this class
+    // takes care of that for us, and because the custom code in
+    // this class modifies the choices in finalizeSetValue before
+    // InvidDBField.setValue() calls verifyNewValue(), which would
+    // normally check out the value selected against the results
+    // of choices().
+
+    if (field.getID() == interfaceSchema.IPNET)
+      {
+	return false;
+      }
+    
+    return super.mustChoose(field);
   }
 
   /**
