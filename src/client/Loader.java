@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,6 +88,7 @@ public class Loader extends Thread {
       {
 	synchronized (this)
 	  {
+	    System.out.println("Dang, have to wait to get the base list");
 	    try
 	      {
 		this.wait();
