@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1627,7 +1627,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     maxLengthN;			// string
 
   checkboxField
-    vectorCF,			// all but password
+    vectorCF,			// all but password, boolean
     labeledCF,			// boolean
     editInPlaceCF,		// invid
     cryptedCF;			// password
@@ -1828,18 +1828,23 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   void checkVisibility()
   {
-    if (passwordShowing)
+    if (passwordShowing || booleanShowing)
       {
 	setRowVisible(vectorCF, false);
 	setRowVisible(maxArrayN, vectorCF.getState());
-
-	setRowVisible(cryptedCF, true);
       }
     else
       {
 	setRowVisible(vectorCF, true);
 	setRowVisible(maxArrayN, vectorCF.getState());
+      }
 
+    if (passwordShowing)
+      {
+	setRowVisible(cryptedCF, true);
+      }
+    else
+      {
 	setRowVisible(cryptedCF, false);
       }
 
