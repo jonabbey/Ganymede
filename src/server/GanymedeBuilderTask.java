@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/12/07 03:59:18 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/12/07 20:44:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,6 +99,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private static String currentBackUpDirectory = null;
   private static String oldBackUpDirectory = null;
+
   /**
    * <p>This hashtable maps directory paths to an Integer
    * counting the number of tasks that are currently
@@ -112,6 +113,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   private static String basePath = null;
   private static long rollunderTime = 0;
   private static long rolloverTime = 0;
+  private static boolean firstRun = true;
   private static int id = 0;
 
   /* --- */
@@ -246,6 +248,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		// will never happen, since we are giving 0 to
 		// increment
 	      }
+
+	    // guess what?  we're going to capture the return value of
+	    // builderPhase2 and just not do anything with it!  that's
+	    // how wacky we're going to be!
 
 	    try
 	      {
@@ -812,6 +818,22 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	  }
       }
 
+    // if this is our first run of a builder task's file io prep,
+    // sweep through the backup directory and zip up any directories
+    // that match our pattern for day directories
+
+    if (firstRun)
+      {
+	try
+	  {
+	    cleanBackupDirectory();
+	  }
+	finally
+	  {
+	    firstRun = false;
+	  }
+      }
+
     // if we haven't zipped up our old directory, do that
     
     if (oldBackUpDirectory != null)
@@ -819,9 +841,12 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	if (busyCount(oldBackUpDirectory) == 0)
 	  {
 	    String zipName = oldBackUpDirectory + ".zip";
+
+	    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): trying to zip " + oldBackUpDirectory);
 	    
 	    if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
 	      {
+		Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): zipped " + oldBackUpDirectory);
 		FileOps.deleteDirectory(oldBackUpDirectory);
 	      }
 
@@ -830,4 +855,110 @@ public abstract class GanymedeBuilderTask implements Runnable {
       }
   }
 
+  /**
+   * <P> This static method is run before the first time a builder task
+   * writes any file on server start-up.  It is responsible for sweeping
+   * through the system backup directory and zipping up any day directories
+   * that are lingering from earlier runs.</P>
+   */
+
+  private static synchronized void cleanBackupDirectory() throws IOException
+  {
+    if (basePath == null || basePath.equals(""))
+      {
+	return;
+      }
+
+    File directory = new File(basePath);
+
+    if (!directory.exists() || !directory.isDirectory() || !directory.canWrite())
+      {
+	return;
+      }
+
+    gnu.regexp.RE regexp = null;
+
+    try
+      {
+	regexp = new gnu.regexp.RE("(\\d\\d\\d\\d)_(\\d\\d)_(\\d\\d)");
+      }
+    catch (gnu.regexp.REException ex)
+      {
+	// assuming we get the pattern right, this shouldn't happen
+
+	ex.printStackTrace();
+	return;
+      }
+
+    String names[] = directory.list();
+
+    for (int i = 0; i < names.length; i++)
+      {
+	if (names[i].endsWith(".zip"))
+	  {
+	    continue;
+	  }
+
+	File test = new File(directory, names[i]);
+
+	if (!test.isDirectory())
+	  {
+	    continue;
+	  }
+
+	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
+
+	gnu.regexp.REMatch matches[] = regexp.getAllMatches(names[i]);
+
+	if (matches == null)
+	  {
+	    continue;
+	  }
+
+	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
+
+	if (matches.length != 3)
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matches length is " + matches.length);
+
+	    continue;
+	  }
+
+	String yearString = matches[0].toString();
+	String monthString = matches[1].toString();
+	String dateString = matches[2].toString();
+
+	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
+	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
+	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): dateString " + dateString);
+
+	try
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to zip " + basePath + names[i]);
+
+	    int year = Integer.parseInt(yearString);
+	    int month = Integer.parseInt(monthString);
+	    int date = Integer.parseInt(dateString);
+
+	    Calendar cal = new GregorianCalendar(year, month, date); // midnight start of day
+	    cal.add(Calendar.DATE, 1); // end of day
+
+	    if (cal.getTime().getTime() < rollunderTime)
+	      {
+		String oldBackUpDirectory = basePath + names[i];
+		String zipName = basePath + names[i] + File.separator + ".zip";
+
+		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		  {
+		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + basePath + names[i]);
+		    FileOps.deleteDirectory(oldBackUpDirectory);
+		  }
+	      }
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    continue;
+	  }
+      }
+  }
 }
