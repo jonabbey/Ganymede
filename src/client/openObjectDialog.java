@@ -97,6 +97,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     gbc.fill = GridBagConstraints.NONE;
     
     type = new JComboBox();
+    type.setLightWeightPopupEnabled(false);
     Vector bases = client.getBaseList();
     Hashtable baseToShort = client.getBaseToShort();
     Hashtable baseNames = client.getBaseNames();
@@ -438,7 +439,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     
     if ((e.getWhen() - lastClick < 500)  && (currentObject == lastObject))
       {
-	//client.wp.addWindow(client.session.edit_db_object( (Invid)((listHandle)currentObject).getObject()) , true);
 	invid = (Invid)((listHandle)currentObject).getObject();
 	close(true);
 
