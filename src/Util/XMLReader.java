@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/10/26 03:38:51 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/10/26 08:55:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -481,6 +481,17 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * XMLItems in the tree will be linked using the getParent() and
    * getChildren() methods supported by every XMLItem class.</P>
    *
+   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * read from the reader stream will be eaten, and will not appear in
+   * the tree returned.  The XMLCloseElements are used to determine
+   * where the list of children should end, and so are implicitly
+   * captured in the tree returned.  If any XMLError or XMLEndDocument
+   * items are found while searching for the completion of an open
+   * element's tree, that will be returned directly, and all items
+   * loaded from the reader in building the tree will be thrown
+   * away.  XMLWarning elements will be returned at the point at which
+   * they were encountered in the tree parsing.</P>
+   *
    * <P>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
    * is extremely deeply nested.</P> 
@@ -500,6 +511,17 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * of a tree of all elements contained under it.  All XMLItems in
    * the tree will be linked using the getParent() and getChildren()
    * methods supported by every XMLItem class.</P>
+   *
+   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * read from the reader stream will be eaten, and will not appear in
+   * the tree returned.  The XMLCloseElements are used to determine
+   * where the list of children should end, and so are implicitly
+   * captured in the tree returned.  If any XMLError or XMLEndDocument
+   * items are found while searching for the completion of an open
+   * element's tree, that will be returned directly, and all items
+   * loaded from the reader in building the tree will be thrown
+   * away.  XMLWarning elements will be returned at the point at which
+   * they were encountered in the tree parsing.</P>
    *
    * <P>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
@@ -529,6 +551,17 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * of a tree of all elements contained under it.  All XMLItems in
    * the tree will be linked using the getParent() and getChildren()
    * methods supported by every XMLItem class.</P>
+   *
+   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * read from the reader stream will be eaten, and will not appear in
+   * the tree returned.  The XMLCloseElements are used to determine
+   * where the list of children should end, and so are implicitly
+   * captured in the tree returned.  If any XMLError or XMLEndDocument
+   * items are found while searching for the completion of an open
+   * element's tree, that will be returned directly, and all items
+   * loaded from the reader in building the tree will be thrown
+   * away.  XMLWarning elements will be returned at the point at which
+   * they were encountered in the tree parsing.</P>
    *
    * <P>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
@@ -566,17 +599,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       {
 	nextItem = getNextTree(null, skipWhiteSpace);
 
-	// if we get an error or a warning, we just pass that up
+	// if we get an error or a pre-mature EOF, we just pass that up
 
-	if (nextItem instanceof XMLError || nextItem instanceof XMLWarning)
-	  {
-	    children = null;
-	    return nextItem;
-	  }
-
-	// ditto a pre-mature EOF
-
-	if (nextItem instanceof XMLEndDocument)
+	if (nextItem instanceof XMLError || nextItem instanceof XMLEndDocument)
 	  {
 	    children = null;
 	    return nextItem;
