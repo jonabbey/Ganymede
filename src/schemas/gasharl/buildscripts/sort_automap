@@ -1,0 +1,11 @@
+#!/bin/csh
+#
+# Solaris 2.x Sort script for automounter maps
+#
+
+grep '^+' $1 > automap.a
+grep -v '^+' $1 | sort > automap.sort
+# mv $1 $1.presort
+cat automap.sort automap.a > $1
+rm automap.a
+rm automap.sort

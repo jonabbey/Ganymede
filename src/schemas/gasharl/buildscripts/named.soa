@@ -1,0 +1,10 @@
+@	IN	SOA	ns1.arlut.utexas.edu. root.ns1.arlut.utexas.edu. (
+	1994091611	; Serial  - last mod.
+	10800		; Refresh - every 3 hours
+	3600		; Retry   - every hour
+	604800		; Expire  - one week
+	108000	)	; minimum - 3 hours
+;
+	IN	NS	ns1.arlut.utexas.edu.
+	IN	NS	csdsun1.arlut.utexas.edu.
+;

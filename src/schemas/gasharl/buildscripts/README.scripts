@@ -1,0 +1,134 @@
+#***********************************************************************
+#
+#             ARL:UT Group Administration Shell Package
+#                         September 13, 1994
+#
+#  Copyright 1994. The University of Texas at Austin (UTA).  All rights
+#  reserved.  By using this software the USER indicates that he or she
+#  has read, understood, and will comply with the following:
+#
+#  -UTA hereby grants USER nonexclusive permission to use, copy, and/or
+#  modify this software for internal purposes only.  Any non-internal 
+#  distribution, including commercial sale or license, of this software,
+#  copies of the software, its associated documentation, and/or
+#  modifications of either is strictly prohibited without the prior
+#  consent of UTA.  Title to copyright to this software and its 
+#  associated documentation shall at all times remain with UTA. 
+#  Appropriate copyright notice shall be placed on all software copies,
+#  and a complete copy of this notice shall be included in all copies
+#  of the associated documentation.  No right is granted to use in 
+#  advertising, publicity, or otherwise any trademark, service mark,
+#  or the name of UTA.
+#
+#  -This software and any associated documentation is provided "as is",
+#  and UTA MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+#  INCLUDING THOSE OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+#  PURPOSE, OR THAT USE OF THE SOFTWARE, MODIFICATIONS, OR ASSOCIATED
+#  DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS 
+#  OR OTHER INTELLECTUAL PROPERTY RIGHTS OF A THIRD PARTY.  UTA, the
+#  University of Texas System, its Regents, officers, and employees 
+#  shall not be liable under any circumstances for any direct, indirect,
+#  special, incidental, or consequential damages with respect to any
+#  claim by USER or any third party on account of or arising from the
+#  use, or inability to use, this software or its associated 
+#  documentation, even if UTA has been advised of the possibility of
+#  those damages.
+#
+#***********************************************************************
+
+Last modified by Pug on 9/17/94.
+
+Here are the files that you will find in the scripts directory.
+
+README.scripts    -        This document.
+gash2alias        -        The conversion script from GASH aliases_info to
+                           aliases and userdb. (See Sendmail 8.6.9)
+                           (Called by Makefile.gash.)
+gash2auto         -        The conversion script from auto.vol and
+                           auto.home.* to the appropriate NIS maps.
+                           (Called by Makefile.gash.)
+gash2dns          -        The conversion script from hosts_info to DNS,
+                           hosts and ethers. (Called by Makefile.gash.)
+gash2group        -        The conversion script from group_info to group.
+                           (Called by Makefile.gash.)
+gash2passwd       -        The conversion from user_info to passwd.
+                           (Called by Makefile.gash.)
+gashmove          -        A simple script to move old files into a logs
+                           directory. (Called by Makefile.gash.)
+named.boot        -        A sample named.boot file as used at ARL:UT.
+named.cache       -        A sample named.cache file as used at ARL:UT.
+named.hosts.in    -        A place to put specific information for the
+                           named.hosts file that is not in the hosts_info
+                           file or the SOA record. (Read in by gash2dns.)
+named.local       -        A sample named.local file as used at ARL:UT.
+named.networks    -        A file that is parsed for the correct reverse
+                           DNS files to create. (Read in by gash2dns.)
+named.soa         -        A sample named.soa record as used at ARL:UT.
+                           (Read in by gash2dns.)
+
+#***********************************************************************
+
+Additionally, you will need to have perl installed on your system. If
+you do not have it (or a link to it) in /usr/bin, you will have to
+modify the top line of the gash2* scripts to indicate the correct
+location.
+
+If you are not certain how to program perl, please do not try to modify
+the scripts until you are certain of what you are doing. Some of these
+(such as gash2dns) are very difficult to understand. (Note: gash2dns is
+mostly difficult to change the pattern match for what a type two system
+line looks like. See gash2dns for more info.)
+
+#***********************************************************************
+
+The scripts gash2alias, gash2auto, gash2dns, gash2group, gash2passwd and
+gashmove all have documentation in them for their use. For the most
+part, they should only be called by the GASH NIS Makefile except during
+testing of modifications. The remaining files are as follows:
+
+
+named.boot        :
+
+  This is a DNS boot file and is read in by in.named to decide which
+  domains, both forward and reverse, should be read in from what files.
+  This should be modified for your local domain, as well as the local
+  directory location. As well, there are modifications to be made at the
+  top of gash2dns for local DNS names and IP addresses.
+
+named.cache       :
+
+  This is a sample DNS cache file, and should need no modifications
+  unless the root nameservers change.
+
+named.hosts.in    :
+
+  This is the file that is used to declare items that should be in the
+  forward nameservice file, but not in reverse nameservice files. These
+  items can include special CNAME aliases, MX mail exchangers and
+  definitions for machines such as the loopback host and the like.
+  Basically, this is for any items not contained directly in the GASH
+  hosts_info file.
+
+named.local       :
+
+  This is the loopback reverse DNS data file. It simple says who
+  1.0.0.127.in-addr.arpa is.
+
+named.networks    :
+
+  This is a list of the local DNS IP reverse domains. These are usually
+  used in class B networks to subdivide into smaller networks. Each entry
+  in this file will be made into a reverse DNS file. Currently these are
+  used as the third octet of the IP address. (ie. 129.116.224.2 has 224
+  as the thrid octet of the IP address.) The gash2dns file will need
+  some modifications to do something else if so desired. Be very careful
+  modifying gash2dns, especially the pattern match, or you could
+  suddenly lose all of your DNS entries.
+
+named.soa         :
+
+  A sample SOA record. This is the Start Of Authority record and
+  contains the information such as who the Primary DNS server is, the
+  current serial number, how often to do updates and the like. Please
+  make sure to change the name of the Primary DNS server since my
+  machine is not the primary nameserver for anyone but our domain.

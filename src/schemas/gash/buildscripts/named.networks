@@ -1,0 +1,25 @@
+#
+# Network number followed by whitespace, then the word 'on' or 'off'. This
+# tells if the network is in use, 'on', or not, 'off'.
+#
+# WARNING!!! 'on' and 'off' MUST currently be in lowercase. 
+#
+# Created by Pug on 7/21/93.
+#
+128	on
+130	on
+136	on
+144	on
+152	on
+160	on
+176	on
+188	on
+192	on
+196	on
+208	on
+212	on
+224	on
+236	on
+240	on
+244	on
+252	on

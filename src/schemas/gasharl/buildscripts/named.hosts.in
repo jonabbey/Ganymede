@@ -1,0 +1,13 @@
+; Define a MX record for the entire DNS domain.
+	IN	MX	0 ns1.arlut.utexas.edu.
+;
+; Define loopback interface.
+;
+localhost	IN	A	127.0.0.1
+loopback		IN	CNAME	localhost
+lb		IN	CNAME	localhost
+loghost		IN	CNAME	localhost
+;
+; Define a fake host for ease of use by users.
+;
+utcat	IN	CNAME	utcat.utexas.edu.

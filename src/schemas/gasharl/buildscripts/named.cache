@@ -1,0 +1,26 @@
+;
+;
+.			99999999	IN	NS	ns.internic.net.
+.			99999999	IN	NS	aos.arl.army.mil.
+.			99999999	IN	NS	ns1.isi.edu.
+.			99999999	IN	NS	c.nyser.net.
+.			99999999	IN	NS	terp.umd.edu.
+.			99999999	IN	NS	ns.nasa.gov.
+.			99999999	IN	NS	nic.nordu.net.
+.			99999999	IN	NS	ns.nic.ddn.mil.
+;
+;
+;	---------
+;	ADDRESSES
+;	---------
+ns.internic.net.	99999999	IN	A	198.41.0.4
+aos.arl.army.mil.	99999999	IN	A	192.5.25.82
+aos.arl.army.mil.	99999999	IN	A	128.63.4.82
+ns1.isi.edu.		99999999	IN	A	128.9.0.107
+c.nyser.net.		99999999	IN	A	192.33.4.12
+terp.umd.edu.		99999999	IN	A	128.8.10.90
+ns.nasa.gov.		99999999	IN	A	128.102.16.10
+ns.nasa.gov.		99999999	IN	A	192.52.195.10
+nic.nordu.net.		99999999	IN	A	192.36.148.17
+ns.nic.ddn.mil.		99999999	IN	A	192.112.36.4
+;

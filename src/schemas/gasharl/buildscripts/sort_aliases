@@ -1,0 +1,10 @@
+#!/bin/csh
+#
+# Solaris 2.x Sort script for aliases_info 
+#
+
+grep '^:' aliases_info | sort -t: +2 -3 > aliases_info.c
+grep '^<' aliases_info | sort -t\> +1 -2 > aliases_info.b
+grep -v '^:' aliases_info | grep -v '^<' > aliases_info.a
+cat aliases_info.a aliases_info.b aliases_info.c > aliases_info
+rm aliases_info.a aliases_info.b aliases_info.c

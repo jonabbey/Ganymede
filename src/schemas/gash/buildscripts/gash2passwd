@@ -1,0 +1,139 @@
+#!/usr/bin/perl
+
+#***********************************************************************
+#
+#             ARL:UT Group Administration Shell Package
+#                         September 13, 1994
+#
+#  Copyright 1994. The University of Texas at Austin (UTA).  All rights
+#  reserved.  By using this software the USER indicates that he or she
+#  has read, understood, and will comply with the following:
+#
+#  -UTA hereby grants USER nonexclusive permission to use, copy, and/or
+#  modify this software for internal purposes only.  Any non-internal 
+#  distribution, including commercial sale or license, of this software,
+#  copies of the software, its associated documentation, and/or
+#  modifications of either is strictly prohibited without the prior
+#  consent of UTA.  Title to copyright to this software and its 
+#  associated documentation shall at all times remain with UTA. 
+#  Appropriate copyright notice shall be placed on all software copies,
+#  and a complete copy of this notice shall be included in all copies
+#  of the associated documentation.  No right is granted to use in 
+#  advertising, publicity, or otherwise any trademark, service mark,
+#  or the name of UTA.
+#
+#  -This software and any associated documentation is provided "as is",
+#  and UTA MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+#  INCLUDING THOSE OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+#  PURPOSE, OR THAT USE OF THE SOFTWARE, MODIFICATIONS, OR ASSOCIATED
+#  DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS 
+#  OR OTHER INTELLECTUAL PROPERTY RIGHTS OF A THIRD PARTY.  UTA, the
+#  University of Texas System, its Regents, officers, and employees 
+#  shall not be liable under any circumstances for any direct, indirect,
+#  special, incidental, or consequential damages with respect to any
+#  claim by USER or any third party on account of or arising from the
+#  use, or inability to use, this software or its associated 
+#  documentation, even if UTA has been advised of the possibility of
+#  those damages.
+#
+#***********************************************************************
+
+#
+# Last modified by Pug on 9/14/94.
+#
+# This script will convert a gash passwd info file into the regular passwd
+# file used by UNIX and NIS.
+#
+# The format of the gash passwd info file is:
+#          
+# username:password:uid:gid:gcos-field:home-dir:login-shell:ssn
+#
+#     where
+#
+#     username       is the user's login name.   This  field  con-
+#                    tains  no  uppercase characters, and must not
+#                    be more than eight characters in length.
+#
+#     password       is the user's encrypted password, or a string
+#                    of the form: ##name if the encrypted password
+#                    is in the  /etc/security/passwd.adjunct  file
+#                    (see  passwd.adjunct(5)).   If  this field is
+#                    empty, login(1) does not request  a  password
+#                    before logging the user in.
+#
+#     uid            is the user's numerical ID  for  the  system,
+#                    which  must  be  unique.   uid is generally a
+#                    value between 0 and 32767.
+#
+#     gid            is the numerical ID of  the  group  that  the
+#                    user  belongs  to.   gid is generally a value
+#                    between 0 an 32767.
+#
+#     gcos-field     is the user's real name, along with  informa-
+#                    tion to pass along in a mail-message heading.
+#                    It is called the  gcos-field  for  historical
+#                    reasons.   A  &  in this field stands for the
+#                    login name (in cases where the login name ap-
+#                    pears in a user's real name).
+#
+#     home-dir       is the pathname to the directory in which the
+#                    user is initially positioned upon logging in.
+#
+#     login-shell    is the user's initial shell program.  If this
+#                    field   is   empty,   the  default  shell  is
+#                    /usr/bin/sh.
+#
+# The last item is a compile time option and you must uncomment a line
+# below to get warnings for this item missing.
+#
+#     ssn            is the user's social  security  number.  This
+#                    is used to ensure  a  user  only  having  one
+#                    account and to ensure security.
+#
+
+if ($#ARGV != 0) {
+    print "gash2passwd converts a gash passwd file to the corrct format for usage by\n UNIX machines through NIS.\n\nUsage:\n\tgash2passwd {gash_passwd_info_file}\n";
+    exit;
+}
+
+#
+# Open passwd file.
+#
+
+open(PASSWD, "> passwd") || die "Can't open passwd file: $!\n";
+
+#
+# Open error file.
+#
+
+open(ERRORS, "> passwd.errors") || die "Can't open passwd errors file: $!\n";
+
+#
+# Open warning file.
+#
+
+open(WARNS, "> passwd.warns") || die "Can't open passwd warning file: $!\n";
+
+#
+# Parse input file.
+#
+
+while (<>) {
+    if (/^(\S+:\S+:\d+:\d+:.+:\/home\/\S+:\S+):.*/) {
+	print PASSWD $1, "\n";
+    }
+    else {
+	if (/^(\S+:\S+:\d+:\d+:.+:\/\S+\/\S+:\S+)/) {
+	    print PASSWD $1, "\n";
+# This is the line you uncomment to get the warnings for missing SSN.
+#	    print WARNS "Missing SS# on line: ", $_;
+	}
+	else {
+	    print ERRORS "Incorrect format on line: ", $_;
+	}
+    }
+}
+
+close(PASSWD);
+close(ERRORS);
+close(WARNS);

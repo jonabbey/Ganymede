@@ -1,0 +1,30 @@
+#!/opt/bin/perl
+#
+# presort_group_entries
+#
+# This script is designed to go through the GASH group_info
+# file and sort the entries in groups.
+#
+# GASH (v1.03f and after) sorts group entries
+# when the groups are modified, but this script
+# is needed to pre-sort group entries so that they will
+# all appear sorted, rather than only ones that a recent
+# version of GASH has modified.
+#
+# If you create your group_info file with GASH v1.03f or
+# later, all group entries will be sorted as they are
+# created and modified, so you don't need to run this
+# script.
+
+open(INPUT, "<group_info") || die "crud";
+open(OUTPUT, ">group_info.sorted") || die "dang";
+
+while (<INPUT>) {
+	s/\n//;  # remove new line
+	@fields = split(/:/, $_);
+	@entries = split(/,/, $fields[3]);
+	@entries = sort @entries;
+	printf OUTPUT "%s:%s:%s:%s:%s:%s\n", $fields[0], $fields[1], $fields[2], join(',', @entries), $fields[4], $fields[5];
+}
+close(INPUT);
+close(OUTPUT);

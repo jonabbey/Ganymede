@@ -1,0 +1,257 @@
+#!/usr/bin/perl
+
+#
+# Written by Pug on 8/6/93.
+#
+# This perl script will convert a file from GASH hosts format into the correct
+# hosts and DNS files. The format for a GASH hosts file is as follows:
+#
+# IP[whitespace]hostname[whitespace]nickname[whitespace]#manager:room number:
+#   :ethers:type:manufacturer:model:operating system
+#
+# Please note: There can be zero or more nicknames seperated by whitespace and
+#              this is one continuous line despite what was done for easy of
+#              of printing. As well, the information after the # is optional
+#              since in the beginning there will possibly be hosts that 
+#              information is not available for. Hopefully GASH will help 
+#              resolve this problem and fill in the unknown areas. Also, the
+#              ethers field is - seperated due to the problem with :'s
+#              being used to seperate the other fields.
+#
+
+#
+# Give description of host2dns if the incorrect number of parameters are used.
+#
+
+if ($#ARGV != 1) {
+    print "gash2dns converts a gash host file to the corresponding host and DNS files.\n\nUsage:\n\ngash2dns {gash_host_file} {named_dir}\n";
+    exit;
+}
+
+require "timelocal.pl";
+
+#
+# Make sure the gash_host_file and the named_dir exist.
+#
+
+-r @ARGV[0] || die "Gash host file, @ARGV[0], doesn't exist: $!\n";
+-r @ARGV[1] || die "Gash named directory, @ARGV[1], doesn't exist: $!\n";
+$dns_dir = @ARGV[1];
+$ARGV = pop(@ARGV);
+
+#
+# Open ERRORS to dump comments and errors from gash file into.
+#
+
+open(ERRORS, "> host.errors") || die "Can't open errors for output: $!\n";
+
+#
+# Open named.hosts file to write to.
+#
+
+open(NAMEDHOSTS, "> ${dns_dir}/named.hosts") || die "Can't open named.hosts file for output: $!\n";
+
+#
+# Open hosts file to write to.
+#
+
+open(HOSTS, "> hosts") || die "Can't open hosts file for output: $!\n";
+select((select(HOSTS), $~ = HOSTS)[0]);
+
+#
+# Open ethers file to write to.
+#
+
+open(ETHERS, "> ethers") || die "Can't open ethers file for output: $!\n";
+select((select(ETHERS), $~ = ETHERS)[0]);
+
+#
+# Open named.soa, read through it, rewrite it with the correct information.
+#
+
+open(SOA, "${dns_dir}/named.soa") || die "Can't open SOA input file: $!\n";
+$soa = "";
+@numbs = ('01' .. '99');
+while (<SOA>) {			# Read in the file.
+    if (/(\d{4})(\d{2})(\d{2})(\d{2})\s+\;\s+Serial/) {	# Is the serial number?
+	$serial = "";		# If so, start our array.
+	@timearray = (0,0,0,$3,$2-1,$1-1900,0,0,0);
+	#
+	# Array for serial #'s date. Subtract from 1900 to get year for struct.
+	# This is so there is no problem after turn of century. This may need
+	# to be changed if the material passed changes.
+	#
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+	@today = (0,0,0,$mday,$mon,$year,0,0,0);
+	if (&timelocal(@today) > &timelocal(@timearray)) { 
+	    # Is today greater than serial.
+	    # Get todays information
+	    $serial .= "\t".($year+1900).$numbs[$mon].$numbs[$mday-1]."01\t; Serial  - last mod.\n"
+				# Print out todays info since it's a new day.
+	}
+	else {
+	    if ($4 != 99) {	# 100 Revisions for this date?
+		$serial .= "\t".$1.$2.$3.$numbs[$4]."\t; Serial  - last mod.\n"
+				# Print out info incrementing serial number.
+		}
+	    else {
+		($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(&timelocal(@timearray)+60*60*24);
+				# Add a day, if over 100 revisions.
+		$serial .= "\t".($year+1900).$numbs[$mon].$numbs[$mday-1]."01\t; Serial  - last mod.\n"
+				# Print out serial number for next day.
+	    }
+	}
+	$soa .= $serial;	# Add the serial number to the header.
+    }
+    else {
+	$soa .= $_;		# Copy the line to the header.
+    }
+}
+open(SOA, "> ${dns_dir}/named.soa") || die "Can't open SOA file for output: $!\n";
+print SOA $soa;			# Write out the new header.
+close(SOA);
+
+#
+# Open named.networks, read through it and create the correct named reverse
+# files from it.
+#
+
+open(NETWORKS, "${dns_dir}/named.networks") || die "Can't open networks file: $!\n";
+while (<NETWORKS>) {
+    if ((/^(\d{1,3})\s+on/) || (/^(\d{1,3}c)\s+on/)) { # Is it a network and on?
+	open(REVFILE, "> ${dns_dir}/named.$1") || die "Can't open reverse file for $1 network: $!\n";
+	print REVFILE $soa;
+	$networks{$1} = "true";
+    }
+}
+close(NETWORKS);
+
+#
+# Print the SOA record to the named.hosts file.
+#
+
+print NAMEDHOSTS $soa;
+
+#
+# Open named.hosts.in, read through it and put it out to named.hosts.
+#
+
+open(HOSTSIN, "${dns_dir}/named.hosts.in") || die "Can't open hosts infile: $!\n";
+while (<HOSTSIN>) {
+    print NAMEDHOSTS;
+}
+    
+#
+# Itterate over the file - opening and using the correct files for output.
+#
+
+$oldip = -1;
+while (<>) {
+    if (/^(\w\S*)\.arlut\.utexas\.edu\s*,.*:.*/) {
+	chop;			# Strip newline off.
+	($garbage, $comment) = split(/:/,$_,2);
+	($main, $inter, $nicks) = split(/,/,$garbage,3);
+	$systems{$1} = $comment; # Setup the Comment for the System.
+	$nicks =~ s/^\s+//;
+	$nicks =~ s/\s+$//;
+	foreach $nick (split(/\s+/,$nicks)) {
+	  print NAMEDHOSTS "$nick		IN	CNAME	$main.\n";
+	}
+    }			     
+    elsif ((/^>(\w[^,]*)*\s*,\s*(\w[^,]*)\.arlut\.utexas\.edu\s*,\s*(\w[^,:]*)*\s*:\s*(129\.116\.\d{1,3}\.\d{1,3})\s*:\s*([a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2})\s*$/) 
+    || (/^>(\w[^,]*)*\s*,\s*(\w[^,]*)\.arlut\.utexas\.edu\s*,\s*(\w[^,:]*)*\s*:\s*(192\.48\.\d{1,3}\.\d{1,3})\s*:\s*([a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2}-[a-fA-F0-9]{1,2})\s*$/)) {
+	$first_host = $1;
+	$host = $2;
+	$master = $2;
+	$nicks = $3;
+	$ip = $4;
+#	select((select(NAMEDHOSTS), $~ = "NAMEDHOST")[0]);
+#	write(NAMEDHOSTS);	# Write out the generic DNS name.
+	print NAMEDHOSTS "$host		IN	A	$ip\n";
+	if (($1) && ($1 ne $2)) {
+	    $host = $1;
+	   # select((select(NAMEDHOSTS), $~ = "NAMEDHOST")[0]);
+	   # write(NAMEDHOSTS);	# Write out the generic DNS name.
+	    print NAMEDHOSTS "$host		IN	A	$ip\n";
+	}
+	($ip1, $ip2, $ip3, $ip4) = split(/\./,$ip); # Split the IP up.
+	if (($ip1 != 192) && ($networks{$ip3})) {
+	    open(REVFILE, ">> ${dns_dir}/named.$ip3") || die "Can't open reverse name file for $ip3: $!\n";
+	}
+	elsif (($ip1 == 192) && ($networks{"${ip3}c"})) {
+	    open(REVFILE, ">> ${dns_dir}/named.${ip3}c") || die "Can't open reverse name file for ${ip3}c: $!\n";
+	}
+	else {
+	    print ERRORS "Bad network - $ip\n";
+	}
+#	select((select(REVFILE), $~ = "REVFILE")[0]);
+#	write(REVFILE);		# Write the info to the reverse DNS file.
+	print REVFILE "$ip4		IN	PTR	$master.arlut.utexas.edu.\n";
+	close(REVFILE);
+	$ethers = $5; $ethers =~ s/-/:/g; # Convert ethers to correct format.
+	write(ETHERS);
+	if ($systems{$master}) {
+	    ($tmp,$room,$type,$manufacture,$model,$os,$user) = split(/:/,$systems{$master});
+	    if ($tmp) {
+		@manager = split(/,/,$tmp);
+	    }
+	    if ($manufacture) {
+		print NAMEDHOSTS "		IN      HINFO   \"$manufacture/$model\" \"$os\"\n";
+	    }
+	}
+	if ($nicks) {
+	    $nicks =~ s/^\s+//;
+	    $nicks =~ s/\s+$//;
+	    foreach $nick (split(/\s+/,$nicks)) {
+	   #      select((select(NAMEDHOSTS), $~ = "CNAMES")[0]);
+	   #      write(CNAMES);	# Write out the generic DNS name.
+		print NAMEDHOSTS "$nick		IN	CNAME	$host\n";
+		# print NAMEDHOSTS "$nick		IN	CNAME	$master\n";
+		}
+	}
+	if (!($first_host) || ($master ne $host)) {
+	    print HOSTS "$ip     $host.arlut.utexas.edu $host\n# Machine: $master  Manager(s): @manager  Room: $room  Machine: $manufacture/$model  OS: $os\n";
+	}
+    }
+    else {
+	print ERRORS "Unknown line: $_";
+    }
+}
+
+#
+# Clean up by closing still open files.
+#
+    
+close(GASHFILE);
+close(ERRORS);
+close(NAMEDHOSTS);
+close(HOSTS);
+close(ETHERS);
+    
+exit;
+
+format NAMEDHOST =
+@<<<<<<<<<<<<<<<	IN	A	@<<<<<<<<<<<<<<<
+$host,					$ip
+.
+
+format CNAMES =
+@<<<<<<<<<<<<<<<	IN	CNAME	@<<<<<<<<<<<<<<<
+$nick,					$tmphost
+.
+
+format NAMEDRP =
+# Not currently in use. The RP is not usable until a named 4.9.x.
+                        IN      RP      @>>>>>>>>>>>>>>>.arlut.utexas.edu. .
+                                        $tmpmgr
+.
+
+format REVFILE =
+@<<<                    IN      PTR     @>>>>>>>>>>>>>>>.arlut.utexas.edu.
+$ip4,                                   $master
+.
+
+format ETHERS =
+@<<<<<<<<<<<<<<<<<      @>>>>>>>>>>>>>>>.arlut.utexas.edu   # @<<<<<<<<<<<<<<<
+$ethers,                $host,                                $ip
+.
