@@ -6,8 +6,8 @@
    
    Created: 6 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/07/21 05:40:38 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/03/27 20:35:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -352,6 +352,12 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	  }
 
 	iField = (InvidDBField) object.getField((short) 257); // volume invid
+
+	if (iField == null)
+	  {
+	    return userName + " - **undefined**";
+	  }
+
 	tmpInvid = iField.value();
 
 	if (editset != null)

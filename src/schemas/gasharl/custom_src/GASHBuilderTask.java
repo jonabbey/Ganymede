@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/03/20 20:47:02 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/03/27 20:35:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1342,7 +1342,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		if (ref == null || ref.getType() != (short) 276)
 		  {
-		    throw new RuntimeException("Schema and/or database error");
+		    Ganymede.debug("Error, can't find a volume entry for user " + getLabel(userRef) +
+				   " on automounter map " + mapname);
+		    continue;
 		  }
 
 		buf.append(getLabel(ref));
