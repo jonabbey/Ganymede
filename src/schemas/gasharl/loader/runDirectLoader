@@ -11,6 +11,7 @@
 # Where are we running the JVM from?
 
 JAVA=/usr/java1.2/bin/java
+#JAVA=/opt/bin/java
 
 # Where are the Ganymede jars installed?
 
