@@ -28,6 +28,15 @@ firewall.
 This change also speeds up login and noticeably reduces the memory
 loading on the server.  A win/win/win deal.
 
+2. [CLIENT] Fixed gclient.getObjectHandle()
+
+The getObjectHandle() method in the client's gclient class didn't
+properly deal with an empty list back from the GanymedeSession's
+queryInvids() method.  This could result in an exception being thrown
+rather than a dialog being shown in certain circumstances in the
+client in which a user tries to edit an object reference that he
+doesn't have permission to edit or view.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 10, 2003
