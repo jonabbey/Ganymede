@@ -26,6 +26,7 @@
   <property name="build.classes" value="${build.dir}/classes"/>
   <property name="build.doc" value="${build.dir}/doc"/>
   <property name="build.lib" value="${build.dir}/lib"/>
+  <property name="build.crypto" value="${build.dir}/crypto"/>
 
   <!-- Dist directories -->
   <property name="dist.jars" value="../jars"/>
@@ -37,6 +38,34 @@
 
   <!-- Global properties for javac -->
   <property name="build.compiler" value="modern"/>
+
+  <!-- Crypto Key Properties -->
+  <property name="use.ssl" value="true"/>
+  <property name="do.signjars" value="true"/>
+
+  <property name="priv_key.alias" value="GanymedeServerSSLKeys"/>
+  <property name="priv_key.storepass" value="ganypassphrase"/>
+  <property name="priv_key.days_valid" value="3650"/>
+  <property name="priv_key.keystore" value="${build.crypto}/GanymedeServerKey"/>
+  <property name="priv_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
+  <property name="pubcert.truststore" value="${build.crypto}/client.truststore"/>
+  <property name="pubcert.storepass" value="gclientpassphrase"/>
+
+  <condition property="sslkeys.notgenerated">
+    <not>
+      <and>
+        <available file="${priv_key.keystore}"/>
+        <available file="${pubcert.truststore}"/>
+      </and>
+    </not>
+  </condition>
+
+  <condition property="need.sslkeys">
+    <and>
+      <equals arg1="${sslkeys.notgenerated}" arg2="true"/>
+      <equals arg1="${use.ssl}" arg2="true"/>
+    </and>
+  </condition>
 
   <path id="classpath">
     <fileset dir="${lib.dir}">
@@ -64,10 +93,28 @@ validate      - Cross-checks all Directory Droid .java source files against
 
                 See verification/resource_validator.pl for details.
 
+genkeys       - Generates a new private/public key pair and cert for authenticating
+                the server when using SSL sockets for client/server communications.
+
+regenkeys     - Deletes and regenerates SSL private key for the server and
+                public certificate for the client.  Be careful!  When you delete
+                or regenerate your SSL key material, you will have to be sure and
+                update your server and client jar files at the same time.
+
 clean         - Cleans the build class tree
+
 javadoc_clean - Cleans the java doc tree
-distclean     - Cleans the directories at the top distribution level
+
+dist_clean    - Cleans the directories at the top distribution level
+
 veryclean     - Does all of distclean, javadoc_clean, clean
+
+cleankeys     - Deletes the existing SSL key and cert material.  Be careful!  When
+                you delete or regenerate your SSL key material, you will have to be
+                sure and update your server and client jar files at the same time.
+
+                Because this is such an irretrievable operation, you have to run this
+                rule by hand, the other clean rules won't do this for you.
 
 total         - Complete strip and rebuild
 </echo>
@@ -78,6 +125,7 @@ total         - Complete strip and rebuild
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${build.lib}"/>
     <mkdir dir="${build.doc}"/>
+    <mkdir dir="${build.crypto}"/>
     <tstamp/>
     <echo message="${TSTAMP}"/>
   </target>
@@ -148,32 +196,11 @@ refresh the jar files.
   </target>
 
 
-  <target name="jars" depends="main">
+  <target name="jars" depends="main, genkeys">
     <!-- Copy over any jars used in the build -->
     <copy todir="${build.lib}">
       <fileset dir="${lib.dir}"/>
     </copy>
-
-    <!-- Build the client jar file -->
-    <jar jarfile="${build.lib}/ddroid.jar" duplicate="preserve">
-      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/common/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
-      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
-      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
-      <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
-
-      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/client/*"/>
-    </jar>
 
     <!-- Build the server jar file -->
     <jar jarfile="${build.lib}/ddroidServer.jar" duplicate="preserve">
@@ -194,6 +221,31 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/FileReceiverBase*_Stub.class"/>
 
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/server/*.properties"/>
+
+      <fileset dir="${build.crypto}" includes="GanymedeServerKey"/>
+    </jar>
+
+    <!-- Build the client jar file -->
+    <jar jarfile="${build.lib}/ddroid.jar" duplicate="preserve">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/common/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
+      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+      <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
+
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/client/*"/>
+
+      <fileset dir="${build.crypto}" includes="client.truststore"/>
     </jar>
 
     <!-- Build the admin jar file -->
@@ -222,12 +274,23 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*.gif"/>
 
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
+
+      <fileset dir="${build.crypto}" includes="client.truststore"/>
     </jar>
+
+    <antcall target="signjars"/>
     
     <!-- Copy over the newly created jars -->
     <copy todir="${dist.jars}">
       <fileset dir="${build.lib}"/>
     </copy>
+  </target>
+
+
+  <target name="signjars" if="do.signjars">
+    <signjar alias="${priv_key.alias}" storepass="${priv_key.storepass}" keystore="${priv_key.keystore}">
+     <fileset dir="." includes="${build.lib}/ddroid.jar, ${build.lib}/ddroidAdmin.jar"/>
+    </signjar>
   </target>
 
 
@@ -280,5 +343,36 @@ refresh the jar files.
 
 
   <target name="dist" depends="main,validate,jars,javadoc"/>
-  
+
+
+  <target name="regenkeys" if="use.ssl" depends="cleankeys">
+    <antcall target="genkeys"/>
+  </target>
+
+
+  <target name="cleankeys">
+    <delete failonerror="false">
+      <fileset dir="${build.crypto}" includes="**/*"/>
+    </delete>
+  </target>
+
+
+  <target name="genkeys" if="need.sslkeys" depends="prepare">
+    <genkey alias="${priv_key.alias}" keystore="${priv_key.keystore}" storepass="${priv_key.storepass}"
+            dname="${priv_key.dname}" validity="${priv_key.days_valid}" verbose="true"/>
+    <exec dir="." executable="keytool">
+      <arg line= "-export -v -keystore ${priv_key.keystore} -alias ${priv_key.alias} -file ${pubcert.truststore}.tmp -storepass ${priv_key.storepass}"/>
+    </exec>
+    <exec dir="." executable="keytool">
+      <arg line="-import -v -alias ${priv_key.alias} -noprompt -file ${pubcert.truststore}.tmp -keystore ${pubcert.truststore} -storepass ${pubcert.storepass}"/>
+    </exec>
+    <delete failonerror="false"><fileset dir="." includes="${pubcert.truststore}.tmp"/></delete>
+    <echo>
+ 
+Fresh SSL keys have been generated.  Be sure and run 'ant jars' to rebuild the jar files.  Remember
+that the server, admin, and client jar files must all be updated at one time in order to keep
+the SSL keys and certificates matched.
+ 
+</echo>
+  </target>
 </project>
