@@ -1508,13 +1508,24 @@ public class DBEditSet {
 								      ts.l("commit_persistTransaction.error_text")));
 	  }
       }
-    catch (IOException ex)
+    catch (Throwable ex)
       {
-	// "Couldn''t commit transaction, IOException caught writing journal"
-	// "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
-	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
-								  ts.l("commit_persistTransaction.exception_text",
-								       ex.getMessage())));
+	if (ex instanceof IOException)
+	  {
+	    // "Couldn''t commit transaction, Exception caught writing journal"
+	    // "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+								      ts.l("commit_persistTransaction.ioexception_text",
+									   ex.getMessage())));
+	  }
+	else
+	  {
+	    // "Couldn''t commit transaction, Exception caught writing journal"
+	    // "Couldn''t commit transaction, an exception was caught persisting to the journal.\n\n{0}"
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+								      ts.l("commit_persistTransaction.exception_text",
+									   ex.getMessage())));
+	  }
       }
   }
 
