@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/06/30 04:35:21 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/10/04 08:49:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -183,17 +183,17 @@ public class DBLog {
    *
    */
 
-  GanymedeSession session = null;
+  GanymedeSession gSession = null;
 
   /* -- */
 
-  public DBLog(String filename, GanymedeSession session) throws IOException
+  public DBLog(String filename, GanymedeSession gSession) throws IOException
   {
     // get the signature to append to mail messages
 
     loadSignature();
 
-    this.session = session;
+    this.gSession = gSession;
 
     logFileName = filename;
     logStream = new FileOutputStream(logFileName, true); // append
@@ -594,7 +594,7 @@ public class DBLog {
     if (admin != null)
       {
 	returnAddr = adminPersonaCustom.convertAdminInvidToString(admin, 
-								  session.getSession());
+								  gSession.getSession());
       }
     else
       {
@@ -954,7 +954,7 @@ public class DBLog {
 
 	    if (event.admin != null)
 	      {
-		name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
+		name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getSession());
 	      }
 	    else
 	      {
@@ -977,8 +977,7 @@ public class DBLog {
 
 	if (type.ccToOwners)
 	  {
-	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects,
-									     session.getSession()));
+	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects));
 	  }
 
 	// who should we say the mail is from?
@@ -986,7 +985,7 @@ public class DBLog {
 	if (event.admin != null)
 	  {
 	    returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin, 
-								      session.getSession());
+								      gSession.getSession());
 	  }
 	else
 	  {
@@ -1083,8 +1082,7 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects,
-								       transSession));
+	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects));
       }
 
     mailList = VectorUtils.union(mailList, type.addressVect);
@@ -1267,7 +1265,7 @@ public class DBLog {
 
     // this query would lock if eventBase is already locked on this thread 
 
-    eventCodeVector = session.internalQuery(new Query(SchemaConstants.EventBase));
+    eventCodeVector = gSession.internalQuery(new Query(SchemaConstants.EventBase));
 
     if (eventCodeVector == null)
       {
@@ -1285,7 +1283,7 @@ public class DBLog {
 	entry = (Result) eventCodeVector.elementAt(i);
 	
 	sysEventCodes.put(entry.toString(), 
-			  new systemEventType(session.session.viewDBObject(entry.getInvid())));
+			  new systemEventType(gSession.getSession().viewDBObject(entry.getInvid())));
       }
 
     // remember when we updated our local cache
@@ -1365,7 +1363,7 @@ public class DBLog {
 
     // would deadlock here if eventBase was locked on this thread
 
-    eventCodeVector = session.internalQuery(new Query(SchemaConstants.ObjectEventBase));
+    eventCodeVector = gSession.internalQuery(new Query(SchemaConstants.ObjectEventBase));
 
     if (eventCodeVector == null)
       {
@@ -1382,7 +1380,7 @@ public class DBLog {
 
 	entry = (Result) eventCodeVector.elementAt(i);
 
-	objEventobj = (DBObject) session.session.viewDBObject(entry.getInvid());
+	objEventobj = (DBObject) gSession.getSession().viewDBObject(entry.getInvid());
 	objEventItem = new objectEventType(objEventobj);
 	objEventCodes.put(objEventItem.hashKey, objEventItem);
       }
@@ -1443,8 +1441,7 @@ public class DBLog {
 	// first we calculate what email addresses we should notify
 	// based on the ownership of the objects
 
-	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects,
-										 session));
+	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects));
       }
     else
       {
@@ -1488,7 +1485,7 @@ public class DBLog {
    * &lt;objects&gt; list.</P>
    */
 
-  static public Vector calculateOwnerAddresses(Vector objects, DBSession session)
+  public Vector calculateOwnerAddresses(Vector objects)
   {
     Enumeration objectsEnum, ownersEnum;
     Invid invid, ownerInvid;
@@ -1500,11 +1497,6 @@ public class DBLog {
 
     /* -- */
 
-    if (session == null)
-      {
-	session = Ganymede.internalSession.getSession();
-      }
-
     if (debug)
       {
 	System.err.println("DBLog.java: calculateOwnerAddresses");
@@ -1515,7 +1507,7 @@ public class DBLog {
     while (objectsEnum.hasMoreElements())
       {
 	invid = (Invid) objectsEnum.nextElement();
-	object = session.viewDBObject(invid);
+	object = gSession.getSession().viewDBObject(invid);
 
 	if (object == null)
 	  {
@@ -1565,7 +1557,7 @@ public class DBLog {
 		  }
 	      }
 
-	    refObj = session.getGSession().getContainingObj(refObj);
+	    refObj = gSession.getContainingObj(refObj);
 	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
 	  }
 	else
@@ -1633,11 +1625,11 @@ public class DBLog {
 		if (debug)
 		  {
 		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " + 
-				       session.getGSession().viewObjectLabel(ownerInvid));
+				       gSession.viewObjectLabel(ownerInvid));
 		  }
 
 		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid, 
-									      session));
+									      gSession.getSession()));
 		
 		seenOwners.put(ownerInvid, ownerInvid);
 	      }

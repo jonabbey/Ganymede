@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2000/09/22 18:50:19 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2000/10/04 08:49:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.128 $ %D%
+ * @version $Revision: 1.129 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2364,6 +2364,9 @@ public final class DBStore {
 
   private boolean sysEventExists(String token)
   {
+    // it's safe to use Ganymede.internalSession here because we'll
+    // only call sysEventExists before we allow login processing
+
     return (Ganymede.internalSession.findLabeledObject(token, SchemaConstants.EventBase) != null);
   }
 
@@ -2447,6 +2450,10 @@ public final class DBStore {
 
   private final String describe(Invid x)
   {
+    // very little synchronization involved here aside from
+    // backpointers in the debugBackPointers() method above, so we're
+    // not very worried about deadlocks here
+
     return Ganymede.internalSession.describe(x);
   }
 }

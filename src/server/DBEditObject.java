@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.137 $
-   Last Mod Date: $Date: 2000/10/03 06:47:13 $
+   Version: $Revision: 1.138 $
+   Last Mod Date: $Date: 2000/10/04 08:49:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.137 $ $Date: 2000/10/03 06:47:13 $ $Name:  $
+ * @version $Revision: 1.138 $ $Date: 2000/10/04 08:49:07 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2028,11 +2028,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	if (baseId < 0)
 	  {
 	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
-	    return null;
-	  }
-
-	if (Ganymede.internalSession == null)
-	  {
 	    return null;
 	  }
 

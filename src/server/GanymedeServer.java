@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2000/09/15 23:32:18 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2000/10/04 08:49:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -147,6 +147,22 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
+  /**
+   * <p>During the login process, we need to get exclusive access over
+   * an extended time to synchronized methods in a privileged
+   * GanymedeSession to do the query operations for login.  If we used
+   * the generic Ganymede.internalSession for this, we might lock the
+   * server up, as Ganymede.internalSession is also used for Invid
+   * label look up operations in the transaction commit process, which
+   * involves a writeLock that will block the login's read lock from
+   * being granted.</p>
+   *
+   * <p>By having our own private GanymedeSession for logins, we avoid
+   * this deadlock possibility.</p>
+   */
+
+  private GanymedeSession loginSession;
+
   /* -- */
 
   /**
@@ -169,6 +185,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	Ganymede.debug("Error: attempted to start a second server");
 	throw new RemoteException("Error: attempted to start a second server");
       }
+
+    loginSession = new GanymedeSession();
+    loginSession.enableWizards(false);
+    loginSession.enableOversight(false);
   } 
 
   /**
@@ -328,7 +348,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
 	    userQuery = new Query(SchemaConstants.UserBase, root, false);
 
-	    Vector results = Ganymede.internalSession.internalQuery(userQuery);
+	    Vector results = loginSession.internalQuery(userQuery);
 
 	    // results.size() really shouldn't be any larger than 1,
 	    // since we are doing a match on username and username is
@@ -336,7 +356,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    for (int i = 0; !found && results != null && (i < results.size()); i++)
 	      {
-		user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+		user = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	
 		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	
@@ -380,7 +400,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
-		results = Ganymede.internalSession.internalQuery(userQuery);
+		results = loginSession.internalQuery(userQuery);
 
 		// find the entry with the matching name and the
 		// matching password.  We no longer expect the
@@ -399,7 +419,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		for (int i = 0; !found && (i < results.size()); i++)
 		  {
-		    persona = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+		    persona = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 
@@ -435,11 +455,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
 		    userQuery = new Query(SchemaConstants.UserBase, root, false);
 	    
-		    results = Ganymede.internalSession.internalQuery(userQuery);
+		    results = loginSession.internalQuery(userQuery);
 
 		    if (results.size() == 1)
 		      {
-			user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+			user = loginSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
 		      }
 		  }
 	      }
@@ -916,11 +936,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     
     userQuery = new Query(SchemaConstants.PersonaBase, root, false);
     
-    Vector results = Ganymede.internalSession.internalQuery(userQuery);
+    Vector results = loginSession.internalQuery(userQuery);
     
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	obj = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+	obj = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 	pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 	    
@@ -1234,6 +1254,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       vectorEmpty = true,
       swept = false;
 
+    // XXX
+    // 
+    // it's safe to use Ganymede.internalSession's DBSession here only
+    // because we don't call the synchronized viewDBObject method on
+    // it unless and until we are granted the DBDumpLock, and because
+    // we are not a synchronized method on GanymedeServer.
+    //
+    // XXX
+
     DBSession session = Ganymede.internalSession.session;
 
     /* -- */
@@ -1410,6 +1439,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     boolean
       ok = true;
 
+    // XXX
+    // 
+    // it's safe to use Ganymede.internalSession's DBSession here only
+    // because we don't call the synchronized viewDBObject method on
+    // it unless and until we are granted the DBDumpLock, and because
+    // we are not a synchronized method on GanymedeServer.
+    //
+    // XXX
+
     DBSession session = Ganymede.internalSession.session;
 
     /* -- */
@@ -1495,9 +1533,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    if (session.viewDBObject(backTarget) == null)
 		      {
 			ok = false;
+
+			// again, this use of Ganymede.internalSession
+			// is safe because it just winds up being
+			// another viewDBObject call
 		    
 			Ganymede.debug("*** Backpointers hash for object " +
-				       Ganymede.internalSession.describe(key) +
+				       session.getGSession().describe(key) +
 				       " has an invid pointing to a non-existent object: " + backTarget);
 		      }
 		  }
