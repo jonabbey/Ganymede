@@ -4,8 +4,8 @@
    IPv4Range.java
 
    Created: 4 April 2001
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2001/04/09 04:31:17 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/04/09 05:12:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -123,6 +123,75 @@ public class IPv4Range {
 	for (int j = 0; j < 2; j++)
 	  {
 	    range[0][i][j] = initRange[i][j];
+	  }
+      }
+  }
+
+  public IPv4Range(byte[] networkNumber)
+  {
+    if (networkNumber.length != 4)
+      {
+	throw new IllegalArgumentException("Bad number of bytes");
+      }
+
+    range = new byte[1][4][2];
+
+    boolean hostPortion = true;
+
+    for (int i = 3; i >= 0; i--)
+      {
+	range[0][i][0] = networkNumber[i];
+	range[0][i][1] = networkNumber[i];
+
+	if (hostPortion)
+	  {
+	    if (range[0][i][0] == u2s(0))
+	      {
+		range[0][i][0] = u2s(1);
+		range[0][i][1] = u2s(254);
+	      }
+	    else
+	      {
+		hostPortion = false;
+	      }
+	  }
+      }
+  }
+
+  /**
+   * <p>This version of the constructor takes an unsigned-encoded
+   * 4 Byte array holding an IP network number in which all trailing
+   * zero Bytes are assumed to be able to vary across the range
+   * 1-254.</p>
+   */
+
+  public IPv4Range(Byte[] networkNumber)
+  {
+    if (networkNumber.length != 4)
+      {
+	throw new IllegalArgumentException("Bad number of bytes");
+      }
+
+    range = new byte[1][4][2];
+
+    boolean hostPortion = true;
+
+    for (int i = 3; i >= 0; i--)
+      {
+	range[0][i][0] = networkNumber[i].byteValue();
+	range[0][i][1] = networkNumber[i].byteValue();
+
+	if (hostPortion)
+	  {
+	    if (range[0][i][0] == u2s(0))
+	      {
+		range[0][i][0] = u2s(1);
+		range[0][i][0] = u2s(254);
+	      }
+	    else
+	      {
+		hostPortion = false;
+	      }
 	  }
       }
   }
@@ -769,6 +838,7 @@ public class IPv4Range {
 
   public static void main(String argv[])
   {
+    /*
     System.out.println("IPv4Range debug test suite");
     System.out.println("--------------------\n");
 
@@ -857,6 +927,48 @@ public class IPv4Range {
 
 	System.out.println(genIPV4string(address));
       }
+
+    System.out.println("\nNetwork Number Test\n---------------");
+
+    byte[] tmpAddress = new byte[4];
+
+    tmpAddress[0] = u2s(10);
+    tmpAddress[1] = u2s(3);
+    tmpAddress[2] = u2s(1);
+    tmpAddress[3] = u2s(0);
+
+    range = new IPv4Range(tmpAddress);
+
+    enum = range.getElements();
+
+    while (enum.hasMoreElements())
+      {
+	Byte[] address = (Byte[]) enum.nextElement();
+	
+	System.out.println(genIPV4string(address));
+	
+	if (!range.matches(address))
+	  {
+	    System.out.println("*Error, mismatch!");
+	  }
+      }
+
+    System.out.println("\nRestricted range test 3\n---------------");
+
+    enum = range.getElements(0,75);
+
+    while (enum.hasMoreElements())
+      {
+	Byte[] address = (Byte[]) enum.nextElement();
+	
+	System.out.println(genIPV4string(address));
+	
+	if (!range.matches(address))
+	  {
+	    System.out.println("*Error, mismatch!");
+	  }
+      }
+    */
   }
 }
 
@@ -886,6 +998,16 @@ final class IPv4RangeEnumerator implements Enumeration {
 
   IPv4RangeEnumerator(IPv4Range v4Range, int start, int stop)
   {
+    if (start < 0 || start > 255)
+      {
+	throw new IllegalArgumentException("start out of range");
+      }
+
+    if (stop < 0 || stop > 255)
+      {
+	throw new IllegalArgumentException("stop out of range");
+      }
+
     byte[][][] tmpRange = v4Range.getByteArray();
     int rowCount = 0;
 
