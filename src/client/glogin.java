@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
 
-  protected gclient g_client;
+  public static gclient g_client;
 
   protected Image ganymede_logo;
   protected JTextField username;
@@ -72,7 +72,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   protected static ClientBase my_client;
 
   protected static Session my_session;
-  protected static String my_username,my_passwd;
+  protected static String my_username, my_passwd;
 
   protected static glogin my_glogin;
 
@@ -83,6 +83,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   private static boolean WeAreApplet = true;
 
   private static Container appletContentPane = null;
+
+  protected static DeathWatcherThread deathThread;
 
   /**
    *  This main() function will allow this applet to run as an application
@@ -341,7 +343,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	try
 	  {
-	    my_client = new ClientBase(server_url, this);  //Exception will happen here
+	    my_client = new ClientBase(server_url, this);  // Exception will happen here
 	    connected = true;
 	  }
 	catch (RemoteException rx)
@@ -371,36 +373,48 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Logout fromt the server. 
+   * Logout from the server. 
    *
    * This is called from the gclient.
    */
 
-  public void logout() throws RemoteException
+  public void logout()
   {
-    my_client.disconnect();
-    enableButtons(true);
+    try
+      {
+	my_client.disconnect();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (RemoteException ex)
+      {
+      }
+    finally
+      {
+	try
+	  {
+	    g_client.setVisible(false);
+	    g_client.dispose();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+
+	enableButtons(true);
+      }
   }
 
-//   /**
-//    *
-//    * If the applet is no longer visible on the page, we exit.
-//    *
-//    */
+  /**
+   *
+   * If the applet is no longer visible on the page, we exit.
+   *
+   */
 
-//   public void destroy() 
-//   {
-//     try 
-//       {
-// 	if (my_glogin.my_session != null)
-// 	  {
-// 	    my_glogin.my_session.logout();
-// 	  }
-//       }
-//     catch (RemoteException ex) 
-//       {
-//       }
-//   }
+  public void destroy() 
+  {
+    logout();
+  }
   
   public String getUserName()
   {
@@ -408,11 +422,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   public void enableButtons(boolean enabled)
-    {
-      connector.setEnabled(enabled);
-      _quitButton.setEnabled(enabled);
-
-    }
+  {
+    connector.setEnabled(enabled);
+    _quitButton.setEnabled(enabled);
+  }
 
   /**
    * Set the cursor to a wait cursor(usually a watch.)
@@ -451,7 +464,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	connector.doClick();
       }
-    
     else if (e.getSource() == connector)
       {
 	setWaitCursor();
@@ -480,7 +492,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	catch (NullPointerException ex)
 	  {
-
 	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "Error: Didn't get server reference.  Please Quit and Restart");
 	    
@@ -494,7 +505,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "Error: " + ex.getMessage());
-	    	    
+
 	    connector.setEnabled(true);
 	    _quitButton.setEnabled(true);
 
@@ -512,7 +523,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	else 
 	  {
 	    // This means that the user was not able to log into the server properly.
-	    
+
 	    // We re-enable the "Login to server" button so that the user can try again.
 
 	    connector.setEnabled(true);
@@ -541,6 +552,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	glogin.helpBase = null;
       }
 
+    // create the thread in our thread group that the disconnected()
+    // method will use to knock us down.
+
+    deathThread = new DeathWatcherThread();
+    deathThread.start();
+
+    // and pop up everything
+
     g_client = new gclient(session,this);
 
     passwd.setText("");
@@ -554,7 +573,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	// This will get the ball rolling.
 
 	g_client.start();
-
       }
     catch (Exception e)
       {
@@ -577,49 +595,85 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public void disconnected(ClientEvent e)
   {
-    if (debug)
+    try
       {
-	System.out.println("glogin: " + e.getMessage());
+	deathThread.die(e.getMessage());
       }
-
-    // If this is not an applet, we want to call System.exit().  The
-    // problem is, if the client is waiting on something from the
-    // server, then it will wait all day without ever showing the
-    // dialog.  So we spawn this thread, to kill the client off after
-    // 2 minutes even if the dialog never shows.
-
-    if (! isApplet())
+    catch (NullPointerException ex)
       {
-	if (debug)
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                              DeathWatcherThread
+
+------------------------------------------------------------------------------*/
+
+class DeathWatcherThread extends Thread {
+
+  final boolean debug = false;
+
+  String message = null;
+
+  /* -- */
+
+  public DeathWatcherThread()
+  {
+  }
+
+  public synchronized void run()
+  {
+    while (message == null)
+      {
+	try
 	  {
-	    System.out.println("glogin: not an applet, spawning exit thread.");
+	    wait();
 	  }
-
-	ExitThread t = new ExitThread(e.getMessage());
-	t.start();
-      }
-    else if (debug)
-      {
-	System.out.println("glogin: this is an applet, no thread for you.");
-      }
-
-    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
-
-    if (isApplet())
-      {
-	if (debug)
+	catch (InterruptedException ex)
 	  {
-	    System.out.println("Forced to disconnect, but not going to System.exit because you are an applet");
+	    if (message == null)
+	      {
+		return;
+	      }
 	  }
       }
-    else
-      {
-	if (debug)
-	  {
-	    System.out.println("Forced to disconnect, calling System.exit(0)");
-	  }
-	System.exit(0);
-      }
+
+    ExitThread exitThread = new ExitThread(message);
+
+    // start up the death timer, which will close all our active
+    // windows in a bit.. we hold off on just doing it now to not
+    // startle the user too much.
+
+    exitThread.start();
+
+    // throw up a modal dialog to get the user's attention
+
+    // note, we really shouldn't use just 'new Date()'.toString() here,
+    // but I'm just that lazy at the moment.
+
+    new JErrorDialog(glogin.g_client, 
+		     "The server is disconnecting us: \n\n" + message + 
+		     "\n\n" + new Date());
+
+    // if we get here, the dialog has been put down
+
+    exitThread.dieNow();
+  }
+
+  /**
+   *
+   * This method causes the DeathWatcherThread to kick off the
+   * end-of-the-world process.
+   * 
+   */
+
+  public synchronized void die(String message)
+  {
+    this.message = message;
+
+    notify();
   }
 }
 
@@ -633,17 +687,19 @@ class ExitThread extends Thread {
 
   final boolean debug = false;
 
-  final String message;
+  String message;
+
+  boolean dieNow = false;
+
+  /* -- */
 
   public ExitThread(String message)
   {
-    super();
-    
     this.message = message;
   }
 
-  public void run() {
-
+  public synchronized void run()
+  {
     if (debug)
       {
 	System.out.println("ExitThread: running");
@@ -655,9 +711,8 @@ class ExitThread extends Thread {
 
     try
       {
-	while (i > 0)
+	while (!dieNow && i > 0)
 	  {
-	    
 	    sleep(1000);
 	    System.out.print(".");
 	    i--;
@@ -669,12 +724,12 @@ class ExitThread extends Thread {
       }
     
     System.out.println("\nGanymede disconnected: " + message);
-    
-    System.exit(0);
-    
+
+    glogin.my_glogin.logout();
+  }
+
+  public void dieNow()
+  {
+    this.dieNow = true;
   }
 }
-
-
-
-
