@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -163,7 +163,8 @@ public class JDialogBuff implements java.io.Serializable {
 
 	    if (debug)
 	      {
-		System.err.println("JDialogBuff: choice label = " + choiceLabel + " value = " + chunk.value + " init = " + chunk.initialValue);
+		System.err.println("JDialogBuff: choice label = " + choiceLabel +
+				   " value = " + chunk.value + " init = " + chunk.initialValue);
 	      }
 
 	    retVal.addChoice(choiceLabel, (Vector) chunk.value, (String)chunk.initialValue);
@@ -483,20 +484,27 @@ public class JDialogBuff implements java.io.Serializable {
 		  {
 		    if (debug)
 		      {
-			System.err.println("end of first vector chunk: " + tempString.toString());
+			System.err.println("retrieveChunks(): end of first vector chunk: " + tempString.toString());
 		      }
 
 		    tempVect = new Vector();
-		    tempVect.addElement(tempString.toString());
+
+		    if (tempString.length() != 0)
+		      {
+			tempVect.addElement(tempString.toString());
+		      }
 		  }
 		else
 		  {
 		    if (debug)
 		      {
-			System.err.println("end of a middle vector chunk: " + tempString.toString());
+			System.err.println("retrieveChunks(): end of a middle vector chunk: " + tempString.toString());
 		      }
 
-		    tempVect.addElement(tempString.toString());
+		    if (tempString.length() != 0)
+		      {
+			tempVect.addElement(tempString.toString());
+		      }
 		  }
 
 		tempString.setLength(0);
@@ -507,17 +515,20 @@ public class JDialogBuff implements java.io.Serializable {
 	  {
 	    if (debug)
 	      {
-		System.err.println("end of a last vector chunk: " + tempString.toString());
+		System.err.println("retrieveChunks(): end of a last vector chunk: " + tempString.toString());
 	      }
 
-	    tempVect.addElement(tempString.toString());
+	    if (tempString.length() != 0)
+	      {
+		tempVect.addElement(tempString.toString());
+	      }
 	    operands.addElement(tempVect);
 	  }
 	else
 	  {
 	    if (debug)
 	      {
-		System.err.println("end of scalar chunk: " + tempString.toString());
+		System.err.println("retrieveChunks(): end of scalar chunk: " + tempString.toString());
 	      }
 
 	    if (tempString.length() == 0)
@@ -803,6 +814,17 @@ public class JDialogBuff implements java.io.Serializable {
 		    buffer.append(chars[j]);
 		  }
 	      }
+	  }
+
+	// if we have a singleton vector, add a comma
+	// so our retrieveChunks() code will correctly
+	// identify this operand as a Vector.  
+
+	// May God Have Mercy On My Soul For This Hack I Now Commit.
+
+	if (operands.size() <= 1)
+	  {
+	    buffer.append(",");
 	  }
       }
 
