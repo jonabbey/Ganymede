@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.9 $ %D%
+ Version: $Revision: 1.10 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,11 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
   JLabel 
     label = new JLabel();
 
+  Dimension
+    cellDimension;
+
   boolean
+    heightSet = false,
     sorted,
     allowCallback = false;
 
@@ -72,6 +76,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
     
     label.setBackground(Color.white);
     label.setOpaque(true);
+
     //model setSize(items.size());
     //System.out.println("Setting size to " + items.size());
 
@@ -104,16 +109,16 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 					    return -1;
 					  }
 					else if (comp > 0)
-					  { 
+					  {
 					    return 1;
-					  } 
+					  }
 					else
-					  { 
+					  {
 					    return 0;
 					  }
 				      }
 				  }
-				  )	      
+				  )
 		  ).sort();
 
 		  if (debug)
@@ -196,6 +201,9 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
     
     addMouseListener(this);
     setCellRenderer(this);
+
+    setPrototypeCellValue(items.elementAt(0));
+    setFixedCellWidth(-1);
   }
 
   public void setSize(int size)
@@ -259,9 +267,8 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 	    i++;
 	  }
       }
-    
+
     insertHandleAt(handle, i);
-    
   }
 
   /**
@@ -354,6 +361,7 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 	  }
 	return;
       }
+
     if ((listHandle)model.elementAt(index) == null)
       {
 	if (debug)
@@ -362,10 +370,12 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 	  }
 	return;
       }
+
     if (debug)
       {
 	System.out.println("element at" + index + " is " + ((listHandle)model.elementAt(index)).getLabel());
       }
+
     label.setText("");
     label.setText(((listHandle)model.elementAt(index)).getLabel());
   }
@@ -377,10 +387,11 @@ public class JstringListBox extends JList implements ListCellRenderer, ListSelec
 						boolean cellHasFocus)
   {
     configureListCellRenderer(value, index);
+
     if (isSelected)
       {
-	label.setBackground(Color.white);
-	label.setForeground(Color.red);
+	label.setBackground(Color.blue);
+	label.setForeground(Color.white);
       }
     else
       {
