@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.6 $ %D% 
+ * @version $Revision: 1.7 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -223,6 +223,17 @@ public class rowTable extends baseTable {
 	clickInCell(x,y);
       }
   }
+
+  /**
+   * Erases all the cells in the table and removes any per-cell
+   * attribute sets.  
+   */
+  public void clearCells()
+  {
+    index = new Hashtable();
+    super.clearCells();
+  }
+
 
   /**
    * Creates a new row, adds it to the hashtable
