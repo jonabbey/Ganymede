@@ -165,6 +165,11 @@ on the server to be pinned after the schema editor window has been
 closed.  I've added a great deal of manual object dissolution and
 reference clearing to prevent memory pinning in the server.
 
+More importantly, the admin console's schema editor code now properly
+handles clearing the server-side schema editor context if the window
+is closed through the window system's controls rather than through the
+'commit' or 'cancel' buttons.
+
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
 RELEASE DATE: October 11, 2001
