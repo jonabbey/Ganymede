@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.262 $
-   Last Mod Date: $Date: 2002/11/01 03:17:27 $
+   Version: $Revision: 1.263 $
+   Last Mod Date: $Date: 2002/11/01 03:48:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.262 $ $Date: 2002/11/01 03:17:27 $
+ * @version $Revision: 1.263 $ $Date: 2002/11/01 03:48:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4343,7 +4343,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	Vector ownerInvids;
+	Vector ownerInvids = null;
 
 	if (newObjectOwnerInvids != null)
 	  {
@@ -4351,36 +4351,37 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
-	    ownerInvids = new Vector();
-	    ownerList = getOwnerGroups();
+	    // supergash is allowed to create objects with no owners,
+	    // so we won't worry about what supergash might try to do.
 
-	    if (ownerList.size() == 0)
+	    if (!supergashMode)
 	      {
-		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, no owner group to put it in.");
-	      }
-
-	    // if we're interactive, the client really should have
-	    // helped us out by prompting the user for their preferred
-	    // default owner list.  So we'll bitch.
-
-	    if (enableWizards)
-	      {
-		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, no way of knowing which " +
-						  "owner groups to place it in");
-	      }
-	    else
-	      {
-		// if we weren't told who to make own the object, we'll just
-		// pick the first owner group we can put it into and put it there.
-
-		// supergash doesn't need to set any owner at all.
-
-		if (!supergashMode)
+		ownerInvids = new Vector();
+		ownerList = getOwnerGroups();
+		
+		if (ownerList.size() == 0)
 		  {
+		    return Ganymede.createErrorDialog("Can't create",
+						      "Can't create new object, no owner group to put it in.");
+		  }
+		
+		// if we're interactive, the client really should have
+		// helped us out by prompting the user for their preferred
+		// default owner list.  So we'll bitch.
+		
+		if (enableWizards)
+		  {
+		    return Ganymede.createErrorDialog("Can't create",
+						      "Can't create new object, no way of knowing which " +
+						      "owner groups to place it in");
+		  }
+		else
+		  {
+		    // if we weren't told who to make own the object, we'll just
+		    // pick the first owner group we can put it into and put it there.
+		    
 		    ownerInvids.addElement(ownerList.getInvid(0));
-
+		    
 		    if (ownerList.size() > 1)
 		      {
 			randomOwner = true;
