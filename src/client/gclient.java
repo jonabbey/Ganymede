@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,6 +45,8 @@ import com.sun.java.swing.*;
 ------------------------------------------------------------------------------*/
 
 public class gclient extends JFrame implements treeCallback,ActionListener {
+  
+  final boolean debug = true;
 
   Session session;
   glogin _myglogin;
@@ -118,6 +120,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public gclient(Session s, glogin g) 
   {
     super("Ganymede Client: "+g.my_client.getName()+" logged in");
+
+    System.out.println("Starting gclient");
 
     if (s == null)
       {
@@ -388,6 +392,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   void buildTree() throws RemoteException
   {
+    if (debug)
+      {
+	System.out.println("Building tree");
+      }
     Base base;
     BaseNode t;
 
@@ -406,6 +414,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  
 	refreshObjects(t, false);
       } 
+    if (debug)
+      {
+	System.out.println("Done building tree,");
+      }
   }
 
   /**
