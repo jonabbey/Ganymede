@@ -455,6 +455,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		  catch (Throwable ex)
 		    {
 		      gc.processException(ex);
+		      return null;
 		    }
 		}
 	      }
