@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2004/03/24 03:48:46 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2004/03/24 03:50:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -297,7 +297,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "objectClass", "person");
     writeLDIF(out, "uid", user.getLabel());
 
-    String fullName = user.getFieldValueLocal(userSchema.FULLNAME).toString();
+    String fullName = (String) user.getFieldValueLocal(userSchema.FULLNAME);
 
     if (fullName != null)
       {
