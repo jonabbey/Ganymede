@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/07/08 04:27:44 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/07/27 00:23:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.31 $ %D%
+ * @version $Revision: 1.32 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -788,6 +788,9 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 					       null,
 					       null,
 					       null));
+
+    System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
+
     try
       {
 	Ganymede.log.close();
@@ -796,6 +799,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
       {
 	System.err.println("IO Exception closing log file:" + ex);
       }
+
+    System.err.println("\nServer shutdown complete.");
 
     System.exit(0);
 
