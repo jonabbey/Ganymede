@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -458,6 +458,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	Embedded.removeAllElements();
       }
+
+    // sort fieldChoices
+
+    gc.sortStringVector(fieldChoices);
+
+    // and reset the options panel checkboxes.
 
     if (optionsPanel != null)
       {
@@ -1875,6 +1881,13 @@ class OptionsPanel extends JPanel {
 
     resetBoxes();
   }
+
+  /**
+   *
+   * This method clears out the checkboxes in the 'fields returned'
+   * panel.
+   * 
+   */
 
   public void resetBoxes()
   {
