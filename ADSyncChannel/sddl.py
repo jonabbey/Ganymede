@@ -179,8 +179,8 @@ class UUID:
     return "%x" % (self.time_low) + "-" + \
            "%x" % (self.time_mid) + "-" + \
            "%x" % (self.time_hi_and_version) + "-" + \
-           "".join( ["%x" % c for c in self.clock_seq] ) + "-" + \
-           "".join( ["%x" % c for c in self.node] )
+           "".join( ["%02x" % c for c in self.clock_seq] ) + "-" + \
+           "".join( ["%02x" % c for c in self.node] )
 
 
   def __cmp__(self, other):
