@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -141,17 +141,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	bf = new DBObjectBaseField(this);
 
-	bf.field_name = "Owner";
-	bf.field_code = SchemaConstants.OwnerListField;
+	bf.field_name = "Containing Object";
+	bf.field_code = SchemaConstants.ContainerField;
 	bf.field_type = FieldType.INVID;
-	bf.field_order = 0;
+	bf.field_order = bf.field_code;
 	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
 	bf.targetField = -1;	// procedure for handling deletion and what not..
 	bf.editable = false;
 	bf.removable = false;
 	bf.array = false;
+	bf.visibility = false;	// we don't want the client to show the owner link
 
-	fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
+	fieldHash.put(new Short(bf.field_code), bf);
 
 	// note that we won't have an expiration date or removal date
 	// for an embedded object
@@ -583,16 +584,22 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (classdef == null)
       {
-	return new DBEditObject();
+	return new DBEditObject(this);
       }
 
     Constructor c;
     DBEditObject e_object = null;
+    Class[] cParams = new Class[1];
+
+    cParams[0] = this.getClass();
+
+    Object[] params = new Object[1];
+    params[0] = this;
 
     try
       {
-	c = classdef.getDeclaredConstructor(new Class[0]); // no param constructor
-	e_object = (DBEditObject) c.newInstance(new Object[0]);
+	c = classdef.getDeclaredConstructor(cParams); // no param constructor
+	e_object = (DBEditObject) c.newInstance(params);
       }
     catch (NoSuchMethodException ex)
       {
