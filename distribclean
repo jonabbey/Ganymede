@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.8 $
-# Date: $Date: 1999/01/29 21:23:09 $
+# Version: $Revision: 1.9 $
+# Date: $Date: 1999/01/29 22:07:44 $
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
@@ -73,10 +73,6 @@ rm -f Makefile
 find . -name config.sh -exec rm {} \;
 
 find . -name rebuild -exec rm {} \;
-
-find schemas -name \*.class -exec rm {} \;
-
-find schemas -name \*.jar -exec rm {} \;
 
 # Clean up the classes tree.. we've got the jars, so we don't
 # need the classes in the classes tree.
