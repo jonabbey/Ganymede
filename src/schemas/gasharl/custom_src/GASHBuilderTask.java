@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2001/07/23 21:46:47 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2001/07/23 21:54:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2458,8 +2458,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    result.setLength(0);
-
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
     sysname += dnsdomain;
 
@@ -2473,6 +2471,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    DBObject interfaceObj;
 
 	    /* -- */
+
+	    result.setLength(0);
 
 	    interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
 
