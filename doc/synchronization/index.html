@@ -341,29 +341,29 @@
     about:</p>
 
     <ul>
-      <li><p><code class="type">Task Name</code> -- The name of the Task
+      <li><code class="type">Task Name</code> -- The name of the Task
       as seen in the admin console, must be unique in the Ganymede
-      server.</p></li>
+      server.</li>
 
-      <li><p><code class="type">Task Class</code> -- The fully qualified
+      <li><code class="type">Task Class</code> -- The fully qualified
       class name for your custom <a
       href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
       subclass, as defined in your <a
-      href="../glossary.html#custom.jar">custom.jar</a> file.</p></li>
+      href="../glossary.html#custom.jar">custom.jar</a> file.</li>
 
-      <li><p><code class="type">Run On Transaction Commit</code> -- A
+      <li><code class="type">Run On Transaction Commit</code> -- A
       check-box, should be checked to indicate that this task is to be
-      scheduled for automatic execution.</p></li>
+      scheduled for automatic execution.</li>
 
       <li>
-	<p><code class="type">Option Strings</code> -- A Vector String
+	<code class="type">Option Strings</code> -- A Vector String
 	field, used to provide optional run-time configuration
 	information to builder tasks that are programmed to look for
-	it.</p>
-
-	<p>The strings in the <code class="type">Option Strings</code>
+	it.
+	<br/>
+	The strings in the <code class="type">Option Strings</code>
 	field should all be in the form: <code class="example">key =
-	value</code>.</p>
+	value</code>.
       </li>
     </ul>
 
@@ -597,11 +597,11 @@ what object type the method is to operate on.  This is a common idiom
 in the internal Ganymede <a
 href="../javadoc/arlut/csd/ganymede/server/DBStore.html">DBStore</a> API.</p>
 
-<p>The overall effect of builderPhase1() is to look to see whether any
-users or groups, as defined in the userKit schema, have changed since
-this builder task was last run, and if so, to write out passwd and
-group files suitable for integration into a simple NIS or <code
-class="filename">/etc/passwd</code>, <code
+<p>The overall effect of this implementation of builderPhase1() is to
+look to see whether any users or groups, as defined in the userKit
+schema, have changed since this builder task was last run, and if so,
+to write out passwd and group files suitable for integration into a
+simple NIS or <code class="filename">/etc/passwd</code>, <code
 class="filename">/etc/group</code> type environment.</p>
 
 <p>If no users or groups have changed, this builderPhase1() method
@@ -1076,23 +1076,48 @@ need to move to an incremental model for synchronization.</p>
 
     <p>All that you need to do to configure a Sync Channel in Ganymede
     is to create a <code class="type">Sync Channel</code> object in
-    the Ganymede server.  Each <code class="type">Sync Channel</code>
-    object has a unique name (the <code class="type">Name</code>
-    field), a path for the directory that the Ganymede server will
-    write synchronization files to (the <code class="type">Directory
-    Path</code> field), a path to the executable external program that
-    will process synchronization files from the synchronization files
-    directory (the <code class="type">Service Program</code> field),
-    and a list of what objects and fields from the Ganymede data store
-    the Sync Channel is supposed to include in its synchronization
-    files (the <code class="type">Sync Data</code> field).  There's
-    also an <code class="type">Allow Plaintext Passwords</code>
-    check-box which can be selected to allow plain-text passwords to be
-    written to this Sync Channel, or deselected to prevent plain-text
-    passwords from being (but allowing various hashed password to be)
-    written.</p>
+    the Ganymede server.  the <code class="type">Sync Channel</code>
+    object has the following fields that you can set:</p>
 
-    <p>It looks like this:</p>
+    <ul>
+      <li><code class="type">Name</code> -- The unique name for this
+      Sync Channel.</li>
+
+      <li><code class="type">Queue Directory</code> -- Path to the
+      directory that the Ganymede server will write synchronization
+      files into.</li>
+
+      <li><code class="type">Service Program</code> -- Path to the
+      executable external program that will process the
+      synchronization files.</li>
+
+      <li><code class="type">Sync Data</code> -- Map of object and
+      field types to the conditions under which they are (or are not)
+      to be written to this Sync Channel.</li>
+
+      <li>
+	<code class="type">Allow Plaintext Passwords</code> --
+	Check-box controlling whether or not password plaintext is
+	allowed to be written to this Sync Channel.
+
+	<br/>
+
+	If this check-box is not selected, the Ganymede server will
+	still permit stored password hashes to be written to the Sync
+	Channel, but plaintext will be disallowed.  You might want to
+	restrict plaintext passwords if you know that your Service
+	Program doesn't need access to the plain text in order to
+	synchronize passwords.
+
+	<br/>
+
+	See the <a
+	href="../xml/data.html#PASSWORD">&lt;password&gt;</a> element
+	guide for more details on password hashing vs. plaintext.
+      </li>
+    </ul>
+ 
+    <p>A <code class="type">Sync Channel</code> object looks like this:</p>
 
     <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
 
@@ -1151,16 +1176,15 @@ need to move to an incremental model for synchronization.</p>
       
     <center><img src="screenshots/sync_field_options.png" class="screenshot"/></center>
 
-    <h4>What The Sync Channel Incremental Model Writes Out</h4>
+    <h4 id="what_xml_incremental_writes">What The Sync Channel Incremental Model Writes Out</h4>
 
     <p>The Ganymede server writes one XML file to the Sync Channel
     synchronization directory for each relevant transaction that is
     committed to the Ganymede server.  Each transaction is given a
-    simple numeric, integer filename, unadorned with any filename
-    extension.  The Ganymede server maintains a transaction count for
-    every transaction committed after the Ganymede server is
-    initialized, the first transaction committed being transaction
-    zero.</p>
+    simple integer filename, unadorned with any filename extension.
+    The Ganymede server maintains a transaction count for every
+    transaction committed after the Ganymede server is initialized,
+    the first transaction committed being transaction zero.</p>
 
     <p>Each file that is written out looks like this:</p>
 
@@ -1187,12 +1211,21 @@ need to move to an incremental model for synchronization.</p>
     <div align="center">
       <table border="1">
 	<tr><th>Attribute</th><th>Value</th></tr>
-	<tr><td><b>major_version</b></td><td>A major version number for the Ganymede Sync Channel transaction format.</td></tr>
-	<tr><td><b>minor_version</b></td><td>A minor version number for the Ganymede Sync Channel transaction format.</td></tr>
-	<tr><td><b>channel</b></td><td>The name of the Sync Channel that generated this XML file.</td></tr>
-	<tr><td><b>user</b></td><td>The name of the Ganymede user or admin that committed this transaction.</td></tr>
-	<tr><td><b>number</b></td><td>Unique number for this transaction, the number of transactions committed by this Ganymede server prior to this one.  Also the filename of this file.</td></tr>
-	<tr><td><b>time</b></td><td>Java time code marking the time this transaction was written.  Interpreted as the number of milliseconds since Midnight, January 1, 1970 UTC.</td></tr>
+	<tr><td><b>major_version</b></td><td>A major version number
+	for the Ganymede Sync Channel transaction format.</td></tr>
+	<tr><td><b>minor_version</b></td><td>A minor version number
+	for the Ganymede Sync Channel transaction format.</td></tr>
+	<tr><td><b>channel</b></td><td>The name of the Sync Channel
+	that generated this XML file.</td></tr>
+	<tr><td><b>user</b></td><td>The name of the Ganymede user or
+	admin that committed this transaction.</td></tr>
+	<tr><td><b>number</b></td><td>Unique number for this
+	transaction, the number of transactions committed by this
+	Ganymede server prior to this one.  Also the filename of this
+	file.</td></tr>
+	<tr><td><b>time</b></td><td>Java time code marking the time
+	this transaction was written.  Interpreted as the number of
+	milliseconds since Midnight, January 1, 1970 UTC.</td></tr>
       </table>
     </div>
 
@@ -1246,7 +1279,7 @@ need to move to an incremental model for synchronization.</p>
     respectively, will be empty.</p>
 
     <p>Here's an example of a user in the laboratory's Ganymede server
-    being deleted:</p>
+    being deleted by the expiration task:</p>
 
 <xmp class="listing"><transaction major_version="1" minor_version="1" channel="Users" user="expiration" number="21" time="1111730401435">
   <object_delta>
@@ -1263,6 +1296,7 @@ need to move to an incremental model for synchronization.</p>
         <Office_Phone>3872</Office_Phone>
         <Groups>
           <invid type="Group" id="asrmas" oid="257:143"/>
+          <invid type="Group" id="omssys" oid="257:851"/>
         </Groups>
         <Home_Group><invid type="Group" id="asrmas" oid="257:143"/></Home_Group>
         <Login_Shell>/bin/bash</Login_Shell>
@@ -1284,6 +1318,122 @@ need to move to an incremental model for synchronization.</p>
   </object_delta>
 </transaction>
 </xmp>
+
+    <p>Notice that all fields that were contained in the object prior
+    to the transaction commit and which match the <code
+    class="type">Sync Data</code> constraints are included in the
+    before state, while the after state is empty.  This is an
+    ex-user.</p>
+
+    <h4 id="xml_incremental_service_program">Writing a Sync Channel Incremental Service Program</h4>
+
+    <p>Writing a Service Program for use with the Sync Channel
+    Incremental Mode is generally rather more complicated than <a
+    href="#external_builder">writing an external sync script for use
+    with GanymedeBuilderTask</a>.  Your Service Program has to be able
+    to cooperate with the Ganymede server in handling the message
+    queuing protocol for your Sync Channel Queue Directory, and it has
+    to be able to parse and process the XML written out by the
+    Ganymede server.</p>
+
+    <p>Here are the rules for a Sync Channel Incremental Service
+    Program:</p>
+
+    <ul>
+      <li>As with the GanymedeBuilderTask external sync scripts, your
+      Service Program is on its own with regard to setting up
+      environment variables, working directory, logging/output
+      streams, and locating files.  Your Service Program must be able
+      to find its Queue Directory with no hints from the Ganymede
+      server at runtime.</li>
+
+      <li>The Ganymede server will run your Service Program with a
+      single command line argument.  This will be the highest
+      transaction number your Service Program is allowed to process
+      during this run.  Any transactions with higher numbers that your
+      Service Program may come across in the Sync Channel Queue
+      Directory are not safe to operate on, as they may not be fully
+      written or committed.  If they are fully written, they may later
+      be withdrawn if the server runs into an I/O problem while
+      writing XML to other configured Sync Channel Queue
+      Directories.</li>
+
+      <li>Your Service Program is required to process transactions in
+      increasing numeric order.  Be careful to use a numeric sort and
+      not a textual sort when ordering your processing.</li>
+
+      <li>Your Service Program must process transactions.  This
+      involves reading an XML transaction file from the Queue
+      Directory, parsing and interpreting the XML record in terms of
+      the Ganymede server schema, and performing the appropriate
+      action on the target directory service to make the equivalent
+      changes in the target service's schema.</li>
+
+      <li>Your Service Program is responsible for removing
+      successfully processed transactions from the Queue Directory.
+      Your Service Program must only remove a transaction from the
+      Queue Directory when it is certain that the change has been
+      properly synchronized into the target service.  You may wish to
+      move successfully committed transactions to another directory
+      for record keeping (and the possibility of playback in the event
+      of a rollback of your target service), or you may delete them
+      from the Queue Directory entirely.  Your Service Program must
+      not leave processed transactions in the Queue Directory.</li>
+
+      <li>It is conceivable that your Service Progam may be
+      interrupted or killed after it has completely processed a
+      transaction and before it has cleared the transaction from the
+      Queue Directory.  You must attempt to deal with this situation
+      as cleanly as possible.  Ideally, your Service Program should be
+      able to recognize that the target service is already compliant
+      with the after state of a given transaction.  This should only
+      ever happen with the first transaction your Service Program, as
+      your Service Program should never start processing a transaction
+      before it has cleared the previous transaction from the Queue
+      Directory.</li>
+
+      <li>If your Service Program encounters a transaction that it
+      cannot process due to a transient error, it must stop processing
+      transactions, and leave the failed transaction in the Queue
+      Directory for processing by a later attempt.</li>
+
+      <li>
+	If your Service Program encounters a transaction that it
+	cannot process due to a data mismatch with the target service,
+	you must attempt to notify a human to take a look at the
+	problem.  This may be through logging to a Service
+	Program-specific log, by writing to a syslog service, by
+	creating an SNMP trap, or by sending email.  Or all of the
+	above, if you can.  Your Service Program must process no
+	further transactions, and it must leave the problematic
+	transaction in the Queue Directory for human examination.
+	
+	<br/><br/>
+      
+	This class of error should ideally never occur, if your
+	Ganymede server schema and your Service Program and your
+	target service are all properly compatible.
+      </li>
+
+      <li>If you can determine with confidence that certain classes of
+      data mismatches are non-fatal and will not cause new problems to
+      arise with future transactions, you may record a non-fatal error
+      to your Service Program log, move the problematic transaction
+      aside for human examination, and continue processing
+      transactions.  You should be extraordinarily certain about your
+      logic before doing this, however.</li>
+    </ul>
+
+    <p>As you can see, writing a Sync Channel Incremental Service
+    Program can be quite involved.  To make it easier on you, we have
+    written a Python package, SyncUtils, which knows how to set up
+    logging, how to parse Ganymede XML transaction files, and how to
+    identify what objects and fields were created, edited, and
+    deleted.  Writing synchronization code with SyncUtils is as easy
+    as writing a callback Python function that takes data from the
+    SyncUtils package and works with it from there.</p>
+
+    <h3 id="xml_full_state">The Sync Channel Full State Model</h3>
  
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
