@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/10/29 18:43:35 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/11/02 19:15:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,8 +62,11 @@ import java.util.*;
 public class systemCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
-  static QueryResult shellChoices = new QueryResult();
-  static Date shellChoiceStamp = null;
+
+  // must pre-alloc for sync in updateSystemTypeChoiceList()
+
+  static QueryResult systemTypes = new QueryResult(); 
+  static Date systemTypesStamp = null;
 
   // ---
 
@@ -359,6 +362,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     ObjectHandle handle;
     boolean found = false;
+    String label = null;
 
     /* -- */
 
@@ -368,16 +372,15 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return true;
       }
 
-    String label = getGSession().viewObjectLabel(netInvid);
-
     if (debug)
       {
+	label = getGSession().viewObjectLabel(netInvid);
 	System.err.println("systemCustom.freeNet(): attempting to free " + label);
       }
 
     // do we already have this net in our free list?
 
-    for (int i = 0; i < freeNets.size(); i++)
+    for (int i = 0; !found && i < freeNets.size(); i++)
       {
 	handle = (ObjectHandle) freeNets.elementAt(i);
 	
@@ -397,6 +400,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return true;
       }
 
+    // the net wasn't already in the freeNets vector.  See if we can
+    // find the net in our current netsInRoom, and if so add it to
+    // our freeNets vector
+
     for (int i = 0; i < netsInRoom.size(); i++)
       {
 	handle = (ObjectHandle) netsInRoom.elementAt(i);
@@ -414,7 +421,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    return false;
+    return true;		// we're probably freeing a net from an old room
   }
 
   /**
@@ -679,6 +686,46 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
   }
 
+  void updateSystemTypeChoiceList()
+  {
+    synchronized (systemTypes)
+      {
+	DBObjectBase base = Ganymede.db.getObjectBase((short) 272);
+
+	// just go ahead and throw the null pointer if we didn't get our base.
+
+	if (systemTypesStamp == null || systemTypesStamp.before(base.getTimeStamp()))
+	  {
+	    if (debug)
+	      {
+		System.err.println("userCustom - updateSystemTypeChoiceList()");
+	      }
+
+	    systemTypes = new QueryResult();
+
+	    Query query = new Query((short) 272, null, false);
+
+	    // internalQuery doesn't care if the query has its filtered bit set
+	    
+	    Vector results = internalSession().internalQuery(query);
+	    
+	    for (int i = 0; i < results.size(); i++)
+	      {
+		systemTypes.addRow(null, results.elementAt(i).toString(), false); // no invid
+	      }
+
+	    if (systemTypesStamp == null)
+	      {
+		systemTypesStamp = new Date();
+	      }
+	    else
+	      {
+		systemTypesStamp.setTime(System.currentTimeMillis());
+	      }
+	  }
+      }
+  }
+
   /**
    * <p>Allocates a free I.P. address for the given network object.  This
    * is done using the {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}
@@ -921,10 +968,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public Object obtainChoicesKey(DBField field)
   {
-    DBObjectBase base = Ganymede.db.getObjectBase((short) 272);	// system types
-
-    /* -- */
-
     if (field.getID() == systemSchema.VOLUMES)
       {
 	return null;		// no choices for volumes
@@ -934,14 +977,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	return super.obtainChoicesKey(field);
       }
-    else
-      {
-	// we put a time stamp on here so the client
-	// will know to call obtainChoiceList() afresh if the
-	// system types base has been modified
 
-	return "System Type:" + base.getTimeStamp();
-      }
+    DBObjectBase base = Ganymede.db.getObjectBase((short) 272);	// system types
+
+    // we put a time stamp on here so the client
+    // will know to call obtainChoiceList() afresh if the
+    // system types base has been modified
+    
+    return "System Type:" + base.getTimeStamp();
   }
 
   /**
@@ -970,11 +1013,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return super.obtainChoiceList(field);
       }
 
-    Query query = new Query((short) 272, null, false); // list all system types
-
-    query.setFiltered(false);	// don't care if we own the system types
-
-    return editset.getSession().getGSession().query(query);
+    updateSystemTypeChoiceList();
+    return systemTypes;
   }
 
   /**
