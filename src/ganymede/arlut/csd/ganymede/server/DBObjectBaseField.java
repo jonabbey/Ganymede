@@ -3967,7 +3967,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    (base.getTypeID() == SchemaConstants.PersonaBase && getID() == SchemaConstants.PersonaLabelField) ||
 	    (base.getTypeID() == SchemaConstants.OwnerBase && getID() == SchemaConstants.OwnerNameField) ||
 	    (base.getTypeID() == SchemaConstants.EventBase && getID() == SchemaConstants.EventToken) ||
-	    (base.getTypeID() == SchemaConstants.RoleBase && getID() == SchemaConstants.RoleName))
+	    (base.getTypeID() == SchemaConstants.RoleBase && getID() == SchemaConstants.RoleName) ||
+	    (base.getTypeID() == SchemaConstants.TaskBase && getID() == SchemaConstants.TaskName) ||
+	    (base.getTypeID() == SchemaConstants.SyncChannelBase && getID() == SchemaConstants.SyncChannelName))
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("setNameSpace.need_namespace", this.toString()));
