@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/02/29 09:35:10 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2000/03/01 05:03:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.87 $ $Date: 2000/02/29 09:35:10 $
+ * @version $Revision: 1.88 $ $Date: 2000/03/01 05:03:06 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1375,11 +1375,11 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     db_field[] results;
     Enumeration enum;
-    int count = 0;
+    int count = fields.size();
 
     /* -- */
 
-    results = new db_field[fields.size()];
+    results = new db_field[count];
 
     enum = fields.elements();
 

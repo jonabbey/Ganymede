@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2000/02/29 10:25:48 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2000/03/01 05:03:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.107 $ %D%
+ * @version $Revision: 1.108 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -441,6 +441,8 @@ public class DBStore {
 		    maxBaseId = tempBase.getTypeID();
 		  }
 	      }
+
+	    rootCategory.resort();
 	  }
       }
     catch (IOException ex)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2000/02/29 09:35:11 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2000/03/01 05:03:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -796,6 +796,26 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (store.file_major == 1)
       {
 	new VecQuickSort(customFields, comparator).sort();
+
+	if (false)
+	  {
+	    System.err.println("** Sorted DBObjectBase " + getName());
+
+	    for (int i = 0; i < customFields.size(); i++)
+	      {
+		Object x = customFields.elementAt(i);
+
+		if (x instanceof DBObjectBaseField)
+		  {
+		    System.err.print("Field [" + ((DBObjectBaseField) x).tmp_displayOrder);
+		    System.err.println("] = " + ((DBObjectBaseField) x).getName());
+		  }
+		else
+		  {
+		    System.err.println("**XXX***");
+		  }
+	      }
+	  }
       }
 
     // at file version 1.1, we introduced label_id's.
@@ -2514,7 +2534,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		continue;
 	      }
 	
-	    templateVector.addElement(fieldDef.template);
+	    templateVector.addElement(fieldDef.getTemplate());
 	  }
 
 	// then load our custom fields
@@ -2525,7 +2545,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    fieldDef = (DBObjectBaseField) enum.nextElement();
 	
-	    templateVector.addElement(fieldDef.template);
+	    templateVector.addElement(fieldDef.getTemplate());
 	  }
       }
 

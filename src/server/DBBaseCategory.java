@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/02/29 10:25:46 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/03/01 05:03:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -140,6 +140,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * the ganymede.db file format, we'll keep this field so we can do a
    * sort after loading when reading an old file.
    */
+
 
   int tmp_displayOrder = -1;
 
@@ -518,6 +519,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     /* -- */
 
+    // read in category name
+
     pathName = in.readUTF();
 
     // we stopped using an explicitly stored display order field at
@@ -587,14 +590,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    addNodeAfter(new DBBaseCategory(store, in), null);
 	  }
       }
-
-    // sort contents by display order if we are reading an old file.
-    // A 2.x file will have the contents sorted in the on-disk file.
-
-    if (store.file_major == 1)
-      {
-	new VecQuickSort(contents, comparator).sort();
-      }
   }
 
   /**
@@ -641,6 +636,48 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     XMLUtils.indent(xmlOut, indentLevel);
 
     xmlOut.endElement("category");
+  }
+
+  /**
+   * <P>Resorts this category's contents based on the tmp_displayOrder field.</P>
+   */
+
+  public void resort()
+  {
+    new VecQuickSort(contents, comparator).sort();
+
+    if (false)
+      {
+	System.err.println("** Sorted category " + getPath());
+
+	for (int i = 0; i < contents.size(); i++)
+	  {
+	    Object x = contents.elementAt(i);
+
+	    if (x instanceof DBBaseCategory)
+	      {
+		System.err.print("Cat[" + ((DBBaseCategory) x).tmp_displayOrder);
+		System.err.println("] = " + ((DBBaseCategory) x).getPath());
+	      }
+	    else if (x instanceof DBObjectBase)
+	      {
+		System.err.print("Base[" + ((DBObjectBase) x).tmp_displayOrder);
+		System.err.println("] = " + ((DBObjectBase) x).getName());
+	      }
+	  }
+      }
+
+    // re-sort subcategories
+
+    for (int i = 0; i < contents.size(); i++)
+      {
+	Object x = contents.elementAt(i);
+
+	if (x instanceof DBBaseCategory)
+	  {
+	    ((DBBaseCategory) x).resort();
+	  }
+      }
   }
 
   /**

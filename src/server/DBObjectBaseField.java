@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2000/02/29 10:25:47 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2000/03/01 05:03:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -429,7 +429,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		out.writeUTF(regexpPat); // added at file version 1.14
 	      }
 	  }
-
       }
     else if (isNumeric())
       {
@@ -516,8 +515,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     comment = in.readUTF();
 
-    // we stopped keeping the editable and removable flags in
-    // the ganymede.db file at 1.18
+    // we stopped keeping the editable and removable flags in the
+    // ganymede.db file at 1.17
 
     if (base.store.file_major == 1 && base.store.file_minor <= 17)
       {
@@ -1079,6 +1078,21 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   public Base getBase()
   {
     return base;
+  }
+
+  /**
+   * <p>Returns a FieldTemplate serializable field definition object
+   * for this field.</p>
+   */
+
+  public FieldTemplate getTemplate()
+  {
+    if (template == null)
+      {
+	template = new FieldTemplate(this);
+      }
+    
+    return template;
   }
 
   /**
