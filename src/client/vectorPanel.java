@@ -4,7 +4,7 @@
    vectorPanel.java
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -44,6 +44,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   Hashtable
     ewHash;
+
+  JScrollPane 
+    scrollPane;
 
   JButton
     addB;
@@ -99,7 +102,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
 
     this.editable = editable;
-    setBackground(Color.black);    
 
     bottomPanel = new JPanel();
     bottomPanel.setLayout(new BorderLayout());
@@ -128,10 +130,18 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	throw new RuntimeException("Can't check if field is editable: " + rx);
       }
-    setLayout(new BorderLayout());
-    add("South", bottomPanel);
-    add("Center", centerPanel);
+
+    JPanel main = new JPanel();
+    main.setLayout(new BorderLayout());
+    main.setBorderStyle(2);
+    main.add("South", bottomPanel);
+    main.add("Center", centerPanel);
     
+    //scrollPane = new JScrollPane();
+    //scrollPane.getViewport().add(main);
+    //add(scrollPane);
+    add(main);
+
     compVector = new Vector();
     ewHash = new Hashtable();
 
@@ -245,30 +255,50 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    string_field stringfield = (string_field)my_field;
 	    
-	    if (stringfield.size() > 0)
+	    if (editable && stringfield.isEditable())
 	      {
-		for (int i=0;i<stringfield.size();i++) 
+		if (stringfield.size() > 0)
 		  {
-		    
-		    JstringField sf = new JstringField(stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
-						       stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
-						       ca,
-						       stringfield.isEditable(),
-						       !(stringfield.showEcho()),
-						       stringfield.allowedChars(),
-						       stringfield.disallowedChars(),
-						       this);
-		    System.out.println("Setting text");
-		    sf.setText((String)(stringfield.getElement(i)));
-		    
-		    addElement(sf);
-		    
+		    for (int i=0;i<stringfield.size();i++) 
+		      {
+			
+			JstringField sf = new JstringField(stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
+							   stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
+							   ca,
+							   stringfield.isEditable(),
+							   !(stringfield.showEcho()),
+							   stringfield.allowedChars(),
+							   stringfield.disallowedChars(),
+							   this);
+			System.out.println("Setting text");
+			sf.setText((String)(stringfield.getElement(i)));
+			
+			addElement(sf);
+			
+		      }
 		  }
+		else
+		  {
+		    System.out.println("No objects in vector");
+		  } 
 	      }
-	    else
+	    else // Not editable
 	      {
-		System.out.println("No objects in vector");
-	      } 
+		if (stringfield.size() > 0)
+		  {
+		    Vector strings = new Vector();;
+		    for (int i=0;i<stringfield.size();i++) 
+		      {
+			strings.addElement(stringfield.getElement(i));
+		      }
+		    JListBox list = new JListBox(strings);
+		    centerPanel.add(list);
+		  }
+		else
+		  {
+		    System.out.println("No objects in vector");
+		  } 
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -276,10 +306,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	
       }
-    //else if (my_field instanceof password_field)
-    //{
 
-    //}
     else if (my_field instanceof invid_field)
       {
 	System.out.println("Adding vector invid_field");
@@ -436,6 +463,88 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    }
 	}
     }
+
+	
+  /* This method is used to add an item to the vector.
+   * Since on the last element on the vector has a plus
+   * button, this item is going to be added to the end
+   * of the vector.
+   */
+  public void addElement(Component c)
+    {
+      
+      if (c == null)
+	{
+	  throw new IllegalArgumentException("Component parameter is null");
+	}
+      
+      compVector.addElement(c);
+
+      System.out.println("Index of element: " + compVector.size());
+      
+      //Don't add the buttons for an non-editable field
+      if (editable)
+	{
+	  elementWrapper ew = new elementWrapper(c, this);
+	  ewHash.put(c, ew);
+	  centerPanel.add(ew);
+	}
+      else
+	{
+	  centerPanel.add(c);
+	}
+      invalidate();
+
+      parent.validate();
+      
+
+    }
+  
+  public void deleteElement(Component c) 
+    {
+      System.out.println("Deleting element");
+      if (c == null)
+	{
+	  throw new IllegalArgumentException("Component parameter is null");
+	}
+
+      if (my_field == null)
+	{
+	  throw new RuntimeException("Error: vectorPanel.my_field is null ");
+	}
+      
+      try
+	{
+	  if (!my_field.isEditable())
+	    return;
+	}
+      catch (RemoteException rx) 
+	{
+	  throw new RuntimeException("Could not check field: " + rx);
+	}
+      /* If there is only one element remaining in the vector,
+	 the the user should not be able to delete the element. */
+      if (compVector.size() == 1)
+	{
+	  System.err.println("You cannot delete the only element in a vector");
+	  return;
+	}
+
+      try
+	{
+	  System.out.println("Deleting element number: " + compVector.indexOf(c));
+	  my_field.deleteElement(compVector.indexOf(c));
+	  compVector.removeElement(c);	  
+	  centerPanel.remove((elementWrapper)ewHash.get(c));
+	  invalidate();
+	  parent.validate();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not delete element:" + rx);
+	}
+    }
+
    
   public void actionPerformed(ActionEvent e)
     {
@@ -561,86 +670,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	}	    
     }
 	
-	
-  /* This method is used to add an item to the vector.
-   * Since on the last element on the vector has a plus
-   * button, this item is going to be added to the end
-   * of the vector.
-   */
-  public void addElement(Component c)
-    {
-      
-      if (c == null)
-	{
-	  throw new IllegalArgumentException("Component parameter is null");
-	}
-      
-      compVector.addElement(c);
-
-      System.out.println("Index of element: " + compVector.size());
-      
-      //Don't add the buttons for an non-editable field
-      if (editable)
-	{
-	  elementWrapper ew = new elementWrapper(c, this);
-	  ewHash.put(c, ew);
-	  centerPanel.add(ew);
-	}
-      else
-	{
-	  centerPanel.add(c);
-	}
-      invalidate();
-
-      parent.validate();
-      
-
-    }
-  
-  public void deleteElement(Component c) 
-    {
-      System.out.println("Deleting element");
-      if (c == null)
-	{
-	  throw new IllegalArgumentException("Component parameter is null");
-	}
-
-      if (my_field == null)
-	{
-	  throw new RuntimeException("Error: vectorPanel.my_field is null ");
-	}
-      
-      try
-	{
-	  if (!my_field.isEditable())
-	    return;
-	}
-      catch (RemoteException rx) 
-	{
-	  throw new RuntimeException("Could not check field: " + rx);
-	}
-      /* If there is only one element remaining in the vector,
-	 the the user should not be able to delete the element. */
-      if (compVector.size() == 1)
-	{
-	  System.err.println("You cannot delete the only element in a vector");
-	  return;
-	}
-
-      try
-	{
-	  System.out.println("Deleting element number: " + compVector.indexOf(c));
-	  my_field.deleteElement(compVector.indexOf(c));
-	  compVector.removeElement(c);	  
-	  centerPanel.remove((elementWrapper)ewHash.get(c));
-	  invalidate();
-	  parent.validate();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not delete element:" + rx);
-	}
-    }
   
   public Session getSession() 
     {
@@ -686,7 +715,7 @@ class elementWrapper extends JPanel implements ActionListener {
 
       this.parent = parent;
     
-      //removeImage = PackageResources.getImageResource(this, "dynamite.jpg", getClass());
+      removeImage = PackageResources.getImageResource(this, "dynamite.gif", getClass());
 
       setLayout(new BorderLayout());
       
@@ -694,8 +723,8 @@ class elementWrapper extends JPanel implements ActionListener {
       
       buttonPanel.setLayout(new BorderLayout());
       
-      //minus = new JButton(new ImageGlyph(removeImage));
-      minus = new JButton("X");
+      minus = new JButton(new ImageIcon(removeImage));
+      //minus = new JButton("X");
       minus.addActionListener(this);
       
       buttonPanel.add("Center",minus);
