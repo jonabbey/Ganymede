@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/10/03 01:42:22 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/10/03 01:48:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,7 +74,7 @@ import java.util.Stack;
  * the stack.</p>
  */
 
-public class NamedStack {
+final public class NamedStack {
 
   private Stack stack;
 
