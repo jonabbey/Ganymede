@@ -745,6 +745,10 @@ server will wait for any builder tasks waiting on phase 2 (execution
 of external scripts for NIS/DNS/etc. builds) to complete before
 shutting down.
 
+This is to insure that a builder task in phase 2 won't interrupt an
+external build script or program, leaving a network service in an
+inconsistent state.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
