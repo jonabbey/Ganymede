@@ -20,8 +20,18 @@
     padding-left: 5px; padding-bottom: 10px; padding-top: 10px;
   }
 
+  h3 {
+    border-style: solid; border-width: thin; border-color: black;
+    width: auto;
+    text-align: right;
+    background: #CCCCFF;
+    font-weight: bold;
+    padding-left: 5px; padding-bottom: 10px; padding-top: 10px; padding-right: 5px;
+  }
+  
  p.address { font-family: Arial, Helvetica; font-style: italic; }
 }
+
 
 @media screen {
 }
