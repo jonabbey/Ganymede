@@ -87,6 +87,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   private static String buildScript = null;
   private static Runtime runtime = null;
 
+  private static boolean tryKerberos = false;
+
   private static String AppleOptions = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>simultaneous_login_enabled</key><true/></dict></plist>";
 
 
@@ -294,7 +296,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString());
     writeLDIF(out, "sn", user.getLabel());
 
-    if (false)
+    if (!tryKerberos)
       {
 	// now write out the password.  If the user was inactivated, there
 	// won't be a password.. to make sure that ldapdiff does the right
@@ -318,7 +320,15 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     DBObject group = getObject((Invid) user.getFieldValueLocal(userSchema.HOMEGROUP));
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
-    writeLDIF(out, "authAuthority", "1.0;Kerberos:ARLUT.UTEXAS.EDU;");
+    if (tryKerberos)
+      {
+	writeLDIF(out, "authAuthority", "1.0;Kerberos:ARLUT.UTEXAS.EDU;");
+      }
+    else
+      {
+	writeLDIF(out, "authAuthority", ";basic;");
+      }
+
     writeLDIF(out, "objectClass", "inetOrgPerson");
     writeLDIF(out, "objectClass", "posixAccount");
     writeLDIF(out, "objectClass", "shadowAccount");
