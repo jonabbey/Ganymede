@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2000/08/25 21:21:27 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2000/08/25 21:22:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -369,7 +369,7 @@ public class Ganymede {
 	  {
 	    Server serv = (Server) obj;
 	    
-	    if (serv.up())
+	    if (serv.up())	// another exception opportunity
 	      {
 		System.err.println("*\n*\n* Error, another Ganymede server is already running at: " + rmiServerURL);
 		System.err.println("* I can't startup until it is gone.\n*\n*");
