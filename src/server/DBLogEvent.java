@@ -8,8 +8,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/07/22 03:52:35 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/10/21 16:01:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -698,9 +698,9 @@ public class DBLogEvent {
 	  {
 	    multibuffer.append("\\n");
 	  }
-	else if (ary[i] == '|')
+	else if (ary[i] == '\\')
 	  {
-	    multibuffer.append("\\|");
+	    multibuffer.append("\\\\");
 	  }
 	else
 	  {

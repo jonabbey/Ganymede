@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/09/22 23:15:21 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/10/21 16:01:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1764,7 +1764,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (namespace == null)
 	  {
-	    throw new IllegalArgumentException("Unknown namespace id specified for field");
+	    // throw new IllegalArgumentException("Unknown namespace id specified for field");
+	    System.err.println("**** Unknown namespace id <" + nameSpaceId + "> specified for field " + 
+			       base.toString() + ", field: " + toString());
 	  }
       }
   }
@@ -2272,6 +2274,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += ", namespace: " + namespace.getName();
 	  }
 
+	if (regexpPat != null)
+	  {
+	    result += ", regexpPat: '" + regexpPat + "'";
+	  }
+
 	break;
 
       case INVID:
@@ -2467,6 +2474,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (badChars != null)
 	  {
 	    result += " badChars: '" + badChars + "'";
+	  }
+
+	if (regexpPat != null)
+	  {
+	    result += " regexpPat: '" + regexpPat + "'";
 	  }
 	
 	break;

@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/10/12 18:56:10 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/10/21 16:01:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -624,10 +624,15 @@ public class DBLog {
    * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
    * performed on behalf of the administrator with invid &lt;invid&gt;.
    *
+   * @param fullTransactions if true, the buffer returned will include all events in any
+   * transactions that involve the given invid.  if false, only those events in a transaction
+   * directly affecting the given invid will be returned.
+   *
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin)
+  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin,
+						   boolean fullTransactions)
   {
     FileReader reader;
 
@@ -716,19 +721,22 @@ public class DBLog {
 	      }
 	    else
 	      {
-		for (int i = 0; i < event.objects.size(); i++)
+		for (int i = 0; !found && i < event.objects.size(); i++)
 		  {
 		    if (invid.equals((Invid) event.objects.elementAt(i)))
 		      {
 			found = true;
 		      }
 		  }
-		    
+		
 		if (transactionID != null)
 		  {
 		    if (transactionID.equals(event.transactionID))
 		      {
-			found = true;
+			if (fullTransactions || event.eventClassToken.equals("finishtransaction"))
+			  {
+			    found = true;
+			  }
 		      }
 		  }
 	      }

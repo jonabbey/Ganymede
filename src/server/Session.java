@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 1999/06/18 22:43:27 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 1999/10/21 16:01:26 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.39 $ %D%
+ * @version $Revision: 1.40 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -508,6 +508,21 @@ public interface Session extends Remote {
    */
 
   StringBuffer    viewObjectHistory(Invid invid, Date since) throws RemoteException;
+
+  /**
+   * <p>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
+   *
+   * @param invid The invid identifier for the object whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   * @param fullTransactions If false, only events directly involving the requested
+   * object will be included in the result buffer.
+   *
+   * @return A StringBuffer containing a record of events for the Invid in question,
+   * or null if permissions are denied to view the history.
+   */
+
+  StringBuffer    viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws RemoteException;
 
   /**
    * <p>This method returns a multi-line string containing excerpts from

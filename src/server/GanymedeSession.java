@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.154 $
-   Last Mod Date: $Date: 1999/10/13 20:02:14 $
+   Version: $Revision: 1.155 $
+   Last Mod Date: $Date: 1999/10/21 16:01:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.154 $ %D%
+ * @version $Revision: 1.155 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3264,6 +3264,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public StringBuffer viewObjectHistory(Invid invid, Date since)
   {
+    return viewObjectHistory(invid, since, true);
+  }
+
+  /**
+   * <P>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
+   *
+   * @param invid The invid identifier for the object whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   * @param fullTransactions If false, only events directly involving the requested
+   * object will be included in the result buffer.
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions)
+  {
     DBObject obj;
 
     /* -- */
@@ -3299,7 +3316,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, false); // *sync* DBLog 
+    return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions); // *sync* DBLog 
   }
 
   /**
@@ -3357,7 +3374,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, true); // *sync* DBLog
+    return Ganymede.log.retrieveHistory(invid, since, true, true); // *sync* DBLog
   }
 
   /**
