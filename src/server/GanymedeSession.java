@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.261 $
-   Last Mod Date: $Date: 2002/11/01 02:40:18 $
+   Version: $Revision: 1.262 $
+   Last Mod Date: $Date: 2002/11/01 03:17:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.261 $ $Date: 2002/11/01 02:40:18 $
+ * @version $Revision: 1.262 $ $Date: 2002/11/01 03:17:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4270,7 +4270,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     DBObject newObj;
     ReturnVal retVal;
-    QueryResult ownerList;
+    QueryResult ownerList = null;
+    boolean randomOwner = false;
 
     /* -- */
 
@@ -4291,8 +4292,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    error = "Permission to create object of type " + base.getName() + " denied.";
 	  }
 
-	return Ganymede.createErrorDialog("Can't create",
-					  error);
+	return Ganymede.createErrorDialog("Can't create", error);
       }
 
     // i think this section of code is actually pretty unlikely to
@@ -4319,9 +4319,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	setLastEvent("create " + newObj.getTypeName());
 
-	ReturnVal result = new ReturnVal(true);
+	retVal = new ReturnVal(true);
 
-	result.setInvid(newObj.getInvid());
+	retVal.setInvid(newObj.getInvid());
 
 	if (this.remotelyAccessible)
 	  {
@@ -4337,61 +4337,55 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    ((DBObject) newObj).exportFields();
 	  }
 
-	result.setObject(newObj);
+	retVal.setObject(newObj);
 
-	return result;
+	return retVal;
       }
     else
       {
-	Vector ownerInvids = new Vector();
+	Vector ownerInvids;
 
 	if (newObjectOwnerInvids != null)
 	  {
-	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
-	      {
-		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
-	      }
+	    ownerInvids = newObjectOwnerInvids;
 	  }
 	else
 	  {
+	    ownerInvids = new Vector();
 	    ownerList = getOwnerGroups();
 
-	    // if we have only one group possible, we'll assume we're
-	    // putting it in that, otherwise since the client hasn't
-	    // done a setDefaultOwner() call, if we're running with an
-	    // interactive client, return an error dialog telling them
-	    // to set the default owner group
+	    if (ownerList.size() == 0)
+	      {
+		return Ganymede.createErrorDialog("Can't create",
+						  "Can't create new object, no owner group to put it in.");
+	      }
 
-	    // if we're running non-interactively and we have more than one
-	    // choice
+	    // if we're interactive, the client really should have
+	    // helped us out by prompting the user for their preferred
+	    // default owner list.  So we'll bitch.
 
-	    if (ownerList != null && ownerList.size() != 1 && enableWizards)
+	    if (enableWizards)
 	      {
 		return Ganymede.createErrorDialog("Can't create",
 						  "Can't create new object, no way of knowing which " +
-						  "owner group to place it in");
+						  "owner groups to place it in");
 	      }
-
-	    // if we've only got one possible owner group, set
-	    // that.  otherwise, if we're not supergashmode, go
-	    // ahead and just pick one so the creator has
-	    // ownership over the new object..  since we would
-	    // have caught an interactive attempt at object
-	    // creation with multiple possible choices before now,
-	    // we must be operating in non-interactive mode, and
-	    // we'll just have to trust the batch user to set the
-	    // ownership of the object subequently, if they care.
-
-	    // if we are operating in supergashmode, of course,
-	    // the user's session will continue to have ownership
-	    // privileges over the object even without setting an
-	    // owner, so in that case we again will trust that the
-	    // ownership will be explicitly set later on, and we
-	    // won't set any owners
-
-	    if (ownerList.size() == 1 || !supergashMode)
+	    else
 	      {
-		ownerInvids.addElement(ownerList.getInvid(0));
+		// if we weren't told who to make own the object, we'll just
+		// pick the first owner group we can put it into and put it there.
+
+		// supergash doesn't need to set any owner at all.
+
+		if (!supergashMode)
+		  {
+		    ownerInvids.addElement(ownerList.getInvid(0));
+
+		    if (ownerList.size() > 1)
+		      {
+			randomOwner = true;
+		      }
+		  }
 	      }
 	  }
 
@@ -4411,9 +4405,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	setLastEvent("create " + newObj.getTypeName());
 
-	ReturnVal result = new ReturnVal(true);
+	if (randomOwner)
+	  {
+	    retVal = Ganymede.createInfoDialog("Warning, picked an owner group at random",
+					       "Warning: created " + newObj.getTypeName() + 
+					       " in owner group " + viewObjectLabel(ownerList.getInvid(0)));
+	  }
+	else
+	  {
+	    retVal = new ReturnVal(true);
+	  }
 
-	result.setInvid(newObj.getInvid());
+	retVal.setInvid(newObj.getInvid());
 
 	if (this.remotelyAccessible)
 	  {
@@ -4429,9 +4432,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    ((DBObject) newObj).exportFields();
 	  }
 
-	result.setObject(newObj);
+	retVal.setObject(newObj);
 	    
-	return result;
+	return retVal;
       }
   }
 
