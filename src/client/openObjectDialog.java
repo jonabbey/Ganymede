@@ -190,6 +190,12 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     titleL.setText(text);
   }
 
+  public String getTypeString()
+  {
+    listHandle lh = (listHandle)type.getSelectedItem();
+    return lh.getLabel();
+  }
+
   public void close(boolean foundOne)
   {
     // Make sure we return null if we didn't find one
@@ -311,8 +317,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		  }
 		else if (edit_invids.size() == 0)
 		  {
-		    JErrorDialog d = new JErrorDialog(client,
-						      "Error finding object",
+		    client.showErrorMessage("Error finding object",
 						      "No object starts with that string.");
 		    return;
 		  }
