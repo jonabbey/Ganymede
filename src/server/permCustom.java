@@ -5,7 +5,7 @@
    This file is a management class for Role records in Ganymede.
    
    Created: 21 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -107,6 +107,43 @@ public class permCustom extends DBEditObject implements SchemaConstants {
       }
 
     return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of DBField will
+   * wind up calling up to here to let us override the normal visibility
+   * process.<br><br>
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.<br><br>
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    // since the default permission object is always delegatable, we
+    // won't show the checkbox in this case.
+
+    if (field.getFieldDef().base != this.objectBase)
+      {
+	throw new IllegalArgumentException("field/object mismatch");
+      }
+
+    if ((field.getID() == SchemaConstants.RoleDelegatable) &&
+	(field.getOwner().getInvid().getNum() == SchemaConstants.RoleDefaultObj))
+      {
+	return false;
+      }
+
+    return super.canSeeField(session, field);
   }
 
 }
