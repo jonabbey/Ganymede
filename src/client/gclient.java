@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.87 $ %D%
+   Version: $Revision: 1.88 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -166,7 +166,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   // Dialog and GUI objects
 
-  private JComboBox
+  protected JComboBox
     personaCombo = null;  // ComboBox showing current persona on the toolbar
 
   JFilterDialog
@@ -177,6 +177,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   openObjectDialog
     openDialog;
+
+  createObjectDialog
+    createDialog = null;
 
   Image images[];
 
@@ -206,7 +209,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     search,
     pencil,
     trash,
-    creation;
+    creation,
+    createDialogImage;
 
   public JLabel
     leftL,
@@ -455,7 +459,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     personaListener = new PersonaListener(session, this);
 
-    if (personae != null)
+    if ((!showToolbar) && (personae != null))
       {
 	PersonaMenu = new JMenu("Persona");
 	personaGroup = new ButtonGroup();
@@ -540,6 +544,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
 
     Image remove = PackageResources.getImageResource(this, "remove.gif", getClass());
     Image expire = PackageResources.getImageResource(this, "expire.gif", getClass());
@@ -904,23 +909,34 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.out.println("--Updating persona menu");
       }
 
-    Enumeration buttons = personaGroup.getElements();
-
-    while (buttons.hasMoreElements())
+    // either update the JComboBox, or the menu, depending on which one we have.
+    if (personaGroup != null)
       {
-	JCheckBoxMenuItem mi = (JCheckBoxMenuItem)buttons.nextElement();
-	if (mi.getActionCommand().equals(currentPersonaString))
+	Enumeration buttons = personaGroup.getElements();
+	
+	while (buttons.hasMoreElements())
 	  {
-	    if (debug)
+	    JCheckBoxMenuItem mi = (JCheckBoxMenuItem)buttons.nextElement();
+	    if (mi.getActionCommand().equals(currentPersonaString))
 	      {
-		System.out.println("Calling setState(true)");
+		if (debug)
+		  {
+		    System.out.println("Calling setState(true)");
+		  }
+		
+		mi.setState(true);
+		break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
+		// besides, if I do some setState(false)'s, then actions will be performed.
 	      }
-
-	    mi.setState(true);
-	    break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
-	    // besides, if I do some setState(false)'s, then actions will be performed.
 	  }
       }
+
+    // If we have a combo box, update that too
+    if (personaCombo != null)
+      {
+	personaCombo.setSelectedItem(currentPersonaString);
+      }
+
     personaListener.listen(true);
   }
 
@@ -1518,6 +1534,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	Ppanel.add("Center", new JLabel("Persona:", SwingConstants.RIGHT));
 	Ppanel.add("East", personaCombo);
 	panel.add("Center", Ppanel);
+
       }
     else if (debug)
       {
@@ -2845,6 +2862,25 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     setNormalCursor();
     return ok;
   }
+
+  /**
+   *
+   * Opens a panel to choose a new type to create an object.
+   */
+  void createObjectDialog()
+  {
+    short type = -1;
+
+    if (createDialog == null)
+      {
+	createDialog = new createObjectDialog(this);
+      }
+
+    // This shows the dialog
+    createDialog.setVisible(true);
+
+  }
+  
   /**
    * Opens a panel used to choose an object for editing.
    *
@@ -3773,6 +3809,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    logout();
 	  }
       }
+    else if (command.equals("create new object"))
+      {
+	createObjectDialog();
+      }
     else if (command.equals("open object for editing"))
       {
 	editObjectDialog();
@@ -4641,17 +4681,33 @@ class PersonaListener implements ActionListener{
 	  }
 	
 	//JComboBox bad
-	newPersona = (String)((JComboBox)event.getSource()).getSelectedItem();
+	newPersona = (String)gc.personaCombo.getSelectedItem();
+	
+	if (gc.debug)
+	  {
+	    System.out.println("Box says: " + newPersona);
+	  }
+	
       }
     else
       {
 	System.out.println("Persona Listener doesn't understand that action.");
       }
+
+    if (newPersona == null)
+      {
+	gc.updatePersonaMenu();
+	return;
+      }
     
     
     if (newPersona.equals(gc.currentPersonaString))
       {
-	gc.showErrorMessage("You are already in that persona.");	
+	if (gc.debug)
+	  {
+	    gc.showErrorMessage("You are already in that persona.");	
+	  }
+	
 	return;
       }
     
@@ -4717,6 +4773,8 @@ class PersonaListener implements ActionListener{
 	    {
 	      gc.setWaitCursor();
 	      gc.setStatus("Successfully changed persona.");
+	      // List of creatable object types might have changed.
+	      gc.createDialog = null;
 	      gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
 	      //gc.setPersonaCombo(newPersona);
 	      gc.ownerGroups = null;
