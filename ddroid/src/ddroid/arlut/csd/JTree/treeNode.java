@@ -301,4 +301,12 @@ public class treeNode implements Cloneable {
     return expanded;
   }
 
+  /**
+   * Clean up any additional fields the node may be carrying along, to
+   * be overridden in subclasses.
+   */
+
+  public void cleanup
+  {
+  }
 }

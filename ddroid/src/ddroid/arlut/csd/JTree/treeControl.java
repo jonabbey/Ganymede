@@ -711,6 +711,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     node.nextSibling = null;
     node.prevSibling = null;
+
+    node.cleanup();
   }
 
   /**
