@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Ganymede schema kit build script
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 1999/01/22 01:01:48 $
+#
+############################################################
+
+# First, build the classes and the custom.jar
+
+cd custom_src
+build
+buildCustomJar
+
+# Second, build the loader files
+cd ../loader/source
+build
