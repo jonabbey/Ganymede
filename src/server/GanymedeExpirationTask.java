@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,8 @@ import java.rmi.*;
 public class GanymedeExpirationTask implements Runnable {
 
   public static final boolean debug = false;
+
+  // ---
 
   public GanymedeExpirationTask()
   {
