@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2000/03/15 03:32:26 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2000/03/16 06:36:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.110 $ %D%
+ * @version $Revision: 1.111 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1227,7 +1227,7 @@ public class DBStore {
 
   public boolean okToDelete(Invid invid, DBSession mySession)
   {
-    if (true)
+    if (false)
       {
 	System.err.println("DBStore.okToDelete(" + Ganymede.internalSession.describe(invid) + ") entering");
       }
@@ -1238,7 +1238,7 @@ public class DBStore {
 	  {
 	    DBSession session = (DBSession) sessions.elementAt(i);
 	
-	    if (debug)
+	    if (false)
 	      {
 		System.err.println("DBStore.okToDelete() checking session " + session);
 	      }
@@ -1249,7 +1249,7 @@ public class DBStore {
 	
 	    if (session == mySession)
 	      {
-		if (debug)
+		if (false)
 		  {
 		    System.err.println("DBStore.okToDelete() skipping session " + session);
 		  }
@@ -1260,14 +1260,14 @@ public class DBStore {
 	      {
 		DBEditSet editSet = session.editSet;
 
-		if (debug && editSet == null)
+		if (false && editSet == null)
 		  {
 		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
 		  }
 
 		if (editSet != null && !editSet.canDelete(invid))
 		  {
-		    if (debug)
+		    if (false)
 		      {
 			System.err.println("DBStore.okToDelete() refusing delete");
 		      }
@@ -1278,7 +1278,7 @@ public class DBStore {
 	  }
       }
 
-    if (debug)
+    if (false)
       {
 	System.err.println("DBStore.okToDelete() okaying delete");
       }
