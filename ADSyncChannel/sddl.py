@@ -27,18 +27,18 @@ class SecurityDescriptor:
     # Revision: 2 bytes
     # Type: 2 bytes
     # 4 Offset markers: 4 bytes each
-    (self.rev,
-     self.stype,
-     self.owner_sid_offset,
-     self.group_sid_offset,
-     self.sacl_offset,
-     self.dacl_offset) = struct.unpack("<HHIIII", data[:20])
+    (self.revision,
+     self.type,
+     owner_sid_offset,
+     group_sid_offset,
+     sacl_offset,
+     dacl_offset) = struct.unpack("<HHIIII", data[:20])
 
-    self.sacl = ACL(data[self.sacl_offset:])
-    self.dacl = ACL(data[self.dacl_offset:])
+    self.systemACL = ACL(data[sacl_offset:])
+    self.discretionaryACL = ACL(data[dacl_offset:])
 
-    self.owner_sid = SID(data[self.owner_sid_offset:])
-    self.group_sid = SID(data[self.group_sid_offset:])
+    self.owner = SID(data[owner_sid_offset:])
+    self.group = SID(data[group_sid_offset:])
 
     # TODO: Break this out into a separate unittest
     # assert( self.pack() == data )
@@ -49,26 +49,45 @@ class SecurityDescriptor:
     Takes the state of this security descriptor and serializes it back into a
     stream of bytes.
     '''
-    s = struct.pack("<HHIIII", self.rev, \
-                               self.stype, \
-                               self.owner_sid_offset, \
-                               self.group_sid_offset, \
-                               self.sacl_offset, \
-                               self.dacl_offset)
-    s += self.sacl.pack()
-    s += self.dacl.pack()
-    s += self.owner_sid.pack()
-    s += self.group_sid.pack()
+    pksacl = self.systemACL.pack()
+    pkdacl = self.discretionaryACL.pack()
+    pkowner = self.owner.pack()
+    pkgroup = self.group.pack()
+
+    # Note: I don't know if there's a "definitive" ordering for the fields in
+    # a security descriptor, nor could I locate one on MSDN. There *is* a 
+    # specific ordering for the offsets, though.
+    #
+    # As a default, I'll just order the actual fields in the order that they
+    # "usually" appear when I read a security descriptor from AD.
+    
+    # We'll put the sacl first, and the header block of a security descriptor
+    # is 20 bytes. Thus, the offset for the sacl will always be 20
+    offset_sacl = 20
+    
+    # Next comes the dacl, the owner sid, and the group sid
+    offset_dacl = offset_sacl + len(pksacl)
+    offset_owner = offset_dacl + len(pkdacl)
+    offset_group = offset_owner + len(pkowner)
+
+    s = struct.pack("<HHIIII", self.revision, \
+                               self.type, \
+                               offset_owner, \
+                               offset_group, \
+                               offset_sacl, \
+                               offset_dacl)
+
+    s += pksacl + pkdacl + pkowner + pkgroup
     return s
   
 
   def to_tuple(self):
-    d = (("Rev", "0x%x" % self.rev),
-         ("Type", "0x%x" % self.stype),
-         ("SACL", self.sacl),
-         ("DACL", self.dacl),
-         ("Owner SID", self.owner_sid),
-         ("Group SID", self.group_sid))
+    d = (("Rev", "0x%x" % self.revision),
+         ("Type", "0x%x" % self.type),
+         ("SACL", self.systemACL),
+         ("DACL", self.discretionaryACL),
+         ("Owner SID", self.owner),
+         ("Group SID", self.group))
     return d
 
 
@@ -193,7 +212,7 @@ class ACE:
     # Flags: 1 byte
     # Size: 2 bytes
     # Access mask: 4 byte int
-    self.stype, self.flags, self.size, self.mask = struct.unpack("<BBHI", data[:8])
+    self.aceType, self.aceFlags, self.size, self.accessMask = struct.unpack("<BBHI", data[:8])
 
     # This will hold our current offset into the ACE's binary data
     offset = 8
@@ -202,35 +221,35 @@ class ACE:
     # some optional elements, depending on what type of ACE it actually is.
     #
     # If the ACE is of the "object" variety...
-    if self.stype in [SEC_ACE_TYPE_ACCESS_ALLOWED_OBJECT,
-                      SEC_ACE_TYPE_ACCESS_DENIED_OBJECT,
-                      SEC_ACE_TYPE_SYSTEM_AUDIT_OBJECT,
-                      SEC_ACE_TYPE_SYSTEM_ALARM_OBJECT]:
+    if self.aceType in [SEC_ACE_TYPE_ACCESS_ALLOWED_OBJECT,
+                        SEC_ACE_TYPE_ACCESS_DENIED_OBJECT,
+                        SEC_ACE_TYPE_SYSTEM_AUDIT_OBJECT,
+                        SEC_ACE_TYPE_SYSTEM_ALARM_OBJECT]:
 
       # ...then that means there's a 4 byte (int) flag to be read.
-      self.objflags = struct.unpack("<I", data[offset:offset+4])[0]
+      self.flags = struct.unpack("<I", data[offset:offset+4])[0]
       offset += 4
 
       # If the flags indicate the there is an "object present", then we should
       # expect a 16-byte UUID for the object at this point in the data stream.
-      if (self.objflags & SEC_ACE_OBJECT_PRESENT) != 0:
-        self.obj_guid = UUID(data[offset:offset+16])
+      if (self.flags & SEC_ACE_OBJECT_PRESENT) != 0:
+        self.objectType = UUID(data[offset:offset+16])
         offset += 16
 
       # If the flags indicate the there is an "inherited object present", then
-      # we should expect a 16-byte UUID for the inhereited object at this point
+      # we should expect a 16-byte UUID for the inherited object at this point
       # in the data stream.
-      if (self.objflags & SEC_ACE_OBJECT_INHERITED_PRESENT) != 0:
-        self.inh_guid = UUID(data[offset:offset+16])
+      if (self.flags & SEC_ACE_OBJECT_INHERITED_PRESENT) != 0:
+        self.inheritedObjectType = UUID(data[offset:offset+16])
         offset += 16
     
       # Lastly, all ACE's of the "object" variety end with an SID of the "trustee"
-      self.sid = SID(data[offset:self.size])
+      self.trustee = SID(data[offset:self.size])
 
     else:
       # If the ACE is NOT of the "object" variety, then it's easy: all that's left
       # to parse is the SID of the "trustee" of this ACE.
-      self.sid = SID(data[offset:self.size])
+      self.trustee = SID(data[offset:self.size])
 
     # Ensure that when we re-encode this ACE, it matches the input we received
     # assert( self.pack() == data[:self.size] )
@@ -240,40 +259,54 @@ class ACE:
     '''
     Takes the state of this ACE and serializes it back into a stream of bytes.
     '''
-    s = struct.pack("<BBHI", self.stype, \
-                             self.flags, \
-                             self.size, \
-                             self.mask)
+    # We know the size of the header block is always 8, so that's what we'll
+    # start with
+    size = 8
+    payload = ""
 
-    if hasattr(self, "objflags"):
-      s += struct.pack("<I", self.objflags)
+    # The optional object flags are 4 bytes
+    if hasattr(self, "flags"):
+      payload += struct.pack("<I", self.flags)
+      size += 4
 
-    if hasattr(self, "obj_guid"):
-      s += self.obj_guid.pack()
+    if hasattr(self, "objectType"):
+      payload += self.objectType.pack()
+      # UUID's are 16 bytes
+      size += 16
 
-    if hasattr(self, "inh_guid"):
-      s += self.inh_guid.pack()
+    if hasattr(self, "inheritedObjectType"):
+      payload += self.inheritedObjectType.pack()
+      # UUID's are 16 bytes
+      size += 16
 
-    s += self.sid.pack()
-    return s
+    # And we'll always have a trustee here
+    packedTrustee = self.trustee.pack()
+    payload += packedTrustee
+    size += len(packedTrustee)
+
+    header = struct.pack("<BBHI", self.aceType, \
+                                  self.aceFlags, \
+                                  size, \
+                                  self.accessMask)
+
+    return header + payload
 
 
   def to_tuple(self):
-    d = [("Type", "0x%x" % self.stype),
-         ("Flags", "0x%x" % self.flags),
-         ("Size", self.size),
-         ("Mask", "0x%x" % self.mask)]
+    d = [("Type", "0x%x" % self.aceType),
+         ("Flags", "0x%x" % self.aceFlags),
+         ("Mask", "0x%x" % self.accessMask)]
 
-    if hasattr(self, "objflags"):
-      d.append(("Object flags", "0x%x" % self.objflags))
+    if hasattr(self, "flags"):
+      d.append(("Object flags", "0x%x" % self.flags))
 
-    if hasattr(self, "obj_guid"):
-      d.append(("Object GUID", self.obj_guid))
+    if hasattr(self, "objectType"):
+      d.append(("Object Type", self.objectType))
 
-    if hasattr(self, "inh_guid"):
-      d.append(("Inherited GUID", self.inh_guid))
+    if hasattr(self, "inheritedObjectType"):
+      d.append(("Inherited Type", self.inheritedObjectType))
 
-    d.append(("SID", self.sid))
+    d.append(("Trustee", self.trustee))
     return d
 
 
@@ -302,11 +335,11 @@ class ACL:
     # Revision: 2 byte short
     # Size: 2 byte short
     # Number of ACEs to follow: 4 byte int
-    self.rev, self.size, self.num_aces = struct.unpack("<HHI", data[:8])
+    self.revision, size, num_aces = struct.unpack("<HHI", data[:8])
     self.aces = []
 
     offset = 8
-    for i in range(self.num_aces):
+    for i in range(num_aces):
       ace = ACE(data[offset:])
       offset += ace.size
       self.aces.append(ace)
@@ -319,16 +352,23 @@ class ACL:
     '''
     Takes the state of this ACL and serializes it back into a stream of bytes.
     '''
-    s = struct.pack("<HHI", self.rev, self.size, self.num_aces)
+    # The header block is 8 bytes, so that'll be out initial size
+    size = 8
+    payload = ""
+    
     for ace in self.aces:
-      s += ace.pack()
-    return s
+      pk = ace.pack()
+      payload += pk
+      size += len(pk)
+
+    header = struct.pack("<HHI", self.revision, size, len(self.aces))
+
+    return header + payload
 
 
   def to_tuple(self):
-    d = (("Rev", "0x%x" % self.rev),
-         ("Size", self.size),
-         ("Number of ACEs", self.num_aces),
+    d = (("Rev", "0x%x" % self.revision),
+         ("Number of ACEs", len(self.aces)),
          ("ACES", [ace for ace in self.aces]))
     return d
 
@@ -354,7 +394,7 @@ class SID:
     http://linux-ntfs.sourceforge.net/ntfs/concepts/sid.html
     '''
     self.data = data
-    self.rev, self.num_subauths = struct.unpack("<BB", data[:2])
+    self.revision, self.num_subauths = struct.unpack("<BB", data[:2])
 
     # The NT Authority is stored in 6-bytes, big endian. We'll pad
     # it with 2 leading empty bytes so it will fit in a python bignum
@@ -373,7 +413,7 @@ class SID:
     '''
     Takes the state of this ACL and serializes it back into a stream of bytes.
     '''
-    s = struct.pack("<BB", self.rev, self.num_subauths)
+    s = struct.pack("<BB", self.revision, self.num_subauths)
     s += struct.pack(">Q", self.ntauth)[2:]
 
     for auth in self.subauths:
@@ -383,7 +423,7 @@ class SID:
 
 
   def __repr__(self):
-    s = "S-%s-%s" % (self.rev, self.ntauth)
+    s = "S-%s-%s" % (self.revision, self.ntauth)
     for sa in self.subauths:
       s += "-%s" % sa
     return s
