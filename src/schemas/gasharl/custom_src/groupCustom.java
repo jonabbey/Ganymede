@@ -6,15 +6,16 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2001/07/13 20:02:17 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2001/09/24 21:43:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -361,6 +362,65 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   }
 
   /**
+   * <p>Customization method to verify overall consistency of
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ganymede.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal consistencyCheck(DBObject object)
+  {
+    GanymedeSession gsession = object.getGSession();
+
+    Vector users = object.getFieldValuesLocal(USERS);
+    Vector homeUsers = object.getFieldValuesLocal(HOMEUSERS);
+
+    Vector diff = VectorUtils.difference(homeUsers, users);
+
+    if (diff.size() != 0)
+      {
+	Vector names = new Vector();
+
+	for (int i = 0; i < diff.size(); i++)
+	  {
+	    Invid objId = (Invid) diff.elementAt(i);
+
+	    if (gsession != null)
+	      {
+		names.addElement(gsession.viewObjectLabel(objId));
+	      }
+	    else
+	      {
+		names.addElement(objId);
+	      }
+	  }
+
+	return Ganymede.createErrorDialog("Group Consistency Violation",
+					  "Error, the following users have group " + object.getLabel() + " listed as their home " +
+					  "group, but are not listed as normal members of the group:\n\n" + 
+					  VectorUtils.vectorString(names));
+      }
+
+    // okay, then
+
+    return null;
+  }
+
+  /**
    *
    * This method is a hook for subclasses to override to
    * pass the phase-two commit command to external processes.<br><br>
@@ -445,8 +505,18 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    return null;
 
 	  case DELELEMENTS:
-	    return Ganymede.createErrorDialog("Group Validation Error",
-					      "Can't do bulk removal of home group entries right now.");
+
+	    if (gSession == null)
+	      {
+		// If there is no session, the server is doing something special.
+		// Assume the server knows what is going on, and let it do the deed.
+		return null;
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Group Validation Error",
+						  "Can't do bulk removal of home group entries right now.");
+	      }
 
 	  case DELELEMENT:
 
@@ -607,11 +677,55 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	      }
 	  }
       }
-    else
+    else if (field.getID() == USERS) // from groupSchema
       {
-	if (debug)
+	switch (operation)
 	  {
-	    print("it's not the HOMEGROUP");
+	  case DELELEMENTS:
+
+	    if (gSession == null)
+	      {
+		return null;	// fine, whatever
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Group Validation Error",
+						  "Can't do bulk removal of group entries right now.");
+	      }
+
+	  case DELELEMENT:
+	    Vector users = getFieldValuesLocal(USERS);
+	    int index = ((Integer) param1).intValue();
+	    Invid userInvid = (Invid)users.elementAt(index);
+
+	    Vector homeUsers = getFieldValuesLocal(HOMEUSERS);
+
+	    if (!homeUsers.contains(userInvid))
+	      {
+		return null;	// fine, whatever
+	      }
+
+	    if (gSession == null)
+	      {
+		// no session, this is being done by an automated process, let
+		// it go
+
+		return null;
+	      }
+
+	    if (!gSession.getSession().isInteractive())
+	      {
+		// let it go for now, we'll verify at transaction commit if we have to
+
+		return null;
+	      }
+
+	    String username = gSession.viewObjectLabel(userInvid);
+
+	    return Ganymede.createErrorDialog("Group Validation Error",
+					      "Can't remove user " + username + " from group " + getLabel() 
+					      + "'s list of users, this user is using " + getLabel() + 
+					      " as their home group.  Remove this user from the home users list first.");
 	  }
       }
 
