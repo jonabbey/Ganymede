@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.7 $
-# $Date: 1999/05/07 05:34:03 $
+# $Revision: 1.8 $
+# $Date: 1999/07/05 20:58:50 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -150,23 +150,12 @@ $installdir = $vars{"CLIENTINSTALL"};
 
 &makedir("$installdir/bin", 0750); print ".";
 &makedir("$installdir/jars", 0750); print ".";
-&makedir("$installdir/html", 0750); print ".";
-&makedir("$installdir/html/activator", 0750); print ".";
-&makedir("$installdir/html/hotjava", 0750); print ".";
 &makedir("$installdir/password", 0750); print ".";
 
 copy("jars/ganymede.jar", "$installdir/jars/ganymede.jar"); print ".";
-link("$installdir/jars/ganymede.jar", "$installdir/html/activator/ganymede.jar"); print ".";
-link("$installdir/jars/ganymede.jar", "$installdir/html/hotjava/ganymede.jar"); print ".";
 copy("jars/ganymedeAdmin.jar", "$installdir/jars/ganymedeAdmin.jar"); print ".";
-link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/activator/ganymedeAdmin.jar"); print ".";
-link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/hotjava/ganymedeAdmin.jar"); print ".";
 copy("jars/password.jar", "$installdir/jars/password.jar"); print ".";
-link("$installdir/jars/password.jar", "$installdir/html/activator/password.jar"); print ".";
-link("$installdir/jars/password.jar", "$installdir/html/hotjava/password.jar"); print ".";
 copydir("password", "$installdir/password"); print ".";
-
-copy($vars{"SWINGJARS"}."/swingall.jar", "$installdir/html/hotjava/swingall.jar"); print ".";
 
 # Copy and process the properties file into place
 
@@ -340,103 +329,6 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/password/build";
-
-# Write out the client web pages
-
-# First, the activator form of the client
-
-$systemname = $vars{"SYSTEMNAME"};
-
-open INPUT, "webforms/clientActivator.html" or die "Couldn't open clientActivator web template!";
-open OUTPUT, ">$installdir/html/activator/client.html" or die "Couldn't write activator client.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the hotjava form of the client
-
-open INPUT, "webforms/clientHotJava.html" or die "Couldn't open clientActivator web template!";
-open OUTPUT, ">$installdir/html/hotjava/client.html" or die "Couldn't write activator client.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the admin console
-
-# Activator version
-
-open INPUT, "webforms/consoleActivator.html" or die "Couldn't open consoleActivator web template!";
-open OUTPUT, ">$installdir/html/activator/console.html" or die "Couldn't write activator console.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/supergash/$vars{"SUPERNAME"}/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# HotJava version
-
-open INPUT, "webforms/consoleHotJava.html" or die "Couldn't open consoleHotJava web template!";
-open OUTPUT, ">$installdir/html/hotjava/console.html" or die "Couldn't write hotjava console.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/supergash/$vars{"SUPERNAME"}/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-
-close INPUT;
-close OUTPUT;
-
-# And the password client
-
-# Activator
-
-$systemname = $vars{"SYSTEMNAME"};
-
-open INPUT, "webforms/passwordActivator.html" or die "Couldn't open password Activator web template!";
-open OUTPUT, ">$installdir/html/activator/password.html" or die "Couldn't write activator password.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the hotjava form of the password client
-
-open INPUT, "webforms/passwordHotJava.html" or die "Couldn't open passwordHotJava web template!";
-open OUTPUT, ">$installdir/html/hotjava/password.html" or die "Couldn't write activator password.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
 
 print "\nDone\n";
 

@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.38 $
-# $Date: 1999/04/06 21:36:02 $
+# $Revision: 1.39 $
+# $Date: 1999/07/05 20:58:49 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -491,6 +491,7 @@ print "Generating install scripts\n";
 
 write_install("installClient.in", "installClient");
 write_install("installClient2.in", "installClient2");
+write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
 print "Done with configure.\n";

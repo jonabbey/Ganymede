@@ -1,0 +1,296 @@
+#!/opt/bin/perl5
+#
+# Install script for Ganymede web resources
+#
+# $Name:  $
+# $Revision: 1.1 $
+# $Date: 1999/07/05 20:58:51 $
+#
+# Jonathan Abbey - jonabbey@arlut.utexas.edu
+#
+############################################################
+
+use File::Copy;
+
+# This script needs to get a several pieces of information from
+# the user, including:
+#
+# Where should the web resources be placed?
+# What system is the server running on?
+# What superuser name is desired?
+#
+# Everything else can be reasonably derived from the above.
+
+@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL", "SUPERNAME");
+
+%vars = ("SYSTEMNAME" => "",
+         "REGISTRYPORT" => "1099",
+         "HTMLINSTALL" => "/sample/apache/html/ganymede",
+         "SUPERNAME" => "supergash");
+
+%descrip = ("SYSTEMNAME" => "What is the name of the system that the server will run on?",
+	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
+            "HTMLINSTALL" => "Where should the files for Ganymede web access be installed?\n",
+	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");
+
+####################
+
+# We don't want to hold back stdout
+
+$| = 1;
+
+print <<ENDINTRO;
+
+Ganymede Web Resources Install Script
+-------------------------------------
+
+ENDINTRO
+
+# Make sure we're running from the right directory
+
+open TEST, "jars/ganymede.jar" or $failure = 1;
+
+if (!$failure) {
+  close TEST;
+} else {
+  print "*error* couldn't find client jar file.  not run from install directory?\n";
+  exit;
+}
+
+# Read the information from the user
+
+$vars{"SYSTEMNAME"} = `hostname`; # default hostname
+chop $vars{"SYSTEMNAME"}; # take off trailing newline
+
+foreach $step (@steps) {
+
+  $success = 0;
+
+  while (!$success) {
+    print $descrip{$step};
+    print " [$vars{$step}] ";
+
+    $inp = <>;
+
+    chop $inp; # cut off newline
+
+    if ($inp ne "") {
+      $vars{$step} = $inp;
+    }
+
+    if ($vars{$step}eq "") {
+	$success = 0;
+	print "*You must provide a value for this field*\n";
+      }
+    } else {
+      $success = 1;
+    }
+
+    if (($step eq "HTMLINSTALL") {
+      if ($vars{$step} !~ /^\//) {
+	print "*Relative pathnames not allowed, please enter a full path.\n";
+	$success = 0;
+      }
+    }
+  }
+}
+
+# Ok, we've got everything
+
+print <<ENDCONFIG;
+
+Testing configuration information
+
+ENDCONFIG
+
+# can we make the client install directory?
+
+$installdir = $vars{"HTMLINSTALL"};
+
+&removelastslash($installdir);
+
+if (!-d $installdir) {
+  mkdir($installdir, 0750) or die "*Couldn't make the web resources directory $installdir*\n"; 
+  print "Made the web resources directory ok\n";
+} else {
+  print "Found the web resources directory ok\n";
+}
+
+print "\nConfiguration seems to check out.\n\n";
+print "Installing";
+
+copy("jars/ganymede.jar", "$installdir/ganymede.jar"); print ".";
+copy("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar"); print ".";
+copy("jars/password.jar", "$installdir/password.jar"); print ".";
+
+# Copy and process the properties file into place
+
+%clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		  "ganymede.rootname" => $vars{"SUPERNAME"},
+		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
+
+# Write out the client web pages
+
+# First, the activator form of the client
+
+$systemname = $vars{"SYSTEMNAME"};
+
+open INPUT, "webforms/clientActivator.html" or die "Couldn't open clientActivator web template!";
+open OUTPUT, ">$installdir/client_plugin.html" or die "Couldn't write client_plugin.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the hotjava form of the client
+
+open INPUT, "webforms/clientHotJava.html" or die "Couldn't open clientHotJava web template!";
+open OUTPUT, ">$installdir/client_native.html" or die "Couldn't write client_native.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the admin console
+
+# Activator version
+
+open INPUT, "webforms/consoleActivator.html" or die "Couldn't open consoleActivator web template!";
+open OUTPUT, ">$installdir/console_plugin.html" or die "Couldn't write console_plugin.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/supergash/$vars{"SUPERNAME"}/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# HotJava version
+
+open INPUT, "webforms/consoleHotJava.html" or die "Couldn't open consoleHotJava web template!";
+open OUTPUT, ">$installdir/console_native.html" or die "Couldn't write console_native.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/supergash/$vars{"SUPERNAME"}/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# And the password client
+
+# Activator
+
+$systemname = $vars{"SYSTEMNAME"};
+
+open INPUT, "webforms/passwordActivator.html" or die "Couldn't open password Activator web template!";
+open OUTPUT, ">$installdir/password_plugin.html" or die "Couldn't write password_plugin.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the hotjava form of the password client
+
+open INPUT, "webforms/passwordHotJava.html" or die "Couldn't open passwordHotJava web template!";
+open OUTPUT, ">$installdir/password_native.html" or die "Couldn't write password_native.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+print "\nDone\n";
+
+######################################################################### 
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+######################################################################### 
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+}
+
+######################################################################### 
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+######################################################################### 
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0750);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      copy("$source/$file", "$target/$file");
+    }
+  }
+}
+
+######################################################################### 
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name 
+# input
+#
+######################################################################### 
+sub removelastslash{
+    if ($_[0] =~ /\/$/) {
+	chop $_[0];
+    }
+}
