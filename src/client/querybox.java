@@ -836,47 +836,58 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
       System.out.println("Here's how many rows we've got " + fieldOptions.size());
 
-    for (int x = 0; x < fieldOptions.size(); x ++)
-      {
-	try
-	  {
-	    tempVector = (Vector) fieldOptions.elementAt(x);
-	    
-	    for (int y = 0; y < tempVector.size(); y ++)
-	      {
-		// here we process each checkbox in the row
-		
-		    tempBox = (Checkbox) tempVector.elementAt(y);
-
-		    if (tempBox.getState() == true)
-		      // the box has been checked -- we want this field
-		  
-		      {
-			tempString = tempBox.getLabel();
-			tempField = defaultBase.getField(tempString);
-			tempShort = tempField.getID();
-			someQuery.addField(tempShort); // add the field to the query return
-		
-			System.out.println("Here's: " + tempField.getName());
-		      }
-		
-		    else {
-
-		      // else just skip this box
+      fieldLoop :for (int x = 0; x < fieldOptions.size(); x ++)
+	{
+	  try
+	    {
+	      tempVector = (Vector) fieldOptions.elementAt(x);
 	      
-		      System.out.println("Skipping " + tempBox.getLabel()); 
-		    }
+	      for (int y = 0; y < tempVector.size(); y ++)
+		{
+		  // here we process each checkbox in the row
 		
-	      }
-	  }
+		  tempBox = (Checkbox) tempVector.elementAt(y);
 
+		  if (tempBox.getState() == true)
+		    // the box has been checked -- we want this field
+		  
+		    {
+		      tempString = tempBox.getLabel();
+		      tempField = defaultBase.getField(tempString);
+			
+		      // Sometimes this next lines gives us fits...why?
+		      if (tempField == null) 
+			{  
+			  System.out.println("It's a cold, null world,");
+			  System.out.println("Thetrefore, we're breaking out of loop");
+			  break fieldLoop;
+			}
+		      else 
+			{
+			  tempShort = tempField.getID();
+			  someQuery.addField(tempShort); // add the field to the query return
+		
+			  System.out.println("Setting Return: " + tempField.getName());
+			}
+		    }
+		    
+		  else {
 
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote exception: " + ex);	
-	  }
+		    // else just skip this box
+	      
+		    System.out.println("Skipping " + tempBox.getLabel()); 
+		  }
+		    
+		}
+	    }
+	  
 	
-      }
+	  catch (RemoteException ex)
+	    {
+	      throw new RuntimeException("caught remote exception: " + ex);	
+	    }
+	
+	}
 
 
     return someQuery;
