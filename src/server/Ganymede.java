@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2001/10/05 19:27:43 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2001/10/05 19:44:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,6 +66,7 @@ import java.util.*;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.WordWrap;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -563,24 +564,26 @@ public class Ganymede {
 
 		    if (forcelocalhost)
 		      {
-			Ganymede.debug("** Warning **");
+			Ganymede.debug("\n** Warning **\n");
 		      }
 		    else
 		      {
-			Ganymede.debug("** Error **");
+			Ganymede.debug("\n** Error **\n");
 		      }
 
-		    Ganymede.debug("Both the system hostname (" + java.net.InetAddress.getLocalHost().getHostName() +
-				   ") and\nthe ganymede.serverhost definition (" + 
-				   serverHostProperty + ") resolve to the 127.0.0.1 loopback address");
-		    Ganymede.debug("The Ganymede server must have an externally accessible IP address or else clients");
+		    Ganymede.debug(WordWrap.wrap("Both the system hostname (" + 
+						 java.net.InetAddress.getLocalHost().getHostName() +
+						 ") and\nthe ganymede.serverhost definition (" + 
+						 serverHostProperty + ") resolve to the 127.0.0.1 loopback address", 
+						 70, null));
+		    Ganymede.debug("\nThe Ganymede server must have an externally accessible IP address or else clients");
 		    Ganymede.debug("will not be able to communicate with the Ganymede server from other than localhost.");
 
 		    if (!forcelocalhost)
 		      {
 			Ganymede.debug("\nIf you really want to be only useable for localhost, use the -forcelocalhost option.");
 			
-			Ganymede.debug("\nShutting down.");
+			Ganymede.debug("\nShutting down.\n\n");
 			
 			GanymedeServer.shutdown();
 		      }
