@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -656,19 +656,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	System.err.println("DBObjectBase.receive(): class name: " + classname);
       }
 
-    if (classname != null && !classname.equals(""))
-      {
-	try
-	  {
-	    classdef = Class.forName(classname);
-	  }
-	catch (ClassNotFoundException ex)
-	  {
-	    System.err.println("DBObjectBase.receive(): class definition could not be found: " + ex);
-	    classdef = null;
-	  }
-      }
-
     type_code = in.readShort();	// read our index for the DBStore's objectbase hash
 
     size = in.readShort();
@@ -830,6 +817,26 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return (getTypeID() > SchemaConstants.FinalBase);
   }
 
+  /**
+   *
+   * This method is used to force a reload of the custom object code
+   * for this object type.
+   *
+   */
+
+  public synchronized void reloadCustomClass()
+  {
+    this.classdef = null;
+
+    try
+      {
+	this.objectHook = this.createHook();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Unexpected remote exception.. RMI init prob? " + ex);
+      }
+  }
 
   /**
    *
@@ -843,7 +850,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (classdef == null)
       {
-	return new DBEditObject(this);
+	if (classname != null && !classname.equals(""))
+	  {
+	    try
+	      {
+		classdef = Class.forName(classname);
+	      }
+	    catch (ClassNotFoundException ex)
+	      {
+		System.err.println("DBObjectBase.receive(): class definition could not be found: " + ex);
+		classdef = null;
+	      }
+	  }
+	
+	if (classdef == null)
+	  {
+	    return new DBEditObject(this);
+	  }
       }
 
     Constructor c;
