@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -134,13 +134,13 @@ public class DBSession {
    * Only one session can have a particular object checked out for editing at
    * a time.<br><br>
    *
-   * The session has to have a readlock established and a transaction 
-   * opened before it can pull an object out for editing.
+   * The session has to have a transaction opened before it can pull
+   * an object out for editing.
    *
    * @param invid The invariant id of the object to be modified.  The objectBase
    *              referenced in the invid must be locked in lock.
    *
-   * @see arlut.csd.ganymede.DBObjectBase
+   * @see arlut.csd.ganymede.DBObjectBase 
    */
 
   public synchronized DBEditObject editDBObject(Invid invid)
@@ -156,11 +156,11 @@ public class DBSession {
    * Only one session can have a particular object checked out for editing at
    * a time.<br><br>
    *
-   * The session has to have a readlock established and a transaction 
-   * opened before it can pull a new object out for editing.  If the object
-   * specified by <baseID, objectID> is part of the current transaction,
-   * the transactional copy will be returned, and no readLock is strictly
-   * necessary in that case.
+   * The session has to have a transaction opened before it can pull a
+   * new object out for editing.  If the object specified by <baseID,
+   * objectID> is part of the current transaction, the transactional
+   * copy will be returned, and no readLock is strictly necessary in
+   * that case.
    *
    * @param baseID The short id number of the DBObjectBase containing the object to
    *               be edited.
@@ -169,7 +169,7 @@ public class DBSession {
    *                 object base.
    *
    * @see arlut.csd.ganymede.DBObjectBase
-   *
+   * 
    */
 
   public synchronized DBEditObject editDBObject(short baseID, int objectID)
@@ -202,9 +202,6 @@ public class DBSession {
    *
    * Get a reference to a read-only copy of an object in the DBStore.<br><br>
    *
-   * The session has to have a read lock established before calling
-   * viewDBObject.  Otherwise a RuntimeException will be thrown.<br><br>
-   *
    * If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
    * transaction.
@@ -225,9 +222,6 @@ public class DBSession {
   /**
    *
    * Get a reference to a read-only copy of an object in the DBStore.<br><br>
-   *
-   * The session has to have a read lock established before calling
-   * viewDBObject.  Otherwise a RuntimeException will be thrown.<br><br>
    *
    * If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
@@ -298,14 +292,14 @@ public class DBSession {
    * Remove an object from the database<br><br>
    *
    * This method method can only be called in the context of an open
-   * transaction and an open lock on the object's base.  This method
-   * will mark an object for deletion.  When the transaction is
-   * committed, the object is removed from the database.  If the
-   * transaction is aborted, the object remains in the database
-   * unchanged.
+   * transaction.  This method will mark an object for deletion.  When
+   * the transaction is committed, the object is removed from the
+   * database.  If the transaction is aborted, the object remains in
+   * the database unchanged.
    *
    * @param invid Invid of the object to be deleted
-   * */
+   * 
+   */
 
   public synchronized void deleteDBObject(Invid invid)
   {
@@ -317,17 +311,16 @@ public class DBSession {
    * Remove an object from the database<br><br>
    *
    * This method method can only be called in the context of an open
-   * transaction and an open lock on the object's base.  This method
-   * will check an object out of the DBStore and add it to the
-   * editset's deletion list.  When the transaction is committed, the
-   * object has its remove() method called to do cleanup, and the
-   * editSet nulls the object's slot in the DBStore.  If the
-   * transaction is aborted, the object remains in the database
+   * transaction.  This method will check an object out of the DBStore
+   * and add it to the editset's deletion list.  When the transaction
+   * is committed, the object has its remove() method called to do
+   * cleanup, and the editSet nulls the object's slot in the DBStore.
+   * If the transaction is aborted, the object remains in the database
    * unchanged.
    *
    * @param baseID id of the object base containing the object to be deleted
    * @param objectID id of the object to be deleted
-   * 
+   *  
    */
 
   public synchronized void deleteDBObject(short baseID, int objectID)
