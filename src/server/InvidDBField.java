@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -784,7 +784,8 @@ public final class InvidDBField extends DBField implements invid_field {
     
     if (newRef == null)
       {
-	setLastError("couldn't check out new invid " + newRemote + " for symmetry maintenance");
+	setLastError("couldn't check out new invid " + newRemote + " (" + 
+		     session.getGSession().viewObjectLabel(newRemote) + ") for symmetry maintenance");
 	return false;
       }
 
@@ -1406,6 +1407,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
+    ReturnVal retVal = null, newRetVal;
 
     /* -- */
 
@@ -1433,6 +1435,24 @@ public final class InvidDBField extends DBField implements invid_field {
     newRemote = (Invid) value;
 
     eObj = (DBEditObject) owner;
+
+    if (!local)
+      {
+	// Wizard check
+	
+	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	
+	if ((newRetVal != null) && !newRetVal.didSucceed())
+	  {
+	    // we're not done.. return the next wizard dialog, or the failure code
+	    
+	    return newRetVal;
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+      }
 
     // try to do the binding
 
@@ -1475,7 +1495,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	this.newValue = null;
 
-	return null;
+	return retVal;
       }
     else
       {
@@ -1508,6 +1528,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
+    ReturnVal retVal = null, newRetVal;
 
     /* -- */
 
@@ -1543,6 +1564,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
+    if (!local)
+      {
+	// Wizard check
+
+	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+
+	if ((newRetVal != null) && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+      }
+
     oldRemote = (Invid) values.elementAt(index);
     newRemote = (Invid) value;
     
@@ -1561,7 +1598,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (eObj.finalizeSetElement(this, index, value))
       {
 	values.setElementAt(value, index);
-	return null;
+	return retVal;
       }
     else
       {
@@ -1588,6 +1625,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid remote;
+    ReturnVal retVal = null, newRetVal;
 
     /* -- */
 
@@ -1629,6 +1667,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
+    if (!local)
+      {
+	// Wizard check
+
+	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+
+	if ((newRetVal != null) && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+      }
+
     if (!bind(null, remote, local))
       {
 	setLastError("Couldn't bind reverse pointer");
@@ -1648,7 +1702,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	defined = true;		// very important!
 
-	return null;
+	return retVal;
       } 
     else
       {
@@ -1777,9 +1831,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public ReturnVal deleteElement(int index, boolean local)
   {
-    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid remote;
+    ReturnVal retVal = null, newRetVal;
 
     /* -- */
 
@@ -1804,6 +1858,22 @@ public final class InvidDBField extends DBField implements invid_field {
     remote = (Invid) values.elementAt(index);
 
     eObj = (DBEditObject) owner;
+
+    if (!local)
+      {
+	// Wizard check
+
+	newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+
+	if ((newRetVal != null) && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+      }
 
     if (!unbind(remote, local))
       {
@@ -1831,13 +1901,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (values.size() > 0)
 	  {
-	    return null;
+	    return retVal;
 	  }
 	else
 	  {
 	    defined = false;
 
-	    return null;
+	    return retVal;
 	  }
       }
     else
