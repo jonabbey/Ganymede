@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.89 $ %D%
+   Version: $Revision: 1.90 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2138,7 +2138,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // Ganymede.debug("Query on embedded type");
 
-	    System.err.println("Query on embedded type");
+	    System.err.println("Query on embedded type: " + base.getName());
 	  }
       }
     else
@@ -2147,7 +2147,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // Ganymede.debug("Query on non-embedded type");
 	    
-	    System.err.println("Query on non-embedded type");
+	    System.err.println("Query on non-embedded type " + base.getName());
 	  }
       }
 
@@ -2364,6 +2364,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		if (result.containsInvid(x.getInvid()))
 		  {
+		    if (debug)
+		      {
+			System.err.println("don't need to add invid " + x.getInvid() + ", we got it first time");
+		      }
+
 		    continue;
 		  }
 
@@ -3186,6 +3191,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // if we're looking at an embedded object, lets cascade up and
     // find the top-level ancestor
+
+    if (debug)
+      {
+	System.err.println("Trying to find top-level object for " + 
+			   object.getTypeDesc() + ":" + object.getInvid().toString());
+      }
 
     localObj = object;
 
