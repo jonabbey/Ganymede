@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/11/04 21:47:12 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/11/04 23:12:37 $
    Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -67,8 +67,8 @@ import MD5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.5 $</p>
- * <p>Last Mod Date: $Date: 1999/11/04 21:47:12 $</p>
+ * <p>Version: $Revision: 1.6 $</p>
+ * <p>Last Mod Date: $Date: 1999/11/04 23:12:37 $</p>
  * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
@@ -90,19 +90,25 @@ public final class MD5Crypt {
 
   static public void main(String argv[])
   {
-    if (argv.length != 2)
+    if ((argv.length < 1) || (argv.length > 2))
       {
 	System.err.println("Usage: MD5Crypt password salt");
 	System.exit(1);
       }
 
-    String password = argv[0];
-    String salt = argv[1];
-
-    System.err.println(MD5Crypt.crypt(password, salt));
+    if (argv.length == 2)
+      {
+	System.err.println(MD5Crypt.crypt(argv[0], argv[1]));
+      }
+    else
+      {
+	System.err.println(MD5Crypt.crypt(argv[0]));
+      }
     
     System.exit(0);
   }
+
+  static private final String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
   static private final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -135,6 +141,34 @@ public final class MD5Crypt {
   static private final int bytes2u(byte inp)
   {
     return (int) inp & 0xff;
+  }
+
+  /**
+   * <p>This method actually generates a OpenBSD/FreeBSD/Linux PAM compatible
+   * md5-encoded password hash from a plaintext password and a
+   * salt.</p>
+   *
+   * <p>The resulting string will be in the form '$1$&lt;salt&gt;$&lt;hashed mess&gt;</p>
+   *
+   * @param password Plaintext password
+   *
+   * @return An OpenBSD/FreeBSD/Linux-compatible md5-hashed password field.
+   */
+
+  static public final String crypt(String password)
+  {
+    StringBuffer salt = new StringBuffer();
+    java.util.Random randgen = new java.util.Random();
+
+    /* -- */
+
+     while (salt.length() < 8)
+       {
+	 int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+         salt.append(SALTCHARS.substring(index, index+1));
+       }
+
+     return MD5Crypt.crypt(password, salt.toString());
   }
 
   /**
