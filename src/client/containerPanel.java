@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.47 $ %D%
+    Version: $Revision: 1.48 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1938,11 +1938,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // note that the permissions editor does its own callbacks to
     // the server, albeit using our transaction / session.
 
+    Invid invid = object.getInvid(); // server call
+
     perm_button pb = new perm_button((perm_field) field,
 				     editable,
 				     gc.getBaseHash(),
-				     (object.getInvid().getType() == SchemaConstants.PermBase) &&
-				     (object.getInvid().getNum() == SchemaConstants.PermSelfUserObj));
+				     (invid.getType() == SchemaConstants.PermBase) &&
+				     (invid.getNum() == SchemaConstants.PermSelfUserObj));
     
     addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
     
