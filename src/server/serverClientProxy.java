@@ -11,8 +11,8 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2002/08/03 00:20:27 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2002/08/03 01:29:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,10 +77,16 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.4 $ $Date: 2002/08/03 00:20:27 $
+ * @version $Revision: 1.5 $ $Date: 2002/08/03 01:29:57 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {
+
+  /**
+   * <p>Used to generate a unique name for our background thread.</p>
+   */
+
+  private static int classCounter = 0;
 
   /**
    * <p>Our remote reference to the Client</p>
@@ -156,7 +162,7 @@ public class serverClientProxy implements Runnable {
     eventBuffer = new clientEvent[maxBufferSize];
     lookUp = new clientEvent[clientEvent.LAST - clientEvent.FIRST + 1];
 
-    commThread = new Thread(this, "client console proxy");
+    commThread = new Thread(this, "Ganymede Client Messaging Proxy Thread-" + classCounter++);
     commThread.start();
   }
 

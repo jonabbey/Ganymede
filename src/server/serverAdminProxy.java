@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2002/08/02 22:31:47 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2002/08/03 01:29:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,13 +78,19 @@ import arlut.csd.Util.booleanSemaphore;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.24 $ $Date: 2002/08/02 22:31:47 $
+ * @version $Revision: 1.25 $ $Date: 2002/08/03 01:29:57 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class serverAdminProxy implements Admin, Runnable {
 
   private static final boolean debug = false;
+
+  /**
+   * <p>Used to generate a unique name for our background thread.</p>
+   */
+
+  private static int classCounter = 0;
 
   /**
    * <p>Our background communications thread, which is responsible for
@@ -145,7 +151,7 @@ public class serverAdminProxy implements Admin, Runnable {
     eventBuffer = new adminEvent[maxBufferSize];
     lookUp = new adminEvent[adminEvent.LAST - adminEvent.FIRST + 1];
 
-    commThread = new Thread(this, "admin console proxy");
+    commThread = new Thread(this, "Ganymede Admin Console Proxy Thread-" + classCounter++);
     commThread.start();
   }
 

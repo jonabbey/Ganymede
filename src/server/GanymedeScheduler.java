@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2002/01/26 20:05:52 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2002/08/03 01:29:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ public class GanymedeScheduler extends Thread {
   public static void main(String[] argv)
   {
     GanymedeScheduler scheduler = new GanymedeScheduler(false);
-    new Thread(scheduler).start();
+    new Thread(scheduler, "Ganymede Scheduler Thread").start();
 
     Date time, currentTime;
 
