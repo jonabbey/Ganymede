@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.6 $
-# Date: $Date: 1999/01/20 19:24:50 $
+# Version: $Revision: 1.7 $
+# Date: $Date: 1999/01/20 19:50:22 $
 #
 ############################################################
 
@@ -30,9 +30,12 @@ cd server_classes
 
 # We need the Util package for lots of things
 
-ln -s ../arlut/csd/Util arlut/csd/Util
+cd arlut/csd
+rm -f Util
+ln -s $CLASSDIR/arlut/csd/Util .
+cd ../..
 
-# We need a few things from JDataComponent
+# We need one thing from JDataComponent
 
 rm -rf arlut/csd/JDataComponent
 mkdir arlut/csd/JDataComponent
@@ -41,6 +44,9 @@ cd arlut/csd/JDataComponent
 rm -f listHandle.class
 ln -s $CLASSDIR/arlut/csd/JDataComponent/listHandle.class .
 cd ../../..
+
+# And we need the JDialog package for the serializable
+# dialog objects
 
 cd arlut/csd
 rm -f JDialog
