@@ -201,15 +201,16 @@ export CLASSPATH
 
 # ulimit -n 128
 
+# SUNSPECIFIC contains directives specific to Sun's JVM.  If you're
+# running on an IBM JVM, you will probably want to comment out
+# this next line.
+#
 # The directive '-XX:MaxPermSize=$MAXPERMSPACE' is used to increase
 # the portion of the server's heap that is dedicated to class and
 # method memory, and most especially to interned string storage.  The
 # Ganymede server aggressively interns Strings to avoid redundantly
-# storing Strings in the heap.  This directive may not be recognized
-# in JVMs other than Sun's.. you can remove this directive if you need
-# to in such cases.
-#
-# The -server option is also specific to Sun's JVM, and should be removed
-# if you are running on an IBM JDK.
+# storing Strings in the heap.
 
-$JAVA -server $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP -XX:MaxPermSize=$MAXPERMSPACE $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
+SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE"
+
+$JAVA $SUNSPECFICI $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
