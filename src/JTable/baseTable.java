@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.4 $ %D%
+ * @version $Revision: 1.5 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -116,6 +116,13 @@ public class baseTable extends Panel implements AdjustmentListener {
   tableCol[]
     cols;			// header information, column attributes
 
+  PopupMenu 
+    menu;			// popup menu attached to table as a whole
+
+  int 
+    menuRow = -1,
+    menuCol = -1;		// holds the row, col of the last popup launch
+
   /* -- */
 
   // -------------------- Constructors --------------------
@@ -148,16 +155,17 @@ public class baseTable extends Panel implements AdjustmentListener {
    */
 
   public baseTable(tableAttr headerAttrib, 
-		     tableAttr tableAttrib,
-		     tableAttr[] colAttribs, 
-		     int[] colWidths, 
-		     Color vHeadLineColor,
-		     Color vRowLineColor,
-		     Color hHeadLineColor,
-		     Color hRowLineColor,
-		     String[] headers,
-		     boolean horizLines, boolean vertLines,
-		     boolean vertFill, boolean hVertFill)
+		   tableAttr tableAttrib,
+		   tableAttr[] colAttribs, 
+		   int[] colWidths, 
+		   Color vHeadLineColor,
+		   Color vRowLineColor,
+		   Color hHeadLineColor,
+		   Color hRowLineColor,
+		   String[] headers,
+		   boolean horizLines, boolean vertLines,
+		   boolean vertFill, boolean hVertFill,
+		   PopupMenu menu)
   {
     // implicit super() call here creates the panel
 
@@ -176,6 +184,7 @@ public class baseTable extends Panel implements AdjustmentListener {
     this.vertLines = vertLines;
     this.vertFill = vertFill;
     this.hVertFill = hVertFill;
+    this.menu = menu;
 
     if (this.horizLines)
       {
@@ -254,6 +263,11 @@ public class baseTable extends Panel implements AdjustmentListener {
       {
 	System.err.println("** exiting full constructor");
       }
+
+    if (menu != null)
+      {
+	canvas.add(menu);
+      }
   }
 
   /**
@@ -264,7 +278,8 @@ public class baseTable extends Panel implements AdjustmentListener {
    *
    */
 
-  public baseTable(int[] colWidths, String[] headers)
+  public baseTable(int[] colWidths, String[] headers,
+		   PopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -277,7 +292,8 @@ public class baseTable extends Panel implements AdjustmentListener {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 false, true, true, false);
+	 false, true, true, false,
+	 menu);
 
     if (debug)
       {
@@ -979,12 +995,14 @@ public class baseTable extends Panel implements AdjustmentListener {
    * Unselect all cells
    */
 
-  public final void unSelectAll()
+  public void unSelectAll()
   {
     for (int i = 0; i < cols.length; i++)
       {
 	unSelectCol(i);
       }
+
+    refreshTable();
   }
 
   /**
@@ -1596,6 +1614,31 @@ public class baseTable extends Panel implements AdjustmentListener {
       {
 	reShape();
       }
+  }
+
+  // component overrides
+
+  public Dimension getPreferredSize()
+  {
+    if (rows.size() < 5)
+      {
+	return new Dimension(origTotalWidth,
+			     headerAttrib.height + 2 * hHeadLineThickness +
+			     5 * (row_height + hRowLineThickness));
+      }
+    else
+      {
+	return new Dimension(origTotalWidth,
+			     headerAttrib.height + 2 * hHeadLineThickness +
+			     rows.size() * (row_height + hRowLineThickness));
+      }
+  }
+
+  public Dimension getMinimumSize()
+  {
+    return new Dimension(origTotalWidth,
+			 headerAttrib.height + 2 * hHeadLineThickness +
+			 2 * (row_height + hRowLineThickness));
   }
 
 }
@@ -2323,47 +2366,51 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	System.err.println("mouseDown x = " + x + ", y = " + y);
       }
 
-    // mouse down near column line
-
     colDrag = 0;
     clickCol = -1;
 
-    for (col = 1; col < rt.cols.length; col++)
+    if (!e.isPopupTrigger())
       {
-	// nice wide grab range
 	
-	if ((vx > rt.colPos[col] - colgrab) &&
-	    (vx < rt.colPos[col] + colgrab))
+	// mouse down near column line?
+
+	for (col = 1; col < rt.cols.length; col++)
 	  {
-	    if (debug)
+	    // nice wide grab range
+	
+	    if ((vx > rt.colPos[col] - colgrab) &&
+		(vx < rt.colPos[col] + colgrab))
 	      {
-		System.err.println("column " + col);
+		if (debug)
+		  {
+		    System.err.println("column " + col);
+		  }
+
+		// we've clicked close to an interior
+		// pole.. we'll drag it
+
+		colDrag = col;
 	      }
-
-	    // we've clicked close to an interior
-	    // pole.. we'll drag it
-
-	    colDrag = col;
+	    else if ((vx >= (rt.colPos[col] + colgrab)) &&
+		     (vx <= (rt.colPos[col+1] - colgrab)))
+	      {
+		clickCol = col;
+	      }
 	  }
-	else if ((vx >= (rt.colPos[col] + colgrab)) &&
-		 (vx <= (rt.colPos[col+1] - colgrab)))
+
+	// note that the above loop is mostly intended to handle the
+	// column adjustment.. since the far left column is not adjustable,
+	// the above loop misses it.  Check for it here.
+
+	if (clickCol == -1)
 	  {
-	    clickCol = col;
-	  }
-      }
-
-    // note that the above loop is mostly intended to handle the
-    // column adjustment.. since the far left column is not adjustable,
-    // the above loop misses it.  Check for it here.
-
-    if (clickCol == -1)
-      {
-	if ((vx >= rt.colPos[0]) &&
-	    (vx <= (rt.colPos[1] - colgrab)))
-	  {
-	    clickCol = 0;
-	  }
+	    if ((vx >= rt.colPos[0]) &&
+		(vx <= (rt.colPos[1] - colgrab)))
+	      {
+		clickCol = 0;
+	      }
 	
+	  }
       }
 
     if (clickCol != -1)
@@ -2375,11 +2422,12 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    clickRow = (vy - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) / 
 	      (rt.row_height + rt.hRowLineThickness);
 
-	    // if the user clicked below the last defined row, we don't register
-	    // the click.
+	    // if the user clicked below the last defined row, unselect
+	    // anything selected and return.
 
 	    if (clickRow >= rt.rows.size())
 	      {
+		rt.unSelectAll();
 		return;
 	      }
 
@@ -2404,6 +2452,11 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    lastClick = e.getWhen();
 	  }
       }
+
+    if (e.isPopupTrigger())
+      {
+	popupHandler(e);
+      }
   }
 
   // finish column dragging
@@ -2417,6 +2470,11 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
       x1;
 
     /* -- */
+
+    if (e.isPopupTrigger())
+      {
+	popupHandler(e);
+      }
 
     x = e.getX();
     y = e.getY();
@@ -2519,6 +2577,123 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
     colXOR = -1;
   }
 
+  // private popupmenu handler
+
+  private void popupHandler(MouseEvent e)
+  {
+    int
+      x, y,
+      vx, vy,
+      clickRow,
+      clickCol;
+
+    tableCell
+      cell;
+
+    tableCol
+      col;
+
+    /* -- */
+
+    x = e.getX();
+    y = e.getY();
+
+    if (rt.hbar_visible)
+      {
+	vx = x + h_offset;	// adjust for horizontal scrolling
+      }
+    else
+      {
+	vx = x;
+      }
+
+    if (rt.vbar_visible)
+      {
+	vy = y + v_offset;	// adjust for vertical scrolling
+      }
+    else
+      {
+	vy = y;
+      }
+
+    if (debug)
+      {
+	System.err.println("popup x = " + x + ", y = " + y);
+      }
+
+    // What column were we triggered on?
+
+    clickCol = -1;
+
+    for (int i = 0; i < rt.cols.length; i++)
+      {
+	// nice wide grab range
+	if ((vx >= (rt.colPos[i])) &&
+	    (vx <= (rt.colPos[i+1])))
+	  {
+	    clickCol = i;
+	  }
+      }
+
+    if (clickCol == -1)
+      {
+	return;
+      }
+
+    // What row were we triggered on?
+
+    if ((y > rt.headerAttrib.height + 2 * rt.hHeadLineThickness))
+      {
+	clickRow = (vy - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) / 
+	  (rt.row_height + rt.hRowLineThickness);
+	
+	// if the user clicked below the last defined row, ignore it
+	
+	if (clickRow >= rt.rows.size())
+	  {
+	    return;
+	  }
+      }
+    else
+      {
+	return;
+      }
+
+    // remember what row and column we launched the popup from so 
+    // rowTable, etc., can report the row/col in its callback
+
+    rt.menuRow = clickRow;
+    rt.menuCol = clickCol;
+
+    System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
+
+    cell = ((tableRow) rt.rows.elementAt(clickRow)).cells[clickCol];
+
+    if (cell.menu != null)
+      {
+	System.err.println("Showing cell menu");
+	cell.menu.show(this, x, y);
+	return;
+      }
+
+    col = rt.cols[clickCol];
+
+    if (col.menu != null)
+      {
+	System.err.println("Showing column menu");
+	col.menu.show(this, x, y);
+	return;
+      }
+
+    if (rt.menu != null)
+      {
+	System.err.println("Showing topLevel menu");
+	rt.menu.show(this,x,y);
+	return;
+      }
+    
+  }
+
   // 
   // MouseMotionListener methods
   //
@@ -2575,6 +2750,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	  }
       }
   }
+
 }
 
 /*------------------------------------------------------------------------------
@@ -2590,12 +2766,14 @@ class tableCell {
   String text;
   tableAttr attr;
   boolean selected;
+  PopupMenu menu;
 
   public tableCell(String text, tableAttr attr)
   {
     this.text = text;
     this.attr = attr;
     this.selected = false;
+    this.menu = null;
   }
 
   public tableCell(String text)
@@ -2603,6 +2781,7 @@ class tableCell {
     this.text = text;
     this.attr = null;
     this.selected = false;
+    this.menu = null;
   }
 
   public tableCell()
@@ -2610,6 +2789,7 @@ class tableCell {
     this.text = null;
     this.attr = null;
     this.selected = false;
+    this.menu = null;
   }
 }
 
@@ -2651,6 +2831,9 @@ class tableCol {
   tableAttr attr;
   float origWidth;
   int width;
+  PopupMenu menu;
+
+  /* -- */
 
   tableCol(baseTable rt, String header, float origWidth, tableAttr attr)
   {
@@ -2658,6 +2841,7 @@ class tableCol {
     this.header = header;
     this.origWidth = origWidth;
     this.attr = attr;
+    this.menu = null;
 
     if (this.attr != null)
       {
