@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -162,13 +162,18 @@ public class glogin extends java.applet.Applet implements Runnable {
 
     connector = new JButton("Login to Server");
     connector.setKeyAccelerator(KeyEvent.VK_ENTER);
+    connector.setOpaque(true);
     connector.setBackground(ClientColor.buttonBG);
     connector.addActionListener(_loginHandler);
     
     _quitButton.addActionListener(_loginHandler);
 
     bPanel.add(_connectStatus,"Center");
-    bPanel.add(_quitButton,"East");
+    if (!WeAreApplet)
+      {
+	//Don't let applets quit
+	bPanel.add(_quitButton,"East");
+      }
 
     p.add(bPanel);
 
@@ -317,6 +322,11 @@ public class glogin extends java.applet.Applet implements Runnable {
     System.exit(1);
   }
 
+  public String getUserName()
+  {
+    return my_username;
+  }
+
   public void enableButtons(boolean enabled)
     {
       connector.setEnabled(enabled);
@@ -354,8 +364,8 @@ class LoginHandler implements ActionListener {
   {
     if (e.getSource() == my_glogin.connector)
       {
-	String uname = my_glogin.username.getText();
-	String pword = my_glogin.passwd.getText();
+	String uname = my_glogin.username.getText().trim();
+	String pword = my_glogin.passwd.getText().trim();
 
 	my_glogin.my_username = uname;
 	my_glogin.my_passwd = pword;
