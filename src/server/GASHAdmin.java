@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -350,12 +350,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     shutdownDialog = new StringDialog(this,
 				      "Confirm Ganymede Server Shutdown", 
-				      "Are you sure you want to shutdown the Ganymede server?", 
+				      "Are you sure you want to \nshutdown the Ganymede server?", 
 				      "Yes", "No", question);
 
     dumpDialog = new StringDialog(this,
 				  "Ganymede Server Dump",
-				  "Are you sure you want to schedule a full dump of the Ganymede database?", 
+				  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
 				  "Yes", "No", question);
 
     //    setBackground(Color.white);
