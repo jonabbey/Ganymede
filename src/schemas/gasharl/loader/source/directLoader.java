@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1707,7 +1707,7 @@ public class directLoader {
 
 	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAssocUser, invid);
 
-	    newPersona.setFieldValueLocal(SchemaConstants.PersonaNameField, key + ":GASH Admin");
+	    newPersona.setFieldValueLocal(SchemaConstants.PersonaNameField, "GASH Admin");
 
 	    pass_field passField = (pass_field) newPersona.getField(SchemaConstants.PersonaPasswordField);
 	    passField.setCryptPass(ogRec.password(key));
