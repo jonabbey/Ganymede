@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.30 $
-# $Date: 2000/12/05 23:52:24 $
+# $Revision: 1.31 $
+# $Date: 2000/12/07 04:00:55 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -190,9 +190,10 @@ print "Installing";
 $installdir = $vars{"SERVERINSTALL"};
 
 &makedir("$installdir/bin", 0750); print ".";
-&makedir("$installdir/db", 0750); print ".";
-&makedir("$installdir/db/out", 0750); print ".";
+&makedir("$installdir/db", 0700); print ".";
+&makedir("$installdir/db/out", 0700); print ".";
 &makedir("$installdir/db/text", 0750); print ".";
+&makedir("$installdir/backups", 0700); print ".";
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/html", 0750); print ".";
 &copydir("doc", "$installdir/doc"); print ".";
@@ -239,7 +240,8 @@ copy("scripts/signature", "$installdir/db/signature"); print ".";
 		"ganymede.helpbase" => $vars{"HELPWEB"},
 		"ganymede.softtimeout" => "false",
 		"ganymede.timeoutIdleNoObjs" => "15",
-		"ganymede.timeoutIdleWithObjs" => "20"
+		"ganymede.timeoutIdleWithObjs" => "20",
+		"ganymede.builder.backups" => "$installdir/backups",
 	       );
 
 open INPUT, $template or die "Couldn't open properties template!";

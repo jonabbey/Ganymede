@@ -11,8 +11,6 @@
 # ganymede.database
 #
 # The location and filename for the Ganymede server.
-#
-# Used by the server
 
 ganymede.database=/home/broccol/gash2/code/arlut/csd/ganymede/db/ganymede.db
 
@@ -20,8 +18,6 @@ ganymede.database=/home/broccol/gash2/code/arlut/csd/ganymede/db/ganymede.db
 # ganymede.log
 #
 # The location and filename for the Ganymede log file.
-#
-# Used by the server
 
 ganymede.log=/home/broccol/gash2/code/arlut/csd/ganymede/db/log
 
@@ -29,8 +25,6 @@ ganymede.log=/home/broccol/gash2/code/arlut/csd/ganymede/db/log
 # ganymede.journal
 #
 # The location and filename for the Ganymede journal file.
-#
-# Used by the server
 
 ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 
@@ -38,8 +32,6 @@ ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 #
 # The filename to dump an html representation of the database schema to when
 # the admin console requests a schema dump.
-#
-# Used by the server
 
 ganymede.htmldump=/home/broccol/public_html/gash2/design/schema.html
 
@@ -48,8 +40,6 @@ ganymede.htmldump=/home/broccol/public_html/gash2/design/schema.html
 #
 # The filename for a signature file to append to mail messages sent out
 # by Ganymede in response to various events.
-#
-# Used by the server
 
 ganymede.signaturefile=/home/broccol/gash2/code/arlut/csd/ganymede/signature
 
@@ -59,8 +49,6 @@ ganymede.signaturefile=/home/broccol/gash2/code/arlut/csd/ganymede/signature
 # The path to a directory containing .txt and .html files that
 # Ganymede will provide to the client on demand.  Used for the motd and the
 # like.
-#
-# Used by the server
 
 ganymede.messageDirectory=/home/broccol/gash2/code/arlut/csd/ganymede/db/text
 
@@ -68,18 +56,14 @@ ganymede.messageDirectory=/home/broccol/gash2/code/arlut/csd/ganymede/db/text
 # ganymede.mailhost
 #
 # The name of the SMTP host that Ganymede will talk to when sending mail.
-#
-# Used by the server
 
 ganymede.mailhost=ns1.arlut.utexas.edu
 
 
 # ganymede.returnaddr
 #
-# What return email address will appear on mail sent by the
+# What return email address will appear on system mail sent by the
 # Ganymede server?
-#
-# Used by the server
 
 ganymede.returnaddr=jonabbey@arlut.utexas.edu
 
@@ -87,8 +71,6 @@ ganymede.returnaddr=jonabbey@arlut.utexas.edu
 # ganymede.serverhost
 #
 # The name of the system that the Ganymede server is being run on.
-#
-# Used by the client and admin console
 
 ganymede.serverhost=www.arlut.utexas.edu
 
@@ -97,8 +79,6 @@ ganymede.serverhost=www.arlut.utexas.edu
 #
 # The port number of the Java rmi registry daemon handling object
 # bindings for the Ganymede server.
-#
-# Used by the client, server, and admin console
 
 ganymede.registryPort=1099
 
@@ -106,8 +86,6 @@ ganymede.registryPort=1099
 # ganymede.rootname
 #
 # The name of the root-privileged account.
-#
-# Used by the server
 
 ganymede.rootname=supergash
 
@@ -120,8 +98,6 @@ ganymede.rootname=supergash
 # when the Ganymede server is run with no pre-existing
 # database/schema file.  This password can also be used if
 # the server is started with a special command line flag.
-#
-# Used by the server
 
 ganymede.defaultrootpass=dodo
 
@@ -129,8 +105,6 @@ ganymede.defaultrootpass=dodo
 # ganymede.monitorname
 #
 # The name of the monitor account.
-#
-# Used by the server on initial database construction
 
 ganymede.monitorname=monitor
 
@@ -142,8 +116,6 @@ ganymede.monitorname=monitor
 # This password will be encoded in the monitor persona
 # when the Ganymede server is run with no pre-existing
 # database/schema file.
-#
-# Used by the server on initial database construction
 
 ganymede.defaultmonitorpass=display
 
@@ -211,8 +183,6 @@ ganymede.timeoutIdleWithObjs=20
 # ganymede.helpbase
 #
 # The url for the root of the Ganymede help document tree.
-#
-# Used by the server
 
 ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
@@ -226,8 +196,14 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 # This is an optional item.  If it is specified, the server
 # will attempt to use this external helper program to
 # accelerate the process of searching through the log file.
-#
-# Used by server
 
 ganymede.loghelper=/var/ganymede/bin/logscan.pl
 
+
+# ganymede.builder.backups
+#
+# This property defines the location where backups of
+# files written by builder tasks are archived, in zip
+# format.
+
+ganymede.builder.backups=
