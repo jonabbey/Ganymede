@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/25 00:14:01 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/25 00:28:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ public class StringUtils {
 
     StringBuffer buffer = new StringBuffer();
 
-    for (int i = 0 i < inputString.length(); i++)
+    for (int i = 0; i < inputString.length(); i++)
       {
 	char c = inputString.charAt(i);
 
