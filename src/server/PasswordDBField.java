@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -475,6 +475,24 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	return null;
       }
+  }
+
+  /**
+   *
+   * Sets the value of this field, if a scalar.
+   * Returns true on success, false on failure.
+   * If false is returned, the DBSession's
+   * last error value will have been set to
+   * indicate the reason for failure.
+   *
+   * @see arlut.csd.ganymede.DBSession
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public boolean setValue(Object value)
+  {
+    throw new IllegalArgumentException("can't directly set the value on a password field");
   }
 
   /**
