@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -291,6 +291,20 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   public void setEditable(boolean editable)
   {
     _date.setEditable(editable);
+  }
+
+  /**
+   * Passes enabled to all components in the date field.
+   */
+  public void setEnabled(boolean enabled)
+  {
+    try
+      {
+	_calendarButton.setEnabled(enabled);
+	_clearButton.setEnabled(enabled);
+	_date.setEnabled(enabled);
+      }
+    catch (NullPointerException e) {}  // the buttons might still be null
   }
 
   /**
