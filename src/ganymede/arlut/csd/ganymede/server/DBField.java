@@ -3158,23 +3158,47 @@ public abstract class DBField implements Remote, db_field {
 
     try
       {
-	DBField conflictField = ns.lookup(conflictValue);
-	DBObject conflictObject = conflictField.getOwner();
-	String conflictLabel = conflictObject.getLabel();
-	String conflictClassName = conflictObject.getTypeName();
+	DBField conflictField = ns.lookupPersistent(conflictValue);
 
-	return Ganymede.createErrorDialog("Server: Error in " + methodName,
-					  "This action could not be completed" +
-					  " because \"" + conflictValue + "\" is already being used.\n\n" +
-					  conflictClassName + " \"" + conflictLabel + 
-					  "\" contains this value in its " +
-					  conflictField.getName() + " field.\n\n" +
-					  "You can choose a different value here, or you can try to " +
-					  "edit or delete the \"" + conflictLabel + "\" object to remove " +
-					  "the conflict.");
+	if (conflictField != null)
+	  {
+	    DBObject conflictObject = conflictField.getOwner();
+	    String conflictLabel = conflictObject.getLabel();
+	    String conflictClassName = conflictObject.getTypeName();
+
+	    return Ganymede.createErrorDialog("Server: Error in " + methodName,
+					      "This action could not be completed" +
+					      " because \"" + conflictValue + "\" is already being used.\n\n" +
+					      conflictClassName + " \"" + conflictLabel + 
+					      "\" contains this value in its " +
+					      conflictField.getName() + " field.\n\n" +
+					      "You can choose a different value here, or you can try to " +
+					      "edit or delete the \"" + conflictLabel + "\" object to remove " +
+					      "the conflict.");
+	  }
+	else
+	  {
+	    conflictField = ns.lookupShadow(conflictValue);
+
+	    DBObject conflictObject = conflictField.getOwner();
+	    String conflictLabel = conflictObject.getLabel();
+	    String conflictClassName = conflictObject.getTypeName();
+
+	    return Ganymede.createErrorDialog("Server: Error in " + methodName,
+					      "This action could not be completed" +
+					      " because \"" + conflictValue + "\" is already being used in a transaction.\n\n" +
+					      conflictClassName + " \"" + conflictLabel + 
+					      "\" contains this value in its " +
+					      conflictField.getName() + " field.\n\n" +
+					      "You can choose a different value here, or you can try to " +
+					      "edit or delete the \"" + conflictLabel + "\" object to remove " +
+					      "the conflict.");
+	  }
       }
     catch (NullPointerException ex)
       {
+	ex.printStackTrace();
+
 	return Ganymede.createErrorDialog("Server: Error in " + methodName,
 					  "value " + conflictValue +
 					  " already taken in namespace");

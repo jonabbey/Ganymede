@@ -136,7 +136,7 @@ class DBNameSpaceHandle implements Cloneable {
     this.owner = owner;
     this.original = this.inuse = originalValue;
 
-    setField(field);
+    setPersistentField(field);
   }
 
   public boolean matches(DBEditSet set)
@@ -144,7 +144,49 @@ class DBNameSpaceHandle implements Cloneable {
     return (this.owner == set);
   }
 
-  public DBField getField(GanymedeSession session)
+  /**
+   * <p>This method returns true if the namespace-managed value that
+   * this handle is associated with is held in a committed object in the
+   * Ganymede data store.</p>
+   *
+   * <p>If this method returns false, that means that this handle must
+   * be associated with a field in an active DBEditSet's transaction
+   * set, or else we wouldn't have a handle for it.</p>
+   */
+
+  public boolean isPersisted()
+  {
+    return fieldInvid != null;
+  }
+
+  /**
+   * <p>This method associates this value with a DBField that is
+   * persisted (or will be persisted?) in the Ganymede persistent
+   * store.</p>
+   */
+
+  public void setPersistentField(DBField field)
+  {
+    if (field != null)
+      {
+	fieldInvid = field.getOwner().getInvid();
+	fieldId = field.getID();
+      }
+    else
+      {
+	fieldInvid = null;
+	fieldId = -1;
+      }
+  }
+
+  /**
+   * <p>If the value that this handle is associated with is stored in the Ganymede server's
+   * persistent data store (i.e., that this handle is associated with a field in an
+   * already-committed object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.</p>
+   */
+
+  public DBField getPersistentField(GanymedeSession session)
   {
     if (fieldInvid == null)
       {
@@ -179,19 +221,52 @@ class DBNameSpaceHandle implements Cloneable {
       }
   }
 
-  public void setField(DBField field)
+  /**
+   * <p>This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the GanymedeSession
+   * provided.</p>
+   */
+
+  public boolean isEditedByUs(GanymedeSession session)
   {
-    if (field != null)
-      {
-	fieldInvid = field.getOwner().getInvid();
-	fieldId = field.getID();
-      }
-    else
-      {
-	fieldInvid = null;
-	fieldId = -1;
-      }
+    return (owner != null && session.getSession().getEditSet() == owner);
   }
+
+  /**
+   * <p>This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the transaction
+   * provided.</p>
+   */
+
+  public boolean isEditedByUs(DBEditSet editSet)
+  {
+    return (owner != null && editSet == owner);
+  }
+
+  /**
+   * <p>If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method may be used to set a pointer to
+   * the editable DBField which contains the constrained value in the
+   * active transaction.</p>
+   */
+
+  public void setShadowField(DBField newShadow)
+  {
+    shadowField = newShadow;
+  }
+
+  /**
+   * <p>If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method will return a pointer to the
+   * editable DBField which contains the constrained value in the active
+   * transaction.</p>
+   */
+
+  public DBField getShadowField()
+  {
+    return shadowField;
+  }
+
 
   public Object clone()
   {

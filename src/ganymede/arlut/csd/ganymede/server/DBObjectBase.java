@@ -3768,7 +3768,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
             return null;
           }
         
-        DBField field = namespace.lookup(key);
+        DBField field = namespace.lookupPersistent(key);
         if (field.getObjTypeID() == getTypeID())
           {
             return field.getOwner();

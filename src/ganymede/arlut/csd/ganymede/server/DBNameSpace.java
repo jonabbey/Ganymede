@@ -379,7 +379,7 @@ public final class DBNameSpace implements NameSpace {
 
   /*----------------------------------------------------------------------------
                                                                           method
-                                                                        lookup()
+                                                              lookupPersistent()
 
   ----------------------------------------------------------------------------*/
 
@@ -388,8 +388,10 @@ public final class DBNameSpace implements NameSpace {
    * <p>This method allows the namespace to be used as a unique valued 
    * search index.</p>
    *
-   * <p>Note that this lookup only works for precise equality lookup.. i.e., 
-   * strings must be the same capitalization and the whole works.</p>
+   * <p>Note that this lookup is case sensitive or not according to the case
+   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
+   * the DBField returned may contain the value (if value is a String) with
+   * different capitalization.</p>
    *
    * <p>As well, this method is really probably useful in the context of
    * a DBReadLock, but we're not doing anything to enforce this requirement 
@@ -399,7 +401,7 @@ public final class DBNameSpace implements NameSpace {
    *
    */
 
-  public synchronized DBField lookup(Object value)
+  public synchronized DBField lookupPersistent(Object value)
   {
     DBNameSpaceHandle _handle;
 
@@ -412,16 +414,18 @@ public final class DBNameSpace implements NameSpace {
 	return null;
       }
 
-    return _handle.getField(Ganymede.internalSession);
+    return _handle.getPersistentField(Ganymede.internalSession);
   }
 
   /**
    *
    * <p>This method allows the namespace to be used as a unique valued 
    * search index.</p>
-   *
-   * <p>Note that this lookup only works for precise equality lookup.. i.e., 
-   * strings must be the same capitalization and the whole works.</p>
+   *   
+   * <p>Note that this lookup is case sensitive or not according to the case
+   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
+   * the DBField returned may contain the value (if value is a String) with
+   * different capitalization.</p>
    *
    * <p>As well, this method is really probably useful in the context of
    * a DBReadLock, but we're not doing anything to enforce this requirement 
@@ -433,7 +437,7 @@ public final class DBNameSpace implements NameSpace {
    *
    */
 
-  public synchronized DBField lookup(GanymedeSession session, Object value)
+  public synchronized DBField lookupPersistent(GanymedeSession session, Object value)
   {
     DBNameSpaceHandle _handle;
 
@@ -446,8 +450,107 @@ public final class DBNameSpace implements NameSpace {
 	return null;
       }
 
-    return _handle.getField(session);
+    return _handle.getPersistentField(session);
   }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                  lookupShadow()
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>If the value is attached to an object that is being created or edited in
+   * a transaction, this method will return the editable DBField that contains
+   * the constrained value during editing.</p>
+   *
+   * <p>Note that this lookup is case sensitive or not according to the case
+   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
+   * the DBField returned may contain the value (if value is a String) with
+   * different capitalization.</p>
+   *
+   * <p>As well, this method is really probably useful in the context of
+   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * at this point.</p>
+   *
+   * @param value The value to search for in the namespace hash.
+   */
+
+  public synchronized DBField lookupShadow(Object value)
+  {
+    DBNameSpaceHandle _handle;
+
+    /* -- */
+
+    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+    if (_handle == null)
+      {
+	return null;
+      }
+
+    return _handle.getShadowField();
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                 lookupMyValue()
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>This method looks to find where the given value is bound in the namespace,
+   * taking into account the transactional view the calling session has.  If the
+   * value is attached to an object in the current transaction, this method will
+   * return a reference to the editable shadow DBField.  If not, this method
+   * will either return the read-only persistent version from the DBStore, or null
+   * if the value sought has been cleared from use in the objects being edited by
+   * the transaction.</p>
+   *   
+   * <p>Note that this lookup is case sensitive or not according to the case
+   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
+   * the DBField returned may contain the value (if value is a String) with
+   * different capitalization.</p>
+   *
+   * <p>As well, this method is really probably useful in the context of
+   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * at this point.</p>
+   *
+   * @param session The GanymedeSession to use to lookup the containing object..
+   * useful when a GanymedeSession is doing the looking up of value
+   * @param value The value to search for in the namespace hash.
+   *
+   */
+
+  public synchronized DBField lookupMyValue(GanymedeSession session, Object value)
+  {
+    DBNameSpaceHandle _handle;
+    DBField shadow;
+
+    /* -- */
+
+    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+    if (_handle == null)
+      {
+	return null;
+      }
+
+    if (_handle.isEditedByUs(session))
+      {
+	shadow = _handle.getShadowField();
+
+	// if the value is not in use in our transaction even though
+	// we have edited with that value, shadow will be null, and so
+	// we'll return null
+	
+	return shadow;
+      }
+
+    return _handle.getPersistentField(session);
+  }
+
 
   /*----------------------------------------------------------------------------
                                                                           method
@@ -583,7 +686,7 @@ public final class DBNameSpace implements NameSpace {
 	      }
 
 	    handle.inuse = true;
-	    handle.shadowField = field;
+	    handle.setShadowField(field);
 
 	    // we don't have to have the transaction record remember
 	    // the value since we should already have this value noted
@@ -602,7 +705,7 @@ public final class DBNameSpace implements NameSpace {
 
 	handle = new DBNameSpaceHandle(editSet, false, null);
 	handle.inuse = true;
-	handle.shadowField = field;
+	handle.setShadowField(field);
 	
 	uniqueHash.put(value, handle);
 
@@ -746,7 +849,7 @@ public final class DBNameSpace implements NameSpace {
 	// we're reserving it now, but it's not actually in use yet.
 
 	handle.inuse = false;
-	handle.shadowField = null;
+	handle.setShadowField(null);
 	
 	uniqueHash.put(value, handle);
 
@@ -878,7 +981,7 @@ public final class DBNameSpace implements NameSpace {
 	    handle.owner = editSet;
 	    handle.original = true;
 	    handle.inuse = false;
-	    handle.shadowField = null;
+	    handle.setShadowField(null);
 
 	    remember(editSet, value);
 	  }
@@ -894,21 +997,25 @@ public final class DBNameSpace implements NameSpace {
 		// value, which we will need if we abort this editset
 
 		handle.inuse = false;
-		handle.shadowField = null;
+		handle.setShadowField(null);
 	      }
 	  }
       }
     else
       {
+	throw new Error("This code is ancient, and probably wrong, and should never ever ever ever be callled.\n\nAKA, Shut her down, boys, she's a-pumping mud.");
+
+	/*
 	// we're creating a new value.. previous value
 	// is false
 
 	handle = new DBNameSpaceHandle(editSet, false, null);
 	handle.inuse = true;
-	handle.shadowField = null;
+	handle.setShadowField(null);
 	uniqueHash.put(value, handle);
 
 	remember(editSet, value);
+	*/
       }
 
     return true;
@@ -1049,7 +1156,7 @@ public final class DBNameSpace implements NameSpace {
 		// query mechanism in GanymedeSession can track down
 		// the field bound to the namespace value.
 
-		handle.shadowField = null;
+		handle.setShadowField(null);
 		handle.owner = null;
 		handle.inuse = true;
 	      }
@@ -1134,7 +1241,7 @@ public final class DBNameSpace implements NameSpace {
 	if (handle.original)
 	  {
 	    handle.owner = null;
-	    handle.shadowField = null;
+	    handle.setShadowField(null);
 	    handle.inuse = true;
 	  }
 	else
@@ -1200,8 +1307,8 @@ public final class DBNameSpace implements NameSpace {
 	if (handle.inuse)
 	  {
 	    handle.owner = null;
-	    handle.setField(handle.shadowField);
-	    handle.shadowField = null;
+	    handle.setPersistentField(handle.shadowField);
+	    handle.setShadowField(null);
 	  }
 	else
 	  {

@@ -940,7 +940,7 @@ class JournalEntry {
 			  {
 			    currentHandle = definition.namespace.getHandle(_field.key(j));
 
-			    if (currentHandle.getField(Ganymede.internalSession) != _field)
+			    if (currentHandle.getPersistentField(Ganymede.internalSession) != _field)
 			      {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
@@ -952,7 +952,7 @@ class JournalEntry {
 		      {
 			currentHandle = definition.namespace.getHandle(_field.key());
 
-			if (currentHandle.getField(Ganymede.internalSession) != _field)
+			if (currentHandle.getPersistentField(Ganymede.internalSession) != _field)
 			  {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }

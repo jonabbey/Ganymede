@@ -3265,7 +3265,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    
 			if (ipBytes != null)
 			  {
-			    resultfield = ns.lookup(this, ipBytes);
+			    resultfield = ns.lookupMyValue(this, ipBytes);
 			  }
 
 			// it's hard to tell here whether any fields of
@@ -3285,7 +3285,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    
 			    if (ipBytes != null)
 			      {
-				resultfield = ns.lookup(this, ipBytes);
+				resultfield = ns.lookupMyValue(this, ipBytes);
 			      }
 			  }
 		      }
@@ -3296,7 +3296,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 			// to convert strings to invids here for a
 			// namespace-optimized lookup
 
-			resultfield = ns.lookup(this, node.value); // *sync* DBNameSpace
+			resultfield = ns.lookupMyValue(this, node.value); // *sync* DBNameSpace
 
 			if (debug)
 			  {

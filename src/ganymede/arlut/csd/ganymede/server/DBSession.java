@@ -1665,6 +1665,15 @@ final public class DBSession {
   }
 
   /**
+   * <p>Simple accessor to allow us to trap derefence later if we want.</p>
+   */
+
+  public DBEditSet getEditSet()
+  {
+    return editSet;
+  }
+
+  /**
    * <p>Gets our lock key</p>
    */
 
