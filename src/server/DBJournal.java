@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,12 @@ import java.util.*;
 
 public class DBJournal {
 
-  static final boolean debug = true;
+  static boolean debug = true;
+
+  public static void setDebug(boolean val)
+  {
+    debug = val;
+  }
 
   static final String id_string = "GJournal";
   static final byte major_version = 0;
@@ -299,6 +304,11 @@ public class DBJournal {
 
 	    obj = new DBObject(base, jFile);
 
+	    if (!base.objectHash.containsKey(new Integer(obj.id)))
+	      {
+		System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
+	      }
+
 	    if (debug)
 	      {
 		obj.print(System.err);
@@ -545,6 +555,14 @@ class JournalEntry {
       {
 	// put the new object in place
 	base.objectHash.put(new Integer(id), obj);
+
+	// keep our base's maxid up to date for
+	// any newly created objects in the journal
+
+	if (id > base.maxid)
+	  {
+	    base.maxid = id;
+	  }
       }
   }
 }
