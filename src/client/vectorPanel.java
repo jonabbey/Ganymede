@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.13 $ %D%
+  Version: $Revision: 1.14 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -77,6 +77,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   short 
     type;
 
+  LineBorder
+   lineBorder = new LineBorder(Color.black);
+
   JPanel
     bottomPanel,
     centerPanel;
@@ -86,9 +89,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     isEditInPlace,
     centerPanelAdded = false;
 
+  Image
+    removeImage;
+
   private db_field my_field;
 
-  private windowPanel parent;
+  protected windowPanel parent;
+
+
 
   containerPanel
     container;
@@ -148,6 +156,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     centerPanel = new JPanel(false);
 
     //centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
+
     centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
     
     try
@@ -174,7 +183,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     
     setLayout(new BorderLayout());
-    setBorder(new EtchedBorder());
+    setBorder(new com.sun.java.swing.border.EtchedBorder());
     //add("South", addB);
     
     compVector = new Vector();
@@ -309,9 +318,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		JIPField ipf = new JIPField(new JcomponentAttr(null,
 							       new Font("Helvetica",Font.PLAIN,12),
 							       Color.black,Color.white),
-					    editable);
+					    editable,
+					    ipfield.v6Allowed());
 		
-		ipf.setValue((Byte[]) ipfield.getElement(i), false); // don't want v6 yet
+		ipf.setValue((Byte[]) ipfield.getElement(i));
 		ipf.setCallback(this);
 		
 		addElement(ipf);
@@ -480,12 +490,21 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	    ip_field ipfield = (ip_field) my_field;
 	    
-	    JIPField ipf = new JIPField(new JcomponentAttr(null,
-							   new Font("Helvetica",Font.PLAIN,12),
-							   Color.black,Color.white),
-					true);
-	    ipf.setCallback(this);
-	    addElement(ipf);
+	    try
+	      {
+		
+		JIPField ipf = new JIPField(new JcomponentAttr(null,
+							       new Font("Helvetica",Font.PLAIN,12),
+							       Color.black,Color.white),
+					    true,
+					    ipfield.v6Allowed());
+		ipf.setCallback(this);
+		addElement(ipf);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not make new ip field: " + rx);
+	      }
 	  }
 	else if (my_field instanceof num_field) 
 	  {
@@ -540,13 +559,18 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     }
 
+  public void addElement(Component c)
+  {
+
+    addElement("Title(temp)", c);
+  }
 	
   /* This method is used to add an item to the vector.
    * Since on the last element on the vector has a plus
    * button, this item is going to be added to the end
    * of the vector.
    */
-  public void addElement(Component c)
+  public void addElement(String title, Component c)
   {
     if (c == null)
       {
@@ -570,7 +594,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (editable)
       {
-	elementWrapper ew = new elementWrapper(c, this);
+	elementWrapper ew = new elementWrapper(title, c, this);
 	ewHash.put(c, ew);
 	centerPanel.add(ew);
       }
@@ -665,7 +689,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	System.out.println("You clicked on a plus (no action)?");
       }
-    else if (v.getValue().equals("minus") )
+    else if (v.getValue().equals("remove") )
       {
 	if (debug)
 	  {
@@ -801,90 +825,59 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     return null;
   }
-}
-
-  /////////////////////////////////////////////////////////////////////////
+  /*
+  public void doLayout()
+  {
+    super.doLayout();
+    setSize(getPreferredSize().width, getPreferredSize().height);
+  }*/
 
   /**
-   *  This class will be used as a wrapper for each of the elements in the
-   *  vector.  It contains plus and minus buttons that will allow a
-   *  component to be deleted or a component to be added to the vector being
-   *  displayed.
-   *
-   */ 
-
-class elementWrapper extends JPanel implements ActionListener {
-
-  // class variables
-
-  private Component my_component = null;
+   * Override validate to reset the current size.
+   */
+  /*
+  public void validate()
+  {
+    //System.out.println("validate in vp: " + whereAmI());
+    super.validate();
+    if (getParent() != null)
+      {
+	getParent().validate();
+      }
+    container.validate();
+  }
   
-  JPanel 
-    buttonPanel;
-
-  JButton 
-    minus;
-
-  Image
-    removeImage;
-
-  vectorPanel
-    parent;
-
-  // class methods
-
-  public elementWrapper(Component comp, vectorPanel parent)
+  public void invalidate()
   {
-    System.out.println("Adding new elementWrapper");
-
-    if (comp == null) 
+    //System.out.println("invalidate in vp: " + whereAmI());
+    System.out.println("inv in vp: parent ->" + getParent());
+    super.invalidate();
+  }
+  */
+  public String whereAmI()
+  {
+    if (getParent() instanceof containerPanel)
       {
-	throw new IllegalArgumentException("Error: Component parameter is null");
+	return ((containerPanel)getParent()).whereAmI() + "/v";
       }
-
-    this.parent = parent;
-    
-    removeImage = PackageResources.getImageResource(this, "trash.gif", getClass());
-
-    setLayout(new BorderLayout());
-      
-    buttonPanel = new JPanel();
-      
-    buttonPanel.setLayout(new BorderLayout());
-      
-    minus = new JButton(new ImageIcon(removeImage));
-    minus.setMargin(new Insets(0,0,0,0));
-    //minus = new JButton("X");
-    minus.addActionListener(this);
-      
-    buttonPanel.add("Center",minus);
-      
-    my_component = comp;
-      
-    add("Center",comp);
-    add("East",buttonPanel);
+    else if (getParent() instanceof vectorPanel)
+      {
+	return ((vectorPanel)getParent()).whereAmI() + "/v";
+      }
+    else if (getParent() instanceof JPanel)
+      {
+	return ((vectorPanel)((JPanel)getParent()).getParent()).whereAmI() + "/p/v";
+      }
+    else if (getParent() instanceof elementWrapper)
+      {
+	return ((elementWrapper)getParent()).whereAmI() + "/v";
+      }
+    else 
+      {
+	System.out.println("What kind of parent is this: " + getParent());
+      }
+    return "/v";
   }
 
-  public Component getComponent() 
-  {
-    return my_component;
-  }
-
-
-  public void actionPerformed(ActionEvent evt) 
-  {
-    if (evt.getSource() == minus) 
-      {
-	JValueObject v = new JValueObject(getComponent(),"minus");
-	parent.setValuePerformed(v);
-      }
-    else
-      {
-	throw new RuntimeException("actionPerformed invoked by ActionEvent from invalid source");
-      }
-  }
 }
-
-
-
 

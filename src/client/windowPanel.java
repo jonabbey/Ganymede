@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,11 +55,19 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     Windows = new Hashtable(),
     windowList = new Hashtable();
 
-  Menu
+  JMenu
     windowMenu;
 
   WindowBar 
     windowBar = null;
+
+  // Load images for other packages
+  ImageIcon
+    // These are all for vectorPanel
+    openIcon = new ImageIcon(PackageResources.getImageResource(this, "scrollup.gif", getClass())),
+    closeIcon = new ImageIcon(PackageResources.getImageResource(this, "scrolldo.gif", getClass())),
+    removeImageIcon = new ImageIcon(PackageResources.getImageResource(this, "trash.gif", getClass()));
+
 
   /* -- */
 
@@ -69,7 +77,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
    *
    */
 
-  public windowPanel(gclient parent, Menu windowMenu)
+  public windowPanel(gclient parent, JMenu windowMenu)
   {
     if (debug)
       {
@@ -574,11 +582,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       }
   }
 
-  public Menu updateMenu()
+  public JMenu updateMenu()
   {
     Enumeration windows;
     Object obj;
-    MenuItem MI;
+    JMenuItem MI;
 
     /* -- */
 
@@ -592,11 +600,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
 	if (obj instanceof JInternalFrame)
 	  {
-	    MI = new MenuItem(((JInternalFrame)obj).getTitle());
+	    MI = new JMenuItem(((JInternalFrame)obj).getTitle());
 	  }
 	else if (obj instanceof gResultTable)
 	  {
-	    MI = new MenuItem(((gResultTable)obj).getTitle());
+	    MI = new JMenuItem(((gResultTable)obj).getTitle());
 	  }
 
 	if (MI != null)

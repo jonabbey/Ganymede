@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.20 $ %D%
+    Version: $Revision: 1.21 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -278,6 +278,49 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	System.out.println("Done updating container panel");
       }
+  }
+  /*
+  public void doLayout()
+  {
+    System.out.println("doLayout in containerP");
+    super.doLayout();
+    setSize(getPreferredSize().width, getPreferredSize().height);
+  }
+  */
+  /**
+   * Override validate to reset the current size.
+   */
+  /*  public void validate()
+  {
+    //System.out.println("validate in cp: " + whereAmI());
+    super.validate();
+    setSize(getPreferredSize().width, getPreferredSize().height);
+    if (getParent() != null)
+      {
+	getParent().validate();
+      }
+  }*/
+
+
+  public String whereAmI()
+  {
+    if (getParent() instanceof containerPanel)
+      {
+	return ((containerPanel)getParent()).whereAmI() + "/c";
+      }
+    else if (getParent() instanceof vectorPanel)
+      {
+	return ((vectorPanel)getParent()).whereAmI() + "/c";
+      }
+    else if (getParent() instanceof elementWrapper)
+      {
+	return ((elementWrapper)getParent()).whereAmI() + "/c";
+      }
+    else 
+      {
+	System.out.println("What kind of parent is this: " + getParent());
+      }
+    return "/c";
   }
 
   public boolean setValuePerformed(JValueObject v)

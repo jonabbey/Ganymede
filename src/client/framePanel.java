@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,7 +44,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     NOTES = -1,
     OBJECTS_OWNED = -1,
     PERSONAE = -1;
-  
+
+  JProgressBar
+    progressBar;
+
+  JPanel
+    progressPanel;
 
   JTabbedPane 
     pane;
@@ -138,6 +143,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
+      progressPanel = new JPanel();
+      progressPanel.setBorder(new EmptyBorder(new Insets(30,30,30,30)));
+      progressBar = new JProgressBar();
+      progressPanel.add(new JLabel("Loading..."));
+      progressPanel.add(progressBar);
+
+      getContentPane().add("Center", progressPanel);
       
       Thread thread = new Thread(this);
       thread.start();
@@ -208,10 +220,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 
       // Add the notes panel
+      try
+	{
+	  notes_field = (string_field)object.getField(SchemaConstants.NotesField);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get notes_field: " + rx);
+	}
+
       notes = new JScrollPane();
       addNotesPanel();
 
       showGeneralTab();
+      contentPane.remove(progressPanel);
       contentPane.add("Center", pane);
 
       contentPane.invalidate();
@@ -228,6 +250,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       return my_notesPanel;
     }
 
+  //This need to be changed to show the progress bar
   void create_general_panel()
     {
       if (debug)
@@ -235,11 +258,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.out.println("Creating general panel");
 	}
       
-      containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this);
+      containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this, progressBar);
 
-      cp.setBorder(new EmptyBorder(new Insets(5,5,10,5)));
+      cp.setBorder(new EmptyBorder(new Insets(10,10,10,10)));
 
       general.setViewportView(cp);
+      //general.setViewportView(progressBar);
       general_created = true;
       general.invalidate();
       validate();
@@ -310,7 +334,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
 	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
-	  notes_field = (string_field)object.getField(SchemaConstants.NotesField);
 	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
 	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
 	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
@@ -437,10 +460,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		    {
 		      System.out.println("Setting notes test to *" + notesText + "*.");
 		    }
-		  
+
+		  System.out.println("Adding the noteIcon");
 		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
 		  
 		  pane.setIconAt(NOTES, noteIcon);
+		}
+	      else
+		{
+		  System.out.println("Empty notes");
 		}
 	    }
 	  else
