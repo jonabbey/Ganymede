@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2001/11/17 01:21:27 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2001/12/19 23:46:09 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -694,7 +694,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     tree.refresh();
   }
   
-
   void editBase(BaseNode node)
   {
     be.editBase(node);
@@ -1156,7 +1155,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    fe.refreshFieldEdit(true);
 	  }
-	
       }
     else if (event.getSource() == deleteNameMI)
       {

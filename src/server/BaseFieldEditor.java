@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/11/17 00:10:39 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2001/12/19 23:46:09 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -924,6 +924,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
   void editField(FieldNode fieldNode, boolean forceRefresh)
   {
+    if (fieldNode == null)
+      {
+	throw new IllegalArgumentException("null fieldNode");
+      }
+
     editField(fieldNode, forceRefresh, true);
   }
 
@@ -940,6 +945,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     if (debug)
       {
 	System.err.println(" -in FieldEditor.editField()");
+      }
+
+    if (fieldNode == null)
+      {
+	throw new IllegalArgumentException("null fieldNode");
       }
 
     listenToCallbacks = false;	// so we don't get confused by programmatic edits
