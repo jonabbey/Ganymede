@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,6 +69,10 @@ public class CategoryDump implements Category, CategoryNode {
       {
 	// skip the 'cat' chunk if we're the root
 	getChunk(src, index);
+      }
+    else
+      {
+	lastIndex = index;
       }
 
     this.name = getChunk(src, lastIndex);
