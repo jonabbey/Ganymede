@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,21 +29,22 @@ import arlut.csd.JDialog.*;
  *
  * This class provides a report on the status of the client's requested operation.
  * It is intended to be returned by a call on the server to make a change to
- * the database.
+ * the database.<br><br>
  *
  * Included in this object is a general success code, a list of field id's that
  * need to be rescanned in the relevant object, if applicable, a dialog resource
  * that can provide a description of a dialog box to be presented to the user,
  * and an optional callback that the client can call with the results of the
- * dialog box if necessary.
+ * dialog box if necessary.<br><br>
  *
  * Note that operations that succeed without needing any further information
- * or action on the part of the client will simply return null.
+ * or action on the part of the client will simply return null.<br><br>
  *
  * If a non-null ReturnVal object is passed back, one of two things may be true.
  * didSucceed() may return true, in which case the operation was successful, but
  * there may be an informational dialog returned and/or a list of fields that
  * need to be updated in the relevant object in response to the successful update.
+ * <br><br>
  *
  * Alternatively, didSucceed() may return false, in which case the operation either
  * could not succeed or is incomplete.  In this case, doRescan() will return false,
@@ -73,6 +74,7 @@ public class ReturnVal implements java.io.Serializable {
   boolean success;
   byte status;
   private StringBuffer rescanList;
+  private StringBuffer objRescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
 
@@ -108,7 +110,7 @@ public class ReturnVal implements java.io.Serializable {
    *
    * If the operation was not successful, this method should
    * return a dialog box describing the problem and, potentially,
-   * asking for more information to complete the operation.
+   * asking for more information to complete the operation.<br><br>
    *
    * This method be checked after all calls to the server that
    * return non-null ReturnVal objects.
@@ -126,7 +128,7 @@ public class ReturnVal implements java.io.Serializable {
    * to complete this operation, this method will return an RMI
    * handle to a callback on the server.  The client should
    * popup the dialog box specified by getDialog() and pass the
-   * results to the callback returned by this method.
+   * results to the callback returned by this method.<br><br>
    *
    * This method will return null if getDialog() returns
    * null, and need not be checked in that case.
@@ -142,7 +144,7 @@ public class ReturnVal implements java.io.Serializable {
    *
    * This method returns true if the server is requesting that 
    * fields in the object referenced by the client's preceding call 
-   * to the server be reprocessed.
+   * to the server be reprocessed.<br><br>
    *
    * This method will never return true if didSucceed() returns
    * false, and need not be checked in that case.
@@ -215,6 +217,78 @@ public class ReturnVal implements java.io.Serializable {
     return results;
   }
 
+  /**
+   *
+   * This method returns true if the server is requesting that 
+   * other objects that the client may be displaying for viewing
+   * or editing be reprocessed.<br><br>
+   *
+   * This method will never return true if didSucceed() returns
+   * false, and need not be checked in that case.
+   *
+   */
+
+  public boolean doObjRescan()
+  {
+    return !(objRescanList == null);
+  }
+
+  /**
+   *
+   * This method returns true if the server is requesting that all
+   * objects displayed by the client be refreshed.<br><br>
+   *
+   * It is unclear at this point whether the server will ever actually
+   * make such a request of the client.
+   *
+   */
+
+  public boolean objRescanAll()
+  {
+    if (objRescanList != null &&
+	objRescanList.toString().equals("all"))
+      {
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
+   *
+   * This method returns a Vector of Invid objects if the server
+   * provided an explicit list of objects that need to be reprocessed,
+   * or null if all or no objects need to be processed.
+   *
+   */
+  
+  public Vector getObjRescanList()
+  {
+    if (objRescanList == null ||
+	objRescanList.toString().equals("all"))
+      {
+	return null;
+      }
+
+    Vector results = new Vector();
+    int index = 0;
+    String temp1 = objRescanList.toString();
+    String temp2;
+
+    while (temp1.indexOf('|', index) != -1)
+      {
+	temp2 = temp1.substring(index, temp1.indexOf('|', index));
+
+	results.addElement(new Invid(temp2));
+
+	// let's get the next bit
+
+	index = temp1.indexOf('|', index) + 1;
+      }
+
+    return results;
+  }
+
   // ---------------------------------------------------------------------------
   // server side operations
   // ---------------------------------------------------------------------------
@@ -268,6 +342,24 @@ public class ReturnVal implements java.io.Serializable {
 
     rescanList.append(fieldID);
     rescanList.append("|");
+  }
+
+  public void addRescanObject(Invid objid)
+  {
+    if (objRescanList == null)
+      {
+	objRescanList = new StringBuffer();
+      }
+    else
+      {
+	if (objRescanList.toString().equals("all"))
+	  {
+	    return;
+	  }
+      }
+
+    objRescanList.append(objid.toString());
+    objRescanList.append("|");
   }
 
   public void setCallback(Ganymediator callback)
