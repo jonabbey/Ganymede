@@ -13,7 +13,6 @@ public class Cinfo
 		mapping.put("byte","Byte");
 		mapping.put("boolean","Boolean");
 		mapping.put("char","Char");
-		//mapping.put("","");
 	}
 
 	static String tName(String nm, Hashtable ht)
@@ -185,16 +184,9 @@ public class Cinfo
          * a convienience method in Modifer to print the whole string.
          */
 		int mod = c.getModifiers();
-		//System.out.print(Modifier.toString(mod));
 
-		/*if (Modifier.isInterface(mod))
-		{
-			System.out.print(" interface ");
-		}
-		else
-		{*/
 		System.out.print("public class ");
-		//}
+
 		System.out.print(tName(c.getName(), null) + "Remote implements " + c.getName() + ", java.io.Serializable");
 
 		supClass = c.getSuperclass();
@@ -211,7 +203,7 @@ public class Cinfo
          * Fields are of the form [Modifiers] [Type] [Name] ;
          */
 
-		System.out.println("\n\r/*\n\r * Field Definitions.\r\n */");
+		System.out.println("\n/*\n * Field Definitions.\n */");
 		for (int i = 0; i < ff.length; i++)
 		{
 			Class ctmp = ff[i].getType();
@@ -235,30 +227,7 @@ public class Cinfo
          * simplye [Modifiers] ClassName ( [ Parameters ] ) { }
          *
          */
-		System.out.println("\n\r/*\n\r * Declared Constructors. \n\r */");
-	/*	x = tName(c.getName(), null);
-		for (int i = 0; i < cn.length; i++)
-		{
-			int md = cn[i].getModifiers();
-			System.out.print("\t" + Modifier.toString(md) + " " + x);
-
-			Class cx[] = cn[i].getParameterTypes();
-			System.out.print("( ");
-			if (cx.length > 0)
-			{
-				for (int j = 0; j < cx.length; j++)
-				{
-					System.out.print(tName(cx[j].getName(), null));
-					if (j < (cx.length - 1))
-					{
-						System.out.print(", ");
-					}
-				}
-			}
-			System.out.print(")");
-			System.out.println("\n\t{\n\t}");
-		}
-	*/
+		System.out.println("\n/*\n * Declared Constructors. \n */");
 		if(c.getName().endsWith("field"))
 		{
 			System.out.print("\tpublic " + tName(c.getName(), null) + "Remote (Invid objID, short fieldID, Session ses)\n\t{");
@@ -276,7 +245,7 @@ public class Cinfo
          * set of parameters so they are :
          *  [modifiers] [type] [name] ( [optional parameters] ) { }
          */
-		System.out.println("\n\r/*\n\r * Declared Methods.\n\r */");
+		System.out.println("\n/*\n * Declared Methods.\n */");
 		for (int i = 0; i < mm.length; i++)
 		{
 			int md = mm[i].getModifiers();
