@@ -6,7 +6,7 @@
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import java.io.*;
 
 ------------------------------------------------------------------------------*/
 
-public class PermMatrix {
+public class PermMatrix implements java.io.Serializable {
 
   public static final boolean debug = false;
 
