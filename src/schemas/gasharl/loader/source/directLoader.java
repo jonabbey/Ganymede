@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/03/03 00:33:46 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 1999/03/15 22:23:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -98,6 +98,22 @@ public class directLoader {
   static Vector mailGroups = new Vector();
   static Hashtable userMail = new Hashtable();
   static Hashtable mailInvids = new Hashtable();
+
+  /**
+   *
+   * maps group names to contract numbers
+   *
+   */
+
+  static Hashtable groupContracts = new Hashtable();
+
+  /**
+   *
+   * maps contract numbers to Contract objects
+   *
+   */
+
+  static Hashtable contracts = new Hashtable();
 
   static Hashtable groups = new Hashtable();
   static Hashtable groupID = new Hashtable();
@@ -196,6 +212,7 @@ public class directLoader {
     scanUserCategories();
     scanUsers();
     scanEmail();
+    scanContracts();		// arl
     scanGroups();
     scanUserNetgroups();
     scanSystemTypes();
@@ -394,6 +411,12 @@ public class directLoader {
 
 	my_client.session.openTransaction("GASH directLoader");
 	registerEmail();
+	commitTransaction();
+
+	System.out.println("\nRegistering ARL Contracts\n");
+
+	my_client.session.openTransaction("GASH directLoader");
+	registerContracts();
 	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
@@ -849,6 +872,101 @@ public class directLoader {
       {
 	System.err.println("unknown IO exception caught: " + ex);
       }
+  }
+
+  /**
+   *
+   */
+
+  private static void scanContracts()
+  {
+    String line;
+
+    /* -- */
+
+    // first, load up contract info
+
+    try
+      {
+	try
+	  {
+	    inReader = new BufferedReader(new FileReader("input/activecontracts.txt"));
+	  }
+	catch (FileNotFoundException ex)
+	  {
+	    System.err.println("Couldn't find activecontracts.txt");
+	    return;
+	  }
+
+	for (line = inReader.readLine(); line != null; line = inReader.readLine())
+	  {
+	    Contract x = new Contract(line);
+	    contracts.put(x.number, x);
+	  }
+      }
+    catch (IOException ex)
+      {
+      }
+    finally
+      {
+	if (inReader != null)
+	  {
+	    try
+	      {
+		inReader.close();
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+
+    // second, load up group<->contract mapping info
+
+    try
+      {
+	try
+	  {
+	    inReader = new BufferedReader(new FileReader("input/table.in.dat"));
+	  }
+	catch (FileNotFoundException ex)
+	  {
+	    System.err.println("Couldn't find table.in.dat");
+	    return;
+	  }
+
+	for (line = inReader.readLine(); line != null; line = inReader.readLine())
+	  {
+	    // skip comment lines
+
+	    if (line.startsWith("CC"))
+	      {
+		continue;
+	      }
+
+	    String groupName = line.substring(4,10).toLowerCase();
+	    String contractNumber = line.substring(65,72);
+
+	    groupContracts.put(groupName, contractNumber);
+	  }
+      }
+    catch (IOException ex)
+      {
+      }
+    finally
+      {
+	if (inReader != null)
+	  {
+	    try
+	      {
+		inReader.close();
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+
   }
 
   /**
@@ -2045,6 +2163,43 @@ public class directLoader {
    *
    */
 
+  private static void registerContracts() throws RemoteException
+  {
+    String key;
+    Contract contract;
+    DBEditObject current_obj;
+    Enumeration enum;
+
+    /* -- */
+
+    enum = contracts.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+	contract = (Contract) contracts.get(key);
+
+	System.out.print("Creating contract " + contract.name);
+
+	// base 280 is for ARL contracts
+
+	current_obj = (DBEditObject) createObject((short) 280);
+	contract.invid = current_obj.getInvid();
+
+	System.out.println(" [" + contract.invid + "]");
+
+	current_obj.setFieldValueLocal((short) 256, contract.name);
+	current_obj.setFieldValueLocal((short) 257, contract.number);
+	current_obj.setFieldValueLocal((short) 258, contract.startDate);
+	current_obj.setFieldValueLocal((short) 259, contract.stopDate);
+	current_obj.setFieldValueLocal((short) 260, contract.description);
+      }
+  }
+
+  /**
+   *
+   */
+
   private static void registerGroups() throws RemoteException
   {
     String key;
@@ -2092,8 +2247,22 @@ public class directLoader {
 	current_obj.setFieldValueLocal(groupSchema.DESCRIPTION, groupObj.description);
 
 	// set the contract info
+	
+	try
+	  {
+	    String contractNumber = (String) groupContracts.get(key);
+	    Contract contractObj = (Contract) contracts.get(contractNumber);
 
-	current_obj.setFieldValueLocal(groupSchema.CONTRACT, groupObj.contract);
+	    current_obj.setFieldValueLocal(groupSchema.CONTRACTLINK, contractObj.invid);
+	  }
+	catch (NullPointerException ex)
+	  {
+	    System.err.println("Couldn't register contract link for group " + key);
+
+	    // oh well, we don't recognize a contract object.. just provide a string
+
+	    current_obj.setFieldValueLocal(groupSchema.CONTRACT, groupObj.contract);
+	  }
 
 	// add users
 

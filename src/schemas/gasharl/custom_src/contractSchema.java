@@ -1,12 +1,12 @@
 /*
 
-   groupSchema.java
+   contractSchema.java
 
-   An interface defining constants to be used by the group code.
+   An interface defining constants to be used by the contract code.
    
-   Created: 23 April 1998
+   Created: 15 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
+   Version: $Revision: 1.1 $
    Last Mod Date: $Date: 1999/03/15 22:22:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -50,29 +50,22 @@ package arlut.csd.ganymede.custom;
 
 /*------------------------------------------------------------------------------
                                                                        interface
-                                                                     groupSchema
+                                                                  contractSchema
 
 ------------------------------------------------------------------------------*/
 
 /**
  *
- * An interface defining constants to be used by the group code.
+ * An interface defining constants to be used by the contract code.
  *
  */
 
-public interface groupSchema {
+public interface contractSchema {
 
-  // field id's for the group object.  These should match the
-  // current specs in the Ganymede schema file precisely.  If
-  // you change the schema for the group, you'll want to change
-  // this file to match.
-
-  final static short GROUPNAME=256;
-  final static short PASSWORD=257;
-  final static short GID=258;
-  final static short DESCRIPTION=259;
-  final static short CONTRACT=260;
-  final static short USERS=261;
-  final static short HOMEUSERS=262;
-  final static short CONTRACTLINK=263;
+  final static short CONTRACTNAME=256;
+  final static short CONTRACTNUMBER=257;
+  final static short CONTRACTSTART=258;
+  final static short CONTRACTSTOP=259;
+  final static short CONTRACTDESCRIP=260;
+  final static short CONTRACTGROUPS=261;
 }
