@@ -56,7 +56,7 @@ package arlut.csd.ganymede.gasharl;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -369,7 +369,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	  {
 	    retVal = invF.deleteElement(index);
 	  }
-	catch (DDPermissionsException ex)
+	catch (GanyPermissionsException ex)
 	  {
 	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						"Permissions error in deleting old home group.");

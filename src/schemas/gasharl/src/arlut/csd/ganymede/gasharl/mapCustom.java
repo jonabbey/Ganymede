@@ -54,7 +54,7 @@ package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.QueryResult;
@@ -317,7 +317,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 		  {
 		    retVal = invf.deleteElement(invid);
 		  }
-		catch (DDPermissionsException ex)
+		catch (GanyPermissionsException ex)
 		  {
 		    retVal = Ganymede.createErrorDialog("mapCustom: Error",
 							"Permissions error unlinking user " + getGSession().viewObjectLabel(user) +
