@@ -8,7 +8,8 @@
   graph of nodes, each node being a small image and a line of text.
   Nodes with children can be opened or closed, allowing the child
   nodes to be made visible or hidden.  Each node can be selected
-  and can have a pop-up menu attached.
+  and can have a pop-up menu attached.  Nodes can be dragged, with
+  both 'drag-tween' and 'drag on' drag supported.
 
   Copyright (C) 1997  The University of Texas at Austin.
 
@@ -27,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.5 $ %D%
+  Version: $Revision: 1.6 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,12 +49,15 @@ import com.sun.java.swing.*;
 
 /**
  *
- * <p>treeControl is an AWT Tree View component, supporting a hierarchical display
- * of nodes that can be expanded or withdrawn at any level, in the manner of
- * an outline display.  </p>
+ * <p>This component allows the display of a tree structured
+ * graph of nodes, each node being a small image and a line of text.
+ * Nodes with children can be opened or closed, allowing the child
+ * nodes to be made visible or hidden.  Each node can be selected
+ * and can have a pop-up menu attached.  Nodes can be dragged, with
+ * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.5 $ %D%
+ * @version $Revision: 1.6 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -200,7 +204,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * This method is used to set the drag behavior of the tree.
    *
    * @param dCallback DragDrop manager object
-   * @param mode One of treeControl.DRAG_NONE, treeControl.DRAG_ICON, and treeControl.DRAG_LINE.
+   * @param mode A binary or'ing of of treeControl.DRAG_NONE, treeControl.DRAG_ICON,
+   * and treeControl.DRAG_LINE.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    *
@@ -385,6 +390,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	      {
 		// we're going to be the row after all the kiddies
 
+		// create an empty range.. getVisibleDescendantRange will
+		// expand this to represent the span taken by the visible
+		// children of newNode.prevSibling.
+
 		Range range = new Range(newNode.prevSibling.child.row,
 					newNode.prevSibling.child.row);
 
@@ -411,10 +420,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
 	newNode.nextSibling = newNode.prevSibling.nextSibling;
 	newNode.prevSibling.nextSibling = newNode;
+
 	if (newNode.nextSibling != null)
 	  {
 	    newNode.nextSibling.prevSibling = newNode;
 	  }
+
 	newNode.parent = newNode.prevSibling.parent;
       }
     else if (newNode.parent != null)
@@ -462,10 +473,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   /**
    *
    * <p>Removes a node from the tree, along with all its children.
-   * If the node is parent to a subtree, the subtree remains coherent,
-   * and could potentially be reinserted into the tree at another point,
-   * although currently there is no way to change the parent/insertAfter
-   * parameters for a treeNode, so this is a moot point for the time being.</p>
+   * Any child nodes attached to the node to be deleted will be
+   * unlinked from one another.  If you want to be able to re-insert
+   * the deleted node elsewhere in the tree, you probably should use
+   * moveNode() instead.</p>
    *
    * @param node The node to be removed.
    * @param repaint If true, immediately re-render and refresh the treeCanvas.
@@ -480,8 +491,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     // if we're visible and have children visible, contract to
     // hide those
-
-    //    maxWidth = 0;
 
     if (node.row != -1)
       {
@@ -524,6 +533,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	node.nextSibling.prevSibling = node.prevSibling;
       }
 
+    // if node.row == -1, the node is not currently visible for
+    // display.
+
     if (node.row != -1)
       {
 	rows.removeElementAt(node.row);
@@ -537,6 +549,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	  }
       }
 
+    // clean things out for GC.
+
     breakdownTree(node.child);
     node.tree = null;
     node.row = -1;
@@ -549,6 +563,83 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	refresh();
       }
+  }
+
+  /**
+   *
+   * Moves a node (possibly the root of an extensive subtree) from one
+   * location in the tree to another.<br><br>
+   *
+   * Note that this method is currently implemented in a fairly simplistic
+   * manner, using the deleteNode and insertNode primitives, cloning nodes
+   * as they are copied into the new location in the tree.  This works reliably,
+   * but this might not be the best implementation for moving large sub-trees.
+   *
+   * @param node The node to be moved.
+   * @param parent Parent node to insert this node under, null if this is a top-level node
+   * @param insertAfter sibling to insert this node after
+   * @param repaint If true, immediately re-render and refresh the treeCanvas after moving the node.
+   *
+   * @return a reference to a copy of the node in its new location
+   *
+   */
+
+  public synchronized treeNode moveNode(treeNode node, treeNode parent,
+					treeNode insertAfter, boolean repaint)
+  {
+    if (insertAfter == null && parent == null)
+      {
+	throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
+      }
+
+    if (node == null)
+      {
+	throw new IllegalArgumentException("can't move null");
+      }
+
+    /* - */
+
+    treeNode newNode, child, oldchild, nextchild;
+
+    /* -- */
+
+    // make a copy of the node to put into the new position, 
+
+    newNode = (treeNode) node.clone();
+
+    newNode.resetNode();
+    newNode.parent = parent;
+    newNode.prevSibling = insertAfter;
+
+    insertNode(newNode, false);
+
+    if (node.isOpen())
+      {
+	expandNode(newNode, false, false);
+      }
+
+    // now, if the node we moved has children, move them over too.
+
+    oldchild = null;
+    child = node.child;
+
+    while (child != null)
+      {
+	nextchild = child.nextSibling;
+	oldchild = moveNode(child, newNode, oldchild, false);
+	child = nextchild;
+      }
+
+    // now take the node we moved out of the tree
+
+    deleteNode(node, false);
+
+    if (repaint)
+      {
+	refresh();
+      }
+
+    return newNode;
   }
 
   /**
@@ -581,6 +672,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	refresh();
       }
   }
+
+
 
   /**
    *
@@ -615,11 +708,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     node.prevSibling = null;
   }
 
-  // Helper method to force recalculation of childStacks.  This method
-  // should be called on the child of a node, not on the node itself,
-  // lest clearStacks recurse along the node's siblings.. not that
-  // that will cause any great hardship, but it would slow things down
-  // a very little bit.
+  /**
+   *
+   * Helper method to force recalculation of childStacks.  This method
+   * should be called on the child of a node, not on the node itself,
+   * lest clearStacks recurse along the node's siblings.. not that
+   * that will cause any great hardship, but it would slow things down
+   * a very little bit.
+   *
+   */
 
   void clearStacks(treeNode node)
   {
@@ -699,7 +796,18 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    */
 
-  public synchronized void expandNode(treeNode node, boolean repaint)
+  public void expandNode(treeNode node, boolean repaint)
+  {
+    expandNode(node, repaint, true);
+  }
+
+  /**
+   *
+   * open the given node
+   *
+   */
+
+  public synchronized void expandNode(treeNode node, boolean repaint, boolean doCallback)
   {
     int row;
     treeNode p;
@@ -728,20 +836,23 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	refresh();
       }
 
-    callback.treeNodeExpanded(node);
+    if (doCallback && callback != null)
+      {
+	callback.treeNodeExpanded(node);
+      }
   }
 
-  // recursive routine to make descendant nodes
-  // visible.  will not expand any contracted
-  // nodes, but will add any nodes reachable
-  // without passing below a contracted node to
-  // the visibility 
-  //
-  // the row parameter is the row to match the node
-  // to.
-  //
-  // returns: the row number of the last descendant
-  // made visible
+  /**
+   *
+   * recursive routine to make descendant nodes visible.  will not
+   * expand any contracted nodes, but will add any nodes reachable
+   * without passing below a contracted node to the visibility
+   *
+   * @param row the row to match the node to.
+   *  
+   * @return the row number of the last descendant made visible 
+   *
+   */
 
   int makeDescendantsVisible(treeNode node, int row)
   {
@@ -766,10 +877,20 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    * close the given node
    *
+   */
+
+  public void contractNode(treeNode node, boolean repaint)
+  {
+    contractNode(node, repaint, true);
+  }
+
+  /**
+   *
+   * close the given node
    *
    */
 
-  public synchronized void contractNode(treeNode node, boolean repaint)
+  public synchronized void contractNode(treeNode node, boolean repaint, boolean doCallback)
   {
     Range range;
     treeNode n;
@@ -780,8 +901,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	return;
       }
-
-    //    maxWidth = 0;
 
     node.expanded = false;
 
@@ -846,12 +965,19 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	refresh();
       }
 
-    callback.treeNodeContracted(node);
+    if (doCallback && callback != null)
+      {
+	callback.treeNodeContracted(node);
+      }
   }
 
-  // calculates the rows that are visible at and below node,
-  // so that contractNode() can remove all nodes in that
-  // range from visibility
+  /**
+   *
+   * calculates the rows that are visible at and below node,
+   * so that contractNode() can remove all nodes in that
+   * range from visibility
+   *
+   */
 
   void getVisibleDescendantRange(treeNode node, Range range)
   {
@@ -893,6 +1019,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
+  /**
+   *
+   * Select a node without issuing a callback to the client.<br><br>
+   *
+   * Used to implement highlighting during drag-and-drop.
+   *
+   */
+
   void transientSelectNode(treeNode node)
   {
     if (node.selected)
@@ -911,6 +1045,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
+  /**
+   *
+   * Mark a node as selected, issuing a callback to the client
+   * reporting the selection.<br><br>
+   *
+   * This method does not deselect other nodes.
+   *
+   */
+
   void selectNode(treeNode node)
   {
     if (node.selected)
@@ -926,6 +1069,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
+  /**
+   *
+   * Deselect a node without issuing a callback to the client.<br><br>
+   *
+   * Used to implement highlighting during drag-and-drop.
+   *
+   */
+
   void transientUnselectNode(treeNode node)
   {
     if (!node.selected)
@@ -935,6 +1086,17 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     node.selected = false;
   }
+
+  /**
+   *
+   * Deselect a node, issuing a callback to the client
+   * reporting the deselection.<br><br>
+   *
+   * @param anySelected If true, the client will be told 
+   * that some node will remain selected after this operation
+   * is completed
+   *
+   */
 
   void unselectNode(treeNode node, boolean anySelected)
   {
@@ -950,6 +1112,17 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	callback.treeNodeUnSelected(node, anySelected);
       }
   }
+
+  /**
+   *
+   * Deselect all nodes, issuing a callback to the client
+   * reporting the deselection.<br><br>
+   *
+   * @param anySelected If true, the client will be told 
+   * that some node will remain selected after this operation
+   * is completed.
+   *
+   */
 
   void unselectAllNodes(boolean anySelected)
   {
@@ -1008,7 +1181,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     setBounds(x,y,width,height);
   }
 
-
   public synchronized void setBounds(int x, int y, int width, int height)
   {
     if (debug)
@@ -1046,10 +1218,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   
   // Internal method
 
-  // This method recalculates the general parameters of our tree's
-  // display.  That is, it calculates whether or not we need scroll
-  // bars, adds or deletes the scroll bars, and scales the column
-  // positions to match the general rendering parameters.
+  /**
+   *
+   * This method recalculates the general parameters of our tree's
+   * display.  That is, it calculates whether or not we need scroll
+   * bars, adds or deletes the scroll bars, and scales the column
+   * positions to match the general rendering parameters.
+   *
+   */
 
   void reShape()
   {
@@ -1070,10 +1246,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   // Internal method
 
-  // Check to see whether we need scrollbars in our current component size,
-  // set the min/max/visible parameters
-  //
-  // This method is intended to be called from reShape().
+  /**
+   *
+   * Check to see whether we need scrollbars in our current component size,
+   * set the min/max/visible parameters<br><br>
+   *
+   * This method is intended to be called from reShape().
+   *
+   */
 
   void adjustScrollbars()
   {
