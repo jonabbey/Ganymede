@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: Before May 7, 1998
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,12 +59,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   /* -- */
 
-  public JInvidChooser(containerPanel parent, short objectType)
+  public JInvidChooser(containerPanel parent, short objectType, boolean showNew)
   {
-    this(null, parent, objectType);
+    this(null, parent, objectType, showNew);
   }
 
-  public JInvidChooser(Vector objects, containerPanel parent, short objectType)
+  public JInvidChooser(Vector objects, containerPanel parent, short objectType, boolean showNew)
   {
     super(objects);
 
@@ -84,9 +84,11 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	view.setEnabled(false);
       }
 
-    // If the target type is unspecified, then it doesn't have a target
+    // If the objectType is -1 or less, we have no information about
+    // what type of object can be pointed to by this JInvidChooser, so
+    // we certainly can't offer to create a new one for the user.
 
-    if (objectType > -1) 
+    if (showNew && objectType > -1) 
       {
 	create = new JButton("New");
 	create.addActionListener(this);
