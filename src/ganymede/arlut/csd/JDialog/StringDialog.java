@@ -258,9 +258,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
     Dimension size = super.getPreferredSize();
 
-    if (size.width > 800)
+    if (size.width > 1000)
       {
-	size.width = 800;
+	size.width = 1000;
       }
 
     if (size.height > 600)
@@ -724,6 +724,20 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      }
 	  }
       }
+  }
+
+  /**
+   * <p>Set the word wrap length of the main text area in this StringDialog.</p>
+   */
+
+  public void setWrapLength(int wrapLength)
+  {
+    textLabel.setWrapLength(wrapLength);
+  }
+
+  public void setFont(Font font)
+  {
+    textLabel.setFont(font);
   }
 
   /**
