@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2002/01/11 23:01:15 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2002/01/12 17:04:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -223,7 +223,7 @@ public class DBLog {
       {
 	this.mailFilename = mailFilename;
 	mailLogStream = new FileOutputStream(mailFilename, true); // append
-	mailLogWriter = new PrintWriter(mailLogStream, false); // no critical need for auto-flush
+	mailLogWriter = new PrintWriter(mailLogStream, true); // auto-flush on newline
 
 	mailLogWriter.println();	// emit newline to terminate any incomplete entry
       }
