@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -160,7 +160,7 @@ public class Ganymede {
 
     developSchema = ParseArgs.switchExists("developschema", argv);
 
-    if (developschema)
+    if (developSchema)
       {
 	System.out.println("Fundamental object types open for schema editing (-developschema)"); 
       }
@@ -241,9 +241,16 @@ public class Ganymede {
 	firstrun = false;
       }
 
-    debug("Initializing Security Manager");
+    if (false)			// hurt me harder, 1.2b4!
+      {
+	debug("Initializing Security Manager");
 
-    System.setSecurityManager(new RMISecurityManager());
+	System.setSecurityManager(new RMISecurityManager());
+      }
+    else
+      {
+	debug("Not Initializing RMI Security Manager");
+      }
 
     if (debugFilename != null)
       {
