@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 1999/07/22 03:52:11 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 1999/09/22 23:14:21 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.107 $ $Date: 1999/07/22 03:52:11 $ $Name:  $
+ * @version $Revision: 1.108 $ $Date: 1999/09/22 23:14:21 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1115,7 +1115,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			println("It's not in there, downloading a new one.");
+			println("JComboBox contents not cached, downloading stringfield choices.");
 		      }
 		      
 		    QueryResult choicesV = sf.choices();
@@ -1229,7 +1229,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (debug)
 		      {
-			println("It's not in there, downloading a new one.");
+			println("JInvidChooser contents not cached, downloading invid field choices.");
 		      }
 		      
 		    QueryResult choicesV = invf.choices();
@@ -1426,7 +1426,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    println("It's not in there, downloading a new one.");
+		    println("list for updateStringStringSelector() not loaded, downloading a new one.");
 		  }
 	    
 		QueryResult choicesV = field.choices();
@@ -1500,7 +1500,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    println("It's not in there, downloading a new one.");
+		    println("list for updateInvidStringSelector() not loaded, downloading a new one.");
 		  }
 	    
 		QueryResult choicesV = field.choices();
@@ -2455,7 +2455,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    println("It's not in there, downloading anew.");
+		    println("Choice list for addInvidVector not cached, downloading choices.");
 		  }
 
 		QueryResult qr = field.choices();
@@ -2691,7 +2691,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    println("It's not in there, downloading a new one.");
+		    println("Choice list for addStringField not cached, downloading a new one.");
 		  }
 		
 		gc.cachedLists.putList(key, field.choices());
@@ -3214,7 +3214,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		println("It's not in there, downloading a new one.");
+		println("Choice list for addInvidField not cached, downloading a new one.");
 	      }
 
 	    gc.cachedLists.putList(key, field.choices());
