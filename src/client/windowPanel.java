@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -465,9 +465,11 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 			System.out.println("Adding perm matrix");
 		      }
 
-		    perm_editor pe = new perm_editor((perm_field)fields[i], 
-						     editable, this, parent.baseHash);
-		    addRow(panel, pe, name, i);
+		    perm_button pb = new perm_button((perm_field) fields[i],
+						     editable,
+						     parent.baseHash);
+
+		    addRow(panel, pb, name, i);
 
 		    break;
 
