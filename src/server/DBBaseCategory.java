@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,25 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   private DBStore store;
   private Vector contents;
 
-  private DBSchemaEdit editor;
+  /**
+   *
+   * We use this baseHash to keep a map of DBObjectBase.getKey() to
+   * instances of DBObjectBase.  addNode() uses this to find a
+   * server-local DBObjectBase from a remote Base reference passed
+   * us by the schema editor on the client.
+   *
+   */
+
+  private Hashtable baseHash;
+
+  /**
+   *
+   * A reference to the DBSchemaEdit object that is editing us
+   * for a client-side schema editor.
+   *
+   */
+
+  private DBSchemaEdit editor = null;
 
   /* -- */
 
@@ -145,6 +163,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     this.store = store;
     contents = new Vector();
 
+    this.baseHash = baseHash;
+
     setName(rootCategory.getName());
     setDisplayOrder(rootCategory.getDisplayOrder());
     
@@ -203,6 +223,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    oldCategory = (DBBaseCategory) node;
 	    newCategory = (DBBaseCategory) newSubCategory(oldCategory.getName());
+	    newCategory.editor = editor;
 
 	    if (debug)
 	      {
@@ -210,6 +231,32 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	      }
 
 	    newCategory.recurseDown(oldCategory, baseHash, editor);
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method is used when a schema editor is 'checking in'
+   * a category tree.
+   *
+   */
+
+  public synchronized void clearEditor()
+  {
+    CategoryNode node;
+
+    /* -- */
+
+    this.editor = null;
+
+    for (int i = 0; i < contents.size(); i++)
+      {
+	node = (CategoryNode) contents.elementAt(i);
+
+	if (node instanceof DBBaseCategory)
+	  {
+	    ((DBBaseCategory) node).clearEditor();
 	  }
       }
   }
@@ -657,16 +704,45 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	      {
 		DBObjectBase newBase = null;
 
-		try
+		if (editor != null)
 		  {
-		    newBase = store.getObjectBase(((Base) node).getName());
+		    Short key;
+
+		    try
+		      {
+			key = new Short(((Base) node).getTypeID());
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught bad remote " + ex);
+		      }
+
+		    newBase = (DBObjectBase) editor.newBases.get(key);
 		  }
-		catch (RemoteException ex)
+		else
 		  {
-		    throw new RuntimeException("caught bad remote " + ex);
+		    try
+		      {
+			newBase = store.getObjectBase(((Base) node).getTypeID());
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught bad remote " + ex);
+		      }
 		  }
 
-		if (node.getDisplayOrder() >= contents.size())
+		if (newBase == null)
+		  {
+		    throw new NullPointerException("null newBase in addNode! " + 
+						   ((editor == null) ? "local" : "remote"));
+		  }
+
+		if (contents == null)
+		  {
+		    throw new NullPointerException("null contents in addNode!");
+		  }
+
+		if (newBase.getDisplayOrder() >= contents.size())
 		  {
 		    contents.addElement(newBase);
 		  }

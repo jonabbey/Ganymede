@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -834,6 +834,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// newBases
 
 	store.objectBases = newBases; 
+	rootCategory.clearEditor();
 	store.rootCategory = rootCategory;
 
 	// and unlock the server
