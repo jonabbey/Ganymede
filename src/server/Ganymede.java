@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,6 +51,7 @@ public class Ganymede {
   public static final boolean debug = true;  
   public static Date startTime = new Date();
   public static String debugFilename = null;
+  public static boolean developSchema = false;
 
   public static GanymedeServer server;
   public static GanymedeSession internalSession;
@@ -148,13 +149,21 @@ public class Ganymede {
     if (propFilename == null)
       {
 	System.out.println("Error: invalid command line parameters");
-	System.out.println("Usage: java Ganymede [-resetadmin] properties=<property file> [debug=<rmi debug file>]");
+	System.out.print("Usage: java Ganymede [-resetadmin] [-developschema] ");
+	System.out.println("properties=<property file> [debug=<rmi debug file>]");
 	return;
       }
 
     debugFilename = ParseArgs.getArg("debug", argv);
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
+
+    developSchema = ParseArgs.switchExists("developschema", argv);
+
+    if (developschema)
+      {
+	System.out.println("Fundamental object types open for schema editing (-developschema)"); 
+      }
     
     if (!loadProperties(propFilename))
       {
