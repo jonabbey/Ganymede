@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -73,6 +73,44 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   {
     super(original, editset);
   }
+  
+  /**
+   *
+   * Hook to have this object create a new embedded object
+   * in the given field.  
+   *
+   */
+
+  public Invid createNewEmbeddedObject(InvidDBField field)
+  {
+    DBEditObject newObject;
+    DBObjectBase targetBase;
+    DBObjectBaseField fieldDef;
+
+    /* -- */
+
+    if (field.getName().equals("Test Embed"))
+      {
+	fieldDef = field.getFieldDef();
+	
+	if (fieldDef.getTargetBase() > -1)
+	  {
+	    targetBase = Ganymede.db.getObjectBase(fieldDef.getTargetBase());
+	    newObject = targetBase.createNewObject(editset);
+	    return newObject.getInvid();
+	  }
+	else
+	  {
+	    editset.getSession().setLastError("error in schema.. imbedded object type not restricted..");
+	    return null;
+	  }
+      }
+    else
+      {
+	return null;		// default
+      }
+  }
+
 
   /**
    *
@@ -85,7 +123,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   public StringBuffer obtainChoiceList(DBField field)
   {
-    if (!field.getName().equals("Shell"))
+    if (!field.getName().equals("Login Shell"))
       {
 	return super.obtainChoiceList(field);
       }
