@@ -6,15 +6,16 @@
    
    Created: 12 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:05:10 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/06/13 22:58:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -87,4 +88,5 @@ public interface userSchema {
   final static short ALIASES=267;
   final static short SIGNATURE=268;
   final static short EMAILTARGET=269;
+  final static short PASSWORDCHANGETIME=275;
 }

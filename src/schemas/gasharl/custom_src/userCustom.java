@@ -6,15 +6,15 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2001/06/08 08:09:43 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2001/06/13 22:58:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -139,7 +139,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     super(original, editset);
   }
-
 
   /**
    * <p>Initializes a newly created DBEditObject.</p>
@@ -1433,6 +1432,24 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	return null;
+      }
+
+    if (field.getID() == userSchema.PASSWORD)
+      {
+	// the password is being changed, update the time that it will need to
+	// be changed again
+
+	Calendar myCal = new GregorianCalendar();
+	myCal.add(Calendar.MONTH, 3);
+
+	Date updateTime = myCal.getTime();
+
+	DateDBField dateField = (DateDBField) getField(userSchema.PASSWORDCHANGETIME);
+
+	if (dateField != null)
+	  {
+	    dateField.setValueLocal(updateTime);
+	  }
       }
 
     // our maxDate() and isDateLimited() methods have pre-filtered any
