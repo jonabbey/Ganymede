@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2000/11/10 05:04:52 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2001/01/11 13:54:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -173,12 +173,6 @@ public abstract class DBField implements Remote, db_field {
 
   DBObjectBaseField definition;
   
-  /**
-   * required for use with {@link arlut.csd.ganymede.DBFieldTable DBFieldTable}.
-   */
-
-  DBField next = null;
-
   /**
    * <P>Permissions record for this field in the current
    * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} context,

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.142 $
-   Last Mod Date: $Date: 2000/12/13 18:39:08 $
+   Version: $Revision: 1.143 $
+   Last Mod Date: $Date: 2001/01/11 13:54:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.142 $ $Date: 2000/12/13 18:39:08 $ $Name:  $
+ * @version $Revision: 1.143 $ $Date: 2001/01/11 13:54:04 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -249,7 +249,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
+    fieldAry = new DBField[objectBase.fieldTable.size()];
 
     synchronized (objectBase)
       {
@@ -307,7 +307,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (tmp != null)
 	      {
-		fields.putNoSyncNoRemove(tmp);
+		saveField(tmp);
 	      }
 	  }
       }
@@ -343,7 +343,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     stored = true;
     status = EDITING;
 
-    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
+    fieldAry = new DBField[objectBase.fieldTable.size()];
 
     this.gSession = getSession().getGSession();
 
@@ -359,56 +359,62 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // methods on the copied fields will allow editing
     // to go forward
 
-    if (original.fields != null)
+    if (original.fieldAry != null)
       {
-	enum = original.fields.elements();
-
-	while (enum.hasMoreElements())
+	synchronized (original.fieldAry)
 	  {
-	    field = (DBField) enum.nextElement();
-
-	    switch (field.getType())
+	    for (int i = 0; i < original.fieldAry.length; i++)
 	      {
-	      case BOOLEAN:
-		tmp = new BooleanDBField(this, (BooleanDBField) field);
-		break;
+		field = original.fieldAry[i];
+
+		if (field == null)
+		  {
+		    continue;
+		  }
+
+		switch (field.getType())
+		  {
+		  case BOOLEAN:
+		    tmp = new BooleanDBField(this, (BooleanDBField) field);
+		    break;
 		    
-	      case NUMERIC:
-		tmp = new NumericDBField(this, (NumericDBField) field);
-		break;
+		  case NUMERIC:
+		    tmp = new NumericDBField(this, (NumericDBField) field);
+		    break;
 
-	      case FLOAT:
-		tmp = new FloatDBField(this, (FloatDBField) field);
-		break;
+		  case FLOAT:
+		    tmp = new FloatDBField(this, (FloatDBField) field);
+		    break;
 
-	      case DATE:
-		tmp = new DateDBField(this, (DateDBField) field);
-		break;
+		  case DATE:
+		    tmp = new DateDBField(this, (DateDBField) field);
+		    break;
 
-	      case STRING:
-		tmp = new StringDBField(this, (StringDBField) field);
-		break;
+		  case STRING:
+		    tmp = new StringDBField(this, (StringDBField) field);
+		    break;
 		    
-	      case INVID:
-		tmp = new InvidDBField(this, (InvidDBField) field);
-		break;
+		  case INVID:
+		    tmp = new InvidDBField(this, (InvidDBField) field);
+		    break;
 
-	      case PERMISSIONMATRIX:
-		tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-		break;
+		  case PERMISSIONMATRIX:
+		    tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
+		    break;
 
-	      case PASSWORD:
-		tmp = new PasswordDBField(this, (PasswordDBField) field);
-		break;
+		  case PASSWORD:
+		    tmp = new PasswordDBField(this, (PasswordDBField) field);
+		    break;
 
-	      case IP:
-		tmp = new IPDBField(this, (IPDBField) field);
-		break;
-	      }
+		  case IP:
+		    tmp = new IPDBField(this, (IPDBField) field);
+		    break;
+		  }
 
-	    if (tmp != null)
-	      {
-		fields.putNoSyncNoRemove(tmp);
+		if (tmp != null)
+		  {
+		    saveField(tmp);
+		  }
 	      }
 	  }
       }
@@ -424,7 +430,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    fieldDef = (DBObjectBaseField) enum.nextElement();
 	    
-	    if (!fields.containsKey(fieldDef.getID()))
+	    // if we don't have it in our fieldAry already,
+	    // we'll want to add it
+
+	    if (retrieveField(fieldDef.getID()) == null)
 	      {
 		if (!checkNewField(fieldDef.getID()))
 		  {
@@ -471,7 +480,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		  }
 
-		fields.putNoSyncNoRemove(tmp);
+		saveField(tmp);
 	      }
 	  }
       }
@@ -614,17 +623,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final ReturnVal setFieldValue(short fieldID, Object value)
   {
-    // note! this *must* be setValue(), not setValueLocal(), as this
-    // is a method that the client calls directly.
+    ReturnVal retval;
+    DBField field = retrieveField(fieldID);
 
-    try
+    /* -- */
+
+    if (field != null)
       {
-	return getField(fieldID).setValue(value);
+	return field.setValue(value);
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote on a local op: " + ex);
-      }
+
+    return Ganymede.createErrorDialog("DBEditObject.setFieldValue() error",
+				      "DBEditObject.setFieldValue() couldn't find field " + fieldID + 
+				      " in object " + getLabel());
   }
 
   /**
@@ -639,7 +650,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
   {
     ReturnVal retval;
-    DBField field = (DBField) getField(fieldID);
+    DBField field = retrieveField(fieldID);
 
     /* -- */
 
@@ -662,50 +673,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final boolean isStored()
   {
     return stored;
-  }
-
-  /**
-   * <p>Clears out any non-valued fields, used to clean out any fields 
-   * that remained undefined after editing is done.</p>
-   */
-
-  final synchronized void clearTransientFields()
-  {
-    Enumeration enum;
-    DBField field;
-    Vector removeList;
-    
-    /* -- */
-
-    removeList = new Vector();
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
-      {
-	field = (DBField) enum.nextElement();
-
-	// we don't want to emit fields that don't have anything in them..
-	// DBField.isDefined() is supposed to tell us whether a field should
-	// be kept.
-
-	if (!field.isDefined())
-	  {
-	    removeList.addElement(field);
-
-	    if (false)
-	      {
-		System.err.println("going to be removing transient: " + ((DBField) field).getName()); 
-	      }
-	  }
-      }
-
-    enum = removeList.elements();
-
-    while (enum.hasMoreElements())
-      {
-	field = (DBField) enum.nextElement();
-	fields.remove(field.getID());
-      }
   }
 
   /* -------------------- pseudo-static Customization hooks -------------------- 
@@ -1594,7 +1561,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	if (canCloneField(session, origObj, origField))
 	  {
-	    newField = (DBField) getField(origField.getID());
+	    newField = retrieveField(origField.getID());
 
 	    // if we already initialized this field when we were
 	    // constructed, don't copy over a value onto this field.
@@ -2519,7 +2486,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     ReturnVal finalResult = new ReturnVal(true); // we use this to track rescan requests
     ReturnVal retVal = null;
     DBField field;
-    Enumeration enum;
     String label = getLabel();	// remember the label before we clear it
 
     /* -- */
@@ -2590,92 +2556,98 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    finalResult.unionRescan(retVal);
 	  }
 
-	enum = fields.elements();
-
-	while (enum.hasMoreElements())
+	synchronized (fieldAry)
 	  {
-	    field = (DBField) enum.nextElement();
+	    for (int i = 0; i < fieldAry.length; i++)
+	      {
+		field = fieldAry[i];
 
-	    // we can't clear field 0 yet, since we need that
-	    // for permissions verifications for other fields
+		if (field == null)
+		  {
+		    continue;
+		  }
+
+		// we can't clear field 0 yet, since we need that
+		// for permissions verifications for other fields
 	    
-	    if (field.getID() == 0)
-	      {
-		continue;
-	      }
-
-	    if (field.isVector())
-	      {
-		if (debug)
+		if (field.getID() == 0)
 		  {
-		    System.err.println("++ Attempting to clear vector field " + field.getName());
+		    continue;
 		  }
 
-		while (field.size() > 0)
+		if (field.isVector())
 		  {
-		    // if this is an InvidDBField, deleteElement()
-		    // will convert this request into a deletion of
-		    // the embedded object.
-			
-		    retVal = field.deleteElement(0); // *sync*
-			
-		    if (retVal != null && !retVal.didSucceed())
+		    if (debug)
 		      {
-			editset.rollback("del" + label); // *sync*
+			System.err.println("++ Attempting to clear vector field " + field.getName());
+		      }
+
+		    while (field.size() > 0)
+		      {
+			// if this is an InvidDBField, deleteElement()
+			// will convert this request into a deletion of
+			// the embedded object.
+			
+			retVal = field.deleteElement(0); // *sync*
+			
+			if (retVal != null && !retVal.didSucceed())
+			  {
+			    editset.rollback("del" + label); // *sync*
 			    
-			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject disapproved of deleting element from field " + 
-							  field.getName());
-		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
-		      }
-		  }
-	      }
-	    else
-	      {
-		// permission matrices and passwords don't allow us to
-		// call set value directly.  We're mainly concerned
-		// with invid's (for linking), i.p. addresses and
-		// strings (for the namespace) here anyway.
-
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear scalar field " + field.getName());
-		  }
-
-		if (field.getType() != PERMISSIONMATRIX &&
-		    field.getType() != PASSWORD)
-		  {
-		    retVal = field.setValueLocal(null); // *sync*
-
-		    if (retVal != null && !retVal.didSucceed())
-		      {
-			editset.rollback("del" + label); // *sync*
-
-			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject could not clear field " + 
-							  field.getName());
-		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject disapproved of deleting element from field " + 
+							      field.getName());
+			  }
+			else
+			  {
+			    finalResult.unionRescan(retVal);
+			  }
 		      }
 		  }
 		else
 		  {
-		    // catchall for permission matrix and password
-		    // fields, which do this their own way.
+		    // permission matrices and passwords don't allow us to
+		    // call set value directly.  We're mainly concerned
+		    // with invid's (for linking), i.p. addresses and
+		    // strings (for the namespace) here anyway.
 
-		    field.setUndefined(true);
+		    if (debug)
+		      {
+			System.err.println("++ Attempting to clear scalar field " + field.getName());
+		      }
+
+		    if (field.getType() != PERMISSIONMATRIX &&
+			field.getType() != PASSWORD)
+		      {
+			retVal = field.setValueLocal(null); // *sync*
+
+			if (retVal != null && !retVal.didSucceed())
+			  {
+			    editset.rollback("del" + label); // *sync*
+
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject could not clear field " + 
+							      field.getName());
+			  }
+			else
+			  {
+			    finalResult.unionRescan(retVal);
+			  }
+		      }
+		    else
+		      {
+			// catchall for permission matrix and password
+			// fields, which do this their own way.
+
+			field.setUndefined(true);
+		      }
 		  }
 	      }
 	  }
 
 	// ok, we've cleared all fields but field 0.. clear that to finish up.
 
-	field = (DBField) getField((short) 0);
+	field = retrieveField((short) 0);
 
 	if (field != null)
 	  {
@@ -2891,53 +2863,55 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // loop over the invid fields in the target, get a list of fields we need to unlink.
     
     Invid myInvid = getInvid();
-    Enumeration fieldEnum = remobj.fields.elements();
-    
-    while (fieldEnum.hasMoreElements())
+
+    synchronized (remobj.fieldAry)
       {
-	DBField tmpField = (DBField) fieldEnum.nextElement();
-
-	if (!(tmpField instanceof InvidDBField))
+	for (int i = 0; i < remobj.fieldAry.length; i++)
 	  {
-	    continue;
-	  }
+	    DBField tmpField = remobj.fieldAry[i];
 
-	// if the field is symmetric and doesn't point to us, we won't
-	// try to unlink it here.
-
-	if (tmpField.getFieldDef().isSymmetric())
-	  {
-	    continue;
-	  }
-
-	// If the invid field we're checking out doesn't reference
-	// us, don't bother with it.
-
-	if (tmpField.isVector())
-	  {
-	    if (!tmpField.containsElementLocal(myInvid))
+	    if (tmpField == null ||!(tmpField instanceof InvidDBField))
 	      {
 		continue;
 	      }
-	  }
-	else
-	  {
-	    Invid tempInvid = (Invid) tmpField.getValueLocal();
 
-	    if (tempInvid == null || !tempInvid.equals(myInvid))
+	    // if the field is symmetric and doesn't point to us, we won't
+	    // try to unlink it here.
+
+	    if (tmpField.getFieldDef().isSymmetric())
 	      {
 		continue;
 	      }
+
+	    // If the invid field we're checking out doesn't reference
+	    // us, don't bother with it.
+
+	    if (tmpField.isVector())
+	      {
+		if (!tmpField.containsElementLocal(myInvid))
+		  {
+		    continue;
+		  }
+	      }
+	    else
+	      {
+		Invid tempInvid = (Invid) tmpField.getValueLocal();
+
+		if (tempInvid == null || !tempInvid.equals(myInvid))
+		  {
+		    continue;
+		  }
+	      }
+
+	    if (false)
+	      {
+		System.err.println("\tNeed to clear field " + tmpField.toString());
+	      }
+
+	    // ok, we know we need to do the unbinding for this field.
+
+	    fieldsToUnbind.addElement(new Short(tmpField.getID()));
 	  }
-
-	if (false)
-	  {
-	    System.err.println("\tNeed to clear field " + tmpField.toString());
-	  }
-
-	// ok, we know we need to do the unbinding for this field.
-
-	fieldsToUnbind.addElement(new Short(tmpField.getID()));
       }
 
     if (remobj instanceof DBEditObject)
@@ -3237,31 +3211,37 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   synchronized final Hashtable checkpoint()
   {
-    Enumeration enum;
     Object key, value;
     Hashtable result = new Hashtable();
     DBField field;
 
     /* -- */
 
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-	key = new Short(field.getID());
-	value = field.checkpoint();
-
-	if (value != null)
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    result.put(key, value);
-	  }
-	else
-	  {
-	    // hack, hack.. we're using a reference
-	    // to this object to represent a null value
+	    field = fieldAry[i];
 
-	    result.put(key, this);
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    key = new Short(field.getID());
+	    value = field.checkpoint();
+
+	    if (value != null)
+	      {
+		result.put(key, value);
+	      }
+	    else
+	      {
+		// hack, hack.. we're using a reference
+		// to this object to represent a null value
+
+		result.put(key, this);
+	      }
 	  }
       }
 
@@ -3297,7 +3277,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	key = (Short) enum.nextElement();
 
-	field = fields.get(key.shortValue());
+	field = retrieveField(key.shortValue());
 
 	value = ckpoint.get(key);
 

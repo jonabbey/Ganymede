@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/12/12 23:47:18 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2001/01/11 13:54:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1162,16 +1162,10 @@ public class DBEditSet {
 	      {
 		eObj = (DBEditObject) committedObjects.elementAt(i);
 
-		// anything that's going back into the DBStore needs
-		// to have the transient fields cleared away
-
-		/*
-		if (eObj.getStatus() == DBEditObject.EDITING ||
-		    eObj.getStatus() == DBEditObject.CREATING)
-		  {
-		    eObj.clearTransientFields();
-		  }
-		*/
+		// this is where we used to call clearTransientFields
+		// on eObj, but we don't do that anymore since everything
+		// here and below should check the defined() method itself
+		// to skip fields that have no useful information in them
 
 		// we'll want to log the before/after state of any objects
 		// edited by this transaction
@@ -1424,6 +1418,9 @@ public class DBEditSet {
 
 		// Create a read-only version of eObj, with all fields
 		// reset to checked-in status, put it into our object hash
+
+		// note that this new DBObject will not include any
+		// transient fields which self-identify as undefined
 
 		base.objectTable.put(new DBObject(eObj));
 

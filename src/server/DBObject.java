@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2001/01/10 18:53:38 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2001/01/11 13:54:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.109 $ $Date: 2001/01/10 18:53:38 $
+ * @version $Revision: 1.110 $ $Date: 2001/01/11 13:54:07 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -164,14 +164,13 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    *
-   * Our field table, essentially a custom hash of DBField objects
-   * keyed by their numeric field id's.
+   * Our fields, hashed into an array
    *
    * @see arlut.csd.ganymede.DBField
    *
    */
 
-  protected DBFieldTable fields;
+  protected DBField[] fieldAry;
 
   /**
    *
@@ -232,7 +231,7 @@ public class DBObject implements db_object, FieldType, Remote {
   DBObject(DBObjectBase objectBase)
   {
     this.objectBase = objectBase;
-    fields = null;
+    fieldAry = null;
 
     shadowObject = null;
 
@@ -284,7 +283,6 @@ public class DBObject implements db_object, FieldType, Remote {
   
   DBObject(DBEditObject eObj)
   {
-    Enumeration enum;
     DBField field;
 
     /* -- */
@@ -294,21 +292,30 @@ public class DBObject implements db_object, FieldType, Remote {
 
     shadowObject = null;
 
-    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
+    short count = 0;
+
+    for (short i = 0; i < eObj.fieldAry.length; i++)
+      {
+	field = eObj.fieldAry[i];
+
+	if (field != null && field.isDefined())
+	  {
+	    count++;
+	  }
+      }
 
     // put any defined fields into the object we're going
     // to commit back into our DBStore
 
-    enum = eObj.fields.elements();
+    fieldAry = new DBField[count];
 
-    while (enum.hasMoreElements())
+    for (short i = 0; i < eObj.fieldAry.length; i++)
       {
-	field = (DBField) enum.nextElement();
+	field = eObj.fieldAry[i];
 
-	if (field.isDefined())
+	if (field != null && field.isDefined())
 	  {
-	    field.setOwner(this); // this will make the field non-editable
-	    fields.putNoSyncNoRemove(field);
+	    saveField(field);
 	  }
       }
 
@@ -327,7 +334,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    Enumeration enum;
     DBField field, copy;
 
     /* -- */
@@ -337,16 +343,20 @@ public class DBObject implements db_object, FieldType, Remote {
 
     shadowObject = null;
 
-    fields = new DBFieldTable(original.fields.size(), (float) 1.0);
+    fieldAry = new DBField[original.fieldAry.length];
 
     // put any defined fields into the object we're going
     // to commit back into our DBStore
 
-    enum = original.fields.elements();
-
-    while (enum.hasMoreElements())
+    for (int i = 0; i < original.fieldAry.length; i++)
       {
-	field = (DBField) enum.nextElement();
+	field = original.fieldAry[i];
+
+	if (field == null)
+	  {
+	    System.err.print("XXZZ weird, null field in dbobject copy constructor");
+	    continue;
+	  }
 
 	switch (field.getType())
 	  {
@@ -354,7 +364,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new BooleanDBField(this, (BooleanDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -362,7 +372,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new NumericDBField(this, (NumericDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -370,7 +380,7 @@ public class DBObject implements db_object, FieldType, Remote {
  	    copy = new FloatDBField(this, (FloatDBField) field);
  
  	    copy.setOwner(this);
- 	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
  
  	    break;
 
@@ -378,7 +388,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new DateDBField(this, (DateDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -386,7 +396,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new StringDBField(this, (StringDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -394,7 +404,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new InvidDBField(this, (InvidDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -402,7 +412,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 	    
@@ -410,7 +420,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new PasswordDBField(this, (PasswordDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 
@@ -418,7 +428,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    copy = new IPDBField(this, (IPDBField) field);
 
 	    copy.setOwner(this);
-	    fields.putNoSyncNoRemove(copy);
+	    fieldAry[i] = copy;
 
 	    break;
 	  }
@@ -437,25 +447,35 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public final void exportFields()
   {
-    Enumeration enum = fields.elements();
     DBField field;
 
-    while (enum.hasMoreElements())
+    /* -- */
+
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-
-	// export can fail if the object has already
-	// been exported.. don't worry about it if
-	// it happens.. the client will know about it
-	// if we try to pass a non-exported object
-	// back to it, anyway.
-
-	try
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    UnicastRemoteObject.exportObject(field);
-	  }
-	catch (RemoteException ex)
-	  {
+	    field = fieldAry[i];
+
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    // export can fail if the object has already
+	    // been exported.. don't worry about it if
+	    // it happens.. the client will know about it
+	    // if we try to pass a non-exported object
+	    // back to it, anyway.
+	
+	    try
+	      {
+		UnicastRemoteObject.exportObject(field);
+	      }
+	    catch (RemoteException ex)
+	      {
+		return;
+	      }
 	  }
       }
   }
@@ -745,7 +765,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
   synchronized void emit(DataOutput out) throws IOException
   {
-    Enumeration enum;
     DBField field;
 
     /* -- */
@@ -754,29 +773,37 @@ public class DBObject implements db_object, FieldType, Remote {
 
     out.writeInt(getID());	// write out our object id
 
-    if (fields.size() == 0)
+    synchronized (fieldAry)
       {
-	Ganymede.debug("**** Error: writing object with no fields: " + 
-		       objectBase.getName() + " <" + getID() + ">");
-      }
+	short count = 0;
 
-    out.writeShort(fields.size());
-
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
-      {
-	field = (DBField) enum.nextElement();
-
-	// We may see undefined fields at this point, as the
-	// DBEditSet.commit() logic now abstains from doing a
-	// clearTransientFields() to allow threads to do arbitrary
-	// read operations while commits are being processed.
-
-	if (field.isDefined())
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    out.writeShort(field.getID());
-	    field.emit(out);
+	    field = fieldAry[i];
+
+	    if (field != null && field.isDefined())
+	      {
+		count++;
+	      }
+	  }
+
+	if (count == 0)
+	  {
+	    Ganymede.debug("**** Error: writing object with no fields: " + 
+			   objectBase.getName() + " <" + getID() + ">");
+	  }
+
+	out.writeShort(count);
+
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    field = fieldAry[i];
+
+	    if (field != null && field.isDefined())
+	      {
+		out.writeShort(field.getID());
+		field.emit(out);
+	      }
 	  }
       }
   }
@@ -818,14 +845,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	System.err.println("DBObject.receive(): No fields reading object " + getID());
       }
 
-    if (tmp_count > 0)
-      {
-	fields = new DBFieldTable(tmp_count, (float) 1.0);
-      }
-    else
-      {
-	fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
-      }
+    fieldAry = new DBField[tmp_count];
 
     for (int i = 0; i < tmp_count; i++)
       {
@@ -956,7 +976,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (tmp.isDefined())
 	  {
-	    fields.putNoSyncNoRemove(tmp);
+	    saveField(tmp);
 	  }
 	else
 	  {
@@ -1212,7 +1232,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>Get read-only list of custom DBFields contained in this object.</p>
+   * <p>Get read-only Vector of DBFieldInfo objects for the custom
+   * DBFields contained in this object, in display order.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1220,7 +1241,6 @@ public class DBObject implements db_object, FieldType, Remote {
   synchronized public Vector getFieldInfoVector()
   {
     Vector results = new Vector();
-    Enumeration enum;
     DBField field;
 
     /* -- */
@@ -1239,7 +1259,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    System.err.println("fieldDef: " + fieldDef);
 	  }
 
-	field = fields.get(fieldDef.getID());
+	field = retrieveField(fieldDef.getID());
 	
 	if (field != null)
 	  {
@@ -1273,9 +1293,172 @@ public class DBObject implements db_object, FieldType, Remote {
     return results;
   }
 
+  /**
+   * <p>This method places a DBField into a slot in this object's
+   * fieldAry DBField array.  saveField() uses a hashing algorithm to
+   * try and speed up field save and retrieving, but we are optimizing
+   * for low memory usage rather than O(1) saving and retrieving.
+   * Hash collisions are saved directly in the fieldAry, meaning that
+   * any hash collisions increase the likelihood of further hash
+   * collisions, but we don't need an extra 'next' pointer in the
+   * DBField class, saving us 4 bytes of memory for every field of
+   * every object in the database.</p>.
+   */
+
+  public final void saveField(DBField field)
+  {
+    synchronized (fieldAry)
+      {
+	if (field == null)
+	  {
+	    throw new IllegalArgumentException("null value passed to saveField");
+	  }
+	
+	short hashindex = (short) ((field.getID()& 0x7FFF) % fieldAry.length);
+	
+	short index = hashindex;
+	
+	while (fieldAry[index] != null)
+	  {
+	    if (index++ >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+		
+		throw new ArrayIndexOutOfBoundsException("full fieldAry hash");
+	      }
+	  }
+	
+	fieldAry[index] = field;
+      }
+  }
 
   /**
-   * <p>Get read-only access to a field from this object.</p>
+   * <p>This method places a DBField into a slot in this object's
+   * fieldAry DBField array.  saveField() uses a hashing algorithm to
+   * try and speed up field save and retrieving, but we are optimizing
+   * for low memory usage rather than O(1) saving and retrieving.
+   * Hash collisions are saved directly in the fieldAry, meaning that
+   * any hash collisions increase the likelihood of further hash
+   * collisions, but we don't need an extra 'next' pointer in the
+   * DBField class, saving us 4 bytes of memory for every field of
+   * every object in the database.</p>.
+   */
+
+  public final void replaceField(DBField field)
+  {
+    synchronized (fieldAry)
+      {
+	if (field == null)
+	  {
+	    throw new IllegalArgumentException("null value passed to clearField");
+	  }
+
+	short id = field.getID();
+
+	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+
+	short index = hashindex;
+
+	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	  {
+	    if (index++ >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+
+		return;
+	      }
+	  }
+
+	fieldAry[index] = field;
+      }
+  }
+
+  /**
+   * <p>This method places a DBField into a slot in this object's
+   * fieldAry DBField array.  saveField() uses a hashing algorithm to
+   * try and speed up field save and retrieving, but we are optimizing
+   * for low memory usage rather than O(1) saving and retrieving.
+   * Hash collisions are saved directly in the fieldAry, meaning that
+   * any hash collisions increase the likelihood of further hash
+   * collisions, but we don't need an extra 'next' pointer in the
+   * DBField class, saving us 4 bytes of memory for every field of
+   * every object in the database.</p>.
+   */
+
+  public final void clearField(short id)
+  {
+    synchronized (fieldAry)
+      {
+	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+
+	short index = hashindex;
+
+	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	  {
+	    if (index++ >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+
+		return;
+	      }
+	  }
+
+	fieldAry[index] = null;
+      }
+  }
+
+  /**
+   * <p>This method retrieves a DBField from this object's
+   * fieldAry DBField array.  retrieveField() uses a hashing algorithm to
+   * try and speed up field retrieving, but we are optimizing
+   * for low memory usage rather than O(1) operations.</p>
+   */
+
+  public final DBField retrieveField(short id)
+  {
+    synchronized (fieldAry)
+      {
+	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+
+	short index = hashindex;
+
+	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	  {
+	    if (index++ >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+
+		return null;
+	      }
+	  }
+
+	return fieldAry[index];
+      }
+  }
+
+  /**
+   * <p>Get access to a field from this object.  This method
+   * is exported to clients over RMI.</p>
    *
    * @param id The field code for the desired field of this object.
    *
@@ -1285,36 +1468,33 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public final db_field getField(short id)
   {
-    return fields.get(id);
+    return retrieveField(id);
   }
 
   /**
    * <p>Get read-only access to a field from this object, by name.</p>
-   *
-   * <p>This method needs to be synchronized to avoid conflict with 
-   * {@link arlut.csd.ganymede.DBEditObject#clearTransientFields() DBEditObject.clearTransientFields()}.</p>
    *
    * @param fieldname The fieldname for the desired field of this object
    *
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public db_field getField(String fieldname)
+  synchronized public final db_field getField(String fieldname)
   {
-    Enumeration enum;
     DBField field;
 
     /* -- */
 
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-
-	if (field.getName().equalsIgnoreCase(fieldname))
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    return field;
+	    field = fieldAry[i];
+	    
+	    if (field != null && field.getName().equalsIgnoreCase(fieldname))
+	      {
+		return field;
+	      }
 	  }
       }
 
@@ -1329,7 +1509,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public final String getFieldName(short id)
   {
-    DBField field = fields.get(id);
+    DBField field = retrieveField(id);
 
     if (field != null)
       {
@@ -1347,20 +1527,20 @@ public class DBObject implements db_object, FieldType, Remote {
 
   synchronized public final short getFieldId(String fieldname)
   {
-    Enumeration enum;
     DBField field;
 
     /* -- */
 
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-
-	if (field.getName().equalsIgnoreCase(fieldname))
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    return field.getID();
+	    field = fieldAry[i];
+
+	    if (field != null && field.getName().equalsIgnoreCase(fieldname))
+	      {
+		return field.getID();
+	      }
 	  }
       }
 
@@ -1371,35 +1551,12 @@ public class DBObject implements db_object, FieldType, Remote {
    * <p>Get complete list of DBFields contained in this object.
    * The list returned will appear in unsorted order.</p>
    *
-   * This method needs to be synchronized to avoid conflict with
-   * {@link arlut.csd.ganymede.DBEditObject#clearTransientFields() DBEditObject.clearTransientFields()}.</p>
-   *
    * @see arlut.csd.ganymede.db_object
    */
 
   public synchronized db_field[] listFields()
   {
-    db_field[] results;
-    Enumeration enum;
-    int count = fields.size();
-
-    /* -- */
-
-    results = new db_field[count];
-
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
-      {
-	results[--count] = (db_field) enum.nextElement();
-      }
-
-    if (count != 0)
-      {
-	throw new RuntimeException("synchronization error, fields hash modified");
-      }
-
-    return results;
+    return fieldAry;
   }
 
   /**
@@ -1476,7 +1633,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	  {
 	    if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
 	      {
-		field = (DBField) getField(fieldDef.getID());
+		field = retrieveField(fieldDef.getID());
 	    
 		if (field == null || !field.isDefined())
 		  {
@@ -1490,11 +1647,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	    ex.printStackTrace();
 	    System.err.println("\n");
 
-	    if (fields == null)
-	      {
-		System.err.println("fields == null");
-	      }
-		
 	    System.err.println("My type is " + getTypeName() + "\nMy invid is " + getInvid());
 	  }
       }
@@ -1765,7 +1917,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>Get a sorted list of DBFields contained in this object.</p>
+   * <p>Get a display-order sorted list of DBFields contained in this
+   * object.</p>
    *
    * <p>This is a server-side only operation.. permissions are not
    * checked.</p>
@@ -1774,7 +1927,6 @@ public class DBObject implements db_object, FieldType, Remote {
   synchronized public Vector getFieldVector(boolean customOnly)
   {
     Vector results = new Vector();
-    Enumeration enum;
     DBField field;
 
     /* -- */
@@ -1787,7 +1939,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	  {
 	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
 	    
-	    field = fields.get(fieldDef.getID());
+	    field = retrieveField(fieldDef.getID());
 	    
 	    if (field != null)
 	      {
@@ -1797,11 +1949,13 @@ public class DBObject implements db_object, FieldType, Remote {
       }
     else			// all fields in this object
       {
+	// first the display fields
+
 	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
 	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
 	    
-	    field = fields.get(fieldDef.getID());
+	    field = retrieveField(fieldDef.getID());
 	    
 	    if (field != null)
 	      {
@@ -1811,15 +1965,16 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	// then tack on the built-in fields
 
-	enum = fields.elements();
-    
-	while (enum.hasMoreElements())
+	synchronized (fieldAry)
 	  {
-	    field = (DBField) enum.nextElement();
-
-	    if (field.isBuiltIn())
+	    for (int i = 0; i < fieldAry.length; i++)
 	      {
-		results.addElement(field);
+		field = fieldAry[i];
+		
+		if (field != null && field.isBuiltIn())
+		  {
+		    results.addElement(field);
+		  }
 	      }
 	  }
       }
@@ -1834,43 +1989,48 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public synchronized void print(PrintStream out)
   {
-    Enumeration enum;
     DBField field;
 
     /* -- */
 
     out.println("Invid: <" + objectBase.object_name + ":" + getID() + ">");
-   
-    enum = fields.elements();
 
-    while (enum.hasMoreElements())
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-
-	out.print(field.getName());
-	out.print(" : ");
-
-	if (field.isVector())
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    for (int i = 0; i < field.size(); i++)
-	      {
-		out.print("\t" + field.key(i));
+	    field = fieldAry[i];
 
-		if (i + 1 < field.size())
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    out.print(field.getName());
+	    out.print(" : ");
+
+	    if (field.isVector())
+	      {
+		for (int j = 0; j < field.size(); j++)
 		  {
-		    out.println(",");
-		  }
-		else
-		  {
-		    out.println();
+		    out.print("\t" + field.key(j));
+
+		    if (j + 1 < field.size())
+		      {
+			out.println(",");
+		      }
+		    else
+		      {
+			out.println();
+		      }
 		  }
 	      }
-	  }
-	else
-	  {
-	    out.println(field.getID());
-	  }
-      }    
+	    else
+	      {
+		out.println(field.key());
+	      }
+	  } 
+      }   
   }
 
   /**
@@ -1907,29 +2067,53 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     this.objectBase = newBase;
 
-    Vector tmpFieldVec = new Vector();
-    Enumeration enum = fields.elements();
     DBField field;
+    short count = 0;
 
-    while (enum.hasMoreElements())
+    // we need to be double-synchronized because we are looping
+    // over fieldAry and because we are replacing fieldAry in midstream
+
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-       
-	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
-
-	if (field.definition == null || !field.isDefined())
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    tmpFieldVec.addElement(field);
+	    field = fieldAry[i];
+
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    if (newBase.getField(field.getID()) != null && field.isDefined())
+	      {
+		count++;
+	      }
 	  }
-      }
+    
+	DBField oldAry[] = fieldAry;
 
-    for (int i = 0; i < tmpFieldVec.size(); i++)
-      {
-	field = (DBField) tmpFieldVec.elementAt(i);
+	fieldAry = new DBField[count];
 
-	fields.removeNoSync(field.getID());
+	for (int i = 0; i < oldAry.length; i++)
+	  {
+	    field = oldAry[i];
 
-	System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getName());
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    field.definition = (DBObjectBaseField) newBase.getField(field.getID());
+
+	    if (field.definition != null && field.isDefined())
+	      {
+		saveField(field);
+	      }
+	    else
+	      {
+		System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getName());
+	      }
+	  }
       }
   }
 
@@ -1965,30 +2149,37 @@ public class DBObject implements db_object, FieldType, Remote {
    * object is checked out by a DBEditSet.</p> 
    */
 
-  public synchronized Vector getASymmetricTargets()
+  public Vector getASymmetricTargets()
   {
     Vector results = new Vector();
-    Enumeration enum = fields.elements();
     DBField field;
     InvidDBField invField;
-    
-    while (enum.hasMoreElements())
+
+    synchronized (fieldAry)
       {
-	field = (DBField) enum.nextElement();
-
-	if (field instanceof InvidDBField)
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    invField = (InvidDBField) field;
+	    field = fieldAry[i];
 
-	    if (invField.isDefined() && !invField.getFieldDef().isSymmetric())
+	    if (field == null)
 	      {
-		if (!invField.isVector())
+		continue;
+	      }
+
+	    if (field instanceof InvidDBField)
+	      {
+		invField = (InvidDBField) field;
+
+		if (invField.isDefined() && !invField.getFieldDef().isSymmetric())
 		  {
-		    VectorUtils.unionAdd(results, invField.value);
-		  }
-		else
-		  {
-		    results = VectorUtils.union(results, invField.getValuesLocal());
+		    if (!invField.isVector())
+		      {
+			VectorUtils.unionAdd(results, invField.value);
+		      }
+		    else
+		      {
+			results = VectorUtils.union(results, invField.getValuesLocal());
+		      }
 		  }
 	      }
 	  }
@@ -2176,7 +2367,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * adding it to the buffer.
    */
 
-  private void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
+  private synchronized void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
   {
     String name;
     DBObjectBaseField fieldDef;
@@ -2192,7 +2383,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	  {
 	    fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 
-	    field = fields.get(fieldDef.getID());
+	    field = retrieveField(fieldDef.getID());
 
 	    if (field != null && field.isDefined() && (local || field.isVisible()))
 	      {
@@ -2245,17 +2436,18 @@ public class DBObject implements db_object, FieldType, Remote {
 		  }
 	      }
 	  }
+      }
 
+    synchronized (fieldAry)
+      {
 	// okay, got all the custom fields.. now we need to summarize all the
 	// built-in fields that were not listed in customFields.
-
-	Enumeration elements = fields.elements();
-
-	while (elements.hasMoreElements())
+	
+	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    field = (DBField) elements.nextElement();
-
-	    if (!field.isBuiltIn() || !field.isDefined())
+	    field = fieldAry[i];
+	    
+	    if (field == null || !field.isBuiltIn() || !field.isDefined())
 	      {
 		continue;
 	      }

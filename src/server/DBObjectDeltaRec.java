@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/02/29 09:35:12 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2001/01/11 13:54:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -724,7 +724,7 @@ public class DBObjectDeltaRec implements FieldType {
   /**
    *
    * This method takes an object in its original state, and returns a
-   * new copy of the object with the changes emboddied in this
+   * new copy of the object with the changes embodied in this
    * DBObjectDeltaRec applied to it.
    *
    */
@@ -756,7 +756,7 @@ public class DBObjectDeltaRec implements FieldType {
 
 	if (!fieldRec.vector && fieldRec.scalarValue == null)
 	  {
-	    copy.fields.removeNoSync(fieldRec.fieldcode);
+	    copy.clearField(fieldRec.fieldcode);
 
 	    continue;
 	  }
@@ -766,7 +766,9 @@ public class DBObjectDeltaRec implements FieldType {
 	if (!fieldRec.vector)
 	  {
 	    fieldRec.scalarValue.setOwner(copy);
-	    copy.fields.putNoSync(fieldRec.scalarValue);
+
+	    copy.clearField(fieldRec.fieldcode);
+	    copy.replaceField(fieldRec.scalarValue);
 
 	    continue;
 	  }
@@ -781,7 +783,7 @@ public class DBObjectDeltaRec implements FieldType {
 	// can be vectors, we don't have to worry about the password
 	// and permission matrix special-case logic.
 
-	DBField field = (DBField) copy.getField(fieldRec.fieldcode);
+	DBField field = copy.retrieveField(fieldRec.fieldcode);
 
 	for (int j = 0; j < fieldRec.addValues.size(); j++)
 	  {

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2000/12/07 23:03:25 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2001/01/11 13:54:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1301,73 +1301,74 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		// loop 3: iterate over the fields present in this object
 
-		enum3 = object.fields.elements();
-
-		while (enum3.hasMoreElements())
+		synchronized (object.fieldAry)
 		  {
-		    field = (DBField) enum3.nextElement();
-
-		    if (!(field instanceof InvidDBField))
+		    for (int i = 0; i < object.fieldAry.length; i++)
 		      {
-			continue;	// only check invid fields
-		      }
+			field = object.fieldAry[i];
 
-		    iField = (InvidDBField) field;
-
-		    if (iField.isVector())
-		      {
-			tempVector = iField.getVectVal();
-			vectorEmpty = true;
-
-			// clear out the invid's held in this field pending
-			// successful lookup
-
-			iField.value = new Vector(); 
-
-			// iterate over the invid's held in this vector
-		    
-			enum4 = tempVector.elements();
-
-			while (enum4.hasMoreElements())
+			if (field == null || !(field instanceof InvidDBField))
 			  {
-			    invid = (Invid) enum4.nextElement();
+			    continue;	// only check invid fields
+			  }
 
-			    if (session.viewDBObject(invid) != null)
+			iField = (InvidDBField) field;
+
+			if (iField.isVector())
+			  {
+			    tempVector = iField.getVectVal();
+			    vectorEmpty = true;
+
+			    // clear out the invid's held in this field pending
+			    // successful lookup
+
+			    iField.value = new Vector(); 
+
+			    // iterate over the invid's held in this vector
+		    
+			    enum4 = tempVector.elements();
+
+			    while (enum4.hasMoreElements())
 			      {
-				iField.getVectVal().addElement(invid); // keep this invid
-				vectorEmpty = false;
+				invid = (Invid) enum4.nextElement();
+
+				if (session.viewDBObject(invid) != null)
+				  {
+				    iField.getVectVal().addElement(invid); // keep this invid
+				    vectorEmpty = false;
+				  }
+				else
+				  {
+				    Ganymede.debug("Removing invid: " + invid + 
+						   " from vector field " + iField.getName() +
+						   " from object " +  base.getName() + 
+						   ":" + object.getLabel());
+				    swept = true;
+				  }
 			      }
-			    else
+
+			    // now, if the vector is totally empty, we'll be removing
+			    // this field from definition
+
+			    if (vectorEmpty)
 			      {
+				removeVector.addElement(new Short(iField.getID()));
+			      }
+			  }
+			else
+			  {
+			    invid = (Invid) iField.value;
+
+			    if (session.viewDBObject(invid) == null)
+			      {
+				swept = true;
+				removeVector.addElement(new Short(iField.getID()));
+
 				Ganymede.debug("Removing invid: " + invid + 
-					       " from vector field " + iField.getName() +
+					       " from scalar field " + iField.getName() +
 					       " from object " +  base.getName() + 
 					       ":" + object.getLabel());
-				swept = true;
 			      }
-			  }
-
-			// now, if the vector is totally empty, we'll be removing
-			// this field from definition
-
-			if (vectorEmpty)
-			  {
-			    removeVector.addElement(new Short(iField.getID()));
-			  }
-		      }
-		    else
-		      {
-			invid = (Invid) iField.value;
-
-			if (session.viewDBObject(invid) == null)
-			  {
-			    swept = true;
-			    removeVector.addElement(new Short(iField.getID()));
-
-			    Ganymede.debug("Removing invid: " + invid + 
-					   " from scalar field " + iField.getName() +
-					   " from object " +  base.getName() + 
-					   ":" + object.getLabel());
 			  }
 		      }
 		  }
@@ -1376,7 +1377,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		for (int i = 0; i < removeVector.size(); i++)
 		  {
-		    object.fields.remove(((Short) removeVector.elementAt(i)).shortValue());
+		    object.clearField(((Short) removeVector.elementAt(i)).shortValue());
 
 		    Ganymede.debug("Undefining (now) empty field: " + 
 				   removeVector.elementAt(i) +
@@ -1484,24 +1485,25 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		// loop over the fields in this object	    
 
-		enum3 = object.fields.elements();
-
-		while (enum3.hasMoreElements())
+		synchronized (object.fieldAry)
 		  {
-		    field = (DBField) enum3.nextElement();
-
-		    // we only care about invid fields
-
-		    if (!(field instanceof InvidDBField))
+		    for (int i = 0; i < object.fieldAry.length; i++)
 		      {
-			continue;
-		      }
-
-		    iField = (InvidDBField) field;
-		
-		    if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
-		      {
-			ok = false;
+			field = object.fieldAry[i];
+			
+			// we only care about invid fields
+			
+			if (field == null || !(field instanceof InvidDBField))
+			  {
+			    continue;
+			  }
+			
+			iField = (InvidDBField) field;
+			
+			if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+			  {
+			    ok = false;
+			  }
 		      }
 		  }
 	      }
