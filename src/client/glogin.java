@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,8 @@ import jdj.*;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.ganymede.*;
+import arlut.csd.Util.ParseArgs;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -91,38 +93,13 @@ public class glogin extends JApplet implements Runnable {
   {
     WeAreApplet = false;
 
-    for (int i = 0; i < args.length; i++)
+    debug = ParseArgs.switchExists("-debug", args);
+    properties_file = ParseArgs.getArg("-properties", args);
+
+
+    if (properties_file == null)
       {
-	System.out.println("Dealing with: " + args[i]);
-	if (args[i].equals("-debug"))
-	  {
-	    System.out.println("Starting up in debug mode.");
-	    debug = true;
-	  }
-	else if (args[i].equals("-properties"))
-	  {
-	    if ((i + 1) < args.length)
-	      {
-		System.out.println("Incrementing i");
-		properties_file = args[++i];
-
-		if (properties_file.equals("-debug"))
-		  {
-		    throw new IllegalArgumentException("-properties takes a String argument.  Example:\n\n  glogin -properties properties_file\n\n");
-		  }
-		    
-	      }
-	    else
-	      {
-		System.out.println("-properties takes a String argument.  Example:\n\n  glogin -properties properties_file\n\n");
-	      }
-	  }
-	else
-	  {
-	    System.out.println("Unknown command: " + args[i]);
-	    System.out.println("\nThe only two know command line options are -debug and -properties <property file>\n");
-	  }
-
+	throw new IllegalArgumentException("-properties takes a String argument.  Example:\n\n  glogin -properties=properties_file\n\n");
       }
 
     my_glogin = new glogin();
@@ -130,12 +107,11 @@ public class glogin extends JApplet implements Runnable {
 
     if (properties_file != null)
       {
-	System.out.println("Opening properties file: " + properties_file);
-
 	ganymedeProperties = new Properties();
 	
 	if (debug)
 	  {
+	    System.out.println("Starting up in debug mode.");
 	    System.out.println("Loading properties from: " + properties_file);
 	  }
 
