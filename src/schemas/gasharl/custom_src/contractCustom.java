@@ -4,10 +4,10 @@
 
    This file is a management class for automounter map objects in Ganymede.
    
-   Created: 6 December 1997
+   Created: 15 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/03/15 22:22:53 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/03/15 22:55:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -105,15 +105,9 @@ public class contractCustom extends DBEditObject implements SchemaConstants {
 
   public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
-    // we want anyone to be able to link into the auto.home.default
-    // map.
+    // we want anyone to be able to link a group to this contract
 
-    if (!object.getLabel().equals("auto.home.default"))
-      {
-	return false;
-      }
-
-    if (fieldID == mapSchema.ENTRIES)
+    if (fieldID == contractSchema.CONTRACTGROUPS)
       {
 	return true;
       }
