@@ -11,7 +11,7 @@
    StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,9 +45,14 @@ import arlut.csd.Util.*;
 
 public class DBLog {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
+
+  String logFileName = null;
+  File logFile = null;
+  FileOutputStream logStream = null;
+  PrintWriter logWriter = null;
 
   /**
    *
@@ -56,20 +61,68 @@ public class DBLog {
    */
 
   String signature = null;
-  String logFileName = null;
-  File logFile = null;
-  FileOutputStream logStream = null;
-  PrintWriter logWriter = null;
+
+  /**
+   *
+   * We use this Date object to track the time of the last log event
+   * recorded.
+   *
+   */
+
   Date currentTime = new Date();
+
+  /**
+   *
+   * This variable tracks whether the log file has been closed, or whether
+   * it is open for append.  If true, the log file may not be written to.
+   *
+   */
+
   boolean closed = false;
 
   /**
    *
    * We keep a table of the system event codes to speed the logging process.
+   * This hash maps system event classTokens to instances of systemEventType.
+   *
+   * @see arlut.csd.ganymede.systemEventType
    *
    */
 
-  Hashtable eventCodes = new Hashtable(); // maps event codes strings to DBObjects
+  Hashtable sysEventCodes = new Hashtable();
+
+  /**
+   *
+   * This field keeps track of when we last updated the sysEventCodes
+   * hash, so that we can check against the timestamp held in the
+   * System Event DBObjectBase to see whether we need to refresh the
+   * sysEventCodes hash.
+   * 
+   */
+
+  Date sysEventCodesTimeStamp = null;
+
+  /**
+   *
+   * We keep a table of the system event codes to speed the logging process.
+   * This hash maps object event classTokens to instances of objectEventType.
+   *
+   * @see arlut.csd.ganymede.objectEventType
+   *
+   */
+
+  Hashtable objEventCodes = new Hashtable();
+
+  /**
+   *
+   * This field keeps track of when we last updated the objEventCodes
+   * hash, so that we can check against the timestamp held in the
+   * Object Event DBObjectBase to see whether we need to refresh the
+   * objEventCodes hash.
+   * 
+   */
+
+  Date objEventCodesTimeStamp = null;
 
   /**
    *
@@ -87,6 +140,15 @@ public class DBLog {
 
   SharedStringBuffer multibuffer = new SharedStringBuffer();
 
+  /**
+   *
+   * GanymedeSession reference to allow the log code to do searching
+   * of the database, etc.
+   *
+   */
+
+  GanymedeSession session = null;
+
   /* -- */
 
   public DBLog(String filename, GanymedeSession session) throws IOException
@@ -94,6 +156,8 @@ public class DBLog {
     // get the signature to append to mail messages
 
     loadSignature();
+
+    this.session = session;
 
     logFileName = filename;
     logStream = new FileOutputStream(logFileName, true); // append
@@ -105,28 +169,9 @@ public class DBLog {
     // speedy lookup of event codes without having to synchronize on
     // the main objectBase hashes during logging
 
-    if (debug)
-      {
-	System.err.println("Opened log file.. searching for event objects");
-      }
+    updateSysEventCodeHash();
 
-    Vector eventCodeVector = session.internalQuery(new Query(SchemaConstants.EventBase));
-    Result entry;
-
-    if (eventCodeVector != null)
-      {
-	for (int i = 0; i < eventCodeVector.size(); i++)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Processing event object # " + i);
-	      }
-
-	    entry = (Result) eventCodeVector.elementAt(i);
-	    
-	    eventCodes.put(entry.toString(), new eventType(session.session.viewDBObject(entry.getInvid())));
-	  }
-      }
+    updateObjEventCodeHash();
 
     // initalize our mailer
 
@@ -163,13 +208,15 @@ public class DBLog {
    * strings will be extracted from the event's database record
    *
    * @param event A single event to be logged, with its own timestamp.
-   * 
+   * @param mailToOwners If true, this event's mail will go to the owners
+   * of any objects referenced by event.
+   *  
    */
 
   public synchronized void mailNotify(String title, String description,
 				      DBLogEvent event, boolean mailToOwners)
   {
-    eventType type;
+    systemEventType type;
 
     /* -- */
 
@@ -180,8 +227,10 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("Writing log event " + event.eventClassToken);
+	System.err.println("DBLopg.mailNotify(): Writing log event " + event.eventClassToken);
       }
+
+    updateSysEventCodeHash();
 
     // we calculate the list of email addresses that we want to send this
     // event's notifcation to.. we do it before the writeEntry() call so
@@ -189,88 +238,78 @@ public class DBLog {
 
     if (mailToOwners)
       {
-	event.augmentNotifyVect();
+	calculateMailTargets(event);
       }
+
+    // log the event to the log file.
 
     currentTime.setTime(System.currentTimeMillis());
     event.writeEntry(logWriter, currentTime, null);
     
-    type = (eventType) eventCodes.get(event.eventClassToken);
+    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
     if (type == null)
       {
+	Ganymede.debug("Error in DBLog.mailNotify(): unrecognized eventClassToken: " + 
+		       event.eventClassToken);
 	return;
       }
 
-    if (type.mail)
+    if (!type.mail)
       {
-	if (debug)
-	  {
-	    System.err.println("Attempting to email log event " + event.eventClassToken);
-	  }
+	Ganymede.debug("Logic error in DBLog.mailNotify():  eventClassToken not configured for mail delivery: " + 
+		       event.eventClassToken);
+	return;
+      }
+    
+    if (debug)
+      {
+	System.err.println("Attempting to email log event " + event.eventClassToken);
+      }
 
-	// prepare our message, word wrap it
+    // prepare our message, word wrap it
 
-	String message = type.description + "\n\n" + event.description + "\n\n";
+    String message = type.description + "\n\n" + event.description + "\n\n";
 
-	if (description != null)
-	  {
-	    message = message + description + "\n\n";
-	  }
+    if (description != null)
+      {
+	message = message + description + "\n\n";
+      }
+    
+    message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-	message = arlut.csd.Util.WordWrap.wrap(message, 78);
+    // the signature is pre-wrapped
 	
-	message = message + signature;
+    message = message + signature;
 
-	// get our list of recipients
+    // get our list of recipients from the event's enumerated list of recipients
+    // and the event code's address list.
 
-	Vector emailList = new Vector();
+    Vector emailList = VectorUtils.union(event.notifyVect, type.addressVect);
 
-	// first, get the list of recipients from the event's list
+    // and now..
+    
+    try
+      {
+	// bombs away!
 
-	if (event.notifyVect != null)
-	  {
-	    for (int i = 0; i < event.notifyVect.size(); i++)
-	      {
-		emailList.addElement(event.notifyVect.elementAt(i));
-	      }
-	  }
+	mailer.sendmsg(Ganymede.returnaddrProperty,
+		       emailList,
+		       "Ganymede: " + ((title == null) ? type.name : title),
+		       message);
+      }
+    catch (UnknownHostException ex)
+      {
+	throw new RuntimeException("Couldn't figure address " + ex);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("IO problem " + ex);
+      }
 
-	// then add any we have that the database says should be told 
-	// for this event type
-
-	if (type.addressVect != null)
-	  {
-	    for (int i = 0; i < type.addressVect.size(); i++)
-	      {
-		emailList.addElement(type.addressVect.elementAt(i));
-	      }
-	  }
-
-	// and now..
-
-	try
-	  {
-	    // bombs away!
-
-	    mailer.sendmsg(Ganymede.returnaddrProperty,
-			   emailList,
-			   "Ganymede: " + ((title == null) ? type.name : title),
-			   message);
-	  }
-	catch (UnknownHostException ex)
-	  {
-	    throw new RuntimeException("Couldn't figure address " + ex);
-	  }
-	catch (IOException ex)
-	  {
-	    throw new RuntimeException("IO problem " + ex);
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Completed emailing log event " + event.eventClassToken);
-	  }
+    if (debug)
+      {
+	System.err.println("Completed emailing log event " + event.eventClassToken);
       }
   }
 
@@ -286,7 +325,7 @@ public class DBLog {
 
   public synchronized void logSystemEvent(DBLogEvent event)
   {
-    eventType type;
+    systemEventType type;
 
     /* -- */
 
@@ -297,8 +336,10 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("Writing log event " + event.eventClassToken);
+	System.err.println("DBLog.logSystemEvent(): Writing log event " + event.eventClassToken);
       }
+
+    updateSysEventCodeHash();
 
     currentTime.setTime(System.currentTimeMillis());
 
@@ -307,7 +348,7 @@ public class DBLog {
 
     event.writeEntry(logWriter, currentTime, null);
     
-    type = (eventType) eventCodes.get(event.eventClassToken);
+    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
     if (type == null)
       {
@@ -402,6 +443,14 @@ public class DBLog {
 	throw new RuntimeException("log already closed.");
       }
 
+    if (debug)
+      {	
+	System.err.println("DBLog.logTransaction(): Logging transaction for  " + adminName);
+      }
+
+    updateSysEventCodeHash();
+    updateObjEventCodeHash();
+
     currentTime.setTime(System.currentTimeMillis());
     transactionID = adminName + ":" + currentTime.getTime();
 
@@ -442,14 +491,26 @@ public class DBLog {
 
 	if (debug)
 	  {
-	    System.err.println("Writing: " + event.description);
+	    System.err.println("DBLog.logTransaction(): logging event: " + event.description);
 	  }
+
+	// first, if we have a recognizable object-specific event happening,
+	// send out the notification for it.
+
+	sendObjectMail(event);
+
+	// now, go ahead and add to the mail buffers we are prepping
+	// to describe this whole transaction
 
 	// we are keeping a bunch of buffers, one for each combination
 	// of email addresses that we've encountered.. different
 	// addresses or groups of addresses may get a different subset
 	// of the mail for this transaction, the mailOut logic handles
 	// that.
+
+	// appendMailOut() takes care of calling calculateMailTargets()
+	// on event, which handles calculating who needs to receive
+	// email about this event.
 
 	appendMailOut(event, mailOuts);
 	event.writeEntry(logWriter, currentTime, transactionID);
@@ -472,7 +533,8 @@ public class DBLog {
     while (enum.hasMoreElements())
       {
 	MailOut mailout = (MailOut) enum.nextElement();
-	String description = arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + "\n" + signature;
+	String description = arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + 
+	  "\n" + signature;
 
 	if (debug)
 	  {
@@ -509,8 +571,8 @@ public class DBLog {
    * occuring on or after the time specified in this Date object.
    *
    * @param keyOnAdmin if true, rather than returning a string containing events
-   * that involved <invid>, retrieveHistory() will return a string containing events
-   * performed on behalf of the administrator with invid <invid>.
+   * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
+   * performed on behalf of the administrator with invid &lt;invid&gt;.
    *
    * @return A human-readable multiline string containing a list of history events
    *
@@ -680,6 +742,562 @@ public class DBLog {
 
   /**
    *
+   * This mail sends out the 'auxiliary' type specific log information
+   * to designated users, using the object event objects in the Ganymede
+   * database.  This mail is sent for a distinct eventcode/object type pair,
+   * outside of the context of a transaction.
+   *
+   */
+
+  private void sendObjectMail(DBLogEvent event)
+  {
+    if (event == null || event.objects == null || event.objects.size() != 1)
+      {
+	return;
+      }
+
+    /* - */
+
+    Invid objectInvid = (Invid) event.objects.elementAt(0);
+    String key = event.eventClassToken + ":" + objectInvid.getType();
+    objectEventType eventRec = (objectEventType) objEventCodes.get(key);
+
+    /* -- */
+
+    if (eventRec == null)
+      {
+	return;
+      }
+
+    if (debug)
+      {
+	System.err.println("DBLog.sendObjectMail(): processing object Event " + eventRec.token);
+      }
+
+    // ok.  now we've got an objectEventType, so we will want to send out
+    // mail for this event.
+
+    Vector mailList = new Vector();
+
+    if (eventRec.ccToSelf)
+      {
+	String name;
+
+	name = convertAdminInvidToString(event.admin);
+
+	if (name == null)
+	  {
+	    name = event.adminName;
+	  }
+
+	mailList.addElement(name);
+      }
+
+    if (eventRec.ccToOwners)
+      {
+	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects));
+      }
+
+    mailList = VectorUtils.union(mailList, eventRec.addressVect);
+
+    // okay, we want to tell mailList about what happened.
+
+    String title;
+
+    if (eventRec.name != null)
+      {
+	title = "Ganymede: " + eventRec.name;
+      }
+    else
+      {
+	title = "Ganymede: " + eventRec.token;
+      }
+
+    String message = eventRec.description + "\n\n" + event.description;
+
+    message = arlut.csd.Util.WordWrap.wrap(message, 78);
+
+    message = message + signature;
+
+    try
+      {
+	// bombs away!
+
+	mailer.sendmsg(Ganymede.returnaddrProperty,
+		       mailList,
+		       title,
+		       message);
+      }
+    catch (UnknownHostException ex)
+      {
+	throw new RuntimeException("Couldn't figure address " + ex);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("IO problem " + ex);
+      }
+  }
+
+  /**
+   *
+   * Private helper method to (re)initialize our local hash of system
+   * event codes.
+   * 
+   */
+
+  private void updateSysEventCodeHash()
+  {
+    Vector eventCodeVector;
+    Result entry;
+
+    /* -- */
+
+    // check our time stamp, make sure we aren't unnecessarily
+    // refreshing
+
+    if (debug)
+      {
+	System.err.println("updateSysEventCodeHash(): entering..");
+      }
+
+    if (sysEventCodesTimeStamp != null)
+      {
+	DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.EventBase);
+
+	if (!eventBase.getTimeStamp().after(sysEventCodesTimeStamp))
+	  {
+	    if (debug)
+	      {
+		System.err.println("updateSysEventCodeHash(): exiting, no work needed..");
+	      }
+
+	    return;
+	  }
+      }
+    
+    if (debug)
+      {
+	System.err.println("updateSysEventCodeHash(): updating..");
+      }
+
+    eventCodeVector = session.internalQuery(new Query(SchemaConstants.EventBase));
+
+    if (eventCodeVector == null)
+      {
+	Ganymede.debug("DBLog.updateSysEventCodeHash(): no event records found in database");
+	return;
+      }
+
+    sysEventCodes.clear();
+      
+    for (int i = 0; i < eventCodeVector.size(); i++)
+      {
+	if (debug)
+	  {
+	    System.err.println("Processing sysEvent object # " + i);
+	  }
+	
+	entry = (Result) eventCodeVector.elementAt(i);
+	
+	sysEventCodes.put(entry.toString(), new systemEventType(session.session.viewDBObject(entry.getInvid())));
+      }
+
+    // remember when we updated our local cache
+
+    if (sysEventCodesTimeStamp == null)
+      {
+	sysEventCodesTimeStamp = new Date();
+      }
+    else
+      {
+	sysEventCodesTimeStamp.setTime(System.currentTimeMillis());
+      }
+
+    if (debug)
+      {
+	System.err.println("updateSysEventCodeHash(): exiting, sysEventCodeHash updated.");
+      }
+  }
+
+  /**
+   *
+   * Private helper method to (re)initialize our local hash of object
+   * event codes.
+   * 
+   */
+
+  private void updateObjEventCodeHash()
+  {
+    Vector eventCodeVector;
+    Result entry;
+    DBObject objEventobj;
+    objectEventType objEventItem;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("updateObjEventCodeHash(): entering..");
+      }
+
+    // check our time stamp, make sure we aren't unnecessarily
+    // refreshing
+
+    if (objEventCodesTimeStamp != null)
+      {
+	DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.ObjectEventBase);
+
+	if (!eventBase.getTimeStamp().after(objEventCodesTimeStamp))
+	  {
+	    return;
+	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("updateObjEventCodeHash(): updating..");
+      }
+
+    eventCodeVector = session.internalQuery(new Query(SchemaConstants.ObjectEventBase));
+
+    if (eventCodeVector == null)
+      {
+	Ganymede.debug("DBLog.updateObjEventCodeHash(): no event records found in database");
+	return;
+      }
+
+    objEventCodes.clear();
+      
+    for (int i = 0; i < eventCodeVector.size(); i++)
+      {
+	if (debug)
+	  {
+	    System.err.println("Processing objEvent object # " + i);
+	  }
+
+	entry = (Result) eventCodeVector.elementAt(i);
+
+	objEventobj = (DBObject) session.session.viewDBObject(entry.getInvid());
+	objEventItem = new objectEventType(objEventobj);
+	objEventCodes.put(objEventItem.hashKey, objEventItem);
+      }
+
+    // remember when we updated our local cache
+
+    if (objEventCodesTimeStamp == null)
+      {
+	objEventCodesTimeStamp = new Date();
+      }
+    else
+      {
+	objEventCodesTimeStamp.setTime(System.currentTimeMillis());
+      }
+  }
+
+  /**
+   *
+   * This method generates a list of additional email addresses that
+   * notification for this event should be sent to, based on the
+   * event's type and the ownership of objects referenced by this
+   * event.<br><br>
+   *
+   * Note that the email addresses added to this event's mail list
+   * will be in addition to any that were previously specified by the
+   * code that originally generated the log event.
+   *    
+   */
+
+  private void calculateMailTargets(DBLogEvent event)
+  {
+    Vector 
+      notifyVect,
+      appendVect;
+
+    /* -- */
+
+    // if the DBLogEvent has aleady been processed by us, we don't
+    // want to redundantly add entries.
+
+    if (event.augmented)
+      {
+	return;
+      }
+
+    if (debug)
+      {
+	System.err.println("calculateMailTargets: entering");
+      }
+
+    // If the event's notifyVect is null, we'll create a new vector,
+    // otherwise, we'll be appending to the existing list.
+
+    notifyVect = event.notifyVect;
+
+    // first we calculate what email addresses we should notify based
+    // on the ownership of the objects
+
+    notifyVect = VectorUtils.union(notifyVect, calculateOwnerAddresses(event.objects));
+
+    // now update notifyList
+
+    event.setMailTargets(notifyVect);
+
+    // The DBLogEvent needs to remember that we've already expanded
+    // its email list.
+
+    event.augmented = true;
+  }
+
+  /**
+   *
+   * This method takes a vector of Invid's representing objects touched
+   * during a transaction, and returns a Vector of email addresses that
+   * should be notified of operations affecting the objects in the
+   * &lt;objects&gt; list.
+   *
+   */
+
+  private Vector calculateOwnerAddresses(Vector objects)
+  {
+    Enumeration objectsEnum, ownersEnum;
+    Invid invid, ownerInvid;
+    InvidDBField ownersField, invidField2;
+    DBObject object, object2;
+    Vector vect;
+    Vector results = new Vector();
+    Hashtable seenOwners = new Hashtable();
+
+    /* -- */
+
+    objectsEnum = objects.elements();
+
+    while (objectsEnum.hasMoreElements())
+      {
+	invid = (Invid) objectsEnum.nextElement();
+	object = Ganymede.internalSession.session.viewDBObject(invid);
+
+	if (object == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Couldn't find invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
+	  }
+
+	// okay, we've got a reference to (one of) the DBObject's being
+	// modified by this event.. what do we want to do with it?
+
+	// we don't want to mess with embedded objects
+
+	if (object.isEmbedded())
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Skipping Embeded invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	// get a list of owners invid's for this object
+
+	ownersField = (InvidDBField) object.getField(SchemaConstants.OwnerListField);
+	
+	if (ownersField == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Couldn't access owner list for invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	vect = ownersField.getValuesLocal();
+
+	if (vect == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Empty owner list for invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	// okay, we have the list of owner invid's for this object.  For each
+	// of these owners, we need to see what email lists and addresses are 
+	// to receive notification
+
+	ownersEnum = vect.elements(); // this object's owner list
+
+	while (ownersEnum.hasMoreElements())
+	  {
+	    ownerInvid = (Invid) ownersEnum.nextElement();
+
+	    if (!seenOwners.containsKey(ownerInvid))
+	      {
+		if (debug)
+		  {
+		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " + 
+				       session.viewObjectLabel(ownerInvid));
+		  }
+
+		results = VectorUtils.union(results, getOwnerGroupAddresses(ownerInvid));
+		
+		seenOwners.put(ownerInvid, ownerInvid);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("DBLog.calculateOwnerAddresses(): returning ");
+      }
+
+    return results;
+  }
+
+  /**
+   *
+   * This method takes an Invid for an Owner Group DBObject
+   * and returns a Vector of Strings containing the list
+   * of email addresses for that owner group.
+   *
+   */
+
+  private Vector getOwnerGroupAddresses(Invid ownerInvid)
+  {
+    DBObject ownerGroup;
+    Vector result = new Vector();
+    InvidDBField emailInvids;
+    StringDBField externalAddresses;
+
+    /* -- */
+
+    ownerGroup = session.session.viewDBObject(ownerInvid);
+
+    if (ownerGroup == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("calculateOwnerGroupAddresses(): Couldn't look up owner group " + 
+			       ownerInvid.toString());
+	  }
+	
+	return result;
+      }
+
+    // should we cc: the admins?
+
+    Boolean cc = (Boolean) ownerGroup.getFieldValueLocal(SchemaConstants.OwnerCcAdmins);
+
+    if (cc != null && cc.booleanValue())
+      {
+	Vector adminList = new Vector();
+	Vector adminInvidList;
+	Invid adminInvid;
+	String adminAddr;
+
+	adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+
+	for (int i = 0; i < adminInvidList.size(); i++)
+	  {
+	    adminInvid = (Invid) adminInvidList.elementAt(i);
+	    adminAddr = convertAdminInvidToString(adminInvid);
+
+	    if (adminAddr != null)
+	      {
+		adminList.addElement(adminAddr);
+	      }
+	  }
+
+	result = VectorUtils.union(result, adminList);
+      }
+
+    // do we have any external addresses?
+
+    externalAddresses = (StringDBField) ownerGroup.getField(SchemaConstants.OwnerExternalMail);
+
+    if (externalAddresses == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("calculateOwnerGroupAddresses(): No external mail list defined for owner group " + 
+			       ownerInvid.toString());
+	  }
+      }
+    else
+      {
+	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This method takes an Invid pointing to an Admin persona
+   * record, and returns a string that can be used to send
+   * email to that person.  This method will return null
+   * if no address could be determined for this administrator.
+   *
+   */
+
+  private String convertAdminInvidToString(Invid adminInvid)
+  {
+    DBObject admin;
+    String address;
+    int colondex;
+
+    /* -- */
+
+    if (adminInvid.getType() != SchemaConstants.PersonaBase)
+      {
+	throw new RuntimeException("not an administrator invid");
+      }
+
+    admin = session.session.viewDBObject(adminInvid);
+
+    address = (String) admin.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
+
+    if (address == null)
+      {
+	// okay, we got no address pre-registered for this
+	// admin.. we need now to try to guess at one, by looking
+	// to see this admin's name is of the form user:role, in
+	// which case we can just try to send to 'user', which will
+	// work as long as Ganymede's users cohere with the user names
+	// at Ganymede.mailHostProperty.
+
+	String adminName = session.viewObjectLabel(adminInvid);
+
+	colondex = adminName.indexOf(':');
+	
+	if (colondex == -1)
+	  {
+	    return null;
+	  }
+    
+	address = adminName.substring(0, colondex);
+      }
+
+    return address;
+  }
+
+  /**
+   *
    * This method takes a DBLogEvent object, scans it to determine
    * what mailing lists should be notified of the event in the
    * context of a transaction, and adds a description of the
@@ -700,7 +1318,7 @@ public class DBLog {
 
     /* -- */
 
-    event.augmentNotifyVect();
+    calculateMailTargets(event);
     
     enum = event.notifyVect.elements();
 
@@ -768,18 +1386,18 @@ public class DBLog {
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                       eventType
+                                                                 systemEventType
 
 ------------------------------------------------------------------------------*/
 
 /**
  *
- * This class is used to store event information derived from the Ganymede
- * database.
- *
+ * This class is used to store system event information derived from
+ * the Ganymede database.
+ * 
  */
 
-class eventType {
+class systemEventType {
 
   String token;
   String name;
@@ -793,7 +1411,7 @@ class eventType {
 
   /* -- */
 
-  eventType(DBObject obj)
+  systemEventType(DBObject obj)
   {
     token = getString(obj, SchemaConstants.EventToken);
     name = getString(obj, SchemaConstants.EventName);
@@ -839,44 +1457,161 @@ class eventType {
   {
     StringBuffer result = new StringBuffer();
     InvidDBField invF;
+    StringDBField strF;
     Enumeration enum;
     Invid tmpI;
     String tmpS;
 
     /* -- */
 
-    invF = (InvidDBField) obj.getField(SchemaConstants.EventMailList);
-    
-    if (invF == null)
-      {
-	addressVect = new Vector(); // empty vect
-	return "";
-      }
-
     addressVect = new Vector();
 
-    enum = invF.values.elements();
+    // Get the list of addresses from the object's external email
+    // string list.. we use union here so that we don't get
+    // duplicates.
 
-    while (enum.hasMoreElements())
+    strF = (StringDBField) obj.getField(SchemaConstants.EventExternalMail);
+
+    if (strF != null)
       {
-	tmpI = (Invid) enum.nextElement();
-
-	if (tmpI != null)
-	  {
-	    tmpS = Ganymede.internalSession.viewObjectLabel(tmpI);
-
-	    addressVect.addElement(tmpS);	    
-	  }
+	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
       }
-
+	
+    // and create the address string
+    
     for (int i = 0; i < addressVect.size(); i++)
       {
 	if (i > 0)
 	  {
 	    result.append(", ");
 	  }
-
+	
 	result.append((String) addressVect.elementAt(i));
+      }
+
+    return result.toString();
+  }
+
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                 objectEventType
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class is used to store object event information derived from
+ * the Ganymede database.
+ * 
+ */
+
+class objectEventType {
+
+  String token;
+  short objType;
+  String name;
+  String description;
+  String addresses;
+  Vector addressVect;
+  boolean ccToSelf;
+  boolean ccToOwners;
+  String hashKey;
+
+  private DBField f;
+
+  /* -- */
+
+  objectEventType(DBObject obj)
+  {
+    token = getString(obj, SchemaConstants.ObjectEventToken);
+    name = getString(obj, SchemaConstants.ObjectEventName);
+    description = getString(obj, SchemaConstants.ObjectEventDescription);
+    addresses = getAddresses(obj);
+    ccToSelf = getBoolean(obj, SchemaConstants.ObjectEventMailToSelf);
+    ccToOwners = getBoolean(obj, SchemaConstants.ObjectEventMailOwners);
+    objType = (short) getInt(obj, SchemaConstants.ObjectEventObjectType);
+
+    hashKey = token + ":" + objType;
+  }
+
+  private String getString(DBObject obj, short fieldId)
+  {
+    f = (DBField) obj.getField(fieldId);
+
+    if (f == null)
+      {
+	return "";
+      }
+
+    return (String) f.getValueLocal();
+  }
+
+  private boolean getBoolean(DBObject obj, short fieldId)
+  {
+    f = (DBField) obj.getField(fieldId);
+
+    if (f == null)
+      {
+	return false;
+      }
+
+    return ((Boolean) f.getValueLocal()).booleanValue();
+  }
+
+  private int getInt(DBObject obj, short fieldId)
+  {
+    f = (DBField) obj.getField(fieldId);
+
+    // we'll go ahead and throw a NullPointerException if
+    // f isn't defined.
+
+    return ((Integer) f.getValueLocal()).intValue();
+  }
+
+  /**
+   *
+   * This method takes an event definition object and extracts
+   * a list of email addresses to which mail will be sent when
+   * an event of this type is logged.
+   *
+   */
+
+  private String getAddresses(DBObject obj)
+  {
+    StringBuffer result = new StringBuffer();
+    InvidDBField invF;
+    StringDBField strF;
+    Enumeration enum;
+    Invid tmpI;
+    String tmpS;
+
+    /* -- */
+
+    addressVect = new Vector();
+
+    // Get the list of addresses from the object's external email
+    // string list.. we use union here so that we don't get
+    // duplicates.
+
+    strF = (StringDBField) obj.getField(SchemaConstants.ObjectEventExternalMail);
+
+    if (strF != null)
+      {
+	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
+
+	// and create the address string
+
+	for (int i = 0; i < addressVect.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+	    
+	    result.append((String) addressVect.elementAt(i));
+	  }
       }
 
     return result.toString();

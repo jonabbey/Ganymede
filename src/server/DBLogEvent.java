@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -557,164 +557,36 @@ public class DBLogEvent {
 
   /**
    *
-   * This method augments the notify list vector with a list of
-   * all non-supergash personae that have ownership
-   *
+   * This method is used by DBLog to set the list of email targets
+   * that this event will need to be mailed to.
+   * 
    */
 
-  public void augmentNotifyVect()
+  public synchronized void setMailTargets(Vector mailTargets)
   {
-    Enumeration enum, enum2;
-    Invid invid, invid2, invid3;
-    InvidDBField invidField, invidField2;
-    DBObject object, object2;
-    Vector vect;
-    
-    /* -- */
+    this.notifyVect = mailTargets;
 
-    if (augmented)
+    if (mailTargets == null)
       {
 	return;
       }
 
-    if (debug)
+    // we want to set the notifyList String as well as the
+    // notifyVect vector..
+    
+    this.multibuffer.setLength(0);
+
+    for (int i = 0; i < notifyVect.size(); i++)
       {
-	System.err.println("augmentNotifyVect: entering");
-      }
-
-    if (notifyVect == null)
-      {
-	notifyVect = new Vector();
-      }
-
-    // examine the list of invid's that are involved in this event
-
-    enum = objects.elements();
-
-    while (enum.hasMoreElements())
-      {
-	invid = (Invid) enum.nextElement();
-	object = Ganymede.internalSession.session.viewDBObject(invid);
-
-	if (object == null)
+	if (i > 0)
 	  {
-	    if (debug)
-	      {
-		System.err.println("augmentNotifyVect: Couldn't find invid " + invid.toString());
-	      }
-
-	    continue;
+	    this.multibuffer.append(", ");
 	  }
-
-	if (object.isEmbedded())
-	  {
-	    if (debug)
-	      {
-		System.err.println("augmentNotifyVect: Skipping Embeded invid " + invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	invidField = (InvidDBField) object.getField(SchemaConstants.OwnerListField);
-	
-	if (invidField == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("augmentNotifyVect: Couldn't access owner list for invid " + invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	vect = invidField.getValues();
-
-	if (vect == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("augmentNotifyVect: Empty owner list for invid " + invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	enum2 = vect.elements(); // this object's owner list
-
-	while (enum2.hasMoreElements())
-	  {
-	    invid2 = (Invid) enum2.nextElement();
-
-	    if (invid2.getNum() == 0)
-	      {
-		continue;	// don't want supergash
-	      }
-
-	    object2 = Ganymede.internalSession.session.viewDBObject(invid2);
-
-	    if (object2 == null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("augmentNotifyVect: Couldn't look up owner group " + 
-				       invid2.toString() + " for invid " + invid.toString());
-		  }
-
-		continue;
-	      }
-
-	    // now, what mail lists should we add?
-
-	    invidField2 = (InvidDBField) object2.getField(SchemaConstants.OwnerMailList);
-
-	    if (invidField2 == null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("augmentNotifyVect: No mail list defined for owner group " + 
-				       invid2.toString() + " for invid " + invid.toString());
-		  }
-
-		continue;
-	      }
-
-	    Vector tmpVect = invidField2.getValues();
-
-	    if (tmpVect == null)
-	      {
-		continue;
-	      }
-
-	    for (int i = 0; i < tmpVect.size(); i++)
-	      {
-		invid3 = (Invid) tmpVect.elementAt(i);
-
-		notifyVect.addElement(Ganymede.internalSession.viewObjectLabel(invid3));
-	      }
-	  }
-      }
-
-    // now update notifyList
-
-    if (notifyVect != null)
-      {
-	multibuffer.setLength(0);
-
-	for (int i = 0; i < notifyVect.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		multibuffer.append(", ");
-	      }
 	    
-	    multibuffer.append((String) notifyVect.elementAt(i));
-	  }
-
-	this.notifyList = multibuffer.toString();
+	this.multibuffer.append((String) notifyVect.elementAt(i));
       }
-
-    augmented = true;
+    
+    this.notifyList = multibuffer.toString();
   }
 
   /**
