@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -266,18 +266,27 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     String cryptedPass;
     int uid;
     int gid;
-    String name;
-    String room;
-    String div;
-    String officePhone;
-    String homePhone;
     String directory;
     String shell;
+    String purpose;
+
+    // person info
+
+    String firstName = null;
+    String lastName = null;
+    String room = null;
+    String div = null;
+    String officePhone = null;
+    String homePhone = null;
 
     PasswordDBField passField;
     Vector invids;
+
     Invid groupInvid;
-    DBObject group;
+    DBObject group = null;
+
+    Invid personInvid;
+    DBObject person = null;
 
     StringBuffer result = new StringBuffer();
 
@@ -296,12 +305,12 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	System.err.println("NISBuilder.writeUserLine(): null password for user " + username);
 	cryptedPass = "**Nopass**";
       }
-
-    uid = ((Integer) object.getFieldValueLocal((short) 256)).intValue();
-
+    
+    uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
+    
     // get the gid
     
-    groupInvid = (Invid) object.getFieldValueLocal((short) 265); // home group
+    groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP);
 
     if (groupInvid == null)
       {
@@ -311,16 +320,34 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     else
       {
 	group = getObject(groupInvid);
-	gid = ((Integer) group.getFieldValueLocal((short) 258)).intValue();
+	gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
       }
 
-    name = (String) object.getFieldValueLocal((short) 257);
-    room = (String) object.getFieldValueLocal((short) 259);
-    div = (String) object.getFieldValueLocal((short) 258);
-    officePhone = (String) object.getFieldValueLocal((short) 260);
-    homePhone = (String) object.getFieldValueLocal((short) 261);
-    directory = (String) object.getFieldValueLocal((short) 262);
-    shell = (String) object.getFieldValueLocal((short) 263);
+    personInvid = (Invid) object.getFieldValueLocal(userSchema.PERSON);
+    
+    if (personInvid == null)
+      {
+	System.err.println("NISBuilder.writeUserLine(): null person for user " + username);
+      }
+    else
+      {
+	person = getObject(personInvid);
+      }
+
+    if (person != null)
+      {
+	firstName = (String) person.getFieldValueLocal(personSchema.FIRSTNAME);
+	lastName = (String) person.getFieldValueLocal(personSchema.LASTNAME);
+	room = (String) person.getFieldValueLocal(personSchema.ROOM);
+	div = (String) person.getFieldValueLocal(personSchema.DIVISION);
+	officePhone = (String) person.getFieldValueLocal(personSchema.OFFICEPHONE);
+	homePhone = (String) person.getFieldValueLocal(personSchema.HOMEPHONE);
+      }
+
+    purpose = (String) object.getFieldValueLocal(userSchema.PURPOSE);
+
+    directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
+    shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
 
     // now build our output line
 
@@ -332,19 +359,40 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     result.append(":");
     result.append(Integer.toString(gid));
     result.append(":");
-    result.append(name);
-    result.append(",");
-    result.append(room);
-    result.append(" ");
-    result.append(div);
-    result.append(",");
-    result.append(officePhone);
 
-    if (homePhone != null && !homePhone.equals(""))
+    if (person != null)
       {
+	result.append(firstName);
+	result.append(" ");
+	result.append(lastName);
+
+	if (purpose != null && !purpose.equals(""))
+	  {
+	    result.append(" (");
+	    result.append(purpose);
+	    result.append(")");
+	  }
+
 	result.append(",");
-	result.append(homePhone);
+	result.append(room);
+	result.append(" ");
+	result.append(div);
+	result.append(",");
+	result.append(officePhone);
+	
+	if (homePhone != null && !homePhone.equals(""))
+	  {
+	    result.append(",");
+	    result.append(homePhone);
+	  }
       }
+    else
+      {
+	if (purpose != null && !purpose.equals(""))
+	  {
+	    result.append(purpose);
+	  }
+      }     
 
     result.append(":");
     result.append(directory);
@@ -389,21 +437,23 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    groupname = (String) object.getFieldValueLocal((short) 256);
+    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
     // currently in the Ganymede schema, group passwords aren't in passfields.
 
-    pass = (String) object.getFieldValueLocal((short) 257);
-    gid = ((Integer) object.getFieldValueLocal((short) 258)).intValue();
+    pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
+    gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
     
-    // we currently don't explicitly record the home group.. just take the first group
-    // that the user is in.
+    // We don't need to list out the users that have this group set as
+    // their default UNIX home group, because UNIX sets the groups for
+    // a user as the union of the gid in the passwd entry and the
+    // groups that they are explicitly listed in in the group file.
 
-    invids = object.getFieldValuesLocal((short) 261);
+    invids = object.getFieldValuesLocal(groupSchema.USERS);
 
     if (invids == null)
       {
-	// System.err.println("NISBuilder.writeUserLine(): null user list for group " + groupname);
+	// System.err.println("NISBuilder.writeGroupLine(): null user list for group " + groupname);
       }
     else
       {
