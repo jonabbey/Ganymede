@@ -200,7 +200,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * being set to null
    */
 
-  protected boolean deleting = false;	
+  private boolean deleting = false;	
 
   /**
    * tracks this object's editing status.  See
@@ -2631,22 +2631,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					  ts.l("finalizeRemove.errorTxt", label));
       }
 
-    // we want to delete / null out all fields.. this will take care
-    // of invid links, embedded objects, and namespace allocations.
-    
-    // set the deleting flag to true so that our subclasses won't
-    // freak about values being set to null.
-
-    // NOTE: notice that we don't log a DBLogEvent for the object's
-    // deletion anywhere in this method, as is done similarly in
-    // finalizeInactivate() and finalizeReactivate().  Logging for
-    // object removal, like that for object creation and editing, is
-    // done in DBEditSet.commit().  We have to take care of logging
-    // for inactivation and reactivation in finalizeInactivate() and
-    // finalizeReactivate() because otherwise we have no way of
-    // determining that we inactivated or reactivated an object in the
-    // context of the DBEditSet.commit() method.
-
     if (debug)
       {
 	System.err.println("++ Attempting to delete object " + label);
@@ -2665,6 +2649,22 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      }
 	  }
       }
+
+    // we want to delete / null out all fields.. this will take care
+    // of invid links, embedded objects, and namespace allocations.
+    
+    // set the deleting flag to true so that our subclasses won't
+    // freak about values being set to null.
+
+    // NOTE: notice that we don't log a DBLogEvent for the object's
+    // deletion anywhere in this method, as is done similarly in
+    // finalizeInactivate() and finalizeReactivate().  Logging for
+    // object removal, like that for object creation and editing, is
+    // done in DBEditSet.commit().  We have to take care of logging
+    // for inactivation and reactivation in finalizeInactivate() and
+    // finalizeReactivate() because otherwise we have no way of
+    // determining that we inactivated or reactivated an object in the
+    // context of the DBEditSet.commit() method.
 
     this.deleting = true;
 
@@ -2753,10 +2753,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      }
 	    else
 	      {
-		// permission matrices and passwords don't allow us to
-		// call set value directly.  We're mainly concerned
-		// with invid's (for linking), i.p. addresses and
-		// strings (for the namespace) here anyway.
+		// permission and field option matrices, along with
+		// passwords, don't allow us to call set value
+		// directly.  We're mainly concerned with invid's (for
+		// linking), i.p. addresses and strings (for the
+		// namespace) here anyway.
 		
 		if (debug)
 		  {
@@ -3554,7 +3555,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * DBObjectBase.</p>
    *
    * @param changedFieldDefs If not null, this parameter will be a
-   * hashtable that the diff algorithm should insert unity mappings
+   * HashMap that the diff algorithm should insert unity mappings
    * for each DBObjectBaseField whose value was found to have changed
    * in this diff.
    *
