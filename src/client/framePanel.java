@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -102,10 +102,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   db_field[]
     fields;
 
-  JTextArea
-    notesArea;
-
-  int 
+  int
     row = 0;
 
   boolean 
