@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.64 $ %D%
+   Version: $Revision: 1.65 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1927,22 +1927,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		newCategory.addNode(base, false, true);
 
-		BaseNode newNode = new BaseNode(targetNode, base.getName(), base,
-						null, true, 2, 2, baseMenu);
-
-		if (debug)
-		  {
-		    System.err.println("Deleting dragNode: " + dragNode.getText());
-		  }
-
-		tree.deleteNode(dragNode, false);
-
-		if (debug)
-		  {
-		    System.err.println("Inserting newNode: " + newNode.getText());
-		  }
-
-		tree.insertNode(newNode, false);
+		BaseNode newNode = (BaseNode) tree.moveNode(dragNode, targetNode, null, true);
 
 		refreshFields(newNode, true);
 
@@ -1988,11 +1973,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		oldCategory.removeNode(category.getName());
 		newCategory.addNode((CategoryNode) category, false, true);
 
-		CatTreeNode newNode = new CatTreeNode(targetNode, category.getName(), category,
-						      null, true, 0, 1, categoryMenu);
-
-		tree.deleteNode(dragNode, false);
-		tree.insertNode(newNode, true);
+		CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, targetNode, null, true);
 
 		if (ce.catNode == dragNode)
 		  {
@@ -2158,11 +2139,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (aboveNode != dragNode)
 	      {
 		//Insert below the aboveNode
-		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
-						  aboveNode, false, 3, 3, fieldMenu);
-		
-		tree.deleteNode(dragNode, false);
-		tree.insertNode(newNode, true);
+
+		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, aboveNode, true);
 
 		if (fe.fieldNode == dragNode)
 		  {
@@ -2179,11 +2157,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (belowNode != dragNode)
 	      {
 		//First node, insert below parent
-		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
-						  null, false, 3, 3, fieldMenu);
 
-		tree.deleteNode(dragNode, false);
-		tree.insertNode(newNode, true);
+		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, null, true);
 
 		if (fe.fieldNode == dragNode)
 		  {
@@ -2329,12 +2304,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    newCategory.addNode((CategoryNode) base, false, true);
 
-	    tree.deleteNode(dragNode, false);
-
-	    BaseNode newNode = new BaseNode(newParent, base.getName(), base, previousNode,
-					    false, 2, 2, baseMenu);
-
-	    tree.insertNode(newNode, false);
+	    BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
 	    refreshFields(newNode, true);
 
@@ -2418,7 +2388,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		previousNode = aboveNode.getParent();
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("New Category = " + newCategory.getPath());
 		System.err.println("new parent = " + newParent.getText());
@@ -2431,7 +2401,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    if (newCategory.equals(oldCategory))
 	      {
-		if (false)
+		if (debug)
 		  {
 		    System.err.println("Moving within the same category");
 		  }
@@ -2442,7 +2412,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("new displayOrder = " + displayOrder);
 	      }
@@ -2451,19 +2421,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    category.setDisplayOrder(displayOrder);
 	    newCategory.addNode((CategoryNode) category, true, true);
-	    tree.deleteNode(dragNode, false);
 
-	    CatTreeNode newNode = new CatTreeNode(newParent, category.getName(), category, previousNode,
-						  false, 0, 1, categoryMenu);
-
-	    tree.insertNode(newNode, false);
+	    CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
 	    if (ce.catNode == dragNode)
 	      {
 		ce.catNode = newNode;
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("Reinserted category " + category.getName());
 		System.err.println("reinserted order = " + category.getDisplayOrder());
