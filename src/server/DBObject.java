@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2001/08/15 03:47:18 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2001/08/15 03:56:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.131 $ $Date: 2001/08/15 03:47:18 $
+ * @version $Revision: 1.132 $ $Date: 2001/08/15 03:56:57 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1495,7 +1495,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    if (index == hashindex)
 	      {
 		// couldn't find it
-		throw new RuntimeException("Error, DBObject.replaceField could not find matching field");
+		throw new IllegalArgumentException("Error, DBObject.replaceField could not find matching field");
 	      }
 	  }
 

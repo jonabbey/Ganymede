@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/08/15 03:47:18 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/08/15 03:56:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -766,13 +766,17 @@ public class DBObjectDeltaRec implements FieldType {
 	    continue;
 	  }
 
-	// are we doing a replace?
+	// are we doing a replace or add?
 
 	if (!fieldRec.vector)
 	  {
 	    fieldRec.scalarValue.setOwner(copy);
 
-	    copy.replaceField(fieldRec.scalarValue);
+	    // we have to clear before saving, as saveField
+	    // just looks for an open slot
+
+	    copy.clearField(fieldRec.fieldcode);
+	    copy.saveField(fieldRec.scalarValue);
 
 	    continue;
 	  }
