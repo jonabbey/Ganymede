@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 1999/10/09 01:00:43 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2000/02/18 08:24:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3139,5 +3139,13 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
   {
     System.err.println("Server forced disconnect: " + reason);
     System.exit(0);
+  }
+
+  /**
+   * sendMessage stub.
+   */
+
+  public void sendMessage(int type, String message)
+  {
   }
 }
