@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,8 +46,8 @@ public class glogin extends JApplet implements Runnable {
   protected gclient g_client;
 
   protected Image ganymede_logo;
-  protected JTextField username;
-  protected JPasswordField passwd;
+  protected TextField username;
+  protected TextField passwd;
   protected JButton connector;
   protected JButton _quitButton;
   protected JPanel bPanel;
@@ -174,7 +174,7 @@ public class glogin extends JApplet implements Runnable {
     gbl.setConstraints(userL, gbc);
     appletContentPane.add(userL);
 
-    username = new JTextField(20);
+    username = new TextField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
@@ -189,18 +189,14 @@ public class glogin extends JApplet implements Runnable {
     gbl.setConstraints(passL, gbc);
     appletContentPane.add(passL);
 
-    passwd = new JPasswordField(20);
+    passwd = new TextField(20);
+    passwd.setEchoChar('*');
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
     gbl.setConstraints(passwd, gbc);
     appletContentPane.add(passwd);
     
-    //username.setEnabled(false);
-    //    username.setText("supergash");
-    //    passwd.setText("dodo");
-    //passwd.setEnabled(false);
-
     _quitButton = new JButton("Quit");
     _quitButton.setBackground(ClientColor.buttonBG);
     _loginHandler = new LoginHandler(this);
