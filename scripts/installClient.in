@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.21 $
-# $Date: 2001/01/31 10:14:58 $
+# $Revision: 1.22 $
+# $Date: 2001/01/31 10:31:39 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -177,10 +177,41 @@ $installdir = $vars{"CLIENTINSTALL"};
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/password", 0750); print ".";
 
+open OUTPUT, ">$installdir/README" or die "Couldn't open $installdir/README!";
+print OUTPUT <<ENDREADME;
+
+Ganymede Clients
+----------------
+
+This directory contains the clients for the Ganymede directory
+management system.
+
+The bin directory contains the actual executable clients.  These
+clients are actually bourne shell scripts that invoke the Java VM
+on the Ganymede client classes, held in the jars directory.
+
+The client scripts were customized at install time with their
+installation location.  If you move these client scripts to
+another location, you will have to edit the scripts to reflect
+their new location, or provide a symbolic link from the old
+client installation directory to the new location.
+
+The client.properties file in this directory is consulted by the
+Ganymede clients to determine where the Ganymede server is.  If
+you want to retarget the clients to another location for the
+Ganymede server, you should be able to accomplish this by
+simply editing the client.properties file.
+
+ENDREADME
+
+close OUTPUT;
+chmod 0644 "$installdir/README"; print ".";
+
+copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
+
 copy("jars/ganymede.jar", $installdir."/jars/ganymede.jar"); print ".";
 copy("jars/ganymedeAdmin.jar", $installdir."/jars/ganymedeAdmin.jar"); print ".";
 copy("jars/password.jar", $installdir."/jars/password.jar"); print ".";
-copydir("password", $installdir."/password"); print ".";
 
 # Copy and process the properties file into place
 
@@ -365,43 +396,6 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/changePassword";
-
-# Make sure we have the configured changePassword in the password dir
-
-unlink("$installdir/password/changePassword");
-link("$installdir/bin/changePassword", "$installdir/password/changePassword");
-
-# Copy and process the Password build script into place
-
-print "\nCustomizing password client build scripts\n";
-
-%buildconvert = ("JAVAC" => $vars{"JVM"}."/javac",
-		 "RMIC" => $vars{"JVM"}."/rmic",
-		 "JAR" => $vars{"JVM"}."/jar",
-		 "SOURCE" => "$installdir/password",
-		 "CLASSDIR" => "$installdir/password/classes",
-		 "JARDIR" => "$installdir/jars",
-		 "TARGETJAR" => "$installdir/jars/password.jar");
-
-open INPUT, "scripts/passwordconfig.sh.template" or die "Couldn't open password build config template!";
-open OUTPUT, ">$installdir/password/config.sh" or die "Couldn't write password build config";
-
-while (<INPUT>) {
-  
-  if (!/^([A-Z]*)=/) {
-    print OUTPUT $_;
-  } elsif (defined $buildconvert{$1}) {
-    print OUTPUT "$1=$buildconvert{$1}\n";
-  } else {
-    print "Error.. unrecognized template entry $1 - copying template value\n";
-    print OUTPUT $_;
-  }
-}
-
-close INPUT;
-close OUTPUT;
-
-chmod 0750, "$installdir/password/build";
 
 print "\nDone\n";
 
