@@ -1,11 +1,11 @@
-Ganymede Release 1.01
-June 7, 2001
+Ganymede Release 1.03
+June 22, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.02 to 1.03 -------------------
 
-RELEASE DATE: ??, 2001
+RELEASE DATE: June 22, 2001
 
 1. [SERVER] Fixed non-event related mail sending in DBLog
 
@@ -33,7 +33,19 @@ to initialize the Ganymede database.
 3. [SERVER] Fixed infinite loop bug in XML parser
 
 The XML parsing code had a bug that would leave it looping infinitely
-if the XML stream was closed before completion of parsing.
+if the XML stream was closed before completion of parsing.  This
+didn't break the server, but it did take up a lot of processor
+time, and kept all of the memory associated with an XML session
+pinned in the server's heap.
+
+4. [SERVER] Fixed default label field for persona objects
+
+The persona object schema definition was improperly defaulted to use
+the older 'name' field as the label, rather than the composite 'label'
+field.  This could cause errors when trying to login with a newly
+created persona.
+
+This bug was reported by Muller Miklos as well.
 
 -------------------- Changes from 1.01 to 1.02 -------------------
 
