@@ -2,8 +2,8 @@
 #
 # Ganymede build script
 #
-# Version: $Revision: 1.6 $
-# Date: $Date: 2004/03/24 03:41:48 $
+# Version: $Revision: 1.7 $
+# Date: $Date: 2004/03/24 03:42:09 $
 #
 ############################################################
 
@@ -28,7 +28,7 @@ cd classes
 
 mv -f $currentdir/../custom.jar $currentdir/../custom.jar.old > /dev/null 2>&1
 
-$JAVADIR/jar -cf $currentdir/../custom.jar arlut com
+$JAVADIR/jar -cf $currentdir/../custom.jar arlut net
 
 cd $currentdir
 
