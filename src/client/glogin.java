@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,7 +81,7 @@ public class glogin extends JApplet implements Runnable {
 
     my_glogin = new glogin();
 
-    my_glogin.setLayout(new BorderLayout());
+    my_glogin.getContentPane().setLayout(new BorderLayout());
 
     my_frame = new JFrame("Ganymede Client");
 
@@ -97,7 +97,7 @@ public class glogin extends JApplet implements Runnable {
  
     my_glogin.init();
     my_glogin.start();
-    my_glogin.getLayout().layoutContainer(my_glogin);
+    my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
   }
 
   /**
@@ -331,9 +331,8 @@ public class glogin extends JApplet implements Runnable {
 
     connector.setText("Login to server");
     username.setEnabled(true);
-    System.out.println("Setting passwd enabled to true");
+    username.requestFocus();
     passwd.setEnabled(true);
-    //passwd.requestFocus();
 
     invalidate();
     validate();
@@ -342,7 +341,7 @@ public class glogin extends JApplet implements Runnable {
   public void stop() 
   {
     // If the applet is no longer visible on the page, we exit.
-
+    
     try 
       {
 	if (my_glogin.my_session != null)
@@ -353,10 +352,10 @@ public class glogin extends JApplet implements Runnable {
     catch (RemoteException ex) 
       {
       }
-
+    
     //System.exit(1);
   }
-
+  
   public String getUserName()
   {
     return my_username;
