@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2001/07/09 07:15:51 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2001/07/09 07:29:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3753,12 +3753,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					      "depends on Role names being unique.");
 	  }
 
-	if (!namespace.isSchemaEditInProgress())
+	if (!loading)
 	  {
-	    namespace.schemaEditCheckout();
+	    if (!namespace.isSchemaEditInProgress())
+	      {
+		namespace.schemaEditCheckout();
+	      }
+	    
+	    namespace.schemaEditUnregister(base.getTypeID(), getID());
 	  }
-
-	namespace.schemaEditUnregister(base.type_code, field_code);
 
 	namespace = null;
 
@@ -3788,61 +3791,64 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      }
 	  }
 
-	if (oldNamespace != null && oldNamespace != namespace)
+	if (!loading)
 	  {
-	    if (!oldNamespace.isSchemaEditInProgress())
+	    if (oldNamespace != null && oldNamespace != namespace)
 	      {
-		oldNamespace.schemaEditCheckout();
-	      }
-
-	    oldNamespace.schemaEditUnregister(base.getTypeID(), getID());
-	  }
-
-	if (namespace != null && namespace != oldNamespace)
-	  {
-	    if (!namespace.isSchemaEditInProgress())
-	      {
-		namespace.schemaEditCheckout();
-	      }
-
-	    // make sure that we can allocate all values already attached to this
-	    // field
-
-	    boolean success = true;
-	    Enumeration enum = base.objectTable.elements();
-
-	    while (success && enum.hasMoreElements())
-	      {
-		DBObject obj = (DBObject) enum.nextElement();
-
-		DBField field = (DBField) obj.getField(getID());
-
-		if (field == null)
+		if (!oldNamespace.isSchemaEditInProgress())
 		  {
-		    continue;
+		    oldNamespace.schemaEditCheckout();
 		  }
-
-		if (!this.isArray())
+		
+		oldNamespace.schemaEditUnregister(base.getTypeID(), getID());
+	      }
+	    
+	    if (namespace != null && namespace != oldNamespace)
+	      {
+		if (!namespace.isSchemaEditInProgress())
 		  {
-		    success = namespace.schemaEditRegister(field.key(), field);
+		    namespace.schemaEditCheckout();
 		  }
-		else
+		
+		// make sure that we can allocate all values already attached to this
+		// field
+		
+		boolean success = true;
+		Enumeration enum = base.objectTable.elements();
+		
+		while (success && enum.hasMoreElements())
 		  {
-		    for (int i = 0; success && i < field.size(); i++)
+		    DBObject obj = (DBObject) enum.nextElement();
+		    
+		    DBField field = (DBField) obj.getField(getID());
+		    
+		    if (field == null)
 		      {
-			success = namespace.schemaEditRegister(field.key(i), field);
+			continue;
+		      }
+		    
+		    if (!this.isArray())
+		      {
+			success = namespace.schemaEditRegister(field.key(), field);
+		      }
+		    else
+		      {
+			for (int i = 0; success && i < field.size(); i++)
+			  {
+			    success = namespace.schemaEditRegister(field.key(i), field);
+			  }
 		      }
 		  }
-	      }
-
-	    if (!success)
-	      {
-		namespace.schemaEditUnregister(base.getTypeID(), getID());
-		namespace = oldNamespace;
-
-		return Ganymede.createErrorDialog("Schema Editing Error",
-						  "Can't set namespace " + nameSpaceId + " on field " + base.toString() + " " + toString() +
-						  " without violating namespace uniqueness constraint on previously registered values.");
+		
+		if (!success)
+		  {
+		    namespace.schemaEditUnregister(base.getTypeID(), getID());
+		    namespace = oldNamespace;
+		    
+		    return Ganymede.createErrorDialog("Schema Editing Error",
+						      "Can't set namespace " + nameSpaceId + " on field " + base.toString() + " " + toString() +
+						      " without violating namespace uniqueness constraint on previously registered values.");
+		  }
 	      }
 	  }
 
@@ -3871,23 +3877,76 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * this field definition is not a string, numeric, or IP type.</p>
    */
 
-  ReturnVal setNameSpace(DBNameSpace namespace)
+  ReturnVal setNameSpace(DBNameSpace newNamespace)
   {
     if (!isString() && !isNumeric() && !isIP())
       {
 	throw new IllegalArgumentException("not a string/numeric field");
       }
 
-    this.namespace = namespace;
+    if (!loading)
+      {
+	if (this.namespace != null && this.namespace != newNamespace)
+	  {
+	    if (!this.namespace.isSchemaEditInProgress())
+	      {
+		this.namespace.schemaEditCheckout();
+	      }
+	    
+	    this.namespace.schemaEditUnregister(base.getTypeID(), getID());
+	  }
+	
+	if (newNamespace != null && newNamespace != this.namespace)
+	  {
+	    if (!newNamespace.isSchemaEditInProgress())
+	      {
+		newNamespace.schemaEditCheckout();
+	      }
+	    
+	    // make sure that we can allocate all values already attached to this
+	    // field
+	    
+	    boolean success = true;
+	    Enumeration enum = base.objectTable.elements();
+	    
+	    while (success && enum.hasMoreElements())
+	      {
+		DBObject obj = (DBObject) enum.nextElement();
+		
+		DBField field = (DBField) obj.getField(getID());
+		
+		if (field == null)
+		  {
+		    continue;
+		  }
+		
+		if (!this.isArray())
+		  {
+		    success = newNamespace.schemaEditRegister(field.key(), field);
+		  }
+		else
+		  {
+		    for (int i = 0; success && i < field.size(); i++)
+		      {
+			success = newNamespace.schemaEditRegister(field.key(i), field);
+		      }
+		  }
+	      }
+	    
+	    if (!success)
+	      {
+		newNamespace.schemaEditUnregister(base.getTypeID(), getID());
+		
+		return Ganymede.createErrorDialog("Schema Editing Error",
+						  "Can't set namespace " + newNamespace.toString() + " on field " + base.toString() + " " + toString() +
+						  " without violating namespace uniqueness constraint on previously registered values.");
+	      }
+	  }
+      }
 
-    if (isInUse())
-      {
-	return warning1;
-      }
-    else
-      {
-	return null;
-      }
+    this.namespace = newNamespace;
+
+    return null;
   }
 
   // **
