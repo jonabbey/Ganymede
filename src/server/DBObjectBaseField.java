@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,15 +36,18 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   // schema fields
 
-  String field_name;		// name of this field
+  String field_name = null;	// name of this field
   short field_code;		// id of this field in the current object
   short field_type;		// data type contained herein
   short field_order;		// display order for this field
-  byte visibility;		// visibility code
-  String classname;		// name of class to manage user interactions with this field
-  String comment;
+
+  boolean editable = true;	// can this field be edited in the schema editor?
+  boolean removable = true;	// can this field be removed from the owning Base in the schema editor?
+
+  String classname = null;	// name of class to manage user interactions with this field
+  String comment = null;
   Class classdef;		// class object containing the code managing dbfields of this type
-  boolean array;		// true if this field is an array type
+  boolean array = false;	// true if this field is an array type
   boolean loading = false;	// true if we're in the middle of loading
 
   // array attributes
@@ -69,7 +72,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   // invid attributes
 
   boolean editInPlace = false;
-  short allowedTarget = -1;
+  short allowedTarget = -1;	// no target restrictions
   short targetField = -1;
 
   // schema editing
@@ -142,7 +145,10 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     field_code = original.field_code; // id of this field in the current object
     field_type = original.field_type; // data type contained herein
     field_order = original.field_order;	// display order
-    visibility = original.visibility; // visibility code
+
+    editable = original.editable;
+    removable = original.removable;
+
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
     classdef = original.classdef; // class object containing the code managing dbfields of this type
@@ -173,7 +179,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     out.writeShort(field_type);
     out.writeUTF(classname);
     out.writeUTF(comment);
-    out.writeByte(visibility);
+    out.writeBoolean(editable);
+    out.writeBoolean(removable);
 
     if ((base.store.major_version >= 1) && (base.store.minor_version >= 1))
       {
@@ -243,7 +250,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
     comment = in.readUTF();
 
-    visibility = in.readByte();
+    editable = in.readBoolean();
+    removable = in.readBoolean();
 
     // at file version 1.1, we introduced field_order
 
@@ -314,21 +322,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public boolean isEditable()
   {
-    if (base.getTypeID() == 0)
-      {
-	// determine which fields in the Admin object Base
-	// are editable
-
-	return true;
-      }
-    else if (field_code == 0)
-      {
-	return false;
-      }
-    else
-      {
-	return true;
-      }
+    return editable;
   }
 
   /**
@@ -340,21 +334,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public boolean isRemovable()
   {
-    if (base.getTypeID() == 0)
-      {
-	// determine which fields in the Admin object Base
-	// are editable
-
-	return true;
-      }
-    else if (field_code == 0)
-      {
-	return false;
-      }
-    else
-      {
-	return true;
-      }
+    return removable;
   }
 
   /**
@@ -608,36 +588,6 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     return (field_type == PERMISSIONMATRIX);
   }
   
-
-  /**
-   *
-   * Returns the visibility threshold for this field
-   *
-   * @see arlut.csd.ganymede.BaseField
-   */
-
-  public byte getVisibility()
-  {
-    return visibility;
-  }
-
-  /**
-   *
-   * Sets the basic visibility threshold for this field.
-   *
-   * @see arlut.csd.ganymede.BaseField
-   */
-
-  public synchronized void setVisibility(byte b)
-  {
-    if (editor == null)
-      {
-	throw new IllegalArgumentException("not editing");
-      }
-
-    visibility = b;
-  }
-
   /**
    *
    * <p>Returns true if this field is a vector field, false otherwise.</p>
@@ -1266,6 +1216,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    *
    * <p>-1 means there is no restriction on target type.</p>
    *
+   * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
+   *
    * @see arlut.csd.ganymede.BaseField
    */
 
@@ -1303,7 +1255,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not an invid field");
       }
 
-    if (val == -1)
+    if (val < 0)
       {
 	allowedTarget = val;
 	return;
@@ -1434,7 +1386,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not an invid field");
       }
 
-    if (val == -1)
+    if (val < 0)
       {
 	targetField = val;
 	return;
