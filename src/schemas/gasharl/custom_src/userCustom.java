@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2001/08/31 03:14:08 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2001/08/31 03:19:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2243,6 +2243,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
 		    resultString = in.readLine();
 		    in.close();
+
+		    resultFile.delete();
 		    
 		    return Ganymede.createErrorDialog("Password Rejected",
 						      resultString);
@@ -2317,6 +2319,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
 		    resultString = in.readLine();
 		    in.close();
+
+		    resultFile.delete();
 		    
 		    return Ganymede.createErrorDialog("Password History Not Saved",
 						      resultString);
