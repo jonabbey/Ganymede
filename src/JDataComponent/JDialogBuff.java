@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,11 +22,114 @@ import java.awt.Frame;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * This class is a serializable description of a dialog object that a server
+ * is asking a client to present.  The client retrieves an object of type
+ * JDialogBuff from the server via RMI, then calls extractDialogRsrc()
+ * in order to get a DialogRsrc object.  This object can then be used on
+ * the client to construct an dialog box.
+ *
+ */
+
 public class JDialogBuff implements java.io.Serializable {
   
-  StringBuffer buffer;
+  StringBuffer buffer;		// serialized dialog resource description
 
   /* -- */
+
+  // client side code
+
+  public DialogRsrc extractDialogRsrc(Frame frame)
+  { 
+    Vector chunks = retrieveChunks();
+
+    String title;
+    String text;
+    String okText;
+    String cancelText;
+    String imageName;
+
+    DialogRsrc retVal;
+
+    JDialogBuffChunk chunk;
+
+    /* -- */
+
+    if (chunks == null || chunks.size() < 5)
+      {
+	throw new RuntimeException("error, can't extract dialog resource.. mandatory fields missing");
+      }
+
+    chunk = (JDialogBuffChunk) chunks.elementAt(0);
+
+    title = (String) chunk.value;
+
+    chunk = (JDialogBuffChunk) chunks.elementAt(1);
+
+    text = (String) chunk.value;
+
+    chunk = (JDialogBuffChunk) chunks.elementAt(2);
+
+    okText = (String) chunk.value;
+
+    chunk = (JDialogBuffChunk) chunks.elementAt(3);
+
+    cancelText = (String) chunk.value;
+
+    chunk = (JDialogBuffChunk) chunks.elementAt(4);
+
+    imageName = (String) chunk.value;
+
+    retVal = new DialogRsrc(frame, title, text, okText, cancelText, imageName);
+
+    if (chunks.size() == 5)
+      {
+	return retVal;
+      }
+
+    // now, we've got some parameters to pass in
+
+    int index = 5;
+
+    while (index < chunks.size())
+      {
+	chunk = (JDialogBuffChunk) chunks.elementAt(index);
+
+	if (chunk.label.equals("@string"))
+	  {
+	    retVal.addString((String) chunk.value);
+	  }
+	else if (chunk.label.equals("@boolean"))
+	  {
+	    retVal.addBoolean((String) chunk.value);
+	  }
+	else if (chunk.label.equals("@separator"))
+	  {
+	    retVal.addSeparator();
+	  }
+	else if (chunk.label.equals("@pass"))
+	  {
+	    retVal.addPassword((String) chunk.value);
+	  }
+	else if (chunk.label.startsWith("@choice>"))
+	  {
+	    String choiceLabel = chunk.label.substring(8); // after @choice>
+
+	    retVal.addChoice(choiceLabel, (Vector) chunk.value);
+	  }
+	else 
+	  {
+	    throw new RuntimeException("unrecognized chunk" + chunk.label);
+	  }
+
+	index++;
+      }
+
+    return retVal;
+  }
+
+  // server-side constructors
 
   /**
    * Constructor for JDialogBuff
@@ -136,96 +239,7 @@ public class JDialogBuff implements java.io.Serializable {
     addChunk("@pass", label);
   }
 
-  // client side code
-
-  public DialogRsrc extractDialogRsrc(Frame frame)
-  { 
-    Vector chunks = retrieveChunks();
-
-    String title;
-    String text;
-    String okText;
-    String cancelText;
-    String imageName;
-
-    DialogRsrc retVal;
-
-    JDialogBuffChunk chunk;
-
-    /* -- */
-
-    if (chunks.size() < 5)
-      {
-	throw new RuntimeException("error, can't extract dialog resource.. mandatory fields missing");
-      }
-
-    chunk = (JDialogBuffChunk) chunks.elementAt(0);
-
-    title = (String) chunk.value;
-
-    chunk = (JDialogBuffChunk) chunks.elementAt(1);
-
-    text = (String) chunk.value;
-
-    chunk = (JDialogBuffChunk) chunks.elementAt(2);
-
-    okText = (String) chunk.value;
-
-    chunk = (JDialogBuffChunk) chunks.elementAt(3);
-
-    cancelText = (String) chunk.value;
-
-    chunk = (JDialogBuffChunk) chunks.elementAt(4);
-
-    imageName = (String) chunk.value;
-
-    retVal = new DialogRsrc(frame, title, text, okText, cancelText, imageName);
-
-    if (chunks.size() == 5)
-      {
-	return retVal;
-      }
-
-    // now, we've got some parameters to pass in
-
-    int index = 5;
-
-    while (index < chunks.size())
-      {
-	chunk = (JDialogBuffChunk) chunks.elementAt(index);
-
-	if (chunk.label.equals("@string"))
-	  {
-	    retVal.addString((String) chunk.value);
-	  }
-	else if (chunk.label.equals("@boolean"))
-	  {
-	    retVal.addBoolean((String) chunk.value);
-	  }
-	else if (chunk.label.equals("@separator"))
-	  {
-	    retVal.addSeparator();
-	  }
-	else if (chunk.label.equals("@pass"))
-	  {
-	    retVal.addPassword((String) chunk.value);
-	  }
-	else if (chunk.label.startsWith("@choice>"))
-	  {
-	    String choiceLabel = chunk.label.substring(8); // after @choice>
-
-	    retVal.addChoice(choiceLabel, (Vector) chunk.value);
-	  }
-	else 
-	  {
-	    throw new RuntimeException("unrecognized chunk" + chunk.label);
-	  }
-
-	index++;
-      }
-
-    return retVal;
-  }
+  // from here on down, it's strictly for internal processing. -------------
 
   private Vector retrieveChunks()
   {
