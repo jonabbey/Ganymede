@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 14 November 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,8 +23,8 @@ public interface invid_field extends db_field {
   // information on the values and choices present
   // for this field.
 
-  StringBuffer encodedValues() throws RemoteException;
-  StringBuffer choices() throws RemoteException;
+  QueryResult encodedValues() throws RemoteException;
+  QueryResult choices() throws RemoteException;
 
   // the following methods apply if this is an edit-in-place vector
 

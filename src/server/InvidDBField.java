@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1168,9 +1168,9 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public synchronized StringBuffer encodedValues()
+  public QueryResult encodedValues()
   {
-    StringBuffer results = new StringBuffer();
+    QueryResult results = new QueryResult();
     Invid invid;
 
     /* -- */
@@ -1180,13 +1180,11 @@ public class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("can't call encodedValues on scalar field");
       }
 
-    results.append(DBEditObject.objectDumpHeader(true));
-
     for (int i = 0; i < values.size(); i++)
       {
 	invid = (Invid) values.elementAt(i);
-	results.append(DBEditObject.resultDump(new Result(invid,
-							  Ganymede.internalSession.viewObjectLabel(invid))));
+
+	results.addRow(invid, Ganymede.internalSession.viewObjectLabel(invid));
       }
 
     return results;
@@ -1201,7 +1199,7 @@ public class InvidDBField extends DBField implements invid_field {
    * 
    */
 
-  public StringBuffer choices()
+  public QueryResult choices()
   {
     DBEditObject eObj;
 
@@ -1251,7 +1249,8 @@ public class InvidDBField extends DBField implements invid_field {
 
     i = (Invid) o;
 
-    if (limited() && i.getType() != getAllowedTarget())
+    if (limited() && (getAllowedTarget() != -2) &&
+	(i.getType() != getAllowedTarget()))
       {
 	// the invid points to an object of the wrong type
 
