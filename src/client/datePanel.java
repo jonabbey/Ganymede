@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,8 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JCalendar.*;
 
+import arlut.csd.JDialog.*;
+
 public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
 
   boolean 
@@ -33,6 +35,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
   framePanel
     fp;
+
+  gclient
+    gc;
 
   date_field
     field;
@@ -73,6 +78,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     this.field = field;
     this.label = label;
     this.fp = fp;
+
+    gc = fp.wp.gc;
 
     setLayout(new BorderLayout());
     
@@ -173,6 +180,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	if (field != null)
 	  {
 	    Date d = (Date)field.getValue();
+
 	    if (d != null)
 	      {
 		top_pane.add("Center", new JLabel(d.toString()));
@@ -191,75 +199,103 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       {
 	throw new RuntimeException("Could not check visibility");
       }
-    
   }
   
   public void actionPerformed(ActionEvent e)
-    {
-      System.out.println("Action performed in datePanel");
-      if (e.getActionCommand().equals("Clear"))
-	{
-	  boolean ok = false;
-	  try
-	    {
-	      ok = field.setValue(null);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not clear date field: " + rx);
-	    }
-	  if (ok)
-	    {
-	      cal.clear();
-	      topLabel.setText(label + " will be cleared after commit.");
-	      fp.wp.getgclient().somethingChanged = true;
-	    }
-	  else
-	    {
-	      setStatus("Server says:  Could not clear date field.");
-	      try
-		{
-		  System.err.println("last error: " + fp.wp.gc.getSession().getLastError());
-		}
-	      catch (RemoteException rx)
-		{
-		  throw new RuntimeException("Could not get last error: " + rx);
-		}
-	    }
-	}
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    System.out.println("Action performed in datePanel");
+
+    if (e.getActionCommand().equals("Clear"))
+      {
+	boolean ok = false;
+
+	try
+	  {
+	    retVal = field.setValue(null);
+
+	    ok = (retVal == null) ? true : retVal.didSucceed();
+
+	    if (retVal != null)
+	      {
+		gc.handleReturnVal(retVal);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not clear date field: " + rx);
+	  }
+
+	if (ok)
+	  {
+	    cal.clear();
+	    topLabel.setText(label + " will be cleared after commit.");
+	    fp.wp.getgclient().somethingChanged = true;
+	  }
+	else
+	  {
+	    setStatus("Server says:  Could not clear date field.");
+
+	    try
+	      {
+		System.err.println("last error: " + gc.getSession().getLastError());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not get last error: " + rx);
+	      }
+	  }
+      }
     }
 
   public boolean setValuePerformed(JValueObject o)
-    {
-      boolean ok = false;
-      if (o.getSource() == cal)
-	{
-	  Date d = (Date)o.getValue();
-	  System.out.println("Removal Calendar says: " + d.toString());
-	  try
-	    {
-	      ok = field.setValue(d);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not set Value in removal field: " + rx);
-	    }
+  {
+    ReturnVal retVal;
+    boolean ok = false;
+
+    /* -- */
+
+    if (o.getSource() == cal)
+      {
+	Date d = (Date)o.getValue();
+	System.out.println("Removal Calendar says: " + d.toString());
+
+	try
+	  {
+	    retVal = field.setValue(d);
+
+	    ok = (retVal == null) ? true : retVal.didSucceed();
+
+	    if (retVal != null)
+	      {
+		gc.handleReturnVal(retVal);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not set Value in removal field: " + rx);
+	  }
 	
-	  if (ok)
-	    {
-	      topLabel.setText(label + ": " + dateformat.format(d));
-	    }
-	}
-      if (ok)
-	{
-	  fp.wp.gc.somethingChanged = true;
-	}
-      return ok;
-    }
+	if (ok)
+	  {
+	    topLabel.setText(label + ": " + dateformat.format(d));
+	  }
+      }
+
+    if (ok)
+      {
+	gc.somethingChanged = true;
+      }
+
+    return ok;
+  }
 
   private final void setStatus(String s)
   {
-
-    fp.wp.gc.setStatus(s);
+    gc.setStatus(s);
   }
+
 }//datePanel
