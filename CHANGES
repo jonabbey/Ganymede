@@ -130,6 +130,34 @@ automatically filters out duplicates.
 
 I have updated the XML docs to reflect this change.
 
+In addition, the <set> mode can now properly be used to remove
+redundant copies of strings from a vector string field.. this did
+not work properly before.
+
+In other words, if we have an object with the following values
+
+<object type="User" id="broccol">
+  <Aliases>
+     <string val="jonabbey"/>
+     <string val="jonabbey"/>
+  </Aliases>
+</object>
+
+then
+
+<object type="User" id="broccol">
+  <Aliases>
+     <set>
+       <string val="jonabbey"/>
+     </set>
+  </Aliases>
+</object>
+
+will properly remove one of the "jonabbey" strings.  Before, the
+XML field handling logic simply saw that the "jonabbey" string
+was already in the vector (at least) once, and so didn't bother
+to remove the redundant copy.
+
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
 RELEASE DATE: October 11, 2001
