@@ -69,6 +69,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 /*------------------------------------------------------------------------------
@@ -92,6 +94,7 @@ public class JPropertyPanel extends JPanel implements ActionListener {
   private boolean editable;
   private JTable table;
   private JPropertyPanelTM model;
+  private JPropertyPanelTML listener;
   private JPanel tablePanel;
   private JButton addCustom, remove;
   private JstringField custom;
@@ -131,6 +134,10 @@ public class JPropertyPanel extends JPanel implements ActionListener {
     lists.setLayout(gbl);
 
     model = new JPropertyPanelTM(editable);
+
+    listener = new JPropertyPanelTML();
+    model.addTableModelListener(listener);
+
     table = new JTable(model);
 
     BevelBorder
@@ -295,12 +302,12 @@ public class JPropertyPanel extends JPanel implements ActionListener {
 ------------------------------------------------------------------------------*/
 
 /**
- * TreeModel for the JPropertyPanel
+ * TableModel for the JPropertyPanel
  */
 
 class JPropertyPanelTM extends AbstractTableModel {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
   private boolean editable;
 
   ArrayList rows = new ArrayList();
@@ -392,8 +399,39 @@ class JPropertyPanelTM extends AbstractTableModel {
     x.add(key);
     rows.add(x);
 
-    int size = rows.size() -1;
-    fireTableRowsUpdated(size, size);
-    fireTableCellUpdated(size, 0);
+    int row = rows.size()-1;
+    fireTableRowsInserted(row, row);
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               JPropertyPanelTML
+
+------------------------------------------------------------------------------*/
+
+/**
+ * TableModelListener for the JPropertyPanel
+ */
+
+class JPropertyPanelTML implements TableModelListener {
+
+  public void tableChanged(TableModelEvent event)
+  {
+    int row = event.getFirstRow();
+    int col = event.getColumn();
+    JPropertyPanelTM model = (JPropertyPanelTM) event.getSource();
+    String columnName = model.getColumnName(col);
+
+    if (col >= 0)
+      {
+	Object data = model.getValueAt(row, col);
+
+	System.out.println("Change event: " + row + ", " + col + ": " + String.valueOf(data));
+      }
+    else
+      {
+	System.out.println("Row event: " + row);
+      }
   }
 }
