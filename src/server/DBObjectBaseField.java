@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,6 +44,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   boolean editable = true;	// can this field be edited in the schema editor?
   boolean removable = true;	// can this field be removed from the owning Base in the schema editor?
   boolean visibility = true;	// should this field be displayed to the client?
+  boolean builtIn = false;	// is this field a built-in, applicable to all (nonembedded) object types?
 
   String classname = null;	// name of class to manage user interactions with this field
   String comment = null;
@@ -155,6 +156,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     removable = original.removable;
     editInPlace = original.editInPlace;
     visibility = original.visibility;
+    builtIn = original.builtIn;
 
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
@@ -194,6 +196,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     if ((base.store.major_version >= 1) && (base.store.minor_version >= 6))
       {
 	out.writeBoolean(visibility); // added at file version 1.6
+      }
+
+    if ((base.store.major_version >= 1) && (base.store.minor_version >= 7))
+      {
+	out.writeBoolean(builtIn); // added at file version 1.7
       }
 
     if ((base.store.major_version >= 1) && (base.store.minor_version >= 1))
@@ -318,6 +325,17 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	visibility = true;
       }
 
+    // at file version 1.7, we introduced an explicit built-in flag
+
+    if ((base.store.file_major >= 1) && (base.store.file_minor >= 7))
+      {
+	builtIn = in.readBoolean();
+      }
+    else
+      {
+	builtIn = !base.isEmbedded() && field_code < 100;
+      }
+
     // at file version 1.1, we introduced field_order
 
     if ((base.store.file_major >= 1) && (base.store.file_minor >= 1))
@@ -432,6 +450,18 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   public boolean isRemovable()
   {
     return removable;
+  }
+
+  /**
+   *
+   *
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isBuiltIn()
+  {
+    return builtIn;
   }
 
   /**
@@ -1777,6 +1807,10 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	    result += " <crypted>";
 	  }
 
+	break;
+
+      case IP:
+	result = "i.p. field";
 	break;
 
       default:
