@@ -3,8 +3,8 @@
    
    Created: 22 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/07/15 01:06:04 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/05/25 07:23:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,6 +84,8 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
   boolean 
     showChangeFields;
+
+  private boolean changingPass = false;
 
   String
     value1 = null,
@@ -189,7 +191,7 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
     field1.setText(text);
     field2.setText(text);
   }
-  
+
   public void actionPerformed(ActionEvent e)
   {
     DialogRsrc dr = new DialogRsrc(frame, "Set Password", "Enter your new password, twice");
@@ -301,29 +303,42 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 	    System.err.println("value 2 = " + value2);
 	  }
 
-	if ((value1 != null) && (value2 != null) && (value1.equals(value2)))
+	if (!changingPass && (value1 != null) && (value2 != null) && (value1.equals(value2)))
 	  {
 	    validatedPass = value2;
 
 	    try
 	      {
-		if (my_parent != null && !my_parent.setValuePerformed(new JValueObject(this, value1)))
+		changingPass = true;
+
+		try
 		  {
-		    if (debug)
+		    if (my_parent != null && !my_parent.setValuePerformed(new JValueObject(this, value1)))
 		      {
-			System.err.println("trying to complain about server not accept");
+			if (debug)
+			  {
+			    System.err.println("trying to complain about server not accept");
+			  }
+			
+			//		    StringDialog dErr = new StringDialog(frame, "Password not accepted by server",
+			//							 "No change to password made", false);
+			//		    dErr.DialogShow();
+			
+			value1 = null;
+			value2 = null;
+			field1.setText(null);
+			field2.setText(null);
+
+			// try again!
+
+			field1.requestFocus();
+			
+			return false;
 		      }
-
-		    //		    StringDialog dErr = new StringDialog(frame, "Password not accepted by server",
-		    //							 "No change to password made", false);
-		    //		    dErr.DialogShow();
-
-		    field1.setText(null);
-		    field2.setText(null);
-		    value1 = null;
-		    value2 = null;
-
-		    return false;
+		  }
+		finally
+		  {
+		    changingPass = false;
 		  }
 	      }
 	    catch (RemoteException ex)
