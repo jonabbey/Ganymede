@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.98
-March 17, 1999
+Ganymede Developer Release 0.99
+April ??, 1999
 README
 ---------------------------------------------
 
@@ -56,8 +56,8 @@ Things you will need:
   of Swing will NOT work, as Ganymede is now built to use the javax
   version of the Swing libraries.  Probably the best thing to do
   is to install the latest JDK 1.2 package, which includes an
-  up-to-date Swing.  Most of the client testing on 0.96 has been
-  performed with JDK 1.2 on Solaris and Windows.
+  up-to-date Swing.  Most of the client testing on the current release
+  has been performed with JDK 1.1.7 on Solaris and JDK 1.2 on Windows.
 
   Perl 5 to run the install scripts.
 

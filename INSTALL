@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.98
-March 17, 1999
+Ganymede Developer Release 0.99
+April ??, 1999
 INSTALL notes
 ---------------------------------------------
 
@@ -62,7 +62,7 @@ Each of these topics is discussed in its own section below.
   the NIS and DNS source files are sensitive. The ganymede.db file is
   not difficult to analyze, and passwords may be stored in plaintext
   therein, depending on your database configuration.  As shipped with
-  developer release 5, the five sample database configurations do not
+  the current release, the five sample database configurations do not
   store plaintext passwords.  The ganymede.properties file must be
   protected, as it has the the root (supergash) password chosen at
   install time in plaintext.  If desired, the ganymede.properties
