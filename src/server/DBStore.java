@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -269,7 +269,7 @@ public class DBStore {
 
     try 
       {
-	journal = new DBJournal(this, GanymedeConfig.journal);
+	journal = new DBJournal(this, Ganymede.journalProperty);
       }
     catch (IOException ex)
       {
@@ -423,7 +423,7 @@ public class DBStore {
 
 	    // and dump the schema out in a human readable form
 	
-	    textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema.html");
+	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
 	    textOut = new PrintWriter(textOutStream);
 
 	    printCategoryTreeHTML(textOut);
