@@ -35,17 +35,22 @@ import gjt.Box;
 
 class querybox extends Dialog implements ActionListener, ItemListener {
 
+  
+  /////////////////////
+  // Class Variables //
+  /////////////////////
+
+
   static final boolean debug = false;
-  static final int MAXCOMPONENTS = 7; // the maximum number of components that
+  static final int MAXCOMPONENTS = 7; // the number of components that
                                       // can appear in a query choice
 
   // --
 
   Hashtable 
   
-    baseHash,
-    changeHash;
- 
+    baseHash;
+
    // - Buttons
   
   Button OkButton = new Button ("Submit");
@@ -65,22 +70,39 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Panel Choice_Buttons = new Panel(); 
   Panel query_Buttons = new Panel();
 
+  Checkbox editBox = new Checkbox("Editable");
+
   // - Choice menus
 
-  Choice baseChoice = new Choice();
+  qChoice baseChoice = new qChoice();
   
   // - text fields
 
-  TextField inputField = new TextField(6);
+  qTextField inputField = new qTextField(6);
 
-
-  // - variables
+  // - misc. variables
 
   int row = 0;
-  Component[] myAry = new Component[MAXCOMPONENTS];
-  Hashtable myHash = new Hashtable();
+  Base defaultBase;
+  Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
+  Vector Rows = new Vector(); // store the rows 
+  Hashtable myHash = new Hashtable(); // allows you to look up a base with its
+                                      // name as the key
+ 
+  // - these strings store all the important stuff about the current choice row
+
+  String
+    currentBase,
+    currentField,
+    currentOp,
+    currentText;
 
   /* -- */
+
+
+  //////////////////
+  // Constructors //
+  //////////////////
 
   public querybox (Base defaultBase, Hashtable baseHash, Frame parent, String DialogTitle)
     {
@@ -127,19 +149,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       base_panel.setSize(100,100);
       base_panel.setLayout(new FlowLayout());
      
-      Choice intChoice = new Choice();
-        intChoice.add("="); 
-        intChoice.add(">="); 
-        intChoice.add("<="); 
-        intChoice.add("<"); 
-        intChoice.add(">");
-  
-      Choice dateChoice = new Choice();
-	dateChoice.add("Same Day As");
-	dateChoice.add("Same Week As");
-	dateChoice.add("Same Month As");
-	dateChoice.add("Before");
-	dateChoice.add("After");
+      // - Create the choice window containint the fields 
 
       Enumeration enum = baseHash.keys();
       
@@ -152,22 +162,31 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    myHash.put(choiceToAdd, key);
 	  }
 	  
-	  if ((defaultBase != null) && (baseHash.get(defaultBase) != null))
+	  if (defaultBase != null)
 	    {
 	      baseChoice.select(defaultBase.getName()) ; 
+	      System.out.println("Default base given: " + defaultBase);
+	    }
+	  else 
+	    { 
+	      // no default given. pick the one that's there.
+	    
+	      currentBase = baseChoice.getSelectedItem();
+	      this.defaultBase = (Base) myHash.get(currentBase);
+	      defaultBase = this.defaultBase;
+	      String test = defaultBase.getName();
 	    }
 	}
       catch (RemoteException ex)
 	{
-	  throw new RuntimeException("caught remote exception setting perms " + ex);
-	  
+	  throw new RuntimeException("caught remote exception: " + ex);
 	}
          
       baseChoice.setBackground(Color.white);
       baseChoice.addItemListener(this);
       base_panel.add(baseChoice);
       base_panel.add(new Label("     "));
-      base_panel.add(new Checkbox("Editable"));
+      base_panel.add(editBox);
 
       choice_pane.setSize(100,100);
       inner_choice.setLayout(new TableLayout(false));
@@ -176,27 +195,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
       query_panel.add("Center", choiceBox);
       query_panel.add("North", baseBox);
-   
-      // Add a row and see how it goes
-
-      Label separate; // used purely for aesthetics
-
-      Choice isNot = new Choice();
-      isNot.add("is");
-      isNot.add("is not");
-
-      myAry[0] = getChoiceFields(defaultBase);
-      separate = new Label("   ");
-      myAry[1] = separate;
-      myAry[2] = isNot; 
-      separate = new Label("   ");
-      myAry[3] = separate;
-      myAry[4] = intChoice; 
-      separate = new Label("   ");
-      myAry[5] = separate;
-      myAry[6] = inputField; 
       
-      addRow(myAry, true, inner_choice);
+      addChoiceRow(defaultBase); // adds the initial row
     }
 
   public querybox (Hashtable baseHash, Frame parent, String myTitle) {
@@ -204,12 +204,19 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   } 
 
  
-  Choice getChoiceFields (Base base){
-    // Method to return a choice menu containing the fields for
-    // a particular base
+  ////////////////
+  //   Methods  //
+  ////////////////
+
+
+  qChoice getChoiceFields (Base base)
+    {
+      /* Method to return a choice menu containing the fields for
+       * a particular base
+       */
 
     BaseField basefield;
-    Choice myChoice = new Choice();
+    qChoice myChoice = new qChoice();
     int i = 0; // counter variable
 
     try
@@ -224,13 +231,72 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception setting perms " + ex);	
+	throw new RuntimeException("caught remote exception: " + ex);	
       }
 
     return myChoice;  
   }
   
+  void addChoiceRow (Base base)
+    {
+      /* This creates a new row of components and adds 'em to the 
+       * choice window
+       */
+
+  qChoice isNot = new qChoice();
+      isNot.add("is");
+      isNot.add("is not");
+      
+  qChoice selectedOp = new qChoice();    
+
+  qTextField newInput = new qTextField(6); 
+
+  //Label separate; // used purely for aesthetics
+
+      //* -- *//
+
+      Choice tempo = getChoiceFields(base);
+      myAry[0] = tempo;
+      currentField = tempo.getSelectedItem();  
+      selectedOp = getOpChoice(currentField);
+
+      myAry[1] = new Label("   ");
+      myAry[2] = isNot; 
+      myAry[3] = new Label("   ");
+      myAry[4] = selectedOp; 
+      myAry[5] = new Label("   ");
+      myAry[6] = newInput; 
+      
+      addRow(this.myAry, true, inner_choice);
+     
+      
+    }
   
+  qChoice getOpChoice (String field)
+    {
+      /*
+       * A choice menu will be returned, and that choice
+       * will correspond to the legal choices for the 
+       * field passed as the parameter to the method
+       */
+      
+     qChoice intChoice = new qChoice();
+        intChoice.add("="); 
+        intChoice.add(">="); 
+        intChoice.add("<="); 
+        intChoice.add("<"); 
+        intChoice.add(">");
+  
+      qChoice dateChoice = new qChoice();
+	dateChoice.add("Same Day As");
+	dateChoice.add("Same Week As");
+	dateChoice.add("Same Month As");
+	dateChoice.add("Before");
+	dateChoice.add("After");
+
+	return intChoice;  // This WILL return the correct choice
+    }
+
 
   void addRow (Component[] myRow, boolean visible, Panel myPanel) 
     {
@@ -259,21 +325,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
     }
   
-  void setRowEnabled (Component[] myAry, boolean b)
-    { 
-      /* This takes an array of components and sets their enabled values to
-       * true or false, depending on the boolean value passed to the method
-       */
-      
-      for (int i = 0; i < myAry.length; i++)
-	{
-	  if (myAry[i] != null)
-	    {
-	      myAry[i].setEnabled(b);
-	    }
-	}
-    }
-
   public void myshow(boolean truth_value){
     
     // Method to set the perm_editor to visible or invisible
@@ -295,42 +346,109 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     } 
 
     if (e.getSource() == addButton){
-      setRowEnabled(myAry, false);
+
+    System.out.println("Add Button Clicked");
+    System.out.println("Here's the defaultBase: " + defaultBase);
+	
     }
 
     if (e.getSource() == removeButton){
-      setRowEnabled(myAry, true);
+     
+    System.out.println("Remove Button Clicked");
+    System.out.println("Here's the defaultBase: " + defaultBase);
+	  
     }
+    
   } 
   
+  public void removeRow(Component[] myRow, Panel myPanel){
+
+
+    for (int n = 0; n < myRow.length; n++)
+      {
+	myPanel.remove(myRow[n]);
+      }
+    
+    this.row--;
+    System.out.println("Row: " + this.row);
+  }
+
+
   public void itemStateChanged(ItemEvent e)
     {
    
       /* -- */
 
-      // To handle the state of the checkboxes
+      /* Ok, we're assuming that the change is coming from 
+       * base choice menu. Not a bad assumption, but we'll have 
+       * incluce a couple other possibilities: the editable
+       * checkbox and the fields choice menu.
+       */
       
-      Choice myChoice = (Choice) e.getSource();
-      String compString = new String(myChoice.getSelectedItem());
-      if (myHash.get(compString) != null){
-	Base newBase = (Base) myHash.get(compString);
-
-	// remove the current row
-	inner_choice.remove(myAry[0]);
-	inner_choice.remove(myAry[1]);
-	row --;
-	
-	myAry[0] =  (Component) getChoiceFields(newBase);
-	addRow(myAry, true, inner_choice);	  
-	repaint();
-      }
-      
-      if (compString.equals("Group")){
+      if (e.getSource() == baseChoice)
 	{
-	  System.out.println("Ninja: " + myChoice.getSelectedItem());
+
+	  // First, change the base
+	  
+	  Base defaultBase = (Base) myHash.get(baseChoice.getSelectedItem());
+	  this.defaultBase = defaultBase;
+
+	  // remove for all entries in vector of component arrays
+
+	  removeRow(myAry, inner_choice);
+	  myAry[0] = getChoiceFields(defaultBase);
+	  addRow(myAry, true, inner_choice);
+	 
+	  // remove all rows. Then, 
+	    
+	  Rows = null; // Kill the current vector of Rows
+		  
 	}
-      }
-      
+	
+      //if (compString.equals("Group")){
+      //    {
+      //      System.out.println("Ninja: " + myChoice.getSelectedItem());
+      //    }
+	 
     }
 }
 
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                         qChoice
+
+------------------------------------------------------------------------------*/
+
+class qChoice extends Choice {
+  
+  int qRow; // keps track of which row the choice menu is located in
+  
+  public int getRow()
+    {
+      return this.qRow;
+    }
+
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                      qTextField
+
+------------------------------------------------------------------------------*/
+
+class qTextField extends TextField {
+  
+  int qRow; // keeps track of which row the choice menu is located in
+
+  public qTextField(int size)
+    {
+      super(size); // Would you like that super-sized for just 39 cents?
+    }
+
+  public int getRow()
+    {
+      return this.qRow;
+    }
+
+}
