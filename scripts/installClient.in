@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.23 $
-# $Date: 2001/01/31 10:44:17 $
+# $Revision: 1.24 $
+# $Date: 2001/01/31 10:46:21 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -175,7 +175,6 @@ $installdir = $vars{"CLIENTINSTALL"};
 
 &makedir("$installdir/bin", 0750); print ".";
 &makedir("$installdir/jars", 0750); print ".";
-&makedir("$installdir/password", 0750); print ".";
 
 open OUTPUT, ">$installdir/README" or die "Couldn't open $installdir/README!";
 print OUTPUT <<ENDREADME;
