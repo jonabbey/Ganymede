@@ -2,23 +2,23 @@
 
    rowSelectCallback.java
 
-   An interface that objects can implement to allow csd.Table tables
+   An interface that objects can implement to allow arlut.csd.Table tables
    to report when a row is selected.
 
    Created: 19 June 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.Table;
+package arlut.csd.Table;
 
 /**
- * An interface that objects can implement to allow csd.Table tables
+ * An interface that objects can implement to allow arlut.csd.Table tables
  * to report when a row is selected.
  *
- * @see csd.rowTable
+ * @see arlut.csd.Table.rowTable
  */
 
 public interface rowSelectCallback {

@@ -5,12 +5,12 @@
    A GUI component
 
    Created: 17 June 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
-package csd.Table;
+package arlut.csd.Table;
 
 import java.awt.*;
 import java.util.*;
@@ -26,9 +26,9 @@ import java.util.*;
  * access model
  *
  *
- * @see csd.Table.baseTable
+ * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.3 $ %D% 
+ * @version $Revision: 1.4 $ %D% 
  */
 
 public class gridTable extends baseTable {

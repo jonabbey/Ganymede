@@ -5,12 +5,12 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
-package csd.Table;
+package arlut.csd.Table;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -27,9 +27,9 @@ import java.util.*;
  * access model based on a hashtable.
  *
  *
- * @see csd.Table.baseTable
+ * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.10 $ %D% 
+ * @version $Revision: 1.11 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {

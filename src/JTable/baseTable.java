@@ -5,12 +5,12 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
-package csd.Table;
+package arlut.csd.Table;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -49,10 +49,10 @@ import java.util.*;
  * incorporates a baseTable. The ability to select rows can be turned off,
  * in which case baseTable becomes strictly a display component.</p>
  *
- * @see csd.Table.rowTable
- * @see csd.Table.gridTable
+ * @see arlut.csd.Table.rowTable
+ * @see arlut.csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.9 $ %D%
+ * @version $Revision: 1.10 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener, ActionListener {

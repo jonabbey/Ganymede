@@ -5,13 +5,13 @@
    A GUI component
 
    Created: 4 June 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.Table;
+package arlut.csd.Table;
 
 import java.awt.*;
 import java.util.*;

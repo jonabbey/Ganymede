@@ -4,7 +4,7 @@
   A test framework for the baseTable GUI component
 
   Created: 5 June 1996
-  Version: $Revision: 1.5 $ %D%
+  Version: $Revision: 1.6 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
-import csd.Table.*;
+import arlut.csd.Table.*;
 
 /*------------------------------------------------------------------------------
                                                                     public class
@@ -33,7 +33,7 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
 
   /* - */
 
-  csd.Table.rowTable table;
+  arlut.csd.Table.rowTable table;
 
   testBorder tBorder = null;
   TextField statusField = null;
@@ -124,7 +124,7 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
 	System.err.println("testTable constructor: constructing gridTable");
       }
 
-    table = new csd.Table.rowTable(colWidths, headers, this, null);
+    table = new arlut.csd.Table.rowTable(colWidths, headers, this, null);
 
     if (debug)
       {
