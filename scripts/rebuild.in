@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.5 $
-# $Date: 1999/01/18 22:11:31 $
+# $Revision: 1.6 $
+# $Date: 1999/01/18 22:35:38 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -114,7 +114,7 @@ sub package_scan {
 
     my($file, $targetdir) = @_;
 
-    my(*SCANFILE, $packagename, $filename, $classname);
+    my($packagename, $filename, $classname);
 
     # Break the filename off of the file
 
@@ -137,7 +137,7 @@ sub package_scan {
     # swap . for /
 
     if (defined $packagename) {
-	$packagename =~ s/\./\//;
+	$packagename =~ s/\./\//g;
     }
 
     removelastslash($targetdir);
@@ -173,9 +173,9 @@ foreach $file (@javafiles) {
 
   $mtime = (stat ($file))[9];
 
-  $class_file = package_scan($file);
+  $class_file = package_scan($file, $targetdir);
 
-  print "Stat $class_file\n";
+#  print "Stat $class_file\n";
 
   $class_mtime = (stat ($class_file))[9];
 

@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.15 $
-# $Date: 1999/01/18 22:25:32 $
+# $Revision: 1.16 $
+# $Date: 1999/01/18 22:35:38 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -296,15 +296,13 @@ while ($#schemas > 0) {
 # rewrite the header to properly specify the location of perl on this
 # system.
 
-# Note that JDataComponent is currently a grab-bag of 3 different packages,
-# and so rebuild won't work on it.
-
 @rebuilds=("$rootdir/src/jdj",
 	   "$rootdir/src/Util",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
 	   "$rootdir/src/server",
 	   "$rootdir/src/client",
+	   "$rootdir/src/JDataComponent",
 	   "$rootdir/src/schemas/bsd/custom_src",
 	   "$rootdir/src/schemas/gash/custom_src",
 	   "$rootdir/src/schemas/gasharl/custom_src",
