@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.87 $ %D%
+   Version: $Revision: 1.88 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1513,13 +1513,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     signature.append("This message was sent by ");
     signature.append(username);
-    signature.append(", running the Ganymede client on ");
+    signature.append(", who is running the Ganymede client on ");
     signature.append(clienthost);
     signature.append(".");
 
-    body.append("\n------------------------------------------------------------\n");
+    body.append("\n--------------------------------------------------------------------------------\n");
     body.append(WordWrap.wrap(signature.toString(), 78, null));
-    body.append("\n------------------------------------------------------------\n");
+    body.append("\n--------------------------------------------------------------------------------\n");
 
     try
       {
