@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -918,7 +918,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    */
 
-  public synchronized boolean finalizeSetValue(DBField field, Object value)
+  public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
     Vector personaeInvids;
@@ -962,13 +962,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    
 		    if (!dir.equals(expected))
 		      {
-			return false;
+			return Ganymede.createErrorDialog("Schema Error",
+							  "Home directory should be " + expected + ".\n" +
+							  "This is a restriction encoded in userCustom.java.");
 		      }
 		  }
 	      }
 	  }
 
-	return true;
+	return null;
       }
 
     // when we rename a user, we have lots to do.. a number of other
@@ -982,7 +984,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	if (deleting && (value == null))
 	  {
-	    return true;
+	    return null;
 	  }
 
 	// signature alias field will need to be rescanned,
@@ -1062,7 +1064,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	if (inv == null)
 	  {
-	    return true;
+	    return null;
 	  }
 
 	// rename all the associated persona with the new user name
@@ -1093,7 +1095,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		if (okay)
 		  {
-		    return false;
+		    return Ganymede.createErrorDialog("Schema Error",
+						      "Couldn't rename associated admin persona " + oldName);
 		  }
 		else
 		  {
@@ -1109,7 +1112,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			sf.setValueLocal(oldNames.elementAt(j));
 		      }
 
-		    return false;
+		    return Ganymede.createErrorDialog("Schema Error",
+						      "Couldn't rename associated admin persona " + oldName);
 		  }
 	      }
 	    else
@@ -1119,7 +1123,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    return true;
+    return null;
   }
 
   /**
