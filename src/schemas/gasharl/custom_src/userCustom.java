@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2001/06/13 22:58:57 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2001/06/14 17:25:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1450,6 +1450,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    dateField.setValueLocal(updateTime);
 	  }
+
+	ReturnVal result = new ReturnVal(true, true);	
+	    
+	result.addRescanField(this.getInvid(), userSchema.PASSWORDCHANGETIME);
+
+	return result;
       }
 
     // our maxDate() and isDateLimited() methods have pre-filtered any
