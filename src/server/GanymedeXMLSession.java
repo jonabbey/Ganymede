@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2001/09/10 18:57:58 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2002/01/30 20:39:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2170,10 +2170,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method actually does the work of sending our data to the
-   * server.</p>
+   * <p>This method actually does the work of integrating our data into the
+   * DBStore.</p>
    *
-   * @returns true if the data was successfully sent to the server and
+   * @returns true if the data was successfully integrated to the server and
    * the transaction committed successfully, false if the transaction
    * had problems and was abandoned.
    */
@@ -2475,17 +2475,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) deletedObjects.elementAt(i);
 
-	incCount(deleteCount, object.typeString);
-	    
 	Invid target = object.getInvid();
 
 	if (target == null)
 	  {
-	    err.println("Error, couldn't find Invid for object to be deleted: " + object);
-
-	    success = false;
+	    err.println("Warning, couldn't find Invid for object to be deleted: " + object);
 	    continue;
 	  }
+
+	incCount(deleteCount, object.typeString);
 
 	attempt = session.remove_db_object(target);
 
