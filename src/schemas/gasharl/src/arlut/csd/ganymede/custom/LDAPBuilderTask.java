@@ -294,19 +294,22 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString());
     writeLDIF(out, "sn", user.getLabel());
 
-    // now write out the password.  If the user was inactivated, there
-    // won't be a password.. to make sure that ldapdiff does the right
-    // thing, we just won't emit a userPassword field in that case.
-
-    PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
-
-    if (pdbf != null)
+    if (false)
       {
-	String passText = pdbf.getUNIXCryptText();
+	// now write out the password.  If the user was inactivated, there
+	// won't be a password.. to make sure that ldapdiff does the right
+	// thing, we just won't emit a userPassword field in that case.
 
-	if (passText != null) {
-	  writeBinaryLDIF(out, "userPassword", "{CRYPT}" + passText);
-	}
+	PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
+
+	if (pdbf != null)
+	  {
+	    String passText = pdbf.getUNIXCryptText();
+
+	    if (passText != null) {
+	      writeBinaryLDIF(out, "userPassword", "{CRYPT}" + passText);
+	    }
+	  }
       }
 
     writeLDIF(out, "loginShell", user.getFieldValueLocal(userSchema.LOGINSHELL).toString());
@@ -315,7 +318,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     DBObject group = getObject((Invid) user.getFieldValueLocal(userSchema.HOMEGROUP));
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
-    writeLDIF(out, "authAuthority", ";basic;");
+    writeLDIF(out, "authAuthority", "1.0;Kerberos:ARLUT.UTEXAS.EDU;");
     writeLDIF(out, "objectClass", "inetOrgPerson");
     writeLDIF(out, "objectClass", "posixAccount");
     writeLDIF(out, "objectClass", "shadowAccount");
