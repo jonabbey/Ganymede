@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -189,18 +189,18 @@ public class directLoader {
 	    pf.setPerm((short) 258, defPerm); // shell
 	  }
 
-	my_client.session.commitTransaction(); // lock in perm object
+	commitTransaction();
 	my_client.session.openTransaction("NIS directLoader");
 
 	System.out.println("\nRegistering users\n");
 
 	registerUsers();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
 	my_client.session.openTransaction("NIS directLoader");
 	registerGroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
       }
     catch (RemoteException ex)
       {
@@ -225,6 +225,16 @@ public class directLoader {
     my_server.dump();
       
     System.exit(0);
+  }
+
+  private static void commitTransaction() throws RemoteException
+  {
+    ReturnVal retVal = my_client.session.commitTransaction(true);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	throw new RuntimeException("Could not commit transaction, aborting loader");
+      }
   }
 
   /*----------------------------------------------------------------------------*/
