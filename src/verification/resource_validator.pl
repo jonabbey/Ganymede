@@ -39,10 +39,10 @@ use Config::Properties;
 $| = 1;				# don't buffer stdout, to assist debug
 
 if (defined $ARGV[0]) {
-  $scan_root = "$ARGV[0]/ganymede/arlut/csd/ganymede";
+  $scan_root = "$ARGV[0]/ganymede/arlut/csd/";
   $properties_root = "$ARGV[0]/resources";
 } else {
-  $scan_root = "/home/broccol/ganymede/ganymede/src/ganymede/arlut/csd/ganymede";
+  $scan_root = "/home/broccol/ganymede/ganymede/src/ganymede/arlut/csd";
   $properties_root = "/home/broccol/ganymede/ganymede/src/resources";
 }
 
