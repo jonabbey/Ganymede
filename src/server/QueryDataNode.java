@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,4 +112,86 @@ public class QueryDataNode extends QueryNode {
     this.comparator = comparator;
     this.value = value;
   }
+
+
+  /** 
+   * This method dumps the value of the data node to a string in the form of:
+   *
+   * quote(data value)
+   *
+   */
+  
+  public String dumpToString ()
+    {
+
+      String operator, returnVal;
+
+      // The following is designed to make the query string
+      // more readable by using the operator instad of its
+      // mapped numeric value
+
+      if (this.comparator == 1)
+	{
+	  operator = "=";
+	}
+      else if (this.comparator == 2)
+	{
+	  operator = "<"; 
+	} 
+      else if (this.comparator == 3)
+	  {
+	    operator = "<=";
+	  }
+      else if (this.comparator == 4)
+	{
+	  operator = ">";
+	}
+      else if (this.comparator == 5)
+	{
+	  operator = ">=";
+	}
+      else
+	{
+	  operator = "Error: Operator undefined";
+	}
+
+
+      returnVal = "(" + operator;
+
+      // add fieldname
+      
+      if (fieldname != null)
+	{
+	  returnVal = returnVal + "(fieldname " + fieldname + ")"; 
+	}
+      else if (fieldId != -1)
+	{
+	  returnVal = returnVal + "(fieldname #" + fieldId +")"; 
+	}
+      else
+	{
+	  returnVal = returnVal + "(fieldname null)";
+	}
+      
+      // add value
+      
+      if (this.value == null)
+	{
+	  System.err.println("Error: Value undefined in QueryDataNode");
+	  returnVal = returnVal + "(value undefined)";
+	}
+      else
+	{
+      returnVal = returnVal + "(value " + this.value + ")";
+	}
+      
+      // close parenthesis
+
+      returnVal = returnVal + ")";
+      
+      // all done
+
+      return returnVal;
+      
+    }
 }
