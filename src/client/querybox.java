@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1242,6 +1242,7 @@ class QueryRow implements ItemListener {
       }
     else if (field.isString())
       {
+	compareChoice.addItem("matching");
 	compareChoice.addItem("==");
 	compareChoice.addItem("== [Case Insensitive]");
 	compareChoice.addItem("<");
@@ -1618,6 +1619,10 @@ class QueryRow implements ItemListener {
 	else if (operator.equals("Defined"))
 	  {
 	    opValue = QueryDataNode.DEFINED;
+	  }
+	else if (operator.equals("matching"))
+	  {
+	    opValue = QueryDataNode.MATCHES;
 	  }
 
 	if (opValue == 0)
