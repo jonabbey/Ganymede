@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -695,6 +695,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
         if (fieldDef.isArray())
 	  {
 	    vectorCF.setState(true);
+	    maxArrayN.setValue(fieldDef.getMaxArraySize());
 	  }
 	else
 	  {
