@@ -599,52 +599,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * Something to assist in garbage collection.
+   * <p>This method handles cleanup post-schema edit.</p>
    */
 
-  public void cleanup()
+  public void cleanupSchemaEdit()
   {
-    // our ad-hoc semaphore
-
-    synchronized (cleanedup)
-      {
-	if (cleanedup.size() != 0)
-	  {
-	    return;
-	  }
-
-	cleanedup.addElement("cleaning");
-      }
-
-    // note, we must not clear errBuf here, as we may cleanup before
-    // calling getReturnVal() to report to the client.
-
-    reader = null;
-
-    objectTypes.clear();
-    objectTypes = null;
-
-    objectTypeIDs.clear();
-    objectTypeIDs = null;
-
-    objectStore.clear();
-    objectStore = null;
-    
-    createdObjects.setSize(0);
-    createdObjects = null;
-    
-    editedObjects.setSize(0);
-    editedObjects = null;
-    
-    embeddedObjects.setSize(0);
-    embeddedObjects = null;
-    
-    inactivatedObjects.setSize(0);
-    inactivatedObjects = null;
-    
-    deletedObjects.setSize(0);
-    deletedObjects = null;
-
     if (spacesToAdd != null)
       {
 	spacesToAdd.setSize(0);
@@ -692,7 +651,55 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	categoryTree.dissolve();
 	categoryTree = null;
       }
- 
+  }
+
+  /**
+   * Something to assist in garbage collection.
+   */
+
+  public void cleanup()
+  {
+    // our ad-hoc semaphore
+
+    synchronized (cleanedup)
+      {
+	if (cleanedup.size() != 0)
+	  {
+	    return;
+	  }
+
+	cleanedup.addElement("cleaning");
+      }
+
+    // note, we must not clear errBuf here, as we may cleanup before
+    // calling getReturnVal() to report to the client.
+
+    reader = null;
+
+    objectTypes.clear();
+    objectTypes = null;
+
+    objectTypeIDs.clear();
+    objectTypeIDs = null;
+
+    objectStore.clear();
+    objectStore = null;
+    
+    createdObjects.setSize(0);
+    createdObjects = null;
+    
+    editedObjects.setSize(0);
+    editedObjects = null;
+    
+    embeddedObjects.setSize(0);
+    embeddedObjects = null;
+    
+    inactivatedObjects.setSize(0);
+    inactivatedObjects = null;
+    
+    deletedObjects.setSize(0);
+    deletedObjects = null;
+
     if (session != null && session.isLoggedIn())
       {
 	session.logout();
@@ -763,7 +770,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganyschema"))
 	  {
-	    if (!processSchema(nextElement))
+	    boolean schemaOk = false;
+
+	    try
+	      {
+		schemaOk = processSchema(nextElement);
+	      }
+	    finally
+	      {
+		cleanupSchemaEdit();
+	      }
+	    
+	    if (!schemaOk)
 	      {
 		return;
 	      }
@@ -784,7 +802,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganydata"))
 	  {
-	    if (!processData())
+	    boolean dataOk = false;
+
+	    try
+	      {
+		dataOk = processData();
+	      }
+	    finally
+	      {
+		cleanup();
+	      }
+
+	    if (!dataOk)
 	      {
 		// don't both processing rest of XML
 		// doc.. just jump down to finally clause
@@ -822,6 +851,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    reader.close();
 	  }
 
+	cleanupSchemaEdit();
 	cleanup();
       }
   }

@@ -685,7 +685,7 @@ public final class xmlclient implements ClientListener {
 
 	    try
 	      {
-		Thread.sleep(1500);	// sleep for 2.5 seconds before calling back
+		Thread.sleep(1500);	// sleep for 1.5 seconds before calling back
 	      }
 	    catch (InterruptedException ex)
 	      {
