@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -188,14 +188,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       }
 
     if (field.getID() == HOMEUSERS) // from groupSchema
-      {
-
-	if (!session.enableWizards)
-	  {
-	    return Ganymede.createErrorDialog("You have to use wizards!",
-					      "This operation can not be completed without additional input.  Please use wizards.");
-	  }
-
+      {    
 	// What are they doing to the home users?
 	switch (operation) {
 	case ADDELEMENT:
@@ -211,7 +204,82 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    {
 	      print("HOMEUSERS field changing.");
 	    }
+	
 	  
+	  Vector users = getFieldValuesLocal(HOMEUSERS);
+	  int index = ((Integer) param1).intValue();
+	  Invid userInvid = (Invid)users.elementAt(index);
+
+	  if (gSession == null)
+	    {
+	      // If there is no session, the server is doing something special.
+	      // Assume the server knows what is going on, and let it do the deed.
+	      return null;
+	    }
+	  else if (!gSession.enableWizards)
+	    {
+	      // Stupid client won't let us show wizards.  We'll teach them!
+	      // First, find out what is going on.  How many groups is this user in?
+	      
+	      db_object user = gSession.edit_db_object(userInvid);
+	      int size = 0;
+	      try
+		{
+		  size = user.getField(userSchema.GROUPLIST).size();
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new RuntimeException("How come I can't talk to the server, when I AM the server? " + rx);
+		}
+	      
+	      if (size == 2)
+		{
+		  // They belong to two groups: this one, and one other one.
+		  // We will make the other one the home group.
+		  try
+		    {
+		      db_field groupListField = user.getField(userSchema.GROUPLIST);
+		      Vector groupList = groupListField.getValues();    
+		      
+		      for (int i = 0; i < groupList.size() ;i++)
+			{
+			  if (!this.equals(groupList.elementAt(i)))
+			    {
+			      // this will be the new home group
+			      if (debug)
+				{
+				  print("Found the other group, changing the user's home group.");
+				}
+			      
+			      db_field homeGroup = user.getField(userSchema.HOMEGROUP);
+			      homeGroup.setValue(groupList.elementAt(i));
+			      
+			      break;
+			    }
+			}
+		    }
+		  catch (RemoteException rx)
+		    {
+		      throw new RuntimeException("Again, with the remote exceptions: " + rx);
+		    }
+		}
+	      else if (size < 1)
+		{
+		  // They are only in one group, so what good is that?
+		  return Ganymede.createErrorDialog("Group Change Failed",
+						    "This user has this group for a home group.  You cannot remove this user, since this is his only group.");
+		}
+	    
+	      else 
+		{
+		  return Ganymede.createErrorDialog("Group Change Failed",
+						    "This user has many groups to choose from.  You must choose one to be the home group, or turn wizards on.");
+		}
+
+	    }
+
+
+  
 	  // This calls for a wizard.  See if one is running already
 	  if (gSession.isWizardActive() && gSession.getWizard() instanceof groupHomeGroupWizard)
 	    {
@@ -262,10 +330,6 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		  print("Starting up a new wizard");
 		}
 
-	      Vector users = getFieldValuesLocal(HOMEUSERS);
-	      int index = ((Integer) param1).intValue();
-	      Invid userInvid = (Invid)users.elementAt(index);
-	      
 	      homeWizard = new groupHomeGroupWizard(this.gSession, this, userInvid);
 
 	      return homeWizard.getStartDialog();
@@ -288,7 +352,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     // otherwise, we don't care, at least not yet
 
     return null;
-  }
+      }
 
   private void print(String s)
   {
