@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -179,14 +179,22 @@ final public class DBSession {
 
     // add this object to the transaction
 
+    String ckp_label = "create" + e_object.toString();
+
+    checkpoint(ckp_label);
+
     editSet.addObject(e_object);
 
     // set any inital fields, register the object as created
 
     if (!e_object.initializeNewObject())
       {
-	e_object.setStatus(DBEditObject.DROPPING);
+	rollback(ckp_label);
 	return null;
+      }
+    else
+      {
+	popCheckpoint(ckp_label);
       }
 
     // update admin consoles
