@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,64 @@ public class Result implements java.io.Serializable {
   public Invid getInvid()
   {
     return invid;
+  }
+
+  public String resultDump()
+  {
+    StringBuffer buffer = new StringBuffer();
+    char[] chars;
+
+    /* -- */
+
+    chars = invid.toString().toCharArray();
+    
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '|')
+	  {
+	    buffer.append("\\|");
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    buffer.append("\\\n");
+	  }
+	else if (chars[j] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append("|");
+
+    chars = label.toCharArray();
+    
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '|')
+	  {
+	    buffer.append("\\|");
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    buffer.append("\\\n");
+	  }
+	else if (chars[j] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append("\n");
+
+    return buffer.toString();
   }
 
   // and hashCode
