@@ -578,7 +578,7 @@ public class DBJournal implements ObjectStatus {
 		    if (debug)
 		      {
 			// "Delete: {0}:{1}"
-			System.err.println(ts.l("load.delete", base.object_name, obj_id));
+			System.err.println(ts.l("load.delete", base.object_name, new Short(obj_id)));
 		      }
 		
 		    entries.addElement(new JournalEntry(base, obj_id, null));
@@ -738,7 +738,7 @@ public class DBJournal implements ObjectStatus {
 	    if (debug)
 	      {
 		// "Wrote object deletion record:\n\t{0} : {1}"
-		System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, eObj.getID()));
+		System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, new Integer(eObj.getID())));
 	      }
 	    break;
 
