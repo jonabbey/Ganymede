@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.rmi.server.UnicastRemoteObject;
  *
  */
 
-public class DBObjectBase extends UnicastRemoteObject implements Base {
+public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
 
   static boolean debug = true;
 
@@ -54,7 +54,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   Class classdef;
   short type_code;
   short label_id;		// which field represents our label?
-  String category = "";		// what type of object is this?
+  Category category;	// what type of object is this?
+  int displayOrder = 0;
 
   // runtime data
 
@@ -219,6 +220,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	label_id = original.label_id;
 	category = original.category;
 	type_code = original.type_code;
+	displayOrder = original.displayOrder;
     
 	// make copies of all the old field definitions
 	// for this object type, and save them into our
@@ -284,7 +286,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     if ((store.major_version >= 1) && (store.minor_version >= 3))
       {
-	out.writeUTF(category);	// added at file version 1.3
+	if (category.getPath() == null)
+	  {
+	    out.writeUTF(store.rootCategory.getPath());
+	  }
+	else
+	  {
+	    out.writeUTF(category.getPath()); // added at file version 1.3
+	  }
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 4))
+      {
+	out.writeInt(displayOrder);	// added at file version 1.4
       }
 
     out.writeInt(objectHash.size());
@@ -375,15 +389,51 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	label_id = -1;
       }
 
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): " + label_id + " is object label");
+      }
+
     // at file version 1.3, we introduced object base categories's.
 
     if ((store.file_major >= 1) && (store.file_minor >= 3))
       {
-	category = in.readUTF();
+	String pathName = in.readUTF();
+
+	if (debug)
+	  {
+	    System.err.println("DBObjectBase.receive(): category is " + pathName);
+	  }
+
+	// and get our parent
+	
+	category = store.getCategory(pathName);
+
+	if (debug)
+	  {
+	    if (category == null)
+	      {
+		System.err.println("DBObjectBase.receive(): category is null");
+	      }
+	  }
       }
     else
       {
-	category = "";
+	category = null;
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 4))
+      {
+	displayOrder = in.readInt();	// added at file version 1.4
+
+	if (category != null)
+	  {
+	    category.addNode(this, true, false);
+	  }
+      }
+    else
+      {
+	displayOrder = 0;
       }
 
     // read in the objects belonging to this ObjectBase
@@ -677,7 +727,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public synchronized void setName(String newName)
   {
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in an schema editing context");
       }
@@ -707,12 +757,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public synchronized void setClassName(String newName)
   {
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in an schema editing context");
       }
 
     classname = newName;
+
+    if (newName.equals(""))
+      {
+	return;
+      }
 
     try
       {
@@ -969,7 +1024,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     /* -- */
 
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
@@ -1006,7 +1061,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public void setLabelField(short fieldID)
   {
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
@@ -1024,35 +1079,35 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * Get the objectbase category.
    *
    * @see arlut.csd.ganymede.Base
+   * @see arlut.csd.ganymede.CategoryNode
+   *
    */
 
-  public String getCategory()
+  public Category getCategory()
   {
     return category;
   }
 
   /**
    *
-   * Set the objectbase category.
+   * Set the objectbase category.  This operation only registers
+   * the category in this base, it doesn't register the base in the
+   * category.  The proper way to add this base to a Category is to
+   * call addNode(Base, nodeBefore) on the appropriate Category
+   * object.  That addNode() operation will call setCategory() here.
    *
-   * @see arlut.csd.ganymede.Base
+   * @see arlut.csd.ganymede.CategoryNode
+   *
    */
 
-  public void setCategory(String category)
+  public void setCategory(Category category)
   {
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't call in a non-edit context");
+	throw new IllegalArgumentException("can't set category in non-edit context");
       }
 
-    if (category == null)
-      {
-	this.category = "";
-      }
-    else
-      {
-	this.category = category;
-      }
+    this.category = category;
   }
 
   /**
@@ -1071,7 +1126,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     /* -- */
 
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
@@ -1111,7 +1166,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public synchronized boolean deleteField(BaseField bF)
   {
-    if (editor == null)
+    if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
@@ -1171,6 +1226,33 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     return false;
   }
 
+  /**
+   *
+   * Returns the display order of this Base within the containing
+   * category.
+   *
+   * @see arlut.csd.ganymede.CategoryNode
+   *
+   */
+
+  public int getDisplayOrder()
+  {
+    return displayOrder;
+  }
+
+  /**
+   *
+   * Sets the display order of this Base within the containing
+   * category.
+   *
+   * @see arlut.csd.ganymede.CategoryNode
+   *
+   */
+
+  public void setDisplayOrder(int displayOrder)
+  {
+    this.displayOrder = displayOrder;
+  }
 
   /**
    *
