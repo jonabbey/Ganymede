@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.16 $
-# Date: $Date: 2000/01/29 02:30:13 $
+# Version: $Revision: 1.17 $
+# Date: $Date: 2000/02/19 02:23:02 $
 #
 ############################################################
 
@@ -55,6 +55,8 @@ rm -f JDialog
 ln -s $TARGETDIR/arlut/csd/JDialog .
 cd ../..
 
+# we're in the server_classes directory
+
 rm -f jcrypt.class
 ln -s ../jcrypt.class .
 
@@ -79,11 +81,23 @@ ln -s ../MD5State.class .
 rm -f MD5Crypt.class
 ln -s ../MD5Crypt.class .
 
-./sync_tree
-./sync_tree.gnu
-./sync_tree.xml
+echo "Syncing main server tree"
 
-$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class messageObject.class MD5*.class
+./sync_tree
+
+echo "Syncing gnu regexp subtree"
+
+./sync_tree.gnu
+
+echo "Syncing xml subtree"
+
+rm -f com
+ln -s ../com .
+
+rm -f org
+ln -s ../org .
+
+$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class messageObject.class MD5*.class com org
 
 cd ..
 

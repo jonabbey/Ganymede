@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.47 $
-# $Date: 2000/02/18 07:58:05 $
+# $Revision: 1.48 $
+# $Date: 2000/02/19 02:22:58 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -502,9 +502,7 @@ while ($#rebuilds > 0) {
        "sync_tree.server.in",
        "$classdir/server_classes/sync_tree",
        "sync_tree.gnu.server.in",
-       "$classdir/server_classes/sync_tree.gnu",
-       "sync_tree.xml.server.in",
-       "$classdir/server_classes/sync_tree.xml");
+       "$classdir/server_classes/sync_tree.gnu");
 
 print "Generating jar generation scripts.\n\n";
 

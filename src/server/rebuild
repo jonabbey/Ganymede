@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.1 $
-# $Date: 1999/07/23 00:56:03 $
+# $Revision: 1.2 $
+# $Date: 2000/02/19 02:23:06 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -189,7 +189,7 @@ if ($file_list eq "") {
   print "There is nothing to compile.\n";
 } else {
   print "Compiling $file_list\n";
-  system "$javac -deprecation -d $targetdir $file_list\n" || print "Could not finish compiling.\n";
+  system "$javac -d $targetdir $file_list\n" || print "Could not finish compiling.\n";
   print "Done.\n";
 }
 

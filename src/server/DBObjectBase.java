@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2000/02/11 07:16:59 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2000/02/19 02:23:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,6 +113,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /* - */
 
+  /**
+   * <P>The central Ganymede database object that this object base is contained
+   * within.</P>
+   */
+
   DBStore store;
 
   /**
@@ -167,13 +172,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   int displayOrder = 0;
 
+  /**
+   * <P>If true, this type of object is used as a target for an
+   * edit-in-place {@link arlut.csd.ganymede.InvidDBField
+   * InvidDBField}.</P>
+   */
+
   private boolean embedded;
 
   // runtime data
 
   /**
-   * field dictionary, sorted in displayOrder
-   */
+   * field dictionary, sorted in displayOrder */
 
   Vector sortedFields;
 
@@ -205,14 +215,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   int maxid;
 
   /**
-   * Timestamp for the last time this DBObjectBase was
-   * changed, used by GanymedeBuilderTasks to determine
-   * whether a particular build sequence is necessary.
+   * <P>Timestamp for the last time this DBObjectBase was
+   * changed, used by 
+   * {@link arlut.csd.ganymede.GanymedeBuilderTask GanymedeBuilderTasks} 
+   * to determine whether a particular build sequence is necessary.</P>
    */
 
   Date lastChange;
 
-  boolean reallyLoading;
+  /**
+   * <P>This flag is used to keep track of whether this DBObjectBase
+   * was created solely to scan schema data out of the ganymede.db
+   * file.  If this flag is false during loading, this DBObjectBase
+   * will just drop objects on the floor rather than integrating them
+   * into the objectTable.</P>
+   */
+
+  private boolean reallyLoading;
 
   /**
    * <P>If this DBObjectBase is locked with an exclusive lock
@@ -341,11 +360,35 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /* -- */
 
+  /**
+   * <P>Generic constructor.</P>
+   *
+   * @param store The DBStore database this DBObjectBase is being created for.
+   * @param embedded If true, objects of this DBObjectBase type will not
+   * be top-level objects, but rather will be embedded using edit-in-place
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBFields}.
+   */
 
   public DBObjectBase(DBStore store, boolean embedded) throws RemoteException
   {
     this(store, embedded, true);
   }
+
+  /**
+   * <P>This constructor actually does all the work of initializing a new
+   * DBObjectBase.  All other constructors for DBObjectBase will eventually
+   * call this constructor.</P>
+   *
+   * @param store The DBStore database this DBObjectBase is being created for.
+   * @param embedded If true, objects of this DBObjectBase type will not
+   * be top-level objects, but rather will be embedded using edit-in-place
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBFields}.
+   * @param createFields If true, the standard fields required by the server
+   * for its own operations will be created as part of DBObjectBase creation.  This
+   * should be false if this DBObjectBase is being created in the process of loading
+   * data from a pre-existing database which will presumably already have all
+   * essential fields defined.
+   */
 
   public DBObjectBase(DBStore store, boolean embedded, boolean createFields) throws RemoteException
   {

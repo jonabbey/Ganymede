@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.10 $
-# $Date: 1999/07/08 04:25:19 $
+# $Revision: 1.11 $
+# $Date: 2000/02/19 02:22:58 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -31,7 +31,7 @@
 
 # What directory are we handling?
 
-chdir("<#CLASSDIR#>/admin_classes/arlut/csd/ganymede") || die ("Couldn't change dir");
+chdir("<#TARGETDIR#>/admin_classes/arlut/csd/ganymede") || die ("Couldn't change dir");
 
 # Clean it out
 
@@ -42,14 +42,14 @@ system("rm -rf *");
 print "\nLinking admin classes from arlut.csd.ganymede\n\n";
 
 foreach $family (@ganymede_classes) {
-  opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
+  opendir SOURCEDIR, "<#TARGETDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
   @classes = grep /^$family[\$\.].*\.?class$/, readdir SOURCEDIR;
   closedir SOURCEDIR;
   
   foreach $file (@classes) {
     print "Linking " . $file . "\n";
     
-    $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
+    $result = link ("<#TARGETDIR#>/arlut/csd/ganymede/".$file, $file);
     
     if (!$result){
       print "$! -- $file\n";
@@ -61,14 +61,14 @@ foreach $family (@ganymede_classes) {
 
 print "\nAttempting to link admin stubs\n\n";
 
-opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#TARGETDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@stubs) {
   print "Linking " . $file . "\n";
 
-  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#TARGETDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
@@ -77,20 +77,20 @@ foreach $file (@stubs) {
 
 # Link the nice picture we use.
 
-link("<#CLASSDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
+link("<#TARGETDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
 
 # Now we need to link in any gif files
 
 print "\nAttempting to link admin gifs\n\n";
 
-opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#TARGETDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @gifs = grep /\.gif/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@gifs) {
   print "Linking " . $file . "\n";
 
-  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#TARGETDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
