@@ -57,7 +57,10 @@ package arlut.csd.ddroid.gasharl;
 
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.server.DBObject;
+import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ddroid.server.GanymedeBuilderTask;
 import arlut.csd.ddroid.server.PasswordDBField;
+import arlut.csd.ddroid.common.SchemaConstants;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
@@ -265,7 +268,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < netgroups.size(); i++)
       {
-	DBObject netgroup = getObject(netgroups.elementAt(i));
+	DBObject netgroup = getObject(((Invid) netgroups.elementAt(i)));
 	
 	if (netgroup_or_parent_equals(netgroup, netgroupName))
 	  {
@@ -283,7 +286,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
   public boolean netgroup_or_parent_equals(DBObject netgroup, String netgroupName)
   {
-    String name = netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+    String name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
 
     if (name.equals(netgroupName))
       {
@@ -294,7 +297,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < netgroups.size(); i++)
       {
-	if (netgroup_matches(getObject(netgroups.elementAt(i)), netgroupName))
+	if (netgroup_or_parent_equals(getObject((Invid) netgroups.elementAt(i)), netgroupName))
 	  {
 	    return true;
 	  }
@@ -326,11 +329,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
       
-    username = userObject.getFieldValueLocal(userSchema.USERNAME);
+    username = (String) userObject.getFieldValueLocal(userSchema.USERNAME);
     invidString = userObject.getInvid().toString();
-    badge = userObject.getFieldValueLocal(userSchema.BADGE);
+    badge = (String) userObject.getFieldValueLocal(userSchema.BADGE);
     
-    PasswordDBField passField = userObject.getField(userSchema.PASSWORD);
+    PasswordDBField passField = (PasswordDBField) userObject.getField(userSchema.PASSWORD);
     md5Crypt = passField.getMD5CryptText();
     plaintext = passField.getPlainText();
 
