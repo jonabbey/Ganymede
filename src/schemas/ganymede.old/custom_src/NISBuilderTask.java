@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,8 +35,13 @@ import java.io.*;
 
 public class NISBuilderTask extends GanymedeBuilderTask {
 
-  static final String path = "/home/broccol/gash2/code/arlut/csd/ganymede/db/out/";
+  private static String path = null;
+
+  // ---
+
   private Date now = null;
+
+  /* -- */
 
   /**
    *
@@ -56,6 +61,16 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     boolean result = false;
 
     /* -- */
+
+    if (path == null)
+      {
+	path = System.getProperty("ganymede.nis.output");
+
+	if (path == null)
+	  {
+	    throw new RuntimeException("NISBuilder not able to determine output directory.");
+	  }
+      }
 
     now = null;
 
