@@ -1,11 +1,11 @@
 Ganymede Release 1.0.7
-August ??, 2001
+September ??, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
-RELEASE DATE: August ??, 2001
+RELEASE DATE: September ??, 2001
 
 1. [SERVER] Deleted objects now have all of their fields logged
 
@@ -20,6 +20,12 @@ without any logging done.
 The real advantage to this for other users will not so much be
 for scanning the log file as it will be to make the object deletion
 email more informative.
+
+2. [SERVER] Better error message on field creation failure
+
+The server now gives a better error message if a user tries to link an
+object to a (previously undefined) field that the user does not have
+permission to create.
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 

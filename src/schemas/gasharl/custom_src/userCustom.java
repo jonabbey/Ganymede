@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2001/09/10 19:38:55 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2001/09/11 04:10:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1884,10 +1884,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    result = validatePasswordChoice((String) param1, getGSession().isSuperGash());
 		
-	    if (result != null && !result.didSucceed())
-	      {
-		return result;
-	      }
+	    return result;
 	  }
 
 	// if we are changing the list of email aliases, we'll want
@@ -2085,7 +2082,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 						  "userCustom.wizardHook(): can't initialize userCategoryWizard.");
 	      }
 	  }
-
 
 	if ((field.getID() != USERNAME) ||
 	    (operation != SETVAL))
@@ -2352,9 +2348,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					  "I need to know the username before I can save the password");
       }
 
-    File resultFile = userCustom.getNextFileName();
-
-    String saverCommand = saverName + " " + username + " " + resultFile.getPath();
+    String saverCommand = saverName + " " + username;
 
     File file = new File(saverName);
 
@@ -2378,17 +2372,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		try
 		  {
-		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
-		    resultString = in.readLine();
-		    in.close();
-
 		    // the calling code doesn't really care about the
 		    // failure to save, but
 		    // Ganymede.createErrorDialog() will log this to
 		    // stderr.
 
 		    return Ganymede.createErrorDialog("Password History Not Saved",
-						      resultString);
+						      "External error in npasswd saver");
 		  }
 		catch (FileNotFoundException ex)
 		  {
