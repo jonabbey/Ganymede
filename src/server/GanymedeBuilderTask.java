@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/12/07 23:03:25 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/12/08 21:06:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -947,25 +947,49 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
 
-	gnu.regexp.REMatch matches[] = regexp.getAllMatches(names[i]);
+	gnu.regexp.REMatch match = regexp.getMatch(names[i]);
 
-	if (matches == null)
+	if (match == null)
 	  {
 	    continue;
 	  }
 
 	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
 
-	if (matches.length != 3)
-	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matches length is " + matches.length);
+	String yearString, monthString, dateString;
 
+	if (match.getSubStartIndex(0) == -1)
+	  {
+	    yearString = names[i].substring(match.getSubStartIndex(0),
+					    match.getSubEndIndex(0));
+	  }
+	else
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on year");
 	    continue;
 	  }
 
-	String yearString = matches[0].toString();
-	String monthString = matches[1].toString();
-	String dateString = matches[2].toString();
+	if (match.getSubStartIndex(1) == -1)
+	  {
+	    monthString = names[i].substring(match.getSubStartIndex(1),
+					     match.getSubEndIndex(1));
+	  }
+	else
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on month");
+	    continue;
+	  }
+
+	if (match.getSubStartIndex(2) == -1)
+	  {
+	    dateString = names[i].substring(match.getSubStartIndex(2),
+					    match.getSubEndIndex(2));
+	  }
+	else
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on date");
+	    continue;
+	  }
 
 	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
 	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
@@ -987,10 +1011,33 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		String oldBackUpDirectory = basePath + names[i];
 		String zipName = basePath + names[i] + File.separator + ".zip";
 
-		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		// it is conceivable that we have successfully zipped
+		// a directory before, but did not delete the
+		// directory for some reason.. if so, just leave
+		// everything alone so that a human can deal with it
+
+		File zipFile = new File(zipName);
+
+		if (!zipFile.exists())
 		  {
-		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + basePath + names[i]);
-		    FileOps.deleteDirectory(oldBackUpDirectory);
+		    if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		      {
+			Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + basePath + names[i]);
+
+			try
+			  {
+			    FileOps.deleteDirectory(oldBackUpDirectory);
+			  }
+			catch (IOException ex)
+			  {
+			    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): could not remove " + 
+					   basePath + names[i]);
+			  }
+		      }
+		  }
+		else
+		  {
+		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): not zipping " + basePath + names[i]);
 		  }
 	      }
 	  }
