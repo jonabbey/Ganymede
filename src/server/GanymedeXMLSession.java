@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/11/07 09:20:51 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/11/10 05:04:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -121,7 +121,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * regards threading, etc.</p>
    */
 
-  public int bufferSize = 20;
+  public int bufferSize = 100;
 
   /**
    * <p>Hashtable mapping object type names to
@@ -609,7 +609,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      }
 	    else
 	      {
-		this.success = true;
+		// if all we wind up doing is schema editing, we'll
+		// want return a positive success.  in transmitData(),
+		// below, we set this.success back to false until we
+		// know that we have successfully committed all the
+		// data in the <ganydata> block.
+
+		this.success = true; 
 	      }
 
 	    nextElement = getNextItem();
@@ -1100,12 +1106,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (_success)
 	  {
+	    err.println("Committing schema edit");
 	    editor.commit();
+	    this.editor = null;
 	    return true;
 	  }
 	else
 	  {
+	    err.println("Releasing schema edit");
 	    editor.release();
+	    this.editor = null;
 	    return false;
 	  }
       }
@@ -1634,6 +1644,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    return false;
 		  }
 
+		System.err.print(".");
+
 		String mode = objectRecord.getMode();
 	    
 		if (mode == null || mode.equals("create"))
@@ -1680,6 +1692,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    item = getNextItem();
 	  }
+
+	System.err.println("\n\n");
 
 	committedTransaction = transmitData();
 
@@ -1756,7 +1770,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (objectHash == null)
       {
-	objectHash = new Hashtable();
+	objectHash = new Hashtable(10001, 0.75f);
 	objectStore.put(object.type, objectHash);
       }
 
@@ -1810,7 +1824,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// we do this mainly so we can fall through to our if (element
 	// == null) logic below.
 
-	objectHash = new Hashtable();
+	objectHash = new Hashtable(10001, 0.75f);
 	objectStore.put(typeKey, objectHash);
       }
 
@@ -1818,6 +1832,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (element == null)
       {
+	// okay, let's look up the given label in the database to see
+	// if the user is trying to refer to a pre-existing object.
+
+	// note that we really shouldn't be doing this before we have
+	// looped through and done a storeObject() on all objects in
+	// the xml <ganydata> section, or else we might prematurely
+	// store a reference to a pre-existing object when the xml
+	// file meant to reference an object defined in it
+
 	if (debug)
 	  {
 	    err.println("Calling findLabeledObject() on " + typeId + ":" + objId);
@@ -2088,6 +2111,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     for (int i = 0; success && i < createdObjects.size(); i++)
       {
+	boolean newlyCreated = false;
+
 	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
 	
 	// if the object has enough information that we can look it up
@@ -2098,6 +2123,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	if (!newObject.forceCreate && newObject.getInvid() != null)
 	  {
 	    incCount(editCount, newObject.typeString);
+
+	    System.err.println("Editing pre-existing " + newObject);
 
 	    attempt = newObject.editOnServer(session);
 
@@ -2121,6 +2148,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	else
 	  {
 	    incCount(createCount, newObject.typeString);
+
+	    //	    System.err.println("Creating " + newObject);
+
+	    newlyCreated = true;
 
 	    attempt = newObject.createOnServer(session);
 
@@ -2154,11 +2185,33 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("[1] Error registering fields for " + newObject + ", reason: " + msg);
+		err.print("[1] Error registering fields for ");
+
+		if (newlyCreated)
+		  {
+		    err.print("newly created object ");
+		  }
+		else
+		  {
+		    err.print("edited object ");
+		  }
+
+		err.print(newObject + ", reason: " + msg);
 	      }
 	    else
 	      {
-		err.println("[1] Error registering fields for " + newObject + ", no reason given.");
+		err.print("[1] Error registering fields for ");
+
+		if (newlyCreated)
+		  {
+		    err.print("newly created object ");
+		  }
+		else
+		  {
+		    err.print("edited object ");
+		  }
+
+		err.print(newObject + ", no reason given.");
 	      }
 
 	    success = false;

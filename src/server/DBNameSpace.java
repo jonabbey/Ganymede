@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/10/06 02:38:35 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/11/10 05:04:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -110,11 +110,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   Hashtable checkpoints = new Hashtable();
 
-  // used during editing
-
-  DBSchemaEdit editor;
-  DBNameSpace original;
-
   /* -- */
 
   // constructors
@@ -130,47 +125,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     receive(in);
     uniqueHash = new GHashtable(caseInsensitive); // size?
     reserved = new Hashtable();	// size?
-
-    editor = null;
-    original = null;
-  }
-
-  /**
-   *
-   * Copy constructor, used during Schema Editing
-   *
-   */
-
-  public DBNameSpace(DBSchemaEdit editor, DBNameSpace original) throws RemoteException
-  {
-    this.editor = editor;
-    this.original = original;
-    this.name = original.name;
-    this.caseInsensitive = original.caseInsensitive;
-    uniqueHash = new GHashtable(caseInsensitive); // size?
-    reserved = new Hashtable();	// size?
-  }
-  
-  /**
-   *
-   * Create a new DBNameSpace object with specified name and
-   * case sensitivity.
-   *
-   * @param editor DBSchemaEdit object managing the schema changes, or null if none
-   * @param name Name for this name space
-   * @param caseInsensitive If true, case is disregarded in this namespace
-   *
-   */
-
-  public DBNameSpace(DBSchemaEdit editor, String name, boolean caseInsensitive) throws RemoteException
-  {
-    this.editor = editor;
-    this.name = name;
-    this.caseInsensitive = caseInsensitive;
-    uniqueHash = new GHashtable(caseInsensitive); // size?
-    reserved = new Hashtable();	// size?
-
-    original = null;
   }
 
   /**
@@ -183,13 +137,10 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public DBNameSpace(String name, boolean caseInsensitive) throws RemoteException
   {
-    this.editor = null;
     this.name = name;
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     reserved = new Hashtable();	// size?
-
-    original = null;
   }
 
   /**
@@ -325,21 +276,18 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized DBField lookup(Object value)
   {
-    DBNameSpaceHandle handle;
+    DBNameSpaceHandle _handle;
 
     /* -- */
 
-    if (uniqueHash.containsKey(value))
-      {
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.field != null)
-	  {
-	    return handle.field;
-	  }
+    if (_handle == null)
+      {
+	return null;
       }
 
-    return null;
+    return _handle.getField(Ganymede.internalSession);
   }
 
   /*----------------------------------------------------------------------------
@@ -1122,7 +1070,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	    // our handle to go along with the new order
 
 	    handle.owner = null;
-	    handle.field = handle.shadowField;
+	    handle.setField(handle.shadowField);
 	    handle.shadowField = null;
 	  }
 	else

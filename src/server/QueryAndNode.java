@@ -4,8 +4,8 @@
 
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/06/19 03:21:04 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/11/10 05:05:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -71,6 +71,11 @@ public class QueryAndNode extends QueryNode {
   {
     this.child1 = child1;
     this.child2 = child2;
+  }
+
+  public String toString()
+  {
+    return "(" + child1.toString() + ") AND (" + child2.toString() + ")";
   }
 }
 

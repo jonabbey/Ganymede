@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2000/11/04 02:12:07 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2000/11/10 05:04:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.133 $ %D%
+ * @version $Revision: 1.134 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -283,14 +283,12 @@ public final class DBStore {
    * contents from a single disk file.</p>
    *
    * @param filename Name of the database file
-   * @param reallyLoad if true, we'll actually fully load the database.
-   * If false, we'll just get the schema loaded so we can report on it.
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public void load(String filename, boolean reallyLoad)
+  public void load(String filename)
   {
-    load(filename, reallyLoad, true);
+    load(filename, true);
   }
 
   /**
@@ -300,15 +298,12 @@ public final class DBStore {
    * contents from a single disk file.</p>
    *
    * @param filename Name of the database file
-   * @param reallyLoad if true, we'll actually fully load the database.
-   * If false, we'll just get the schema loaded so we can report on it.
    * @param loadJournal if true, process and consolidate the journal
    * on loading.
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void load(String filename, boolean reallyLoad,
-				boolean loadJournal)
+  public synchronized void load(String filename, boolean loadJournal)
   {
     FileInputStream inStream = null;
     BufferedInputStream bufStream = null;
@@ -420,7 +415,7 @@ public final class DBStore {
 	
 	    for (short i = 0; i < baseCount; i++)
 	      {
-		tempBase = new DBObjectBase(in, this, reallyLoad);
+		tempBase = new DBObjectBase(in, this);
 	    
 		setBase(tempBase);
 
@@ -1913,14 +1908,25 @@ public final class DBStore {
 	
 	    eObj = (DBEditObject) retVal.getObject();
 	
-	    s = (StringDBField) eObj.getField("Name");
+	    // set the user visible name
+
+	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
 	    s.setValueLocal(Ganymede.rootname);
-    
-	    p = (PasswordDBField) eObj.getField("Password");
+
+	    // check to make sure the invisible label field was properly set
+
+	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+
+	    if (!s.getValueString().equals(Ganymede.rootname))
+	      {
+		System.err.println("*** Error, supergash label field not automatically set..");
+		System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
+
+		s.setValueLocal(Ganymede.rootname);
+	      }
+
+	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 	    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
-	
-	    //	    i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
-	    //	    i.addElementLocal(supergashOwner);
 	
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
 	    b.setValueLocal(Boolean.TRUE);
@@ -1982,18 +1988,29 @@ public final class DBStore {
 		throw new RuntimeException("Couldn't create monitor admin persona.");
 	      }
 	
-	    eObj = (DBEditObject) retVal.getObject();
-	
-	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
-	
-	    if (Ganymede.monitornameProperty != null)
-	      {
-		s.setValueLocal(Ganymede.monitornameProperty);
-	      }
-	    else
+	    if (Ganymede.monitornameProperty == null)
 	      {
 		throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
 	      }
+
+	    eObj = (DBEditObject) retVal.getObject();
+	
+	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+	    s.setValueLocal(Ganymede.monitornameProperty);
+
+	    // check our autonomic functioning
+
+	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+
+	    if (!s.getValueString().equals(Ganymede.monitornameProperty))
+	      {
+		System.err.println("*** Error, monitor label field not automatically set..");
+		System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
+
+		s.setValueLocal(Ganymede.monitornameProperty);
+	      }
+
+	    //	    s.setValueLocal(Ganymede.monitornameProperty);
     
 	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 	

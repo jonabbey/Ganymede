@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.212 $
-   Last Mod Date: $Date: 2000/11/07 09:20:49 $
+   Version: $Revision: 1.213 $
+   Last Mod Date: $Date: 2000/11/10 05:04:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.212 $ $Date: 2000/11/07 09:20:49 $
+ * @version $Revision: 1.213 $ $Date: 2000/11/10 05:04:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2608,6 +2608,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Vector results = internalQuery(localquery);
 
+    if (debug)
+      {
+	Ganymede.debug("findLabeledObject() found results, size = " + results.size());
+      }
+
     if (results == null || results.size() != 1)
       {
 	return null;
@@ -2625,6 +2630,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	throw new RuntimeException("findLabeledObject() ASSERTFAIL: Error in query processing," + 
 				   " didn't get back right kind of object");
+      }
+
+    if (debug)
+      {
+	Ganymede.debug("findLabeledObject() found results, returning = " + value);
       }
 
     return value;
@@ -3090,7 +3100,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
-		setLastError("Couldn't find field label in query optimizer for base" + base);
+		// this object type has no label field, so we can't
+		// reliably scan for it
+
 		return null;
 	      }
 	  }
@@ -3110,7 +3122,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    
 	    if (debug)
 	      {
-		System.err.println("Eureka!  Optimized query!");
+		System.err.println("Eureka!  Optimized query!\n" + query.toString());
 	      }
 
 	    DBObject resultobject;
@@ -3170,6 +3182,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    // to invids here for a namespace-optimized lookup
 
 		    resultfield = ns.lookup(node.value); // *sync* DBNameSpace
+
+		    if (debug)
+		      {
+			System.err.println("Did a namespace lookup in " + ns.getName() + 
+					   " for value " + node.value);
+			System.err.println("Found " + resultfield);
+		      }
 		  }
 
 		// note that DBNameSpace.lookup() will always point us
@@ -3189,10 +3208,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    if (resultfield.getFieldDef() != fieldDef)
 		      {
+			if (debug)
+			  {
+			    System.err.println("Error, didn't find the right kind of field");
+			    System.err.println("Found: " + resultfield.getFieldDef());
+
+			    if (resultfield.getFieldDef().IAmACopy)
+			      {
+				System.err.println("\t**COPY**");
+			      }
+
+			    System.err.println("Wanted: " + fieldDef);
+
+			    if (fieldDef.IAmACopy)
+			      {
+				System.err.println("\t**COPY**");
+			      }
+			  }
+
 			return intersectQueries(query, result, null);
 		      }
 
 		    resultobject = resultfield.owner;
+
+		    if (debug)
+		      {
+			System.err.println("Found object: " + resultobject);
+		      }
 
 		    // if we're matching an embedded, we want to return our
 		    // container.
@@ -3623,25 +3665,50 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (internal || !query.filtered || filterMatch(obj))
       {
 	DBEditObject x;
+
+	if (debug)
+	  {
+	    Ganymede.debug("not discounting out of hand");
+	  }
 	
 	if (session.isTransactionOpen())
 	  {
 	    // Do we have a version of this object checked out?
 
+	    if (debug)
+	      {
+		Ganymede.debug("transaction open");
+	      }
+
 	    x = session.editSet.findObject(obj.getInvid()); // *sync* DBEditSet
 
 	    if (x == null)
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("didn't find this object in our transaction");
+		  }
+
 		// nope, go ahead and return the object as we found it in the
 		// main hash
 
 		if (perspectiveObject == null)
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("not using perspective object");
+		      }
+
 		    result.addRow(obj.getInvid(), obj.getLabel(), obj.isInactivated(),
 				  obj.willExpire(), obj.willBeRemoved(), perm.isEditable());
 		  }
 		else
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("using perspective object");
+		      }
+
 		    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
 				  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
 				  perm.isEditable());
@@ -3649,6 +3716,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("found this object in our transaction");
+
+		    Ganymede.debug(x.getLabel() + ", invid: " + x.getInvid());
+		  }
+
 		// yup we found it.. if we are deleting or dropping it, we don't want 
 		// to return it
 		
@@ -3657,40 +3731,82 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  {
 		    // ok, we're editing it or creating it.. now, does it still meet
 		    // the search criteria?
-		    
+
+		    if (debug)
+		      {
+			Ganymede.debug("editing or creating");
+		      }
+
 		    if (DBQueryHandler.matches(this, query, x))
 		      {
+			if (debug)
+			  {
+			    Ganymede.debug("still matching");
+			  }
+
 			if (perspectiveObject == null)
 			  {
+			    if (debug)
+			      {
+				Ganymede.debug("not using perspective object");
+			      }
+
 			    result.addRow(x.getInvid(), x.getLabel(), 
 					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
 					  true);
 			  }
 			else
 			  {
+			    if (debug)
+			      {
+				Ganymede.debug("using perspective object");
+			      }
+
 			    result.addRow(x.getInvid(), perspectiveObject.lookupLabel(x), 
 					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
 					  true);
 			  }
 			// we must be able to edit it, since it's checked out
 		      }
+		    else
+		      {
+			if (debug)
+			  {
+			    Ganymede.debug("not still matching");
+			  }
+		      }
 		  }
 	      }
 	  }
 	else
 	  {
+	    if (debug)
+	      {
+		Ganymede.debug("transaction not open");
+	      }
+
 	    // we don't have a transaction open, so there's no worry
 	    // about us having a different version of the object open
 	    // in our transaction
 	    
 	    if (perspectiveObject == null)
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("not using perspective object");
+		  }
+
 		result.addRow(obj.getInvid(), obj.getLabel(), 
 			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
 			      perm.isEditable());
 	      }
 	    else
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("using perspective object");
+		  }
+
 		result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
 			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
 			      perm.isEditable());

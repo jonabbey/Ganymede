@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2000/11/04 03:42:44 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2000/11/10 05:04:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -254,16 +254,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   Date lastChange;
 
   /**
-   * <P>This flag is used to keep track of whether this DBObjectBase
-   * was created solely to scan schema data out of the ganymede.db
-   * file.  If this flag is false during loading, this DBObjectBase
-   * will just drop objects on the floor rather than integrating them
-   * into the objectTable.</P>
-   */
-
-  private boolean reallyLoading;
-
-  /**
    * <P>If this DBObjectBase is locked with an exclusive lock
    * (either a {@link arlut.csd.ganymede.DBWriteLock DBWriteLock} or
    * a {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}), this field
@@ -457,11 +447,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    * @param in Input stream to read this object base from.
    * @param store The Ganymede database object we are loading into.
-   * @param reallyLoad If false, we won't remember objects loaded.  This
-   * is used when we want to just examine a db file's schema information.
    */
 
-  public DBObjectBase(DataInput in, DBStore store, boolean reallyLoad) throws IOException, RemoteException
+  public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
   {
     // create an empty object base without creating the built in
     // fields.. we'll load fields and create the system standard
@@ -470,27 +458,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     this(store, false, false);
 
-    this.reallyLoading = reallyLoad;
-
     receive(in);
 
     // need to recreate objectHook now that we have loaded our classdef info
     // from disk.
 
-    if (reallyLoad)
-      {
-	objectHook = this.createHook();
-      }
-  }
-
-  /**
-   * <p>receive constructor.  Used to initialize this DBObjectBase from disk
-   * and load the objects of this type in from the standing store.</p>
-   */
-
-  public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
-  {
-    this (in, store, true);
+    objectHook = this.createHook();
   }
 
   /**
@@ -783,11 +756,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    maxid = tempObject.getID();
 	  }
 
-	if (reallyLoading)
-	  {
-	    objectTable.putNoSyncNoRemove(tempObject);
-	    tempObject.setBackPointers(); // register anonymous invid fields
-	  }
+	objectTable.putNoSyncNoRemove(tempObject);
+	tempObject.setBackPointers(); // register anonymous invid fields
       }
 
     if (debug)
@@ -1464,6 +1434,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (chosenSlot == null)
       {
 	invid = new Invid(getTypeID(), getNextID());
+
+	if (debug2)
+	  {
+	    if (objectTable.containsKey(chosenSlot.getNum()))
+	      {
+		throw new IllegalArgumentException("bad invid chosen in createNewObject: num already taken");
+	      }
+	  }
       }
     else
       {
@@ -1478,6 +1456,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 
 	invid = chosenSlot;
+
+	if (maxid < invid.getNum())
+	  {
+	    maxid = invid.getNum();
+	  }
       }
 
     // it is crucial that we will have called createHook() before
@@ -2557,7 +2540,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    if (debug2)
+    if (DBSchemaEdit.debug)
       {
 	Ganymede.debug("DBObjectBase.clearEditor(): clearing editor for " + getName());
       }
@@ -2629,7 +2612,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	while (enum.hasMoreElements())
 	  {
 	    obj = (DBObject) enum.nextElement();
-	    
+	   
+	    if (DBSchemaEdit.debug)
+	      {
+		System.err.println("Updating base reference on " + obj);
+	      }
+
 	    obj.updateBaseRefs(this);
 	  }
       }

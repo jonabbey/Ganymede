@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/07/07 01:23:35 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/11/10 05:04:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,13 +75,13 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.25 $ $Date: 2000/07/07 01:23:35 $ $Name:  $
+ * @version $Revision: 1.26 $ $Date: 2000/11/10 05:04:55 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class DBQueryHandler {
 
-  static final boolean debug = false;
+  final static boolean debug = false;
 
   /**
    *
@@ -244,7 +244,7 @@ public class DBQueryHandler {
 
 	    switch (n.arrayOp)
 	      {
-	      case n.LENGTHEQ:
+	      case QueryDataNode.LENGTHEQ:
 
 		if (!field.isVector())
 		  {
@@ -260,7 +260,7 @@ public class DBQueryHandler {
 
 		return (intval == values.size());
 
-	      case n.LENGTHGR:
+	      case QueryDataNode.LENGTHGR:
 
 		if (!field.isVector())
 		  {
@@ -276,7 +276,7 @@ public class DBQueryHandler {
 
 		return (values.size() > intval);
 
-	      case n.LENGTHLE:
+	      case QueryDataNode.LENGTHLE:
 
 		if (!field.isVector())
 		  {
@@ -302,7 +302,7 @@ public class DBQueryHandler {
 	      {
 		// Compare a string value or regexp against a string field
 
-		if (n.arrayOp == n.NONE)
+		if (n.arrayOp == QueryDataNode.NONE)
 		  {
 		    return compareStrings(n, (String) n.value, (String) value);
 		  }
@@ -329,7 +329,7 @@ public class DBQueryHandler {
 		    System.err.println("Doing a real invid compare");
 		  }
 
-		if (n.comparator == n.EQUALS)
+		if (n.comparator == QueryDataNode.EQUALS)
 		  {
 		    i1 = (Invid) n.value;
 
@@ -338,7 +338,7 @@ public class DBQueryHandler {
 			return false;
 		      }
 
-		    if (n.arrayOp == n.NONE)
+		    if (n.arrayOp == QueryDataNode.NONE)
 		      {
 			if (debug)
 			  {
@@ -353,7 +353,7 @@ public class DBQueryHandler {
 		      {
 			switch (n.arrayOp)
 			  {
-			  case n.CONTAINS:
+			  case QueryDataNode.CONTAINS:
 
 			    if (debug)
 			      {
@@ -407,14 +407,14 @@ public class DBQueryHandler {
 		    System.err.println("Doing a string/invid compare");
 		  }
 
-		if (n.arrayOp == n.NONE)
+		if (n.arrayOp == QueryDataNode.NONE)
 		  {
 		    s1 = (String) n.value;
 		    s2 = (String) session.viewObjectLabel((Invid)value);
 		    
 		    return compareString(n, s1, s2);
 		  }
-		else if (n.arrayOp == n.CONTAINS)
+		else if (n.arrayOp == QueryDataNode.CONTAINS)
 		  {
 		    s1 = (String) n.value;
 		    
@@ -460,7 +460,7 @@ public class DBQueryHandler {
 		    System.err.println("Doing a string/IP address compare");
 		  }
 
-		if (n.arrayOp == n.NONE)
+		if (n.arrayOp == QueryDataNode.NONE)
 		  {
 		    s1 = (String) n.value;
 		    Byte[] ipBytes = (Byte[]) value;
@@ -481,7 +481,7 @@ public class DBQueryHandler {
 
 		    return compareString(n, s1, s2);
 		  }
-		else if (n.arrayOp == n.CONTAINS)
+		else if (n.arrayOp == QueryDataNode.CONTAINS)
 		  {
 		    s1 = (String) n.value;
 		    
@@ -532,20 +532,20 @@ public class DBQueryHandler {
 
 		// scalar compare?
 
-		if (n.arrayOp == n.NONE)
+		if (n.arrayOp == QueryDataNode.NONE)
 		  {
 		    fBytes = (Byte[]) value;
 		    oBytes = (Byte[]) n.value;
 		    
-		    if (n.comparator == n.EQUALS)
+		    if (n.comparator == QueryDataNode.EQUALS)
 		      {
 			return compareIPs(fBytes, oBytes);
 		      }
-		    else if (n.comparator == n.STARTSWITH)
+		    else if (n.comparator == QueryDataNode.STARTSWITH)
 		      {
 			return ipBeginsWith(fBytes, oBytes);
 		      }
-		    else if (n.comparator == n.ENDSWITH)
+		    else if (n.comparator == QueryDataNode.ENDSWITH)
 		      {
 			return ipEndsWith(fBytes, oBytes);
 		      }
@@ -562,7 +562,7 @@ public class DBQueryHandler {
 			
 			switch (n.arrayOp)
 			  {
-			  case n.CONTAINS:
+			  case QueryDataNode.CONTAINS:
 			    
 			    for (int i = 0; i < values.size(); i++)
 			      {
@@ -588,7 +588,7 @@ public class DBQueryHandler {
 
 	    // ---------------------------------------- End possible array fields --------------------
 
-	    if (n.arrayOp != n.NONE)
+	    if (n.arrayOp != QueryDataNode.NONE)
 	      {
 		return false;
 	      }
@@ -599,7 +599,7 @@ public class DBQueryHandler {
 
 	    if (value instanceof Boolean)
 	      {
-		if (n.comparator == n.EQUALS)
+		if (n.comparator == QueryDataNode.EQUALS)
 		  {
 		    return ((Boolean) value).equals(n.value);
 		  }
@@ -620,23 +620,23 @@ public class DBQueryHandler {
 		time1 = ((Date) value).getTime();
 		time2 = ((Date) n.value).getTime();
 
-		if (n.comparator == n.EQUALS)
+		if (n.comparator == QueryDataNode.EQUALS)
 		  {
 		    return (time1 == time2);
 		  }
-		else if (n.comparator == n.LESS)
+		else if (n.comparator == QueryDataNode.LESS)
 		  {
 		    return (time1 < time2);
 		  }
-		else if (n.comparator == n.LESSEQ)
+		else if (n.comparator == QueryDataNode.LESSEQ)
 		  {
 		    return (time1 <= time2);
 		  }
-		else if (n.comparator == n.GREAT)
+		else if (n.comparator == QueryDataNode.GREAT)
 		  {
 		    return (time1 > time2);
 		  }
-		else if (n.comparator == n.GREATEQ)
+		else if (n.comparator == QueryDataNode.GREATEQ)
 		  {
 		    return (time1 >= time2);
 		  }
@@ -657,23 +657,23 @@ public class DBQueryHandler {
 		val1 = ((Integer) value).intValue();
 		val2 = ((Integer) n.value).intValue();
 
-		if (n.comparator == n.EQUALS)
+		if (n.comparator == QueryDataNode.EQUALS)
 		  {
 		    return (val1 == val2);
 		  }
-		else if (n.comparator == n.LESS)
+		else if (n.comparator == QueryDataNode.LESS)
 		  {
 		    return (val1 < val2);
 		  }
-		else if (n.comparator == n.LESSEQ)
+		else if (n.comparator == QueryDataNode.LESSEQ)
 		  {
 		    return (val1 <= val2);
 		  }
-		else if (n.comparator == n.GREAT)
+		else if (n.comparator == QueryDataNode.GREAT)
 		  {
 		    return (val1 > val2);
 		  }
-		else if (n.comparator == n.GREATEQ)
+		else if (n.comparator == QueryDataNode.GREATEQ)
 		  {
 		    return (val1 >= val2);
 		  }
@@ -706,7 +706,7 @@ public class DBQueryHandler {
 
     switch (n.arrayOp)
       {
-      case n.CONTAINS:
+      case QueryDataNode.CONTAINS:
 	
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -739,6 +739,11 @@ public class DBQueryHandler {
 
     if (string1 == null || string2 == null)
       {
+	if (debug)
+	  {
+	    System.err.println("null param for compareString");
+	  }
+
 	return false;
       }
 
@@ -843,30 +848,78 @@ public class DBQueryHandler {
 	return (nocasematch != null);
 
       case QueryDataNode.EQUALS:
+
+	if (debug)
+	  {
+	    System.err.println("EQUALS compare, " + string1 + ", " + string2);
+	  }
+
 	return string1.equals(string2);
 
       case QueryDataNode.NOCASEEQ:
+
+	if (debug)
+	  {
+	    System.err.println("NOCASEEQ compare, " + string1 + ", " + string2);
+	  }
+
 	return string1.equalsIgnoreCase(string2);
 
       case QueryDataNode.STARTSWITH:
+
+	if (debug)
+	  {
+	    System.err.println("STARTSWITH compare, " + string1 + ", " + string2);
+	  }
+
 	return string2.startsWith(string1);
 
       case QueryDataNode.ENDSWITH:
+
+	if (debug)
+	  {
+	    System.err.println("ENDSWITH compare, " + string1 + ", " + string2);
+	  }
+
 	return string2.endsWith(string1);
 
       case QueryDataNode.LESS:
+
+	if (debug)
+	  {
+	    System.err.println("LESS compare, " + string1 + ", " + string2);
+	  }
+
 	result = string2.compareTo(string1);
 	return result < 0;
 
       case QueryDataNode.LESSEQ:
+
+	if (debug)
+	  {
+	    System.err.println("LESSEQ compare, " + string1 + ", " + string2);
+	  }
+
 	result = string2.compareTo(string1);
 	return result <= 0;
 
       case QueryDataNode.GREAT:
+
+	if (debug)
+	  {
+	    System.err.println("GREAT compare, " + string1 + ", " + string2);
+	  }
+
 	result = string2.compareTo(string1);
 	return result > 0;
 
       case QueryDataNode.GREATEQ:
+
+	if (debug)
+	  {
+	    System.err.println("GREATEQ compare, " + string1 + ", " + string2);
+	  }
+
 	result = string2.compareTo(string1);
 	return result >= 0;
       }

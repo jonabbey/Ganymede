@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/10/06 02:38:35 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/11/10 05:04:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -100,7 +100,8 @@ class DBNameSpaceHandle {
    * committed in a transaction
    */
 
-  DBField field;
+  private Invid fieldObj;
+  private short fieldId;
 
   /**
    * if this handle is currently being edited by an editset,
@@ -125,11 +126,38 @@ class DBNameSpaceHandle {
   {
     this.owner = owner;
     this.original = this.inuse = originalValue;
-    this.field = field;
+
+    setField(field);
   }
 
   public boolean matches(DBEditSet set)
   {
     return (this.owner == set);
+  }
+
+  public DBField getField(GanymedeSession session)
+  {
+    if (fieldObj == null)
+      {
+	return null;
+      }
+
+    DBObject _obj = session.session.viewDBObject(fieldObj);
+   
+    return (DBField) _obj.getField(fieldId);
+  }
+
+  public void setField(DBField field)
+  {
+    if (field != null)
+      {
+	fieldObj = field.getOwner().getInvid();
+	fieldId = field.getID();
+      }
+    else
+      {
+	fieldObj = null;
+	fieldId = -1;
+      }
   }
 }

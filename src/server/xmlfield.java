@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/11/07 09:28:01 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/11/10 05:05:02 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2000/11/07 09:28:01 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2000/11/10 05:05:02 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1113,6 +1113,11 @@ public class xmlfield implements FieldType {
 			  {
 			    object.setInvid(result.getInvid());
 			    object.objref = result.getObject();
+
+			    // store this object so we can resolve
+			    // invid references to it
+
+			    owner.xSession.storeObject(object);
 			  }
 
 			// remember that we created this embedded

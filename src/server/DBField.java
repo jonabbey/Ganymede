@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2000/11/07 09:20:47 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2000/11/10 05:04:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3032,5 +3032,4 @@ public abstract class DBField implements Remote, db_field {
   {
     return "[" + owner.toString() + ":" + getName() + "]";
   }
-
 }

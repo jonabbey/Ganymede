@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2000/11/04 03:42:45 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2000/11/10 05:04:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,7 +104,7 @@ import java.io.*;
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
 
-  private final static boolean debug = false;
+  final static boolean debug = false;
 
   // ---
 
@@ -198,25 +198,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
-	// All the bases referenced in newBases now should have their
-	// editor fields pointing to us.. check to make sure
-
-	if (debug)
-	  {
-	    Enumeration debugenum = newBases.elements();
-
-	    while (debugenum.hasMoreElements())
-	      {
-		DBObjectBase thisbase = (DBObjectBase) debugenum.nextElement();
-
-		if (thisbase.editor == null)
-		  {
-		    throw new RuntimeException("ERROR: The recursive copy left off setting editor for " + 
-					       thisbase.getName());
-		  }
-	      }
-	  }
-
 	// make a shallow copy of our namespaces vector.. note that
 	// since DBNameSpace's are immutable once created, we don't
 	// need to worry about creating new ones, or about correcting
@@ -247,22 +228,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public Category getRootCategory()
   {
-    if (debug)
-      {
-	Enumeration debugenum = newBases.elements();
-
-	while (debugenum.hasMoreElements())
-	  {
-	    DBObjectBase thisbase = (DBObjectBase) debugenum.nextElement();
-
-	    if (thisbase.editor == null)
-	      {
-		throw new RuntimeException("ERROR: getRootCategory(): the recursive copy left off setting editor for " + 
-					   thisbase.getName());
-	      }
-	  }
-      }
-
     return rootCategory;
   }
 
@@ -619,33 +584,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     newBases.put(base.getKey(), base);
 
-    if (debug)
-      {
-	if (base.editor == null)
-	  {
-	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after newBases.put()");
-	  }
-      }
-
     localCat.addNodeAfter(base, null);
 
-    if (debug)
-      {
-	if (base.editor == null)
-	  {
-	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after addNodeAfter()");
-	  }
-	else
-	  {
-	    DBObjectBase testbase = (DBObjectBase) newBases.get(base.getKey());
-
-	    if (testbase.editor == null)
-	      {
-		throw new RuntimeException("DBSchemaEdit.createNewBase(): testbase's editor field is null after addNodeAfter()");
-	      }
-	  }
-      }
-    
     if (debug)
       {
 	Ganymede.debug("DBScemaEdit: created base: " + base.getKey());
@@ -809,7 +749,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     try
       {
-	ns = new DBNameSpace(this, name, caseInsensitive);
+	ns = new DBNameSpace(name, caseInsensitive);
 
 	synchronized (store)
 	  {
@@ -927,7 +867,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
-	// first the object bases
+	// first the new object bases
 
 	enum = newBases.elements();
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 2000/11/07 09:20:45 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 2000/11/10 05:04:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.140 $ $Date: 2000/11/07 09:20:45 $ $Name:  $
+ * @version $Revision: 1.141 $ $Date: 2000/11/10 05:04:51 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -128,6 +128,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final static int ADDELEMENTS = 5;
   public final static int DELELEMENTS = 6;
   public final static int LASTOP = 6;
+
+  public final static Date minDate = new Date(Long.MIN_VALUE);
+  public final static Date maxDate = new Date(Long.MAX_VALUE);
 
   public final static void setDebug(boolean val)
   {
@@ -2148,8 +2151,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean isDateLimited(DBField field)
   {
-    if ((field.getID() == SchemaConstants.ExpirationField) ||
-	(field.getID() == SchemaConstants.RemovalField))
+    if (getGSession() != null && getGSession().enableWizards &&
+	((field.getID() == SchemaConstants.ExpirationField) ||
+	 (field.getID() == SchemaConstants.RemovalField)))
       {
 	return true; // no values in the past, thanks
       }
@@ -2165,8 +2169,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public Date minDate(DBField field)
   {
     if (getGSession() != null && getGSession().enableWizards &&
-	(field.getID() == SchemaConstants.ExpirationField) ||
-	(field.getID() == SchemaConstants.RemovalField))
+	((field.getID() == SchemaConstants.ExpirationField) ||
+	 (field.getID() == SchemaConstants.RemovalField)))
       {
 	return new Date(); // no values in the past, thanks
       }

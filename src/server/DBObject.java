@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2000/11/07 09:20:48 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2000/11/10 05:04:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.105 $ $Date: 2000/11/07 09:20:48 $
+ * @version $Revision: 1.106 $ $Date: 2000/11/10 05:04:54 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1920,6 +1920,7 @@ public class DBObject implements db_object, FieldType, Remote {
     while (enum.hasMoreElements())
       {
 	field = (DBField) enum.nextElement();
+       
 	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
 
 	if (!field.isDefined())

@@ -9,8 +9,8 @@
    
    Created: 21 October 1996
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/05/26 23:17:30 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/11/10 05:04:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -361,6 +361,46 @@ public class Query implements java.io.Serializable {
       }
 
     linkedQueries.addElement(query);
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (objectType != -1)
+      {
+	result.append("objectType = ");
+	result.append(objectType);
+	result.append("\n");
+      }
+
+    if (objectName != null)
+      {
+	result.append("objectName = ");
+	result.append(objectName);
+	result.append("\n");
+      }
+
+    if (returnType != -1)
+      {
+	result.append("returnType = ");
+	result.append(returnType);
+	result.append("\n");
+      }
+
+    if (returnName != null)
+      {
+	result.append("returnName = ");
+	result.append(returnName);
+	result.append("\n");
+      }
+
+    result.append("editableOnly = ");
+    result.append(editableOnly ? "True\n" : "False\n");
+
+    result.append(root.toString());
+
+    return result.toString();
   }
 }
 

@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/02/29 09:35:10 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/11/10 05:04:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -699,9 +699,6 @@ class JournalEntry {
 
   void process(DBStore store)
   {
-    DBField[]
-      fields;
-
     DBObjectBaseField
       definition;
 
@@ -745,40 +742,41 @@ class JournalEntry {
 
 	    badObj.unsetBackPointers();
 
-	    db_field[] tempFields = badObj.listFields();
-	    fields = new DBField[tempFields.length];
+	    // and we need to clear out any namespace pointers
 
-	    for (int i = 0; i < fields.length; i++)
+	    db_field[] tempFields = badObj.listFields();
+
+	    for (int i = 0; i < tempFields.length; i++)
 	      {
-		fields[i] = (DBField) tempFields[i];
-		definition = fields[i].getFieldDef();
+		DBField _field = (DBField) tempFields[i];
+		definition = _field.getFieldDef();
 
 		if (definition.namespace != null)
 		  {
-		    if (fields[i].isVector())
+		    if (_field.isVector())
 		      {
-			for (int j = 0; j < fields[i].size(); j++)
+			for (int j = 0; j < _field.size(); j++)
 			  {
-			    currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(fields[i].key(j));
+			    currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(_field.key(j));
 
-			    if (currentHandle.field == fields[i])
+			    if (currentHandle.getField(Ganymede.internalSession) != _field)
 			      {
-				// this namespace entry is currently pointing to us.. get rid of it.
-
-				definition.namespace.uniqueHash.remove(fields[i].key(j));
+				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
+
+			    definition.namespace.uniqueHash.remove(_field.key(j));
 			  }
 		      }
 		    else
 		      {
-			currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(fields[i].key());
+			currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(_field.key());
 
-			if (currentHandle.field == fields[i])
+			if (currentHandle.getField(Ganymede.internalSession) != _field)
 			  {
-				// this namespace entry is currently pointing to us.. get rid of it.
-			    
-			    definition.namespace.uniqueHash.remove(fields[i].key());
+			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
+
+			definition.namespace.uniqueHash.remove(_field.key());
 		      }
 		  }
 	      }
@@ -810,32 +808,31 @@ class JournalEntry {
 	// new values.  We may still wind up doing this. 
 
 	db_field[] tempFields = obj.listFields();
-	fields = new DBField[tempFields.length];
 
-	for (int i = 0; i < fields.length; i++)
+	for (int i = 0; i < tempFields.length; i++)
 	  {
-	    fields[i] = (DBField) tempFields[i];
-	    definition = fields[i].getFieldDef();
+	    DBField _field = (DBField) tempFields[i];
+	    definition = _field.getFieldDef();
 
 	    if (definition.namespace != null)
 	      {
-		if (fields[i].isVector())
+		if (_field.isVector())
 		  {
 		    // mark the elements in the vector in the namespace
 		    // note that we don't use the namespace mark method here, 
 		    // because we are just setting up the namespace, not
 		    // manipulating it in the context of an editset
 
-		    for (int j = 0; j < fields[i].size(); j++)
+		    for (int j = 0; j < _field.size(); j++)
 		      {
-			definition.namespace.uniqueHash.put(fields[i].key(j), 
-							    new DBNameSpaceHandle(null, true, fields[i]));
+			definition.namespace.uniqueHash.put(_field.key(j), 
+							    new DBNameSpaceHandle(null, true, _field));
 		      }
 		  }
 		else
 		  {
 		    // mark the scalar value in the namespace
-		    definition.namespace.uniqueHash.put(fields[i].key(), new DBNameSpaceHandle(null, true, fields[i]));
+		    definition.namespace.uniqueHash.put(_field.key(), new DBNameSpaceHandle(null, true, _field));
 		  }
 	      }
 	  }
