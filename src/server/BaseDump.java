@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,7 @@ public class BaseDump implements Base, CategoryNode {
   short label_id;
   String labelFieldName;
   boolean canInactivate;
+  boolean canCreate;
   boolean isEmbedded;
   int displayOrder;
 
@@ -94,6 +95,8 @@ public class BaseDump implements Base, CategoryNode {
     labelFieldName = getChunk(src, lastIndex);
 
     this.canInactivate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
+
+    this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
 
     this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
 
@@ -210,9 +213,16 @@ public class BaseDump implements Base, CategoryNode {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
+  /**
+   *
+   * We ignore the Session param here, since we're a client side dump
+   * associated with a known Session.
+   * 
+   */
+
   public boolean canCreate(Session session) 
   {
-    throw new RuntimeException("this method not supported in BaseDump");
+    return canCreate;
   }  
 
   public boolean canInactivate() 
