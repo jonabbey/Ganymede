@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,6 +57,12 @@ public class GanymedeExpirationTask implements Runnable {
     /* -- */
 
     Ganymede.debug("Expiration Task: Starting");
+
+    if (Ganymede.db.schemaEditInProgress)
+      {
+	Ganymede.debug("Deferring expiration task - schema being edited");
+	return;
+      }
 
     try
       {
