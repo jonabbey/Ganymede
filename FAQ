@@ -1,5 +1,5 @@
-Ganymede Release 1.0
-May 31, 2001
+Ganymede Release 1.0.5
+July 24, 2001
 FAQ
 ---------------------------------------------
 
@@ -212,6 +212,10 @@ P133 with 32 megs.
 
    Newer versions of Java are just about always better.  Use the
 latest production release of Java 1.3 if you can.
+
+   Ganymede 1.0.5 and later also includes support for launching the
+Ganymede clients using the JNLP protocol, which is supported by Sun's
+Java Web Start product at http://java.sun.com/products/javawebstart/.
 
      ------------------------------------------------------------
 
@@ -489,6 +493,6 @@ see the question you asked or bug you reported.
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.16 $
-Last Mod Date: $Date: 2001/06/01 02:12:56 $
+Version: $Revision: 1.17 $
+Last Mod Date: $Date: 2001/07/26 19:51:51 $
 -------------------------------------------------------------------------------
