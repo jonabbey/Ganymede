@@ -107,7 +107,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 	      {
 		if (debug)
 		  {
-		    System.out.println("Skipping embedded field");
+		    println("Skipping embedded field");
 		  }
 	      }
 	    else
@@ -136,7 +136,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     invalidate();
     parent.validate();
-    System.out.println("Done in thread, she's loaded!");
+    println("Done in thread, she's loaded!");
 
     JPanel emptyP = new JPanel();
     center.add("empty", emptyP);
@@ -150,7 +150,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
       {
 	if (debug)
 	  {
-	    System.out.println("I DON'T CARE IF YOU ARE DESELECTED!");
+	    println("I DON'T CARE IF YOU ARE DESELECTED!");
 	  }
       }
     else if (event.getStateChange() == ItemEvent.SELECTED)
@@ -159,16 +159,25 @@ public class ownershipPanel extends JPanel implements ItemListener {
 	
 	if (debug)
 	  {
-	    System.out.println("Item selected: " + item);
+	    println("Item selected: " + item);
 	  }
 	
 	objectPane op = (objectPane) paneHash.get(item);
 	
 	if (!op.isStarted())
 	  {
+	    if (debug) 
+	      {
+		println("starting new thread");
+	      }
+
 	    parent.getgclient().setStatus("Downloading objects for thi sbase");
 	    Thread thread = new Thread(op);
 	    thread.start();
+	  }
+	else if (debug)
+	  {
+	    println("thread already started?");
 	  }
 	
 	cards.show(center, item);
@@ -177,10 +186,15 @@ public class ownershipPanel extends JPanel implements ItemListener {
       {
 	if (debug)
 	  {
-	    System.out.println("What the hell kind of item event is this? " + event);
+	    println("What the hell kind of item event is this? " + event);
 	  }
       }
   }
+
+  private void println(String s)
+    {
+      System.out.println("OwnershipPanel: " + s);
+    }
 }
 
 /*------------------------------------------------------------------------------
@@ -262,7 +276,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     isStarted = true;
 
-    System.out.println("Loading one of the panels");
+    println("Loading one of the panels");
 
     // Get the list of selected choices
 
@@ -284,11 +298,11 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  {
 	    if (qResult == null)
 	      {
-		System.out.println("Hey, the qResult is null.");
+		println("Hey, the qResult is null.");
 	      }
 	    else
 	      {
-		System.out.println("Found " + qResult.size() + " matching items.");
+		println("Found " + qResult.size() + " matching items.");
 	      }
 	  }
 	
@@ -309,7 +323,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  {
 	    if (debug)
 	      {
-		System.out.println("using cached copy");
+		println("using cached copy");
 	      }
 
 	    list = parent.parent.getgclient().cachedLists.getList(key);
@@ -329,7 +343,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	      {
 		if (debug)
 		  {
-		    System.out.println("Adding new key to cachedList: " + key);
+		    println("Adding new key to cachedList: " + key);
 		  }
 
 		parent.parent.getgclient().cachedLists.putList(key, list);
@@ -345,21 +359,26 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
       {
 	if (owned != null)
 	  {
-	    System.out.println("Creating string selector: owned: " + owned.size());
+	    println("Creating string selector: owned: " + owned.size());
 	  }
 
 	if (possible != null)
 	  {
-	    System.out.println(" possible: " + possible.size());
+	    println(" possible: " + possible.size());
 	  }
 
 	if ((owned == null) && (possible == null))
 	  {
-	    System.out.println("Both owned and possible are null");
+	    println("Both owned and possible are null");
 	  }
       }
 
     ss = new StringSelector(possible, owned, this, editable, true, true);
+
+    if (debug)
+      {
+	println("Done making StringSelector.");
+      }
 
     ss.setCallback(this);
     remove(filler);
@@ -369,7 +388,11 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
     parent.validate();
     stringSelector_loaded = true;
 
-    System.out.println("Done with thread, panel is loaded.");
+    if (debug)
+      {
+	println("Done with thread, panel is loaded.");
+      }
+
     parent.parent.getgclient().setStatus("Done.");
   }
 
@@ -395,7 +418,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
       {
 	if (debug)
 	  {
-	    System.out.println("Adding object to list");
+	    println("Adding object to list");
 	  }
 
 	try
@@ -418,7 +441,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
       {
 	if (debug)
 	  {
-	    System.out.println("Deleting object from list");
+	    println("Deleting object from list");
 	  }
 
 	try
@@ -440,7 +463,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     if (debug)
       {
-	System.out.println("returnValue = " + succeeded);
+	println("returnValue = " + succeeded);
       }
     
     if (succeeded)
@@ -450,5 +473,10 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     return succeeded;
   }
+
+  private void println(String s)
+    {
+      System.out.println("OwnershipPanel.objectPane: " + s);
+    }
 
 }
