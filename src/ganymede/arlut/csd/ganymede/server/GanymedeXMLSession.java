@@ -427,11 +427,26 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     session.checklogin();
 
+    if (debug)
+      {
+	System.err.println("xmlSubmit called on server");
+      }
+
     if (parsing.isSet())
       {
 	try
 	  {
+	    if (debug)
+	      {
+		System.err.println("xmlSubmit byting");
+	      }
+
 	    pipe.write(bytes);	// can block if the parser thread gets behind
+
+	    if (debug)
+	      {
+		System.err.println("xmlSubmit bit");
+	      }
 	  }
 	catch (IOException ex)
 	  {
@@ -471,7 +486,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    cleanup();
 
-	    return getReturnVal(null, false);
+	    try
+	      {
+		return getReturnVal(null, false);
+	      }
+	    finally
+	      {
+		if (debug)
+		  {
+		    System.err.println("xmlSubmit call returned on server 1");
+		  }
+	      }
 	  }
       }
     else
@@ -481,7 +506,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     // if reader is not done, we're ok to continue
 
-    return getReturnVal(null, (reader != null && !reader.isDone()));
+    try
+      {
+	return getReturnVal(null, (reader != null && !reader.isDone()));
+      }
+    finally
+      {
+	if (debug)
+	  {
+	    System.err.println("xmlSubmit call returned on server 2");
+	  }
+      }
   }
 
   /**
@@ -531,9 +566,77 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
+   * <p>This method is called by the XML client on a dedicated thread
+   * to pull stderr messages from the server.</p>
+   *
+   * <p>This call will block on the server until err stream data is
+   * available, but will always block for at least half a second so
+   * that the client doesn't loop on getNextErrChunk() too fast.</p>
+   *
+   * <p>This method will return null after the server closes its error
+   * stream.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.XMLSession
+   */
+
+  public String getNextErrChunk()
+  {
+    String progress = null;
+    StringBuffer errBuffer = errBuf.getBuffer();
+    boolean done = false;
+
+    /* -- */
+
+    while (!done)
+      {
+	synchronized (errBuffer)
+	  {
+	    progress = errBuffer.toString();
+	    errBuffer.setLength(0);	// this doesn't actually free memory.. stoopid StringBuffer
+	  }
+
+	if (progress.length() != 0)
+	  {
+	    done = true;
+
+	    System.err.print(progress);
+
+	    try
+	      {
+		Thread.sleep(500); // sleep for one half second to slow the client/server spin loop down
+	      }
+	    catch (InterruptedException ex2)
+	      {
+		// ?
+	      }
+	  }
+	else
+	  {
+	    if (!parsing.isSet())
+	      {
+		return null;
+	      }
+
+	    try
+	      {
+		Thread.sleep(1000); // sleep for one second to allow more err stream data to accumulate
+	      }
+	    catch (InterruptedException ex2)
+	      {
+		// ?
+	      }
+	  }
+      }
+
+    return progress;
+  }
+
+  /**
    * <p>This method is for use on the server, and is called by the
    * GanymedeSession to let us know if the server is forcing our login
    * off.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
   public void abort()
@@ -666,6 +769,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // note, we must not clear errBuf here, as we may cleanup before
     // calling getReturnVal() to report to the client.
 
+    reader.close();
     reader = null;
 
     objectTypes.clear();
@@ -802,6 +906,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      }
 	    finally
 	      {
+		if (debug)
+		  {
+		    System.err.println("run exited processData(), cleanup(), dataOk = " + String.valueOf(dataOk));
+		  }
 		cleanup();
 	      }
 
@@ -829,13 +937,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// there is something malformed in the XML
 
 	System.err.println("caught exception for GanymedeXMLSession run()");
-
 	ex.printStackTrace();
 
 	err.println(ex.getMessage());
       }
     finally
       {
+	if (debug)
+	  {
+	    System.err.println("run() terminating");
+	  }
+
 	parsing.set(false);
 
 	if (reader != null)
@@ -2772,29 +2884,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private ReturnVal getReturnVal(String message, boolean success)
   {
-    String progress;
-    StringBuffer errBuffer = errBuf.getBuffer();
-
-    synchronized (errBuffer)
-      {
-	progress = errBuffer.toString();
-	errBuffer.setLength(0);	// this doesn't actually free memory.. stoopid StringBuffer
-      }
-
-    if (message != null && !message.equals(""))
-      {
-	progress = progress + "\n" + message;
-      }
-
     if (success)
       {
-	if (progress.length() > 0)
+	if (message != null && message.length() > 0)
 	  {
-	    System.out.println(progress);
+	    System.out.println(message);
 
 	    ReturnVal retVal = new ReturnVal(true);
 	    retVal.setDialog(new JDialogBuff("XML client messages",
-					     progress,
+					     message,
 					     "OK",
 					     null,
 					     "ok.gif"));
@@ -2808,10 +2906,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     else
       {
-	// we depend on createErrorDialog() to dump the progress to the server log
+	if (message == null)
+	  {
+	    return new ReturnVal(false);
+	  }
+	else
+	  {
+	    // we depend on createErrorDialog() to dump the progress to the server log
 
-	return Ganymede.createErrorDialog("XML submit errors",
-					  progress);
+	    return Ganymede.createErrorDialog("XML submit errors",
+					      message);
+	  }
       }
   }
 

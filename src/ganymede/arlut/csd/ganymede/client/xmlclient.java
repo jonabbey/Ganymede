@@ -22,7 +22,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -99,7 +99,7 @@ import arlut.csd.ganymede.rmi.XMLSession;
  * @author Jonathan Abbey
  */
 
-public final class xmlclient implements ClientListener {
+public final class xmlclient implements ClientListener, Runnable {
 
   public static final boolean debug = false;
 
@@ -132,6 +132,7 @@ public final class xmlclient implements ClientListener {
   private boolean dumpData = false;
   private boolean doTest = false;
   private boolean schemaOnly = false;
+  private boolean finishedErrStream = false;
 
   /**
    * RMI reference to a Ganymede server
@@ -144,7 +145,7 @@ public final class xmlclient implements ClientListener {
    * loading data objects into the server.</p>
    */
 
-  public XMLSession session = null;
+  public XMLSession xSession = null;
 
   /**
    * <p>The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
@@ -182,23 +183,23 @@ public final class xmlclient implements ClientListener {
 	  {
 	    if (xc.doXMLDump(true, xc.dumpData, xc.dumpSchema))
 	      {
-		System.exit(0);
+		xc.terminate(0);
 	      }
 	    else
 	      {
-		System.exit(1);
+		xc.terminate(1);		
 	      }
 	  }
 
 	if (xc.doTest)
 	  {
 	    xc.runTest();
-	    System.exit(0);
+	    xc.terminate(0);
 	  }
 
 	if (xc.doEverything(true))
 	  {
-	    System.exit(0);
+	    xc.terminate(0);
 	  }
 	else
 	  {
@@ -211,7 +212,7 @@ public final class xmlclient implements ClientListener {
       }
     finally
       {
-	System.exit(1);
+	xc.terminate(1);
       }
   }
 
@@ -486,7 +487,8 @@ public final class xmlclient implements ClientListener {
   }
 
   /**
-   * <p>Actually do the thing.</p>
+   * <p>This method is used for sending an XML schema edit and/or transaction to
+   * the Ganymede server.</p>
    */
 
   public boolean doEverything(boolean commandLine) throws RemoteException, IOException
@@ -496,6 +498,8 @@ public final class xmlclient implements ClientListener {
 
     if (!scanXML())
       {
+	System.err.println("Bad xml integrity");
+
 	return false;		// malformed in some way
       }
 
@@ -556,7 +560,7 @@ public final class xmlclient implements ClientListener {
 	return false;
       }
 
-    XMLSession xSession = client.xmlLogin(username, password);
+    this.xSession = client.xmlLogin(username, password);
 
     if (xSession == null)
       {
@@ -566,8 +570,12 @@ public final class xmlclient implements ClientListener {
 
     System.out.println("Sending XML to server.");
 
-    // logged in!  now we just need to spin through the xml file and
-    // send it up to the server
+    // logged in !  start our error stream retrieval thread
+
+    new Thread(this).start();
+
+    // now we just need to spin through the xml file and send it up to
+    // the server
 
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(xmlFilename));
 
@@ -580,22 +588,9 @@ public final class xmlclient implements ClientListener {
 	String startWrap = "<ganymede major=\"" + majorVersion + "\" minor=\"" + minorVersion + "\">\n";
 	data = startWrap.getBytes();
 
-	retVal = xSession.xmlSubmit(data);
-
-	if (retVal != null)
+	if (!submitChunk(data))
 	  {
-	    String message = retVal.getDialogText();
-	    
-	    if (message != null)
-	      {
-		System.err.println(message);
-	      }
-	    
-	    if (!retVal.didSucceed())
-	      {
-		xSession.abort();
-		return false;
-	      }
+	    return false;
 	  }
       }
 
@@ -615,29 +610,8 @@ public final class xmlclient implements ClientListener {
 
 	inStream.read(data);
 
-	try
+	if (!submitChunk(data))
 	  {
-	    retVal = xSession.xmlSubmit(data);
-
-	    if (retVal != null)
-	      {
-		String message = retVal.getDialogText();
-
-		if (message != null)
-		  {
-		    System.err.println(message);
-		  }
-
-		if (!retVal.didSucceed())
-		  {
-		    xSession.abort();
-		    return false;
-		  }
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    ex.printStackTrace();
 	    return false;
 	  }
 
@@ -651,48 +625,15 @@ public final class xmlclient implements ClientListener {
 	String endWrap = "\n</ganymede>";
 	data = endWrap.getBytes();
 
-	retVal = xSession.xmlSubmit(data);
-
-	if (retVal != null)
+	if (!submitChunk(data))
 	  {
-	    String message = retVal.getDialogText();
-	    
-	    if (message != null)
-	      {
-		System.err.println(message);
-	      }
-	    
-	    if (!retVal.didSucceed())
-	      {
-		xSession.abort();
-		return false;
-	      }
+	    return false;
 	  }
       }
 
     try
       {
 	retVal = xSession.xmlEnd();
-
-	while (retVal != null && retVal.doNormalProcessing)
-	  {
-	    String message = retVal.getDialogText();
-
-	    if (message != null && message.length()>0)
-	      {
-		System.err.print(message);
-	      }
-
-	    try
-	      {
-		Thread.sleep(1500);	// sleep for 1.5 seconds before calling back
-	      }
-	    catch (InterruptedException ex)
-	      {
-	      }
-
-	    retVal = xSession.xmlEnd();
-	  }
 
 	if (retVal != null)
 	  {
@@ -705,8 +646,56 @@ public final class xmlclient implements ClientListener {
 
 	    return retVal.didSucceed();
 	  }
+	else
+	  {
+	    // a null ReturnVal signifies a successful result
+	    
+	    return true;
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
 
-	// a null ReturnVal signifies a successful result
+	return false;
+      }
+  }
+
+  private boolean submitChunk(byte[] data)
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("submitChunk call");
+      }
+
+    try
+      {
+	retVal = xSession.xmlSubmit(data);
+
+	if (debug)
+	  {
+	    System.err.println("submitChunk completed");
+	  }
+
+	if (retVal != null)
+	  {
+	    String message = retVal.getDialogText();
+
+	    if (message != null)
+	      {
+		System.err.println(message);
+	      }
+	    
+	    if (!retVal.didSucceed())
+	      {
+		xSession.abort();
+		return false;
+	      }
+	  }
 
 	return true;
       }
@@ -933,5 +922,53 @@ public final class xmlclient implements ClientListener {
   {
     System.err.println(e.getMessage());
     System.exit(1);
+  }
+
+  /**
+   * <p>This method is used when we transmit XML to the server.  It
+   * spins on calls to the server's getNextErrChunk() method to pull
+   * the error output stream from the server.</p>
+   */
+
+  public synchronized void run()
+  {
+    String result;
+
+    /* -- */
+
+    this.finishedErrStream = false;
+
+    while (!this.finishedErrStream)
+      {
+	try
+	  {
+	    result = xSession.getNextErrChunk();
+
+	    if (result != null)
+	      {
+		System.err.print(result);
+	      }
+	    else
+	      {
+		this.finishedErrStream = true;
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+      }
+  }
+
+  /**
+   * <p>This method handles terminating the xmlclient.  It is
+   * synchronized against the run method which handles pulling the
+   * error stream from the server, so that we block termination
+   * until the error stream thread completes.</p>
+   */
+
+  private synchronized void terminate(int resultCode)
+  {
+    System.exit(resultCode);
   }
 }

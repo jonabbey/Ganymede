@@ -92,17 +92,23 @@ public interface XMLSession extends java.rmi.Remote {
    * stream has been transmitted, whereupon the server will attempt
    * to finalize the XML transaction and return an overall success or
    * failure message in the ReturnVal.</p>
-   *
-   * <p>Because the GanymedeXMLSession will still be chewing on the
-   * XML transmitted by the client, the client will need to loop on
-   * this call in order to get more output while the chewing occurs.
-   * If the ReturnVal returned has doNormalProcessing set to true,
-   * this means that the server has not transmitted its final
-   * ReturnVal, and the client should sleep for a bit and call
-   * xmlEnd() again to get more output.</p>
    */
 
   ReturnVal xmlEnd() throws RemoteException;
+
+  /**
+   * <p>This method is called by the XML client on a dedicated thread
+   * to pull stderr messages from the server.</p>
+   *
+   * <p>This call will block on the server until err stream data is
+   * available, but will always block for at least half a second so
+   * that the client doesn't loop on getNextErrChunk() too fast.</p>
+   *
+   * <p>This method will return null after the server closes its error
+   * stream.</p>
+   */
+
+  String getNextErrChunk() throws RemoteException;
 
   /**
    * <p>This method can be called to inform the XMLSession that
