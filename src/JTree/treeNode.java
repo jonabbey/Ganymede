@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.1 $ %D%
+  Version: $Revision: 1.2 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ import java.util.*;
  * by the treeCanvas.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  *
  * @see arlut.csd.Tree.treeCanvas
  *
@@ -68,6 +68,7 @@ public class treeNode {
   treeNode nextSibling;
 
   treeMenu menu;
+  treeControl tree;
 
   int row;			// # of the row in the tree this node is currently visible at
 
@@ -147,6 +148,28 @@ public class treeNode {
   public void setText(String text)
   {
     this.text = text;
+  }
+
+  /**
+   *
+   * This method allows you to change the popup menu
+   * on a tree node.
+   *
+   */
+
+  public void setMenu(treeMenu menu)
+  {
+    this.menu = menu;
+
+    if (tree == null)
+      {
+	return;
+      }
+
+    if (menu.registerItems(tree))
+      {
+	tree.canvas.add(menu);
+      }
   }
   
   // Variety of methods to change the images
