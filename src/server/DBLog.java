@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2002/03/16 02:13:13 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2002/06/14 03:33:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -289,8 +289,8 @@ public class DBLog {
    * to.  May legally be null or empty, in which case mail will be sent
    * to anyone needed according to the mailToObjects and mailToOwners
    * parameters
-   * @param title The email subject for this message, will have 'Ganymede: ' prepended
-   * to it.
+   * @param title The email subject for this message, will have the
+   * Ganymede.subjectPrefixProperty prepended to it.
    * @param description The message itself
    * @param mailToObjects If true, this event's mail will go to any
    * email addresses associated with objects referenced by event.
@@ -462,17 +462,17 @@ public class DBLog {
 
     if (type == null)
       {
-	titleString = "Ganymede: " + title;
+	titleString = Ganymede.subjectPrefixProperty + title;
       }
     else
       {
 	if (title == null)
 	  {
-	    titleString = "Ganymede: " + type.name;
+	    titleString = Ganymede.subjectPrefixProperty + type.name;
 	  }
 	else
 	  {
-	    titleString = "Ganymede: " + title;
+	    titleString = Ganymede.subjectPrefixProperty + title;
 	  }
       }
 
@@ -711,7 +711,7 @@ public class DBLog {
 		
 		mailer.sendmsg(returnAddr,
 			       event.notifyVect,
-			       "Ganymede: " + event.subject,
+			       Ganymede.subjectPrefixProperty + event.subject,
 			       message);
 	      }
 	    catch (IOException ex)
@@ -784,7 +784,7 @@ public class DBLog {
 	      {
 		mailer.sendmsg(returnAddr,
 			       mailout.addresses,
-			       "Ganymede: Transaction Log",
+			       Ganymede.subjectPrefixProperty + " Transaction Log",
 			       description);
 	      }
 	    catch (IOException ex)
@@ -1150,7 +1150,7 @@ public class DBLog {
 
 	    mailer.sendmsg(returnAddr,
 			   emailList,
-			   "Ganymede: " + type.name,
+			   Ganymede.subjectPrefixProperty + type.name,
 			   message);
 	  }
 	catch (IOException ex)
@@ -1318,11 +1318,11 @@ public class DBLog {
 	      {
 		if (type.name != null)
 		  {
-		    title = "Ganymede: " + type.name; 
+		    title = Ganymede.subjectPrefixProperty + type.name; 
 		  }
 		else
 		  {
-		    title = "Ganymede: " + type.token;
+		    title = Ganymede.subjectPrefixProperty + type.token; 
 		  }
 
 		if (mailout.objName != null)
@@ -1334,11 +1334,11 @@ public class DBLog {
 	      {
 		if (type.name != null)
 		  {
-		    title = "Ganymede: " + type.name + " (x" + mailout.entryCount + ")";
+		    title = Ganymede.subjectPrefixProperty + type.name + " (x" + mailout.entryCount + ")";
 		  }
 		else
 		  {
-		    title = "Ganymede: " + type.token + " (x" + mailout.entryCount + ")";
+		    title = Ganymede.subjectPrefixProperty + type.token + " (x" + mailout.entryCount + ")";
 		  }
 	      }
 
