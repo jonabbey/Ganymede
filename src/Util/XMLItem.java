@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/14 05:11:30 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/15 03:36:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -171,5 +171,24 @@ public abstract class XMLItem {
   public Integer getAttrInt(String name)
   {
     throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the character data for this XMLItem.</P>
+   */
+
+  public String getString()
+  {
+    throw new IllegalArgumentException("not an XMLCharData.");
+  }
+
+  /**
+   * <P>This method returns the character data for this XMLItem with
+   * leading and trailing whitespace filtered out.</P>
+   */
+
+  public String getCleanString()
+  {
+    throw new IllegalArgumentException("not an XMLCharData.");
   }
 }

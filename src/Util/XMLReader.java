@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/03/14 05:11:31 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/03/15 03:36:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -325,7 +325,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		    nextItem = peekSpecificItem(0);
 		  }
 		
-		if (nextItem.matchesClose(element.getName()))
+		if (nextItem != null && nextItem.matchesClose(element.getName()))
 		  {
 		    element.setEmpty();
 		    getNextItem(false); // coalesce the next item
@@ -363,6 +363,10 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     return peekNextItem(this.skipWhiteSpace);
   }
 
+  /**
+   * <P>Private helper method for peekNextItem().</P>
+   */
+
   private XMLItem peekSpecificItem(int index)
   {
     while (!done && buffer.size() < index + 1)
@@ -375,6 +379,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  {
 	    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
 	  }
+      }
+
+    if (buffer.size() < index + 1)
+      {
+	return null;
       }
 
     return (XMLItem) buffer.elementAt(index);
@@ -399,6 +408,80 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	pushback = item;
 	buffer.notifyAll();	// in case we have multiple threads consuming
       }
+  }
+  
+  /**
+   * <P>This method is intended to be called in the situation where we
+   * have some text between an open and close tag, as in '<open>Some string</open>'.</P>
+   *
+   * <P>getFollowingString() does not expect there to be any other XML 
+   * elements between the open and close element in the stream.</P>
+   *
+   * <P>getFollowingString() expects the openElement to have already been consumed
+   * from the reader at the time that it is called, and will consume the
+   * close element before returning.</P>
+   *
+   * <P>If there is no character data between openElement and the matching closeElement,
+   * null will be returned.</P>
+   */
+
+  public String getFollowingString(XMLItem openItem, boolean skipWhiteSpace)
+  {
+    String result = null;
+    XMLElement openElement;
+    String tagName;
+    XMLItem nextItem;
+
+    /* -- */
+
+    if (!(openItem instanceof XMLElement))
+      {
+	throw new IllegalArgumentException("getFollowingString() needs to be given an XMLElement.");
+      }
+
+    openElement = (XMLElement) openItem;
+
+    // if we have no character data between the open and close tag,
+    // the reader will have reported the openItem as being an empty
+    // element.
+
+    if (openElement.isEmpty())
+      {
+	return null;
+      }
+
+    // okay, we know there's something before we get to the close
+    // element..  handle it.
+
+    tagName = openElement.getName();
+    nextItem = getNextItem(skipWhiteSpace);
+
+    if (nextItem instanceof XMLCharData)
+      {
+	if (skipWhiteSpace)
+	  {
+	    result = nextItem.getCleanString();
+	  }
+	else
+	  {
+	    result = nextItem.getString();
+	  }
+      }
+
+    // and get to the close tag, skipping over whatever gets in our
+    // way
+
+    while (nextItem != null && !nextItem.matchesClose(tagName))
+      {
+	nextItem = getNextItem(skipWhiteSpace);
+      }
+    
+    if (nextItem == null)
+      {
+	throw new IllegalArgumentException("unexpected end of stream");
+      }
+
+    return result;
   }
 
   /**

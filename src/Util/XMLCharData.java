@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/14 05:11:29 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/15 03:36:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,6 +73,10 @@ public class XMLCharData extends XMLItem {
   {
     data = new String(ch, start, length);
   }
+
+  /**
+   * <P>This method returns the character data for this XMLItem.</P>
+   */
 
   public String getString()
   {
