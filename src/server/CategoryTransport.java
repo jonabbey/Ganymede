@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -125,7 +125,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      }
 	    else if (node instanceof DBBaseCategory)
 	      {
-		if (containsVisibleBase((DBBaseCategory) node))
+		if (containsEditableBase((DBBaseCategory) node))
 		  {
 		    addCategoryInfo((DBBaseCategory) node);
 		  }
@@ -136,6 +136,46 @@ public class CategoryTransport implements java.io.Serializable {
     // terminate this category record
 
     addChunk(">");
+  }
+
+  private boolean containsEditableBase(DBBaseCategory category)
+  {
+    Vector contents;
+    CategoryNode node;
+    boolean result = false;
+
+    /* -- */
+
+    if (session == null)
+      {
+	return true;		// we're not filtering, return true immediately
+      }
+
+    contents = category.getNodes();
+
+    if (contents.size() > 0)
+      {
+	for (int i = 0; !result && i < contents.size(); i++)
+	  {
+	    node = (CategoryNode) contents.elementAt(i);
+	    
+	    if (node instanceof DBObjectBase)
+	      {
+		DBObjectBase base = (DBObjectBase) node;
+
+		if (session.getPerm(base.getTypeID()).isEditable())
+		  {
+		    result = true;
+		  }
+	      }
+	    else if (node instanceof DBBaseCategory)
+	      {
+		result = containsVisibleBase((DBBaseCategory) node);
+	      }
+	  }
+      }
+
+    return result;
   }
 
   private boolean containsVisibleBase(DBBaseCategory category)
@@ -163,7 +203,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID()).isEditable())
+		if (session.getPerm(base.getTypeID()).isVisible())
 		  {
 		    result = true;
 		  }
