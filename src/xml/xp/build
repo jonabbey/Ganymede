@@ -3,8 +3,8 @@
 # Ganymede build script for James Clark's XP XML Parser Code
 #
 # Release: $Name:  $
-# Version: $Revision: 1.1 $
-# Date: $Date: 2000/01/26 04:31:46 $
+# Version: $Revision: 1.2 $
+# Date: $Date: 2000/02/21 19:51:50 $
 #
 ############################################################
 
@@ -12,7 +12,6 @@
 
 cd util
 ./build
-echo
 
 # Build James Clark's XML Parser
 
@@ -23,13 +22,11 @@ cd ../xml
 
 # then the Tokenizer
 
-echo
 cd tok
 ./build
 
 # then the Parser
 
-echo
 cd ../parse
 ./build
 
@@ -37,10 +34,8 @@ cd ../parse
 
 cd ../sax
 ./build
-echo
 
 # and finally the XMLWriter classes
 
 cd ../output
 ./build
-echo

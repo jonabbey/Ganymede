@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.16 $ %D%
+  Version: $Revision: 1.17 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.16 $ %D%
+ * @version $Revision: 1.17 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -2373,7 +2373,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		System.err.println("mouseDragged(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
 	      }
 
-	    this.setCursor(Cursor.getPredefinedCursor(Frame.CROSSHAIR_CURSOR));
+	    this.setCursor(Cursor.getPredefinedCursor(java.awt.Cursor.CROSSHAIR_CURSOR));
 	    sprite = images[n.closedImage];
 	    spriteLoc = e.getPoint();
 		

@@ -4,8 +4,8 @@
    
    Created: 1 Oct 1996
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:03:57 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/02/21 19:51:46 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -121,7 +121,7 @@ public class JchoiceList extends Panel {
     clear();
 
     for (int i=0;i<choices.length;i++)
-	l.addItem(choices[i]);
+	l.add(choices[i]);
   }
 
   public void actionPerformed(ActionEvent evt)
