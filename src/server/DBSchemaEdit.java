@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -839,6 +839,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// we want it to be created with supergash privs.
 
 	Ganymede.catTransport = new CategoryTransport(store.rootCategory, Ganymede.internalSession);
+	Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
 
 	GanymedeAdmin.setState("Normal Operation");
       }
