@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2059,9 +2059,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (size() >= getMaxArraySize())
       {
-	setLastError("Field " + getName() + 
-		     " already at or beyond array size limit");
-	return null;
+	return Ganymede.createErrorDialog("Field overflow",
+					  "Field " + getName() +
+					  " is already at or beyond the specified array size limit.");
       }
 
     DBEditObject eObj = (DBEditObject) owner;
@@ -2073,7 +2073,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newObj == null)
       {
-	return null;
+	return Ganymede.createErrorDialog("Couldn't create new embedded object",
+					  "An error occurred in trying to create a new embedded object in the " +
+					  getName() + " field.");
       }
 
     // now we need to do the binding as appropriate
@@ -2104,14 +2106,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	setLastError("Couldn't bind reverse pointer");
-	return null;
+	return retVal;
       }
     else if (debug)
       {
 	InvidDBField invf = (InvidDBField)  embeddedObj.getField(SchemaConstants.ContainerField);
-	System.err.println("-- Created a new embedded object in " + owner.getLabel() + 
-			   ", set it's container pointer to " + invf.getValueString());
+
+	if (debug)
+	  {
+	    System.err.println("-- Created a new embedded object in " + owner.getLabel() + 
+			       ", set it's container pointer to " + invf.getValueString());
+	  }
       }
 
     // finish the binding.  Note that we are directly modifying values
@@ -2140,7 +2145,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	defined = true;		// very important!
 
+	if (retVal == null)
+	  {
+	    retVal = new ReturnVal(true);
+	  }
+
 	retVal.setInvid(newObj);
+
 	return retVal;
       } 
     else
