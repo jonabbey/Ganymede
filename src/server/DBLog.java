@@ -10,8 +10,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2003/02/27 00:01:48 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2003/03/10 23:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -514,7 +514,7 @@ public class DBLog {
     updateObjEventCodeHash();
 
     currentTime = new Date(System.currentTimeMillis());
-    transactionID = adminName + ":" + currentTime.toString();
+    transactionID = adminName + ":" + currentTime.getTime();
 
     Vector objects = new Vector();
 
