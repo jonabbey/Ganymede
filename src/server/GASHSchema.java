@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -239,6 +239,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, SystemColor.window, this, treeImages,
 			   null);
+    tree.setMinimumWidth(200);
     tree.setDrag(this, tree.DRAG_LINE | tree.DRAG_ICON);
 
     //
@@ -683,6 +684,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   }
 
   // treeCallback methods
+
+  public void treeNodeExpanded(treeNode node)
+  {
+    return;
+  }
+
+  public void treeNodeContracted(treeNode node)
+  {
+    return;
+  }
 
   public void treeNodeSelected(treeNode node)
   {
