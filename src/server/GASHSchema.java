@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2703,6 +2703,18 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
 	try
 	  {
 	    String newValue = (String) v.getValue();
+
+	    // we can't allow categories to have null names, because
+	    // if they do, trying to delete the category would
+	    // be.. unfortunate.  We really should have some way of
+	    // *telling* the user why we're not letting them do this,
+	    // but I don't know if we have a handy way of doing that
+	    // from this class.
+
+	    if (newValue.equals(""))
+	      {
+		return false;
+	      }
 
 	    if (debug)
 	      {
