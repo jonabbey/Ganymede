@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 2002/01/20 18:47:35 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 2002/01/20 19:04:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.135 $ $Date: 2002/01/20 18:47:35 $
+ * @version $Revision: 1.136 $ $Date: 2002/01/20 19:04:24 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1424,10 +1424,11 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    * <p>This method places a DBField into a slot in this object's
-   * fieldAry DBField array.  This method makes no checks to ensure
-   * that another DBField with the same field id has not previously
-   * been stored, so it should only be used when the DBObject's
-   * fieldAry is in a known state.  Otherwise, {@link
+   * fieldAry DBField array.  As a (probably reckless) speed
+   * optimization, this method makes no checks to ensure that another
+   * DBField with the same field id has not previously been stored, so
+   * it should only be used when the DBObject's fieldAry is in a known
+   * state.  Otherwise, {@link
    * arlut.csd.ganymede.DBObject#clearField(short) clearField()}
    * should be called before calling saveField(), so that duplicate
    * field id's are not accidentally introduced into the DBObject's
