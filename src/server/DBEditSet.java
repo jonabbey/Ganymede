@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2001/01/13 13:14:18 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2001/02/13 07:03:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1647,7 +1647,7 @@ public class DBEditSet {
 	      {
 		// error.. it should be there so we can remove it
 
-		System.err.println("DBEditObject.syncBackPointers(): missing reverseLinks found removing a backlink: " +
+		System.err.println("DBEditObject.syncObjBackPointers(): missing reverseLinks found removing a backlink: " +
 				   target);
 		continue;
 	      }
@@ -1656,11 +1656,15 @@ public class DBEditSet {
 
 	    if (testInvid == null || !testInvid.equals(ourInvid))
 	      {
-		System.err.println("DBEditObject.syncBackPointers(): couldn't find and remove proper backlink for: " +
+		System.err.println("DBEditObject.syncObjBackPointers(): couldn't find and remove proper backlink for: " +
 				   target);
 	      }
 
 	    // if that was the last back-link, pull the second level hash out
+
+	    // this is safe only because we are using synchronization
+	    // on Ganymede.db.backPointers to restrict modifications
+	    // to the backPointers structure to a thread at a time
 
 	    if (reverseLinks.size() == 0)
 	      {
