@@ -682,7 +682,7 @@ class FieldOptionRow {
  */
 
 class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
-  static protected String[]  cNames =  {"Name", "When to include in build"};
+  static protected String[]  cNames = null;
   static protected Class[]  cTypes = {TreeTableModel.class, Integer.class};
 
   fieldoption_editor foe = null;
@@ -692,6 +692,20 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     super(root); 
 
     this.foe = foe;
+
+    if (cNames == null)
+      {
+	// note that we are using fieldoption_editor's
+	// TranslationService like this because the
+	// resource_validator.pl script that we use in the Ganymede
+	// build environment to validate localization is not yet smart
+	// enough to handle multiple class declarations in a single
+	// .java file.
+
+	cNames = new String[2];
+	cNames[0] = fieldoption_editor.ts.l("fieldOptionModel.name");
+	cNames[1] = fieldoption_editor.ts.l("fieldOptionModel.when");
+      }
   }
   
   //
