@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,21 +28,33 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 
 
-public class notesPanel extends JBufferedPane {
+public class notesPanel extends JBufferedPane implements DocumentListener{
 
   final static boolean debug = true;
 
   JTextArea
     notesArea;
 
-  public notesPanel(string_field notes_field, string_field creator_field, date_field creation_date_field, string_field modifier_field, date_field modification_date_field, boolean editable)
+  framePanel 
+    parent;
+
+  string_field
+    notes_field;
+
+  public notesPanel(string_field notes_field, string_field creator_field, 
+		    date_field creation_date_field, string_field modifier_field,
+		    date_field modification_date_field, boolean editable, framePanel parent)
     {
       if (debug)
 	{
 	  System.out.println("Creating notes panel");
 	}
       
-      setLayout(new BorderLayout(5,5));
+      this.parent = parent;
+      this.notes_field = notes_field;
+
+      //setLayout(new BorderLayout(5,5));
+      setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       setInsets(new Insets(5,5,5,5));
 
       JBufferedPane topPane = new JBufferedPane(false);
@@ -87,43 +99,117 @@ public class notesPanel extends JBufferedPane {
 	  throw new RuntimeException("Could not get creation info: " + rx);
 	}
 
-      JLabel createdBy = new JLabel("Created by " + creator);
-      JLabel createdOn = new JLabel("Created on " + dateformat.format(creation_date));
-      
+      JLabel createdBy = new JLabel();
+      if (creator == null)
+	{
+	  createdBy.setText("No creator set for this object.");
+	}
+      else
+	{
+	  createdBy.setText("Created by " + creator);
+	}
+
+      JLabel createdOn = new JLabel();
+      if (creation_date == null)
+	{
+	  createdOn.setText("No creation date has been set for this object.");
+	}
+      else
+	{
+	  createdOn.setText("Created on " + dateformat.format(creation_date));
+	}
+
       leftPane.add(createdBy);
       leftPane.add(Box.createVerticalStrut(3));
       leftPane.add(createdOn);
       leftPane.add(Box.createVerticalStrut(3));
 
-      JLabel modifiedBy = new JLabel("Modified by " + modifier);
-      JLabel modifiedOn = new JLabel("Modified on " + dateformat.format(mod_date));
+      JLabel modifiedBy = new JLabel();
+      if (modifier == null)
+	{
+	  modifiedBy.setText("No information about the last modifier.");
+	}
+      else
+	{
+	  modifiedBy.setText("Modified by " + modifier);
+	}
+      JLabel modifiedOn = new JLabel();
+      if (mod_date == null)
+	{
+	  modifiedOn.setText("No last modification date");
+	}
+      else
+	{
+	  modifiedOn.setText("Modified on " + dateformat.format(mod_date));
+	}
 
       rightPane.add(modifiedBy);
       rightPane.add(Box.createVerticalStrut(3));
       rightPane.add(modifiedOn);
       rightPane.add(Box.createVerticalStrut(3));
 
-      add("North", topPane);
-
+      //add("North", topPane);
+      add(topPane);
+      
       JBorderedPane bottomPane = new JBorderedPane();
       bottomPane.setBorder(BorderFactory.createTitledBorder(bottomPane, "Notes"));
       bottomPane.setLayout(new BorderLayout());
 
-      notesArea = new JTextArea();
-      bottomPane.add("Center", notesArea);
+      notesArea = new JTextArea(null, 30,15, JTextArea.SCROLLBARS_NONE);
 
-      add("Center", bottomPane);
+      if (debug)
+	{
+	  System.out.println("Columns= " + notesArea.getColumns());
+	  System.out.println("Rows =   " + notesArea.getRows());
+	}
+
+      bottomPane.add("Center", notesArea);
+      add(bottomPane);
+      //add("Center", bottomPane);
       try
 	{
 	  String s = (String)notes_field.getValue();
 	  if (s != null)
 	    {
-	      notesArea.setText(s);
+
+	      notesArea.append(s);
 	    }
 	}
       catch (RemoteException rx)
 	{
 	  throw new RuntimeException("Could not get note text: " + rx);
 	}
+      
+      //notesArea.getDocument().addDocumentListener(this);
+
     }
+
+  public void updateNotes()
+    {
+      try
+	{
+	  notes_field.setValue(notesArea.getText().trim());
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not set notes field: " + rx);
+	}
+    }
+
+  // DocumentListener methods
+  // Get rid of this soon, don't think we need the listeners
+  public void insertUpdate(DocumentEvent e)
+    {
+      System.out.println("insert update");
+    }
+  public void changedUpdate(DocumentEvent e)
+    {
+      System.out.println("changed update");
+    }
+
+  public void removeUpdate(DocumentEvent e)
+    {
+      System.out.println("remove update");
+    }
+
 }
