@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -279,6 +279,7 @@ public class DBEditSet {
 	eObj = (DBEditObject) objects.elementAt(i);
 
 	base = eObj.getBase();
+	base.updateTimeStamp();
 
 	// Create a new DBObject from our DBEditObject and insert
 	// into the object hash
