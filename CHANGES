@@ -361,6 +361,44 @@ for sending an email description of an object from the client.
 This feature is activated by using the 'Mail To...' menu item under
 the 'File' menu in the client's object view/edit windows.
 
+22. [SERVER] Fixed role cloning
+
+The PermissionMatrixDBField class had a slight error in its
+copyFieldTo() method which broke role cloning.  This was supposed to
+work, but it didn't.
+
+Thanks to Pug Bainter (pug@pug.net) for reporting this.
+
+23. [SERVER] Changed client naming for concurrent use
+
+Previously, if a user logged into the Ganymede server with more than
+one client at a time but the same username, the Ganymede server would
+report the second account as user2 in the logs and the admin console.
+
+This can be confusing for situations where both user and user2
+actually exist as valid user accounts, so the Ganymede server logic
+has been changed so that if 'user' is logged in twice at the same
+time, the second login will be reported as 'user[2]' rather than
+'user2'.
+
+Thanks to Pug for complaining about this.
+
+24. [SCHEMA] Fixed gash/gasharl schema system interface deletion bug
+
+Pug caught a bug in the gash/gasharl schema kit, by doing
+something I would never have been able to make myself do.  He created
+a system, set the room to a room with a single network, edited the
+system's single interface, set the network, then deleted the
+interface.
+
+In doing so, he discovered that the gasharl schema kit didn't keep
+track of things properly on interface deletion, and that the network
+that was chosen became unavailable as a choice for that system when an
+interface was created again with the 'add interface' button.
+
+I've fixed this, so now you can delete and add interfaces all you want
+without losing the ability to choose a previously chosen network.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
