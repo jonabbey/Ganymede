@@ -1,5 +1,5 @@
-Ganymede Release 1.0.9
-December 4, 2001
+Ganymede Release 1.0.10
+April 2, 2002
 README.source
 ---------------------------------------------
 
@@ -19,7 +19,10 @@ want to rebuild the jars from scratch, here's what you do.
    can set your CLASSPATH to <install>/src/classes and run
    the ganymede tools.
 
-   You shouldn't see any errors or warnings during the make.
+   You shouldn't see any errors or warnings during the make, with
+   the exception of some deprecation warnings having to do with
+   the org.xml.sax classes Sun decided to bundle into the 1.4
+   JDK, if you compile under 1.4.
 
 4. Run 'make jars'.  This will recreate the 4 jar files used by
    the installation scripts.
