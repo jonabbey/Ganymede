@@ -1,5 +1,5 @@
 <!--
-    Directory Droid Ant build file
+     Directory Droid Ant build file
 
     Last Revision Changed: $Rev$
     Last Changed By: $Author$
@@ -230,6 +230,7 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/server/*.properties"/>
 
       <fileset dir="${build.crypto}" includes="GanymedeServerKey"/>
+      <fileset dir="${build.crypto}" includes="client.truststore"/>
     </jar>
 
     <!-- Build the client jar file -->
