@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/07/27 00:20:35 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/07/27 00:27:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -823,8 +823,16 @@ public class DBLog {
 
 	// prepare our message, word wrap it
 
-	String message = transdescrip + "\n\n" + 
-	  type.description + "\n\n" + event.description + "\n\n";
+	String message;
+
+	if (transdescrip != null && (!transdescrip.equals("null")))
+	  {
+	    message = transdescrip + "\n\n" + type.description + "\n\n" + event.description + "\n\n";
+	  }
+	else
+	  {
+	    message = type.description + "\n\n" + event.description + "\n\n";
+	  }
 
 	message = arlut.csd.Util.WordWrap.wrap(message, 78);
 	
