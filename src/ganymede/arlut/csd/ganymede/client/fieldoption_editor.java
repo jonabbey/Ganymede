@@ -263,6 +263,19 @@ class fieldoption_editor extends JDialog
 	  {
 	    /* get the field options for this field */
 	    template = (FieldTemplate) fields.elementAt(j);
+
+	    /* don't show the time fields, since they are always or
+	     * never changing */
+
+	    switch (template.getID())
+	      {
+	      case SchemaConstants.CreationDateField:
+	      case SchemaConstants.CreatorField:
+	      case SchemaConstants.ModificationDateField:
+	      case SchemaConstants.ModifierField:
+		continue;
+	      }
+
 	    entry = matrix.getOption(id, template.getID());
 
 	    if (entry == null)
