@@ -72,7 +72,8 @@
       </li>
       
       <li><p>In cases like the above, where the element2 element's open and close tag are 
-	  immediately adjacent, XML supports a special syntax for an empty element.  The
+	  immediately adjacent, XML supports a special syntax for an <b>Empty Element</b>, that
+	  is, an element which does not contain any thing between the open tag and close tag.  The
 	  same legal XML structure shown above could be written as:</p>
 	<pre>
         &lt;element1&gt;
@@ -173,7 +174,7 @@
 	  can be ignored or contracted.  For Ganymede's purposes, however,
 	  whitespace between tags is generally ignored, and newlines and
 	  indentation are nice for human readability but not necessary for
-	  Ganymede's input parsing.  More on this as we discuss what Ganymedew
+	  Ganymede's input parsing.  More on this as we discuss what Ganymede
 	  does with XML, below.</p>
       </li>
     </ul>
@@ -243,7 +244,11 @@
     <p>The <b>&lt;ganyschema&gt;</b> element defines the structure of
       the Ganymede database, what types of objects are defined, what
       fields they have, what kind of data those fields can contained,
-      and what everything is called.</p>
+      and what everything is called.  As of 1.0pre1 beta 2, there is
+      no code written that can read this section and set the server's
+      schema accordingly, but if the server is run with the -doXML
+      option, the server will dump out a ganymede.db.xml file that
+      will include the <b>&lt;ganyschema&gt;</b> section.</p>
 
     <p>The <b>&lt;ganyschema&gt;</b> element contains in turn two
       other elements, <b>&lt;namespaces&gt;</b> and
@@ -1918,7 +1923,7 @@ object on the server, regardless of whatever other activity the
     <HR noshade WIDTH="100%">
     
     <FONT FACE="Arial,Helvetica">
-      <i>Last modified: Thu Jun 15 01:27:25 CDT 2000, <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></i>
+      <i>Last modified: Fri Sep 15 01:40:42 CDT 2000, <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></i>
     </FONT>
     
   </BODY>
