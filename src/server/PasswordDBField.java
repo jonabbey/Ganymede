@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/07/27 19:56:30 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/08/05 22:08:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+import MD5;
 import jcrypt;
 
 import arlut.csd.JDialog.*;
@@ -110,8 +111,8 @@ public class PasswordDBField extends DBField implements pass_field {
   // ---
 
   private String cryptedPass;
+  private String md5Pass;
   private String uncryptedPass;
-  private boolean defined = false;
 
   /* -- */
 
@@ -122,7 +123,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
   PasswordDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    defined = true;
     value = values = null;
     this.owner = owner;
     this.definition = definition;
@@ -146,7 +146,6 @@ public class PasswordDBField extends DBField implements pass_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
     values = null;
   }
@@ -161,16 +160,8 @@ public class PasswordDBField extends DBField implements pass_field {
     definition = field.definition;
 
     cryptedPass = field.cryptedPass;
+    md5Pass = field.md5Pass;
     uncryptedPass = field.uncryptedPass;
-
-    if (cryptedPass != null || uncryptedPass != null)
-      {
-	defined = true;
-      }
-    else
-      {
-	defined = false;
-      }
   }
 
   /**
@@ -182,7 +173,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean isDefined()
   {
-    return defined;
+    return (cryptedPass != null || md5Pass != null || uncryptedPass != null);
   }
 
   /**
@@ -197,7 +188,9 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (isEditable(local))
       {
-	defined = false;
+	cryptedPass = null;
+	md5Pass = null;
+	uncryptedPass = null;
 	return null;
       }
 
@@ -264,6 +257,17 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    out.writeUTF(cryptedPass);
 	  }
+
+	// at file version 1.13 we add md5 if we do crypted
+
+	if (md5Pass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(md5Pass);
+	  }
       }
     else
       {
@@ -311,6 +315,16 @@ public class PasswordDBField extends DBField implements pass_field {
 		cryptedPass = null;
 	      }
 
+	    if ((Ganymede.db.file_major >= 1) && (Ganymede.db.file_minor >= 13))
+	      {
+		md5Pass = in.readUTF();
+		
+		if (md5Pass.equals(""))
+		  {
+		    md5Pass = null;
+		  }
+	      }
+
 	    uncryptedPass = null;
 	  }
 	else
@@ -323,12 +337,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 
 	    cryptedPass = null;
+	    md5Pass = null;
 	  }
-      }
-
-    if (cryptedPass != null || uncryptedPass != null)
-      {
-	defined = true;
       }
   }
 
@@ -373,9 +383,30 @@ public class PasswordDBField extends DBField implements pass_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (cryptedPass != null || uncryptedPass != null)
+    if (cryptedPass != null || md5Pass != null || uncryptedPass != null)
       {
-	return "<Password>";
+	StringBuffer result = new StringBuffer();
+
+	result.append("< ");
+
+	if (cryptedPass != null)
+	  {
+	    result.append("crypt ");
+	  }
+
+	if (md5Pass != null)
+	  {
+	    result.append("md5 ");
+	  }
+
+	if (uncryptedPass != null)
+	  {
+	    result.append("text ");
+	  }
+
+	result.append(">");
+
+	return result.toString();
       }
     else
       {
@@ -538,7 +569,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	return text.equals(uncryptedPass);
       }
-    else
+    else if (cryptedPass != null)
       {
 	if (debug)
 	  {
@@ -574,6 +605,11 @@ public class PasswordDBField extends DBField implements pass_field {
 		uncryptedPass = text;
 	      }
 
+	    // likewise, remember the MD5 version in case someone is going
+	    // to want it
+
+	    md5Pass = MD5.md5crypt(text);
+
 	    return true;
 	  }
 	else
@@ -581,34 +617,105 @@ public class PasswordDBField extends DBField implements pass_field {
 	    return false;
 	  }
       }
+    else if (md5Pass != null)
+      {
+	if (debug)
+	  {
+	    System.err.println("present md5 hashed text == " + md5Pass);
+	  }
+
+	cryptedText = MD5.md5crypt(text);
+
+	if (debug)
+	  {
+	    System.err.println("comparison crypted text == " + cryptedText);
+	  }
+
+	if (md5Pass.equals(cryptedText))
+	  {
+	    // If we're set up to keep plaintext copies or our
+	    // encrypted passwords, we're going to go ahead and make a
+	    // note of the plaintext password we just matched to the
+	    // crypt text.  This is really pretty funky, because this
+	    // is being done outside of any transactional context, but
+	    // we're really not changing the *content* of this
+	    // password field, we're just remembering another thing
+	    // about the password we already are keeping.. to wit, the
+	    // actual plain text.  By doing this, Ganymede can accumulate
+	    // plaintext copies of the passwords whenever anyone logs in
+	    // to it (assuming that the schema is set up to have the user's
+	    // password field keep a plaintext copy.)
+
+	    if (definition.isPlainText())
+	      {
+		uncryptedPass = text;
+	      }
+
+	    // likewise, remember the crypt() version in case someone is going
+	    // to want it
+
+	    cryptedPass = jcrypt.crypt(text);
+
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+
+    // should never get here
+
+    return false;
   }
 
   /**
-   * <p>Verification method for comparing a crypt'ed entry with a crypted
-   * value.  The salts for the stored and submitted values must match
+   * <p>Verification method for comparing a hashed entry with a hashed
+   * test value.  If the stored password was hashed with the UNIX crypt()
+   * algorithm, The salts for the stored and submitted values must match
    * in order for a comparison to be made, else an illegal argument
-   * exception will be thrown</p>
+   * exception will be thrown.</p>
+   *
+   * <p>If the stored password was hashed with the MD5 algorithm, there
+   * is no SALT to worry about.</p>
    *
    * @see arlut.csd.ganymede.pass_field
    */
 
   public boolean matchCryptText(String text)
   {
-    if (cryptedPass == null || text == null)
+    if ((cryptedPass == null && md5Pass == null) || text == null)
       {
 	return false;
       }
 
-    if (!text.startsWith(getSalt()))
+    // do we have an md5 password stored?  
+
+    if (md5Pass != null)
       {
-	throw new IllegalArgumentException("bad salt");
+	if (md5Pass.equals(text))
+	  {
+	    return true;
+	  }
       }
 
-    return text.equals(cryptedPass);
+    if (cryptedPass != null)
+      {
+	if (!text.startsWith(getSalt()))
+	  {
+	    throw new IllegalArgumentException("bad salt");
+	  }
+	
+	return text.equals(cryptedPass);
+      }
+
+    return false;
   }
 
   /**
    * <p>This server-side only method returns the UNIX-encrypted password text.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getUNIXCryptText()
@@ -622,6 +729,31 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (uncryptedPass != null)
 	  {
 	    return jcrypt.crypt(uncryptedPass);
+	  }
+	else
+	  {
+	    return null;
+	  }
+      }
+  }
+
+  /**
+   * <p>This server-side only method returns the md5-encrypted password text.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
+   */
+
+  public String getMD5CryptText()
+  {
+    if (crypted() && md5Pass != null)
+      {
+	return md5Pass;
+      }
+    else
+      {
+	if (uncryptedPass != null)
+	  {
+	    return MD5.md5crypt(uncryptedPass);
 	  }
 	else
 	  {
@@ -702,47 +834,49 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    if (text != null)
 	      {
-		cryptedPass = jcrypt.crypt(text);
-
-		// see whether the schema editor has us trying to save
-		// plain text
-
-		if (definition.isPlainText())
+		try
 		  {
-		    uncryptedPass = text;
+		    cryptedPass = jcrypt.crypt(text);
+		    md5Pass = MD5.md5crypt(text);
 		  }
-		else
+		finally
 		  {
-		    uncryptedPass = null;
+		    // see whether the schema editor has us trying to save
+		    // plain text
+		    
+		    if (definition.isPlainText())
+		      {
+			uncryptedPass = text;
+		      }
+		    else
+		      {
+			uncryptedPass = null;
+		      }
+		    
+		    if (debug)
+		      {
+			System.err.println("PasswordDBField.setPlainTextPass(): Setting plain text pass.. crypted = " + 
+					   cryptedPass + ", md5 = " + md5Pass + ", plain = " + uncryptedPass);
+		      }
 		  }
-
-		if (debug)
-		  {
-		    System.err.println("PasswordDBField.setPlainTextPass(): Setting plain text pass.. crypted = " + 
-				       cryptedPass + ", plain = " + uncryptedPass);
-		  }
-
-		defined = true;
 	      }
 	    else
 	      {
 		cryptedPass = null;
+		md5Pass = null;
 		uncryptedPass = null;
 
 		if (debug)
 		  {
 		    System.err.println("PasswordDBField.setPlainTextPass(): Clearing password");
 		  }
-
-		defined = false;
 	      }
 	  }
 	else
 	  {
 	    cryptedPass = null;
+	    md5Pass = null;
 	    uncryptedPass = text;
-
-	    defined = (uncryptedPass != null);
 
 	    if (debug)
 	      {
@@ -760,6 +894,9 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>This method will return an error dialog if this field does not store
    * passwords in UNIX crypted format.</p>
    *
+   * <p>Because the UNIX crypt() hashing is not reversible, any MD5 and plain text
+   * password information stored in this field will be lost.</p>
+   *
    * @see arlut.csd.ganymede.pass_field
    */
 
@@ -767,19 +904,73 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     ReturnVal retVal;
 
-    if (!definition.isCrypted())
-      {
-	owner.editset.session.setLastError("can't set a pre-crypted value into a plaintext password field");
+    /* -- */
 
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
-					  "Can't set a pre-crypted value into a plaintext password field");
+    if (!isEditable(true))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
-    retVal = verifyNewValue(text);
-
-    if (retVal != null && !retVal.didSucceed())
+    if (!definition.isCrypted())
       {
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
+					  "Can't set a pre-crypted value into a plaintext-only password field");
+      }
+
+    retVal = ((DBEditObject)owner).finalizeSetValue(this, text);
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	// whenever the crypt password is directly set, we lose 
+	// plaintext and alternate hashes
+
+	if ((text == null) || (text.equals("")))
+	  {
+	    cryptedPass = null;
+	  }
+	else
+	  {
+	    cryptedPass = text;
+	  }
+
+	md5Pass = null;
+	uncryptedPass = null;
+      }
+
+    return retVal;
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted MD5 password for this field.</p>
+   *
+   * <p>This method will return an error dialog if this field does not store
+   * passwords in crypted format.</p>
+   *
+   * <p>Because the MD5 hashing is not reversible, any Unix crypt() and plain text
+   * password information stored in this field will be lost.</p>
+   *
+   * @see arlut.csd.ganymede.pass_field
+   */
+
+  public ReturnVal setMD5Pass(String text)
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!isEditable(true))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
+      }
+
+    if (!definition.isCrypted())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
+					  "Can't set a pre-crypted value into a plaintext-only password field");
       }
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, text);
@@ -791,16 +982,15 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if ((text == null) || (text.equals("")))
 	  {
-	    cryptedPass = null;
-	    uncryptedPass = null;
-	    defined = false;
+	    md5Pass = null;
 	  }
 	else
 	  {
-	    cryptedPass = text;
-	    uncryptedPass = null;
-	    defined = true;
+	    md5Pass = text;
 	  }
+
+	cryptedPass = null;
+	uncryptedPass = null;
       }
 
     return retVal;
@@ -816,6 +1006,10 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     return ((o == null) || (o instanceof String));
   }
+
+  /**
+   * Generally only for when we get a plaintext submission..
+   */
 
   public ReturnVal verifyNewValue(Object o)
   {

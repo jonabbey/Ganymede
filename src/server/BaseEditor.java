@@ -5,8 +5,8 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:05:26 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/08/05 22:08:43 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -67,6 +67,12 @@ import arlut.csd.JTree.*;
                                                                       BaseEditor
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Part of the admin console's graphical schema editor.  This panel
+ * is responsible for displaying and editing base definitions (title,
+ * label, class).</p>
+ */
 
 class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 

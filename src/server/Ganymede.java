@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 1999/07/29 21:37:50 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 1999/08/05 22:08:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -733,48 +733,62 @@ public class Ganymede {
 
   static public void startupHook()
   {
+    Invid supergashinvid = new Invid(SchemaConstants.PersonaBase,
+				     SchemaConstants.PersonaSupergashObj);
+    DBObject v_object;
     DBEditObject e_object;
+
+    PasswordDBField p;
+
     Invid defaultInv;
     StringDBField s;
     PermissionMatrixDBField pm;
     
     /* -- */
 
-    if (resetadmin)
+    if (resetadmin && Ganymede.defaultrootpassProperty != null)
       {
-	System.out.println("Resetting supergash password.");
+	// check to see if we need to reset the password to match our
+	// properties file
 
-	internalSession.openTransaction("Ganymede startupHook");
+	v_object = internalSession.session.viewDBObject(supergashinvid);
+	p = (PasswordDBField) v_object.getField("Password");
 
-	e_object = (DBEditObject) internalSession.session.editDBObject(new Invid(SchemaConstants.PersonaBase,
-										 SchemaConstants.PersonaSupergashObj));
-
-	if (e_object == null)
+	if (!p.matchPlainText(Ganymede.defaultrootpassProperty))
 	  {
-	    throw new RuntimeException("Error!  Couldn't pull " + rootname + " object");
-	  }
+	    System.out.println("Resetting supergash password.");
 
-	PasswordDBField p = (PasswordDBField) e_object.getField("Password");
-	ReturnVal retval = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	    internalSession.openTransaction("Ganymede startupHook");
 
-	if (retval != null && !retval.didSucceed())
-	  {
-	    throw new RuntimeException("Error!  Couldn't reset " + rootname + " password");
-	  }
+	    e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
 
-	System.out.println(rootname + " password reset to value specified in Ganymede properties file");
-
-	retval = internalSession.commitTransaction();
-
-	if (retval != null && !retval.didSucceed())
-	  {
-	    // if doNormalProcessing is true, the
-	    // transaction was not cleared, but was
-	    // left open for a re-try.  Abort it.
-
-	    if (retval.doNormalProcessing)
+	    if (e_object == null)
 	      {
-		internalSession.abortTransaction();
+		throw new RuntimeException("Error!  Couldn't pull " + rootname + " object");
+	      }
+
+	    p = (PasswordDBField) e_object.getField("Password");
+	    ReturnVal retval = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	    
+	    if (retval != null && !retval.didSucceed())
+	      {
+		throw new RuntimeException("Error!  Couldn't reset " + rootname + " password");
+	      }
+
+	    System.out.println(rootname + " password reset to value specified in Ganymede properties file");
+
+	    retval = internalSession.commitTransaction();
+
+	    if (retval != null && !retval.didSucceed())
+	      {
+		// if doNormalProcessing is true, the
+		// transaction was not cleared, but was
+		// left open for a re-try.  Abort it.
+		
+		if (retval.doNormalProcessing)
+		  {
+		    internalSession.abortTransaction();
+		  }
 	      }
 	  }
       }

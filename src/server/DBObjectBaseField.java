@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/06/15 02:48:20 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/08/05 22:08:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -214,7 +214,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   short targetField = -1;
 
   // password attributes
-  
+
   boolean crypted = true;	// UNIX encryption is the default.
   boolean storePlaintext = false;
 

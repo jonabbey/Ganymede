@@ -6,8 +6,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/05/07 05:21:38 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/08/05 22:08:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -146,4 +146,12 @@ public interface pass_field extends db_field {
    */
 
   ReturnVal setCryptPass(String text) throws RemoteException;
+
+  /** 
+   * <p>This method is used to set a pre-crypted MD5 password for
+   * this field.  This method will return false if this password field
+   * is not stored crypted.</p>
+   */
+
+  ReturnVal setMD5Pass(String text) throws RemoteException;
 }

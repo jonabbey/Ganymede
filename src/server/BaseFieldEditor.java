@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/05/26 23:17:22 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/08/05 22:08:44 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -67,6 +67,11 @@ import arlut.csd.JTree.*;
                                                                  BaseFieldEditor
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Part of the admin console's graphical schema editor.  This panel is
+ * responsible for displaying and editing field definitions.</p>
+ */
 
 class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener, TextListener {
 
@@ -213,7 +218,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "UNIX Crypted:" , 7);
+    addRow(editPanel, cryptedCF, "UNIX/MD5 Crypted:" , 7);
 
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
