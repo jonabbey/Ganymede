@@ -21,6 +21,11 @@ public class DialogRsrc {
   String OKText;
   String CancelText;
 
+  public DialogRsrc(Frame frame, String Title, String Text)
+    {
+      this(frame, Title, Text, "Ok", "Cancel");
+    }
+
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel)
     {
       
@@ -37,16 +42,12 @@ public class DialogRsrc {
   
   public void addString(String string)
     {
-      System.out.println("adding " + string);
       objects.addElement(new stringThing(string));
-      
     }
   
   public void addBoolean(String string)
     {
-      System.out.println("adding " + string);
       objects.addElement(new booleanThing(string));
-      
     }
   
   public void addChoice(String label, Vector choices)
