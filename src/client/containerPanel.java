@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.21 $ %D%
+    Version: $Revision: 1.22 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -279,48 +279,29 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Done updating container panel");
       }
   }
-  /*
-  public void doLayout()
-  {
-    System.out.println("doLayout in containerP");
-    super.doLayout();
-    setSize(getPreferredSize().width, getPreferredSize().height);
-  }
-  */
+
   /**
-   * Override validate to reset the current size.
+   *
+   * This method does causes the hierarchy of containers above
+   * us to be recalculated from the bottom (us) on up.  Normally
+   * the validate process works from the top-most container down,
+   * which isn't what we want at all in this context.
+   *
    */
-  /*  public void validate()
-  {
-    //System.out.println("validate in cp: " + whereAmI());
-    super.validate();
-    setSize(getPreferredSize().width, getPreferredSize().height);
-    if (getParent() != null)
-      {
-	getParent().validate();
-      }
-  }*/
 
-
-  public String whereAmI()
+  public void invalidateRight()
   {
-    if (getParent() instanceof containerPanel)
+    Component c;
+
+    c = this;
+
+    while ((c != null) && !(c instanceof JViewport))
       {
-	return ((containerPanel)getParent()).whereAmI() + "/c";
+	//System.out.println("doLayout on " + c);
+
+	c.doLayout();
+	c = c.getParent();
       }
-    else if (getParent() instanceof vectorPanel)
-      {
-	return ((vectorPanel)getParent()).whereAmI() + "/c";
-      }
-    else if (getParent() instanceof elementWrapper)
-      {
-	return ((elementWrapper)getParent()).whereAmI() + "/c";
-      }
-    else 
-      {
-	System.out.println("What kind of parent is this: " + getParent());
-      }
-    return "/c";
   }
 
   public boolean setValuePerformed(JValueObject v)
@@ -457,12 +438,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else if (v.getValue() instanceof Invid)
 	  {
 	    db_field field = (db_field)objectHash.get(v.getSource());
+
 	    if (field == null)
 	      {
 		throw new RuntimeException("Could not find field in objectHash");
 	      }
+
 	    Invid invid = (Invid)v.getValue();
 	    int index = v.getIndex();
+
 	    try
 	      {
 		if (v.getOperationType() == JValueObject.ADD)
@@ -636,25 +620,36 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Not from a JCombobox");
       }
   }
+
+  void addVectorRow(Component comp, String label, boolean visible)
+  {
+    // create a dummy label for consistency
+
+    JLabel l = new JLabel("");
+    rowHash.put(comp, l);
+
+    comp.setBackground(ClientColor.ComponentBG);
+    add("0 " + row + " 2 lthH", comp); // span 2 columns, no label
+    row++;
+
+    setRowVisible(comp, visible);
+  }
   
   void addRow(Component comp,  String label, boolean visible)
   {
-    addRow(comp, label);
-    setRowVisible(comp, visible);
-  }
+    // create a dummy label for consistency
 
-  void addRow(Component comp,  String label)
-  {
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
+
     comp.setBackground(ClientColor.ComponentBG);
-    add("0 " + row + " lthwHW", l);
-    add("1 " + row + " lthwHW", comp);
 
-    invalidate();
-    frame.validate();
-
+    add("0 " + row + " lthH", l);
+    add("1 " + row + " lthH", comp);
+    
     row++;
+
+    setRowVisible(comp, visible);
   }
 
   void setRowVisible(Component comp, boolean b)
@@ -668,6 +663,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     comp.setVisible(b);
     c.setVisible(b);
+
+    invalidateRight();
   }
 
   /**
@@ -775,7 +772,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + type);
-	    addRow( label, name);
+	    addRow( label, name, true);
 	  }
       }
   }
@@ -801,6 +798,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     QueryResult qr = field.choices();
+
     if (qr == null)
       {
 	tStringSelector ss = new tStringSelector(null,
@@ -813,7 +811,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	objectHash.put(ss, field);
 	ss.setCallback(this);
 	addRow( ss, field.getName(), field.isVisible()); 
-	
       }
     else
       {
@@ -827,7 +824,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	objectHash.put(ss, field);
 	ss.setCallback(this);
 	addRow( ss, field.getName(), field.isVisible()); 
-	
       }
   }
 
@@ -883,6 +879,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     // ss is canChoose, mustChoose
+
     tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 100);
     objectHash.put(ss, field);
     ss.setCallback(this);
@@ -918,7 +915,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	addRow( vp, field.getName(), field.isVisible());
+	addVectorRow( vp, field.getName(), field.isVisible());
       }
     catch (RemoteException rx)
       {
