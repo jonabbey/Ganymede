@@ -151,6 +151,47 @@ requirement of Ganymede 2.0.
 XXX - I forget exactly what Deepak did, but I think the whole
 QueryResults system got changed.. ? XXX
 
+10. [SERVER, CLIENT] Removed the OwnerObjectsOwned field from OwnerBase
+
+With this change, Owner Group objects no longer include an
+InvidDBField tracking objects owned by that Owner Group.  Instead, it
+is the responsibility of the owned object to point to its owner.
+
+By making this relationship non-symmetrical, we gain the ability to
+add or remove objects from an owner group during a transaction without
+having to check out the owner group for exclusive editing.  As such,
+this change will significantly improve concurrency in the Ganymede
+system when many objects are owned by a single owner group.  It will
+also reduce memory loading on the server.
+
+This change was made possible by the (now quite old) change described
+in 0.99.8, #17.
+
+The client was also changed so as not to show the 'objects owned' pane
+when viewing or editing an Owner Group object.  I plan on putting that
+pane back in, but it will be implemented with discrete query logic,
+rather than the old InvidDBField lookup, again for the benefit of
+avoiding owner group locking.
+
+11. [SERVER] Added a per-DBObjectBaseField lastChange variable
+
+For the entire history of Ganymede, the GanymedeBuilderTask has
+consulted a lastChange variable in each DBObjectBase to decide whether
+any objects of a given type (user, group, system, etc.) has been
+changed since that builder task last ran.  Our custom builder tasks
+use this to avoid doing builds when the builder task is not interested
+in what has changed since it last ran.
+
+One problem with this has always been that the object-level timestamp
+didn't really have as much granularity as we would desire.  Now, each
+DBObjectBaseField has its own timestamp, so we can write builder tasks
+that will, say, check to see if any user has had their username or
+password changed since the builder task last ran.  Previously, all the
+builder task could do was check to see if any user had been edited in
+any way since it last ran.  This meant that editing the Notes field on
+a user would trigger unnecessary activity in all builder tasks that
+cared at all about user changes.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
