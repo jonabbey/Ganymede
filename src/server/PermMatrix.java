@@ -6,7 +6,7 @@
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,13 +50,13 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermMatrix(PermissionMatrixDBField field)
   {
-    if (field.matrix != null)
-      {
-	this.matrix = (Hashtable) field.matrix.clone();
-      }
-    else
+    if ((field == null) || (field.matrix == null))
       {
 	this.matrix = new Hashtable();
+      }	
+    else
+      {
+	this.matrix = (Hashtable) field.matrix.clone();
       }
   }
 
