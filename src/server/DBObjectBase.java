@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,7 @@ import java.util.*;
 
 public class DBObjectBase {
 
-  static boolean debug = false;
+  static boolean debug = true;
 
   public static void setDebug(boolean val)
   {
@@ -44,6 +44,7 @@ public class DBObjectBase {
 
   DBStore store;
   String object_name;
+  String classname;
   short type_code;
   Hashtable fieldHash;		// field dictionary
   Hashtable objectHash;		// objects in our objectBase
@@ -66,6 +67,7 @@ public class DBObjectBase {
     dumperList = new Vector();
     this.store = store;
     object_name = null;
+    classname = null;
     type_code = 0;
     fieldHash = null;
     objectHash = null;
@@ -90,6 +92,7 @@ public class DBObjectBase {
     /* -- */
 
     out.writeUTF(object_name);
+    out.writeUTF(classname);
     out.writeShort(type_code);
 
     size = fieldHash.size();
@@ -132,6 +135,13 @@ public class DBObjectBase {
     if (debug)
       {
 	System.err.println("DBObjectBase.receive(): object base name: " + object_name);
+      }
+
+    classname = in.readUTF();
+
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): class name: " + classname);
       }
 
     type_code = in.readShort();
@@ -255,29 +265,59 @@ public class DBObjectBase {
 
   /**
    *
-   * Returns the field definitions for the objects stored in this
-   * ObjectBase.
+   * Returns the name of this object type
    *
    */
 
-  public DBObjectBaseField[] getFields()
+  public String getName()
   {
-    DBObjectBaseField[] result;
+    return object_name;
+  }
+
+  /**
+   *
+   * Returns the name of the class managing this object type
+   *
+   */
+  
+  public String getClassName()
+  {
+    return classname;
+  }
+
+  /**
+   *
+   * Returns the invid type id for this object definition
+   *
+   */
+
+  public int getTypeID()
+  {
+    return type_code;
+  }
+
+  /**
+   *
+   * Returns the field definitions for the objects stored in this
+   * ObjectBase.
+   *
+   * Returns a vector of DBObjectBaseField objects.
+   *
+   */
+
+  public Vector getFields()
+  {
+    Vector result;
+    Enumeration enum;
 
     /* -- */
 
-    result = new DBObjectBaseField[fieldHash.size()];
-
-    for (short i = 0; i < result.length; i++)
+    result = new Vector();
+    enum = fieldHash.elements();
+    
+    while (enum.hasMoreElements())
       {
-	result[i] = (DBObjectBaseField) fieldHash.get(new Short(i));
-
-	// missing field?
-
-	if (debug && (result[i] == null))
-	  {
-	    throw new RuntimeException("missing field definition");
-	  }
+	result.addElement(enum.nextElement());
       }
 
     return result;
