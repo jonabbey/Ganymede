@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2002/04/10 04:59:49 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2002/04/10 05:04:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -383,7 +383,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   private boolean fitsInNIS(Vector newItemVect)
   {
     StringDBField externalTargets = (StringDBField) getField(emailListSchema.EXTERNALTARGETS);
-    InvidDBField members = (InvidDBField) getField(emailListSchema.EXTERNALTARGETS);
+    InvidDBField members = (InvidDBField) getField(emailListSchema.MEMBERS);
 
     int totalLength = externalTargets.getValueString().length() + members.getValueString().length();
 
