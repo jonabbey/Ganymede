@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -147,6 +147,35 @@ public class BooleanDBField extends DBField implements boolean_field {
   public boolean value(int index)
   {
     throw new IllegalArgumentException("vector accessor called on scalar");
+  }
+
+  /**
+   *
+   * Sets the value of this field, if a scalar.<br><br>
+   *
+   * This method is server-side only.<br><br>
+   *
+   * The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.
+   *
+   * @param value Value to set this field to
+   * @param local If true, permissions checking will be skipped
+   *
+   */
+
+  public synchronized ReturnVal setValue(Object value, boolean local)
+  {
+    ReturnVal result = super.setValue(value, local);
+
+    if (value != null)
+      {
+	Boolean boolVal = (Boolean) value;
+
+	defined = boolVal.booleanValue();
+      }
+
+    return result;
   }
 
   public synchronized String getValueString()
