@@ -23,7 +23,7 @@ _1. Configuring the distribution for your site_
    that there is a configure script under the ganymede-xx directory. This
    script does two main things. First, it unpacks four scripts you can
    immediately use to install the client and server, called
-   installClient, installClient2 (for JDK 1.2), installWeb and
+   installClient, installClient2 (for JDK 1.2 and 1.3), installWeb and
    installServer. Second, configure goes through the source tree and
    builds and configures the makefiles and build scripts used to build
    the source.
@@ -437,4 +437,4 @@ _6. Loading the server_
    
     Jonathan Abbey
     
-   Last modified: Thu Oct 5 17:57:12 CDT 2000
+   Last modified: Thu Oct 5 18:04:58 CDT 2000

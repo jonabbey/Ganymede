@@ -1,0 +1,22 @@
+Ganymede Release 1.0 prerelease beta 3
+October 5, 2000
+README.xml
+---------------------------------------------
+
+In this code drop, installClient will install an xmlclient, which is
+capable of transmitting data in bulk into an installed Ganymede
+server.  The xml file format used is documented in doc/xml.html.
+
+The xmlclient itself has a command line option which is not
+yet documented elsewhere.  This is the following:
+
+  xmlclient -dumpschema
+
+	This will cause the xmlclient to connect to the Ganymede server
+	and to dump a <ganymede> xml file to stdout that includes a
+	<ganyschema> section defining the current schema definition in
+	the Ganymede server.
+
+Otherwise, if you run xmlclient by itself on the command line, it will
+present the command line options that it supports.
+
