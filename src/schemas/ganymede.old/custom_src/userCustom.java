@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1178,6 +1178,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    else if (!result.didSucceed())
 	      {
+		if (debug)
+		  {
+		    System.err.println("userCustom: Couldn't create new embedded object in wizardhook");
+		  }
+
 		return result;
 	      }
 	    
@@ -1186,7 +1191,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // find the auto.home.default map, if we can.
 
 	    Vector results = getGSession().internalQuery(new Query((short) 277, 
-								   new QueryDataNode(QueryDataNode.EQUALS,
+								   new QueryDataNode(mapSchema.MAPNAME,
+										     QueryDataNode.EQUALS,
 										     "auto.home.default")));
 
 	    // if we found auto.home.default, set the new volume entry map
@@ -1207,6 +1213,22 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// to refuse edit privileges.
 
 		field.clearPermCache();	// *sync*
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("userCustom.wizardHook(): Couldn't find auto.home.default");
+
+		    if (results == null)
+		      {
+			System.err.println("userCustom.wizardHook(): results == null");
+		      }
+		    else if (results.size() != 1)
+		      {
+			System.err.println("userCustom.wizardHook(): results.size() != 1");
+		      }
+		  }
 	      }
 	    
 	    result = new ReturnVal(true, true);	// go ahead and allow DBField.setValue() to operate
