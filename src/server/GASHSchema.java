@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,8 @@ import java.awt.event.*;
 import java.net.*;
 import java.applet.*;
 import java.util.*;
+
+import jdj.PackageResources;
 
 import gjt.Box;
 import gjt.Util;
@@ -184,21 +186,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     images = new Image[3];
 
-    try
-      {
-	images[0] = toolkit.getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/openfolder.gif"));
-	Util.waitForImage(this, images[0]);
-
-	images[1] = toolkit.getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/folder.gif"));
-	Util.waitForImage(this, images[1]);
-
-	images[2] = toolkit.getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/list.gif"));
-	Util.waitForImage(this, images[2]);
-      }
-    catch (MalformedURLException e)
-      {
-	System.err.println("Bad URL");
-      }
+    images[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    images[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
+    images[2] = PackageResources.getImageResource(this, "list.gif", getClass());
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, SystemColor.window, this, images,
