@@ -4,8 +4,8 @@
 
    Created: 16 November 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/11/17 02:23:23 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/11/17 02:26:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ package arlut.csd.Util;
 public class CVSVersion {
 
   static String CVS_release_name = "$Name:  $";
-  static String CVS_release_date = "$Date: 2001/11/17 02:23:23 $";
+  static String CVS_release_date = "$Date: 2001/11/17 02:26:51 $";
   static String release_string = null;
 
   // ---
@@ -80,74 +80,69 @@ public class CVSVersion {
 
     if (CVS_release_name.length () <= 9)
       {
-	release_string = "version unknown - " + release_date; 
+	release_string = "version unknown" + " - " + CVS_release_date; 
 	return release_string;
       }
 
-    String release_name;
-    String release_number;
+    String release_name = null;
+    String release_number = "version unknown";
 
     // cut off leading $Name:  $, clean up whitespace
 	
-    if (CVS_release_name.length() > 9)
+    release_name = CVS_release_name.substring(6, CVS_release_name.length()-1);
+    release_name.trim();
+	
+    // we use ganymede_XXX for our CVS tags
+    
+    if (release_name.indexOf('_') != -1)
       {
-	// cut off the leading '$Name: ' bit
+	release_number = release_name.substring(release_name.indexOf('_') + 1, 
+						release_name.length());
+      }
+    
+    if (release_number.length() == 9)
+      {
+	// convert XXXYYYZZZ style version number to x.y.z
 	
-	release_name = CVS_release_name.substring(6, CVS_release_name.length()-1);
-	release_name.trim();
+	// i.e., 001000008 to 1.0.8
 	
-	// we use ganymede_XXX for our CVS tags
-	
-	if (release_name.indexOf('_') != -1)
+	String a = release_number.substring(0, 3);
+	String b = release_number.substring(3, 6);
+	String c = release_number.substring(6, 9);
+
+	int ia, ib, ic;
+
+	try
 	  {
-	    release_number = release_name.substring(release_name.indexOf('_') + 1, 
-						    release_name.length());
+	    ia = Integer.parseInt(a);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    ia = -1;
 	  }
 
-	if (release_number.length() == 9)
+	try
 	  {
-	    // convert XXXYYYZZZ style version number to x.y.z
-	
-	    // i.e., 001000008 to 1.0.8
-	
-	    String a = release_number.substring(0, 3);
-	    String b = release_number.substring(3, 6);
-	    String c = release_number.substring(6, 9);
-
-	    int ia, ib, ic;
-
-	    try
-	      {
-		ia = Integer.parseInt(a);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		ia = -1;
-	      }
-
-	    try
-	      {
-		ib = Integer.parseInt(b);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		ib = -1;
-	      }
-
-	    try
-	      {
-		ic = Integer.parseInt(c);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		ic = -1;
-	      }
-
-	    release_number = ia + "." + ib + "." + ic;
+	    ib = Integer.parseInt(b);
 	  }
+	catch (NumberFormatException ex)
+	  {
+	    ib = -1;
+	  }
+
+	try
+	  {
+	    ic = Integer.parseInt(c);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    ic = -1;
+	  }
+
+	release_number = ia + "." + ib + "." + ic;
       }
 
-    release_string = release_number + " - " + release_date;
+    release_string = release_number + " - " + CVS_release_date;
     return release_string;
   }
 }
