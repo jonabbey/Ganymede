@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.30 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.31 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -384,7 +384,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     if (debug && tmp_count == 0)
       {
-	System.err.println("DBObject.receive(): tmp_count = 0");
+	System.err.println("DBObject.receive(): tmp_count = 0 reading object " + id);
       }
 
     if (tmp_count > 0)
@@ -408,7 +408,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
 	if (definition == null)
 	  {
-	    System.err.println("What the fuck?  Null definition for " + objectBase.getName() + ", key = " + key);
+	    System.err.println("What the heck?  Null definition for " + objectBase.getName() + ", key = " + key);
 	  }
 
 	type = definition.getType();
@@ -466,7 +466,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 		  {
 		    if (definition.namespace.uniqueHash.containsKey(tmp.key(j)))
 		      {
-			throw new RuntimeException("Duplicate unique value detected: " + tmp.key(j));
+			throw new RuntimeException("Duplicate unique value detected in vector field: " + tmp.key(j));
 		      } 
 
 		    definition.namespace.uniqueHash.put(tmp.key(j), new DBNameSpaceHandle(null, true, tmp));
@@ -478,7 +478,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 		
 		if (definition.namespace.uniqueHash.containsKey(tmp.key()))
 		  {
-		    throw new RuntimeException("Duplicate unique value detected: " + tmp.key());
+		    throw new RuntimeException("Duplicate unique value detected in scalar field: " + tmp.key());
 		  }
 
 		definition.namespace.uniqueHash.put(tmp.key(), new DBNameSpaceHandle(null, true, tmp));
