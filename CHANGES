@@ -847,6 +847,38 @@ the owner panel.  Now, you can view any object and be able to
 right-click on the items in the owner list to directly view or edit
 the owner groups that own that object.
 
+58. [SERVER] Fixed object cloning in previously broken case
+
+The object cloning logic was not previously excluding object linkage
+(invid) fields that were involved in a one-to-one or many-to-one
+relationship.  The upshot of this was that when a user here cloned an
+I.P. network, the cloned network had duplicated not only a list of
+rooms for the network to be present in, but also the systems, thereby
+unlinking those systems from the original in the process.  This caused
+much confusion until the cause was detected.
+
+Thanks again to Gil Kloepfer for pointing this out.
+
+59. [SERVER] Fixed rollback for object deletes
+
+This was a really critical bug.  The result of this bug was that if an
+object deletion was attempted, but was refused due to consistency
+problems, the system would rollback everything *except* the object's
+to-be-deleted status.  This meant that if the user went on to commit a
+transaction after unsuccessfully deleting an object, that object would
+be deleted anyway.  Worse, all the objects that should have had their
+links to the object undone as part of the deletion operation will
+retain their links to the deleted object, ruining the symmetrical
+pointer integrity constraint of the Ganymede database.
+
+This bug and #58 above manifested as part of the same incident, so
+thanks must go again to Gil Kloepfer for demonstrating a really ugly
+problem.  This bug has been in Ganymede since 0.99.8, lurking quietly
+for over 10 months.
+
+The fix was to move one line of code in DBSession up about three
+lines.  Amazing how these little touches matter.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
