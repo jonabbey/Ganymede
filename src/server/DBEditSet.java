@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,6 +64,18 @@ public class DBEditSet {
     this.dbStore = dbStore;
     objects = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
+  }
+
+  /**
+   *
+   * Method to return the DBSession handle owning this
+   * transaction.
+   *
+   */
+
+  DBSession getSession()
+  {
+    return session;
   }
 
   /**
