@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.26 $ %D%
+  Version: $Revision: 1.27 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -47,7 +47,7 @@ import com.sun.java.swing.border.*;
  *
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, Runnable {
 
   private final static boolean debug = false;
 
@@ -550,7 +550,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
   }
 
-  public void expandLevels(boolean recursive)
+  /**
+   * Expand all the levels.
+   */
+  
+  public void run()
   {
     Enumeration wrappers = ewHash.keys();
 
@@ -561,29 +565,47 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
 	ew.expand(true);
 
-	if (recursive)
+	Component comp = ew.getComponent();
+	
+	if (comp instanceof containerPanel)
 	  {
-	    System.out.println("Recursing...");
-	    Component comp = ew.getComponent();
-
-	    if (comp instanceof containerPanel)
+	    System.out.println("Aye, it's a containerPanel");
+	    containerPanel cp = (containerPanel)comp;
+	    
+	    for (int i = 0; i < cp.vectorPanelList.size(); i++)
 	      {
-		System.out.println("Aye, it's a containerPanel");
-		containerPanel cp = (containerPanel)comp;
-
-		for (int i = 0; i < cp.vectorPanelList.size(); i++)
-		  {
-		    ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
-		  }
+		((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
 	      }
-	    else
-	      {
-		System.out.println("The likes of this I have never seen: " + comp);
-	      }
+	  }
+	else
+	  {
+	    System.out.println("The likes of this I have never seen: " + comp);
 	  }
       }
   }
+  
+  public void expandLevels(boolean recursive)
+  {
+    if (recursive)
+      {
+	Thread t = new Thread(this);
+	t.start();
+      }
+    else
+      {
 
+	Enumeration wrappers = ewHash.keys();
+	
+	/* -- */
+	
+	while (wrappers.hasMoreElements())
+	  {
+	    elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+	    ew.expand(true);
+	  }
+      }
+
+  }
   public void closeLevels(boolean recursive)
   {
     Enumeration wrappers = ewHash.keys();
@@ -603,6 +625,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      }
 	  }
       }
+    
+    // This is necessary for the closing, but the expanding doesn't need validate stuff.
+    // Pretty weird, but thus is swing.
+    invalidate();
+    container.frame.validate();
 
   }
 
@@ -706,7 +733,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (returnValue)
       {
-	wp.gc.somethingChanged = true;
+	wp.gc.somethingChanged();
       }
 
     return returnValue;
@@ -758,7 +785,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	else
 	  {
 	    System.out.println("Add Element returned false");
-	    System.out.println(" here's why: " + wp.getgclient().getSession().getLastError());
 	    return false;
 	  }
       }
@@ -783,7 +809,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	else
 	  {
 	    System.out.println("set Element returned false");
-	    System.out.println(" here's why: " + wp.getgclient().getSession().getLastError());
 	    return false;
 	  }
       }	    
