@@ -5,7 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,14 +47,17 @@ public class JMultiLineLabel extends JTextArea {
     line_height,
     max_width;
 
-  String 
-    text;  //This is the unwrapped line of text.
-
   String[]
     lines;
 
   boolean
     haveMeasured = false;
+
+  int 
+    columns = 42;
+
+  FontMetrics
+    metric;
 
   /*
    * Constructors
@@ -72,20 +75,38 @@ public class JMultiLineLabel extends JTextArea {
 	System.out.println("Starting new JMLL");
       }
 
-    this.text = label;
-
+    metric = getFontMetrics(getFont());
+    
     setEditable(false);
     setOpaque(false);
+    
+    // The JTextArea has an etched border around it, so get rid of it.
+    //setBorder(BorderFactory.createEmptyBorder(0,0,0,0); 
+    setBorder(null); 
 
-    wrap(40);  // This does a newLabel call
+    // Find out the length of the string.  If the length is less than
+    // the default number of columns, make the number of columns the
+    // same as the string.
+
+    if (label != null)
+      {
+	int length = label.length();
+	System.out.println("String is " + length + " chars long.");
+	if (length < columns)
+	  {
+	    columns = length;
+	  }
+      }
+
+    setText(wrap(label));
+    
   }
 
   // Public functions
 
   public void setText(String s)
   {
-    this.text = s;
-    newLabel(s);
+    super.setText(wrap(s));
   }
 
   public int getAlignment()
@@ -99,42 +120,68 @@ public class JMultiLineLabel extends JTextArea {
     repaint();
   } 
 
+  public Dimension getPreferredSize()
+  {
+    int 
+      width,
+      height;
+
+    String text = wrap(getText());
+
+    /* -- */
+
+    // First, find out how wide this puppy is
+    width = getLongestLineWidth(text);
+    
+    // Now, the height
+    height = super.getPreferredSize().height;
+
+    return new Dimension(width, height);
+
+  }
+
   /**
    * Insert new lines in the string
    *
    * @lineLength Number of characters to wrap the line at.
    */
-  public void wrap(int lineLength)
+  public String wrap(String text)
   {
     if (text == null)
       {
 	System.out.println("Whoa, text is null");
       }
     
-    this.text = WordWrap.wrap(text, lineLength, null);
-    newLabel(this.text);
+    return (WordWrap.wrap(text, columns, null));
+
   }
 
   ///////////////////////////////////////////////////////////////////////////////
   // Private functions
   ///////////////////////////////////////////////////////////////////////////////
 
-  protected void newLabel(String label)
+  private int getLongestLineWidth(String wrappedText)
   {
-    if (debug)
-      {
-	System.out.println("newLabel");
-      }
-    
-    
+    int length = 0;
+    int maxLength = 0;
+    StringTokenizer tk = new StringTokenizer(wrappedText, "\n");
 
-    super.setText(label);
+    while (tk.hasMoreElements())
+      {
+	length = metric.stringWidth((String)tk.nextElement());
+	if (length > maxLength)
+	  {
+	    maxLength = length;
+	  }
+      }
+
+    return maxLength;
   }
 
   public static void main(String[] argv)
   {
     JFrame frame = new JFrame();
-    frame.getContentPane().add(new JMultiLineLabel("This is a \n\n\n break.  bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap \n now."));
+    frame.getContentPane().add(new JMultiLineLabel("This is a break.  bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap now."));
     frame.pack();
     frame.show();
   }
