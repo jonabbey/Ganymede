@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/05/30 05:53:38 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/05/31 00:56:57 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2000/05/30 05:53:38 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2000/05/31 00:56:57 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -155,7 +155,7 @@ public class xmlobject {
       }
     catch (NullPointerException ex)
       {
-	System.err.println("\n\nERROR: Unrecognized object type \"" + openElement.getAttrStr("type"));
+	System.err.println("\n\nERROR: Unrecognized object type \"" + openElement.getAttrStr("type") + "\"");
       }
 
     id = openElement.getAttrStr("id"); // may be null
@@ -445,6 +445,11 @@ public class xmlobject {
 
   public String toString()
   {
+    return this.toString(false);
+  }
+
+  public String toString(boolean showAll)
+  {
     StringBuffer result = new StringBuffer();
 
     result.append("<object type=\"");
@@ -465,29 +470,34 @@ public class xmlobject {
 	result.append("\"");
       }
 
-    result.append(">\n");
+    result.append(">");
 
-    // add the fields in the server's display order
-
-    Vector templateVector = xmlclient.xc.loader.getTemplateVector(type);
-
-    for (int i = 0; i < templateVector.size(); i++)
+    if (showAll)
       {
-	FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
+	result.append("\n");
 
-	xmlfield field = (xmlfield) fields.get(template.getName());
+	// add the fields in the server's display order
 
-	if (field == null)
+	Vector templateVector = xmlclient.xc.loader.getTemplateVector(type);
+
+	for (int i = 0; i < templateVector.size(); i++)
 	  {
-	    // missing field, no big deal.  just skip it.
+	    FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
 
-	    continue;
+	    xmlfield field = (xmlfield) fields.get(template.getName());
+
+	    if (field == null)
+	      {
+		// missing field, no big deal.  just skip it.
+
+		continue;
+	      }
+
+	    result.append("\t" + field + "\n");
 	  }
 
-	result.append("\t" + field + "\n");
+	result.append("</object>");
       }
-
-    result.append("</object>");
 
     return result.toString();
   }

@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/05/30 06:05:52 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/05/31 00:56:56 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.22 $ $Date: 2000/05/30 06:05:52 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 2000/05/31 00:56:56 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -134,7 +134,7 @@ public class Loader extends Thread {
       }
   }
 
-  public synchronized void run()
+  public void run()
   {
     if (debug)
       {
@@ -143,55 +143,71 @@ public class Loader extends Thread {
 
     try
       {
-	if (keepGoing)
+	synchronized (this)
 	  {
-	    loadBaseList();
-	  }
-	else
-	  {
-	    System.out.println("**Stopping before baseList is loaded");
+	    if (keepGoing)
+	      {
+		loadBaseList();
+	      }
+	    else
+	      {
+		System.out.println("**Stopping before baseList is loaded");
 
-	    // Ok, it's not really loaded, but this basically means that it is finished.
+		// Ok, it's not really loaded, but this basically means that it is finished.
 
-	    baseListLoaded = true;
-	    notifyAll();
-	  }
-
-	if (keepGoing)
-	  {
-	    loadBaseNames();
-	  }
-	else
-	  {
-	    System.out.println("**Stopping before baseNames are loaded");
-
-	    baseNamesLoaded = true;
-	    this.notifyAll();
+		baseListLoaded = true;
+		notifyAll();
+	      }
 	  }
 
-	if (keepGoing)
+	synchronized (this)
 	  {
-	    loadBaseMap();
-	  }
-	else
-	  {
-	    System.out.println("**Stopping before baseMap is loaded");
+	    if (keepGoing)
+	      {
+		loadBaseNames();
+	      }
+	    else
+	      {
+		System.out.println("**Stopping before baseNames are loaded");
 
-	    baseMapLoaded = true;
-	    this.notifyAll();
+		baseNamesLoaded = true;
+		this.notifyAll();
+	      }
+	  }
+
+	synchronized (this)
+	  {
+	    if (keepGoing)
+	      {
+		loadBaseMap();
+	      }
+	    else
+	      {
+		System.out.println("**Stopping before baseMap is loaded");
+		
+		baseMapLoaded = true;
+		this.notifyAll();
+	      }
 	  }
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not load base hash/map in Loader: " + rx);
       }
+    finally
+      {
+	// wake anybody up, just in case
+
+	synchronized (this)
+	  {
+	    this.notifyAll();
+	  }
+      }
 
     if (debug)
       {
 	System.out.println("Done with thread in loader.");
       }
-
-    this.notifyAll();
   }
 
   /**

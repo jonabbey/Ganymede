@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/05/30 05:53:37 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/05/31 00:56:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.11 $ $Date: 2000/05/30 05:53:37 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 2000/05/31 00:56:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -249,7 +249,8 @@ public class xmlclient implements ClientListener {
     if (propFilename == null)
       {
 	System.err.println("Ganymede xmlclient: Error, must specify properties");
-	ok = false;
+ 	System.err.println("Usage: java arlut.csd.ganymede.client xmlclient properties=<properties file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	System.exit(1);
       }
     else
       {
@@ -267,7 +268,7 @@ public class xmlclient implements ClientListener {
 	// really prompt for a missing user name here.
 
 	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name");
- 	System.err.println("Usage: java xmlclient properties=<property file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+ 	System.err.println("Usage: xmlclient username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
 
@@ -314,7 +315,7 @@ public class xmlclient implements ClientListener {
 
     if (!ok)
       {
- 	System.err.println("Usage: java xmlclient properties=<property file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+ 	System.err.println("Usage: xmlclient username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
   }
@@ -989,27 +990,64 @@ public class xmlclient implements ClientListener {
 	for (int i = 0; success && i < createdObjects.size(); i++)
 	  {
 	    xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
-
-	    System.err.println("Creating " + newObject);
 	
-	    attempt = newObject.createOnServer(session);
+	    // if the object has enough information that we can look
+	    // it up on the server, assume that it already exists and
+	    // go ahead and pull it for editing rather than creating
+	    // it.
 
-	    if (attempt != null && !attempt.didSucceed())
+	    // otherwise, create it.
+
+	    if (newObject.getInvid() != null)
 	      {
-		String msg = attempt.getDialogText();
+		System.err.println("Editing " + newObject);
 
-		if (msg != null)
-		  {
-		    System.err.println("Error creating " + newObject + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error creating " + newObject + ", no reason given.");
-		  }
+		attempt = newObject.editOnServer(session);
 
-		success = false;
-		continue;
+		if (attempt != null && !attempt.didSucceed())
+		  {
+		    String msg = attempt.getDialogText();
+
+		    if (msg != null)
+		      {
+			System.err.println("Error editing object " + newObject + ", reason: " + msg);
+		      }
+		    else
+		      {
+			System.err.println("Error editing object " + newObject + ", no reason given.");
+		      }
+
+		    success = false;
+		    continue;
+		  }
 	      }
+	    else
+	      {
+		System.err.println("Creating " + newObject);
+
+		attempt = newObject.createOnServer(session);
+
+		if (attempt != null && !attempt.didSucceed())
+		  {
+		    String msg = attempt.getDialogText();
+
+		    if (msg != null)
+		      {
+			System.err.println("Error creating " + newObject + ", reason: " + msg);
+		      }
+		    else
+		      {
+			System.err.println("Error creating " + newObject + ", no reason given.");
+		      }
+
+		    success = false;
+		    continue;
+		  }
+	      }
+
+	    // we can't be sure that we can register invid fields
+	    // until all objects that we need to create are
+	    // created.. for now, just register non-invid fields
 
 	    attempt = newObject.registerFields(0); // everything but invids
 
