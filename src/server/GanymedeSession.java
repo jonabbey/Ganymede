@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.114 $ %D%
+   Version: $Revision: 1.115 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.114 $ %D%
+ * @version $Revision: 1.115 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -3301,13 +3301,36 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * could not be checked out for editing for some reason, the ReturnVal
    * will carry an encoded error dialog for the client to display.
    *
+   * @param type The kind of object to create.
+   *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *
    * @see arlut.csd.ganymede.Session
    *
    */
 
-  public ReturnVal create_db_object(short type) 
+  public ReturnVal create_db_object(short type)
+  {
+    return this.create_db_object(type, false);
+  }
+
+  /**
+   *
+   * Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.
+   *
+   * @param type The kind of object to create.
+   * @param embedded If true, assume the object created is embedded and
+   * does not need to have owners set.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   */
+
+  public ReturnVal create_db_object(short type, boolean embedded)
   {
     DBObject newObj;
 
@@ -3317,52 +3340,92 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (getPerm(type, true).isCreatable())
       {
-	if (newObjectOwnerInvids == null)
+	if (embedded)
 	  {
-	    if (ownerList == null)
-	      {
-		getOwnerGroups(); // *sync*
-	      }
+	    newObj = session.createDBObject(type, null); // *sync* DBSession
 
-	    // if we have only one group possible, we'll assume we're
-	    // putting it in that, otherwise since the client hasn't
-	    // done a setDefaultOwner() call, we're gonna have to
-	    // abort before even trying to create the object.
-
-	    if (ownerList.size() != 1)
+	    if (newObj == null)
 	      {
 		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, no way of knowing which " +
-						  "owner group to place it in");
+						  "Can't create new object, the operation was refused");
 	      }
-	  }
 
-	// calculate ownership for this object
+	    setLastEvent("create_db_object: " + newObj.getBase().getName());
 
-	Vector ownerInvids = new Vector();
+	    ReturnVal result = new ReturnVal(true);
 
-	// we may have either a vector of Invids in
-	// newObjectOwnerInvids, or a query result containing a list
-	// of a single Invid
-	
-	if (newObjectOwnerInvids != null)
-	  {
-	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
+	    result.setObject(newObj);
+
+	    if (Ganymede.remotelyAccessible)
 	      {
-		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
+		// the exportObject call will fail if the object has
+		// already been exported.  Unfortunately, there doesn't
+		// seem to be much way to tell this beforehand, so
+		// we won't bother to try.
+
+		try
+		  {
+		    UnicastRemoteObject.exportObject(newObj);
+		  }
+		catch (RemoteException ex)
+		  {
+		    // ex.printStackTrace();
+		  }
+
+		((DBObject) newObj).exportFields();
 	      }
+
+	    return result;
 	  }
 	else
 	  {
-	    ownerInvids.addElement(ownerList.getInvid(0));
-	  }
+	    if (newObjectOwnerInvids == null)
+	      {
+		if (ownerList == null)
+		  {
+		    getOwnerGroups(); // *sync*
+		  }
 
-	newObj = session.createDBObject(type, ownerInvids); // *sync* DBSession
+		// if we have only one group possible, we'll assume we're
+		// putting it in that, otherwise since the client hasn't
+		// done a setDefaultOwner() call, we're gonna have to
+		// abort before even trying to create the object.
 
-	if (newObj == null)
-	  {
-	    return Ganymede.createErrorDialog("Can't create",
-					      "Can't create new object, the operation was refused");
+		if (ownerList.size() != 1)
+		  {
+		    return Ganymede.createErrorDialog("Can't create",
+						      "Can't create new object, no way of knowing which " +
+						      "owner group to place it in");
+		  }
+	      }
+
+	    // calculate ownership for this object
+
+	    Vector ownerInvids = new Vector();
+
+	    // we may have either a vector of Invids in
+	    // newObjectOwnerInvids, or a query result containing a list
+	    // of a single Invid
+	
+	    if (newObjectOwnerInvids != null)
+	      {
+		for (int i = 0; i < newObjectOwnerInvids.size(); i++)
+		  {
+		    ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
+		  }
+	      }
+	    else
+	      {
+		ownerInvids.addElement(ownerList.getInvid(0));
+	      }
+
+	    newObj = session.createDBObject(type, ownerInvids); // *sync* DBSession
+
+	    if (newObj == null)
+	      {
+		return Ganymede.createErrorDialog("Can't create",
+						  "Can't create new object, the operation was refused");
+	      }
 	  }
       }
     else
