@@ -1,8 +1,8 @@
 Ganymede schemas README
 
 $Name:  $
-$Revision: 1.3 $
-$Date: 1999/01/29 20:18:01 $
+$Revision: 1.4 $
+$Date: 1999/03/17 22:21:51 $
 
 Jonathan Abbey, jonabbey@arlut.utexas.edu
 Applied Research Laboratories, The University of Texas at Austin
@@ -76,6 +76,11 @@ and includes comprehensive support for managing a single NIS domain
 and a single DNS domain.  The loader code is designed to read data
 from pre-existing GASH files.  ARL-specific logic is embodied in this
 schema kit.
+
+	With the Ganymede 0.98 release, the gasharl schema is getting
+more and more ARL-specific.  For 0.99, I intend to fork the gasharl
+schema, taking all the not-too-terribly ARL-specific bits and
+repackaging them as an up-to-date gash schema kit.
 
 --
 

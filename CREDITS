@@ -39,7 +39,9 @@ helping bring the client into fruition.
 
  Brian is currently working at ARL as a student employee.  Brian has
 created custom icons for the Ganymede client and rewrote the permissions
-editor to use more Swing classes.
+editor to use more Swing classes, as well as creating the persona
+selection dialog introduced in Ganymede 0.98.  Brian also reworked the
+Query dialog to be more user-friendly.
 
 --
 
