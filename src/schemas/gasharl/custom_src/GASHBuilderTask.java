@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/02/09 03:32:30 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/04/19 22:55:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1631,6 +1631,248 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <p>Samba version 1:</p>
+   *
+   * <p>broccol:12003:612EE67D1EFC2FB60B42BCD4578197DF:27A4F1E1E377CAD237C95B6146457F86:Jonathan Abbey,S321 CSD,3199,6803522:/home/broccol:/bin/tcsh</p>
+   *
+   */
+
+  private boolean writeSambafileVersion1()
+  {
+    PrintWriter sambaFile = null;
+
+    try
+      {
+	sambaFile = openOutFile(path + "smb.passwd", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeSambaFileVersion1(): couldn't open smb.passwd file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    DBObject user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated())
+	      {
+		// we just leave inactivated users out of a Version 1
+		// Samba password file
+
+		continue;
+	      }
+
+	    String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+
+	    if (passField == null)
+	      {
+		continue;
+	      }
+	    
+	    String hash1 = passField.getLANMANCryptText();
+
+	    if (hash1 == null || hash1.equals(""))
+	      {
+		continue;
+	      }
+
+	    String hash2 = passField.getNTUNICODECryptText();
+
+	    if (hash2 == null || hash2.equals(""))
+	      {
+		continue;
+	      }
+
+	    Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
+
+	    if (uid == null)
+	      {
+		continue;
+	      }
+
+	    String fullname = cleanString((String) user.getFieldValueLocal(userSchema.FULLNAME));
+	    String room = cleanString((String) user.getFieldValueLocal(userSchema.ROOM));
+	    String div = cleanString((String) user.getFieldValueLocal(userSchema.DIVISION));
+	    String workphone = cleanString((String) user.getFieldValueLocal(userSchema.OFFICEPHONE));
+	    String homephone = cleanString((String) user.getFieldValueLocal(userSchema.HOMEPHONE));
+	    String homedir = cleanString((String) user.getFieldValueLocal(userSchema.HOMEDIR));
+	    String shell = cleanString((String) user.getFieldValueLocal(userSchema.LOGINSHELL));
+	    String composite = cleanString(fullname + "," + 
+					   room + " " + div + "," + 
+					   workphone + "," + homephone);
+
+	    sambaFile.println(username + ":" + uid.intValue() + ":" + 
+			      hash1 + ":" + hash2 +
+			      composite + ":" + homedir + ":" + shell);
+	  }
+      }
+    finally
+      {
+	sambaFile.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>Samba version 2:</p>
+   *
+   * <p>broccol:12003:612EE67D1EFC2FB60B42BCD4578197DF:27A4F1E1E377CAD237C95B6146457F86:[U          ]:LCT-375412BE:</p>
+   */
+
+  private boolean writeSambafileVersion2()
+  {
+    String hash1 = null;
+    String hash2 = null;
+
+    PrintWriter sambaFile = null;
+
+    try
+      {
+	sambaFile = openOutFile(path + "smb.passwd", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeSambaFileVersion2(): couldn't open smb.passwd file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    DBObject user = (DBObject) users.nextElement();
+
+	    boolean inactivated = user.isInactivated();
+	    
+	    String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+
+	    if (username == null || username.equals(""))
+	      {
+		continue;
+	      }
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+
+	    if (passField == null)
+	      {
+		inactivated = true;
+	      }
+	    
+	    if (!inactivated)
+	      {
+		hash1 = passField.getLANMANCryptText();
+
+		if (hash1 == null || hash1.equals(""))
+		  {
+		    inactivated = true;
+		  }
+		else
+		  {
+		    hash2 = passField.getNTUNICODECryptText();
+		    
+		    if (hash2 == null || hash2.equals(""))
+		      {
+			inactivated = true;
+		      }
+		  }
+	      }
+
+	    if (inactivated)
+	      {
+		hash1 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+		hash2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+	      }
+
+	    Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
+
+	    if (uid == null)
+	      {
+		continue;
+	      }
+
+	    // Samba 2.0 uses a flag string with 11 spaces and/or flag chars
+	    // between a pair of brackets.
+
+	    String flagString;
+
+	    if (inactivated)
+	      {
+		flagString = "[UD         ]";
+	      }
+	    else
+	      {
+		flagString = "[U          ]";
+	      }
+
+	    // sanity checking
+
+	    if (hash1 == null || hash1.length() != 32)
+	      {
+		throw new RuntimeException("bad LANMAN hash string: " + hash1);
+	      }
+
+	    if (hash2 == null || hash2.length() != 32)
+	      {
+		throw new RuntimeException("bad LANMAN hash string: " + hash1);
+	      }
+
+	    if (flagString.length() != 13)
+	      {
+		throw new RuntimeException("bad flag string");
+	      }
+
+	    String dateString = "LCT-" + dateToSMBHex(System.currentTimeMillis());
+
+	    sambaFile.println(username + ":" + uid.intValue() + ":" + 
+			      hash1 + ":" + hash2 + ":" +
+			      flagString + ":" + dateString);
+	  }
+      }
+    finally
+      {
+	sambaFile.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>Samba knows how to handle an 8 byte hex encoded date from the
+   * version 2 smb.passwd file.  This method takes a standard long
+   * Java timecode and generates an 8 byte hex string which holds the
+   * number of seconds since epoch.</p>
+   *
+   * <p><b><blink>Note that this will overflow in the year 2038.</blink></b></p>
+   */
+
+  private String dateToSMBHex(long timecode)
+  {
+    timecode = timecode / 1000;
+
+    if (timecode < 0)
+      {
+	throw new IllegalArgumentException("Time code is out of range from before the epoch");
+      }
+
+    if (timecode > java.lang.Integer.MAX_VALUE)
+      {
+	throw new IllegalArgumentException("Time code has overflowed");
+      }
+
+    return java.lang.Integer.toHexString(((int) timecode / 1000));
+  }
+
+  /**
    * <P>This method generates a file that can be used to synchronize
    * passwords and accounts to an NT PDC and to Samba, and the like.</P>
    *
@@ -2104,6 +2346,40 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     return oldMembers;
+  }
+
+  /** 
+   * We can't have any : characters in the Samba password file other than
+   * as field separators, so we strip any we find out.
+   */
+
+  private String cleanString(String in)
+  {
+    if (in == null)
+      {
+	return "";
+      }
+
+    StringBuffer buffer = new StringBuffer();
+    char[] ary = in.toCharArray();
+
+    /* -- */
+
+    // do it
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] == ':')
+	  {
+	    continue;
+	  }
+	else
+	  {
+	    buffer.append(ary[i]);
+	  }
+      }
+
+    return buffer.toString();
   }
 
   /** 
