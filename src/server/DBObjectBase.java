@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -887,7 +887,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    out.println("<H3>" + object_name + "(" + type_code + ") label: " + getLabelFieldName() + "</H3><p>");
+    out.println("<H3>");
+    out.print(object_name + " (" + type_code + ") <font color=\"#0000ff\">label:</font> " + getLabelFieldName());
+
+    if (classname != null && !classname.equals(""))
+      {
+	out.print(" <font color=\"#0000ff\">managing class:</font> " + classname);
+      }
+
+    out.println("</H3><p>");
 
     if (false)
       {
@@ -898,7 +906,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
 	out.println("</tr>");
 	
-	enum = fieldHash.elements();
+	enum = sortedFields.elements();
 	
 	while (enum.hasMoreElements())
 	  {
@@ -922,7 +930,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
     out.println("</tr>");
 
-    enum = fieldHash.elements();
+    enum = sortedFields.elements();
 
     while (enum.hasMoreElements())
       {
