@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -165,9 +165,9 @@ final public class DBSession {
 	return null;
       }
 
-    // set ownership for this new object
+    // set ownership for this new object if it is not an embedded object
 
-    if (owners != null)
+    if (!base.isEmbedded() && (owners != null))
       {
 	InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
 	
