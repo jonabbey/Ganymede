@@ -7,8 +7,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/29 01:30:07 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/05/04 04:19:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,6 +90,18 @@ public class XMLDumpContext {
   int indentLevel = 0;
 
   /* -- */
+
+  /**
+   * <P>Main constructor</P>
+   *
+   * @param xmlOut The XMLWriter to write to
+   * @param passwords Include plaintext passwords in password field dumps,
+   * even if the password field includes UNIX crypt() or md5Crypt() passwords
+   * that could be depended on for authentication without having to reveal
+   * the plaintext.
+   * @param historyInfo If true, all objects dumped out using this XMLDumpContext
+   * will include creator and modification information.
+   */
   
   public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo)
   {
@@ -163,10 +175,24 @@ public class XMLDumpContext {
     XMLUtils.indent(xmlOut, 0);
   }
 
+  /**
+   * <P>Returns true if this XMLDumpContext is configured to dump
+   * plaintext password information to disk when a password field
+   * has enough information in crypt() or md5Crypt() form that the
+   * Ganymede server would be able to load and authenticate against
+   * a non-plaintext version of the password.</P>
+   */
+
   public boolean doDumpPlaintext()
   {
     return dumpPlaintextPasswords;
   }
+
+  /**
+   * <P>Returns true if this XMLDumpContext is configured to dump
+   * creation and modification information when writing out object
+   * records.</P>
+   */
 
   public boolean doDumpHistoryInfo()
   {

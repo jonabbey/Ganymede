@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2000/04/19 07:55:51 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2000/05/04 04:19:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.119 $ %D%
+ * @version $Revision: 1.120 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -962,19 +962,21 @@ public class DBStore {
 	xmlOut.indentOut();
 	xmlOut.startElementIndent("namespaces");
 
+	xmlOut.indentOut();
+
 	for (int i = 0; i < nameSpaces.size(); i++)
 	  {
 	    ns = (DBNameSpace) nameSpaces.elementAt(i);
 	    ns.emitXML(xmlOut);
 	  }
 
+	xmlOut.indentIn();
 	xmlOut.endElementIndent("namespaces");
 
 	// write out our category tree
 
 	xmlOut.skipLine();
 
-	xmlOut.indentOut();
 	xmlOut.startElementIndent("object_type_definitions");
 
 	xmlOut.indentOut();

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2000/04/19 07:55:50 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2000/05/04 04:19:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.95 $ $Date: 2000/04/19 07:55:50 $
+ * @version $Revision: 1.96 $ $Date: 2000/05/04 04:19:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1135,6 +1135,9 @@ public class DBObject implements db_object, FieldType, Remote {
     xmlOut.attribute("num", java.lang.Integer.toString(getID()));
 
     xmlOut.indentOut();
+
+    // by using getFieldVector(), we get the fields in display
+    // order
 
     Vector fieldVec = getFieldVector(false);
 

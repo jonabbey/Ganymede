@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2000/03/27 21:54:42 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2000/05/04 04:19:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -811,7 +811,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 	xmlOut.startElementIndent("vector");
-	xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
+
+	// A limit of 32767 does not need to be specified, as that is
+	// the highest vector size allowed, and so is implicit.
+
+	if (limit != Short.MAX_VALUE)
+	  {
+	    xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
+	  }
+
 	xmlOut.endElement("vector");
       }
 
@@ -830,13 +838,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	xmlOut.startElementIndent("minlength");
-	xmlOut.attribute("val", java.lang.Short.toString(minLength));
-	xmlOut.endElement("minlength");
+	if (minLength != 0)
+	  {
+	    xmlOut.startElementIndent("minlength");
+	    xmlOut.attribute("val", java.lang.Short.toString(minLength));
+	    xmlOut.endElement("minlength");
+	  }
 
-	xmlOut.startElementIndent("maxlength");
-	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
-	xmlOut.endElement("maxlength");
+	// A limit of 32767 does not need to be specified, as that is
+	// the largest string size allowed, and so is implicit.
+
+	if (maxLength != Short.MAX_VALUE)
+	  {
+	    xmlOut.startElementIndent("maxlength");
+	    xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+	    xmlOut.endElement("maxlength");
+	  }
 
 	if (okChars != null && !okChars.equals(""))
 	  {
@@ -965,13 +982,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	xmlOut.startElementIndent("minlength");
-	xmlOut.attribute("val", java.lang.Short.toString(minLength));
-	xmlOut.endElement("minlength");
-
-	xmlOut.startElementIndent("maxlength");
-	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
-	xmlOut.endElement("maxlength");
+	if (minLength != 0)
+	  {
+	    xmlOut.startElementIndent("minlength");
+	    xmlOut.attribute("val", java.lang.Short.toString(minLength));
+	    xmlOut.endElement("minlength");
+	  }
+	
+	if (maxLength != Short.MAX_VALUE)
+	  {
+	    xmlOut.startElementIndent("maxlength");
+	    xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+	    xmlOut.endElement("maxlength");
+	  }
 
 	if (okChars != null && !okChars.equals(""))
 	  {

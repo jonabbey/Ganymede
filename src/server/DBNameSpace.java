@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/03/25 05:36:40 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/05/04 04:19:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,9 +216,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public void emitXML(XMLDumpContext xDump) throws IOException
   {
-    xDump.indent();
-
-    xDump.startElement("namespace");
+    xDump.startElementIndent("namespace");
     xDump.attribute("name", getName());
 
     if (!caseInsensitive)
