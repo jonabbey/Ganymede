@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2001/01/13 07:36:12 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2001/01/13 07:41:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.113 $ $Date: 2001/01/13 07:36:12 $
+ * @version $Revision: 1.114 $ $Date: 2001/01/13 07:41:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -347,7 +347,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    DBField field, copy;
+    DBField field;
 
     /* -- */
 
@@ -367,81 +367,54 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (field == null)
 	  {
-	    System.err.print("XXZZ weird, null field in dbobject copy constructor");
+	    System.err.println("XXZZ weird, null field in dbobject copy constructor");
 	    continue;
 	  }
 
 	switch (field.getType())
 	  {
 	  case BOOLEAN:
-	    copy = new BooleanDBField(this, (BooleanDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new BooleanDBField(this, (BooleanDBField) field);
 
 	    break;
 
 	  case NUMERIC:
-	    copy = new NumericDBField(this, (NumericDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new NumericDBField(this, (NumericDBField) field);
 
 	    break;
 
  	  case FLOAT:
- 	    copy = new FloatDBField(this, (FloatDBField) field);
- 
- 	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new FloatDBField(this, (FloatDBField) field);
  
  	    break;
 
 	  case DATE:
-	    copy = new DateDBField(this, (DateDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new DateDBField(this, (DateDBField) field);
 
 	    break;
 
 	  case STRING:
-	    copy = new StringDBField(this, (StringDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new StringDBField(this, (StringDBField) field);
 
 	    break;
 
 	  case INVID:
-	    copy = new InvidDBField(this, (InvidDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new InvidDBField(this, (InvidDBField) field);
 
 	    break;
 
 	  case PERMISSIONMATRIX:
-	    copy = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
 
 	    break;
 	    
 	  case PASSWORD:
-	    copy = new PasswordDBField(this, (PasswordDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new PasswordDBField(this, (PasswordDBField) field);
 
 	    break;
 
 	  case IP:
-	    copy = new IPDBField(this, (IPDBField) field);
-
-	    copy.setOwner(this);
-	    fieldAry[i] = copy;
+	    fieldAry[i] = new IPDBField(this, (IPDBField) field);
 
 	    break;
 	  }
