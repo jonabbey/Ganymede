@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -409,9 +409,9 @@ final public class DBSession {
    * 
    */
 
-  public synchronized ReturnVal deleteDBObject(Invid invid, boolean interactive)
+  public synchronized ReturnVal deleteDBObject(Invid invid)
   {
-    return deleteDBObject(invid.getType(), invid.getNum(), interactive);
+    return deleteDBObject(invid.getType(), invid.getNum());
   }
 
   /**
@@ -431,8 +431,7 @@ final public class DBSession {
    *  
    */
 
-  public synchronized ReturnVal deleteDBObject(short baseID, int objectID,
-					       boolean interactive)
+  public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
   {
     DBObject obj;
     DBEditObject eObj;
@@ -455,7 +454,7 @@ final public class DBSession {
 	eObj = obj.createShadow(editSet);
       }
 
-    return deleteDBObject(eObj, interactive);
+    return deleteDBObject(eObj);
   }
 
   /**
@@ -478,7 +477,7 @@ final public class DBSession {
    *   
    */
 
-  public synchronized ReturnVal deleteDBObject(DBEditObject eObj, boolean interactive)
+  public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
   {
     ReturnVal retVal, retVal2;
     String key;
@@ -507,7 +506,7 @@ final public class DBSession {
 	return null;
       }
 
-    retVal = eObj.remove(interactive);
+    retVal = eObj.remove();
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -531,7 +530,7 @@ final public class DBSession {
       {
 	// ok, go ahead and finalize
 
-	retVal2 = eObj.finalizeRemove();
+	retVal2 = eObj.finalizeRemove(true);
 
 	if (retVal2 != null && !retVal2.didSucceed())
 	  {
@@ -563,7 +562,7 @@ final public class DBSession {
    *  
    */
 
-  public synchronized ReturnVal inactivateDBObject(DBEditObject eObj, boolean interactive)
+  public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
   {
     ReturnVal retVal;
     String key;
@@ -585,11 +584,11 @@ final public class DBSession {
 
     editSet.checkpoint(key);
 
-    System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate(" + interactive + ")");
+    System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
 
-    retVal = eObj.inactivate(interactive);
+    retVal = eObj.inactivate();
 
-    System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate(" + interactive + ")");
+    System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -601,6 +600,79 @@ final public class DBSession {
 
 	    editSet.rollback(key);
 	  }
+
+	// otherwise, we've got a wizard that the client will deal with.
+      }
+    else
+      {
+	// immediate success!
+
+	eObj.finalizeInactivate(true);
+      }
+
+    return retVal;
+  }
+
+  /**
+   *
+   * Reactivate an object in the database<br><br>
+   *
+   * This method method can only be called in the context of an open
+   * transaction. Because the object must be checked out (which is the only
+   * way to obtain a DBEditObject), no other locking is required. This method
+   * will take an object out of the DBStore and proceed to do whatever is
+   * necessary to cause that object to be 'inactivated'.
+   *
+   * Note that this method does not specifically check to see whether permission
+   * has been obtained to reactivate the object.. that's done in
+   * GanymedeSession.reactivate_db_object().
+   *
+   * @param eObj An object checked out in the current transaction to be reactivated
+   *  
+   */
+
+  public synchronized ReturnVal reactivateDBObject(DBEditObject eObj)
+  {
+    ReturnVal retVal;
+    String key;
+
+    /* -- */
+
+    key = "reactivate" + eObj.getLabel();
+
+    switch (eObj.getStatus())
+      {
+      case DBEditObject.DELETING:
+      case DBEditObject.DROPPING:
+	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
+					  "Error.. can't reactivate an object that is being deleted\n" +
+					  "If you need to undo an object deletion, cancel your transaction.");
+      }
+
+    editSet.checkpoint(key);
+
+    System.err.println("DBSession.reactivateDBObject(): Calling eObj.reactivate()");
+
+    retVal = eObj.reactivate();
+
+    System.err.println("DBSession.reactivateDBObject(): Got back from eObj.reactivate()");
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	if (retVal.getCallback() == null)
+	  {
+	    // oops, irredeemable failure.  rollback.
+
+	    System.err.println("DBSession.reactivateDBObject(): object refused reactivation, rolling back");
+
+	    editSet.rollback(key);
+	  }
+      }
+    else
+      {
+	// immediate success!
+
+	eObj.finalizeReactivate(true);
       }
 
     return retVal;
