@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2002/08/07 18:39:19 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2003/02/22 03:58:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,13 +90,8 @@ public class DBLog {
 
   // -- 
 
-  String logFileName = null;
-  FileOutputStream logStream = null;
-  PrintWriter logWriter = null;
-
-  String mailFilename = null;
-  FileOutputStream mailLogStream = null;
-  PrintWriter mailLogWriter = null;
+  DBLogController logController;
+  DBLogController mailController;
 
   /**
    *
@@ -105,15 +100,6 @@ public class DBLog {
    */
 
   String signature = null;
-
-  /**
-   *
-   * We use this Date object to track the time of the last log event
-   * recorded.
-   *
-   */
-
-  Date currentTime = new Date();
 
   /**
    *
@@ -205,30 +191,15 @@ public class DBLog {
    * on the Ganymede database
    */
 
-  public DBLog(String filename, String mailFilename, GanymedeSession gSession) throws IOException
+  public DBLog(DBLogController logController, DBLogController mailController, GanymedeSession gSession) throws IOException
   {
+    this.gSession = gSession;
+    this.logController = logController;
+    this.mailController = mailController;
+
     // get the signature to append to mail messages
 
     loadSignature();
-
-    this.gSession = gSession;
-
-    logFileName = filename;
-    logStream = new FileOutputStream(logFileName, true); // append
-    logWriter = new PrintWriter(logStream, true); // auto-flush on newline
-
-    logWriter.println();	// emit newline to terminate any incomplete entry
-
-    // if the user wants to log mailout events, set up the mail log
-
-    if (mailFilename != null && !mailFilename.equals(""))
-      {
-	this.mailFilename = mailFilename;
-	mailLogStream = new FileOutputStream(mailFilename, true); // append
-	mailLogWriter = new PrintWriter(mailLogStream, true); // auto-flush on newline
-
-	mailLogWriter.println();	// emit newline to terminate any incomplete entry
-      }
 
     // now we need to initialize our hash of DBObjects so that we can do
     // speedy lookup of event codes without having to synchronize on
@@ -255,28 +226,16 @@ public class DBLog {
 
   synchronized void close() throws IOException
   {
-    logWriter.close();
-    logStream.close();
+    logController.close();
 
-    if (mailLogStream != null)
+    if (mailController != null)
       {
-	mailLogWriter.close();
-	mailLogStream.close();
+	mailController.close();
       }
 
     mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
 
     closed = true;
-
-    if (debug)
-      {
-	System.err.println("DBLog:" + logFileName + " closed.");
-
-	if (mailFilename != null)
-	  {
-	    System.err.println("DBLog:" + mailFilename + " closed.");
-	  }
-      }
   }
 
   /**
@@ -379,24 +338,26 @@ public class DBLog {
 
     updateSysEventCodeHash();
 
-    // we calculate the list of email addresses that we want to send this
-    // event's notifcation to.. we do it before the writeEntry() call so
-    // that the log will record who the mail was sent to.
+    // we calculate the list of email addresses that we want to send
+    // this event's notifcation to.. we do it before we pass it to the
+    // logController so that the log will record who the mail was sent
+    // to.
 
     calculateMailTargets(event, session, null, mailToObjects, mailToOwners);
 
-    currentTime.setTime(System.currentTimeMillis());
+    event.setLogTime(System.currentTimeMillis());
 
-    // If we're processing a generic mailout, log the mail message to a mail log
-    // if we're keeping one, otherwise skip logging
+    // If we're processing a generic mailout, log the mail message to
+    // a mail log if we're keeping one, otherwise log it to our primary
+    // log
 
-    if (event.eventClassToken.equals("mailout") && mailLogWriter != null)
+    if (event.eventClassToken.equals("mailout") && mailController != null)
       {
-	event.writeEntry(mailLogWriter, currentTime, null);
+	mailController.writeEvent(event);
       }
     else
       {
-	event.writeEntry(logWriter, currentTime, null);
+	logController.writeEvent(event);
 
 	type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 	
@@ -518,12 +479,12 @@ public class DBLog {
 	System.err.println("DBLog.logSystemEvent(): Writing log event " + event.eventClassToken);
       }
 
-    currentTime.setTime(System.currentTimeMillis());
+    event.setLogTime(System.currentTimeMillis());
 
     // We haven't augmented event with the mail targets here.. the log
     // won't record who gets notified for system events.  This is OK.
 
-    event.writeEntry(logWriter, currentTime, null);
+    logController.writeEvent(event);
 
     sendSysEventMail(event, null);
   }
@@ -545,6 +506,7 @@ public class DBLog {
     Hashtable mailOuts = new Hashtable(); // maps address to MailOut objects
     Hashtable objectOuts = new Hashtable(); // objevent tag to hash mapping address to MailOut objects
     Object ref;
+    Date currentTime;
 
     /* -- */
     
@@ -563,8 +525,8 @@ public class DBLog {
     updateSysEventCodeHash();
     updateObjEventCodeHash();
 
-    currentTime.setTime(System.currentTimeMillis());
-    transactionID = adminName + ":" + currentTime.getTime();
+    currentTime = new Date(System.currentTimeMillis());
+    transactionID = adminName + ":" + currentTime.toString();
 
     Vector objects = new Vector();
 
@@ -595,13 +557,16 @@ public class DBLog {
 
     // write out a start-of-transaction line to the log
 
-    new DBLogEvent("starttransaction",
-		   "Start Transaction: " + transdescrip,
-		   admin,
-		   adminName,
-		   objects,
-		   null,
-		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
+    DBLogEvent start = new DBLogEvent("starttransaction",
+				      "Start Transaction: " + transdescrip,
+				      admin,
+				      adminName,
+				      objects,
+				      null,
+				      multibuffer);
+    start.setTransactionID(transactionID);
+    start.setLogTime(currentTime);
+    logController.writeEvent(start);
 
     // check out the 'starttransaction' system event object to see if we're going
     // to do mailing for transaction summaries
@@ -613,6 +578,8 @@ public class DBLog {
     for (int i = 0; i < logEvents.size(); i++)
       {
 	event = (DBLogEvent) logEvents.elementAt(i);
+	event.setTransactionID(transactionID);
+	event.setLogTime(currentTime);
 
 	if (debug)
 	  {
@@ -675,7 +642,7 @@ public class DBLog {
 
 	    // and write it to our log
 
-	    event.writeEntry(logWriter, currentTime, transactionID);
+	    logController.writeEvent(event);
 	  }
 	else
 	  {
@@ -683,7 +650,7 @@ public class DBLog {
 	    // it.. note that we don't lump it with the transaction
 	    // summary.
 
-	    event.writeEntry(logWriter, currentTime, transactionID);
+	    logController.writeEvent(event);
 
 	    String returnAddr = null;
 
@@ -723,13 +690,16 @@ public class DBLog {
 
     // write out an end-of-transaction line to the log
 
-    new DBLogEvent("finishtransaction",
-		   "Finish Transaction: " + transdescrip,
-		   admin,
-		   adminName,
-		   null,
-		   null,
-		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
+    DBLogEvent finish = new DBLogEvent("finishtransaction",
+				       "Finish Transaction: " + transdescrip,
+				       admin,
+				       adminName,
+				       null,
+				       null,
+				       multibuffer);
+    finish.setTransactionID(transactionID);
+    finish.setLogTime(currentTime);
+    logController.writeEvent(finish);
 
     // now, for each distinct set of recipients, mail them their summary
 
@@ -753,7 +723,7 @@ public class DBLog {
 
     // send out object event mail to anyone who has signed up for it
 
-    sendObjectMail(returnAddr, adminName, objectOuts);
+    sendObjectMail(returnAddr, adminName, objectOuts, currentTime);
 
     objectOuts.clear();
 
@@ -821,212 +791,7 @@ public class DBLog {
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin,
 						   boolean fullTransactions)
   {
-    StringBuffer buffer = new StringBuffer();
-    DBLogEvent event = null;
-    String line;
-    String transactionID = null;
-
-    boolean afterSinceTime = false;
-    String dateString;
-    long timeCode;
-    Date time;
-
-    BufferedReader in = null;
-    FileReader reader = null;
-
-    // if we don't have a log helper or we aren't looking for a
-    // specific invid, just read from the file directly
-
-    if (Ganymede.logHelperProperty != null && invid != null)
-      {
-	java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
-
-	try
-	  {
-	    java.lang.Process helperProcess;
-
-	    if (keyOnAdmin)
-	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty + " -a " + invid.toString());
-	      }
-	    else
-	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty + " " + invid.toString());
-	      }
-
-	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + Ganymede.logHelperProperty);
-	    in = null;
-	  }
-      }
-    
-    if (in == null)
-      {
-	try
-	  {
-	    reader = new FileReader(logFileName);
-	  }
-	catch (FileNotFoundException ex)
-	  {
-	    return null;
-	  }
-
-	in = new BufferedReader(reader);
-      }
-
-    /* -- */
-
-    try
-      {
-	while (true)
-	  {
-	    line = in.readLine();
-
-	    if (line == null)
-	      {
-		break;
-	      }
-
-	    if (line.trim().equals(""))
-	      {
-		continue;
-	      }
-
-	    // check to see if we've gotten to the requested start point
-
-	    if (sinceTime != null && !afterSinceTime)
-	      {
-		dateString = line.substring(0, line.indexOf('|'));
-    
-		try
-		  {
-		    timeCode = new Long(dateString).longValue();
-		  }
-		catch (NumberFormatException ex)
-		  {
-		    throw new IOException("couldn't parse time code");
-		  }
-		
-		time = new Date(timeCode);
-		
-		if (time.before(sinceTime))
-		  {
-		    continue;	// don't even bother parsing the rest of the line
-		  }
-		else
-		  {
-		    afterSinceTime = true;
-		  }
-	      }
-
-	    if (event == null)
-	      {
-		event = new DBLogEvent(line);
-	      }
-	    else
-	      {
-		event.loadLine(line);
-	      }
-
-	    boolean found = false;
-
-	    if (keyOnAdmin)
-	      {
-		if (event.admin != null)
-		  {
-		    found = invid.equals(event.admin);
-		  }
-	      }
-	    else
-	      {
-		for (int i = 0; !found && i < event.objects.size(); i++)
-		  {
-		    if (invid.equals((Invid) event.objects.elementAt(i)))
-		      {
-			found = true;
-		      }
-		  }
-		
-		if (transactionID != null)
-		  {
-		    if (transactionID.equals(event.transactionID))
-		      {
-			if (fullTransactions || event.eventClassToken.equals("finishtransaction"))
-			  {
-			    found = true;
-			  }
-		      }
-		  }
-	      }
-
-	    if (found)
-	      {
-		if (event.eventClassToken.equals("starttransaction"))
-		  {
-		    transactionID = event.transactionID;
-
-		    String tmp2 = "---------- Transaction " + event.time.toString() + ": " + event.adminName + 
-		      " ----------\n";
-		    
-		    buffer.append(tmp2);
-		  }
-		else if (event.eventClassToken.equals("finishtransaction"))
-		  {
-		    String tmp2 = "---------- End Transaction " + event.time.toString() + ": " + event.adminName + 
-		      " ----------\n\n";
-		    
-		    buffer.append(tmp2);
-		    transactionID = null;
-		  }
-		else if (transactionID != null)
-		  {
-		    String tmp = event.eventClassToken + "\n" +
-		      WordWrap.wrap(event.description, 78, "\t") + "\n";
-		
-		    buffer.append(tmp);
-		  }
-		else
-		  {
-		    String tmp = event.time.toString() + ": " + event.adminName + "  " + event.eventClassToken +
-		      WordWrap.wrap(event.description, 78, "\t") + "\n";
-
-		    buffer.append(tmp);
-		  }
-	      }
-	  }
-      }
-    catch (IOException ex)
-      {
-	// eof
-      }
-    finally
-      {
-	try
-	  {
-	    in.close();
-	  }
-	catch (IOException ex)
-	  {
-	    // shrug
-	  }
-
-	try
-	  {
-	    if (reader != null)
-	      {
-		reader.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    // shrug
-	  }
-      }
-
-    return buffer;
+    return logController.retrieveHistory(invid, sinceTime, keyOnAdmin, fullTransactions);
   }
 
   // -----
@@ -1290,7 +1055,7 @@ public class DBLog {
     return mailList;
   }
 
-  private void sendObjectMail(String returnAddr, String adminName, Hashtable objectOuts)
+  private void sendObjectMail(String returnAddr, String adminName, Hashtable objectOuts, Date currentTime)
   {
     Enumeration enum = objectOuts.keys();
 

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 2003/01/13 18:36:08 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 2003/02/22 03:58:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -494,7 +494,9 @@ public class Ganymede {
 
     try
       {
-	log = new DBLog(logProperty, mailLogProperty, internalSession);
+	log = new DBLog(new DBLogFileController(logProperty), 
+			new DBLogFileController(mailLogProperty), 
+			internalSession);
       }
     catch (IOException ex)
       {

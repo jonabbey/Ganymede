@@ -7,8 +7,8 @@
    
    Created: 18 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/02/19 04:28:38 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/02/22 03:58:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,8 @@
 
 package arlut.csd.ganymede;
 
+import java.util.Date;
+
 /*------------------------------------------------------------------------------
                                                                        interface
                                                                  DBLogController
@@ -63,7 +65,7 @@ package arlut.csd.ganymede;
  * {@link arlut.csd.ganymede.DBLogEvent DBLogEvents} for the {@link
  * arlut.csd.ganymede.DBLog DBLog} class.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2003/02/19 04:28:38 $
+ * @version $Revision: 1.2 $ $Date: 2003/02/22 03:58:23 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -100,4 +102,11 @@ public interface DBLogController {
    */
 
   public StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin, boolean fullTransactions);
+
+  /**
+   * <p>This method shuts down this controller, freeing up any resources used by this
+   * controller.</p>
+   */
+
+  public void close();
 }

@@ -8,8 +8,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2002/08/07 18:39:19 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2003/02/22 03:58:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -246,6 +246,21 @@ public class DBLogEvent {
       }
 
     loadLine(line);
+  }
+
+  public void setTransactionID(String transID)
+  {
+    this.transactionID = transID;
+  }
+
+  public void setLogTime(Date time)
+  {
+    this.time = time;
+  }
+
+  public void setLogTime(long millis)
+  {
+    this.time = new Date(millis);
   }
 
   /**
@@ -566,9 +581,7 @@ public class DBLogEvent {
   }
 
   /**
-   *
    * This method writes out this event to a log stream
-   *
    */
 
   public void writeEntry(PrintWriter logWriter, Date currentTime, String transactionID)
@@ -624,40 +637,6 @@ public class DBLogEvent {
     writeSep(logWriter);
 
     logWriter.println(notifyList);
-  }
-
-  /**
-   *
-   * This method is used by DBLog to set the list of email targets
-   * that this event will need to be mailed to.
-   * 
-   */
-
-  public synchronized void setMailTargets(Vector mailTargets)
-  {
-    this.notifyVect = mailTargets;
-
-    if (mailTargets == null)
-      {
-	return;
-      }
-
-    // we want to set the notifyList String as well as the
-    // notifyVect vector..
-    
-    this.multibuffer.setLength(0);
-
-    for (int i = 0; i < notifyVect.size(); i++)
-      {
-	if (i > 0)
-	  {
-	    this.multibuffer.append(", ");
-	  }
-	    
-	this.multibuffer.append((String) notifyVect.elementAt(i));
-      }
-    
-    this.notifyList = multibuffer.toString();
   }
 
   /**
@@ -718,6 +697,40 @@ public class DBLogEvent {
       }
 
     return multibuffer;
+  }
+
+  /**
+   *
+   * This method is used by DBLog to set the list of email targets
+   * that this event will need to be mailed to.
+   * 
+   */
+
+  public synchronized void setMailTargets(Vector mailTargets)
+  {
+    this.notifyVect = mailTargets;
+
+    if (mailTargets == null)
+      {
+	return;
+      }
+
+    // we want to set the notifyList String as well as the
+    // notifyVect vector..
+    
+    this.multibuffer.setLength(0);
+
+    for (int i = 0; i < notifyVect.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    this.multibuffer.append(", ");
+	  }
+	    
+	this.multibuffer.append((String) notifyVect.elementAt(i));
+      }
+    
+    this.notifyList = multibuffer.toString();
   }
 
   /**
