@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -465,12 +465,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// what to refresh to see the inactivation results
 
 	ReturnVal result = new ReturnVal(true);
-	ReturnVal rescan = new ReturnVal(true);
-	rescan.addRescanField(SchemaConstants.RemovalField);
-	rescan.addRescanField(userSchema.LOGINSHELL);
-	rescan.addRescanField(userSchema.EMAILTARGET);
 
-	result.addRescanObject(getInvid(), rescan);
+	result.addRescanField(this.getInvid(), SchemaConstants.RemovalField);
+	result.addRescanField(this.getInvid(), userSchema.LOGINSHELL);
+	result.addRescanField(this.getInvid(), userSchema.EMAILTARGET);
 
 	return result;
       }
@@ -671,12 +669,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// what to refresh to see the reactivation results
 
 	ReturnVal result = new ReturnVal(true);
-	ReturnVal rescan = new ReturnVal(true);
-	rescan.addRescanField(SchemaConstants.RemovalField);
-	rescan.addRescanField(userSchema.LOGINSHELL);
-	rescan.addRescanField(userSchema.EMAILTARGET);
 
-	result.addRescanObject(getInvid(), rescan);
+	result.addRescanField(this.getInvid(), SchemaConstants.RemovalField);
+	result.addRescanField(this.getInvid(), userSchema.LOGINSHELL);
+	result.addRescanField(this.getInvid(), userSchema.EMAILTARGET);
 
 	return result;
       }
@@ -1168,7 +1164,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    result = new ReturnVal(true, true);	
 	    
-	    result.addRescanField(userSchema.SIGNATURE);
+	    result.addRescanField(this.getInvid(), userSchema.SIGNATURE);
 
 	    return result;
 	  }
@@ -1183,7 +1179,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// rescan the choice list for the home group field
 
 		result = new ReturnVal(true, true);
-		result.addRescanField(HOMEGROUP);
+		result.addRescanField(this.getInvid(), HOMEGROUP);
 		groupChoices = null;
 		return result;
 
@@ -1218,7 +1214,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		      }
 
 		    result = new ReturnVal(true, true);
-		    result.addRescanField(HOMEGROUP);
+		    result.addRescanField(this.getInvid(), HOMEGROUP);
 		    groupChoices = null;
 		    return result;
 		  }
@@ -1304,11 +1300,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    result = new ReturnVal(true, true); // have setValue() do the right thing
 
-	    result.addRescanField(userSchema.HOMEDIR);
-	    result.addRescanField(userSchema.ALIASES);
-	    result.addRescanField(userSchema.SIGNATURE);
-	    result.addRescanField(userSchema.VOLUMES);
-	    result.addRescanField(userSchema.EMAILTARGET);
+	    result.addRescanField(this.getInvid(), userSchema.HOMEDIR);
+	    result.addRescanField(this.getInvid(), userSchema.ALIASES);
+	    result.addRescanField(this.getInvid(), userSchema.SIGNATURE);
+	    result.addRescanField(this.getInvid(), userSchema.VOLUMES);
+	    result.addRescanField(this.getInvid(), userSchema.EMAILTARGET);
 
 	    return result;
 	  }

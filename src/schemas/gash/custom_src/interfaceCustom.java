@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -524,26 +524,18 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	    return null;
 	  }
 
-	// ok, we want to go ahead and approve the operation,
-	// but we want to cause the client to rescan the IPNET
-	// field in all of our siblings so that their choice
-	// list gets updated to not show whatever net *we*
-	// just chose.
 
-	// First, we create a ReturnVal that will apply to
-	// our siblings.. we want all our siblings to
-	// rescan their choices for the IPNET field
-	
-	ReturnVal rescanPlease = new ReturnVal(true); // bool doesn't matter
-	rescanPlease.addRescanField(interfaceSchema.IPNET);
-
-	// second, we create a ReturnVal which will cause
-	// the field.setValue() call which triggered us
-	// to continue normal processing, and return
-	// our list of rescan preferences to the client.
+	// Ok, we want to create a ReturnVal which will cause the
+	// field.setValue() call which triggered us to continue normal
+	// processing, and return our list of rescan preferences to
+	// the client.
 
 	ReturnVal result = new ReturnVal(true, true);
-	result.addRescanField(interfaceSchema.ADDRESS);
+	result.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+
+	// Now scan through our siblings and let the client know that
+	// they need to refresh their IPNET fields so that they won't
+	// have the net that *we* just chose show up as options.
 
 	Vector entries = getSiblingInvids();
 
@@ -554,7 +546,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("interfaceCustom.wizardHook(): adding object " + 
 				   entries.elementAt(i) + " for rescan");
 	      }
-	    result.addRescanObject((Invid) entries.elementAt(i), rescanPlease);
+	    result.addRescanField((Invid) entries.elementAt(i), interfaceSchema.IPNET);
 	  }
 
 	if (debug)
@@ -581,7 +573,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// sees the change
 
 	ReturnVal result = new ReturnVal(true, true);
-	result.addRescanField(interfaceSchema.IPNET);
+	result.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 
 	if (debug)
 	  {

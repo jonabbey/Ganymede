@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -990,13 +990,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    return null;
 	  }
 
-	// create the ReturnVal that will signify rescan for
-	// the interface fields that we care about under this
-	// system object
-
-	ReturnVal interfaceRescan = new ReturnVal(true, true);
-	interfaceRescan.addRescanField(interfaceSchema.IPNET);
-
 	// create the ReturnVal that we are actually going to
 	// return.. the second true tells the code that called us to
 	// go ahead and proceed normally, but to include the ReturnVal
@@ -1005,9 +998,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	ReturnVal result = new ReturnVal(true, true);
 
+	// Have all of the interface objects under us refresh their IPNET
+	// field to go along with the change in room.
+
 	for (int i = 0; i < interfaces.size(); i++)
 	  {
-	    result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
+	    result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.IPNET);
 	  }
 
 	return result;
@@ -1024,14 +1020,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		return null;
 	      }
 
-	    // create the ReturnVal that will signify rescan for
-	    // the interface fields that we care about under this
-	    // system object
-	    
-	    ReturnVal interfaceRescan = new ReturnVal(true, true);
-	    interfaceRescan.addRescanField(interfaceSchema.NAME);
-	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
-
 	    // create the ReturnVal that we are actually going to
 	    // return.. the second true tells the code that called us to
 	    // go ahead and proceed normally, but to include the ReturnVal
@@ -1039,10 +1027,15 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    // go back to the client.
 	    
 	    ReturnVal result = new ReturnVal(true, true);
+
+	    // Have all of the interface objects under us refresh
+	    // their IPNET field to go along with the changes
+	    // resulting from the extra interface
 	    
 	    for (int i = 0; i < interfaces.size(); i++)
 	      {
-		result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
+		result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.NAME);
+		result.addRescanField((Invid) interfaces.elementAt(i), interfaceSchema.ALIASES);
 	      }
 	    
 	    return result;
@@ -1061,12 +1054,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	      }
 	    
 	    // see notes above
-
-	    ReturnVal interfaceRescan = new ReturnVal(true, true);
-	    interfaceRescan.addRescanField(interfaceSchema.NAME);
-	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
-
-	    // see notes above
 	    
 	    ReturnVal result = new ReturnVal(true, true);
 
@@ -1081,11 +1068,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		index = 1;
 	      }
 
-	    result.addRescanObject((Invid) interfaces.elementAt(index), interfaceRescan);
+	    result.addRescanField((Invid) interfaces.elementAt(index), interfaceSchema.NAME);
+	    result.addRescanField((Invid) interfaces.elementAt(index), interfaceSchema.ALIASES);
 	    
 	    // finalizeDeleteElement() may add things to the SYSTEMALIASES field.
 
-	    result.addRescanField(systemSchema.SYSTEMALIASES);
+	    result.addRescanField(this.getInvid(), systemSchema.SYSTEMALIASES);
 	    return result;
 	  }
       }

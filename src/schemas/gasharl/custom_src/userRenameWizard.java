@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -206,11 +206,11 @@ public class userRenameWizard extends GanymediatorWizard {
 			 null,
 			 "ok.gif");
 	
-	retVal.addRescanField(userSchema.HOMEDIR);
-	retVal.addRescanField(userSchema.ALIASES);
-	retVal.addRescanField(userSchema.SIGNATURE);
-	retVal.addRescanField(userSchema.VOLUMES);
-	retVal.addRescanField(userSchema.EMAILTARGET);
+	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
+	retVal.addRescanField(userObject.getInvid(), userSchema.ALIASES);
+	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+	retVal.addRescanField(userObject.getInvid(), userSchema.VOLUMES);
+	retVal.addRescanField(userObject.getInvid(), userSchema.EMAILTARGET);
       }
     
     System.err.println("Returning confirmation dialog");

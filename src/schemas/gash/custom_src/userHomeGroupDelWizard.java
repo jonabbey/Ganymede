@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -289,7 +289,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 			     null,
 			     "ok.gif");
 
-	    retVal.addRescanField(HOMEGROUP);
+	    retVal.addRescanField(userObject.getInvid(), HOMEGROUP);
 
 	    // we succeeded, so pop off our checkpoint
 

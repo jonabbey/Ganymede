@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -252,14 +252,8 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     // siblings so that their choice list gets updated to not show
     // whatever map *we* just chose.
 
-    // First, we create a ReturnVal that will apply to our siblings
-
-    ReturnVal rescanPlease = new ReturnVal(true); // bool doesn't matter
-    rescanPlease.addRescanField(mapEntrySchema.MAP);
-
-    // second, we create a ReturnVal which will cause
-    // the field.setValue() call which triggered us
-    // to continue normal processing, and return
+    // Create a ReturnVal which will cause the field.setValue() call
+    // which triggered us to continue normal processing, and return
     // our list of rescan preferences to the client.
 
     ReturnVal result = new ReturnVal(true, true);
@@ -267,7 +261,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     for (int i = 0; i < entries.size(); i++)
       {
-	result.addRescanObject((Invid) entries.elementAt(i), rescanPlease);
+	result.addRescanField((Invid) entries.elementAt(i), mapEntrySchema.MAP);
       }
 
     return result;
