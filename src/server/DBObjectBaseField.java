@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2000/10/30 23:06:28 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2000/10/31 09:20:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1065,7 +1065,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
     // names before calling us
 
-    retVal = setName(root.getAttrStr("name"), true);
+    retVal = setName(XMLUtils.XMLDecode(root.getAttrStr("name")), true);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -1960,7 +1960,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 	else if (child.matches("targetobject"))
 	  {
-	    _targetobjectStr = child.getAttrStr("name");
+	    _targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
 	    _targetobject = child.getAttrInt("id");
 	    
 	    if (_targetobjectStr == null && _targetobject == null)
@@ -1973,7 +1973,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 	else if (child.matches("targetfield"))
 	  {
-	    _targetfieldStr = child.getAttrStr("name");
+	    _targetfieldStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
 	    _targetfield = child.getAttrInt("id");
 
 	    if (_targetfieldStr == null && _targetfield == null)

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/10/29 09:09:46 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/10/31 09:20:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -643,9 +643,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
   {
-
-    /* -- */
-    
     if (!session.isSuperGash())
       {
 	err.println("Skipping <ganyschema> element.. not logged in with supergash privileges");
@@ -662,16 +659,23 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     XMLItem schemaTree = reader.getNextTree(ganySchemaItem);
 
+    // getNextTree will throw back an XMLError or XMLEndDocument if
+    // such is encountered while scanning in the tree's subitems
+
     if ((schemaTree instanceof XMLError) ||
 	(schemaTree instanceof XMLEndDocument))
       {
+	err.println(schemaTree.toString());
 	return false;
       }
+
+    // try to get a schema editing context
 
     editor = editSchema();
 
     if (editor == null)
       {
+	err.println("Couldn't edit the schema.. other users logged in?");
 	return false;
       }
 
@@ -709,15 +713,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (schemaChildren.length > nextchild && schemaChildren[nextchild].matches("object_type_definitions"))
 	  {
-	    XMLItem otdItem = schemaChildren[nextchild];
+	    XMLItem _otdItem = schemaChildren[nextchild];
 
-	    if (otdItem.getChildren() == null || otdItem.getChildren().length != 1)
+	    if (_otdItem.getChildren() == null || _otdItem.getChildren().length != 1)
 	      {
 		err.println("Error, the object_type_definitions element does not contain a singly-rooted category tree.");
 		return false;
 	      }
 
-	    categoryTree = otdItem.getChildren()[0];
+	    categoryTree = _otdItem.getChildren()[0];
+	  }
+	else
+	  {
+	    err.println("Couldn't find <object_type_definitions>");
 	  }
 
 	// 1.  calculate what name spaces need to be created, edited, or removed
@@ -729,6 +737,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 	  }
+
+	// calculateNameSpaces() filled in spacesToAdd, spacesToRemove, and spacesToEdit
 
 	// 2. create new name spaces
 
@@ -745,7 +755,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
-	    NameSpace aNewSpace = editor.createNewNameSpace(space.getAttrStr("name"), space.getAttrBoolean("case-sensitive"));
+	    NameSpace aNewSpace = editor.createNewNameSpace(space.getAttrStr("name"), 
+							    space.getAttrBoolean("case-sensitive"));
 
 	    if (aNewSpace == null)
 	      {
@@ -761,8 +772,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    return false;
 	  }
 
-	// 4. delete any bases that are not at least mentioned in the XML
-	// schema tree
+	// calculateBases filled in basesToAdd, basesToRemove, and basesToEdit.
+
+	// 4. delete any bases that are not at least mentioned in the XML schema tree
 
 	for (int i = 0; i < basesToRemove.size(); i++)
 	  {
@@ -783,6 +795,112 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 6. create all bases on the basesToAdd list
 
+	for (int i = 0; i < basesToAdd.size(); i++)
+	  {
+	    XMLItem _entry = (XMLItem) basesToAdd.elementAt(i);
+	    Integer _id = _entry.getAttrInt("id");
+
+	    // create the new base, with the requested id.  we'll
+	    // specify that the object base is not an embedded one,
+	    // since DBObjectBase.setXML() can change that if need be.
+
+	    // also, we'll put it in the root category just so we can
+	    // get things in the category tree before we resequence it
+
+	    DBObjectBase _newBase = (DBObjectBase) editor.createNewBase(editor.getRootCategory(),
+									false,
+									_id.shortValue());
+
+	    // don't yet try to resolve invid links, since we haven't
+	    // done a pass through basesToEdit to fix up fields yet
+
+	    if (!handleReturnVal(_newBase.setXML(_entry, false)))
+	      {
+		return false;
+	      }
+	  }
+
+	// 7. fix up fields in pre-existing bases
+
+	for (int i = 0; i < basesToEdit.size(); i++)
+	  {
+	    XMLItem _entry = (XMLItem) basesToEdit.elementAt(i);
+	    Integer _id = _entry.getAttrInt("id");
+
+	    // create the new base, with the requested id.  we'll
+	    // specify that the object base is not an embedded one,
+	    // since DBObjectBase.setXML() can change that if need be.
+
+	    DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+
+	    if (_oldBase == null)
+	      {
+		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		return false;
+	      }
+
+	    // don't yet try to resolve invid links, since we haven't
+	    // done a complete pass through basesToEdit to fix up
+	    // fields yet
+
+	    if (!handleReturnVal(_oldBase.setXML(_entry, false)))
+	      {
+		return false;
+	      }
+	  }
+
+	// now that we have completed our first pass through fields in
+	// basesToAdd and basesToEdit, go through both lists and
+	// finish fixing up invid links.
+
+	for (int i = 0; i < basesToAdd.size(); i++)
+	  {
+	    XMLItem _entry = (XMLItem) basesToAdd.elementAt(i);
+	    Integer _id = _entry.getAttrInt("id");
+
+	    DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+
+	    if (_oldBase == null)
+	      {
+		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		return false;
+	      }
+
+	    if (!handleReturnVal(_oldBase.setXML(_entry, true)))
+	      {
+		return false;
+	      }
+	  }
+
+	for (int i = 0; i < basesToEdit.size(); i++)
+	  {
+	    XMLItem _entry = (XMLItem) basesToEdit.elementAt(i);
+	    Integer _id = _entry.getAttrInt("id");
+
+	    DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+
+	    if (_oldBase == null)
+	      {
+		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		return false;
+	      }
+
+	    if (!handleReturnVal(_oldBase.setXML(_entry, true)))
+	      {
+		return false;
+	      }
+	  }
+
+	// 8. Shuffle the category tree to match the XML file
+
+	if (!handleReturnVal(reshuffleCategories(categoryTree)))
+	  {
+	    return false;
+	  }
+
+	// 9. Woohoo, Martha, I is a-coming home!
+
+	success = true;
       }
     finally
       {
@@ -943,11 +1061,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	XMLItem objectdef = (XMLItem) newBases.elementAt(i);
 	
 	Integer id = objectdef.getAttrInt("id");
-	String name = objectdef.getAttrStr("name");
+	String name = XMLUtils.XMLDecode(objectdef.getAttrStr("name"));
 	
 	if (id == null)
 	  {
 	    err.println("Couldn't get id for object definition item " + objectdef);
+	    return false;
+	  }
+
+	if (id.shortValue() < 0)
+	  {
+	    err.println("Can't create or edit an object base type with a negative id number:\n"
+			+ objectdef.getTreeString());
 	    return false;
 	  }
 
@@ -1016,6 +1141,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	XMLItem entry = (XMLItem) entries.get(additions.elementAt(i));
 	
+	if (entry.getAttrInt("id").shortValue() < 256)
+	  {
+	    err.println("Object type id's less than 256 are reserved for new system critical\n");
+	    err.println("object types, and may not be created with the xml schema editing support.");
+	    return false;
+	  }
+
 	basesToAdd.addElement(entry);
       }
     
@@ -1080,7 +1212,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	myBaseItem = (XMLItem) basesToEdit.elementAt(i);
 
-	name = myBaseItem.getAttrStr("name");
+	name = XMLUtils.XMLDecode(myBaseItem.getAttrStr("name"));
 
 	numBaseRef = editor.getBase(myBaseItem.getAttrInt("id").shortValue());
 
@@ -1124,6 +1256,128 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
 
     return true;
+  }
+
+  /**
+   * <p>This method is used by the XML schema editing code
+   * in {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}
+   * to fix up the category tree to match that specified in the XML
+   * &lt;ganyschema&gt; element.</p>
+   */
+
+  public synchronized ReturnVal reshuffleCategories(XMLItem categoryRoot)
+  {
+    Hashtable categoryNames = new Hashtable();
+
+    if (!testXMLCategories(categoryRoot, categoryNames))
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "Error, category names not unique in XML schema");
+      }
+
+    DBBaseCategory _rootCategory = buildXMLCategories(categoryRoot);
+
+    if (_rootCategory == null)
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "Error, buildXMLCategories failed somehow");
+      }
+
+    editor.rootCategory = _rootCategory;
+
+    return null;		// tada!
+  }
+
+  /**
+   * <p>This method tests an XML category tree to make sure that all
+   * categories in the tree have unique names.</p>
+   */
+
+  public boolean testXMLCategories(XMLItem categoryRoot, Hashtable names)
+  {
+    if (categoryRoot.matches("category"))
+      {
+	// make sure we don't get duplicate category names
+
+	if (names.containsKey(categoryRoot.getAttrStr("name")))
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    names.put(categoryRoot.getAttrStr("name"), categoryRoot.getAttrStr("name"));
+	  }
+
+	XMLItem children[] = categoryRoot.getChildren();
+
+	if (children == null)
+	  {
+	    return true;
+	  }
+
+	for (int i = 0; i < children.length; i++)
+	  {
+	    if (!testXMLCategories(children[i], names))
+	      {
+		return false;
+	      }
+	  }
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This recursive method takes an XMLItem category tree and returns
+   * a new DBBaseCategory tree with all categories and object definitions
+   * from the XMLItem category tree ordered correctly.</p>
+   */
+
+  public DBBaseCategory buildXMLCategories(XMLItem categoryRoot)
+  {
+    DBBaseCategory _root;
+
+    /* -- */
+
+    if (!categoryRoot.matches("category"))
+      {
+	err.println("buildXMLCategories given a non-category categoryRoot, can't build a new category tree, failing");
+	return null;
+      }
+
+    try
+      {
+	_root = new DBBaseCategory(editor.store, categoryRoot.getAttrStr("name"));
+      }
+    catch (RemoteException ex)
+      {
+	err.println("Caught RMI UnicastRemote initialization error in buildXMLCategories");
+	return null;
+      }
+
+    XMLItem _children[] = categoryRoot.getChildren();
+
+    if (_children == null)
+      {
+	return _root;
+      }
+
+    for (int i = 0; i < _children.length; i++)
+      {
+	XMLItem _child = _children[i];
+
+	if (_child.matches("category"))
+	  {
+	    _root.addNodeAfter(buildXMLCategories(_child), null);
+	  }
+	else if (_child.matches("objectdef"))
+	  {
+	    DBObjectBase _base = (DBObjectBase) editor.getBase(_child.getAttrInt("id").shortValue());
+	    _root.addNodeAfter(_base, null);
+	  }
+      }
+
+    return _root;
   }
 
   /**

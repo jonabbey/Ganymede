@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2000/10/04 08:49:11 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2000/10/31 09:20:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.129 $ %D%
+ * @version $Revision: 1.130 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -158,12 +158,6 @@ public final class DBStore {
     All of the following should only be modified/accessed
     in a critical section synchronized on the DBStore object.
    */
-  
-  /**
-   * to keep track of what ID to assign to new user-space object types
-   */
-
-  short maxBaseId = 256;
   
   /**
    * hash mapping object type to DBObjectBase's
@@ -657,6 +651,8 @@ public final class DBStore {
 	outStream = new FileOutputStream(filename + ".new");
 	bufStream = new BufferedOutputStream(outStream);
 	out = new DataOutputStream(bufStream);
+
+	// okay, then!  let's get started!
 
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
@@ -1300,32 +1296,6 @@ public final class DBStore {
   }
 
   /**
-   *
-   * Returns a base id for a newly created base
-   * 
-   */
-
-  public synchronized short getNextBaseID()
-  {
-    return maxBaseId++;
-  }
-
-  /**
-   *
-   * Let go of a baseId if the base create was not
-   * committed.
-   * 
-   */
-
-  public synchronized void releaseBaseID(short id)
-  {
-    if (id == maxBaseId)
-      {
-	maxBaseId--;
-      }
-  }
-
-  /**
    * 
    * Method to replace/add a DBObjectBase in the DBStore.
    *
@@ -1334,11 +1304,6 @@ public final class DBStore {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
-
-    if (base.getTypeID() > maxBaseId)
-      {
-	maxBaseId = base.getTypeID();
-      }
   }
 
   /**

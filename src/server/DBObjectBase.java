@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2000/10/30 23:06:27 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2000/10/31 09:20:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1072,7 +1072,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // front, but if we are a newly created base we might not have had
     // our name set yet.. go ahead and try to do it here
     
-    _objectName = root.getAttrStr("name");
+    _objectName = XMLUtils.XMLDecode(root.getAttrStr("name"));
 
     if (_objectName == null || _objectName.equals(""))
       {
@@ -1112,7 +1112,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	if (item.matches("fielddef"))
 	  {
-	    String _fieldNameStr = item.getAttrStr("name");
+	    String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
 	    Integer _fieldIDInt = item.getAttrInt("id");
 
 	    if (_fieldNameStr == null || _fieldIDInt == null)
@@ -1758,10 +1758,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized ReturnVal setName(String newName)
   {
-    String myNewName;
-
-    /* -- */
-
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in an schema editing context");
@@ -1775,18 +1771,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     newName = StringUtils.strip(newName,
 				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
 
-    if (isEmbedded() && !newName.startsWith("Embedded "))
-      {
-	myNewName = "Embedded " + newName;
-      }
-    else
-      {
-	myNewName = newName;
-      }
-
     // no change, no harm
 
-    if (myNewName.equals(object_name))
+    if (newName.equals(object_name))
       {
 	return null;
       }
@@ -1796,26 +1783,26 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (this.editor != null)
       {
-	if (this.editor.getBase(myNewName) != null)
+	if (this.editor.getBase(newName) != null)
 	  {
 	    return Ganymede.createErrorDialog("Schema Editing Error",
 					      "Can't rename base " + object_name + 
-					      " to " + myNewName + ", that name is already taken.");
+					      " to " + newName + ", that name is already taken.");
 	  }
       }
     else
       {
-	if (this.store.getObjectBase(myNewName) != null)
+	if (this.store.getObjectBase(newName) != null)
 	  {
 	    return Ganymede.createErrorDialog("Schema Editing Error",
 					      "Can't rename base " + object_name + 
-					      " to " + myNewName + ", that name is already taken.");
+					      " to " + newName + ", that name is already taken.");
 	  }
       }
 
     // ok, go for it
 
-    object_name = myNewName;
+    object_name = newName;
 
     return null;
   }

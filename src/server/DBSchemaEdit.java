@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2000/07/12 04:41:01 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2000/10/31 09:20:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -133,12 +133,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   Hashtable newBases;		
 
   /**
-   * id of the highest DBObjectBase object in newBases
-   */
-
-  short maxId;
-
-  /**
    * this holds the original vector of namespace objects extant
    * at the time the DBSchemaEdit editing session is established.
    */
@@ -196,14 +190,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// duplicate the existing category tree and all the contained
 	// bases
 
-	maxId = store.maxBaseId;
-
-	System.err.println("Creating schema editor.. maxBaseId/maxId = " + maxId);
-
 	newBases = new Hashtable();
 
 	// this DBBaseCategory constructor recursively copies the
-	// bases referenced from store.rootCategory into newBases
+	// bases referenced from store.rootCategory into newBases,
+	// making copies for us to edit along the way.
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
@@ -495,6 +486,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     return null;
   }
 
+
   /** 
    * <P>This method creates a new {@link
    * arlut.csd.ganymede.DBObjectBase DBObjectBase} object and returns
@@ -507,10 +499,50 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
   {
+    short id;
+
+    if (lowRange)
+      {
+	for (id = 0; id < 256; id++)
+	  {
+	    if (getBase(id) == null)
+	      {
+		break;
+	      }
+	  }
+
+	if (id == 256)
+	  {
+	    return null;
+	  }
+      }
+    else
+      {
+	for (id = 256; id <= Short.MAX_VALUE; id++)
+	  {
+	    if (getBase(id) == null)
+	      {
+		break;
+	      }
+	  }
+      }
+
+    return createNewBase(category, embedded, id);
+  }
+
+  /** 
+   * <P>This method creates a new {@link
+   * arlut.csd.ganymede.DBObjectBase DBObjectBase} object and returns
+   * a remote handle to it so that the admin client can set fields on
+   * the base, set attributes, and generally make a nuisance of
+   * itself.</P>
+   */
+
+  public synchronized Base createNewBase(Category category, boolean embedded, short id)
+  {
     DBObjectBase base;
     DBBaseCategory localCat = null;
     String path;
-    short id = 0;
 
     /* -- */
 
@@ -523,25 +555,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	Ganymede.debug("createNewBase failure: already released/committed");
 	throw new RuntimeException("already released/committed");
-      }
-
-    if (lowRange)
-      {
-	Enumeration enum = store.objectBases.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    base = (DBObjectBase) enum.nextElement();
-
-	    if ((base.getTypeID() > id) && (base.getTypeID() < 256))
-	      {
-		id = (short) (base.getTypeID() + 1);
-	      }
-	  }
-      }
-    else
-      {
-	id = ++maxId;
       }
 
     if (store.getObjectBase(id) != null)
@@ -631,7 +644,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 		throw new RuntimeException("DBSchemaEdit.createNewBase(): testbase's editor field is null after addNodeAfter()");
 	      }
 	  }
-	
       }
     
     if (debug)
@@ -925,8 +937,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  }
 
 	// ** need to unlink old objectBases / rootCategory for GC here? **
-
-	store.maxBaseId = maxId;
 
 	// all the bases already have containingHash pointing to
 	// newBases

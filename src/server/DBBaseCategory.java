@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/06/14 04:52:33 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/10/31 09:20:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -332,6 +332,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
   }
+
 
   /**
    * This method is used when a schema editor is 'checking in'
