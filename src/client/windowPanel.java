@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,6 +43,7 @@ import arlut.csd.JDataComponent.*;
  */
 
 public class windowPanel extends JDesktopPane implements InternalFrameListener, ActionListener{  
+
   boolean debug = true;
 
   final boolean debugProperty = false;
@@ -72,6 +73,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     windowMenu;
 
   // Load images for other packages
+
   ImageIcon
     // These are all for vectorPanel
     openIcon = new ImageIcon(PackageResources.getImageResource(this, "macdown_off.gif", getClass())),
@@ -89,11 +91,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10),
     emptyBorder15 = (EmptyBorder)BorderFactory.createEmptyBorder(15,15,15,15);
   
-  //BevelBorder
-  //raisedBorder = new BevelBorder(BevelBorder.RAISED);
-  
   CompoundBorder
-  //emptyButtonBorder = new CompoundBorder(emptyBorder15, raisedBorder),
     eWrapperBorder = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitles, 2)),
     lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder15);
 
@@ -121,6 +119,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     // This is supposed to give us window outline dragging, instead of
     // full window dragging.  Should be faster.
+
     putClientProperty("JDesktopPane.dragMode", "outline");
 
     removeAllMI = new JMenuItem("Remove All Windows");
@@ -157,7 +156,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     return waitImage;
   }
 
-
   /**
    *
    * Create a new view-only window in this windowPanel.
@@ -171,7 +169,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     this.addWindow(object, false, null);
   }
-
 
   /**
    *
@@ -215,17 +212,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     
     // We only want top level windows for top level objects.  No
     // embedded objects.
+
     try
       {
-	while  (object.isEmbedded())
+	while (object.isEmbedded())
 	  {
 	    db_field parent = object.getField(SchemaConstants.ContainerField);
+
 	    if (parent == null)
 	      {
-		throw new IllegalArgumentException("Could not find the ContainerField of this embedded object: " + object);
+		throw new IllegalArgumentException("Could not find the ContainerField of this " +
+						   "embedded object: " + object);
 	      }
 	    
-	    Invid i  = (Invid)((invid_field)parent).getValue();
+	    Invid i  = (Invid) ((invid_field)parent).getValue();
+
 	    if (i == null)
 	      {
 		throw new RuntimeException("Invid value of ContainerField is null");
@@ -235,17 +236,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(i));
 		object = rv.getObject();
+
 		if (object == null)
 		  {
-		    throw new RuntimeException("Could not call edit_db_object on the parent of this embedded object.");
+		    throw new RuntimeException("Could not call edit_db_object on " +
+					       "the parent of this embedded object.");
 		  }
 	      }
 	    else
 	      {
 		object = (gc.handleReturnVal(gc.getSession().view_db_object(i))).getObject();
+
 		if (object == null)
 		  {
-		    throw new RuntimeException("Could not call view_db_object on the parent of this embedded object.");
+		    throw new RuntimeException("Could not call view_db_object on " +
+					       "the parent of this embedded object.");
 		  }
 	      }
 	  }
@@ -261,6 +266,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
 
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
     if (editable)
       {
 	setStatus("Opening object for edit");
@@ -276,28 +282,17 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	if (objectType == null)
 	  {
-	    title = object.getTypeName() + " - " + object.getLabel();
+	    objectType = object.getTypeName();
+	  }
+
+	if (isNewlyCreated)
+	  {
+	    title = "Create: " + objectType + " - " + "New Object";
 	  }
 	else
 	  {
 	    title = objectType + " - " + object.getLabel();
-	  }
 
-	// If we can't get a label, assume this is a newly created
-	// object.  Is that a safe assumption?
-	if ((title == null) || (title.equals("null")) || (title.equals("")))
-	  {
-	    if (objectType == null)
-	      {
-		title = "Create: New Object";
-	      }
-	    else
-	      {
-		title = "Create: " + objectType + " - " + "New Object";
-	      }
-	  }
-	else
-	  {
 	    if (editable)
 	      {
 		title = "Edit: " + title;
@@ -312,7 +307,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    System.out.println("Setting title to: " + title);
 	  }
-
       }
     catch (RemoteException rx)
       {
@@ -358,10 +352,13 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void setSelectedWindow(JInternalFrame window)
   {
     Enumeration windows = windowList.keys();
+
+    /* -- */
     
     while (windows.hasMoreElements())
       {
 	JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
+
 	try
 	  {
 	    w.setSelected(false);
@@ -371,7 +368,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    System.out.println("Could not set selected false.  sorry.");
 	  }
       }
-
 
     window.moveToFront();
     
@@ -394,12 +390,17 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public boolean isOpenForEdit(Invid invid)
   {
     Enumeration e = windowList.keys();
+
+    /* -- */
+
     while (e.hasMoreElements())
       {
 	Object o = windowList.get(e.nextElement());
+
 	if (o instanceof framePanel)
 	  {
-	    framePanel fp = (framePanel)o;
+	    framePanel fp = (framePanel) o;
+
 	    if ((fp.isEditable()) && (fp.getObjectInvid().equals(invid)))
 	      {
 		return true;
@@ -428,7 +429,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * Add a table window.  Usually the output of a query.
    */
 
-  public void addTableWindow(Session session, Query query, DumpResult results, String title)
+  public void addTableWindow(Session session, Query query, 
+			     DumpResult results, String title)
   {
     gResultTable 
       rt = null;
@@ -512,7 +514,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	setStatus("Done.");
       }
-    
   }
 
   public void addWaitWindow(Runnable key)
@@ -525,6 +526,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     frame.setIconifiable(true);
     frame.getContentPane().add(new JLabel("Waiting for query", icon, SwingConstants.CENTER));
     frame.setLayer(new Integer(topLayer));
+
     if (debug)
       {
 	System.out.println("Adding wait window");
@@ -533,17 +535,20 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     waitWindowHash.put(key, frame);
 
     add(frame);
-    
   }
 
   public void removeWaitWindow(Runnable key)
   {
     JInternalFrame frame = (JInternalFrame)waitWindowHash.get(key);
+
+    /* -- */
+
     if (frame == null)
       {
 	System.out.println("Couldn't find window to remove.");
 	return;
       }
+
     if (debug)
       {
 	System.out.println("Removing wait window");
@@ -551,30 +556,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     remove(frame);
     waitWindowHash.remove(frame);
-
-  }
-
-  /**
-   * Closes all the windows
-   *
-   */
-
-  public void closeAll()
-  {
-    Enumeration windows = windowList.keys();      
-
-    try
-      {
-	while (windows.hasMoreElements())
-	  {
-	    JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
-	    w.setClosed(true);
-	  }
-      }
-    catch (java.beans.PropertyVetoException ex)
-      {
-	throw new RuntimeException("beans? " + ex);
-      }
   }
 
   /**
@@ -636,10 +617,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     while (windows.hasMoreElements())
       {
 	Object o  = windowList.get(windows.nextElement());
+
 	if (o instanceof framePanel)
 	  {
-
-	    
 	    framePanel w = (framePanel)o;
 	    
 	    if (w.isEditable())
@@ -658,11 +638,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
   
   /**
-   * Closes all non-editable windows
+   * Closes all internal frames, editable or no.
    *
    */
 
-  public void closeNonEditables()
+  public void closeAll()
   {
     JInternalFrame w;
     Enumeration windows;
@@ -786,31 +766,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     if (obj instanceof framePanel)
       {
 	setSelectedWindow((framePanel)obj);
-	/*
-	((framePanel)obj).moveToFront();
-	try
-	  {
-	    ((framePanel)obj).setSelected(true);
-	  }
-	catch ( java.beans.PropertyVetoException e)
-	  {
-	    System.out.println("Couldn't select the window.");
-	  }
-	*/
       }
     else if (obj instanceof gResultTable)
       {
 	setSelectedWindow((gResultTable)obj);
-	/*
-	((gResultTable)obj).moveToFront();
-	try
-	  {
-	    ((gResultTable)obj).setSelected(true);
-	  }
-	catch ( java.beans.PropertyVetoException e)
-	  {
-	    System.out.println("Couldn't select the window.");
-	    }*/
       }
     else 
       {
@@ -826,6 +785,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     while (enum.hasMoreElements())
       {
 	obj = windowList.get(enum.nextElement());
+
 	if (obj instanceof gResultTable)
 	  {
 	    ((gResultTable)obj).refreshQuery();
@@ -859,21 +819,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
-  /*
-  public void invalidate()
-  {
-    System.out.println("-- Invalidate windowPanel");
-    super.invalidate();
-  }
-
-  public void validate()
-  {
-    System.out.println("-- validate windowPanel");
-    super.validate();
-  }
-  */    
-
-
   // This is for the beans, when a JInternalFrame closes
 
   public void internalFrameClosed(InternalFrameEvent event)
@@ -887,7 +832,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	((framePanel)event.getSource()).stopLoading();
       }
-    //System.out.println("It's a JInternalFrame");
+
     String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
     
     if (oldTitle == null)
@@ -902,7 +847,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	
 	updateMenu();
       }
-    
   }
 
   public void internalFrameDeiconified(InternalFrameEvent e) {}
