@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -114,12 +114,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   public void loadResults(String results)
   {
     boolean firstTime = true;
+    boolean[] used;
     Vector headerVect = new Vector();
     String[] headers;
     int [] colWidths;
     int index = 0;
     char[] chars;
-    StringBuffer tempString = null;
+    StringBuffer tempString = new StringBuffer();
     Invid invid;
     int col;
     int rows = 0;
@@ -136,7 +137,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
     while (chars[index] != '\n')
       {
-	tempString = new StringBuffer();
+	tempString.setLength(0); // truncate the buffer
 
 	while (chars[index] != '|')
 	  {
@@ -166,10 +167,12 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     index++;			// skip past \n
 
     headers = new String[headerVect.size()];
+    used = new boolean[headerVect.size()];
     
     for (int i = 0; i < headers.length; i++)
       {
 	headers[i] = (String) headerVect.elementAt(i);
+	used[i] = false;
       }
 
     colWidths = new int[headerVect.size()];
@@ -198,7 +201,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	// first read in the Invid
 
-	tempString = new StringBuffer();
+	tempString.setLength(0); // truncate the buffer
 
 	// System.err.println("Parsing row " + rows++);
 
@@ -229,7 +232,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	while (chars[index] != '\n')
 	  {
-	    tempString = new StringBuffer();
+	    tempString.setLength(0); // truncate the buffer
 
 	    while (chars[index] != '|')
 	      {
@@ -253,18 +256,34 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	    //	    System.err.println("val: " + tempString.toString());
 
-	    if (tempString.toString() == null)
+	    if (tempString.toString() == null || tempString.toString().equals(""))
 	      {
 		table.setCellText(invid, col++, "", false);
 	      }
 	    else
 	      {
+		used[col] = true;
 		table.setCellText(invid, col++, tempString.toString(), false);
 	      }
 	  }
 
 	index++; // skip newline
       }
+
+    // we have to do this backwards so that we don't
+    // change the index of a column we'll later delete
+
+    for (int i = used.length-1; i >= 0 ; i--)
+      {
+	if (!used[i])
+	  {
+	    table.deleteColumn(i,true);
+	  }
+      }
+
+    // sort by the first column in ascending order
+
+    table.resort(0, true, false);
 
     // the first time we're called, the table will not be visible, so we
     // don't want to refresh it here..
