@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -882,36 +882,63 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (event.getSource() == deleteObjectMI)
       {
-	StringDialog dialog = new StringDialog(this,
-					     "Confirm deletion of Object",
-					     "Are you sure you want to delete this object?",
-					     "Confirm",
-					     "Cancel");
 
+	BaseNode bNode = (BaseNode)currentNode;
+	Base b = bNode.getBase();
 
-	Hashtable answer = dialog.DialogShow();
+	// Check to see if this base is removable.  If it's not, then politely
+	// inform the user.  Otherwise, pop up a dialog to make them confirm 
+	// the deletion.
 
-	if (answer == null) //Returned cancel
+	boolean isRemovable = false;
+	try 
 	  {
-	    System.out.println("Deletion canceled");
+	    isRemovable = b.isRemovable();
 	  }
-	else //Returned confirm
+	catch (RemoteException rx)
 	  {
+	    throw new IllegalArgumentException("exception in isRemovalbe(): " + rx);
+	  }
 
-	    BaseNode bNode = (BaseNode) node;
-	    Base b = bNode.getBase();
+	if (isRemovable)
+	  {
 	    
-	    try
-	      {
-		System.err.println("Deleting base " + b.getName());
-		editor.deleteBase(b);
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Couldn't delete base: remote exception " + ex);
-	      }
+	    StringDialog dialog = new StringDialog(this,
+						   "Confirm deletion of Object",
+						   "Are you sure you want to delete this object?",
+						   "Confirm",
+						   "Cancel");
 	    
-	    objectsRefresh();
+	    
+	    if (dialog.DialogShow() == null) //Returned cancel
+	      {
+		System.out.println("Deletion canceled");
+	      }
+	    else //Returned confirm
+	      {	    
+		try
+		  {
+		    System.err.println("Deleting base " + b.getName());
+		    editor.deleteBase(b);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
+		  }
+		
+		objectsRefresh();
+	      }
+	  }
+	else
+	  {
+	    StringDialog notRemovableD = new StringDialog(this,
+							  "Error:  Base not removable",
+							  "You are not allowed to remove this base.",
+							  "Ok",
+							  null);
+	    notRemovableD.DialogShow();
+
+
 	  }
       }
     else if (event.getSource() == createFieldMI)
@@ -974,35 +1001,35 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (event.getSource() == deleteFieldMI)
       {
-	System.err.println("deleting field node");
 
-	deleteFieldDialog.setVisible(true);
-	/*
+	FieldNode fNode = (FieldNode)currentNode;
+	BaseField field = fNode.getField();
+	boolean isEditable = false;
 	try
 	  {
-	    FieldNode fNode = (FieldNode) node;
-	    BaseNode bNode = (BaseNode) node.getParent();
-	    
-	    if (!bNode.getBase().fieldInUse(fNode.getField()))
-	      {
-		bNode.getBase().deleteField(fNode.getField());
-		refreshFields(bNode.getBase(), true);
-		ne.refreshSpaceList();
-		be.refreshLabelChoice();
-	      }
-	    else
-	      {
-		// field in use
-		
-		System.err.println("Couldn't delete field.. field in use");
-	      }
+	    isEditable = field.isEditable();
 	  }
-	catch (RemoteException ex)
+	catch (RemoteException rx)
 	  {
-	    System.err.println("couldn't delete field" + ex);
+	    throw new IllegalArgumentException("can't tell if field is editable, assuming false: " + rx);
 	  }
-	
-	  */
+	if (isEditable)
+	  {
+	    System.err.println("deleting field node");
+	    
+	    deleteFieldDialog.setVisible(true);
+	  }
+	else
+	  {
+	    StringDialog notEditableDialog = new StringDialog(this, 
+							      "Error: field not editable",
+							      "This field is not editable.  You cannot delete it.  Sorry, but those are the rules.",
+							      "Ok",
+							      null);
+	    notEditableDialog.DialogShow();
+
+
+	  }
       }
   }
 
@@ -2081,6 +2108,19 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     clearFields();
     this.fieldDef = fieldDef;
 
+    // Check to see if this field is editable.
+    // Assume it is not, then ask server.
+    // Each field will be set to editable depending on this variable.
+    boolean isEditable = false;
+    try
+      {
+	isEditable = fieldDef.isEditable();
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("exception: isEditable in editField: " + rx);
+      }
+
     booleanShowing = false;
     numericShowing = false;
     dateShowing = false;
@@ -2233,6 +2273,26 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    numericShowing = true;
 	  }
 
+	//Here is where the editability is checked.
+	commentT.setEnabled(isEditable);
+	nameS.setEnabled(isEditable);
+	classS.setEnabled(isEditable);
+	trueLabelS.setEnabled(isEditable);
+	falseLabelS.setEnabled(isEditable);
+	OKCharS.setEnabled(isEditable);
+	BadCharS.setEnabled(isEditable);
+	idN.setEnabled(isEditable);
+	maxArrayN.setEnabled(isEditable);
+	minLengthN.setEnabled(isEditable);
+	maxLengthN.setEnabled(isEditable);
+	vectorCF.setEnabled(isEditable);
+	labeledCF.setEnabled(isEditable);
+	editInPlaceCF.setEnabled(isEditable);
+	typeC.setEnabled(isEditable);
+	namespaceC.setEnabled(isEditable);
+	targetC.setEnabled(isEditable);
+	fieldC.setEnabled(isEditable);
+	
 	checkVisibility();
       }
     catch (RemoteException ex)
