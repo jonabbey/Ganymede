@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Ganymede build script
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 1999/08/05 22:07:04 $
+#
+############################################################
+
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && builddir=.
+cd $builddir
+
+# Load configuration information
+
+. ./config.sh
+
+# And do the build
+
+echo "Compiling $COMPNAME"
+
+CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
+$JAVAC -J-mx128m -deprecation -d $TARGETDIR *.java
+
+# Return to our last directory
+
+cd $currentdir
+
+echo "Done compiling $COMPNAME"
