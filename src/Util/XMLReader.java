@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/03/29 01:42:48 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/04/11 20:47:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ import com.jclark.xml.sax.*;
  * traditionally done with SAX.</P>
  *
  * <P>When instantiated, the XMLReader creates a background thread that receives
- * SAX events from James Clark's XP XML parse.  These SAX events are converted
+ * SAX events from James Clark's XP XML parser.  These SAX events are converted
  * to {@link arlut.csd.Util.XMLItem XMLItem} objects and saved in an internal
  * buffer.  The user of the XMLReader class calls getNextItem() to retrieve
  * these XMLItem objects from the XMLReader buffer, in order of receipt.</P>
