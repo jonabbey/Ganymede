@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.37 $ %D%
+    Version: $Revision: 1.38 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -101,7 +101,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    *
    */
-  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame)
+  public containerPanel(db_object object, boolean editable, 
+			gclient gc, windowPanel window, framePanel frame)
   {
     this(object, editable, gc, window, frame, null, true);
   }
@@ -116,7 +117,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    */
-  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame, JProgressBar progressBar)
+  public containerPanel(db_object object, boolean editable, gclient gc, 
+			windowPanel window, framePanel frame, JProgressBar progressBar)
   {
     this(object, editable, gc, window, frame, progressBar, true);
   }
@@ -134,9 +136,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame, JProgressBar progressBar, boolean loadNow)
+  public containerPanel(db_object object, boolean editable, gclient gc,
+			windowPanel window, framePanel frame, 
+			JProgressBar progressBar, boolean loadNow)
   {
     super(false);
+
     /* -- */
 
     this.gc = gc;
@@ -167,6 +172,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Container panel is already loaded!");
 	return;
       }
+
     if (debug)
       {
 	System.out.println("Loading container panel");
@@ -199,6 +205,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     try
       {
 	type = object.getTypeID();
+
 	if (progressBar != null)
 	  {
 	    progressBar.setValue(1);
@@ -233,9 +240,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	progressBar.setValue(3);
       }
 
-
-
-
     if (debug)
       {
 	System.out.println("Entering big loop");
@@ -261,6 +265,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		// Find the template
 		boolean found = false;
 		int tSize = templates.size();
+
 		for (int k = 0; k < tSize; k++)
 		  {
 		    fieldTemplate = (FieldTemplate)templates.elementAt(k);
@@ -273,10 +278,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		
 		if (! found)
 		  {
-		    throw new RuntimeException("Could not find the template for this field: " + fieldInfo.getField());
+		    throw new RuntimeException("Could not find the template for this field: " + 
+					       fieldInfo.getField());
 		  }
 
 		short ID = fieldTemplate.getID();
+
 		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
 		    ||  (ID == SchemaConstants.BackLinksField)
 		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
