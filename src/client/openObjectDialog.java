@@ -14,13 +14,14 @@ import java.awt.event.*;
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.TitledBorder;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.VecQuickSort;
 
-public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
-
+//public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
+public class openObjectDialog extends JDialog implements ActionListener, MouseListener{
   private final static boolean debug = true;
 
   long
@@ -50,7 +51,10 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   JComboBox
     type;
 
-  JstringField 
+  JButton
+    ok;
+
+  JTextField 
     text;
 
   listHandle
@@ -94,7 +98,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     
     type = new JComboBox();
     Vector bases = client.getBaseList();
-    
+    Hashtable baseNames = client.getBaseNames();
+
     Base thisBase = null;
 
     try
@@ -102,15 +107,15 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 	for (int i = 0; i < bases.size(); i++)
 	  {
 	    thisBase = (Base)bases.elementAt(i);
-	    String name = thisBase.getName();
-
+	    String name = (String)baseNames.get(thisBase);
+	    
 	    if (name.startsWith("Embedded:"))
+	      {
+		if (debug)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Skipping embedded field: " + name);
-		      }
+		    System.out.println("Skipping embedded field: " + name);
 		  }
+	      }
 	    else
 	      {
 		listHandle lh = new listHandle(name, new Short(thisBase.getTypeID()));
@@ -120,8 +125,9 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
       }
     catch (java.rmi.RemoteException rx)
       {
-	throw new RuntimeException("Could not get base information");
+	throw new RuntimeException("Could not get type id: " + rx);
       }
+    
     
     gbc.gridx = 0;
     gbc.gridy = 1;
@@ -140,8 +146,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     gbl.setConstraints(type, gbc);
     middle.add(type);
 	
-    text = new JstringField(20, true);
-    //text.setCallback(this);
+    text = new JTextField(20);
+    text.addActionListener(this);
     JLabel editTextL = new JLabel("Object Name:");
     
     gbc.fill = GridBagConstraints.NONE;
@@ -159,7 +165,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     
     JPanel buttonP = new JPanel();
     
-    JButton ok = new JButton("Ok");
+    ok = new JButton("Ok");
     ok.setActionCommand("Find Object with this name");
     ok.addActionListener(this);
     buttonP.add(ok);
@@ -242,8 +248,13 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
       {
 	System.out.println("Action performed: " + e.getActionCommand());
       }
+    
 
-    if (e.getActionCommand().equals("Find Object with this name"))
+    if (e.getSource() == text)
+      {
+	ok.doClick();
+      }
+    else if (e.getActionCommand().equals("Find Object with this name"))
       {
 	String string = text.getText();
 
@@ -408,28 +419,4 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
 
-  public boolean setValuePerformed(JValueObject e)
-  {
-    String newValue;
-
-    /* -- */
-
-    newValue = (String) e.getValue();
-
-    if ((newValue != null) &&
-	!newValue.equals(lastValue))
-      {
-	lastValue = newValue;
-
-	if (debug)
-	  {
-	    System.out.println("setValuePerformed ");
-	  }
-	
-	ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Find Object with this name");
-	actionPerformed(ae);
-      }
-    
-    return true;
-  }
 }
