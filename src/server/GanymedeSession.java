@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.104 $ %D%
+   Version: $Revision: 1.105 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -245,17 +245,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
-   * This variable stores the permission bits that are applicable to objects
-   * that the current persona has ownership privilege over.  This matrix
-   * is always a permissive superset of defaultPerms.
-   *
-   */
-
-  PermMatrix personaPerms;
-
-  /**
-   *
-   * When did we last update our reference to the defaultObj?
+   * When did we last update our local cache/summary of permissions records?
    *
    */
 
@@ -263,13 +253,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
-   * A reference to the Ganymede object storing our default permissions,
-   * or the permissions that applies when we are not in supergash mode
-   * and we do not have any ownership over the object in questin.
+   * This variable stores the permission bits that are applicable to objects
+   * that the current persona has ownership privilege over.  This matrix
+   * is always a permissive superset of defaultPerms.
    *
    */
 
-  DBObject defaultObj;
+  PermMatrix personaPerms;
 
   /**
    *
@@ -287,6 +277,47 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   PermMatrix defaultPerms;
+
+  /**
+   *
+   * This variable stores the permission bits that are applicable to
+   * objects that the current persona has ownership privilege over and
+   * which the current admin has permission to delegate to subordinate
+   * roles.  This matrix is always a permissive superset of
+   * delegatableDefaultPerms.
+   * 
+   */
+
+  PermMatrix delegatablePersonaPerms;
+
+  /**
+   *
+   * This variable stores the permission bits that are applicable to
+   * generic objects not specifically owned by this persona and which
+   * the current admin has permission to delegate to subordinate
+   * roles.<br><br>
+   *
+   * Each permission object in the Ganymede database includes
+   * permissions as apply to objects owned by the persona and as apply
+   * to objects not owned by the persona.<br><br>
+   *
+   * This variable holds the union of the 'as apply to objects not
+   * owned by the persona' matrices across all permissions objects
+   * that apply to the current persona.
+   *   
+   */
+
+  PermMatrix delegatableDefaultPerms;
+
+  /**
+   *
+   * A reference to the Ganymede object storing our default permissions,
+   * or the permissions that applies when we are not in supergash mode
+   * and we do not have any ownership over the object in questin.
+   *
+   */
+
+  DBObject defaultObj;
 
   /**
    *
@@ -692,10 +723,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	permBase = null;
 	defaultObj = null;
 	newObjectOwnerInvids = null;
-	defaultPerms = null;
 	visibilityFilterInvids = null;
 	personaPerms = null;
 	defaultPerms = null;
+	delegatablePersonaPerms = null;
+	delegatableDefaultPerms = null;
 
 	Ganymede.debug("User " + username + " logged off");
 
@@ -3952,6 +3984,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     
     defaultPerms = pField.getMatrix();
+
+    // default permissions are implicitly delegatable
+
+    delegatableDefaultPerms = pField.getMatrix();
   }
 
   /**
@@ -4088,6 +4124,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // object.
 
 	    personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+	    delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
 
 	    System.err.println("GanymedeSession.updatePerms(): returning.. no persona obj for " + 
 			       (personaName == null ? username : personaName));
@@ -4164,6 +4201,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
 
+		// we initialize delegatablePersonaPerms with the
+		// permissions for owned and non-owned permissions
+		// that are part of the default permissions..  default
+		// permissions are implicitly delegatable.
+
+		delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+
 		// now we loop over all permissions objects referenced
 		// by our persona, or'ing in both the objects owned
 		// permissions and default permissions to augment defaultPerms
@@ -4199,6 +4243,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 			    personaPerms = personaPerms.union(pmdbf).union(pmdbf2);
 			    defaultPerms = defaultPerms.union(pmdbf2);
+
+			    // we want to maintain our notion of
+			    // delegatable permissions separately..
+
+			    Boolean delegatable = (Boolean) pObj.getFieldValueLocal(SchemaConstants.RoleDelegatable);
+
+			    if (delegatable != null && delegatable.booleanValue())
+			      {
+				delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbf).union(pmdbf2);
+				delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbf2);
+			      }
 			  }
 		      }
 		  }
