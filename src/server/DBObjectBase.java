@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -473,13 +473,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // we only want to emit the 'constant' personae.. those that aren't associated
     // with regular user accounts.
 
+    // if we're SchemaConstants.OwnerBase, we only want to emit the 'supergash'
+    // owner group.
+
     if (type_code == SchemaConstants.PersonaBase)
       {
 	// first, figure out how many we're going to save to emit
 
 	int counter = 0;
 	DBObject personaObj;
-	DBField assocUser;
 
 	baseEnum = objectHash.elements();
 
@@ -510,7 +512,41 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		personaObj.emit(out);
 	      }
 	  }
+      }
+    else if (type_code == SchemaConstants.OwnerBase)
+      {
+	// first, figure out how many we're going to save to emit
 
+	int counter = 0;
+	DBObject ownerObj;
+
+	baseEnum = objectHash.elements();
+
+	while (baseEnum.hasMoreElements())
+	  {
+	    ownerObj = (DBObject) baseEnum.nextElement();
+
+	    if (ownerObj.getLabel().equals("supergash"))
+	      {
+		counter++;
+	      }
+	  }
+
+	//	System.err.println("Writing out " + counter + " objects");
+
+	out.writeInt(counter);
+
+	baseEnum = objectHash.elements();
+
+	while (baseEnum.hasMoreElements())
+	  {
+	    ownerObj = (DBObject) baseEnum.nextElement();
+
+	    if (ownerObj.getLabel().equals("supergash"))
+	      {
+		ownerObj.partialEmit(out);
+	      }
+	  }
       }
     else
       {
@@ -1561,7 +1597,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
   
-  public synchronized BaseField createNewField()
+  public synchronized BaseField createNewField(boolean lowRange)
   {
     short id;
     DBObjectBaseField field;
@@ -1573,7 +1609,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
-    id = getNextFieldID();
+    id = getNextFieldID(lowRange);
 
     try
       {
@@ -1767,7 +1803,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  synchronized short getNextFieldID()
+  synchronized short getNextFieldID(boolean lowRange)
   {
     short id;
     Enumeration enum;
@@ -1775,7 +1811,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    id = 256;  // reserve 256 field slots for built-in types
+    if (lowRange)
+      {
+	id = 100;
+      }
+    else
+      {
+	id = 256;  // reserve 256 field slots for built-in types
+      }
 
     enum = fieldHash.elements();
 
@@ -1895,9 +1938,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean removeWriter(DBWriteLock writer)
   {
+    boolean result;
     synchronized (store)
       {
-	return writerList.removeElement(writer);
+	result = writerList.removeElement(writer);
+	store.notifyAll();
+
+	return result;
       }
   }
 
@@ -1948,9 +1995,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean removeReader(DBReadLock reader)
   {
+    boolean result;
+
     synchronized (store)
       {
-	return readerList.removeElement(reader);
+	result = readerList.removeElement(reader);
+
+	store.notifyAll();
+	return result;
       }
   }
 
@@ -2001,9 +2053,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean removeDumper(DBDumpLock dumper)
   {
+    boolean result;
+
+    /* -- */
+
     synchronized (store)
       {
-	return dumperList.removeElement(dumper);
+	result = dumperList.removeElement(dumper);
+	
+	store.notifyAll();
+	return result;
       }
   }
 
