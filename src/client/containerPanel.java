@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
     Release: $Name:  $
-    Version: $Revision: 1.93 $
-    Last Mod Date: $Date: 1999/03/19 21:33:41 $
+    Version: $Revision: 1.94 $
+    Last Mod Date: $Date: 1999/03/23 06:20:31 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -3259,7 +3259,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 	
     choices = gc.sortListHandleVector(choices);
-    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), !mustChoose);
+
+    /*
+
+      Before I decided that it was just too much of a pain from a user
+      interface perspective to give the user the ability to create new
+      objects from a JInvidChooser, I had this line in place to allow
+      them to do that if the server didn't demand they choose from the
+      list presented.  I don't see going back to this, but it's worth
+      remembering I guess.
+    
+      combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), !mustChoose);
+
+      */
+
+    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), false);
 
     // Find currentListHandle
     

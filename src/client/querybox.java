@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/03/17 20:12:57 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/03/23 06:20:32 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1244,14 +1244,19 @@ class QueryRow implements ItemListener {
 
     // don't show us changing it
 
+    // Do we have a phrase in the operator box which requires does
+    // instead of is?
+
     does = opName.equalsIgnoreCase("Start With") ||
       opName.equalsIgnoreCase("End With") ||
       opName.equalsIgnoreCase("Contain") ||
-      opName.equalsIgnoreCase("Contain Matching");
+      opName.equalsIgnoreCase("Contain Matching") ||
+      opName.equalsIgnoreCase("Contain Matching [Case Insensitive]");
 
     if (does && (!showDoes || boolChoice.getItemCount() == 0))
       {
 	boolChoice.setVisible(false);
+
 	if (boolChoice.getItemCount() > 0)
 	  {
 	    boolChoice.removeAllItems();
@@ -1316,6 +1321,7 @@ class QueryRow implements ItemListener {
 	if (field.isString() || field.isInvid())
 	  {
 	    compareChoice.addItem("Contain Matching");
+	    compareChoice.addItem("Contain Matching [Case Insensitive]");
 	  }
 
 	compareChoice.addItem("Length <");
@@ -1351,6 +1357,7 @@ class QueryRow implements ItemListener {
     else if (field.isString() || field.isInvid())
       {
 	compareChoice.addItem("matching");
+	compareChoice.addItem("matching [Case Insensitive]");
 	compareChoice.addItem("==");
 	compareChoice.addItem("== [Case Insensitive]");
 	compareChoice.addItem("<");
@@ -1674,6 +1681,11 @@ class QueryRow implements ItemListener {
 	    opValue = QueryDataNode.MATCHES;
 	    arrayOp = QueryDataNode.CONTAINS;
 	  }
+	else if (operator.equals("Contain Matching [Case Insensitive]"))
+	  {
+	    opValue = QueryDataNode.NOCASEMATCHES;
+	    arrayOp = QueryDataNode.CONTAINS;
+	  }
 	else if (operator.equals("Length =="))
 	  {
 	    arrayOp = QueryDataNode.LENGTHEQ;
@@ -1756,6 +1768,10 @@ class QueryRow implements ItemListener {
 	else if (operator.equals("matching"))
 	  {
 	    opValue = QueryDataNode.MATCHES;
+	  }
+	else if (operator.equals("matching [Case Insensitive]"))
+	  {
+	    opValue = QueryDataNode.NOCASEMATCHES;
 	  }
 
 	if (opValue == 0)

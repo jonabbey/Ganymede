@@ -8,8 +8,8 @@
    
    Created: Before May 7, 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/01/22 18:04:10 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/03/23 06:20:30 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,8 +65,7 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * Like a JComboBox, but just for Invid's.  It has a couple of pretty
- * buttons on the sides.
+ * A GUI component for choosing an Invid for a scalar invid_field.  
  */
 
 public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
@@ -94,10 +93,29 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   /* -- */
 
+  /**
+   *
+   * @param parent The general or embedded object panel that contains us
+   * @param objectType object type number, used to support creating a new
+   * object by the use of the 'new' button if enabled.
+   * @param showNew if true, the JInvidChooser will include a 'new' button
+   * to enable creation of a new object of the type referenced by this JInvidChooser.
+   */
+
   public JInvidChooser(containerPanel parent, short objectType, boolean showNew)
   {
     this(null, parent, objectType, showNew);
   }
+
+  /**
+   * @param objects A vector of {@link arlut.csd.JDataComponent.listHandle listHandle}
+   * objects representing labeled Invid choices for the user to choose among.
+   * @param parent The general or embedded object panel that contains us
+   * @param objectType object type number, used to support creating a new
+   * object by the use of the 'new' button if enabled.
+   * @param showNew if true, the JInvidChooser will include a 'new' button
+   * to enable creation of a new object of the type referenced by this JInvidChooser.
+   */
 
   public JInvidChooser(Vector objects, containerPanel parent, short objectType, boolean showNew)
   {
@@ -155,12 +173,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   /**
    *
-   * Set the allowNone bit.
+   * <p>Set the allowNone bit.</p>
    *
-   * If allowNone is true, then <none> will remain as a choice in the
-   * chooser.  If it is false, <none> will only be included in the
+   * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
+   * chooser.  If it is false, &lt;none&gt; will only be included in the
    * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.  
+   * anything is chosen.</p>
    *
    */
 
@@ -246,12 +264,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   /**
    *
-   * Get the allowNone bit.<br><br>
+   * <p>Get the allowNone bit.</p>
    *
-   * If allowNone is true, then &lt;none&gt; will remain as a choice in the
+   * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
    * chooser.  If it is false, &lt;none&gt; will only be included in the
    * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.  
+   * anything is chosen.</p>
    */
 
   public boolean isAllowNone()
