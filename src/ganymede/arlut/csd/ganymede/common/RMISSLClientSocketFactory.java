@@ -75,7 +75,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private static int counter = 0;
   private static final boolean socketDebug = false;
   private static final boolean mrShouty = false;
-  private static final RMISSLClientListener listener = null;
+  private static RMISSLClientListener listener = null;
 
   private transient SSLSocketFactory sf;
 
@@ -85,7 +85,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
    * socket is opened.</P>
    */
 
-  public static void setSSLClientListener(RMISSLClientListener listener)
+  public synchronized static void setSSLClientListener(RMISSLClientListener listener)
   {
     RMISSLClientSocketFactory.listener = listener;
   }
@@ -112,10 +112,19 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
     SSLSocket sock = (SSLSocket) getSF().createSocket(host, port);
 
     SSLSession session = sock.getSession();
+    String cipherSuite = session.getCipherSuite();
 
     if (mrShouty)
       {
-	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + session.getCipherSuite());
+	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + cipherSuite);
+      }
+
+    synchronized (RMISSLClientSocketFactory.class)
+      {
+	if (RMISSLClientSocketFactory.listener != null)
+	  {
+	    RMISSLClientSocketFactory.listener.notifySSLClient(host, port, cipherSuite);
+	  }
       }
 
     return sock;
