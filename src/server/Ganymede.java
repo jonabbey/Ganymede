@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2001/10/05 19:57:58 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2001/10/05 20:00:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -581,9 +581,10 @@ public class Ganymede {
 
 		    if (!forcelocalhost)
 		      {
-			Ganymede.debug("\nIf you really want to be only useable for localhost, use the -forcelocalhost option.");
+			Ganymede.debug(WordWrap.wrap("\nIf you really want to be only useable for localhost, " + 
+						     "edit the runServer script to use the -forcelocalhost option.", 70));
 			
-			Ganymede.debug("\nShutting down.\n\n");
+			Ganymede.debug("\nShutting down.\n");
 			
 			GanymedeServer.shutdown();
 		      }
