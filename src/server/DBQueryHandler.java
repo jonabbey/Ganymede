@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,7 +23,7 @@ import java.util.*;
 
 public class DBQueryHandler {
 
-  public static boolean matches(Query q, DBObject obj)
+  public static final boolean matches(Query q, DBObject obj)
   {
     if ((q == null) || (obj == null))
       {
@@ -40,7 +40,7 @@ public class DBQueryHandler {
       }
   }
 
-  public static boolean nodeMatch(QueryNode qN, DBObject obj)
+  public static final boolean nodeMatch(QueryNode qN, DBObject obj)
   {
     if (qN == null)
       {
