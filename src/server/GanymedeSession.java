@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.78 $ %D%
+   Version: $Revision: 1.79 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1289,13 +1289,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * If the transaction cannot be committed for some reason,
    * commitTransaction() will instead abort the transaction.  In any
-   * case, calling commitTransaction() will close the transaction.
+   * case, calling commitTransaction() will close the transaction.<br><br>
+   *
+   * This method is synchronized to avoid nested-monitor deadlock in
+   * DBSession.commitTransaction().
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *            or null if there were no problems
    * 
-   * @see arlut.csd.ganymede.Session
-   */
+   * @see arlut.csd.ganymede.Session */
 
   public synchronized ReturnVal commitTransaction()
   {
@@ -1314,7 +1316,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     this.status = "";
     setLastEvent("commitTransaction");
 
-    retVal = session.commitTransaction();
+    retVal = session.commitTransaction(); // *sync* DBSession DBEditSet
 
     // if we succeeded, we'll schedule our
     // builder tasks to run
