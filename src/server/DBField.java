@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.61 $ %D%
+   Version: $Revision: 1.62 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1933,7 +1933,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * The server code <b>*must not*</b> make any modifications to the
    * returned vector as doing such may violate the namespace maintenance
    * logic.  Always, <b>always</b>, use the addElement(), deleteElement(),
-   * setElement() methods in this class.
+   * setElement() methods in this class.<br><br>
+   *
+   * Remember, this method gives you <b>*direct access</b> to the vector
+   * from this field.  Always always clone the Vector returned if you
+   * find you need to modify the results you get back.  I'm trusting you
+   * here.  Pay attention.
    *
    */
 
