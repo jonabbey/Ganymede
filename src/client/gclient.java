@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,7 +74,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     objViewMI,
     objEditMI,
     objCloneMI,
-    objInactivateMI;
+    objInactivateMI,
+    objDeleteMI;
 
   PopupMenu 
     pMenu = new PopupMenu();
@@ -198,11 +199,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     objEditMI = new MenuItem("Edit Object");
     objCloneMI = new MenuItem("Clone Object");
     objInactivateMI = new MenuItem("Inactivate Object");
+    objDeleteMI = new MenuItem("Delete Object");
 
     objectPM.add(objViewMI);
     objectPM.add(objEditMI);
     objectPM.add(objCloneMI);
     objectPM.add(objInactivateMI);
+    objectPM.add(objDeleteMI);
 
     try
       {
@@ -917,6 +920,29 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	else
 	  {
 	    System.err.println("not a base node, can't create");
+	  }
+      }
+    else if (event.getSource() == objDeleteMI)
+      {
+	// Need to change the icon on the tree to an X or something to show that it is deleted
+	System.out.println("Deleting object");
+	if (node instanceof ObjectNode)
+	  {
+	    ObjectNode objectN = (ObjectNode)node;
+
+	    try
+	      {
+		System.out.println("Deleting invid= " + objectN.getObject().getInvid());
+		session.remove_db_object(objectN.getObject().getInvid());
+	      }
+	    catch(RemoteException rx)
+	      {
+		throw new RuntimeException("Could not delete base: " + rx);
+	      }
+	  }
+	else  // Should never get here, but just in case...
+	  {
+	    System.out.println("Not a base node, can't delete this.");
 	  }
       }
     else if (event.getSource() == objCloneMI)
