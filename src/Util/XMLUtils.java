@@ -7,8 +7,8 @@
 
    Created: 21 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/24 21:21:34 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/11/02 02:20:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -124,6 +124,11 @@ public class XMLUtils {
 
   public static String XMLDecode(String name)
   {
+    if (name == null)
+      {
+	return null;
+      }
+
     StringBuffer buffer = new StringBuffer(name.length());
 
     int i = 0;
