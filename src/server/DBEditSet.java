@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2002/04/03 17:15:35 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2002/04/25 08:01:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -361,6 +361,15 @@ public class DBEditSet {
     if (false)
       {
 	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
+      }
+
+    // if this transaction is in the middle of commit(), don't let the
+    // programmer try to corrupt the transaction by adding new objects
+    // to this transaction.  Gaurav, this means you. ;-)
+
+    if (wLock != null)
+      {
+	throw new RuntimeException("Can't add objects to the transaction during commit.");
       }
 
     // remember that we are not allowing objects that this object is
