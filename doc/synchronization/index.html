@@ -24,14 +24,14 @@
     implementing data synchronization from Ganymede to your target
     directory services.  If you're interested in reading about how to
     format data for importing into Ganymede, you should consult the <a
-    href="xml/index.html">Ganymede XML Guide</a>, which covers that
+    href="../xml/index.html">Ganymede XML Guide</a>, which covers that
     topic.</p>
 
     <p>Whether you are importing data into or exporting data out of
     Ganymede, you will need to be sure that your Ganymede server is
     configured with a schema (and programmable object plug-ins)
     appropriate to the sort of data you want to manage.  See the <a
-    href="xml/schema.html">Ganymede XML Schema</a> document for some
+    href="../xml/schema.html">Ganymede XML Schema</a> document for some
     details on how a Ganymede schema is specified.  (I need to add
     more discussion of this somewhere in the docs, though).</p>
 
@@ -59,7 +59,7 @@
     traditionally required a 'full state' build system, as those
     services originally provided no mechanism for applying incremental
     changes to their configuration.  Modern directory services like
-    LDAP, on the other hand, have always explicitly supported change
+    LDAP, on the other hand, explicitly support incremental change
     commands.  These kinds of directories work most efficiently when a
     small list of recent changes (or "deltas") can be provided.  Other
     possible synchronization targets, such as relational databases,
@@ -123,9 +123,9 @@
     before considering the two new models that Ganymede 2.0
     introduces.</p>
 
-    <h2>3. The GanymedeBuilderTask Synchronization Model</h2>
+    <h2 id="buildertask">3. The GanymedeBuilderTask Synchronization Model</h2>
 
-    <h3>The GanymedeBuilderTask Model Explained</h3>
+    <h3 id="buildertask_explained">The GanymedeBuilderTask Model Explained</h3>
 
     <p>The original Ganymede synchronization model is based around
     full state synchronization, and was designed in conjunction with
@@ -136,14 +136,14 @@
 
     <p>Ganymede's approach to supporting these services was to
     implement a two phase building approach, using the <a
-    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
     class.  When a transaction is committed in Ganymede, the <a
-    href="javadocs/arlut/csd/ganymede/server/GanymedeScheduler.html">
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeScheduler.html">
     arlut.csd.ganymede.server.GanymedeScheduler</a> class schedules a
     set of builder tasks for execution as soon as possible.  When a
     builder task runs, it locks the Ganymede database to prevent any
     new transactions from committing and it executes <a
-    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>.
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>.
     The builderPhase1 method scans the Ganymede database for whatever
     objects are relevant to the builder task's synchronization duties
     and writes that data out to disk, using whatever data format is
@@ -154,7 +154,7 @@
     commit.</p>
 
     <p>The builder tasks then runs <a
-    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2</a>.
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2</a>.
     builderPhase2 is designed to execute an external program or script
     which reads the data written out by builderPhase1 and does
     whatever is necessary to integrate that data into the target
@@ -203,8 +203,43 @@
     stopped and restarted after compiling and loading the new version
     of the builder task's code.</p>
 
-    <h3>How to Configure and Install a GanymedeBuilderTask Subclass</h3>
+    <p>The advantage of using the GanymedeBuilderTask system is that
+    it is the only full state synchronization model that is fully
+    integrated into the Ganymede server's scheduler.  By creating and
+    registering a GanymedeBuilderTask, you can rely on the server to
+    handle scheduling your builds.  The alternative XML-based full
+    state synchronization model (<a href="xml_full_state">described
+    below</a>) is meant only to serve as a manual backup for the
+    Ganymede 2.0 XML-based delta synchronization model.  More on this
+    later.</p>
 
+    <p>Right now, we need to discuss how to actually go about
+    constructing a GanymedeBuilderTask subclass to handle a full state
+    build.</p>
+
+    <h3 id="buildertask_creation">How to build a custom GanymedeBuilderTask Subclass</h3>
+
+    <p>The Ganymede server's <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
+    class contains a lot of support infrastructureto do anything useful, it is necessary to create a subclass
+    and to write the logic for the <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>
+    and <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2</a>
+    methods.  
+
+    <p>The steps involved in creating a GanymedeBuilderTask subclass
+    are very similar to those required when <a
+    href="../customization/index.html#subclass_creation">creating a
+    DBEditObject subclass</a>.  
+
+    <p>Just as with the <a
+    href="../customization/index.html#subclass_creation">DBEditObject</a>
+    case, there are two steps required to create a new Ganymedeput a GanymedeBuilderTask subclass into use  creation of a GanymedeBuilderTask subclass involves
+    writing a Java source file, placing it in the server's
+    <code>custom_src</code> directory, and running 
+
+    <img src="screenshots/builder_task.png"/>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
