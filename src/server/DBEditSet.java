@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2000/06/22 04:56:22 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2000/06/23 23:42:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -127,11 +127,12 @@ public class DBEditSet {
   static final boolean debug = false;
 
   /**
-   * A list of {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s
-   * that were checked out in care of this transaction.
+   * A hashtable mapping Invids to {@link
+   * arlut.csd.ganymede.DBEditObject DBEditObject}s checked out in
+   * care of this transaction.  
    */
 
-  Vector objects = null;
+  Hashtable objects = null;
 
   /**
    * A list of {@link arlut.csd.ganymede.DBLogEvent DBLogEvent}'s
@@ -186,16 +187,6 @@ public class DBEditSet {
 
   DBWriteLock wLock = null;
 
-  /** 
-   * <p>This hashtable maps Invids to themselves.  These are Invids
-   * that this transaction needs to prevent from being deleted,
-   * because one or more objects checked out by this transaction
-   * points to these Invids.  This is part of the replacement system
-   * for the BackLinksField.</p>
-   */
-
-  Hashtable noDeleteLocks;
-
   /**
    * <p>True if this DBEditSet is operating in interactive mode.</p>
    */
@@ -236,10 +227,9 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     this.interactive = interactive;
-    objects = new Vector();
+    objects = new Hashtable();
     logEvents = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
-    noDeleteLocks = new Hashtable();
   }
 
   /**
@@ -273,70 +263,6 @@ public class DBEditSet {
     this.mustAbort = true;
   }
 
-  /** 
-   * <p>This method returns true if this transaction has no objection
-   * to the given Invid being marked for deletion by another
-   * transaction.</p> 
-   */
-
-  public synchronized boolean canDelete(Invid invid)
-  {
-    System.err.println("DBEditSet " + description + ", canDelete(" + 
-		       session.getGSession().describe(invid) + ")");
-
-    boolean result = !noDeleteLocks.containsKey(invid);
-
-    System.err.println("Returning " + result);
-
-    return result;
-  }
-
-  /**
-   * <p>This method is used by InvidDBField.bind() to
-   * attempt to verify the ability to asymmetrically link
-   * to a new object.  This is done for a single field
-   * at a time.  Note that addObject() doesn't use this
-   * method, since it needs to not update noDeleteLocks
-   * unless it can lock a set of objects as a unit.</p>
-   */
-
-  public synchronized ReturnVal deleteLock(Invid target)
-  {
-    DBObject obj;
-    DBEditObject eObj;
-
-    /* -- */
-
-    obj = session.viewDBObject(target);
-
-    eObj = obj.shadowObject;
-	
-    if (eObj != null)
-      {
-	if (eObj.editset != this)
-	  {
-	    synchronized (eObj)
-	      {
-		if (eObj.getStatus() == DBEditObject.DELETING ||
-		    eObj.getStatus() == DBEditObject.DROPPING)
-		  {
-		    return new ReturnVal(false);
-		  }
-		else
-		  {
-		    noDeleteLocks.put(target, target);
-		  }
-	      }
-	  }
-      }
-    else
-      {
-	noDeleteLocks.put(target, target);
-      }
-
-    return null;		// null is true, of course
-  }
-
   /**
    * <p>Method to find a DBObject / DBEditObject if it has
    * previously been checked out to this EditSet in some
@@ -357,26 +283,9 @@ public class DBEditSet {
    * transaction's changes made.</p>
    */
 
-  public synchronized DBEditObject findObject(Invid invid)
+  public DBEditObject findObject(Invid invid)
   {
-    Enumeration enum;
-    DBEditObject obj;
-
-    /* -- */
-
-    enum = objects.elements();
-
-    while (enum.hasMoreElements())
-      {
-	obj = (DBEditObject) enum.nextElement();
-
-	if (obj.getInvid().equals(invid))
-	  {
-	    return obj;
-	  }
-      }
-
-    return null;
+    return (DBEditObject) objects.get(invid);
   }
 
   /**
@@ -390,9 +299,9 @@ public class DBEditSet {
 
   public synchronized boolean addObject(DBEditObject object)
   {
-    if (!objects.contains(object))
+    if (!objects.containsKey(object.getInvid()))
       {
-	objects.addElement(object);
+	objects.put(object.getInvid(), object);
 
 	// just need something to mark the slot in the hash table, to
 	// indicate that this object's base is involved in the
@@ -409,47 +318,9 @@ public class DBEditSet {
     // remember that we are not allowing objects that this object
     // is pointing to via an asymmetric link to be deleted
 
-    Hashtable saveNoDeleteLocks = (Hashtable) noDeleteLocks.clone();
-
-    Vector deleteLockInvids = object.getASymmetricTargets();
-    DBObject obj;
-    DBEditObject eObj;
-
-    for (int i = 0; i < deleteLockInvids.size(); i++)
+    if (!DBDeletionManager.addSessionInvids(session, object.getASymmetricTargets()))
       {
-	Invid invid = (Invid) deleteLockInvids.elementAt(i);
-	obj = session.viewDBObject(invid);
-
-	eObj = obj.shadowObject;
-
-	if (false)
-	  {
-	    System.err.println("\tDelete-locking " + session.getGSession().describe(invid));
-	  }
-	
-	if (eObj != null)
-	  {
-	    if (eObj.editset != this)
-	      {
-		synchronized (eObj)
-		  {
-		    if (eObj.getStatus() == DBEditObject.DELETING ||
-			eObj.getStatus() == DBEditObject.DROPPING)
-		      {
-			noDeleteLocks = saveNoDeleteLocks;
-			return false;
-		      }
-		    else
-		      {
-			noDeleteLocks.put(invid, invid);
-		      }
-		  }
-	      }
-	  }
-	else
-	  {
-	    noDeleteLocks.put(invid, invid);
-	  }
+	return false;
       }
 
     return true;
@@ -546,7 +417,7 @@ public class DBEditSet {
 	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
       }
 
-    // checkpoint our objects
+    // checkpoint our objects, logEvents, and deletion locks
 
     checkpoints.push(new DBCheckPoint(name, this));
 
@@ -706,7 +577,6 @@ public class DBEditSet {
     DBCheckPoint point = null;
     DBCheckPointObj objck;
     DBEditObject obj;
-    boolean found;
 
     /* -- */
 
@@ -728,7 +598,7 @@ public class DBEditSet {
 
     // restore the noDeleteLocks we had
 
-    noDeleteLocks = point.noDeleteLocks;
+    DBDeletionManager.revertSessionCheckpoint(session, point.invidDeleteLocks);
 
     // and our objects
 
@@ -745,21 +615,14 @@ public class DBEditSet {
 	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
 	  }
 
-	found = false;
+	obj = findObject(objck.invid);
 
-	for (int j = 0; !found && j < objects.size(); j++)
+	if (obj != null)
 	  {
-	    obj = (DBEditObject) objects.elementAt(j);
-	    
-	    if (obj.getInvid().equals(objck.invid))
-	      {
-		obj.rollback(objck.fields);
-		obj.status = objck.status;
-		found = true;
-	      }
+	    obj.rollback(objck.fields);
+	    obj.status = objck.status;
 	  }
-
-	if (!found)
+	else
 	  {
 	    // huh?  this shouldn't ever happen, unless maybe we have a rollback order
 	    // error or something.  Complain.
@@ -785,25 +648,33 @@ public class DBEditSet {
 
 	System.err.println("\nDBEditSet.rollback() Now:");
 
-	for (int i = 0; i < objects.size(); i++)
+	Enumeration enum = objects.elements();
+
+	while (enum.hasMoreElements())
 	  {
-	    System.err.println(objects.elementAt(i));
+	    System.err.println(enum.nextElement());
 	  }
       }
+
+    // calculate what DBEditObjects we have in the transaction at the
+    // present time that we didn't have in the checkpoint
+
+    Vector drop = new Vector();
 
     Hashtable oldvalues = new Hashtable();
 
     for (int i = 0; i < point.objects.size(); i++)
       {
-	oldvalues.put(((DBCheckPointObj) point.objects.elementAt(i)).invid, 
-		      ((DBCheckPointObj) point.objects.elementAt(i)).invid);
+	Invid chkinvid = ((DBCheckPointObj) point.objects.elementAt(i)).invid;
+
+	oldvalues.put(chkinvid, chkinvid);
       }
 
-    Vector drop = new Vector();
+    Enumeration enum = objects.elements();
 
-    for (int i = 0; i < objects.size(); i++)
+    while (enum.hasMoreElements())
       {
-	DBEditObject eobjRef = (DBEditObject) objects.elementAt(i);
+	DBEditObject eobjRef = (DBEditObject) enum.nextElement();
 
 	Invid tmpvid = eobjRef.getInvid();
 	
@@ -812,6 +683,8 @@ public class DBEditSet {
 	    drop.addElement(eobjRef);
 	  }
       }
+
+    // and now we get rid of DBEditObjects we need to drop
 
     for (int i = 0; i < drop.size(); i++)
       {
@@ -855,7 +728,7 @@ public class DBEditSet {
 
     for (int i = 0; i < drop.size(); i++)
       {
-	objects.removeElement(drop.elementAt(i));
+	objects.remove(((DBEditObject) drop.elementAt(i)).getInvid());
       }
 
     // and our namespaces
@@ -901,6 +774,7 @@ public class DBEditSet {
   public synchronized ReturnVal commit()
   {
     Vector baseSet = new Vector();
+    Vector committedObjects = new Vector();
     Enumeration enum;
     DBObjectBase base;
     Object key;
@@ -1005,9 +879,11 @@ public class DBEditSet {
 	    // Check all the objects that we have checked out to make
 	    // sure their commit logic approves the transaction.
 
-	    for (int i = 0; i < objects.size(); i++)
+	    enum = objects.elements();
+
+	    while (enum.hasMoreElements())
 	      {
-		eObj = (DBEditObject) objects.elementAt(i);
+		eObj = (DBEditObject) enum.nextElement();
 
 		if (debug)
 		  {
@@ -1111,9 +987,11 @@ public class DBEditSet {
 	    // write the creation and / or modification info into the objects,
 	    // run the objects' commit routines.
 	    
-	    for (int i = 0; i < objects.size(); i++)
+	    enum = objects.elements();
+
+	    while (enum.hasMoreElements())
 	      {
-		eObj = (DBEditObject) objects.elementAt(i);
+		eObj = (DBEditObject) enum.nextElement();
 
 		switch (eObj.getStatus())
 		  {
@@ -1194,9 +1072,17 @@ public class DBEditSet {
 		    // all objects that we've called commitPhase1()
 		    // on so that they will accept future changes.
 
-		    for (int j = 0; j <= i; j++)
+		    // Note.. we really do want to give the user a
+		    // chance to fix things up here.. if the end-user
+		    // requested a transaction commit without the
+		    // possibility of retry, that is handled in
+		    // GanymedeSession.  
+
+		    // We must allow retry here.
+
+		    for (int i = 0; i < committedObjects.size(); i++)
 		      {
-			eObj2 = (DBEditObject) objects.elementAt(j);
+			eObj2 = (DBEditObject) committedObjects.elementAt(i);
 			eObj2.release(false); // undo committing flag
 		      }
 
@@ -1211,6 +1097,10 @@ public class DBEditSet {
 		    retVal.doNormalProcessing = true;
 		    return retVal;
 		  }
+		else
+		  {
+		    committedObjects.addElement(eObj);
+		  }
 	      }
 
 	    // we've gotten this far, phase one must have completed ok.
@@ -1223,9 +1113,9 @@ public class DBEditSet {
 	    // the whole point of 2 phase commit is that nothing can
 	    // go wrong here...
 
-	    for (int i = 0; i < objects.size(); i++)
+	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
-		eObj = (DBEditObject) objects.elementAt(i);
+		eObj = (DBEditObject) committedObjects.elementAt(i);
 
 		eObj.commitPhase2();
 	      }
@@ -1236,9 +1126,9 @@ public class DBEditSet {
 	    GanymedeSession gSession = session.getGSession();
 	    Vector invids;
 
-	    for (int i = 0; i < objects.size(); i++)
+	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
-		eObj = (DBEditObject) objects.elementAt(i);
+		eObj = (DBEditObject) committedObjects.elementAt(i);
 
 		// anything that's going back into the DBStore needs
 		// to have the transient fields cleared away
@@ -1417,6 +1307,11 @@ public class DBEditSet {
 					     gSession.userInvid : gSession.personaInvid),
 					    this);
 	      }
+
+	    // for garbage collection
+
+	    logEvents.removeAllElements();
+	    logEvents = null;
 	  }
 	catch (Exception ex)
 	  {
@@ -1467,9 +1362,9 @@ public class DBEditSet {
 	// it wasn't.  Any exceptions thrown at this point will
 	// propagate up, and let the chips fall where they may.
 
-	for (int i = 0; i < objects.size(); i++)
+	for (int i = 0; i < committedObjects.size(); i++)
 	  {
-	    eObj = (DBEditObject) objects.elementAt(i);
+	    eObj = (DBEditObject) committedObjects.elementAt(i);
 
 	    base = eObj.getBase();
 
@@ -1569,11 +1464,11 @@ public class DBEditSet {
 	    System.err.println(session.key + ": DBEditSet.commit(): releasing write lock");
 	  }
 
-	// very last thing, touch all the bases' time stamps.. we do
-	// this as late as possible to minimize the chance that a
-	// builder task run in response to a previous commit records
-	// its lastRunTime after we, the next transaction committed,
-	// gets our timestamps updated.
+	// very last thing before we release our write lock.. touch
+	// all the bases' time stamps.. we do this as late as possible
+	// to minimize the chance that a builder task run in response
+	// to a previous commit records its lastRunTime after we, the
+	// next transaction committed, gets our timestamps updated.
 
 	for (int i = 0; i < baseSet.size(); i++)
 	  {
@@ -1594,22 +1489,28 @@ public class DBEditSet {
 	    System.err.println(session.key + ": DBEditSet.commit(): released write lock");
 	  }
 
-	// null our vector to speed GC
+	// And now it's just clean up time.  First we remove any
+	// delete locks that we had asserted during this transaction..
 
+	DBDeletionManager.releaseSession(session);
+
+	// null stuff out to speed GC
+
+	objects.clear();
 	objects = null;
+
+	committedObjects.removeAllElements();
+
 	session = null;
 
 	// clear out any checkpoints that may be lingering
 
-	checkpoints.setSize(0);
+	checkpoints.removeAllElements();
 
 	// reset the basesModified hash
 
 	basesModified.clear();
-
-	// and the noDeleteLocks hash
-
-	noDeleteLocks.clear();
+	basesModified = null;
 
 	// we're going to return a ReturnVal with doNormalProcessing set to
 	// false to let everyone above us know that we've totally cleared
@@ -1751,9 +1652,11 @@ public class DBEditSet {
 	throw new RuntimeException("already committed or released");
       }
 
-    while (objects.size() > 0)
+    Enumeration enum = objects.elements();
+
+    while (enum.hasMoreElements())
       {
-	eObj = (DBEditObject) objects.firstElement();
+	eObj = (DBEditObject) enum.nextElement();
 	eObj.release(true);
 	
 	switch (eObj.getStatus())
@@ -1776,9 +1679,9 @@ public class DBEditSet {
 	      }
 	    break;
 	  }
-
-	objects.removeElement(eObj);
       }
+
+    objects.clear();
 
     // undo all namespace modifications associated with this editset
 
@@ -1791,11 +1694,17 @@ public class DBEditSet {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).abort(this);
       }
 
+    // release any deletion locks we have asserted
+
+    DBDeletionManager.releaseSession(session);
+
+    // and help out garbage collection some
+
     objects = null;
     session = null;
-    checkpoints.setSize(0);
     basesModified.clear();
-    noDeleteLocks.clear();
+    checkpoints.removeAllElements();
+    logEvents.removeAllElements();
   }
 
   /**

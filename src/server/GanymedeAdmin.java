@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2000/04/04 08:29:31 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2000/06/23 23:42:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.45 $ $Date: 2000/04/04 08:29:31 $
+ * @version $Revision: 1.46 $ $Date: 2000/06/23 23:42:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1011,12 +1011,21 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     // okay at this point we've asserted our interest in editing the
     // schema and made sure that no one is logged in or can log in.
+    // Now we just need to make sure that we don't have any of the
+    // bases locked by anything that is skipping the semaphore, such
+    // as tasks.
 
-    // All the DBLock establish methods synchronize on the Ganymede
-    // dbstore object, so we are safe against lock establish race
-    // conditions by synchronizing this section on Ganymede.db.
+    // In fact, I believe that the server is now safe against lock
+    // races due to all tasks that might involve DBObjectBase access
+    // being guarded by the loginSemaphore, but there is little cost
+    // in sync'ing here.
 
-    synchronized (Ganymede.db)
+    // All the DBLock establish methods synchronize on the DBLockSync
+    // object referenced by Ganymede.db.lockSync, so we are safe
+    // against lock establish race conditions by synchronizing this
+    // section on Ganymede.db.lockSync.
+
+    synchronized (Ganymede.db.lockSync)
       {
 	Ganymede.debug("entering editSchema synchronization block");
 

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/06/17 00:23:52 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/06/23 23:42:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,9 +79,8 @@ class DBCheckPoint {
 
   Vector
     objects = null,
-    logEvents = null;
-
-  Hashtable noDeleteLocks;
+    logEvents = null,
+    invidDeleteLocks = null;
 
   /* -- */
 
@@ -103,9 +102,11 @@ class DBCheckPoint {
     // we can safely iterate on transaction.objects since we're being
     // created from within a synchronized block in DBEditSet.
 
-    for (int i = 0; i < transaction.objects.size(); i++)
+    Enumeration enum = transaction.objects.elements();
+
+    while (enum.hasMoreElements())
       {
-	obj = (DBEditObject) transaction.objects.elementAt(i);
+	obj = (DBEditObject) enum.nextElement();
 
 	if (debug)
 	  {
@@ -116,7 +117,7 @@ class DBCheckPoint {
 	objects.addElement(new DBCheckPointObj(obj));
       }
 
-    noDeleteLocks = (Hashtable) transaction.noDeleteLocks.clone();
+    invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(transaction.session);
   }
 }
 

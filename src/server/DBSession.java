@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/06/22 04:56:23 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/06/23 23:42:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.85 $ %D%
+ * @version $Revision: 1.86 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -912,37 +912,13 @@ final public class DBSession {
     switch (eObj.getStatus())
       {
       case DBEditObject.CREATING:
-	synchronized (eObj)
-	  {
-	    if (store.okToDelete(eObj.getInvid(), this))
-	      {
-		eObj.setStatus(DBEditObject.DROPPING);
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
-						  eObj.toString() + " can't be deleted because an object which points " +
-						  "to it is currently checked out for editing by someone else.");
-	      }
-	  }
-
-	checkpoint(key);
-
-	break;
-
       case DBEditObject.EDITING:
-	synchronized (eObj)
+
+	if (!DBDeletionManager.setDeleteStatus(eObj, this))
 	  {
-	    if (store.okToDelete(eObj.getInvid(), this))
-	      {
-		eObj.setStatus(DBEditObject.DELETING);
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
-						  eObj.toString() + " can't be deleted because an object which points " +
-						  "to it is currently checked out for editing by someone else.");
-	      }
+	    return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
+					      eObj.toString() + " can't be deleted because an object which points " +
+					      "to it is currently checked out for editing by someone else.");
 	  }
 
 	checkpoint(key);
@@ -1620,14 +1596,15 @@ final public class DBSession {
       {
 	// if we are called while our DBEditSet transaction object is
 	// waiting on a write lock in order to commit() on another
-	// thread, try to kill it off.  We synchronize on Ganymede.db
-	// here because we are using that as a monitor for all lock
-	// operations, and we need the wLock.inEstablish check to be
-	// sync'ed so that we don't force an abort after the editSet
-	// has gotten its lock established and is busy mucking with
-	// the server's DBObjectTables.
+	// thread, try to kill it off.  We synchronize on
+	// Ganymede.db.lockSync here because we are using that as a
+	// monitor for all lock operations, and we need the
+	// wLock.inEstablish check to be sync'ed so that we don't
+	// force an abort after the editSet has gotten its lock
+	// established and is busy mucking with the server's
+	// DBObjectTables.
 
-	synchronized (Ganymede.db)
+	synchronized (Ganymede.db.lockSync)
 	  {
 	    if (editSet.wLock.inEstablish)
 	      {

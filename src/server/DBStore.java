@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2000/06/14 04:52:34 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2000/06/23 23:42:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.121 $ %D%
+ * @version $Revision: 1.122 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1256,76 +1256,6 @@ public class DBStore {
   public synchronized void logout(DBSession session)
   {
     this.sessions.removeElement(session);
-  }
-
-  /**
-   * <p>This method returns true if no transaction is
-   * blocking deletion of the invid in question due to
-   * having an object checked out which has an asymmetric
-   * pointer to the object.</p>
-   *
-   * @param myTransaction The DBSession that is checking on deletion privs
-   */
-
-  public boolean okToDelete(Invid invid, DBSession mySession)
-  {
-    if (false)
-      {
-	System.err.println("DBStore.okToDelete(" + Ganymede.internalSession.describe(invid) + ") entering");
-      }
-
-    synchronized (sessions)
-      {
-	for (int i = 0; i < sessions.size(); i++)
-	  {
-	    DBSession session = (DBSession) sessions.elementAt(i);
-	
-	    if (false)
-	      {
-		System.err.println("DBStore.okToDelete() checking session " + session);
-	      }
-
-	    // if mySession is equal to session, the fact that a deletion
-	    // block is set won't really stop us, since that transaction
-	    // can handle the blocking object in its own transaction
-	
-	    if (session == mySession)
-	      {
-		if (false)
-		  {
-		    System.err.println("DBStore.okToDelete() skipping session " + session);
-		  }
-		continue;
-	      }
-
-	    synchronized (session)
-	      {
-		DBEditSet editSet = session.editSet;
-
-		if (false && editSet == null)
-		  {
-		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
-		  }
-
-		if (editSet != null && !editSet.canDelete(invid))
-		  {
-		    if (false)
-		      {
-			System.err.println("DBStore.okToDelete() refusing delete");
-		      }
-
-		    return false;
-		  }
-	      }
-	  }
-      }
-
-    if (false)
-      {
-	System.err.println("DBStore.okToDelete() okaying delete");
-      }
-    
-    return true;
   }
 
   /** 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 2000/06/22 04:56:26 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 2000/06/23 23:42:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.136 $ %D%
+ * @version $Revision: 1.137 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1069,11 +1069,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	// commit logic doing an update of the DBStore backPointers
 	// hash structure at the right time.
 
-	// We do need to make sure that we're not trying to link to
-	// an object that is in the middle of being deleted, so we
-	// check that here.  If deleteLock() returns a successful
-	// result code, the system will prevent the target object
-	// from being deleted until our transaction has cleared.
+	// We do need to make sure that we're not trying to link to an
+	// object that is in the middle of being deleted, so we check
+	// that here.  If deleteLockObject() returns true, the system
+	// will prevent the target object from being deleted until our
+	// transaction has cleared.
 
 	// We don't have to worry about oldRemote (if it is indeed not
 	// null), as the DBEditSet marked it as non-deletable when we
@@ -1083,18 +1083,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	// be able to revert the link to oldRemote if the transaction
 	// is cancelled.
 
-	retVal = eObj.getEditSet().deleteLock(newRemote);
-
-	if (retVal != null && !retVal.didSucceed())
+	if (DBDeletionManager.deleteLockObject(eObj, session))
+	  {
+	    return null;
+	  }
+	else
 	  {
 	    return Ganymede.createErrorDialog("Bind link error",
 					      "Can't forge an asymmetric link between " + this.toString() +
 					      " and invid " + newRemote.toString() +
 					      ", the target object is being deleted.");
-	  }
-	else
-	  {
-	    return retVal;
 	  }
       }
 

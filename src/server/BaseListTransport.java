@@ -8,8 +8,8 @@
    
    Created: 2 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/29 09:35:05 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/06/23 23:42:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -94,6 +94,11 @@ public class BaseListTransport implements java.io.Serializable {
     /* -- */
 
     this.session = session;
+
+    // we sync on Ganymede.db to make sure that no one adds or deletes
+    // any object bases while we're creating our BaseListTransport.
+    // We could use the loginSemaphore, but that would be a bit heavy
+    // for our purposes here.
 
     synchronized (Ganymede.db)
       {
