@@ -1,7 +1,13 @@
 /*
-  StringDialog.java
-  
-  A configurable Dialog box
+
+   StringDialog.java
+
+   A configurable Dialog box.
+   
+   Created: 16 June 1997
+   Version: $Revision: 1.37 $ %D%
+   Module By: Michael Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
 
 */
 
@@ -33,6 +39,7 @@ import javax.swing.border.*;
  *
  * @see DialogRsrc
  */
+
 public class StringDialog extends JCenterDialog implements ActionListener, JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
@@ -50,7 +57,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     imageCanvas;
 
   JComponent
-    firstComp;   //This is the first component in the dialog.  It will request the focus.
+    firstComp;   // This is the first component in the dialog.  It will request the focus.
 
   JButton 
     OKButton,
@@ -80,25 +87,40 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
   Vector
     components;
 
+  /* -- */
+
+  /**
+   *
+   * Simple constructor for a small dialog box
+   *
+   * @param frame Parent frame of the Dialog Box
+   * @param Title Title of the Dialog Box
+   * @param Text Text shown in the Dialog Box
+   * @param ShowCancel if true, show a "Cancel" button
+   *
+   */
+
   public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel)
   {
     this (frame, Title, Text, "Ok", ShowCancel ? "Cancel" : null, null);
   }
 
   /**
-   * Simple constructor for a small dialog box
+   *
+   * Simple constructor for a small dialog box with a Cancel button
    *
    * @param frame Parent frame of the Dialog Box
    * @param Title Title of the Dialog Box
    * @param Text Text shown in the Dialog Box
    *
    */
+
   public StringDialog(Frame frame, String Title, String Text)
   {
     this(frame, Title, Text, "Ok", "Cancel", null);
   }
 
- /**
+  /**
    * Simple constructor for a small dialog box
    *
    * @param frame Parent frame of the Dialog Box
@@ -113,9 +135,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
   {
     this(new DialogRsrc(frame, Title, Text, OK, Cancel, (Image) null));
   }
-  
 
- /**
+  /**
    * Simple constructor for a small dialog box
    *
    * @param frame Parent frame of the Dialog Box
@@ -125,16 +146,20 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
    * @param Cancel String for "Cancel" button
    * @param image Image to display next to text
    */
+
   public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
   {
     this(new DialogRsrc(frame, Title, Text, OK, Cancel, image));
   }
 
   /**
+   *
    * Constructor for more complicated StringDialog.
    *
-   *@param Resource Sets resource for Dialog box.
+   * @param Resource Sets resource for Dialog box.
+   *
    */
+
   public StringDialog(DialogRsrc Resource) 
   {
     super(Resource.frame, Resource.title, true);
@@ -210,7 +235,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     // Separator goes all the way accross
     // 
 
-    arlut.csd.JDataComponent.JSeparator sep = new     arlut.csd.JDataComponent.JSeparator();
+    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
 
     gbc.gridx = 0;
     gbc.gridy = 3;
@@ -256,7 +281,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     gbl.setConstraints(imagePanel, gbc);
     mainPanel.add(imagePanel);
 
-
     if (debug)
       {
 	System.err.println("StringDialog: adding objects");
@@ -264,6 +288,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
     // We have to make the panel, even if it is empty.  This is
     // because we have to add space to to it for the stupid activator.
+
     panel = new JPanel();
 
     gbc.gridx = 1;
@@ -276,15 +301,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     mainPanel.add(scroller);
 
     // The panel uses its own grid bag stuff
+
     compgbc = new GridBagConstraints();
     compgbl = new GridBagLayout();
 
     compgbc.insets = new Insets(0,4,0,4);
     panel.setLayout(compgbl);
     
-
-
-
     // add stuff to panel here
 
     if (objects != null)
@@ -302,7 +325,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 	      {
 		System.out.println("objects.size() > 0"); 
 	      }
-
 	      
 	    for (int i = 0; i < numberOfObjects; ++i) 
 	      {
@@ -357,6 +379,31 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 			valueHash.put(st.getLabel(), "");
 		      }
 		  }
+		else if (element instanceof dateThing)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Adding date field(JdateField)");
+		      }
+		    
+		    dateThing dt = (dateThing) element;
+
+		    JdateField dateField;
+
+		    if (dt.getMaxDate() != null)
+		      {
+			dateField = new JdateField(null, true, true, null, dt.getMaxDate(), this);
+		      }
+		    else
+		      {
+			dateField = new JdateField(null, true, false, null, null);
+		      }
+
+		    addRow(panel, dateField, dt.getLabel(), i);
+
+		    componentHash.put(dateField, dt.getLabel());
+		    valueHash.put(dt.getLabel(), "");
+		  }
 		else if (element instanceof passwordThing)
 		  {
 		    if (debug)
@@ -365,6 +412,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		      }
 
 		    passwordThing pt = (passwordThing)element;
+
 		    if (pt.isNew())
 		      {
 			if (debug)
@@ -397,6 +445,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 			      {
 				System.out.println("Adding action listener.");
 			      }
+
 			    sf.addActionListener(new ActionListener() {
 			      public void actionPerformed(ActionEvent e)
 				{
@@ -407,12 +456,10 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 			  }
 			
 			addRow(panel, sf, pt.getLabel(), i);
-			
 			componentHash.put(sf, pt.getLabel());
 		      }
 
 		    valueHash.put(pt.getLabel(), "");
-		    
 		  }
 		else if (element instanceof booleanThing)
 		  {
@@ -479,17 +526,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 			addRow(panel, ch, ct.getLabel(), i);
 
 			componentHash.put(ch, ct.getLabel());
+
 			if (ch.getSelectedItem() != null)
 			  {
 			    valueHash.put(ct.getLabel(), ch.getSelectedItem());
 			  }
 		      }
 		  }
-		//		else if (element instanceof Separator)
-		//		  {
-		//		    Separator sep = (Separator)element;
-		//		    addSeparator(panel, sep, i);
-		//		  }
 		else
 		  {
 		    System.out.println("Item " + i + " is of unknown type");
@@ -504,6 +547,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 	    for (int i = 0; i < components.size(); i++)
 	      {
 		JComponent c = (JComponent)components.elementAt(i);
+
 		if (debug)
 		  {
 		    System.out.println("Checking component: " + c);
@@ -512,35 +556,36 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		if (c instanceof JstringField)
 		  {
 		    JstringField sf = (JstringField) c;
+
 		    if (i == components.size() -1) // last one!
 		      {
-			sf.addActionListener(
-					     new ActionListener()
-					     {
-					       public void actionPerformed(ActionEvent e) {
-						 OKButton.doClick();
-					       }
-					     });
+			sf.addActionListener
+			  (
+			   new ActionListener()
+			   {
+			     public void actionPerformed(ActionEvent e) {
+			       OKButton.doClick();
+			     }
+			   });
 		      }
 		    else
 		      {
-			sf.addActionListener(
-					     new ActionListener()
-					     {
-					       public void actionPerformed(ActionEvent e) {
-						 JComponent thisComp = (JComponent)e.getSource();
-						 
-						 ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-					       }
-					     });
+			sf.addActionListener
+			  (
+			   new ActionListener()
+			   {
+			     public void actionPerformed(ActionEvent e) {
+			       JComponent thisComp = (JComponent)e.getSource();
+			       
+			       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+			     }
+			   });
 		      }
 		    
 		    if (i == 0) // first object
 		      {
 			firstComp = sf;
 		      }
-		    
-		    
 		  }
 		else if (c instanceof JpasswordField)
 		  {
@@ -550,25 +595,30 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		      }
 
 		    JpasswordField pf = (JpasswordField) c;
+
 		    if (i == components.size() -1)
 		      {
-			pf.addActionListener(new ActionListener()
-					     {
-					       public void actionPerformed(ActionEvent e) {
-						 OKButton.doClick();
-					       }
-					     });
+			pf.addActionListener
+			  (
+			   new ActionListener()
+			   {
+			     public void actionPerformed(ActionEvent e) {
+			       OKButton.doClick();
+			     }
+			   });
 		      }
 		    else
 		      {
-			pf.addActionListener(new ActionListener()
-					     {
-					       public void actionPerformed(ActionEvent e) {
-						 JComponent thisComp = (JComponent)e.getSource();
-						 
-						 ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-					       }
-					     });
+			pf.addActionListener
+			  (
+			   new ActionListener()
+			   {
+			     public void actionPerformed(ActionEvent e) {
+			       JComponent thisComp = (JComponent)e.getSource();
+			       
+			       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+			     }
+			   });
 		      }
 		    if (i == 0) // first object
 		      {
@@ -583,7 +633,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		      }
 		  }
 	      }
-
 	  }
 	else if (debug)
 	  {
@@ -611,7 +660,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
   public Hashtable DialogShow()
   {
-
     pack();
     show();
 
@@ -649,6 +697,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
       {
 	String label = (String)componentHash.get(obj);
 	JComboBox ch = (JComboBox) obj;
+
 	if (valueHash != null)
 	  {
 	    valueHash.put(label, ch.getSelectedItem());
@@ -665,18 +714,18 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
 	if (label == null)
 	  {
-	    System.out.println("in setValuePerformed from JcheckboxField: label = null");
+	    System.out.println("in itemStateChanged from JcheckboxField: label = null");
 	    return;
 	  }
 
 	JCheckBox cb = (JCheckBox)obj;
 	Boolean answer = new Boolean(cb.isSelected());
+
 	if (valueHash != null)
 	  {
 	    valueHash.put(label, answer);
 	  }
       }
-
     else
       {
 	System.out.println("Unknown item type generated action");
@@ -691,15 +740,30 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
       {
 	String label = (String)componentHash.get(comp);
 	JstringField sf = (JstringField)comp;
+
 	if (valueHash != null)
 	  {
 	    valueHash.put(label, sf.getText());
 	  }
 
-
 	if (debug)
 	  {
 	    System.out.println("Setting " + label + " to " + sf.getText());
+	  }
+      }
+    else if (comp instanceof JdateField)
+      {
+	String label = (String) componentHash.get(comp);
+	JdateField dateField = (JdateField) comp;
+
+	if (valueHash != null)
+	  {
+	    valueHash.put(label, dateField.getDate());
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("Setting " + label + " to " + dateField.getDate());
 	  }
       }
     else if (comp instanceof JpasswordField)
