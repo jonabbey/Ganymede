@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -385,8 +385,9 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	    // than using toString on connecttime.
 
 	    entries.addElement(new AdminEntry(session.username, session.clienthost,
-					      "", session.connecttime.toString(),
-					      session.lastError));
+					      (session.status == null) ? "" : session.status,
+					      session.connecttime.toString(),
+					      (session.lastEvent == null) ? "" : session.lastEvent));
 	  }
       }
 
