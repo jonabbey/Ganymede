@@ -4,15 +4,15 @@
 
    Created: 16 November 2001
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2002/01/26 06:16:01 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2003/03/11 02:30:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -66,7 +66,7 @@ package arlut.csd.Util;
 public class CVSVersion {
 
   static String CVS_release_name = "$Name:  $";
-  static String CVS_release_date = "$Date: 2002/01/26 06:16:01 $";
+  static String CVS_release_date = "$Date: 2003/03/11 02:30:21 $";
   static String release_string = null;
 
   // ---
@@ -109,7 +109,7 @@ public class CVSVersion {
     release_name = CVS_release_name.substring(6, CVS_release_name.length()-1);
     release_name = release_name.trim();
 
-    // cut off leading '$Date: 2002/01/26 06:16:01 $', clean up whitespace
+    // cut off leading '$Date: 2003/03/11 02:30:21 $', clean up whitespace
 
     release_date = CVS_release_date.substring(6, CVS_release_date.length()-1);
     release_date = release_date.trim();

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.210 $
-   Last Mod Date: $Date: 2002/12/16 20:57:51 $
+   Version: $Revision: 1.211 $
+   Last Mod Date: $Date: 2003/03/11 02:30:21 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.210 $ $Date: 2002/12/16 20:57:51 $ $Name:  $
+ * @version $Revision: 1.211 $ $Date: 2003/03/11 02:30:21 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -1655,7 +1655,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("<p>Release number: ");
 	    buffer.append(arlut.csd.Util.CVSVersion.getReleaseString());
-	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002<br>The University of Texas at Austin.</p>");
+	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003<br>The University of Texas at Austin.</p>");
 	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
