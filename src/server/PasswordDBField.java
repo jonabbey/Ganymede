@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2001/03/24 07:42:24 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2001/03/25 10:47:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.Util.*;
  * arlut.csd.ganymede.DBField DBField} in that the normal setValue()/getValue()
  * methods are non-functional.  Instead, there are special methods used to set or
  * access password information in crypted and non-crypted forms.</p>
- * 
+ *
  * <p>Crypted passwords are stored in the UNIX crypt() format.  See the
  * {@link jcrypt jcrypt} class for details on the crypt hashing.</p>
  *
@@ -1089,7 +1089,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public synchronized ReturnVal setPlainTextPass(String plaintext)
   {
+    return setPlainTextPass(plaintext, false, false);
+  }
+
+  /** 
+   * <p>This method is used to set the password for this field,
+   * crypting it in various ways if this password field is stored
+   * crypted.</p>
+   */
+
+  public synchronized ReturnVal setPlainTextPass(String plaintext, boolean local, boolean noWizards)
+  {
     ReturnVal retVal;
+    DBEditObject eObj;
 
     /* -- */
 
@@ -1098,6 +1110,22 @@ public class PasswordDBField extends DBField implements pass_field {
     if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+	
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASSPLAIN, plaintext, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
       }
 
     retVal = ((DBEditObject) owner).finalizeSetValue(this, null);
@@ -1153,11 +1181,27 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setCryptPass(String text)
   {
+    return setCryptPass(text, false, false);
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted password for this field.</p>
+   *
+   * <p>This method will return an error dialog if this field does not store
+   * passwords in UNIX crypted format.</p>
+   *
+   * <p>Because the UNIX crypt() hashing is not reversible, any MD5 and plain text
+   * password information stored in this field will be lost.</p>
+   */
+
+  public ReturnVal setCryptPass(String text, boolean local, boolean noWizards)
+  {
     ReturnVal retVal;
+    DBEditObject eObj;
 
     /* -- */
 
-    if (!isEditable(true))
+    if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "Don't have permission to edit field " + getName() +
@@ -1168,6 +1212,22 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
 					  "Can't set a pre-crypted value into a plaintext-only password field");
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+	
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, text, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
       }
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
@@ -1202,11 +1262,23 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setMD5CryptedPass(String text)
   {
+    return setMD5CryptedPass(text, false, false);
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted OpenBSD-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p>
+   */
+
+  public ReturnVal setMD5CryptedPass(String text, boolean local, boolean noWizards)
+  {
     ReturnVal retVal;
+    DBEditObject eObj;
 
     /* -- */
 
-    if (!isEditable(true))
+    if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "Don't have permission to edit field " + getName() +
@@ -1224,6 +1296,22 @@ public class PasswordDBField extends DBField implements pass_field {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "setMD5CryptedPass() called with an improperly " +
 					  "formatted OpenBSD-style password entry.");
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+	
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, text, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
       }
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
@@ -1258,11 +1346,23 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4)
   {
+    return setWinCryptedPass(LANMAN, NTUnicodeMD4, false, false);
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted OpenBSD-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p>
+   */
+
+  public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4, boolean local, boolean noWizards)
+  {
     ReturnVal retVal;
+    DBEditObject eObj;
 
     /* -- */
 
-    if (!isEditable(true))
+    if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "Don't have permission to edit field " + getName() +
@@ -1273,6 +1373,22 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setWinCryptedPass()",
 					  "Can't set a pre-crypted MD5Crypt value into a non-MD5Crypted password field");
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
       }
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);

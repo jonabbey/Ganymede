@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.147 $
-   Last Mod Date: $Date: 2001/02/14 22:40:30 $
+   Version: $Revision: 1.148 $
+   Last Mod Date: $Date: 2001/03/25 10:47:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.147 $ $Date: 2001/02/14 22:40:30 $ $Name:  $
+ * @version $Revision: 1.148 $ $Date: 2001/03/25 10:47:44 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -127,7 +127,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final static int DELELEMENT = 4;
   public final static int ADDELEMENTS = 5;
   public final static int DELELEMENTS = 6;
-  public final static int LASTOP = 6;
+  public final static int SETPASSPLAIN = 7;
+  public final static int SETPASSCRYPT = 8;
+  public final static int SETPASSMD5 = 9;
+  public final static int SETPASSWINHASHES = 10;
+  public final static int LASTOP = 10;
 
   public final static Date minDate = new Date(Long.MIN_VALUE);
   public final static Date maxDate = new Date(Long.MAX_VALUE);
@@ -1683,6 +1687,50 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Note as well that wizardHook() is called before the namespace checking
    * for the proposed value is performed, while the finalize*() methods are
    * called after the namespace checking.</p>
+   *
+   * <p>The operation parameter will be a small integer, and should hold one of the
+   * following values:</p>
+   *
+   * <dl>
+   * <dt>1 - SETVAL</dt>
+   * <dd>This operation is used whenever a simple scalar field is having
+   * it's value set.  param1 will be the value being placed into the field.</dd>
+   * <dt>2 - SETELEMENT</dt>
+   * <dd>This operation is used whenever a value in a vector field is being
+   * set.  param1 will be an Integer holding the element index, and
+   * param2 will be the value being set.</dd>
+   * <dt>3 - ADDELEMENT</dt>
+   * <dd>This operation is used whenever a value is being added to the
+   * end of a vector field.  param1 will be the value being added.</dd>
+   * <dt>4 - DELELEMENT</dt>
+   * <dd>This operation is used whenever a value in a vector field is being
+   * deleted.  param1 will be an Integer holding the element index.</dd>
+   * <dt>5 - ADDELEMENTS</dt>
+   * <dd>This operation is used whenever a set of elements is being
+   * added to a vector field en masse.  param1 will be a Vector containing
+   * the values that are being added.</dd>
+   * <dt>6 - DELELEMENTS</dt>
+   * <dd>This operation is used whenever a set of elements is being
+   * deleted from a vector field en masse.  param1 will be a Vector containing
+   * the values that are being deleted.</dd>
+   * <dt>7 - SETPASSPLAIN</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using a plaintext source.  param1 will be a String containing the
+   * submitted password, or null if the password is being cleared.</dd>
+   * <dt>8 - SETPASSCRYPT</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using a UNIX crypt() hashed source.  param1 will be a String containing the
+   * submitted hashed password, or null if the password is being cleared.</dd>
+   * <dt>9 - SETPASSMD5</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using an md5Ccrypt() hashed source.  param1 will be a String containing the
+   * submitted hashed password, or null if the password is being cleared.</dd>
+   * <dt>10 - SETPASSWINHASHES</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using Windows style password hashes.  param1 will be the password in
+   * LANMAN hash form, param2 will be the password in NT Unicode MD4 hash
+   * form.  Either or both of param1 and param2 may be null.</dd>
+   * </dl>
    *
    * @return a ReturnVal object indicated success or failure, objects and
    * fields to be rescanned by the client, and a doNormalProcessing flag

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/01/14 07:57:34 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/03/25 10:47:46 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -73,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2001/01/14 07:57:34 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2001/03/25 10:47:46 $ $Name:  $
  * @author Jonathan Abbey
  */
 
