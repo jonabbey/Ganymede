@@ -60,6 +60,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   JLabel
     titleL;
 
+  String lastValue = null;
+
   /* -- */
 
   public openObjectDialog(gclient client)
@@ -94,6 +96,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     Vector bases = client.getBaseList();
     
     Base thisBase = null;
+
     try
       {
 	for (int i = 0; i < bases.size(); i++)
@@ -125,7 +128,9 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 2;
+
     JLabel oType = new JLabel("Object Type:"); 
+
     gbl.setConstraints(oType, gbc);
     middle.add(oType);
 
@@ -235,6 +240,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     if (e.getActionCommand().equals("Find Object with this name"))
       {
 	String string = text.getText();
+
 	if ((string == null) || (string.equals("")))
 	  {
 	    client.setStatus("You are going to have to do better than that.");
@@ -285,6 +291,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 	    
 	    QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 	    QueryResult edit_query = null;
+
 	    try
 	      {
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
@@ -304,7 +311,9 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		  }
 		else if (edit_invids.size() == 0)
 		  {
-		    JErrorDialog d = new JErrorDialog(client, "Error finding object", "No object starts with that string.");
+		    JErrorDialog d = new JErrorDialog(client,
+						      "Error finding object",
+						      "No object starts with that string.");
 		    return;
 		  }
 		else
@@ -396,13 +405,26 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (debug)
-      {
-	System.out.println("setValuePerformed ");
-      }
-    ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Find Object with this name");
-    actionPerformed(ae);
+    String newValue;
 
+    /* -- */
+
+    newValue = (String) e.getValue();
+
+    if ((newValue != null) &&
+	!newValue.equals(lastValue))
+      {
+	lastValue = newValue;
+
+	if (debug)
+	  {
+	    System.out.println("setValuePerformed ");
+	  }
+	
+	ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Find Object with this name");
+	actionPerformed(ae);
+      }
+    
     return true;
   }
 }
