@@ -6,8 +6,8 @@
    
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/10/29 16:12:54 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/03/21 20:30:12 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -340,23 +340,30 @@ public class PasswordClient implements ClientListener {
       }
 
     // Get the server URL
+
     loadProperties(argv[0]);
 
     /* RMI initialization stuff. */
       
-    System.setSecurityManager(new RMISecurityManager());
+    /* This causes problems in Java 1.2.
+
+       System.setSecurityManager(new RMISecurityManager());*/
 
     // Create the client
+
     try
       {
 	client = new PasswordClient(url);
       }
     catch (Exception ex)
       {
-	throw new RuntimeException("Couldn't connect to authentication server.. " + ex);
+	ex.printStackTrace();
+	throw new RuntimeException("Couldn't connect to authentication server.. " + 
+				   ex.getMessage());
       }
 
     // Get the passwords from standard in
+
     java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     // get old password, new password
