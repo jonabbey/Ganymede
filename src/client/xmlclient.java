@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/09/08 22:32:44 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/09/13 06:11:25 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,11 +80,11 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.21 $ $Date: 2000/09/08 22:32:44 $ $Name:  $
+ * @version $Revision: 1.22 $ $Date: 2000/09/13 06:11:25 $ $Name:  $
  * @author Jonathan Abbey
  */
 
-public final class xmlclient {
+public final class xmlclient implements ClientListener {
 
   public static final boolean debug = false;
 
@@ -296,46 +296,14 @@ public final class xmlclient {
 
     // find the server
 
-    try
-      {
-	Remote obj = Naming.lookup(server_url);
-	
-	if (obj instanceof Server)
-	  {
-	    server = (Server) obj;
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	System.err.println("RMI: Couldn't bind to server url " + server_url + 
-			   "\n" + ex.getMessage());
+    ClientBase client = new ClientBase(server_url, this);
 
-	return false;
-      }
-    catch (java.rmi.UnknownHostException ex)
-      {
-	System.err.println("RMI: Couldn't find server\n" + server_url);
-
-	return false;
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	System.err.println("RMI: Malformed URL " + server_url);
-
-	return false;
-      }
-
-    // we've got the server.. now get an XML session on it
-
-    System.err.println("Connected to server.. logging in");
-
-    XMLSession xSession = null;
-
-    xSession = server.xmlLogin(username, password);
+    XMLSession xSession = client.xmlLogin(username, password);
 
     if (xSession == null)
       {
 	System.err.println("Error, couldn't log in to server.. bad username or password?");
+	return false;
       }
 
     System.err.println("Logged into server.. uplinking XML data");
@@ -369,6 +337,8 @@ public final class xmlclient {
 	    System.err.println("Sending " + avail + " bytes of data..");
 
 	    retVal = xSession.xmlSubmit(data);
+
+	    System.err.println("Processing response");
 
 	    if (retVal != null)
 	      {
@@ -630,5 +600,31 @@ public final class xmlclient {
       {
 	item = getNextItem();
       }
+  }
+
+  // These are for the ClientListener
+
+  /**
+   * Handle a message from the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
+   * RMI object.
+   */
+
+  public void messageReceived(ClientEvent e)
+  {
+    if (e.getType() == e.ERROR)
+      {
+	System.err.println(e.getMessage());
+      }
+  }
+
+  /**
+   * Handle a forced disconnect message from the
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} RMI object.
+   */
+
+  public void disconnected(ClientEvent e)
+  {
+    System.err.println(e.getMessage());
+    System.exit(1);
   }
 }

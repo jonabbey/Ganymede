@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/06/30 04:24:41 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/09/13 06:11:25 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.17 $ $Date: 2000/06/30 04:24:41 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 2000/09/13 06:11:25 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -92,6 +92,12 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    */
 
   private Session session = null;
+
+  /**
+   * RMI reference to a client XMLSession on a Ganymede server
+   */
+
+  private XMLSession xSession = null;
  
   private String username = null;
   private String password = null;
@@ -253,6 +259,82 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
+   * <p>This method is used by a client to actually get logged into the
+   * server.  The {@link arlut.csd.ganymede.Session Session} handle
+   * returned is then used to do all server operations appropriate 
+   * for a normal client.  Calling the Session logout() method will
+   * end the client's connection to the server.</p>
+   *
+   * @return null if login failed, else a valid server Session reference
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public XMLSession xmlLogin(String username, String password) throws RemoteException
+  {
+    if (isLoggedIn())
+      {
+	throw new IllegalArgumentException("Already logged in.  Construct a " +
+					   "new ClientBase if you need to login again");
+      }
+
+    this.username = username;
+    this.password = password;
+
+    try
+      {
+	// the server may send us a message using our
+	// forceDisconnect() method during the login process
+
+	loginRefuseMessage = null;
+	xSession = server.xmlLogin(this);
+
+	if (xSession == null)
+	  {
+	    if (loginRefuseMessage != null)
+	      {
+		sendErrorMessage(loginRefuseMessage);
+	      }
+	    else
+	      {
+		sendErrorMessage("Couldn't login to server... bad username/password?");
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("logged in");
+	      }
+	  }
+      }
+    catch (NullPointerException ex)
+      {
+	connected = false;
+
+	if (debug)
+	  {
+	    System.err.println("Error: Didn't get server reference.  Exiting now.");
+	  }
+
+	sendErrorMessage( "Error: Didn't get server reference.  Exiting now.");
+      }
+    catch (Exception ex)
+      {
+	connected = false;
+
+	if (debug)
+	  {
+	    System.err.println("Got some other exception: " + ex);
+	  }
+
+	sendErrorMessage("Got some other exception: " + ex);
+      }
+  
+    return xSession;
+  }
+
+  /**
    *
    * This method returns true if the client has already logged in.
    *
@@ -260,7 +342,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
   public boolean isLoggedIn()
   {
-    return session != null;
+    return session != null || xSession != null;
   }
 
   /**
@@ -272,6 +354,17 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   public Session getSession()
   {
     return session;
+  }
+
+  /**
+   * <p>This method can be used to retrieve a handle to the client's
+   * login session.  This simply returns the same handle that
+   * login() returned, in case the client forgets it or something.</p>
+   */
+
+  public XMLSession getXSession()
+  {
+    return xSession;
   }
 
   /**
