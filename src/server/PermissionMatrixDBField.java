@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/03/27 21:54:46 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/05/24 00:55:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1119,6 +1119,32 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>Resets the permissions in this PermissionMatrixDBField to
+   * the empty set.  Used by non-interactive clients to reset
+   * the Permission Matrix to a known state before setting
+   * permissions.</P>
+   *
+   * <P>Returns null on success, or a failure-coded ReturnVal
+   * on permissions failure.</P>
+   */
+
+  public ReturnVal resetPerms()
+  {
+    if (isEditable())
+      {
+	matrix.clear();
+	matrix = new Hashtable();
+	return null;
+      }
+    else
+      {
+	return Ganymede.createErrorDialog("Permissions failure",
+					  "You don't have permissions to reset " + toString() +
+					  "'s permission matrix.");
+      }
+  }
+
+  /**
    * <P>Sets the permission entry for base &lt;base&gt;,
    * field &lt;field&gt; to PermEntry &lt;entry&gt;</P>
    *
@@ -1203,6 +1229,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public ReturnVal setPerm(Base base, PermEntry entry)
   {
+    // no need for synchronization, since we call a synchronized
+    // setPerm() call
+
     try
       {
 	return setPerm(base.getTypeID(), entry);
@@ -1487,7 +1516,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
     else
       {
-	throw new RuntimeException("Error, don't recognize field name.. should be 'Owned Object Bits' or " +
+	throw new RuntimeException("Error, don't recognize field id.. should be 'Owned Object Bits' or " +
 				   "'Default Bits'.");
       }
   }

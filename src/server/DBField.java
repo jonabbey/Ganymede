@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/04/19 07:55:50 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2000/05/24 00:55:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2922,6 +2922,16 @@ public abstract class DBField implements Remote, db_field {
 	  }
 	else
 	  {
+	    // in theory we perhaps should iterate through the oldval
+	    // Vector to make sure that each element is of the right
+	    // type.. in practice, that would be a lot of overhead to
+	    // guard against something that should never happen,
+	    // anyway.
+	    //
+	    // i'm just saying this to cover my ass in case it does,
+	    // so i'll know that i was deliberately rather than
+	    // accidentally stupid.
+
 	    this.value = oldval;
 	  }
       }

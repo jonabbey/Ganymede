@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/06/19 03:53:18 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/05/24 00:55:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -130,6 +130,18 @@ public interface perm_field extends db_field {
    */
 
   public PermEntry getPerm(Base base) throws RemoteException;
+
+  /**
+   * <P>Resets the permissions in this PermissionMatrixDBField to
+   * the empty set.  Used by non-interactive clients to reset
+   * the Permission Matrix to a known state before setting
+   * permissions.</P>
+   *
+   * <P>Returns null on success, or a failure-coded ReturnVal
+   * on permissions failure.</P>
+   */
+
+  public ReturnVal resetPerms() throws RemoteException;
 
   /**
    * <P>Sets the permission entry for this matrix for base &lt;baseID&gt;,
