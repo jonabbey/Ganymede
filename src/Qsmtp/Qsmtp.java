@@ -599,7 +599,6 @@ public class Qsmtp implements Runnable {
     sock.close();
   }
 
-
   /**
    * <p>This method returns a properly mail-formatted date string.</p>
    */
