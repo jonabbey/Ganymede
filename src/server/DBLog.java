@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/06/17 00:23:53 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/06/28 03:07:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -396,7 +396,8 @@ public class DBLog {
     boolean found;
     DBLogEvent event;
     Enumeration enum;
-    Hashtable mailOuts = new Hashtable(); // maps address to vector of MailOut objects
+    Hashtable mailOuts = new Hashtable(); // maps address to MailOut objects
+    Hashtable objectOuts = new Hashtable(); // objevent tag to hash mapping address to MailOut objects
     Object ref;
 
     /* -- */
@@ -456,7 +457,8 @@ public class DBLog {
 		   null,
 		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
 
-    // check out what kind of emailing we're going to do for a transaction
+    // check out the 'starttransaction' system event object to see if we're going
+    // to do mailing for transaction summaries
 
     systemEventType transactionType = (systemEventType) sysEventCodes.get("starttransaction");
 
@@ -477,15 +479,18 @@ public class DBLog {
 
 	if (event.subject == null)
 	  {
+	    // we track all email addresses that we send mail to in
+	    // response to this particular event so that we can record
+	    // in the log who got told about this
+
 	    Vector sentTo = new Vector();
 
 	    // first, if we have a recognizable object-specific event
-	    // happening, send out the notification for it.  Note that by
-	    // doing so, we are doing this independently of the
-	    // transaction notification consolidation done by
-	    // appendMailOut()..
+	    // happening, queue up notification for it to any intersted
+	    // parties, for later transmission with sendObjectMail().
 
-	    sentTo = VectorUtils.union(sentTo, sendObjectMail(event, transdescrip));
+	    sentTo = VectorUtils.union(sentTo, appendObjectMail(event, objectOuts,
+								transdescrip));
 
 	    // we may have a system event instead, in which case we handle
 	    // mailing it here
@@ -495,10 +500,11 @@ public class DBLog {
 	    // now, go ahead and add to the mail buffers we are prepping
 	    // to describe this whole transaction
 	
-	    // we are keeping a bunch of buffers, one for each combination
-	    // of email addresses that we've encountered.. different
-	    // addresses or groups of addresses may get a different subset
-	    // of the mail for this transaction, the mailOut logic handles
+	    // we are keeping a bunch of buffers, one for each
+	    // combination of email addresses that we've
+	    // encountered.. different addresses or groups of
+	    // addresses may get a different subset of the mail for
+	    // this transaction, the appendMailOut() logic handles
 	    // that.
 	
 	    // appendMailOut() takes care of calling
@@ -595,6 +601,12 @@ public class DBLog {
 	returnAddr = Ganymede.returnaddrProperty;
       }
 
+    // send out object event mail to anyone who has signed up for it
+
+    sendObjectMail(returnAddr, adminName, objectOuts);
+
+    objectOuts.clear();
+
     // send out the mail if the starttransaction system event has the
     // mail checkbox turned on.
 
@@ -631,6 +643,8 @@ public class DBLog {
 	      }
 	  }
       }
+
+    mailOuts.clear();
   }
 
   /**
@@ -1016,8 +1030,16 @@ public class DBLog {
    * system event notification
    */
 
-  private Vector sendObjectMail(DBLogEvent event, String transdescrip)
+  private Vector appendObjectMail(DBLogEvent event, Hashtable objectOuts,
+				  String transdescrip)
   {
+    if (event == null || event.objects == null || event.objects.size() != 1)
+      {
+	return null;
+      }
+
+    // --
+
     String returnAddr;
     Vector mailList = new Vector();
     Invid objectInvid = (Invid) event.objects.elementAt(0);
@@ -1028,26 +1050,21 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.sendObjectMail(): processing object Event " + key);
-      }
-
-    if (event == null || event.objects == null || event.objects.size() != 1)
-      {
-	return mailList;
+	System.err.println("DBLog.appendObjectMail(): processing object Event " + key);
       }
 
     if (type == null)
       {
 	if (debug)
 	  {
-	    System.err.println("DBLog.sendObjectMail(): couldn't find objectEventType " + key);
+	    System.err.println("DBLog.appendObjectMail(): couldn't find objectEventType " + key);
 	  }
 
-	return mailList;
+	return null;
       }
 
-    // ok.  now we've got an objectEventType, so we will want to send out
-    // mail for this event.
+    // ok.  now we've got an objectEventType, so check to see if we
+    // want to send out mail for this event.
 
     if (type.ccToSelf)
       {
@@ -1056,11 +1073,11 @@ public class DBLog {
 	if (event.admin != null)
 	  {
 	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
-	  }
 
-	if (name != null)
-	  {
-	    mailList.addElement(name);
+	    if (name != null)
+	      {
+		mailList.addElement(name);
+	      }
 	  }
       }
 
@@ -1072,52 +1089,124 @@ public class DBLog {
 
     mailList = VectorUtils.union(mailList, type.addressVect);
 
-    // okay, we want to tell mailList about what happened.
-
-    String title;
-
-    if (type.name != null)
+    if (mailList.size() == 0)
       {
-	title = "Ganymede: " + type.name;
-      }
-    else
-      {
-	title = "Ganymede: " + type.token;
+	return null;
       }
 
-    String message = transdescrip + "\n\n" + type.description + "\n\n" + event.description;
+    // looking up the object name can be pricey, so we wait until we
+    // know we probably need to do it, here
 
-    message = arlut.csd.Util.WordWrap.wrap(message, 78);
+    String objectName = session.viewObjectLabel(objectInvid);
 
-    message = message + "\n" + signature;
+    // okay, we have some users interested in getting notified about this
+    // object event..
 
-    // who should we say the mail is from?
+    // get the address hash for this object type.. we use this second
+    // hash to maintain separate object event summaries for different
+    // users, in case one transaction involves objects with different
+    // owner groups
 
-    if (event.admin != null)
+    Hashtable addresses = (Hashtable) objectOuts.get(key);
+
+    if (addresses == null)
       {
-	returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin, 
-								  session.getSession());
+	addresses = new Hashtable();
+
+	objectOuts.put(key, addresses);
       }
-    else
-      {
-	returnAddr = Ganymede.returnaddrProperty;
-      }
 
-    try
+    for (int i = 0; i < mailList.size(); i++)
       {
-	// bombs away!
+	String address = (String) mailList.elementAt(i);
 
-	mailer.sendmsg(returnAddr,
-		       mailList,
-		       title,
-		       message);
-      }
-    catch (IOException ex)
-      {
-	Ganymede.debug("DBLog.sendObjectMail(): mailer error " + ex);
+	MailOut mailout = (MailOut) addresses.get(address);
+
+	if (mailout == null)
+	  {
+	    mailout = new MailOut(address);
+	    addresses.put(address, mailout);
+
+	    // we always create an object event MailOut with the name
+	    // of the object that inspired us to create
+	    // it.. sendObjectMail will include this information on
+	    // the subject mail if the MailOut winds up with only one
+	    // object
+
+	    mailout.setObjectName(objectName);
+	  }
+	
+	mailout.append(event);
       }
 
     return mailList;
+  }
+
+  private void sendObjectMail(String returnAddr, String adminName, Hashtable objectOuts)
+  {
+    Enumeration enum = objectOuts.keys();
+
+    while (enum.hasMoreElements())
+      {
+	String key = (String) enum.nextElement();
+	Hashtable addresses = (Hashtable) objectOuts.get(key);
+
+	Enumeration enum2 = addresses.keys();
+
+	while (enum2.hasMoreElements())
+	  {
+	    String address = (String) enum2.nextElement();
+	    MailOut mailout = (MailOut) addresses.get(address);
+
+	    objectEventType type = (objectEventType) objEventCodes.get(key);
+
+	    String description = type.name + " summary: User " + adminName + ":" + 
+	      currentTime.toString() + "\n\n" + 
+	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
+
+	    String title;
+
+	    if (mailout.entryCount == 1)
+	      {
+		if (type.name != null)
+		  {
+		    title = "Ganymede: " + type.name; 
+		  }
+		else
+		  {
+		    title = "Ganymede: " + type.token;
+		  }
+
+		if (mailout.objName != null)
+		  {
+		    title = title + " \"" + mailout.objName + "\"";
+		  }
+	      }
+	    else
+	      {
+		if (type.name != null)
+		  {
+		    title = "Ganymede: " + type.name + " (x" + mailout.entryCount + ")";
+		  }
+		else
+		  {
+		    title = "Ganymede: " + type.token + " (x" + mailout.entryCount + ")";
+		  }
+	      }
+
+	    try
+	      {
+		mailer.sendmsg(returnAddr,
+			       mailout.addresses,
+			       title,
+			       description);
+	      }
+	    catch (IOException ex)
+	      {
+		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+	      }
+	  }
+      }
   }
 
   /**
@@ -1619,33 +1708,10 @@ public class DBLog {
 	if (mailout == null)
 	  {
 	    mailout = new MailOut(str);
-	    mailout.append("------------------------------------------------------------\n\n");
-	    mailout.append(event.eventClassToken);
-	    mailout.append("\n");
-
-	    for (int i = 0; i < event.eventClassToken.length(); i++)
-	      {
-		mailout.append("-");
-	      }
-
-	    mailout.append("\n\n");
-	    mailout.append(event.description);
 	    map.put(str, mailout);
 	  }
-	else
-	  {
-	    mailout.append("------------------------------------------------------------\n\n");
-	    mailout.append(event.eventClassToken);
-	    mailout.append("\n");
 
-	    for (int i = 0; i < event.eventClassToken.length(); i++)
-	      {
-		mailout.append("-");
-	      }
-
-	    mailout.append("\n\n");
-	    mailout.append(event.description);
-	  }
+	mailout.append(event);
       }
 
     return event.notifyVect;
@@ -1948,6 +2014,8 @@ class MailOut {
 
   StringBuffer description = new StringBuffer();
   Vector addresses;
+  int entryCount = 0;
+  String objName;
 
   /* -- */
 
@@ -1962,9 +2030,30 @@ class MailOut {
     addresses.addElement(address);
   }
 
-  void append(String text)
+  void setObjectName(String objName)
   {
-    description.append(text);
+    this.objName = objName;
+  }
+
+  void addEntryCount()
+  {
+    entryCount++;
+  }
+
+  void append(DBLogEvent event)
+  {
+    entryCount++;
+    description.append("------------------------------------------------------------\n\n");
+    description.append(event.eventClassToken);
+    description.append("\n");
+    
+    for (int i = 0; i < event.eventClassToken.length(); i++)
+      {
+	description.append("-");
+      }
+	
+    description.append("\n\n");
+    description.append(event.description);
   }
 
   public String toString()
