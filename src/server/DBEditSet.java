@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -332,10 +332,33 @@ public class DBEditSet {
 	// need to clear out any transients before
 	// we write the transaction out to disk
 
+	GanymedeSession gSession = session.getGSession();
+	Vector invids;
+
 	for (int i = 0; i < objects.size(); i++)
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
 	    eObj.clearTransientFields();
+
+	    if (eObj.getStatus() == DBEditObject.EDITING)
+	      {
+		invids = new Vector();
+		invids.addElement(eObj.getInvid());
+		
+		System.err.println("Logging event for " + eObj.getLabel());
+		
+		String diff = eObj.diff();
+		
+		System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
+		
+		logEvents.addElement(new DBLogEvent("objectchanged",
+						    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+						    (gSession.personaInvid == null ?
+						     gSession.userInvid : gSession.personaInvid),
+						    gSession.username,
+						    invids,
+						    null));
+	      }
 	  }
 
 	// write this transaction out to the Journal
@@ -364,6 +387,15 @@ public class DBEditSet {
 	    return false;
 	  }
 
+	// log it
+
+	if (Ganymede.log != null)
+	  {
+	    Ganymede.log.logTransaction(logEvents, gSession.username, 
+					(gSession.personaInvid == null ?
+					 gSession.userInvid : gSession.personaInvid));
+	  }
+
 	if (debug)
 	  {
 	    System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
@@ -383,6 +415,8 @@ public class DBEditSet {
       {
 	Ganymede.debug("** Caught exception while preparing transaction for commit: " + ex);
 	Ganymede.debug("** aborting transaction");
+	ex.printStackTrace();
+	Ganymede.debug(ex.getMessage());
 	releaseWriteLock("exception caught while preparing trans.");
 	release();
 	return false;

@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   Client client;
 
   boolean logged_in;
+  boolean forced_off = false;
 
   Date connecttime;
 
@@ -230,6 +231,31 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
+    Vector objects = new Vector();
+
+    if (userInvid != null)
+      {
+	objects.addElement(userInvid);
+      }
+
+    if (personaInvid != null)
+      {
+	objects.addElement(personaInvid);
+      }
+
+    if (Ganymede.log != null)
+      {
+	Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+						   "Abnormal termination for username: " + username + "\n" +
+						   reason,
+						   userInvid,
+						   username,
+						   objects,
+						   null));
+      }
+
+    forced_off = true;		// keep logout from logging a normal logout
+
     this.logout();
   }
 
@@ -289,7 +315,32 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     session.releaseAllReadLocks(); // given that we're synchronized, will we ever have locks here?
     session.logout();
- 
+
+    if (!forced_off)
+      {
+	Vector objects = new Vector();
+
+	if (userInvid != null)
+	  {
+	    objects.addElement(userInvid);
+	  }
+
+	if (personaInvid != null)
+	  {
+	    objects.addElement(personaInvid);
+	  }
+
+	if (Ganymede.log != null)
+	  {
+	    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
+						       "OK logout for username: " + username,
+						       userInvid,
+						       username,
+						       objects,
+						       null));
+	  }
+      }
+
     GanymedeServer.sessions.removeElement(this);
     GanymedeServer.activeUsers.remove(username);
     GanymedeAdmin.refreshUsers();
