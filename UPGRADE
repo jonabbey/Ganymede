@@ -126,7 +126,9 @@ _Upgrading the Schema Kit_
    installed. Tell it the location of your existing server directory, and
    installKit will compile all of the custom code in the new schema kit
    against your server's ganymedeServer.jar file, and integrate the new
-   schema kit into your existing server directory.
+   schema kit into your existing server directory, creating a new schema
+   directory underneath your <server> directory, alongside your
+   pre-existing schema.save directory.
    
    If the installKit script fails for some reason, you haven't lost
    anything. You can just delete the schema directory it was trying to
@@ -190,4 +192,4 @@ _Upgrading the Ganymede Clients_
    
     Jonathan Abbey
     
-   Last modified: Sat Jul 28 00:01:45 CDT 2001
+   Last modified: Sat Jul 28 03:14:31 CDT 2001
