@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.75 $ %D%
+   Version: $Revision: 1.76 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1639,6 +1639,8 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
+    boolean checkpoint = false;
+    String checkkey = null;
 
     /* -- */
 
@@ -1681,9 +1683,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    String checkkey = "setValue" + getName() + owner.getLabel();
+    checkpoint = !eObj.getGSession().enableOversight;
 
-    eObj.getSession().checkpoint(checkkey);
+    if (checkpoint)
+      {
+	checkkey = "setValue" + getName() + owner.getLabel();
+
+	eObj.getSession().checkpoint(checkkey);
+      }
 
     // try to do the binding
 
@@ -1693,7 +1700,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    if (checkpoint)
+	      {
+		eObj.getSession().rollback(checkkey);
+	      }
+
 	    return newRetVal;
 	  }
 
@@ -1712,7 +1723,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    if (checkpoint)
+	      {
+		eObj.getSession().rollback(checkkey);
+	      }
+
 	    return newRetVal;
 	  }
 
@@ -1747,13 +1762,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	this.newValue = null;
 
-	eObj.getSession().popCheckpoint(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().popCheckpoint(checkkey);
+	  }
+
 	return retVal;
       }
     else
       {
 	this.newValue = null;
-	eObj.getSession().rollback(checkkey);
+
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
 					  "InvidDBField setValue: couldn't finalize");
@@ -1785,6 +1808,8 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
+    boolean checkpoint = false;
+    String checkkey = null;
 
     /* -- */
 
@@ -1837,8 +1862,13 @@ public final class InvidDBField extends DBField implements invid_field {
     oldRemote = (Invid) values.elementAt(index);
     newRemote = (Invid) value;
 
-    String checkkey = "setElement" + getName() + owner.getLabel();
-    eObj.getSession().checkpoint(checkkey);
+    checkpoint = !eObj.getGSession().enableOversight;
+
+    if (checkpoint)
+      {
+	checkkey = "setElement" + getName() + owner.getLabel();
+	eObj.getSession().checkpoint(checkkey);
+      }
     
     // try to do the binding
 
@@ -1846,7 +1876,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRetVal != null && !newRetVal.didSucceed())
       {
-	eObj.getSession().rollback(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
+
 	return newRetVal;
       }
 
@@ -1866,12 +1900,21 @@ public final class InvidDBField extends DBField implements invid_field {
     if (eObj.finalizeSetElement(this, index, value))
       {
 	values.setElementAt(value, index);
-	eObj.getSession().popCheckpoint(checkkey);
+
+	if (checkpoint)
+	  {
+	    eObj.getSession().popCheckpoint(checkkey);
+	  }
+
 	return retVal;
       }
     else
       {
-	eObj.getSession().rollback(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
+
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
 					  "InvidDBField setElement: couldn't finalize\n" +
 					  getLastError());
@@ -1900,6 +1943,8 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid remote;
     ReturnVal retVal = null, newRetVal;
+    boolean checkpoint = false;
+    String checkkey = null;
 
     /* -- */
 
@@ -1956,15 +2001,24 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    String checkkey = "addElement" + getName() + owner.getLabel();
+    checkpoint = !eObj.getGSession().enableOversight;
 
-    eObj.getSession().checkpoint(checkkey);
+    if (checkpoint)
+      {
+	checkkey = "addElement" + getName() + owner.getLabel();
+
+	eObj.getSession().checkpoint(checkkey);
+      }
 
     newRetVal = bind(null, remote, local);
 
     if (newRetVal != null && !newRetVal.didSucceed())
       {
-	eObj.getSession().rollback(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
+
 	return newRetVal;
       }
 
@@ -1983,12 +2037,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	defined = true;		// very important!
 
-	eObj.getSession().popCheckpoint(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().popCheckpoint(checkkey);
+	  }
+
 	return retVal;
       } 
     else
       {
-	eObj.getSession().rollback(checkkey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
+
 	return Ganymede.createErrorDialog("InvidDBField.addElement() - custom logic reject",
 					  "Couldn't finalize\n" + getLastError());
       }
@@ -2183,7 +2245,8 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid remote;
     ReturnVal retVal = null, newRetVal;
-    String checkKey;
+    boolean checkpoint = false;
+    String checkkey = null;
 
     /* -- */
 
@@ -2207,9 +2270,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     remote = (Invid) values.elementAt(index);
 
-    checkKey = "del" + remote.toString();
-
     eObj = (DBEditObject) owner;
+
+    checkkey = "del" + remote.toString();
 
     if (!local && eObj.getGSession().enableOversight)
       {
@@ -2231,14 +2294,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (debug)
       {
-	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkKey);
+	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
       }
 
-    eObj.getSession().checkpoint(checkKey);
+    checkpoint = !eObj.getGSession().enableOversight;
+
+    if (checkpoint)
+      {
+	eObj.getSession().checkpoint(checkkey);
+      }
 
     if (debug)
       {
-	System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkKey);
+	System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
       }
 
     // if we are an edit in place object, we don't want to do an
@@ -2279,7 +2347,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (newRetVal != null && !newRetVal.didSucceed())
 	      {
-		eObj.getSession().rollback(checkKey);
+		if (checkpoint)
+		  {
+		    eObj.getSession().rollback(checkkey);
+		  }
+
 		return newRetVal;	// go ahead and return our error code
 	      }
 
@@ -2300,12 +2372,19 @@ public final class InvidDBField extends DBField implements invid_field {
 	    defined = false;
 	  }
 
-	eObj.getSession().popCheckpoint(checkKey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().popCheckpoint(checkkey);
+	  }
+
 	return retVal;
       }
     else
       {
-	eObj.getSession().rollback(checkKey);
+	if (checkpoint)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
 
 	return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
 					  "Couldn't finalize\n" + getLastError());
