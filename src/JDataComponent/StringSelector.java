@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/11/03 00:15:39 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/02/11 07:07:05 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -15,10 +15,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -70,9 +72,9 @@ import arlut.csd.Util.PackageResources;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A two-paneled GUI component for adding or removing strings and/or labeled objects
- * from a list, with an optional list of available strings and/or objects to choose
- * from.</p>
+ * <p>A two-paneled GUI component for adding or removing strings
+ * and/or labeled objects from a list, with an optional list of
+ * available strings and/or objects to choose from.</p>
  *
  * <p>StringSelector consists of one or (optionally) two {@link
  * arlut.csd.JDataComponent.JstringListBox JstringListBox} panels and
@@ -94,9 +96,8 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.23 $ $Date: 1999/11/03 00:15:39 $ $Name:  $
- * @author Mike Mulvaney, Jonathan Abbey 
- */
+ * @version $Revision: 1.24 $ $Date: 2000/02/11 07:07:05 $ $Name:  $
+ * @author Mike Mulvaney, Jonathan Abbey */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
 
@@ -1022,9 +1023,52 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	System.err.println("Error.. got addItem with outSelected == null");
 	return;
       }
-	
-    for (int i = 0; i < handles.size(); i++)
+    
+    if (handles.size() > 1)
       {
+	ok = true;
+
+	if (allowCallback)
+	  {
+	    Vector objVector = new Vector(handles.size());
+
+	    for (int i = 0; i < handles.size(); i++)
+	      {
+		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
+	      }
+
+	    try
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  0, // we are not giving a true index
+								  JValueObject.ADDVECTOR,
+								  objVector));
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+	  } 
+
+	if (ok)
+	  {
+	    for (int i = 0; i < handles.size(); i++)
+	      {
+		putItemIn((listHandle)handles.elementAt(i));
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("setValuePerformed returned false");
+	      }
+	  }
+      }
+    else
+      {
+	ok = true;
+
 	if (allowCallback)
 	  {
 	    try
@@ -1032,28 +1076,25 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		ok = my_parent.setValuePerformed(new JValueObject(this, 
 								  0, // we are not giving a true index
 								  JValueObject.ADD,
-								  ((listHandle)handles.elementAt(i)).getObject()));
+								  ((listHandle)handles.elementAt(0)).getObject()));
 	      }
 	    catch (RemoteException rx)
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
 	    
-	    if (ok)
-	      {
-		putItemIn((listHandle)handles.elementAt(i));
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("setValuePerformed returned false");
-		  }
-	      }
+	  }
+
+	if (ok)
+	  {
+	    putItemIn((listHandle)handles.elementAt(0));
 	  }
 	else
 	  {
-	    putItemIn((listHandle)handles.elementAt(i));
+	    if (debug)
+	      {
+		System.err.println("setValuePerformed returned false");
+	      }
 	  }
       }
     
@@ -1071,6 +1112,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     Vector handles;
     listHandle handle;
+    boolean ok;
 
     /* -- */
 
@@ -1081,42 +1123,78 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	System.err.println("Error.. got removeItem with inSelected == null");
 	return;
       }
-	
-    for (int i =0; i < handles.size(); i++)
+
+    if (handles.size() > 1)
       {
-	handle = (listHandle)handles.elementAt(i);
+	ok = true;
 
 	if (allowCallback)
 	  {
-	    boolean ok = false;
-	    
+	    Vector objVector = new Vector(handles.size());
+
+	    for (int i = 0; i < handles.size(); i++)
+	      {
+		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
+	      }
+
 	    try
 	      {
 		ok = my_parent.setValuePerformed(new JValueObject(this, 
-								  0,
+								  0, // we are not giving a true index
+								  JValueObject.DELETEVECTOR,
+								  objVector));
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+	  } 
+
+	if (ok)
+	  {
+	    for (int i = 0; i < handles.size(); i++)
+	      {
+		takeItemOut((listHandle)handles.elementAt(i));
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("setValuePerformed returned false");
+	      }
+	  }
+      }
+    else
+      {
+	ok = true;
+
+	if (allowCallback)
+	  {
+	    try
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  0, // we are not giving a true index
 								  JValueObject.DELETE,
-								  handle.getObject()));
+								  ((listHandle)handles.elementAt(0)).getObject()));
 	      }
 	    catch (RemoteException rx)
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
 	    
-	    if (ok)
-	      {
-		takeItemOut(handle);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("setValuePerformed returned false.");
-		  }
-	      }
 	  }
-	else // no callback
+
+	if (ok)
 	  {
-	    takeItemOut(handle);
+	    takeItemOut((listHandle)handles.elementAt(0));
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("setValuePerformed returned false");
+	      }
 	  }
       }
   }

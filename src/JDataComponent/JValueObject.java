@@ -9,8 +9,8 @@
 
    Created: 28 Feb 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/03/23 06:19:43 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/02/11 07:07:04 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -70,7 +70,7 @@ import java.awt.*;
  * <p>Note that we came up with this message type before Sun introduced
  * the 1.1 AWT event model.  Great minds... ;-)</p>
  *   
- * @version $Revision: 1.11 $ $Date: 1999/03/23 06:19:43 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 2000/02/11 07:07:04 $ $Name:  $
  * @author Navin Manohar 
  */
 
@@ -80,13 +80,19 @@ public class JValueObject {
    * Boundary guard for acceptable operation types.
    */
 
-  public static final int FIRST = -1009;
+  public static final int FIRST = -1011;
 
   /**
-   * Vector add operation.  Also used to indicate item selection in JstringListBox.
+   * Vector add/scalar operation.  Also used to indicate item selection in JstringListBox.
    */
 
   public static final int ADD = -1001;
+
+  /**
+   * Vector add/vector operation.  Also used to indicate item selection in JstringListBox.
+   */
+
+  public static final int ADDVECTOR = -1009;
 
   /**
    * Vector insert operation, requires both value and index
@@ -96,10 +102,16 @@ public class JValueObject {
   public static final int INSERT = -1002;
 
   /**
-   * Vector delete operation, requires index to be set.
+   * Vector delete scalar operation, requires index to be set.
    */
 
   public static final int DELETE = -1003;
+
+  /**
+   * Vector delete vector operation, requires index to be set.
+   */
+
+  public static final int DELETEVECTOR = -1010;
 
   /**
    * Scalar value set operation.  Requires value to be set.
