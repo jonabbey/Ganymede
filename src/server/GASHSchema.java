@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.72 $ %D%
+   Version: $Revision: 1.73 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1613,6 +1613,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	FieldNode fNode = (FieldNode) node;
 	BaseField field = fNode.getField();
+
+	String label = fNode.getText();
+	String parentLabel = fNode.getParent().getText();
+
 	boolean isEditable = false;
 	boolean isRemovable = false;
 
@@ -1645,7 +1649,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		DialogRsrc dialogResource = new DialogRsrc(this,
 							   "Confirm Field Deletion",
-							   "Confirm Field Deletion",
+							   "Ok to delete field " + label + 
+							   "from object type " + parentLabel + "?",
 							   "Delete", "Cancel",
 							   questionImage);
 
@@ -1670,12 +1675,16 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			      {
 				// field in use
 				
-				System.err.println("Couldn't delete field.. field in use");
+				new JErrorDialog(this,
+						 "Couldn't delete field " + label,
+						 "Couldn't delete field.. field " + label + " is in use");
 			      }
 			  }
 			catch (RemoteException ex)
 			  {
-			    System.err.println("couldn't delete field" + ex);
+			    new JErrorDialog(this,
+					     "Couldn't delete field",
+					     "Caught an exception from the server trying to delete field.. " + ex);
 			  }
 		      }
 		    else if (developMode)
@@ -1701,7 +1710,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		new StringDialog(this, 
 				 "Error: field not editable",
-				 "This field is not editable.  You cannot delete it.",
+				 "Field " + label + " in object type " + parentLabel + 
+				 " is not editable.  You cannot delete it.",
 				 "Ok",
 				 null).DialogShow();
 	      }
@@ -1710,7 +1720,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    new StringDialog(this,
 			     "Error: field not removable",
-			     "This field is not removable.",
+			     "Field " + label + " in object type " + parentLabel +
+			     " is not removable.",
 			     "Ok",
 			     null).DialogShow();
 	  }
