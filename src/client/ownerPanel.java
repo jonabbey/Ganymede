@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,10 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
   invid_field
     field;
 
-  public ownerPanel(invid_field field, boolean editable)
+  framePanel
+   parent;
+
+  public ownerPanel(invid_field field, boolean editable, framePanel parent)
     {
       if (debug)
 	{
@@ -59,7 +62,8 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
       this.editable = editable;
       this.field = field;
-      
+      this.parent = parent;
+
       setInsets(new Insets(5,5,5,5));
       
       try
@@ -123,7 +127,7 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
   public boolean setValuePerformed(JValueObject o)
     {
-
+      boolean returnValue = false;
       if (o.getSource() instanceof stringSelector)
 	{
 	  if (o.getValue() instanceof Invid)
@@ -134,11 +138,11 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 		{
 		  if (o.getOperationType() == JValueObject.ADD)
 		    {
-		      return (field.addElement(invid));
+		      returnValue = field.addElement(invid);
 		    }
 		  else if (o.getOperationType() == JValueObject.DELETE)
 		    {
-		      return (field.deleteElement(index));
+		      returnValue = field.deleteElement(index);
 		    }
 		}
 	      catch (RemoteException rx)
@@ -151,7 +155,13 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 	{
 	  System.out.println("Where did this setValuePerformed come from?");
 	}
-      return false;
+
+      if (returnValue)
+	{
+	  parent.parent.getgclient().somethingChanged = true;
+	}
+
+      return returnValue;
     }
 
 }
