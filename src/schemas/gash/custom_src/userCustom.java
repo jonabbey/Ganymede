@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1493,7 +1493,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    newSize = 0;
+	    newSize = 4;
 	  }
 
 	if (oldEntries != null)
@@ -1502,7 +1502,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    oldSize = 0;
+	    oldSize = 4;
 	  }
 
 	Hashtable newVolumes = new Hashtable(newSize, 1.0f);
