@@ -5,8 +5,8 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/07/27 02:12:58 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/07/27 02:34:04 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -94,6 +94,8 @@ public class notesPanel extends JPanel implements KeyListener {
   string_field
     notes_field;
 
+  private boolean local_editable;
+
   /*--*/
 
   public notesPanel(string_field notes_field, boolean editable, framePanel fp)
@@ -117,7 +119,7 @@ public class notesPanel extends JPanel implements KeyListener {
     TitledBorder tb = new TitledBorder("Notes");
     notesArea.setBorder(new CompoundBorder(tb,eb));
     
-    boolean local_editable = editable;
+    local_editable = editable;
 
     if (local_editable)
       {
@@ -132,7 +134,11 @@ public class notesPanel extends JPanel implements KeyListener {
       }
 
     notesArea.setEditable(local_editable);
-    notesArea.addKeyListener(this);
+
+    if (local_editable)
+      {
+	notesArea.addKeyListener(this);
+      }
     
     JScrollPane notesScroll = new JScrollPane(notesArea);
     add(BorderLayout.CENTER, notesScroll);
@@ -162,6 +168,11 @@ public class notesPanel extends JPanel implements KeyListener {
 
   public void updateNotes()
   {
+    if (!local_editable)
+      {
+	return;
+      }
+
     try
       {
 	if (notes_field != null)
