@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2000/08/31 03:51:10 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2000/10/04 10:02:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -303,6 +303,9 @@ public class Ganymede {
 	  }
       }
 
+    // if they gave us the -doXML sign, make a note that we're going to need
+    // to try and dump the contents of ganymede.db to ganymede.db.xml
+
     if (ParseArgs.switchExists("doXML", argv))
       {
 	doXML = true;
@@ -383,15 +386,16 @@ public class Ganymede {
       }
     catch (java.net.MalformedURLException ex)
       {
-	System.out.println("MalformedURL:" + ex);
+	System.err.println("MalformedURL:" + ex);
       }
     catch (java.net.UnknownHostException ex)
       {
-	System.out.println("UnknownHost:" + ex);
+	System.err.println("UnknownHost:" + ex);
       }
     catch (RemoteException ex)
       {
-	System.out.println("Remote:" + ex);
+	// we expect to see a RemoteException if we had an old
+	// server bound
       }
 
     // inUse can be true if we were able to lookup an RMI object by
@@ -401,8 +405,7 @@ public class Ganymede {
 
     if (inUse)
       {
-	System.err.println("Warning: Ganymede server already bound by other process / Naming failure.");
-	System.err.println("(not likely fatal, the server probably restarted with an existing rmi registry)");
+	System.err.println("Re-using existing RMI registry");
       }
 
     // create the database 

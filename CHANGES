@@ -915,6 +915,27 @@ anti-interleaving code to deal with the fact that subsequent RMI calls
 from a single client are not guaranteed to be handled by the same
 thread on the server.
 
+61. [SERVER] Fixed deadlock vulnerabilities
+
+Previously, the GanymedeServer object used Ganymede.internalSession to
+process database queries for user and admin console logins.  The
+problem was that this was prone to deadlock with some other uses of
+Ganymede.internalSession in the Ganymede server.  In particular, if
+anyone ever attempted to login at the same precise moment that a
+transaction was being committed, the whole server locked up.
+
+Now, the Ganymede server uses a distinct GanymedeSession object to
+handle logins.  Since GanymedeServer has its own synchronization at a
+higher level, it is no longer possible to get nested monitor deadlocks
+from logins.
+
+In addition, since the Ganymede.internalSession object is often used
+by random Ganymede server code to look up things in the database, I
+partially de-synchronized DBSession.viewDBObject() so that a DBSession
+that does not have an open transaction asssociated with it will not
+incur a synchronization penalty/deadlock opportunity merely to
+retrieve a reference to an object from the database.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

@@ -35,7 +35,14 @@ export CLASSPATH
 
 # Run the RMI registry to provide remote name lookup for the server
 
+echo
+echo "Attempting to start rmiregistry"
+
 $RMIREGISTRY $RMIPORT &
+
+echo
+echo "Started rmiregistry"
+echo
 
 # The -resetadmin parameter forces the Ganymede server to reset the supergash and
 # monitor passwords from the properties file
@@ -44,10 +51,6 @@ $RMIREGISTRY $RMIPORT &
 # above is not JIT'ed and add debug=/path/debug.log to the line below.  That will
 # cause the server to record all RMI calls made to it, and will let you examine
 # exception traces that occur while the server is servicing a client request.
-
-# If you want to edit the Ganymede server's essential schema (to do things like enable
-# md5 passwords for Linux/FreeBSD/OpenBSD), you need to add -developschema to the
-# line below.
 
 # If you want the server to do a complete XML dump of the ganymede.db file on startup,
 # add -doXML to the line below
