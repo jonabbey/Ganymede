@@ -226,6 +226,43 @@ written by Robert Harder (rob@iharder.net) and placed into the public
 domain as part of his 'xmlizable' package.  More information on this
 class may be found at http://iharder.net/xmlizable.
 
+Ganymede 2.0 ships with Jython, in src/jython.  Jython is used in the
+Ganymede server to allow DBEditObject sub classes to be written in
+Python, but interpreted on the server.  Jython is copyright the Jython
+Developers and is licensed under the following BSD-like terms:
+
+	Copyright (c) 2000, Jython Developers
+	All rights reserved.
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions
+	are met:
+
+	 - Redistributions of source code must retain the above copyright
+	   notice, this list of conditions and the following disclaimer.
+
+	 - Redistributions in binary form must reproduce the above copyright
+	   notice, this list of conditions and the following disclaimer in
+	   the documentation and/or other materials provided with the distribution.
+
+	 - Neither the name of the Jython Developers nor the names of
+	   its contributors may be used to endorse or promote products
+	   derived from this software without specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+	CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+	PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+	PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+	OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Jython is at http://www.jython.org/
+
 The Ganymede client makes use of the Foxtrot project
 (http://foxtrot.sourceforge.net/) by Simone Bordet, a very nifty GUI
 threading tool that allows us to synchronously decouple the client's
