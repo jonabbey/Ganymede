@@ -6,7 +6,7 @@
    or a scalar.  
 
    Created: 10 April 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,7 @@ public interface db_field extends java.rmi.Remote {
   short getType() throws RemoteException;
   short getDisplayOrder() throws RemoteException;
   String getValueString() throws RemoteException;
+  String getEncodingString() throws RemoteException;
 
   boolean isDefined() throws RemoteException;
   boolean isVector() throws RemoteException;

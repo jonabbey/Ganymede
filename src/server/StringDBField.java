@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -272,6 +272,19 @@ public class StringDBField extends DBField implements string_field {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * For strings, we don't care about having a reversible encoding,
+   * because we can sort and select normally based on the getValueString()
+   * result.
+   *
+   */
+
+  public String getEncodingString()
+  {
+    return getValueString();
   }
 
   // ****

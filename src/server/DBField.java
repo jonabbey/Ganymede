@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -256,6 +256,18 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    */
 
   abstract public String getValueString();
+
+  /**
+   *
+   * Returns a String representing a reversible encoding of the
+   * value of this field.  Each field type will have its own encoding,
+   * suitable for embedding in a DumpResult.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  abstract public String getEncodingString();
 
   /**
    *
