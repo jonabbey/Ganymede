@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:04:06 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/01/26 05:08:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -117,6 +117,26 @@ public class VectorUtils {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * This method adds obj to vect if and only if vect does not
+   * already contain obj.
+   *  
+   */
+
+  public static void unionAdd(Vector vect, Object obj)
+  {
+    for (int i = 0; i < vect.size(); i++)
+      {
+	if (obj.equals(vect.elementAt(i)))
+	  {
+	    return;
+	  }
+      }
+
+    vect.addElement(obj);
   }
 
   /**
