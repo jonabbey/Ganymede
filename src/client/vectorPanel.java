@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.8 $ %D%
+  Version: $Revision: 1.9 $ %D%
   Module By: Navin Manohar
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -391,14 +391,14 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 		    
 		    JComboBox choice = new JComboBox();
 
-		    choice.addItem(inv.toString());
+		    choice.addPossibleValue(inv.toString());
 
 		    if (editable)
 		      {
 			for (int j=0; j< choices.size(); j++)
 			  {
 			    Result result = (Result) choices.elementAt(j);
-			    choice.addItem(result.toString());
+			    choice.addPossibleValue(result.toString());
 			  }
 		      }
 
@@ -793,13 +793,13 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
    *
    */ 
 
-class elementWrapper extends JPanel implements ActionListener {
+class elementWrapper extends JBufferedPane implements ActionListener {
 
   // class variables
 
   private Component my_component = null;
   
-  JPanel 
+  JBufferedPane 
     buttonPanel;
 
   JButton 
@@ -828,7 +828,7 @@ class elementWrapper extends JPanel implements ActionListener {
 
     setLayout(new BorderLayout());
       
-    buttonPanel = new JPanel();
+    buttonPanel = new JBufferedPane();
       
     buttonPanel.setLayout(new BorderLayout());
       

@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,10 @@ public class framePanel extends JInternalFrame {
   JBufferedPane
     general,
     dates,
-    history;    
+    history;
+
+  Container
+    contentPane;
 
   db_field[]
     fields;
@@ -55,13 +58,15 @@ public class framePanel extends JInternalFrame {
   
       // Window properties
       
-      setMaxable(true);
+      setMaximizable(true);
       setResizable(true);
       setClosable(!editable);
-      setIconable(true);
-      setLayout(new BorderLayout());
-      
+      setIconifiable(true);
+
+      contentPane = getContentPane();
+
       // windowPanel wants to know if framePanel is changed
+
       addPropertyChangeListener(parent);
       
       setBackground(ClientColor.WindowBG);
@@ -104,8 +109,7 @@ public class framePanel extends JInternalFrame {
       pane.addTab("History", null, history);
       pane.setSelectedIndex(0);
 
-      setLayout(new BorderLayout());
-      add("Center", pane);
+      contentPane.add("Center", pane);
     }
 
   JBufferedPane createDatePanel() 

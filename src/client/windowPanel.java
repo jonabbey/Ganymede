@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
   gclient
     parent;
 
-  JLayeredPane 
+  JDesktopPane 
     lc;
 
   int 
@@ -87,7 +87,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     setBackground(ClientColor.BG);
 
     setLayout(new BorderLayout());
-    lc = new JLayeredPane();
+    lc = new JDesktopPane();
 
     add("Center", lc);
 
@@ -206,7 +206,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 
     w.setBounds(windowCount*20, windowCount*20, 400,250);
 
-    w.setLayer(topLayer);
+    w.setLayer(new Integer(topLayer));
     
     lc.add(w);
     lc.moveToFront(w);
@@ -248,11 +248,11 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
       }
     else
       {
-	rt.setLayer(topLayer);
+	rt.setLayer(new Integer(topLayer));
 	rt.setBounds(windowCount*20, windowCount*20, 500,500);
 	rt.setResizable(true);
 	rt.setClosable(true);
-	rt.setMaxable(true);
+	rt.setMaximizable(true);
 
 	rt.addPropertyChangeListener(this);
 
@@ -515,7 +515,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	  {
 	    try
 	      {
-		w.setMaxed(true);
+		w.setMaximum(true);
 	      }
 	    catch (java.beans.PropertyVetoException ex)
 	      {
