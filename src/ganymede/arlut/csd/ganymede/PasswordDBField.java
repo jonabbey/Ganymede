@@ -212,6 +212,7 @@ public class PasswordDBField extends DBField implements pass_field {
     uncryptedPass = field.uncryptedPass;
     lanHash = field.lanHash;
     ntHash = field.ntHash;
+    sshaHash = field.sshaHash;
   }
 
   /**
@@ -225,7 +226,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     return (cryptedPass != null || md5CryptPass != null ||
 	    apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
-	    || ntHash != null);
+	    || ntHash != null || sshaHash != null);
   }
 
   /**
