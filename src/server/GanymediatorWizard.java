@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/07/14 21:52:02 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/10/13 21:58:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -155,7 +155,7 @@ import arlut.csd.JDialog.JDialogBuff;
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
  *
- * @version $Revision: 1.13 $ $Date: 1999/07/14 21:52:02 $ $Name:  $
+ * @version $Revision: 1.14 $ $Date: 2000/10/13 21:58:14 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -260,7 +260,6 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 	    result.didSucceed())
 	  {
 	    this.unregister();
-	    state = DONE;
 	  }
 	else if (!stateSet)
 	  {
@@ -281,7 +280,6 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 	    result.didSucceed())
 	  {
 	    this.unregister();
-	    state = DONE;
 	  }
 
 	return result;
@@ -326,25 +324,6 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   /**
    *
    * This method returns a ReturnVal that indicates that the 
-   * wizard sequence has finished without success.
-   *
-   */
-
-  protected ReturnVal fail(String title, String body,
-			   String ok, String cancel, String image)
-  {
-    result.clear();
-    result.success = false;
-    result.setDialog(new JDialogBuff(title, body, ok, cancel, image));
-    result.setCallback(null);
-
-    return result;
-  }
-
-
-  /**
-   *
-   * This method returns a ReturnVal that indicates that the 
    * wizard sequence has not yet finished.
    *
    */
@@ -363,6 +342,26 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   /**
    *
    * This method returns a ReturnVal that indicates that the 
+   * wizard sequence has finished without success.
+   *
+   */
+
+  protected ReturnVal fail(String title, String body,
+			   String ok, String cancel, String image)
+  {
+    unregister();
+
+    result.clear();
+    result.success = false;
+    result.setDialog(new JDialogBuff(title, body, ok, cancel, image));
+    result.setCallback(null);
+
+    return result;
+  }
+
+  /**
+   *
+   * This method returns a ReturnVal that indicates that the 
    * wizard sequence has terminated successfully.
    *
    */
@@ -370,6 +369,8 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   protected ReturnVal success(String title, String body,
 			      String ok, String cancel, String image)
   {
+    unregister();
+
     result.clear();
     result.success = true;
     result.setDialog(new JDialogBuff(title, body, ok, cancel, image));
@@ -484,7 +485,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 
   public void unregister()
   {
-    if (session.isWizardActive(this))
+    if (state != DONE && session.isWizardActive(this))
       {
 	active = false;
 	session.unregisterWizard(this);
