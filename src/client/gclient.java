@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,8 +78,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   // set up a bunch of borders
   public EmptyBorder
-    emptyBorder5 = new EmptyBorder(new Insets(5,5,5,5)),
-    emptyBorder10 = new EmptyBorder(new Insets(10,10,10,10));  
+    emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
+    emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
 
   public BevelBorder
     raisedBorder = new BevelBorder(BevelBorder.RAISED),
@@ -100,6 +100,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     createHash = new Hashtable();    // Hash of objects waiting to be created
                                      // Create and Delete are pending on the Commit button. 
    
+  protected Hashtable
+    cachedLists = new Hashtable();
+
+
   Loader 
     loader;      // Use this to do start up stuff in a thread
   
@@ -874,6 +878,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     InvidNode oldNode, newNode, fNode;
     Query _query = null;
     Vector unsorted_objects = new Vector();
+    short id;
 
     /* -- */
 
@@ -881,8 +886,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     try
       {
+	id = base.getTypeID();
 	//Now get all the children
-	_query = new Query(base.getTypeID());
+	_query = new Query(id);
 	node.setQuery(_query);
       }
     catch (RemoteException rx)
@@ -898,11 +904,34 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 	else
 	  {
-	    QueryResult resultDump =  session.query(_query);
+	    Short Id = new Short(id);
+	    Vector resultDump = null;  //a vector of listHandles
+	    if (cachedLists.containsKey(Id))
+	      {
+		resultDump = (Vector)cachedLists.get(Id);
+		setStatus("Using cached copy");
+	      }
+	    else
+	      {
+		setStatus("Downloading new copy");
+
+		QueryResult qr = session.query(_query);
+		resultDump =  qr.getListHandles();
+		if (resultDump != null)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Caching list for key: " + Id);
+		      }
+
+		    cachedLists.put(Id, resultDump);
+		  }
+	      }
 
 	    for (int i = 0; i < resultDump.size(); i++)
 	      {
-		unsorted_objects.addElement(new Result(resultDump.getInvid(i), resultDump.getLabel(i)));
+		listHandle lh = (listHandle)resultDump.elementAt(i);
+		unsorted_objects.addElement(new Result((Invid)lh.getObject(), lh.getLabel()));
 	      }
 
 	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
@@ -1115,6 +1144,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 	refreshTree(true);
+
+	cachedLists.clear();
 	
 	wp.resetWindowCount();
 
@@ -1215,60 +1246,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     else if (event.getSource() == roseMI)
       {
 	setRose();
-	/*	try
-	  {
-	    setStatus("Switching to Rose look and feel");
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    UIManager.setLookAndFeel("com.sun.java.swing.rose.RoseFactory");
-	    this.invalidate();
-	    this.validate();
-	    this.repaint();
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    setStatus("Done.");
-	  }
-	catch (ClassNotFoundException ex)
-	  {
-	    System.out.println("Could not load Rose: " + ex);
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    System.out.println("Could not load new look: " + ex);
-	  }
-	catch (InstantiationException ex)
-	  {
-	    System.out.println("Could not load new look: " + ex);
-	  }
-	  */	
       }
     else if (event.getSource() == win95MI)
       {
 	setBasic();
-
-	/*
-	try
-	  {
-	    setStatus("Switching to win95 look and feel");
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    UIManager.setLookAndFeel("com.sun.java.swing.basic.BasicFactory");
-	    this.invalidate();
-	    this.validate();
-	    this.repaint();
-	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    setStatus("Done");
-	  }
-	catch (ClassNotFoundException ex)
-	  {
-	    System.out.println("Could not load Rose: " + ex);
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    System.out.println("Could not load new look: " + ex);
-	  }
-	catch (InstantiationException ex)
-	  {
-	    System.out.println("Could not load new look: " + ex);
-	  }
-	  */
       }
 
     else
