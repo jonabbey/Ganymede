@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -255,11 +255,14 @@ public class DBEditSet {
     // and our objects
 
     // first, take care of all the objects that were in the transaction at
-    // the time of this checkpoint.
+    // the time of this checkpoint.. we want to revert these objects to
+    // their checkpoint-time status
 
     for (int i = 0; i < point.objects.size(); i++)
       {
 	objck = (DBCheckPointObj) point.objects.elementAt(i);
+
+	System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
 
 	found = false;
 
@@ -287,9 +290,17 @@ public class DBEditSet {
     // now, we have to sweep out any objects that are in the transaction now
     // that weren't in the transaction at the checkpoint.
 
+    // note that we need a drop temp vector because it confuses things
+    // if we remove elements from objects while we are iterating over it
+
+    Vector drop = new Vector();
+
     for (int i = 0; i < objects.size(); i++)
       {
 	obj = (DBEditObject) objects.elementAt(i);
+
+	System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + obj.getLabel() +
+			   " (" + obj.getInvid().toString() + ")");
 
 	found = false;
 
@@ -328,9 +339,24 @@ public class DBEditSet {
 		  }
 		break;
 	      }
-	    
-	    objects.removeElement(obj);
+
+	    System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" 
+			       + obj.getInvid().toString() + ")");
+
+	    drop.addElement(obj);
 	  }
+	else
+	  {
+	    System.err.println("DBEditSet.rollback(): keeping object " + obj.getLabel() + " (" 
+			       + obj.getInvid().toString() + ")");
+	  }
+      }
+
+    // now go ahead and clean out objects
+
+    for (int i = 0; i < drop.size(); i++)
+      {
+	objects.removeElement(drop.elementAt(i));
       }
 
     // and our namespaces
@@ -907,11 +933,14 @@ class DBCheckPoint {
 
     logEvents = (Vector) transaction.logEvents.clone();
 
-    objects = new Vector(transaction.objects.size());
+    objects = new Vector();
 
     for (int i = 0; i < transaction.objects.size(); i++)
       {
 	obj = (DBEditObject) transaction.objects.elementAt(i);
+
+	System.err.println("DBCheckPoint: add " + obj.getLabel() + 
+			   " (" + obj.getInvid().toString() + ")");
 
 	objects.addElement(new DBCheckPointObj(obj));
       }
