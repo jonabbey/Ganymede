@@ -306,10 +306,18 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
 	if (pdbf != null)
 	  {
-	    String passText = pdbf.getUNIXCryptText();
+	    String passText = pdbf.getSSHAHashText();
 
 	    if (passText != null) {
-	      writeBinaryLDIF(out, "userPassword", "{CRYPT}" + passText);
+	      // getSSHAHashText preformats the password for LDAP
+
+	      writeBinaryLDIF(out, "userPassword", passText);
+	    } else {
+	      passText = pdbf.getUNIXCryptText();
+
+	      if (passText != null) {
+		writeBinaryLDIF(out, "userPassword", "{CRYPT}" + passText);
+	      }
 	    }
 	  }
       }
