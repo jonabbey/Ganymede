@@ -1,9 +1,9 @@
 Ganymede Developer Release 0.99
-April ??, 1999
+April 16, 1999
 CREDITS
 ---------------------------------------------
 
-Ganymede has been under development for nearly 3 years now, in both
+Ganymede has been under development for over 3 years now, in both
 planning and execution.  The work has primarily been performed in
 the Computer Science Division of The Applied Research Laboratories,
 The University of Texas at Austin, with support from CSD and ARL
@@ -82,9 +82,11 @@ without his support.
 
 Within ARL, Gil Kloepfer provided design assistance on the networking
 issues that Ganymede is going to need to address as the lab moves into
-the 21st century.  Jay Scott and Steve Kneuper contributed helpful
-input on functionality and features.  Brian O'Mara did some work on
-icons and graphics for the client. 
+the 21st century.  Jay Scott contributed work on a new version of the
+GASH schema's build kit (which is not yet included with the Ganymede
+distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
+Gramann and others made helpful reports on gaps and problems with
+Ganymede.
 
 A lot of Ganymede is based on the experience and design work that went
 into GASH.  In addition to the aforementioned names, Dean Kennedy and
@@ -106,20 +108,21 @@ Jher, jher@fnord.com - beta testing
 Sheilagh O'Hare, martini@fc.net - design brilliance
 Frederick Dickey, frederick.j.dickey@boeing.com - packaging bug report
 Lewis Muhlenkamp, lewism@tt.comm.mot.com - packaging, client bug reports
+Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de - packaging reports
 
 --
 
 The regular expression class library used in the server to provide regexp
 search support is from the Free Software Foundation, and was written by
-Wes Biggs <wes@cacas.org>.  See the gnu-regexp-1.0.5/README and
-gnu-regexp-1.0.5/LICENSE for more details.
+Wes Biggs <wes@cacas.org>.  See the gnu-regexp-1.0.8/README and
+gnu-regexp-1.0.8/LICENSE for more details.
 
 The Java implementation of the standard UNIX crypt() function was
 converted from C by John Dumas, jdumas@zgs.com, whose code can be
 found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
 Ganymede by permission of the author.
 
-The Qsmtp class was written by James Driscoll (maus@io.com), and
-placed into the public domain.  See
-http://www.io.com/~maus/JavaPage.html for details and additional
-free Java code.
+The Qsmtp class was originally written by James Driscoll
+(maus@io.com), and placed into the public domain.  See
+http://www.io.com/~maus/JavaPage.html for details and additional free
+Java code.
