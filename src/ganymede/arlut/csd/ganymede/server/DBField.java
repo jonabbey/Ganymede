@@ -3273,15 +3273,15 @@ public abstract class DBField implements Remote, db_field {
 	    String conflictLabel = conflictObject.getLabel();
 	    String conflictClassName = conflictObject.getTypeName();
 
-	    return Ganymede.createErrorDialog("Server: Error in " + methodName,
-					      "This action could not be completed" +
-					      " because \"" + conflictValue + "\" is already being used.\n\n" +
-					      conflictClassName + " \"" + conflictLabel + 
-					      "\" contains this value in its " +
-					      conflictField.getName() + " field.\n\n" +
-					      "You can choose a different value here, or you can try to " +
-					      "edit or delete the \"" + conflictLabel + "\" object to remove " +
-					      "the conflict.");
+	    // This action could not be completed because "{0}" is already being used.
+	    //
+	    // {1} "{2}" contains this value in its {3} field.
+	    //
+	    // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
+
+	    return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+					      ts.l("getConflictDialog.persistentError",
+						   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
 	  }
 	else
 	  {
@@ -3291,24 +3291,23 @@ public abstract class DBField implements Remote, db_field {
 	    String conflictLabel = conflictObject.getLabel();
 	    String conflictClassName = conflictObject.getTypeName();
 
-	    return Ganymede.createErrorDialog("Server: Error in " + methodName,
-					      "This action could not be completed" +
-					      " because \"" + conflictValue + "\" is already being used in a transaction.\n\n" +
-					      conflictClassName + " \"" + conflictLabel + 
-					      "\" contains this value in its " +
-					      conflictField.getName() + " field.\n\n" +
-					      "You can choose a different value here, or you can try to " +
-					      "edit or delete the \"" + conflictLabel + "\" object to remove " +
-					      "the conflict.");
+	    // This action could not be completed because "{0}" is already being used in a transaction.
+	    //
+	    // {1} "{2}" contains this value in its {3} field.
+	    //
+	    // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
+
+	    return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+					      ts.l("getConflictDialog.transactionError",
+						   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
 	  }
       }
     catch (NullPointerException ex)
       {
 	ex.printStackTrace();
 
-	return Ganymede.createErrorDialog("Server: Error in " + methodName,
-					  "value " + conflictValue +
-					  " already taken in namespace");
+	return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+					  ts.l("getConflictDialog.simpleError", conflictValue));
       }
   }
 
