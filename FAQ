@@ -1,4 +1,4 @@
-Ganymede Release 0.99.5
+Ganymede Release 0.99.6
 July 28, 1999
 FAQ
 ---------------------------------------------
@@ -25,15 +25,20 @@ distinct portions of Ganymede's database, making it possible for
 administrators to take care of their own portions of your network
 directories without getting in each others' way.  Ganymede logs all
 changes and has an extensive system for sending email notification to
-various interested parties when things change.
+various interested parties when things change. Objects in the database
+can be set to expire or be removed at a later date, making it possible
+to create temporary user accounts and so forth.
 
    Customizers/adopters can write code to take the data from Ganymede
 and propagate it into NIS, DNS, or anything else when changes are made
 in the Ganymede database.  At ARL, we take the data from Ganymede and
 propagate it into NIS, DNS, tacacs+ for router configuration, Samba,
-NT, Sendmail, LDAP, and more.  Having a central point through which all
-network information changes go through before fanning out to all of
-your network distribution mechanisms is extremely powerful.
+NT, Sendmail, LDAP, and more.  In addition to maintaining the
+directory services, Ganymede also triggers external scripts to create
+users' home directories, handle user rename, NFS volume creation,
+etc. Having a central point through which all network information
+changes go through before fanning out to all of your network
+distribution mechanisms is extremely powerful.
 
    Ganymede is much more than a simple directory system like LDAP,
 NIS, or even DNS. Ganymede is a total system for managing your
@@ -228,6 +233,12 @@ and object locking would have to be coordinated across servers, and in
 such a way that a server could go down and be brought back up without
 losing such run-time state.  Also, the scripts to emit data from
 Ganymede server's into local DNS, NIS, and the like would be complex.
+
+   Generally speaking, Ganymede is not intended to be the service that
+operating system (PAM) and/or application code consults directly.
+Instead, Ganymede is intended to feed things like NIS, DNS, and LDAP,
+which have their own means of doing replication and redundant servers
+for backups.
 
 10) What's up with DNS management?  The current stuff is weak.
 

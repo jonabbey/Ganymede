@@ -45,7 +45,7 @@ Query dialog to be more user-friendly.
 
 --
 
- Mike Mulvaney, mikem@mail.utexas.edu
+ Mike Mulvaney, mike@mulvaney.com
 
  Mike worked on Ganymede during his year and a half at the lab, from
 February of 1997 through September of 1998, before moving to the
@@ -112,6 +112,8 @@ Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de - packaging reports
 Andy Johnson, andyjohnson@engineer.com - build script bug reports
 Charles Adams, charles.adams@central.sun.com - bug reports, debugging
 Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
+Glen Joseph, gjoseph@us.ibm.com - installServer bug report
+Martin Schneider, martin@ira.uka.de - server customization bug reports
 
 --
 

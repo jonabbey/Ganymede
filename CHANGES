@@ -1,7 +1,183 @@
-Ganymede Release 0.99.5
-July 28, 1999
+Ganymede Release 0.99.6
+August ??, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.5 to 0.99.6 -------------------
+
+RELEASE DATE: August ??, 1999
+
+1. [SERVER DISTRIB] Fixed decodeDB
+
+decodeDB was failing because the properties weren't being loaded and
+the db load routine was attempting to find the Ganymede.journal
+property.
+
+2. [SCHEMA] More improvements to gasharl schema.
+
+Fixed ARL maildirect file generation to only emit entries for
+normal category user records, made it possible to clear the
+primary user field for systems.  Fixed a minor infidelity in
+hosts_info generation.
+
+3. [CLIENT] Fixed problems with string area gui object
+
+I fixed a couple of problems with the JstringArea class used in
+the Ganymede client to display and edit multi-line string fields.
+
+I had to make some changes to the code so that it really didn't try to
+do editing when the field was not editable, and so that when errors
+are returned when the JstringArea is edited, the focus-loss update
+trigger won't get into an infinite loop, popping an error dialog up
+over and over and over and over again.
+
+The JstringArea is one of the least used GUI components in the client,
+which is why this wasn't detected and fixed a long time ago.
+
+4. [CLIENT] Fixed error in handling fixable transaction failure
+
+The change I made in 0.99.5 to the client's handling of catastrophic
+transaction commit failure broke proper handling of non-catastrophic,
+correctable commit failure.. if such a transaction failed to commit,
+gclient would reset its state, even though the transaction was still
+open and repairable.
+
+gclient.commitTransaction() now handles both circumstances properly.
+
+5. [SERVER] Added support for MD5-hashed passwords.
+
+Added MD5 support to PasswordDBField.java.  Bumped DBStore.minor_version
+to 13 for MD5 support.
+
+The server can now store and authenticate using MD5-hashed passwords.
+Schema kits can be written to input MD5-hashed passwords into the
+system as well as UNIX crypt()'ed passwords.
+
+Neither the Linux nor the BSD schemas have yet been modified to
+support MD5 passwords, but the PasswordDBField code now supports MD5.
+
+6. [SERVER] Improved the server's password reset logic
+
+Previously, if the -resetadmin parameter was given on the command
+line, the server would always open a new transaction and reset the
+supergash password.  Now the server checks to see if the password has
+changed before doing the edit.  This cuts down on the redundant 'hey,
+i set the supergash password!' mail that Ganymede was sending out.
+
+7. [SERVER] Fixed adminPersonaCustom.convertAdminInvidToString()
+
+The new DBLog transaction logic for finding an email address to mail
+to was broken when the change was made by an end-user and not by an
+admin persona.  I fixed adminPersonaCustom.convertAdminInvidToString()
+so that it can gracefully deal with the possibility that the 'admin
+invid' in an DBLogEvent produced by the DBEditSet commit() routine is
+actually an end-user Invid.
+
+8. [SERVER] Reworked DBSession.createDBObject()
+
+The old createDBObject() call in DBSession had problems if a user
+in an owner group tried to create a new object at the same time that
+another user had the owner group checked out for editing.. the object
+create would fail in an ungraceful manner, resulting in the server
+thinking that the user had a negative number of objects checked out,
+and getting very confused.
+
+The DBSession createDBObject() code now does a transaction checkpoint 
+before attempting to place the newly created object in the proper
+owner groups.  If one of the owner groups turns out to be unavailable,
+the object create will fail and the transaction will be rolled back.
+
+I also modified createDBObject() to return a ReturnVal so that
+detailed failure information can be returned to the user if object
+creation fails.
+
+This is continuing a trend.. I've been finding the need to go through
+the code and make some of the server's internal paths better about
+returning detailed error information.
+
+9. [SERVER] Improved DBEditSet.rollback() code
+
+Minor changes to the transaction rollback code, to take advantage of
+the optimized vector compare operations in arlut.csd.Util.VectorUtils.
+Should make rollbacks in very large transactions noticeably faster.
+
+10. [DISTRIBUTION] Added template schema directory, fixed installServer
+
+In 0.99.5 and for awhile before, the installServer script would break
+if you tried to install the Ganymede server without choosing a schema
+kit, which caused installServer to break with a complaint about
+
+'Couldn't write schema build config'.
+
+installServer now goes ahead and installs an empty schema directory
+with all of the build scaffolding required to develop your own schema
+kit.
+
+I am planning on significantly revising the way that schema kits are
+packaged and distributed to make it easier to distribute schema kits
+independently, but that is something for a future revision, I think.
+
+Thanks to Glen Joseph <gjoseph@us.ibm.com> for reporting this.
+
+11. [SERVER] Reworked embedded object initialization
+
+In 0.99.5 and before, embedded objects had their custom
+initializeNewObject() methods called before the embedded object
+was linked into its container, making it hard for custom code
+to make initialization decisions based on the container's state.
+
+This has been fixed; initializeNewObject() for embedded object types
+is now called after the object has been linked into its parent.
+
+In addition, initializeNewObject() now returns a ReturnVal rather than
+a boolean, to allow detailed error messages to be returned to the
+user.  All custom DBEditObject subclasses included in the Ganymede
+distribution have been brought up to date with the new
+initializeNewObject() method signature.
+
+Thanks to Martin Schneider <martin@ira.uka.de> for bringing this to my
+attention.
+
+12. [SERVER] DBEditObject.createNewEmbeddedObject() now returns ReturnVal
+
+Another change made to provide better feedback paths for server
+errors.
+
+This method wasn't one that was ever overridden in the schema kits
+provided with Ganymede, but adopters who did override this method
+will need to modify their custom code to return a ReturnVal rather
+than a boolean.
+
+13. [CLIENT] Fixed string field GUI component.. now limits size properly
+
+Way back in dev6a, I modified the arlut.csd.JDataComponent.JentryField
+class so that it would employ a custom DocumentModel to make sure bad
+characters couldn't be entered into a string/number/ip field in the
+Ganyemde client.
+
+Looks like I had somehow missed testing the code which was supposed to
+prevent entry of characters after the size limitation on the field had
+been met.  There was code there for that function, but it wasn't
+correctly functional.
+
+Modified the arlut.csd.JDataComponent.JentryDocument class to check
+for the number of characters currently in the JentryField versus the
+stated limit (if any) on the number of characters allowed in the
+field.
+
+14. [SERVER] Moved GanymedeServer creation, binding to end of server start
+
+Previously there was a remote chance that a user or admin console
+could attach to the server before all startup housekeeping was taken
+care of.  The GanymedeServer RMI binding is now the very last thing
+done by Ganymede.main().
+
+15. [CLIENT] Fixed client behavior for Java 1.3 beta (Kestrel)
+
+In the new Java 1.3 beta, code-named Kestrel, a lot of JInternalFrame
+code has been changed.  Several things in the Ganymede client had to
+be tweaked to insure internal windows in the Ganymede client work
+acceptably well with all existing versions Swing.
 
 -------------------- Changes from 0.99.4 to 0.99.5 -------------------
 
