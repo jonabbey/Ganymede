@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.11 $ %D%
+    Version: $Revision: 1.12 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -418,12 +418,23 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 	try
 	  {
-	    field.setValue((String)e.getItem());
+	    if (field.setValue((String)e.getItem()))
+	      {
+		System.out.println("field setValue returned true");
+	      }
+	    else
+	      {
+		System.out.println("field setValue returned FALSE!!");
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not set combo box value: " + rx);
 	  }
+      }
+    else
+      {
+	System.out.println("Not from a JCombobox");
       }
   }
   
@@ -731,7 +742,6 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		// Add a combo box
 				  
 		JComboBox combo = new JComboBox();
-				//Choice combo = new Choice();
 
 		Vector choices = gclient.parseDump(field.choices());
 		String currentChoice = (String) field.getValue();
@@ -762,7 +772,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 		combo.setMaximumRowCount(8);
 		combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-		combo.setEditable(false);
+		combo.setEditable(true); // This should be true
 		combo.setVisible(true);
 
 		combo.setCurrentValue(currentChoice);
