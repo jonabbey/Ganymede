@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2001/06/26 05:18:57 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2001/06/26 05:28:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1373,6 +1373,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   public boolean isDateLimited(DBField field)
   {
     if (field.getID() == SchemaConstants.ExpirationField)
+      {
+	return true;
+      }
+
+    if (field.getID() == userSchema.PASSWORDCHANGETIME)
       {
 	return true;
       }
