@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,11 +36,12 @@ public class DBSession {
 
   static boolean debug = true;
 
-  public static void setDebug(boolean val)
+  public final static void setDebug(boolean val)
   {
     debug = val;
   }
-  
+
+  DBObject adminObject;  // the admin object for the current user.
   DBStore store;
   DBLock lock;
   DBEditSet editSet;
@@ -61,21 +62,32 @@ public class DBSession {
    * <p>This constructor is intended to be called by the DBStore login() method.</p>
    *
    * @param store The DBStore database this session belongs to.
+   * @param adminObject The admin object for the user associated with this session, or null if none (only for system init)
    * @param key An identifying key with meaning to whatever code is using arlut.csd.ganymede
    *
    */
    
-  DBSession(DBStore store, Object key)
+  DBSession(DBStore store, DBObject adminObject, Object key)
   {
     this.store = store;
     this.key = key;
+    this.adminObject = adminObject;
 
     editSet = null;
     lastError = null;
   }
 
+  /**
+   *
+   * Close out this DBSession, aborting any open transaction, and releasing
+   * held read locks.
+   *
+   */
+
   public synchronized void logout()
   {
+    releaseReadLock();
+
     if (editSet != null)
       {
 	abortTransaction();
@@ -267,19 +279,6 @@ public class DBSession {
 	return null;
       }
 
-    // we don't check to see if the lock is a
-    // DBReadLock.. viewDBOBject is acceptably atomic relative to any
-    // possible write activity that might be occurring if we are
-    // trying to read on a DBWriteLock, we won't worry about the
-    // DBWriteLock possessor changing things on us.
-
-    // we couldn't be so trusting on an enum establish request, though.
-
-    //**    if ((lock == null) || !lock.isLocked(base))
-    //**     {
-    //**	throw new RuntimeException("viewDBObject: viewDBObject called without lock");
-    //**      }
-
     // depend on the objectHash's thread synchronization here
 
     obj = (DBObject) base.objectHash.get(objKey);
@@ -390,6 +389,18 @@ public class DBSession {
 
   /**
    *
+   * Returns true if the session's lock is currently locked, false
+   * otherwise.
+   *
+   */
+
+  public boolean isLocked()
+  {
+    return (lock != null && lock.isLocked());
+  }
+
+  /**
+   *
    * openReadLock establishes a read lock for the DBObjectBase's in bases.<br><br>
    *
    * The thread calling this method will block until the read lock 
@@ -442,63 +453,6 @@ public class DBSession {
 	lock.release();
 	lock = null;
       }
-  }
-
-  /**
-   *
-   * openWriteLock establishes a write lock for the DBObjectBase's in bases... this
-   * is intended to be used only by sessions that have already established an
-   * open transaction.<br><br>
-   *
-   * The thread calling this method will block until the write lock 
-   * can be established. 
-   *
-   * Once a write lock is established, the owner of this DBSession can
-   * perform consistency checks in the bases secure in the knowledge 
-   * that no other thread can change the database until the current transaction
-   * is committed or released.
-   *
-   * The DBWriteLock will typically be released by commit or abort.
-   *
-   * ALL THIS NEEDS TO BE WORKED ON MORE ***** JON *****
-   */
-
-  private synchronized void openWriteLock(Vector bases) throws InterruptedException
-  {
-    if (lock != null && lock instanceof DBWriteLock )
-      {
-	// already got a writelock.. throw exception
-
-	throw new RuntimeException("already got writelock");
-      }
-    releaseReadLock();
-    lock = new DBWriteLock(store,bases);
-    lock.establish(this);    
-  }
-
-  /**
-   *
-   * openWriteLock establishes a write lock for the entire DBStore.<br><br>
-   *
-   * The thread calling this method will block until the write lock 
-   * can be established.  The write lock cannot be established until
-   * all read locks on the DBStore have completed.  All write lock
-   * requests get queued in order of submission, only one session
-   * can have a write lock at a time.
-   *
-   */
-
-  private synchronized void openWriteLock() throws InterruptedException
-  {
-    if (lock != null && lock instanceof DBWriteLock )
-      {
-	// already got a writelock.. throw exception
-
-	throw new RuntimeException("already got writelock");
-      }
-    releaseReadLock();
-    lock = new DBWriteLock(store);
-    lock.establish(this);
   }
 
   /**
