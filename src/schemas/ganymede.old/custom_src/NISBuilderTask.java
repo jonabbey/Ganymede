@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -298,9 +298,18 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
     // get the gid
     
-    groupInvid = object.getFieldValueLocal((short) 265); // home group
-    group = getObject(groupInvid);
-    gid = ((Integer) group.getFieldValueLocal((short) 258)).intValue();
+    groupInvid = (Invid) object.getFieldValueLocal((short) 265); // home group
+
+    if (groupInvid == null)
+      {
+	System.err.println("NISBuilder.writeUserLine(): null gid for user " + username);
+	gid = -1;
+      }
+    else
+      {
+	group = getObject(groupInvid);
+	gid = ((Integer) group.getFieldValueLocal((short) 258)).intValue();
+      }
 
     name = (String) object.getFieldValueLocal((short) 257);
     room = (String) object.getFieldValueLocal((short) 259);
