@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -486,6 +486,11 @@ public class XMLDumpContext {
   public void write(String str) throws IOException
   {
     xmlOut.write(str);
+  }
+
+  public void flush() throws IOException
+  {
+    xmlOut.flush();
   }
 
   public void close() throws IOException

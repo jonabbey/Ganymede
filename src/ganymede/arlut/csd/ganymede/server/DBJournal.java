@@ -136,6 +136,8 @@ public class DBJournal implements ObjectStatus {
 
   int transactionsInJournal = 0;
 
+  private DBJournalTransaction incompleteTransaction = null;
+
   /* -- */
 
   static void initialize(DataOutput out) throws IOException
@@ -624,9 +626,19 @@ public class DBJournal implements ObjectStatus {
 		  }
 		catch (IOException ex)
 		  {
-		    // XXX here is where we want to rollback any
-		    // XXX transactions in the channels that are numbered
-		    // XXX nextTransactionNumber
+		    // we didn't get the transaction finalized, but it
+		    // had been persisted, which means that some of
+		    // the sync channels may possibly have had some
+		    // transactions written out.  we should have
+		    // cleaned up after any incomplete writes to the
+		    // sync channels, but if the server was abnormally
+		    // terminated at the wrong time, we may have some
+		    // transactions lingering.  we'll record enough
+		    // information in the incompleteTransaction member
+		    // variable so that Ganymede.java can clean them
+		    // up
+
+		    this.incompleteTransaction = new DBJournalTransaction(transaction_time, -1, nextTransactionNumber, null);
 
 		    // then we'll throw this exception back up
 
@@ -869,6 +881,10 @@ public class DBJournal implements ObjectStatus {
     jFile.writeLong(transRecord.getTime());
     jFile.writeInt(transRecord.getTransactionNumber());
 
+    // and push the blocks to disk
+
+    jFile.getFD().sync();
+
     transactionsInJournal++;
     GanymedeAdmin.updateTransCount();
   }
@@ -885,9 +901,44 @@ public class DBJournal implements ObjectStatus {
     jFile.setLength(transRecord.getOffset()-1);
     jFile.seek(transRecord.getOffset());
 
+    // try to make sure the disk operations we just did are committed
+    // to disk
+
+    jFile.getFD().sync();
+
     Ganymede.db.undoNextTransactionNumber(transRecord.getTransactionNumber());
   }
+
+  /**
+   * <p>If the journal contained a persisted but not finalized
+   * transaction when we tried to load it, this method will return a
+   * DBJournalTransaction containing enough information that the
+   * Ganymede main() method can iterate over the defined sync channels
+   * and clear out any lingering xml sync for that transaction.</p>
+   *
+   * <p>This can only happen if the server is abnormally terminated in
+   * a very narrow window, but in the one case in 10,000 where an
+   * abnormal shutdown hit right in that window, we'll go ahead and
+   * worry about it.</p>
+   */
+
+  public DBJournalTransaction getIncompleteTransaction()
+  {
+    return this.incompleteTransaction;
+  }
+
+  /**
+   * <p>After the Ganymede main() method has tried to clean out any
+   * remaining bits of the non-finalized transaction, it will need
+   * to clear the incompleteTransaction record.  This method does
+   * that. </p>
+   */
   
+  public void clearIncompleteTransaction()
+  {
+    this.incompleteTransaction = null;
+  }
+
   /**
    *  returns true if the journal does not contain any transactions
    *

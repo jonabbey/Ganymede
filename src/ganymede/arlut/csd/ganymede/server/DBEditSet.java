@@ -1566,18 +1566,7 @@ public class DBEditSet {
 	  }
 	catch (Throwable ex)
 	  {
-	    for (int j = 0; j < i; j++)
-	      {
-		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(j);
-		
-		try
-		  {
-		    sync.unSync(persistedTransaction);
-		  }
-		catch (Throwable inex)
-		  {
-		  }
-	      }
+	    undoSyncChannels();
 
 	    try
 	      {
@@ -1617,6 +1606,36 @@ public class DBEditSet {
   }
 
   /**
+   * <p>This private helper method scrubs the sync channels of the
+   * persistedTransaction, so that we can avoid having bits of the
+   * transaction sync'ed to the channels when we ultimately wind up
+   * undoing the transaction.</p>
+   */
+
+  private final void undoSyncChannels()
+  {
+    synchronized (Ganymede.syncRunners)
+      {
+	for (int i = 0; i < Ganymede.syncRunners.size(); i++)
+	  {
+	    SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+
+	    try
+	      {
+		sync.unSync(persistedTransaction);
+	      }
+	    catch (Throwable inex)
+	      {
+		// what can we do?  keep clearing them out as best we
+		// can
+
+		inex.printStackTrace();
+	      }
+	  }
+      }
+  }
+
+  /**
    * <p>This private helper method for commit() writes a finalized token
    * to the on-disk transactions journal, so that we'll know upon restart that
    * we don't need to reply the transaction to the sync channels.</p>
@@ -1634,6 +1653,7 @@ public class DBEditSet {
       {
 	try
 	  {
+	    undoSyncChannels();
 	    dbStore.journal.undoTransaction(persistedTransaction);
 	  }
 	catch (IOException inex)

@@ -237,7 +237,7 @@ public class SyncRunner implements Runnable {
 	xmlOut.indentIn();
 	xmlOut.endElementIndent("transaction");
 	xmlOut.skipLine();
-	xmlOut.close();
+	xmlOut.close();		// close() automatically flushes before closing
       }
   }
 
@@ -251,8 +251,13 @@ public class SyncRunner implements Runnable {
   public void unSync(DBJournalTransaction transRecord) throws IOException
   {
     File syncFile = new File(this.getDirectory() + File.separator + String.valueOf(transRecord.getTransactionNumber()));
-    
-    syncFile.delete();
+
+    if (syncFile.exists())
+      {
+	// "SyncRunner {0} deleting left over transaction fragment {1}"
+	Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
+	syncFile.delete();
+      }
   }
 
   private XMLDumpContext createXMLSync(DBJournalTransaction transRecord) throws IOException

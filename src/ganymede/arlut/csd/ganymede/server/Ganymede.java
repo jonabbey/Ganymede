@@ -667,17 +667,6 @@ public class Ganymede {
 				      null,
 				      null));
 
-    // take care of any startup-time database modifications
-
-    try
-      {
-	startupHook();
-      }
-    catch (NotLoggedInException ex)
-      {
-	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
-      }
-
     // Create the background scheduler
 
     scheduler = new GanymedeScheduler(true);
@@ -692,6 +681,47 @@ public class Ganymede {
       {
 	registerTasks();
 	registerSyncChannels();
+
+	// there is a very, very small chance that an abnormal
+	// termination might have left some xml bits in the sync
+	// channels for a transaction that ultimately could not be
+	// processed.  We check for that here, and clean up any
+	// remaining bits if we find them.
+
+	DBJournalTransaction incompleteTransaction = db.journal.getIncompleteTransaction();
+
+	if (incompleteTransaction != null)
+	  {
+	    for (int i = 0; i < syncRunners.size(); i++)
+	      {
+		SyncRunner channel = (SyncRunner) syncRunners.elementAt(i);
+
+		try
+		  {
+		    channel.unSync(incompleteTransaction);
+		  }
+		catch (IOException ex)
+		  {
+		    // what can we do?  keep clearing them out as best we
+		    // can
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    db.journal.clearIncompleteTransaction();
+	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
+      }
+
+    // take care of any startup-time database modifications
+
+    try
+      {
+	startupHook();
       }
     catch (NotLoggedInException ex)
       {
