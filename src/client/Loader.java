@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,7 @@ public class Loader extends Thread {
     baseMap,
     baseNames,
     baseHash,
+    baseHashNoBuiltIns,
     baseToShort;
 
   private Vector
@@ -42,7 +43,8 @@ public class Loader extends Thread {
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
-    baseHashLoaded = false;
+    baseHashLoaded = false,
+    baseHashNoBuiltInsLoaded = false;
 
   private Session
     session;
@@ -61,6 +63,7 @@ public class Loader extends Thread {
 
   public synchronized void run()
   {
+
     if (debug)
       {
 	System.out.println("Starting thread in loader");
@@ -71,6 +74,7 @@ public class Loader extends Thread {
 	loadBaseList();
 	loadBaseNames();
 	loadBaseHash();
+	loadBaseHashNoBuiltIns();
 	loadBaseMap();
       }
     catch (RemoteException rx)
@@ -83,6 +87,40 @@ public class Loader extends Thread {
 	System.out.println("Done with thread in loader.");
       }
     this.notifyAll();
+
+  }
+
+  /**
+   * Clear out all the information in the loader.
+   *
+   */
+  public void clear()
+  {
+
+    if (debug)
+      {
+	System.out.println("Clearing the loader");
+      }
+
+    // Set everything to false, so it will reload them all.
+    baseNamesLoaded = false;
+    baseListLoaded = false;
+    baseMapLoaded = false;
+    baseHashLoaded = false;
+    
+    baseList = null;
+    baseNames = null;
+    baseHash = null;
+    baseMap = null;
+    baseList = null;
+
+    if (debug)
+      {
+	System.out.println("Starting to load the loader again");
+      }
+
+    Thread t = new Thread(this);
+    t.start();
 
   }
 
@@ -154,7 +192,6 @@ public class Loader extends Thread {
     return baseNames;
     
   }
-
   public Hashtable getBaseHash()
   {
     while (! baseHashLoaded)
@@ -189,6 +226,42 @@ public class Loader extends Thread {
     return baseHash;
     
   }
+
+  public Hashtable getBaseHashNoBuiltIns()
+  {
+    while (! baseHashNoBuiltInsLoaded)
+      {
+	System.out.println("Loader: waiting for base hash no built ins");
+
+	synchronized (this)
+	  {
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	if (baseHashNoBuiltIns == null)
+	  {
+	    System.out.println("baseHashNoBuiltIns is null");
+	  }
+	else
+	  {
+	    System.out.println("returning baseHashNoBuiltIns");
+	  }
+      }
+
+    return baseHashNoBuiltIns;
+    
+  }
+
 
   public Hashtable getBaseMap()
   {
@@ -329,6 +402,11 @@ public class Loader extends Thread {
 
     typesV = getBaseList();
 
+    if (typesV == null)
+      {
+	throw new RuntimeException("typesV is null in Loader!");
+      }
+
     if (baseHash != null)
       {
 	baseHash.clear();
@@ -341,16 +419,69 @@ public class Loader extends Thread {
     for (int i = 0; i < typesV.size(); i++)
       {
 	base = (Base) typesV.elementAt(i);
-	baseHash.put(base, base.getFields());
-	if (debug)
+	if (base != null)
 	  {
-	    System.out.println("Putting another base on the old baseHash");
+	    baseHash.put(base, base.getFields(true));
+	    if (debug)
+	      {
+		System.out.println("Putting another base on the old baseHash");
+	      }
+	  }
+	else
+	  {
+	    System.out.println("Base was null");
 	  }
       }
 
     baseHashLoaded = true;
     notifyAll();
   }
+
+
+  private synchronized void loadBaseHashNoBuiltIns() throws RemoteException
+  {
+    Base base;
+    Vector typesV;
+
+    /* -- */
+
+    typesV = getBaseList();
+
+    if (typesV == null)
+      {
+	throw new RuntimeException("typesV is null in Loader!");
+      }
+
+    if (baseHashNoBuiltIns != null)
+      {
+	baseHashNoBuiltIns.clear();
+      }
+    else
+      {
+	baseHashNoBuiltIns = new Hashtable(typesV.size());
+      }
+    
+    for (int i = 0; i < typesV.size(); i++)
+      {
+	base = (Base) typesV.elementAt(i);
+	if (base != null)
+	  {
+	    baseHashNoBuiltIns.put(base, base.getFields(false));
+	    if (debug)
+	      {
+		System.out.println("Putting another base on the old baseHashNoBuiltIns");
+	      }
+	  }
+	else
+	  {
+	    System.out.println("Base was null");
+	  }
+      }
+
+    baseHashNoBuiltInsLoaded = true;
+    notifyAll();
+  }
+
 
   /**
    *
