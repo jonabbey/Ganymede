@@ -1,17 +1,25 @@
 /*
    GASH 2
 
-   DBNameSpace.java
+   DBNameSpaceHandle.java
 
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/01/16 01:27:40 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/16 01:51:20 $
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
+
+package arlut.csd.ganymede;
+
+import java.io.*;
+import java.util.*;
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
