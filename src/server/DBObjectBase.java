@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   // used by the DBLock Classes to synchronize client access
 
   DBLock currentLock;
-  Vector writerList, readerList, dumperList;
+  private Vector writerList, readerList, dumperList;
   boolean writeInProgress;
   boolean dumpInProgress;
 
@@ -862,5 +862,167 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     original = null;
   }
+
+  // the following methods are used to manage locks on this base
+  // All methods that modify writerList, readerList, or dumperList
+  // must be synchronized on store.
+
+  /**
+   *
+   * Add a DBWriteLock to this base's writer queue.
+   *
+   */
+
+  boolean addWriter(DBWriteLock writer)
+  {
+    synchronized (store)
+      {
+	writerList.addElement(writer);
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * Remove a DBWriteLock from this base's writer queue.
+   *
+   */
+
+  boolean removeWriter(DBWriteLock writer)
+  {
+    synchronized (store)
+      {
+	return writerList.removeElement(writer);
+      }
+  }
+
+  /**
+   *
+   * Returns true if this base's writer queue is empty.
+   *
+   */
+
+  boolean isWriterEmpty()
+  {
+    return writerList.isEmpty();
+  }
+
+  /**
+   *
+   * Returns the size of the writer queue
+   *
+   */
+
+  int getWriterSize()
+  {
+    return writerList.size();
+  }
+
+  /**
+   *
+   * Add a DBReadLock to this base's reader list.
+   *
+   */
+
+  boolean addReader(DBReadLock reader)
+  {
+    synchronized (store)
+      {
+	readerList.addElement(reader);
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * Remove a DBReadLock from this base's reader list.
+   *
+   */
+
+  boolean removeReader(DBReadLock reader)
+  {
+    synchronized (store)
+      {
+	return readerList.removeElement(reader);
+      }
+  }
+
+  /**
+   *
+   * Returns true if this base's reader list is empty.
+   *
+   */
+
+  boolean isReaderEmpty()
+  {
+    return readerList.isEmpty();
+  }
+
+  /**
+   *
+   * Returns the size of the reader list
+   *
+   */
+
+  int getReaderSize()
+  {
+    return readerList.size();
+  }
+
+
+  /**
+   *
+   * Add a DBDumpLock to this base's dumper queue.
+   *
+   */
+
+  boolean addDumper(DBDumpLock dumper)
+  {
+    synchronized (store)
+      {
+	dumperList.addElement(dumper);
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * Remove a DBDumpLock from this base's dumper queue.
+   *
+   */
+
+  boolean removeDumper(DBDumpLock dumper)
+  {
+    synchronized (store)
+      {
+	return dumperList.removeElement(dumper);
+      }
+  }
+
+  /**
+   *
+   * Returns true if this base's dumper list is empty.
+   *
+   */
+
+  boolean isDumperEmpty()
+  {
+    return dumperList.isEmpty();
+  }
+
+  /**
+   *
+   * Returns the size of the dumper list
+   *
+   */
+
+  int getDumperSize()
+  {
+    return dumperList.size();
+  }
+
 }
 
