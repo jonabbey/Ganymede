@@ -327,12 +327,39 @@ Now, this email can be turned on or off by editing the
 in the starttransaction object is not checked, no transaction logs
 will ever be mailed.  If it is checked, then the 'Cc: Admin' and 'Cc:
 Owner Groups' checkboxes are consulted to determine whether the admin
-and the owner groups of any affected objects should be notified.
+and the owner groups of any affected objects should be notified.  In
+addition, any email addresses added to the 'Mail List' vector field
+will receive a complete copy of any transaction logs generated during
+the server's operation.
 
 By default, all three checkboxes are turned on and mail will be sent
 out in the same fashion that it was in 0.99.9 and earlier.  Users with
 pre-existing Ganymede databases will have to edit this system event
 object in order to restore the previous mail behavior.
+
+20. [SERVER] Fixed QueryResult.append()
+
+The arlut.csd.ganymede.QueryResult class's append() method did not
+properly update its invidHash and labelHash tables when multiple
+QueryResult objects were coalesced.  This caused the appended
+QueryResult object on the server to act as if it did not contain
+Invid's that it did, which could result in a permissions violation
+report when an InvidDBField tried to verify an Invid in an addElement
+operation.
+
+This only had an affect when the DBEditObject.obtainChoiceList()
+method used the QueryResult.append() method to concatenate query
+results, which the gasharl schema kit's emailListCustom class did for
+its Internal Members field.
+
+21. [CLIENT,SERVER] Fixed object description mail from the client
+
+Fixed the client's object mail feature.  Added getSummaryDescription()
+to the DBObject class and the db_object interface, which is now used
+for sending an email description of an object from the client.
+
+This feature is activated by using the 'Mail To...' menu item under
+the 'File' menu in the client's object view/edit windows.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
