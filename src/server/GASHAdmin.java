@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -616,11 +616,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
    *
    */
 
-  public GASHAdminFrame(String title, boolean WeAreApplet, iAdmin admin, GASHAdmin adminPanel)
+  public GASHAdminFrame(String title, boolean WeAreApplet, GASHAdmin adminPanel)
   {
     super(title);
 
-    this.admin = admin;
     this.WeAreApplet = WeAreApplet;
     this.adminPanel = adminPanel;
 
@@ -773,7 +772,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     startLabel = new JLabel("Server Start Time:");
 
     startField = new JTextField("", 40);
-    startField.setText(admin.serverStart.toString());
     startField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
@@ -955,19 +953,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     topGBL.setConstraints(tabPane, topGBC);
     getContentPane().add(tabPane);
-
-    // pack and load
-
-    admin.setFrame(this);
-
-    try
-      {
-	admin.refreshMe();
-      }
-    catch (RemoteException rx)
-      {
-	System.out.println("Problem trying to refresh: " + rx);
-      }
 
     pack();
     show();
@@ -1400,7 +1385,22 @@ public class GASHAdmin extends JApplet {
 	      password.setText("");
 	      quitButton.setEnabled(false);
 	      loginButton.setEnabled(false);
-	      frame = new GASHAdminFrame("Ganymede Admin Console", WeAreApplet, admin, applet);
+	      frame = new GASHAdminFrame("Ganymede Admin Console", WeAreApplet, applet);
+
+	      // Now that the frame is completely initialized, tie the iAdmin object
+	      // to the frame, and vice-versa.
+
+	      frame.admin = admin;
+	      admin.setFrame(frame);
+
+	      try
+		{
+		  admin.refreshMe();
+		}
+	      catch (RemoteException rx)
+		{
+		  System.out.println("Problem trying to refresh: " + rx);
+		}
 	    }
 	  else
 	    {
