@@ -6,7 +6,7 @@
    StreamTokenizer to make parsing the GASH files easier.
    
    Created: 6 August 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,6 +69,28 @@ public class Parser {
 
   /**
    *
+   * Returns true if the next thing to be read is EOL
+   *
+   */
+
+  public boolean EOLnext() throws IOException
+  {
+    return checkNextToken() == StreamTokenizer.TT_EOL;
+  }
+
+  /**
+   *
+   * Returns true if the next thing to be read is EOF
+   *
+   */
+
+  public boolean EOFnext() throws IOException
+  {
+    return checkNextToken() == StreamTokenizer.TT_EOF;
+  }
+
+  /**
+   *
    * This method runs tokens to the end of the line.
    *
    */
@@ -87,10 +109,25 @@ public class Parser {
    * that this Parser was initialized with.
    *
    */
+
+  public int getNextInt() throws IOException
+  {
+    String nextBit = getNextBit();
+
+    return new Integer(nextBit).intValue();
+  }
+
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer
+   * that this Parser was initialized with, skipping a single leading
+   * :'s and ,'s along the way
+   *
+   */
   
   public String getNextBit() throws IOException
   {
-    return getNextBit(tokens, true);
+    return getNextBit(tokens, false);
   }
 
   /**
