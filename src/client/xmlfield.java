@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/05/24 00:48:35 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/05/24 21:18:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.rmi.server.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2000/05/24 00:48:35 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/05/24 21:18:36 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -189,7 +189,7 @@ public class xmlfield implements FieldType {
 	if (!fieldDef.isArray())
 	  {
 	    nextItem = xmlclient.xc.getNextItem();
-
+	    
 	    value = new xInvid(nextItem);
 	  }
 	else
@@ -363,7 +363,19 @@ public class xmlfield implements FieldType {
 	      }
 	    else if (fieldDef.getType() == FieldType.INVID)
 	      {
-		newValue = new xInvid(nextItem);
+		if (fieldDef.isEditInPlace() && nextItem.matches("object") && nextItem.getAttrStr("type") != null)
+		  {
+		    // we've got an embedded object.. create it, and record it in
+		    // the xmlclient's createdObjects vector.
+
+		    newValue = new xmlobject((XMLElement) nextItem);
+
+		    xmlclient.xc.createdObjects.addElement(newValue);
+		  }
+		else
+		  {
+		    newValue = new xInvid(nextItem);
+		  }
 	      }
 	    else if (fieldDef.getType() == FieldType.IP)
 	      {
@@ -714,12 +726,22 @@ public class xmlfield implements FieldType {
 
 		    for (int i = 0; i < setValues.size(); i++)
 		      {
-			xInvid invidValue = (xInvid) setValues.elementAt(i);
-			Invid invid = invidValue.getInvid();
+			Invid invid;
+
+			/* -- */
+			
+			if (setValues.elementAt(i) instanceof xmlobject)
+			  {
+			    invid = ((xmlobject) setValues.elementAt(i)).getInvid();
+			  }
+			else
+			  {
+			    invid = ((xInvid) setValues.elementAt(i)).getInvid();
+			  }
 
 			if (invid == null)
 			  {
-			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    System.err.println("Error, couldn't resolve invid reference " + setValues.elementAt(i));
 			    return new ReturnVal(false);
 			  }
 
@@ -734,12 +756,22 @@ public class xmlfield implements FieldType {
 
 		    for (int i = 0; i < addValues.size(); i++)
 		      {
-			xInvid invidValue = (xInvid) addValues.elementAt(i);
-			Invid invid = invidValue.getInvid();
+			Invid invid;
+
+			/* -- */
+			
+			if (addValues.elementAt(i) instanceof xmlobject)
+			  {
+			    invid = ((xmlobject) addValues.elementAt(i)).getInvid();
+			  }
+			else
+			  {
+			    invid = ((xInvid) addValues.elementAt(i)).getInvid();
+			  }
 
 			if (invid == null)
 			  {
-			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    System.err.println("Error, couldn't resolve invid reference " + addValues.elementAt(i));
 			    return new ReturnVal(false);
 			  }
 
@@ -754,12 +786,22 @@ public class xmlfield implements FieldType {
 
 		    for (int i = 0; i < delValues.size(); i++)
 		      {
-			xInvid invidValue = (xInvid) delValues.elementAt(i);
-			Invid invid = invidValue.getInvid();
+			Invid invid;
+
+			/* -- */
+			
+			if (delValues.elementAt(i) instanceof xmlobject)
+			  {
+			    invid = ((xmlobject) delValues.elementAt(i)).getInvid();
+			  }
+			else
+			  {
+			    invid = ((xInvid) delValues.elementAt(i)).getInvid();
+			  }
 
 			if (invid == null)
 			  {
-			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    System.err.println("Error, couldn't resolve invid reference " + delValues.elementAt(i));
 			    return new ReturnVal(false);
 			  }
 
