@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996 - 2004
    The University of Texas at Austin.
 
    Contact information
@@ -1971,9 +1971,7 @@ public class PasswordDBField extends DBField implements pass_field {
   public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
-    String s, s2;
-    Vector v;
-    boolean ok = true;
+    String s;
 
     /* -- */
 
