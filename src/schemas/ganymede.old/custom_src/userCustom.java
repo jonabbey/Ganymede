@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,6 +119,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     ReturnVal retVal;
 
     /* -- */
+
+    // we don't want to do this initialization if we are bulk loading.
+
+    if (!getGSession().enableOversight)
+      {
+	return true;
+      }
 
     // need to find a uid for this user
 

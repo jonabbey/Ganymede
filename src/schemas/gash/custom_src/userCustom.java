@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -121,6 +121,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     /* -- */
 
+    // we don't want to do any of this initialization during
+    // bulk-loading.
+
+    if (!getGSession().enableOversight)
+      {
+	return true;
+      }
+
     // need to find a uid for this user
 
     NumericDBField numField = (NumericDBField) getField(UID);
@@ -159,10 +167,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     // create a volume entry for the user.
-
+    
     InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
     Invid invid = invf.createNewEmbedded(true);
-
+    
     if (invid != null)
       {
 	// find the auto.home.default map, if we can.

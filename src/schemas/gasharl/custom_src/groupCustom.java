@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -105,6 +105,14 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     ReturnVal retVal;
 
     /* -- */
+
+    // we don't want to do any of this initialization during
+    // bulk-loading.
+
+    if (!getGSession().enableOversight)
+      {
+	return true;
+      }
 
     // need to find a gid for this group
 
