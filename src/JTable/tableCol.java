@@ -1,6 +1,6 @@
 /*
 
-  baseTable.java
+  tableCol.java
 
   A JDK 1.1 table AWT component.
 
@@ -21,8 +21,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 15 January 1999
-  Version: $Revision: 1.1 $
-  Last Mod Date: $Date: 1999/01/16 01:27:05 $
+  Version: $Revision: 1.2 $
+  Last Mod Date: $Date: 1999/01/16 01:38:24 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 */
