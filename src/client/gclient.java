@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 1999/02/25 04:34:55 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 1999/02/26 21:41:42 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -204,23 +204,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     credits = null,
     about = null;
 
-  PersonaDialog
-    personaDialog;
-
   Vector
     personae,
     ownerGroups = null;  // Vector of owner groups
 
   // Dialog and GUI objects
 
-  protected JComboBox
-    personaCombo = null;  // ComboBox showing current persona on the toolbar
-
   JToolBar 
     toolBar;
     
   JFilterDialog
     filterDialog = null;
+
+  PersonaDialog
+    personaDialog = null;
 
   JDefaultOwnerDialog
     defaultOwnerDialog = null;
@@ -249,6 +246,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     search,
     queryIcon,
     pencil,
+    personaIcon,
     treepencil,
     trash,
     treetrash,
@@ -319,9 +317,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   PersonaListener
     personaListener = null;
 
-  ButtonGroup
-    personaGroup;  // This is the group of persona menu items.  Only one can be chosen.
-
   ButtonGroup 
     personaGroupRB;
 
@@ -391,6 +386,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     session = s;
     _myglogin = g;
     my_username = g.getUserName().toLowerCase();
+    currentPersonaString = my_username;
 
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
@@ -476,7 +472,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     menubarQueryMI.setMnemonic('q');
     menubarQueryMI.addActionListener(this);
 
-   // Personae menu item
+   // Personae init
 
     boolean personasExist = false;
 
@@ -529,49 +525,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     LandFMenu.setMnemonic('l');
     LandFMenu.setCallback(this);
 
-//     // Personae menu
 
-//     boolean personasExist = false;
-
-//     try
-//       {
-// 	personae = session.getPersonae();
-//       }
-//     catch (RemoteException rx)
-//       {
-// 	throw new RuntimeException("Could not load personas: " + rx);
-//       }
-
-//     personaListener = new PersonaListener(session, this);
-
-//     if (personae != null)
-//       {
-// 	PersonaMenu = new JMenu("Persona");
-// 	PersonaMenu.setMnemonic('p');
-// 	personaGroup = new ButtonGroup();
-	
-// 	for (int i = 0; i < personae.size(); i++)
-// 	  {
-// 	    String p = (String)personae.elementAt(i);
-// 	    JCheckBoxMenuItem mi = new JCheckBoxMenuItem(p, false);
-
-// 	    if (p.equals(my_username))
-// 	      {
-// 		currentPersonaString = p;
-// 		mi.setState(true);
-// 	      }
-
-// 	    personaGroup.add(mi);
-// 	    mi.addActionListener(personaListener);
-// 	    PersonaMenu.add(mi);
-// 	  }
-
-// 	personasExist = true;
-//       }
-//     else if (showToolbar && personae != null)
-//       {
-// 	currentPersonaString = my_username;
-//       }
 
     // Help menu
 
@@ -607,11 +561,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     menubar.add(LandFMenu);
     menubar.add(actionMenu);
     menubar.add(windowMenu);
-
-   //  if (personasExist)
-//       {
-// 	menubar.add(PersonaMenu);
-//       }
 
     menubar.add(Box.createGlue());
     menubar.add(helpMenu);    
@@ -661,6 +610,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
     pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    personaIcon = PackageResources.getImageResource(this, "persona.gif", getClass());
     setIconImage(pencil);
     createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
 
@@ -858,8 +808,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if ((personae != null)  && personae.size() > 1)
       {
-	personaDialog = new PersonaDialog(client);
-	personaDialog.setVisible(true);
+	changePersona(); // bring up change persona dialog
       }
 
     // Check for MOTD
@@ -1074,52 +1023,52 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     return objectlist;
   }
 
-  /**
-   *
-   * Update the persona menu so it shows the correct persona as chosen.
-   *
-   */
+//   /**
+//    *
+//    * Update the persona menu so it shows the correct persona as chosen.
+//    *
+//    */
 
-  public void updatePersonaMenu()
-  {
-    if (debug)
-      {
-	System.out.println("--Updating persona menu");
-      }
+//   public void updatePersonaMenu()
+//   {
+//     if (debug)
+//       {
+// 	System.out.println("--Updating persona menu");
+//       }
 
-    personaGroupRB = personaDialog.getButtonGroup();
-    if (personaGroupRB != null)
-      {
-	Enumeration RButtons = personaGroupRB.getElements();
+//     personaGroupRB = personaDialog.getButtonGroup();
+//     if (personaGroupRB != null)
+//       {
+// 	Enumeration RButtons = personaGroupRB.getElements();
 	
-	while (RButtons.hasMoreElements())
-	  {
-	    Object next = RButtons.nextElement();
-	    if (!(next instanceof JRadioButton)) {
-	      break;
-	    }
-	    else {
-	      JRadioButton rb = (JRadioButton)next;
-	      if (rb.getActionCommand().equals(currentPersonaString))
-		{
-		  if (debug)
-		    {
-		      System.out.println("Calling setState(true)");
-		    }
+// 	while (RButtons.hasMoreElements())
+// 	  {
+// 	    Object next = RButtons.nextElement();
+// 	    if (!(next instanceof JRadioButton)) {
+// 	      break;
+// 	    }
+// 	    else {
+// 	      JRadioButton rb = (JRadioButton)next;
+// 	      if (rb.getActionCommand().equals(currentPersonaString))
+// 		{
+// 		  if (debug)
+// 		    {
+// 		      System.out.println("Calling setState(true)");
+// 		    }
 		  
-		  rb.removeActionListener(personaListener);
-		  rb.doClick();
-		  rb.requestFocus();
-		  rb.addActionListener(personaListener);
-		  this.personaDialog.updatePassField(currentPersonaString);
+// 		  rb.removeActionListener(personaListener);
+// 		  rb.doClick();
+// 		  rb.requestFocus();
+// 		  rb.addActionListener(personaListener);
+// 		  this.personaDialog.updatePassField(currentPersonaString);
 
-		  break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
-		  // besides, if I do some setState(false)'s, then actions will be performed.
-		}
-	    }
-	  }
-      }
-  }
+// 		  break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
+// 		  // besides, if I do some setState(false)'s, then actions will be performed.
+// 		}
+// 	    }
+// 	  }
+//       }
+//   }
 
   /**
    *
@@ -1904,20 +1853,22 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBarTemp.add(b);
 
+    if ((personae != null)  && personae.size() > 1)
+      {
+	b = new JButton("Personae", new ImageIcon(personaIcon));
+	//b = new JButton(new ImageIcon(personaIcon));
+	b.setMargin(insets);
+	b.setActionCommand("change persona");
+	b.setVerticalTextPosition(b.BOTTOM);
+	b.setHorizontalTextPosition(b.CENTER);
+	b.setToolTipText("Change Persona");
+	b.addActionListener(this);
+	toolBarTemp.add(b);
+      }
+
     return toolBarTemp;
   }
 
-  /**
-   * Update the persona combo box(on toolbar) to the correct persona.
-   */
-
-  protected void setPersonaCombo(String persona)
-  {
-    if (personaCombo != null)
-      {
-	personaCombo.setSelectedItem("Persona: " + persona);
-      }
-  }
 
   ///////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -3344,20 +3295,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
  void changePersona()
   {
     // The dialog is modal, and will set itself visible when created.
-    // If we have already created it, we'll just pack it and make it
-    // visible
 
-    if (personaDialog == null)
-      {
 	personaDialog = new PersonaDialog(client);
-      }
-    else
-      {
 	personaDialog.pack();	// force it to re-center itself.
 	personaDialog.setVisible(true);
-      }
   }
 
+PersonaDialog getPersonaDialog()
+    {
+      return personaDialog;
+    }
 
   /**
    *
@@ -4800,10 +4747,7 @@ class PersonaListener implements ActionListener {
 
   public void actionPerformed(ActionEvent event)
   {
-    if (gc.debug)
-      {
-	System.out.println("action Performed!");
-      }
+    if (gc.debug) { System.out.println("action Performed!"); }
     
     //Check to see if we need to commit the transaction first.
     
@@ -4811,39 +4755,25 @@ class PersonaListener implements ActionListener {
     
     if (event.getSource() instanceof JRadioButton)
       {
-	if (gc.debug)
-	  {
-	    System.out.println("From radiobutton");
-	  }
+	if (gc.debug) { System.out.println("From radiobutton"); }
 	
 	newPersona = event.getActionCommand();
-	gc.personaDialog.updatePassField(newPersona);
+	gc.getPersonaDialog().updatePassField(newPersona);
 
-	if (gc.debug)
-	  {
-	    System.out.println("radiobutton says: " + newPersona);
-	  }
-
-	if (newPersona == null)
-	  {
-	    gc.updatePersonaMenu();
-	    return;
-	  }
-	
-	if (newPersona.equals(gc.currentPersonaString))
-	  {
-	    if (gc.debug)
-	      {
-		gc.showErrorMessage("You are already in that persona.");	
-	      }
-	    return;
-	  }
+	if (gc.debug) { System.out.println("radiobutton says: " + newPersona); }
       }
 
     else if (event.getSource() instanceof JButton)
       {    
-	newPersona = gc.personaDialog.getNewPersona();
-	
+	newPersona = gc.getPersonaDialog().getNewPersona();
+
+	if (newPersona.equals(gc.currentPersonaString))
+	  {
+	    if (gc.debug) {gc.showErrorMessage("You are already in that persona."); }
+	    return;
+	  }
+
+	// Deal with trying to change w/ uncommitted transactions
 	if (gc.getSomethingChanged())
 	  {
 	    // need to ask: commit, cancel, abort?
@@ -4858,7 +4788,7 @@ class PersonaListener implements ActionListener {
 	    if (result == null)
 	      {
 		gc.setStatus("Persona change cancelled");
-		gc.updatePersonaMenu();
+		gc.getPersonaDialog().updatePersonaMenu();
 		return;
 	      }
 	    else
@@ -4873,12 +4803,13 @@ class PersonaListener implements ActionListener {
 	boolean personaChangeSuccessful = false;	
 	String password = null;
 	
+
 	// All admin level personas have a : in them.  Only admin level
 	// personas need passwords.
 	
 	if (newPersona.indexOf(":") > 0)
 	  {
-	    password = gc.personaDialog.getPasswordField();
+	    password = gc.getPersonaDialog().getPasswordField();
 	  }
 	
 	try
@@ -4895,8 +4826,6 @@ class PersonaListener implements ActionListener {
 		gc.createDialog = null;
 		gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
 		
-		//gc.setPersonaCombo(newPersona);
-		
 		gc.ownerGroups = null;
 		gc.clearCaches();
 		gc.loader.clear();  // This reloads the hashes
@@ -4906,8 +4835,8 @@ class PersonaListener implements ActionListener {
 		gc.currentPersonaString = newPersona;
 		gc.setNormalCursor();
 		
-		gc.setStatus("Successfully changed persona.");
-		
+		gc.setStatus("Successfully changed persona to " + newPersona);
+		gc.getPersonaDialog().updatePersonaMenu();		
 	      }
 	    else
 	      {
@@ -4916,15 +4845,14 @@ class PersonaListener implements ActionListener {
 				    gc.getErrorImage());
 		
 		gc.setStatus("Persona change failed");
+
 	      }
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
 	  }
-	
-	gc.updatePersonaMenu();
-	gc.personaDialog.setVisible(false);
+	gc.getPersonaDialog().setVisible(false);
       }
     
     else
