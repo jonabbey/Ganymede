@@ -6,7 +6,7 @@
    Intersection, and Difference methods.
    
    Created: 21 July 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -215,4 +215,27 @@ public class VectorUtils {
     return result;
   }
 
+  /**
+   *
+   * This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.
+   *
+   */
+
+  public static String vectorString(Vector vec)
+  {
+    StringBuffer temp = new StringBuffer();
+
+    for (int i = 0; i < vec.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    temp.append(",");
+	  }
+
+	temp.append(vec.elementAt(i));
+      }
+
+    return temp.toString();
+  }
 }
