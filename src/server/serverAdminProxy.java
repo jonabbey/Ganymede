@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2002/01/28 21:27:09 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2002/08/02 22:31:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -60,6 +60,7 @@ import java.io.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+import arlut.csd.Util.booleanSemaphore;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -77,7 +78,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.23 $ $Date: 2002/01/28 21:27:09 $
+ * @version $Revision: 1.24 $ $Date: 2002/08/02 22:31:47 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -96,7 +97,12 @@ public class serverAdminProxy implements Admin, Runnable {
    * <p>Our queue of {@link arlut.csd.ganymede.adminEvent adminEvent} objects.</p>
    */
 
-  private Vector eventBuffer;
+  //  private Vector eventBuffer;
+
+  private final adminEvent[] eventBuffer;
+  private int enqueuePtr = 0;
+  private int dequeuePtr = 0;
+  private int ebSz = 0;
 
   /**
    * <p>How many events we'll queue up before deciding that the admin
@@ -106,7 +112,7 @@ public class serverAdminProxy implements Admin, Runnable {
    * events.</p>
    */
 
-  private int maxBufferSize = 15; // only 10 kinds of things defined right now
+  private final int maxBufferSize = 15; // only 10 kinds of things defined right now
 
   /**
    * <p>Our remote reference to the admin console client</p>
@@ -117,10 +123,13 @@ public class serverAdminProxy implements Admin, Runnable {
   /**
    * <p>If true, we have been told to shut down, and our
    * background commThread will exit as soon as it can
-   * clear its event queue.</p>.</p>
+   * clear its event queue.</p>.
+   *
+   * <p>Volatile because we use this as part of our thread synchronization
+   * logic.</p>
    */
 
-  private boolean done = false;
+  private volatile boolean done = false;
 
   /**
    * <p>Handy direct look-up table for events in eventBuffer</p>
@@ -133,7 +142,7 @@ public class serverAdminProxy implements Admin, Runnable {
   public serverAdminProxy(Admin remoteConsole)
   {
     this.remoteConsole = remoteConsole;
-    eventBuffer = new Vector();
+    eventBuffer = new adminEvent[maxBufferSize];
     lookUp = new adminEvent[adminEvent.LAST - adminEvent.FIRST + 1];
 
     commThread = new Thread(this, "admin console proxy");
@@ -173,8 +182,8 @@ public class serverAdminProxy implements Admin, Runnable {
 	    System.err.println("serverAdminProxy.shutdown: in sync");
 	  }
 
-	this.done = true;
-	eventBuffer.notifyAll(); // let the commThread drain and exit
+	done = true;
+	eventBuffer.notify(); // let the commThread drain and exit
       }
   }
 
@@ -390,11 +399,11 @@ public class serverAdminProxy implements Admin, Runnable {
       {
 	// loop until we have shut down and all of our events have drained
 
-	while (!(done && eventBuffer.size() == 0))
+	while (true)
 	  {
 	    synchronized (eventBuffer)
 	      {
-		if (eventBuffer.size() == 0)
+		while (!done && ebSz == 0)
 		  {
 		    try
 		      {
@@ -403,12 +412,14 @@ public class serverAdminProxy implements Admin, Runnable {
 		    catch (InterruptedException ex)
 		      {
 		      }
-		
-		    continue;
 		  }
 
-		event = (adminEvent) eventBuffer.elementAt(0);
-		eventBuffer.removeElementAt(0);
+		if (done && ebSz == 0)
+		  {
+		    return;	// but see finally, below
+		  }
+
+		event = dequeue();
 
 		// clear the direct pointer to this event so that
 		// changeStatus() and replaceEvent() will know that we
@@ -448,11 +459,21 @@ public class serverAdminProxy implements Admin, Runnable {
       }
     finally
       {
-	done = true;	
+	// normally, we won't get here unless done is set, but if we
+	// hit an exception or error above, we might get kicked down
+	// here, so we'll go ahead and set it true.
 
-	// now we need to aid garbage collection
+	done = true;
 
-	eventBuffer.setSize(0);
+	// let's aid garbage collection
+
+	synchronized (eventBuffer)
+	  {
+	    for (int i = 0; i < maxBufferSize; i++)
+	      {
+		eventBuffer[i] = null;
+	      }
+	  }
 
 	// we may get a thread that missed the done check adding to
 	// eventBuffer after the above, but that's not fatal.. it'll
@@ -484,7 +505,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
     synchronized (eventBuffer)
       {
-	if (eventBuffer.size() >= maxBufferSize)
+	if (ebSz >= maxBufferSize)
 	  {
 	    // we shouldn't overflow here because we are replacing or
 	    // coalescing all of our events.. we shouldn't be able to
@@ -493,7 +514,7 @@ public class serverAdminProxy implements Admin, Runnable {
 	    throwOverflow();
 	  }
 
-	eventBuffer.addElement(newEvent);
+	enqueue(newEvent);
 	
 	eventBuffer.notify();	// wake up commThread
       }
@@ -537,14 +558,14 @@ public class serverAdminProxy implements Admin, Runnable {
 	// okay, we don't have an event of matching type on our eventBuffer
 	// queue.  Check for overflow and add the element ourselves.
 
-	if (eventBuffer.size() >= maxBufferSize)
+	if (ebSz >= maxBufferSize)
 	  {
 	    throwOverflow();
 	  }
 
 	adminEvent newEvent = new adminEvent(method, param);
 
-	eventBuffer.addElement(newEvent);
+	enqueue(newEvent);
 
 	// remember that we have an event of this type on our eventBuffer
 	// for direct lookup by later replaceEvent calls.
@@ -569,15 +590,71 @@ public class serverAdminProxy implements Admin, Runnable {
   {
     StringBuffer buffer = new StringBuffer();
     
-    for (int i = 0; i < eventBuffer.size(); i++)
+    synchronized (eventBuffer)
       {
-	buffer.append(i);
-	buffer.append(": ");
-	buffer.append(eventBuffer.elementAt(i));
-	buffer.append("\n");
+	int i = dequeuePtr;
+	int count = 0;
+
+	while (count < ebSz)
+	  {
+	    buffer.append(i);
+	    buffer.append(": ");
+	    buffer.append(eventBuffer[i]);
+	    buffer.append("\n");
+
+	    count++;
+	    i++;
+
+	    if (i >= maxBufferSize)
+	      {
+		i = 0;
+	      }
+	  }
       }
     
     throw new RemoteException("serverAdminProxy buffer overflow:" + buffer.toString());
+  }
+
+  /**
+   * private enqueue method.
+   */
+
+  private void enqueue(adminEvent item)
+  {
+    synchronized (eventBuffer)
+      {
+	eventBuffer[enqueuePtr] = item;
+
+	if (++enqueuePtr >= maxBufferSize)
+	  {
+	    enqueuePtr = 0;
+	  }
+
+	ebSz++;
+      }
+  }
+
+  /**
+   * private dequeue method.  assumes that the calling code will check
+   * bounds.
+   */
+
+  private adminEvent dequeue()
+  {
+    synchronized (eventBuffer)
+      {
+	adminEvent result = eventBuffer[dequeuePtr];
+	eventBuffer[dequeuePtr] = null;
+
+	if (++dequeuePtr >= maxBufferSize)
+	  {
+	    dequeuePtr = 0;
+	  }
+
+	ebSz--;
+	
+	return result;
+      }
   }
 }
 
