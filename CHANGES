@@ -245,6 +245,23 @@ connection thread.
 
 Good stuff, and long overdue.
 
+15. [NIS PASSWORD CLIENT] Removed the rpcpass program
+
+I've taken out the old rpcpass program which was used in conjunction
+with the -x option to Thorsten Kukuk's NIS yppasswdd daemon for Linux.
+The vaguely named rpcpass was used to propagate password, shell, and
+finger info changes from the Linux yppasswdd daemon into Ganymede.
+
+Unfortunately, the passwords that the yppasswdd is capable of
+transmitting to Ganymede are in the old Unix crypt() format, which
+means that passwords submitted in this way are useless if Ganymede
+needs to sync to anything but NIS.
+
+Therefore, and given that we at ARL have not used this code in nearly
+five years, I removed it.  If you are reading this out there in
+Internet land and decide that you've got to have it, let me know and
+I'll see about resurrecting it from Subversion.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
