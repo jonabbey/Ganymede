@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 1999/08/18 23:49:39 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 1999/08/19 00:41:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.117 $ $Date: 1999/08/18 23:49:39 $ $Name:  $
+ * @version $Revision: 1.118 $ $Date: 1999/08/19 00:41:01 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1578,7 +1578,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * still be overridden to do customization, if needed.</p>
    */
 
-  public Invid createNewEmbeddedObject(InvidDBField field)
+  public ReturnVal createNewEmbeddedObject(InvidDBField field)
   {    
     DBEditObject newObject;
     DBObjectBase targetBase;
@@ -1605,30 +1605,34 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	    if (retVal == null)
 	      {
-		throw new RuntimeException("error in server, createNewEmbeddedObject " +
-					   "could not get a useful result from " +
-					   "create_db_object");
+		return Ganymede.createErrorDialog("Server Error",
+						  "DBEditObject.createNewEmbeddedObject could not get " + 
+						  "a useful result from create_db_object");
 	      }
 	
 	    if (!retVal.didSucceed())
 	      {
-		return null;	// failure
+		return retVal;
 	      }
-	
+
 	    newObject = (DBEditObject) retVal.getObject();
-	
-	    return newObject.getInvid();
+
+	    retVal.setInvid(newObject.getInvid());
+
+	    return retVal;
 	  }
 	else
 	  {
-	    throw new RuntimeException("error in schema.. createNewEmbeddedObject called " +
-				       "without a valid GanymedeSession..");
+	    return Ganymede.createErrorDialog("Server Error",
+					      "error in schema.. createNewEmbeddedObject called " +
+					      "without a valid GanymedeSession..");
 	  }
       }
     else
       {
-	throw new RuntimeException("error in schema.. createNewEmbeddedObject " +
-				   "called without a valid target..");
+	return Ganymede.createErrorDialog("Server Error",
+					  "error in schema.. createNewEmbeddedObject called " +
+					  "without a valid target..");
       }
   }
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 1999/08/18 23:49:41 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 1999/08/19 00:41:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.108 $ %D%
+ * @version $Revision: 1.109 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2761,6 +2761,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public synchronized ReturnVal createNewEmbedded(boolean local)
   {
+    ReturnVal retVal = null;
+
+    /* -- */
+
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
@@ -2792,7 +2796,20 @@ public final class InvidDBField extends DBField implements invid_field {
     // have our owner create a new embedded object
     // for us 
 
-    Invid newObj = eObj.createNewEmbeddedObject(this);
+    retVal = eObj.createNewEmbeddedObject(this);
+
+    if (retVal == null)
+      {
+	return Ganymede.createErrorDialog("Couldn't create new embedded object",
+					  "A null value was returned by the createNewEmbeddedObject call in the " +
+					  getName() + " field.\n\nThis may be due to a permissions problem");
+      }
+    else if (!retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    Invid newObj = retVal.getInvid();
 
     if (newObj == null)
       {
@@ -2828,8 +2845,8 @@ public final class InvidDBField extends DBField implements invid_field {
     // container, the permissions system will fail if we don't bypass
     // it by using the local variant.
 
-    ReturnVal retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
-						      owner.getInvid());
+    retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
+					    owner.getInvid());
 
     if (retVal != null && !retVal.didSucceed())
       {
