@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.76 $ %D%
+   Version: $Revision: 1.77 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2226,7 +2226,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method is used to generate a String describing the difference
    * between the current state of the DBEditObject and the original
-   * object's state.
+   * object's state.<br><br>
+   *
+   * This method can also be used if this object is newly created.. in
+   * this case, it will just return a string containing many 'FieldAdded'
+   * entries.
    *
    * @return null if no difference was found
    *
@@ -2281,7 +2285,18 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    System.err.println("Comparing field " + fieldDef.getName());
 	  }
 
-	origField = (DBField) original.getField(fieldDef.getID());
+	// if we're newly created, we'll just treat the old field as
+	// non-existent.
+
+	if (original == null)
+	  {
+	    origField = null;
+	  }
+	else
+	  {
+	    origField = (DBField) original.getField(fieldDef.getID());
+	  }
+
 	currentField = (DBField) this.getField(fieldDef.getID());
 
 	if ((origField == null || !origField.defined) && 
