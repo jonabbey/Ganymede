@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -684,7 +684,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
-    if (!local)
+    if (!local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 	
@@ -912,7 +912,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
-    if (!local)
+    if (!local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -1061,7 +1061,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
-    if (!local)
+    if (!local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -1182,7 +1182,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     eObj = (DBEditObject) owner;
 
-    if (!local)
+    if (!local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
