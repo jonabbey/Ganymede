@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,10 @@ public class DBQueryHandler {
 
   public static final boolean nodeMatch(QueryNode qN, DBObject obj)
   {
+    Object value;
+    
+    /* -- */
+
     if (qN == null)
       {
 	return false;
@@ -66,7 +70,7 @@ public class DBQueryHandler {
 
     if (qN instanceof QueryDataNode)
       {
-	DBField field;
+	DBField field = null;
 	QueryDataNode n;
 
 	/* - */
@@ -90,14 +94,32 @@ public class DBQueryHandler {
 	if (n.fieldname != null)
 	  {
 	    field = (DBField) obj.getField(n.fieldname);
+
+	    if ((field != null) && (field.defined))
+	      {
+		value = field.getValue();
+	      }
+	    else
+	      {
+		return false;
+	      }
 	  }
 	else if (n.fieldId != -1)
 	  {
 	    field = (DBField) obj.getField(n.fieldId);
+
+	    if ((field != null) && (field.defined))
+	      {
+		value = field.getValue();
+	      }
+	    else
+	      {
+		return false;
+	      }
 	  }
 	else
 	  {
-	    throw new RuntimeException("invalid field id in QueryNode");
+	    value = obj.getLabel();
 	  }
 
 	if (n.comparator == n.UNDEFINED)
@@ -105,28 +127,19 @@ public class DBQueryHandler {
 	    return ((field == null) || (!field.defined));
 	  }
 
-	if ((field == null) || (!field.defined))
-	  {
-	    return false;
-	  }
-
 	// okay.  Now we check each field type
 
-	if (field instanceof StringDBField)
+	if (value instanceof String)
 	  {
-	    StringDBField string = (StringDBField) field;
-
-	    /* -- */
-
 	    if (n.comparator == n.EQUALS)
 	      {
-		return (string.getValue().equals(n.value));
+		return (value.equals(n.value));
 	      }
 	    else if (n.comparator == n.NOCASEEQ)
 	      {
 		try
 		  {
-		    return (((String) string.getValue()).equalsIgnoreCase((String) n.value));
+		    return (((String) value).equalsIgnoreCase((String) n.value));
 		  }
 		catch (ClassCastException ex)
 		  {
@@ -137,7 +150,7 @@ public class DBQueryHandler {
 	      {
 		try
 		  {
-		    return (((String) string.getValue()).startsWith((String) n.value));
+		    return (((String) value).startsWith((String) n.value));
 		  }
 		catch (ClassCastException ex)
 		  {
@@ -148,7 +161,7 @@ public class DBQueryHandler {
 	      {
 		try
 		  {
-		    return (((String) string.getValue()).endsWith((String) n.value));
+		    return (((String) value).endsWith((String) n.value));
 		  }
 		catch (ClassCastException ex)
 		  {
@@ -163,15 +176,11 @@ public class DBQueryHandler {
 
 	//
 
-	if (field instanceof BooleanDBField)
+	if (value instanceof Boolean)
 	  {
-	    BooleanDBField bool = (BooleanDBField) field;
-
-	    /* -- */
-
 	    if (n.comparator == n.EQUALS)
 	      {
-		return (bool.getValue().equals(n.value));
+		return ((Boolean) value).equals(n.value);
 	      }
 	    else
 	      {
@@ -181,16 +190,15 @@ public class DBQueryHandler {
 
 	//
 
-	if (field instanceof DateDBField)
+	if (value instanceof Date)
 	  {
-	    DateDBField date = (DateDBField) field;
 	    long time1, time2;
 
 	    /* -- */
 
 	    try
 	      {
-		time1 = ((Date) date.getValue()).getTime();
+		time1 = ((Date) value).getTime();
 		time2 = ((Date) n.value).getTime();
 	      }
 	    catch (ClassCastException ex)
@@ -226,16 +234,15 @@ public class DBQueryHandler {
 
 	//
 
-	if (field instanceof NumericDBField)
+	if (value instanceof Integer)
 	  {
-	    NumericDBField num = (NumericDBField) field;
 	    int val1, val2;
 
 	    /* -- */
 
 	    try
 	      {
-		val1 = ((Integer) num.getValue()).intValue();
+		val1 = ((Integer) value).intValue();
 		val2 = ((Integer) n.value).intValue();
 	      }
 	    catch (ClassCastException ex)
@@ -271,16 +278,15 @@ public class DBQueryHandler {
 
 	//
 
-	if (field instanceof InvidDBField)
+	if (value instanceof Invid)
 	  {
-	    InvidDBField invid = (InvidDBField) field;
 	    Invid i1, i2;
 
 	    /* -- */
 
 	    try
 	      {
-		i1 = (Invid) invid.getValue();
+		i1 = (Invid) value;
 		i2 = (Invid) n.value;
 	      }
 	    catch (ClassCastException ex)
