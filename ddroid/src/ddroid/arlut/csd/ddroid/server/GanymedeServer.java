@@ -324,13 +324,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    if (error.equals("shutdown"))
 	      {
-		return Ganymede.createErrorDialog(ts.l("processLogins.nologins"),
-						  ts.l("processLogins.nologins_shutdown"));
+		return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+						  ts.l("processLogin.nologins_shutdown"));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog(ts.l("processLogins.nologins"),
-						  ts.l("processLogins.nologins_semaphore", error));
+		return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+						  ts.l("processLogin.nologins_semaphore", error));
 	      }
 	  }
       }
