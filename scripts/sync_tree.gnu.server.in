@@ -2,8 +2,8 @@
 #
 # sync_tree.gnu
 #
-# $Revision: 1.1 $
-# $Date: 1999/01/20 00:33:15 $
+# $Revision: 1.2 $
+# $Date: 2000/02/16 11:29:27 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -24,8 +24,7 @@ chdir($targetdir);
 
 system("rm -rf *");
 
-# We want to link in all classes from the ganymede class directory, not including
-# custom, client, loader, and other subordinate package directories
+# We want to link in all classes from the gnu/regexp class directory
 
 opendir SOURCEDIR, $sourcedir or die "couldn't open source dir";
 

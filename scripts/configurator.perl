@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.42 $
-# $Date: 2000/01/26 04:47:17 $
+# $Revision: 1.43 $
+# $Date: 2000/02/16 11:29:27 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -205,7 +205,7 @@ sub write_rebuild {
     open(REBUILDOUT, ">$dir/rebuild") || die("Can't create the $dir/rebuild");
 
     while (<REBUILDIN>){
-	s/\/opt\/bin\/perl5/$perlname/;
+	s/\/opt\/bin\/perl5/$perlname/g;
 	print REBUILDOUT $_;
     }
 
@@ -232,8 +232,8 @@ sub write_syncjars {
     open(SYNCOUT, ">$target") || die("Can't create the $target");
 
     while (<SYNCIN>){
-	s/\/opt\/bin\/perl5/$perlname/;
-	s/\<\#CLASSDIR\#\>/$classdir/;
+	s/\/opt\/bin\/perl5/$perlname/g;
+	s/\<\#CLASSDIR\#\>/$classdir/g;
 	print SYNCOUT $_;
     }
 
@@ -260,9 +260,9 @@ sub write_install {
     open(INSTOUT, ">$rootdir/$target") || die("Can't create the $target");
 
     while (<INSTIN>){
-	s/\/opt\/bin\/perl5/$perlname/;
-	s/\<\#JAVADIR\#\>/$javadir/;
-	s/\<\#SWINGDIR\#\>/$swingdir/;
+	s/\/opt\/bin\/perl5/$perlname/g;
+	s/\<\#JAVADIR\#\>/$javadir/g;
+	s/\<\#SWINGDIR\#\>/$swingdir/g;
 	print INSTOUT $_;
     }
 
@@ -502,7 +502,9 @@ while ($#rebuilds > 0) {
        "sync_tree.server.in",
        "$classdir/server_classes/sync_tree",
        "sync_tree.gnu.server.in",
-       "$classdir/server_classes/sync_tree.gnu");
+       "$classdir/server_classes/sync_tree.gnu",
+       "sync_tree.xml.server.in",
+       "$classdir/server_classes/sync_tree.xml");
 
 print "Generating jar generation scripts.\n\n";
 

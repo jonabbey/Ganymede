@@ -1,5 +1,5 @@
-Ganymede Release 0.99.9
-January 13, 2000
+Ganymede Release 1.0pre1
+March ??, 2000
 CHANGES
 ---------------------------------------------
 
@@ -7,17 +7,233 @@ CHANGES
 
 RELEASE DATE: March ??
 
-1. [SERVER] Another deadlock mitigated
+1. [SERVER] Reworked server synchronization logic
 
 The GanymedeServer.login() method was vulnerable to a nested monitor
 deadlock due to a section being synchronized on both the server's
 GanymedeServer object and its DBStore object.
 
-I went through all code in GanymedeServer and fixed a number of
-improper synchronizations.  The sweepInvids() and checkInvids()
-methods have been fixed so that they are no longer synchronized on
-GanymedeServer but they do now establish a dump lock on the server's
-database, to insure that the object walk is done safely.
+Basically, I was getting way too fancy in synchronizing on various
+server objects instead of defining a proper semaphore class and using
+that.
+
+I added the loginSemaphore class, which takes care of everything
+without my having to worry about n^2 different possible code paths.
+
+I modified the admin console to report the login semaphore count for
+each log entry.. this makes it easy to see at a glance how many users
+are logged on for each log entry, and to insure that the semaphore
+count is incremented and decremented properly under all circumstances.
+
+In the process of all this, I realized that I was unnecessarily doing
+a notifyAll() every time I did a synchronized operation on the
+server's DBStore object.. I had misunderstood when it was necessary to
+do a notify when I originally wrote a lot of this code.
+
+The sweepInvids() and checkInvids() methods have been fixed so that
+they are no longer synchronized on GanymedeServer but they do now
+establish a dump lock on the server's database, to insure that the
+object walk is done safely.
+
+2. [SERVER] Added getBackLinks() method to the DBObject class
+
+Martin Schneider <martin@ira.uka.de> reported that he needed to be
+able to get the Vector of Invid's pointing to a given object through
+asymmetric links, in the same way that was possible by using the old
+backlinks field.  To support this, I added a getBackLinks() method to
+the DBObject class that directly consults the DBStore's backPointers
+hash tree.
+
+3. [ADMIN CONSOLE] Fixed admin console confusion with multiple logins
+
+The admin console had a bug that would cause the console user table to
+become confused if more than one user with the same persona name was
+logged in at the same time on the Ganymede server.
+
+This problem only happened when an admin logged into the server with
+admin privileges more than one at a time.  Logging in without admin
+privileges did not cause this problem, because the server assigns
+unique usernames to logins, but the server does not guarantee unique
+persona names.
+
+The server now reports to the admin console each login's unique user
+name, which the admin console uses for login tracking, but the admin
+console will continue to display the user's (possibly non-unique)
+persona name.
+
+This one has bugged me for awhile, it's good to have this fixed.
+
+This change (and change 5 below) change some of the semantics of the
+admin console's operations, so you should not use an older version of
+the Ganymede admin console with a 1.0pre1 server.
+
+4. [CLIENT] Right clicking on a selected JTable row no longer de-selects the row
+
+This one has bothered me for a long time, too.  I changed the
+baseTable, rowTable, and tableCanvas classes in src/JTable so that
+right-clicks on a table row won't ever deselect that row if already
+selected.  Left-clicking on a selected row in the rowTable will still
+deselect the row.
+
+5. [ADMIN CONSOLE] Threaded out server-to-console communications
+
+The Ganymede server has always communicated synchronously with any
+attached admin consoles, which made the server effectively block if
+the admin console became non-responsive without explicitly throwing a
+RemoteException.  I noticed today that the admin console was blocking
+the server from processing logins/logouts while my window manager on X
+was waiting for me to place a new window, which of course is not
+acceptable.
+
+The Ganymede server now queues up notification events for the admin
+console, and uses a separate thread for each admin console for
+actually handling the server-to-console communications, using the new
+serverAdminProxy class.  The Ganymede server will no longer sit around
+waiting for the admin console when something happens, with the obvious
+benefits resulting in speed and reliability on the server.
+
+As a side benefit of the event queueing model, I've implemented event
+coalescing and event replacement, so that if the Ganymede server is
+generating admin console events faster than the console update thread
+is getting them to the admin console, the server will combine and/or
+drop old events, so that the server won't waste time sending events to
+the console that are already out of date.
+
+The admin console was changed a very little bit to support event
+coalescing; the changeStatus() method in arlut.csd.ganymede.iAdmin now
+depends on the server prefixing each status line with a time stamp,
+rather than trying to time stamp each event from the server itself.
+
+Good stuff, and very clean on the server.
+
+6. [ADMIN CONSOLE] Fixed admin console shutdown process
+
+I fixed some code in the server's GanymedeAdmin class so that an admin
+console will stay open if a shutdown attempt by it was refused for
+some reason.  Also fixed a bug in the admin console that made it fail
+to really attempt to shutdown the server if it tried once and failed.
+
+7. [SERVER] Cleaned up some locking and transaction logic
+
+I went through and did a code review of all of the server's
+transaction and locking classes, and removed a few bits of extraneous
+stuff, fixed a couple of mistakes that could conceivably cause
+problems on edge cases, and extensively commented code that I hadn't
+really touched for a couple of years so that if I dive into it in 2002
+I won't have to figure it all out from scratch again.
+
+These changes probably won't be noticeable in operation unless I broke
+something.
+
+The DBLock code itself has been reworked a fair bit.  The DBLock code
+no longer synchronizes directly on the Ganymede server's DBStore
+object, but instead uses a DBLockSync object held in the DBStore
+object.  This as well will help prevent deadlock problems, by limiting
+the scope of synchronization on the DBStore object even further.
+
+8. [SERVER] Made the database dumper task less timid
+
+Due in part to the increased confidence I have in the server's thread
+safety with the new login semaphore and my code review, I made the
+database dumper task go ahead and do a database consolidation even if
+users are logged into the server.
+
+Previously, the database consolidation task could be postponed
+indefinitely if users were logged in each time the dump task fired,
+leading to a bigger journal file and longer startup times if the
+server machine was rebooted.  Now the database dumper task will go
+ahead and do the dump, even if it has to wait for transaction commits
+to finish so it can assert a DBDumpLock on the database.
+
+9. [SERVER/CLIENT] Added addElements() and deleteElements() to DBField
+
+The Ganymede client has long supported moving large blocks of choices
+from the unselected panel to the selected panel in vector invid and
+string fields, using shift-click to do multiple selection.
+Unfortunately, actually doing this with large blocks has been
+*excruciatingly* slow to perform, as each item moved was a separate
+round trip network call.  For Invid fields, things were even worse, as
+each single item moved involved a separate transaction checkpoint to
+make sure that all bind and unbind operations for the element
+add/delete were done with transactional consistency.
+
+The db_field interface now has explicit addElements() and
+deleteElements() methods that support bulk adds or deletes.  The
+DBField and InvidDBField classes have had these methods added as well.
+For InvidDBField particularly, the speed up from using the bulk
+add/delete methods is dramatic.
+
+In the process of adding addElements() and deleteElements() on the
+server, I wound up significantly increasing the efficiency of even
+non-bulk vector adds where there is an enumerated list of choices that
+any adds have to be chosen from.
+
+In the process of supporting such bulk transfers, I modified a good
+bit of the client and the client's StringSelector GUI component.
+Everywhere the client uses the StringSelector can now handle bulk
+moves in one operation.
+
+Making this change has the potential to complicate custom DBEditObject
+subclasses, which now have to be able to respond in wizardHook() to
+both singleton and bulk adds and deletes, and which have to provide
+separate finalizeAddElements() and finalizeDeleteElements() in
+addition to the old finalizeAddElement() and finalizeDeleteElement()
+methods if the customizer wishes to take special action when items are
+added to or removed from a vector field.
+
+10. [CLIENT] Cleaned up the Objects Owned panel in the Owner Group window
+
+Despite the fact that the 'Objects Owned' panel in the Owner Group
+window uses the same GUI component that the normal 'General' panel
+uses, it was not possible to right-click on entries in order to view
+or edit objects listed.
+
+This has been fixed, and it should now be possible to right-click on
+any object listing in the client and get at least a view/edit menu.
+
+The object type listing pulldown menu in the Objects Owned panel will
+now be sorted in the client.
+
+Turned debugging off in the Objects Owned panel.
+
+11. [CLIENT] Added threading to adminHistory panel
+
+When I added a thread-out to the generic history panel in the client
+(change 0.99.9#10), I neglected to do the same for the admin history
+panel that is present when viewing and/or editing an admin persona
+object.
+
+The admin history panel is now threaded so that it won't block the GUI
+refresh during long waits for a history summary from the server.
+
+12. [SERVER] Fixed journal handling on start up
+
+The DBStore load() method failed to consolidate the journal into a
+clean ganymede.db dump if the journal was not in a fully consistent
+state.  It would print an error message and then skip the normal
+start-up dump.
+
+Now, the error message is still printed, but since the journal loading
+code will properly cope with incomplete or malformed transaction
+records in the journal, the normal startup process is followed
+thereafter.
+
+13. [SERVER/CLIENT] The client now displays whether the server is doing a build
+
+The server will now notify the client when it starts and stops
+performing a build.  The client displays this information in the panel
+in the very bottom left corner, where the 'Status: ' text used to be.
+
+This is an asynchronous message sent by the server using a new
+serverClientProxy class that has its own background thread for
+queueing and sending asynchronous RMI calls to the client.  The
+mechanism used to send this message is generic; it will be easy to
+extend this mechanism if I want to add more generic server
+notification features to the client.
+
+This involved a change to several server classes, including the
+GanymedeBuilderTask base class.  Any task not subclassed from
+GanymedeBuilderTask will not trigger this status update.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
