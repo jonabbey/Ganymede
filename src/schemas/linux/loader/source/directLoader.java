@@ -11,7 +11,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,7 @@ import arlut.csd.ganymede.custom.*;
 
 public class directLoader {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   static GanymedeServer my_server;
   static Session my_session;
