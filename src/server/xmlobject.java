@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2002/08/21 06:58:51 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2003/02/11 02:29:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,13 +72,13 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.6 $ $Date: 2002/08/21 06:58:51 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2003/02/11 02:29:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlobject {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   /**
    * <p>The local identifier string for this object</p>
