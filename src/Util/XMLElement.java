@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/10/26 08:42:45 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/10/28 08:12:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -369,6 +369,33 @@ public class XMLElement extends XMLItem {
 	for (int i = 0; i < children.length; i++)
 	  {
 	    children[i].debugPrintTree(indentLevel);
+	  }
+      }
+  }
+
+  /**
+   * <P>This debug method appends this item and all items
+   * under this item if this item is the top node in a
+   * tree to the StringBuffer passed in.</P>
+   */
+
+  public void getTreeString(StringBuffer buffer, int indentLevel)
+  {
+    for (int i = 0; i < indentLevel; i++)
+      {
+	buffer.append("  ");
+      }
+
+    buffer.append(this.toString());
+    buffer.append("\n");
+
+    if (children != null)
+      {
+	indentLevel++;
+
+	for (int i = 0; i < children.length; i++)
+	  {
+	    children[i].getTreeString(buffer, indentLevel);
 	  }
       }
   }
