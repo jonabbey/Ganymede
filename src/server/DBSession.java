@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,12 @@ import java.util.*;
 
 public class DBSession {
 
-  static final boolean debug = true;
+  static boolean debug = true;
+
+  public static void setDebug(boolean val)
+  {
+    debug = val;
+  }
   
   DBStore store;
   DBLock lock;
@@ -564,5 +569,10 @@ public class DBSession {
   void setLastError(String error)
   {
     this.lastError = error;
+
+    if (debug)
+      {
+	System.err.println("DBSession.setLastError(): " + error);
+      }
   }
 }
