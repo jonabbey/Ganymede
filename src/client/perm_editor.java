@@ -5,7 +5,7 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
   boolean debug = false;
 
+  String DialogTitle;
   boolean enabled;
   boolean viewOnly; // = !enabled
   boolean isActive = true;
@@ -50,8 +51,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
   JButton OkButton = new JButton ("Ok");
   JButton CancelButton = new JButton("Cancel");
-  JButton ExpandButton = new JButton ("Expand All Nodes");
-  JButton CollapseButton = new JButton("Collapse All Nodes");
+  JButton ExpandButton = new JButton ("Expand All");
+  JButton CollapseButton = new JButton("Collapse All");
  
   boolean keepLoading = true;
 
@@ -64,11 +65,11 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
   // Layout Stuff 
   JPanel 
+    Base_Panel,
     Choice_Buttons,
     Expansion_Buttons,
+    All_Buttons,
     waitPanel;
-  GridBagLayout gbl = new GridBagLayout();
-  GridBagConstraints gbc = new GridBagConstraints();
 
   /* -- */
 
@@ -102,7 +103,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     this.enabled = enabled;
     this.gc = gc;
     this.viewOnly = !enabled;
-
+    this.DialogTitle = DialogTitle;
 
     if (!debug)
       {
@@ -157,7 +158,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     Rectangle b = gc.getBounds();
     progressDialog.setLocation(b.width/2 + b.x - 75, b.height/2 + b.y - 50);
     progressDialog.pack();
-
     progressDialog.setVisible(true);
 
 
@@ -195,7 +195,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     CancelButton.addActionListener(this);
  
     Choice_Buttons = new JPanel(); 
-    Choice_Buttons.setLayout(new FlowLayout ());
+    Choice_Buttons.setLayout(new GridLayout(1,2));
+    Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
     Choice_Buttons.add(OkButton);
     Choice_Buttons.add(CancelButton);
 
@@ -231,9 +232,19 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 					  });
 
     Expansion_Buttons = new JPanel(); 
+    Expansion_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
     Expansion_Buttons.setLayout(new GridLayout(1,2));
     Expansion_Buttons.add(ExpandButton);
     Expansion_Buttons.add(CollapseButton);
+
+
+    // Group Expansion buttons and Choice buttons together
+
+    All_Buttons = new JPanel();
+    All_Buttons.setLayout(new BorderLayout());
+    All_Buttons.add("West", Expansion_Buttons);
+    All_Buttons.add("East", Choice_Buttons);
+
 
     progressBar.setValue(2);
     
@@ -318,10 +329,20 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
     getContentPane().setBackground(Color.white);
-    getContentPane().add("Center", edit_pane);
-    getContentPane().add("North", Expansion_Buttons);
-    getContentPane().add("South", Choice_Buttons);
 
+    TitledBorder border = new TitledBorder(this.DialogTitle);
+    border.setTitlePosition(TitledBorder.TOP);
+    border.setTitleJustification(TitledBorder.LEFT);
+
+    Base_Panel = new JPanel(); 
+    Base_Panel.setBorder(border);
+    Base_Panel.setLayout(new BorderLayout());
+
+    Base_Panel.add("Center", edit_pane);
+    Base_Panel.add("South", All_Buttons);
+    //    getContentPane().add("Center", edit_pane);
+    //    getContentPane().add("South", All_Buttons);
+    getContentPane().add("Center", Base_Panel);
     gc.setWaitCursor();
     
     progressDialog.setVisible(false);    
