@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.10 $
-# Date: $Date: 1999/07/08 05:01:05 $
+# Version: $Revision: 1.11 $
+# Date: $Date: 2000/10/06 21:13:24 $
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
@@ -92,9 +92,22 @@ rm -f *.jar
 
 find arlut -name \*.class -exec rm {} \;
 
+# And all the xml stuff under com and org
+
+find com -name \*.class -exec rm {} \;
+find org -name \*.class -exec rm {} \;
+
+# Clean up all the files we sync'ed into server_classes
+# and client_classes
+
+find server_classes -name \*.class -exec rm {} \;
+find client_classes -name \*.class -exec rm {} \;
+
 # Remove the configured sync_tree files.
 
 find arlut -name sync_tree\* -exec rm {} \;
+find server_classes -name sync_tree\* -exec rm {} \;
+find client_classes -name sync_tree\* -exec rm {} \;
 
 cd $GROOTDIR
 
