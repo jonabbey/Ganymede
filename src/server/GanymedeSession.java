@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.110 $ %D%
+   Version: $Revision: 1.111 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.110 $ %D%
+ * @version $Revision: 1.111 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -1101,6 +1101,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     groups = inf.getValuesLocal();
 
+    // *** Caution!  getValuesLocal() does not clone the field's contents..
+    // 
+    // DO NOT modify groups here!
+
     while (groups != null && (groups.size() > 0))
       {
 	children = new Vector();
@@ -1139,6 +1143,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (inf != null)
 	      {
 		temp = inf.getValuesLocal();
+
+		// *** Caution!  getValuesLocal() does not clone the field's contents..
+		// 
+		// DO NOT modify temp here!
 
 		for (int j = 0; j < temp.size(); j++)
 		  {
@@ -4286,6 +4294,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		Vector vals = idbf.getValuesLocal();
 
+		// *** Caution!  getValuesLocal() does not clone the field's contents..
+		// 
+		// DO NOT modify vals here!
+
 		// loop over the owner groups this persona is a member
 		// of, see if it includes the supergash owner group
 		    
@@ -4353,6 +4365,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		if (idbf != null)
 		  {
 		    Vector vals = idbf.getValuesLocal();
+
+		    // *** Caution!  getValuesLocal() does not clone the field's contents..
+		    // 
+		    // DO NOT modify vals here!
+
 		    PermissionMatrixDBField pmdbf, pmdbf2;
 		    DBObject pObj;
 
@@ -4567,7 +4584,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	owners = inf.getValuesLocal();
+	// we have to clone the value returned to us by
+	// getValuesLocal() because getValuesLocal() returns the
+	// actual vector held in the field, and if we were to change
+	// that, bad things would happen.
+
+	owners = (Vector) inf.getValuesLocal().clone();
       }
 
     // All owner group objects are considered to be self-owning.
@@ -4603,6 +4625,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    Vector values = inf2.getValuesLocal();
 
+	    // *** Caution!  getValuesLocal() does not clone the field's contents..
+	    // 
+	    // DO NOT modify values here!
+
 	    if (debug)
 	      {
 		for (int i = 0; i < values.size(); i++)
@@ -4617,6 +4643,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		
 		System.err.println();
 	      }
+
+	    // we don't have to clone inf2.getValuesLocal() since union() will copy
+	    // the elements rather than just setting owners to the vector returned
+	    // by inf2.getValuesLocal() if owners is currently null. 
 
 	    owners = arlut.csd.Util.VectorUtils.union(owners, inf2.getValuesLocal());
 	  }
@@ -4663,6 +4693,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
+    // *** It is critical that this method not modify the owners parameter passed
+    // *** in, as it is 'live' in a DBField.
+
     if (owners == null)
       {
 	return false;
@@ -4697,6 +4730,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	members = inf.getValuesLocal();
 
+	// *** Caution!  getValuesLocal() does not clone the field's contents..
+	// 
+	// DO NOT modify members here!
+
 	for (int j = 0; j < members.size(); j++)
 	  {
 	    if (personaInvid.equals((Invid) members.elementAt(j)))
@@ -4713,6 +4750,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (inf.isVector())
 	      {
+		// using getValuesLocal() here is safe only because
+		// recursePersonaMatch() never tries to modify the
+		// owners value passed in.  Otherwise, we'd have to
+		// clone the results from getValuesLocal().
+
 		if (recursePersonaMatch(inf.getValuesLocal(), alreadySeen))
 		  {
 		    return true;
@@ -4788,6 +4830,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	members = inf.getValuesLocal();
 
+	// *** Caution!  getValuesLocal() does not clone the field's contents..
+	// 
+	// DO NOT modify members here!
+
 	for (int j = 0; j < members.size(); j++)
 	  {
 	    if (personaInvid.equals((Invid) members.elementAt(j)))
@@ -4804,6 +4850,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (inf.isVector())
 	      {
+		// using getValuesLocal() here is safe only because
+		// recursePersonaMatch() never tries to modify the
+		// owners value passed in.  Otherwise, we'd have to
+		// clone the results from getValuesLocal().
+
 		if (recursePersonaMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
@@ -4859,6 +4910,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     
     owners = inf.getValuesLocal();
+
+    // *** Caution!  getValuesLocal() does not clone the field's contents..
+    // 
+    // DO NOT modify owners here!
 
     if (owners == null)
       {
