@@ -5,7 +5,7 @@
    A wizard to manage step-by-step interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,7 +70,7 @@ public class userInactivateWizard extends GanymediatorWizard {
    * </pre>
    */
 
-  int state;
+  //  int state; from superclass
 
   /**
    * The actual user object that this wizard is acting on.

@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,7 +81,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
    * </pre>
    */
 
-  int state;
+  //  int state; from superclass
 
   /**
    * The actual user object that this wizard is acting on.
