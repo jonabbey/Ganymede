@@ -5,8 +5,8 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/06/26 05:58:15 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/06/26 06:11:25 $
    Release: $Name:  $
 
    Module By: Navin Manohar
@@ -596,6 +596,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  {
 	    throw new RuntimeException("Error: Invalid value embedded in JValueObject");
 	  }
+
+	old_date = getDate();
 	
 	try
 	  {
@@ -613,7 +615,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	if (allowCallback)
 	  {
 	    // Do a callback to talk to the server
-	    
+
 	    try 
 	      {
 		if (debug)
@@ -642,6 +644,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		  }
 		
 		setDate(old_date, false);
+
+		return false;
 	      }
 	  }
 	else
