@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.18 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.19 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -70,8 +70,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   DBObjectBase objectBase;
   int id;			// 32 bit id - the object's invariant id
   Hashtable fields;
-  Date removalDate;
-  Date expirationDate;
 
   DBEditObject shadowObject;	// if this object is being edited or removed, this points
 				// to the shadow that manages the changes
@@ -98,8 +96,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     id = 0;
     fields = null;
 
-    removalDate = null;
-    expirationDate = null;
     shadowObject = null;
     editset = null;
   }
@@ -157,8 +153,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     objectBase = eObj.objectBase;
     id = eObj.id;
-    removalDate = eObj.removalDate;
-    expirationDate = eObj.expirationDate;
 
     shadowObject = null;
     editset = null;
@@ -347,18 +341,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     out.writeInt(id);
     out.writeShort(fields.size());
 
-    out.writeBoolean(willExpire());
-    if (willExpire())
-      {
-	out.writeLong(expirationDate.getTime());
-      }
-
-    out.writeBoolean(isInactivated());
-    if (isInactivated())
-      {
-	out.writeLong(removalDate.getTime());
-      }
-
     //    System.err.println("emitting fields");
    
     enum = fields.keys();
@@ -415,24 +397,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	System.err.println("DBObject.receive(): tmp_count = 0");
       }
 
-    if (in.readBoolean())
-      {
-	expirationDate = new Date(in.readLong());
-      }
-    else
-      {
-	expirationDate = null;
-      }
-
-    if (in.readBoolean())
-      {
-	removalDate = new Date(in.readLong());
-      }
-    else
-      {
-	removalDate = null;
-      }
-
     if (tmp_count > 0)
       {
 	fields = new Hashtable(tmp_count);
@@ -479,6 +443,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	  case PERMISSIONMATRIX:
 	    tmp = new PermissionMatrixDBField(this, in, definition);
 	    break;
+
+	  case PASSWORD:
+	    tmp = new PasswordDBField(this, in, definition);
+	    break;
+
 	  }
 
 	if (tmp == null)
@@ -691,7 +660,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	throw new RuntimeException("synchronization error, fields hash modified");
       }
 
-    // sort
+    // sort by display order
 
     (new QuickSort(results,  
 		   new arlut.csd.Util.Compare()
@@ -705,11 +674,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 			 
 			 try
 			   {
-			     if (aF.getID() < bF.getID())
+			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
 			       {
 				 return -1;
 			       }
-			     else if (aF.getID() > bF.getID())
+			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
 			       {
 				 return 1;
 			       }
@@ -774,7 +743,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public boolean isInactivated()
   {
-    return removalDate != null;
+    return (getField(SchemaConstants.RemovalField) != null);
   }
 
   /**
@@ -787,7 +756,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public Date getRemovalDate()
   {
-    return removalDate;
+    DateDBField dbf = (DateDBField) getField(SchemaConstants.RemovalField);
+    
+    if (dbf == null)
+      {
+	return null;
+      }
+
+    return dbf.value();
   }
 
   /**
@@ -799,7 +775,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public boolean willExpire()
   {
-    return expirationDate != null;
+    return (getField(SchemaConstants.ExpirationField) != null);
   }
 
   /**
@@ -812,7 +788,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public Date getExpirationDate()
   {
-    return expirationDate;
+    DateDBField dbf = (DateDBField) getField(SchemaConstants.ExpirationField);
+    
+    if (dbf == null)
+      {
+	return null;
+      }
+
+    return dbf.value();
   }
 
   /**
