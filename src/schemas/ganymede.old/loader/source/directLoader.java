@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2291,7 +2291,7 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
   protected Server server = null;
   protected String username = Ganymede.rootname;
   protected String password = Ganymede.defaultrootpassProperty;
-  protected Session session = null;
+  protected GanymedeSession session = null;
 
   /* -- */
 
@@ -2310,7 +2310,7 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
 
     try
       {
-	session = server.login(this);
+	session = (GanymedeSession) server.login(this);
 
 	if (session == null)
 	  {
@@ -2349,6 +2349,10 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
       }
 
     System.err.println("Got session");
+
+    // turn off oversight whilst we load
+
+    session.enableOversight(false);
   }
 
   /**
