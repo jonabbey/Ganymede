@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -185,14 +185,91 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     return true;
   }
 
+
+  /**
+   *
+   * Called when object is inactivated.  This will take care of users
+   * who have this group as the home group.  
+   *
+   * Overides inactivate() in DBEditObject.
+   */
+
+  public ReturnVal inactivate()
+  {
+    return inactivate(false, false);
+  }
+
+  public ReturnVal inactivate(boolean suceeded, boolean fromWizard) 
+  {
+    ReturnVal retVal = null;
+    groupInactivateWizard wiz;
+
+
+    if (fromWizard)
+      {
+	if (suceeded)
+	  {
+	    DateDBField date;
+	    Calendar cal = Calendar.getInstance();
+	    Date time;
+	    
+	    // make sure that the expiration date is cleared.. we're on
+	    // the removal track now.
+	    
+	    date = (DateDBField) getField(SchemaConstants.ExpirationField);
+	    retVal = date.setValueLocal(null);
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		super.finalizeInactivate(false);
+		return retVal;
+	      }
+	    
+	    // determine what will be the date 3 months from now
+	    
+	    time = new Date();
+	    cal.setTime(time);
+	    cal.add(Calendar.MONTH, 3);
+	    
+	    // and set the removal date
+	    
+	    date = (DateDBField) getField(SchemaConstants.RemovalField);
+	    retVal = date.setValueLocal(cal.getTime());
+	    
+	    finalizeInactivate(true);
+	    return retVal;
+	  }
+	else
+	  {
+	    finalizeInactivate(false);
+	    return new ReturnVal(false);;
+	  }
+
+
+      }
+    else
+      {
+	try
+	  {
+	    wiz = new groupInactivateWizard(this.gSession, this);
+	    
+	    return wiz.getStartDialog();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not create groupInactivateWizard: " + rx);
+	  }
+      }
+
+  }
+
   /**
    *
    * Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
-   *
-   */
+   * */
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
