@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,7 @@ import gjt.Util;
 import gjt.RowLayout;
 import gjt.ColumnLayout;
 
-import arlut.csd.Tree.*;
+import arlut.csd.JTree.*;
 
 import com.sun.java.swing.*;
 
@@ -1666,7 +1666,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   }
 
   // **
-  // The following methods comprise the implementation of arlut.csd.Tree.treeDragDropCallback,
+  // The following methods comprise the implementation of arlut.csd.JTree.treeDragDropCallback,
   // and provide the intelligence behind the Schema Editor tree's drag and drop behavior.
   // **
 
@@ -1674,7 +1674,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
    *
    * This method determines which nodes may be dragged.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    */
 
   public boolean startDrag(treeNode dragNode)
@@ -1707,7 +1707,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
    * This method provides intelligence to the tree, determining which
    * nodes the dragNode may be dropped on.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    */
 
   public boolean iconDragOver(treeNode dragNode, treeNode targetNode)
@@ -1755,7 +1755,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
    * This method provides intelligence to the tree, determining what
    * action is to be taken if a node is dropped on another node.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    */
 
   public void iconDragDrop(treeNode dragNode, treeNode targetNode)
@@ -1869,7 +1869,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
    * Method to control whether the drag line may be moved between a pair of given
    * nodes.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    */
 
   public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
@@ -1956,7 +1956,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
    *
    * This method is called when a drag and drop operation in the Schema Editor's tree is completed.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    */
 
   public void dragLineRelease(treeNode dragNode, treeNode aboveNode, treeNode belowNode)

@@ -5,7 +5,7 @@
    tree node subtype for the GASHSchema editor.
    
    Created: 14 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,7 +13,7 @@
 
 package arlut.csd.ganymede;
 
-import arlut.csd.Tree.*;
+import arlut.csd.JTree.*;
 import java.awt.*;
 
 
@@ -23,7 +23,7 @@ import java.awt.*;
 
 ------------------------------------------------------------------------------*/
 
-class BaseNode extends arlut.csd.Tree.treeNode {
+class BaseNode extends arlut.csd.JTree.treeNode {
 
   private Base base;
 

@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,7 +34,7 @@ import gjt.Util;
 import gjt.RowLayout;
 import gjt.ColumnLayout;
 
-import arlut.csd.Tree.*;
+import arlut.csd.JTree.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
