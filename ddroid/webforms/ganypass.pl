@@ -1,14 +1,14 @@
 #!<##PERLEXE##>
 #####################################################################
 #
-# Directory Droid Password Changer
+# Ganymede Password Changer
 #
 # This script is used to process the form in
 #
 #
 # This script accepts a username, old password, new
 # password and verified new password, then passes them
-# to xmlclient, which attempts to change the Directory Droid
+# to xmlclient, which attempts to change the Ganymede
 # password for user from the old_pass to new_pass
 #
 #####################################################################
@@ -135,7 +135,7 @@ sub print_default {
   print <<ENDDEFAULT;
 <HTML>
   <HEAD>
-    <TITLE>Directory Droid Password Changer</TITLE>
+    <TITLE>Ganymede Password Changer</TITLE>
   </HEAD>
   <BODY BGCOLOR="#FFFFFF">
     <table border=0>
@@ -144,7 +144,7 @@ sub print_default {
 	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
 	</td>
 	<td width="100%" align=center>
-	  <h1>Directory Droid Password Changing Utility</h1>
+	  <h1>Ganymede Password Changing Utility</h1>
 	</td>
 	<td align=right>
 	  <a href="/"><img src="$web_loc/arlbw.jpg" border=0></a>
@@ -153,10 +153,10 @@ sub print_default {
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Directory Droid Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Directory Droid login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="http://www.arlut.utexas.edu/"><small>[ARL:UT Home]</small></a>
@@ -170,10 +170,10 @@ sub print_default {
 <tr>
 
 <td align="center">
-<p>This form changes your user password for Directory Droid and all network
-services managed by Directory Droid at ARL:UT.</p>
+<p>This form changes your user password for Ganymede and all network
+services managed by Ganymede at ARL:UT.</p>
 
-<p>All use of this form is logged, and you will receive email from Directory Droid
+<p>All use of this form is logged, and you will receive email from Ganymede
 notifying you of the success of your password change request.</p>
 </td>
 </tr>
@@ -185,7 +185,7 @@ notifying you of the success of your password change request.</p>
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
-	      <big><font color=ffffcc>Directory Droid Password Changer</font></big>
+	      <big><font color=ffffcc>Ganymede Password Changer</font></big>
 	    </td>
 	  </tr>
 
@@ -239,7 +239,7 @@ sub print_success {
     print <<ENDSUCCESS;
  <HTML>
   <HEAD>
-    <TITLE>Directory Droid Password Changed Successfully</TITLE>
+    <TITLE>Ganymede Password Changed Successfully</TITLE>
   </HEAD>
   <BODY BGCOLOR="#FFFFFF">
     <table border=0>
@@ -257,10 +257,10 @@ sub print_success {
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Directory Droid Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Directory Droid login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -272,13 +272,13 @@ sub print_success {
 <center>
     <table border=0 width="60%">
 <tr>
-<td align="center"> <p>Directory Droid has accepted your password change
+<td align="center"> <p>Ganymede has accepted your password change
 request, and is currently working to propagate your changed password
 information into the network.  It may take a few minutes for your new
 password to take effect everywhere.</p>
 
 <p>As additional confirmation, in a few moments you will receive a
-mail message from Directory Droid describing the change to your
+mail message from Ganymede describing the change to your
 account.</p></td></tr>
 
     </table>
@@ -290,7 +290,7 @@ account.</p></td></tr>
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
-	      <big><font color=ffffcc>Directory Droid Password Changer</font></big>
+	      <big><font color=ffffcc>Ganymede Password Changer</font></big>
 	    </td>
 	  </tr>
 
@@ -329,7 +329,7 @@ $failure =~ s/>/&gt;/g;
     print <<ENDFAILURE;
  <HTML>
   <HEAD>
-    <TITLE>Directory Droid Password Changer</TITLE>
+    <TITLE>Ganymede Password Changer</TITLE>
   </HEAD>
   <BODY BGCOLOR="#FFFFFF">
     <table border=0>
@@ -347,10 +347,10 @@ $failure =~ s/>/&gt;/g;
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Directory Droid Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Directory Droid login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -363,7 +363,7 @@ $failure =~ s/>/&gt;/g;
 
     <table border=0 width="60%">
 
-<tr> <td align="center"> <p>Directory Droid was not able to accept your
+<tr> <td align="center"> <p>Ganymede was not able to accept your
 password change request.  The following error message was reported:</p>
 
 <pre>
@@ -371,9 +371,9 @@ $failure
 </pre>
 
 <p>If your current password was not entered properly, you will receive
-mail from Directory Droid reporting a failure to login.  This is normal, and
+mail from Ganymede reporting a failure to login.  This is normal, and
 is simply letting you know that someone unsuccessfully attempted to
-make a change in Directory Droid on your behalf.</p></tr>
+make a change in Ganymede on your behalf.</p></tr>
     </table>
 
     </table>
@@ -384,7 +384,7 @@ make a change in Directory Droid on your behalf.</p></tr>
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
-	      <big><font color=ffffcc>Directory Droid Password Changer</font></big>
+	      <big><font color=ffffcc>Ganymede Password Changer</font></big>
 	    </td>
 	  </tr>
 
@@ -433,7 +433,7 @@ sub print_nomatch {
     print <<ENDNOMATCH;
  <HTML>
   <HEAD>
-    <TITLE>Directory Droid Password Changer</TITLE>
+    <TITLE>Ganymede Password Changer</TITLE>
   </HEAD>
   <BODY BGCOLOR="#FFFFFF">
     <table border=0>
@@ -451,10 +451,10 @@ sub print_nomatch {
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Directory Droid Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Directory Droid login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -466,7 +466,7 @@ sub print_nomatch {
 <center>
     <table border=0 width="60%">
 
-<tr> <td align="center"> <p>Directory Droid was not able to accept your
+<tr> <td align="center"> <p>Ganymede was not able to accept your
 password change request.  You did not enter your new password
 consistently.  Please try again.</tr>
 
@@ -479,7 +479,7 @@ consistently.  Please try again.</tr>
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
-	      <big><font color=ffffcc>Directory Droid Password Changer</font></big>
+	      <big><font color=ffffcc>Ganymede Password Changer</font></big>
 	    </td>
 	  </tr>
 

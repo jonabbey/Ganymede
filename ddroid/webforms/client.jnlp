@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- JNLP File for Directory Droid Client 
+<!-- JNLP File for Ganymede Client 
 
      This file defines the launch characteristics for the
-     Directory Droid client, allowing the Java Web Start program
-     to properly launch the Directory Droid client.  This file
+     Ganymede client, allowing the Java Web Start program
+     to properly launch the Ganymede client.  This file
      format is documented at 
 
      http://java.sun.com/products/javawebstart/developers.html
@@ -13,10 +13,10 @@
 
 <jnlp spec="1.0+" codebase="#WEBROOT" href="client.jnlp">
   <information>
-    <title>Directory Droid Client</title>
+    <title>Ganymede Client</title>
     <vendor>Applied Research Laboratories</vendor>
     <homepage href="http://www.arlut.utexas.edu/gash2"/>
-    <description>Directory Droid Client</description>
+    <description>Ganymede Client</description>
     <icon href="icon.gif"/>
   </information>
   <resources>
@@ -30,12 +30,12 @@
     <j2se version="1.3.1"/>
     <j2se version="1.3"/>
     <j2se version="1.2"/>
-    <jar href="ddroid.jar"/>
+    <jar href="ganymede.jar"/>
   </resources>
   <applet-desc 
     documentBase="#WEBROOT"
     name="Ganymede"
-    main-class="arlut.csd.ddroid.client.glogin"
+    main-class="arlut.csd.ganymede.client.glogin"
     width="320"
     height="350">
     <param name="ganymede.serverhost" value="#SERVERHOST"/>
