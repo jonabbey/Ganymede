@@ -16,6 +16,12 @@ avoids having that exception thrown by explicitly checking the success
 of the username/password login before trying to construct a
 GanymedeXMLSession.
 
+2. [CLIENT] Fixed date reversion in the pop-up calendar GUI component
+
+I fixed the pop-up calendar's reversion handling for when the user
+attempts to change the date/time in a date field and chooses a date
+that is out of range.
+
 -------------------- Changes from 1.02 to 1.03 -------------------
 
 RELEASE DATE: June 22, 2001
