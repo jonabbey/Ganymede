@@ -4,15 +4,15 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2001/04/04 22:38:44 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2001/04/05 04:08:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -42,7 +42,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -91,6 +92,34 @@ public class StringUtils {
   }
 
   /**
+   * <P>This method takes an inputString and counts the number of times
+   * that patternString occurs within it.</P>
+   */
+
+  public static int count(String inputString, String patternString)
+  {
+    int index = 0;
+    int count = 0;
+
+    while (true)
+      {
+	index = inputString.indexOf(patternString, index);
+
+	if (index == -1)
+	  {
+	    break;
+	  }
+	else
+	  {
+	    index += patternString.length();
+	    count++;
+	  }
+      }
+
+    return count;
+  }
+
+  /**
    * <P>This method takes a (possibly multiline) inputString 
    * containing subsequences matching splitString and returns
    * an array of Strings which contain the contents of the inputString
@@ -104,29 +133,13 @@ public class StringUtils {
 
   public static String[] split(String inputString, String splitString)
   {
-    int index = 0;
-    int count = 0;
+    int index;
+    int count = StringUtils.count(inputString, splitString);
 
-    while (index != -1)
-      {
-	count++;
+    String results[] = new String[count+1];
 
-	index = inputString.indexOf(splitString, index);
-
-	if (index == -1)
-	  {
-	    break;
-	  }
-	else
-	  {
-	    index += splitString.length();
-	  }
-      }
-    
-    String results[] = new String[count];
-
-    index = 0;
     int upperBound = inputString.length();
+    index = 0;
     count = 0;
 
     while (index < upperBound)
@@ -157,8 +170,8 @@ public class StringUtils {
 
   public static void main(String argv[])
   {
-    //    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
-    String test = "10.8.[100-21].[1-253]";
+    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
+    //String test = "10.8.[100-21].[1-253]";
 
     String results[] = StringUtils.split(test, "\n");
 
