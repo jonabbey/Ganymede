@@ -4699,22 +4699,31 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (sendData)
 	  {
-	    message = ts.l("sendXML.data_refused");
+	    message = ts.l("getXML.data_refused");
 	  }
 	else
 	  {
-	    message = ts.l("sendXML.schema_refused");
+	    message = ts.l("getXML.schema_refused");
 	  }
 
 	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
 					  message);
       }
 
-    XMLTransmitter transmitter = new XMLTransmitter(sendData, sendSchema);
+    XMLTransmitter transmitter = null;
+
+    try
+      {
+	transmitter = new XMLTransmitter(sendData, sendSchema);
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
+					  ts.l("getXML.transmitter_error_msg", ex.getMessage()));
+      }
 
     ReturnVal retVal = new ReturnVal(true);
     retVal.setFileTransmitter(transmitter);
-
     return retVal;
   }
 

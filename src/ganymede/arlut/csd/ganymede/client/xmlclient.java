@@ -63,6 +63,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
@@ -203,11 +205,7 @@ public final class xmlclient implements ClientListener {
 	    System.err.println("\nXML submission failed.");
 	  }
       }
-    catch (RemoteException ex)
-      {
-	ex.printStackTrace();
-      }
-    catch (IOException ex)
+    catch (Exception ex)
       {
 	ex.printStackTrace();
       }
@@ -319,7 +317,7 @@ public final class xmlclient implements ClientListener {
     System.err.println("4: xmlclient [username=<username>] [password=<password>] -dumpdata");
   }
 
-  public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException
+  public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException, NotBoundException, MalformedURLException
   {
     // now we should have the username and password if we are going to
     // get them, but do what we can here..
@@ -366,6 +364,16 @@ public final class xmlclient implements ClientListener {
 
     ClientBase client = new ClientBase(server_url, this);
 
+    try
+      {
+	client.connect();
+      }
+    catch (Throwable ex)
+      {
+	System.err.println("Error connecting to the server: " + ex.getMessage());
+	return false;
+      }
+
     Session session = client.login(username, password);
 
     if (session == null)
@@ -399,6 +407,8 @@ public final class xmlclient implements ClientListener {
 	  {
 	    System.err.println(errorMessage);
 	  }
+
+	return false;
       }
 
     FileTransmitter transmitter = retVal.getFileTransmitter();
@@ -414,17 +424,18 @@ public final class xmlclient implements ClientListener {
 	    bytes = transmitter.getNextChunk();
 	  }
       }
-    catch (IOException ex)
+    catch (Exception ex)
       {
 	ex.printStackTrace();
-	System.exit(1);
+      }
+    finally
+      {
+	// and say goodbye
+
+	session.logout();
       }
 
-    // and say goodbye
-
-    session.logout();
-
-    return (retVal == null || retVal.didSucceed());
+    return true;
   }
 
   /**

@@ -59,8 +59,10 @@ import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.BigPipedInputStream;
 import arlut.csd.Util.TranslationService;
 
+import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,7 +76,9 @@ import java.rmi.RemoteException;
  * over RMI in order to receive the file.</p>
  */
 
-public class XMLTransmitter implements FileTransmitter {
+public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitter {
+
+  private static final boolean debug = false;
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -85,17 +89,19 @@ public class XMLTransmitter implements FileTransmitter {
 
   // ---
 
-  private byte[] data = null;
-  private int oldavail = 0;
-  private int avail;
   private boolean eof;
   private PipedOutputStream outpipe;
   private BigPipedInputStream inpipe;
   private boolean doSendData;
   private boolean doSendSchema;
 
-  public XMLTransmitter(boolean sendData, boolean sendSchema)
+  public XMLTransmitter(boolean sendData, boolean sendSchema) throws IOException
   {
+    if (debug)
+      {
+	System.err.println("XMLTransmitter constructed!");
+      }
+
     outpipe = new PipedOutputStream();
     inpipe = new BigPipedInputStream(outpipe);
     doSendData = sendData;
@@ -133,7 +139,7 @@ public class XMLTransmitter implements FileTransmitter {
    * <p>This method returns null on end of file, and will throw an excepti.</p>
    */
 
-  public synchronized byte[] getNextChunk() throws RemoteException
+  public byte[] getNextChunk() throws RemoteException
   {
     try
       {
@@ -142,40 +148,75 @@ public class XMLTransmitter implements FileTransmitter {
 	    return null;
 	  }
 
-	avail = inpipe.available();
+	// see how much input is ready to be read from the pipe..  if
+	// avail is 0, that means there's nothing to read right now,
+	// but there may be, after we call and block on inpipe.read().
+	// In that case, we'll go ahead and set up for a 64k block,
+	// but if we get less than 64k when the blocking call actually
+	// returns, we'll create a proper-sized array for transmission
 
-	if (avail > 65536)
+	int avail = 0;
+
+	inpipe.available();
+
+	// we don't want to try to send more than 64k at once, as it's
+	// hard (impossible?) to serialize an array longer than that.
+
+	// this used to be true, anyway...
+
+	if (avail > 65536 || avail == 0)
 	  {
 	    avail = 65536;
 	  }
 
-	if (avail == 0)
-	  {
-	    avail = 1024;
-	  }
-
-	if (oldavail != avail)
-	  {
-	    data = new byte[avail];
-	  }
+	byte[] data = new byte[avail];
 
 	int count  = inpipe.read(data);	// we may block waiting for the schema dump thread here
 
-	if (count == -1)
+	if (debug)
 	  {
+	    System.err.println("getNextChunk ahoy [" + avail + "," + count + "]!");
+	  }
+
+	if (count <= 0)
+	  {
+	    // -1 is eof, we shouldn't actually get 0, but..
+
 	    eof = true;
 	    return null;
 	  }
+	else if (count != data.length)
+	  {
+	    // we read a smaller chunk, shrink the data down
+
+	    byte[] chunk = new byte[count];
+	    System.arraycopy(data, 0, chunk, 0, count);
+	    return chunk;
+	  }
 	else
 	  {
+	    // the data is good to go as is
+
 	    return data;
 	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+	throw new RemoteException(ex.getMessage());
       }
     finally
       {
 	if (eof)
 	  {
-	    inpipe.close();
+	    try
+	      {
+		inpipe.close();
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+	      }
 	  }
       }
   }
@@ -185,9 +226,17 @@ public class XMLTransmitter implements FileTransmitter {
    * more of the file will be pulled.</p>
    */
   
-  public synchronized void end() throws RemoteException
+  public void end() throws RemoteException
   {
     eof = true;
-    inpipe.close();
+
+    try
+      {
+	inpipe.close();
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
   }
 }

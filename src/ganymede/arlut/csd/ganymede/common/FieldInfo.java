@@ -157,7 +157,7 @@ public class FieldInfo implements java.io.Serializable {
 
   public short getID()
   {
-    return new Short(ID);
+    return ID;
   }
 
   /**
@@ -169,7 +169,7 @@ public class FieldInfo implements java.io.Serializable {
 
   public Short getIDObj()
   {
-    return ID;
+    return new Short(ID);
   }
 
   public boolean isDefined()

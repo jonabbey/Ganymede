@@ -87,7 +87,7 @@ import arlut.csd.Util.booleanSemaphore;
 
 public class ClientBase implements Runnable {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   // ---
 
