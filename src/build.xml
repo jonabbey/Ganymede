@@ -32,6 +32,22 @@
     </fileset>
   </path>
 
+  <target name="help">
+    <echo>ant rules
+---------
+
+all           - Prepares build tree and compiles everything
+jars          - Produces the jar files for the server, client, and admin console
+javadoc       - Builds the java doc tree
+
+clean         - Cleans the build class tree
+javadoc_clean - Cleans the java doc tree
+distclean     - Cleans the directories at the top distribution level
+veryclean     - Does all of distclean, javadoc_clean, clean
+
+total         - Complete strip and rebuild
+</echo>
+  </target>
 
 
   <target name="prepare">
