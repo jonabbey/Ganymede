@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.1
-May 26, 1999
+Ganymede Developer Release 0.99.2
+June ??, 1999
 THINGSTODO
 ---------------------------------------------
 
@@ -76,6 +76,16 @@ etc., my fantasy that internationalization was something I could just
 sort of pretend I'd never heard of seems to be evaporating.  I don't
 think I'll be able to dedicate time to it anytime in the foreseeable
 future, but someone is going to have to at some point.
+
+6) Schema Editor improvements
+
+The schema editing code in the server is one of the more fragile pieces
+of code in the server.  It is adequate, but has a tendency to cause
+problems if people try to delete or incompatibly change fields in
+the database that are currently holding data.  There also seems
+to be a persistent error someplace that can make fields appear
+out of order despite dragging them into proper position in the schema
+editor.
 
 ---
 
