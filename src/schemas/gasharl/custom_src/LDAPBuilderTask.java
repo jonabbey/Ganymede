@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2004/03/24 03:40:59 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2004/03/24 03:48:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -296,7 +296,13 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "objectClass", "top");
     writeLDIF(out, "objectClass", "person");
     writeLDIF(out, "uid", user.getLabel());
-    writeLDIF(out, "cn", user.getFieldValueLocal(userSchema.FULLNAME).toString());
+
+    String fullName = user.getFieldValueLocal(userSchema.FULLNAME).toString();
+
+    if (fullName != null)
+      {
+	writeLDIF(out, "cn", fullName);
+      }
 
     out.println();
   }
@@ -345,6 +351,11 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
   private void writeLDIF(PrintWriter out, String attribute, String value)
   {
+    if (value == null)
+      {
+	return;
+      }
+
     if (isBinary(value))
       {
 	writeBinaryLDIF(out, attribute, value);
