@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,7 +34,7 @@ import com.sun.java.swing.*;
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
 
-  windowPanel parent;
+  windowPanel wp;
   PopupMenu popMenu;
   MenuItem viewMI;
   MenuItem editMI;
@@ -48,13 +48,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   /* -- */
 
-  public gResultTable(windowPanel parent, Session session, Query query, DumpResult results) throws RemoteException
+  public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException
   {
     super();			// JInternalFrame init
 
     this.setTitle("Query Results");
 
-    this.parent = parent;
+    this.wp = wp;
     this.session = session;
     this.query = query;
 
@@ -95,7 +95,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     Vector results = null;
 
-    parent.parent.setStatus("Querying server");
+    setStatus("Querying server");
 
     if (query != null)
       {
@@ -111,7 +111,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	if (buffer == null)
 	  {
 	    System.err.println("null query dump result");
-	    parent.parent.setStatus("No results");
+	    setStatus("No results");
 	  }
 	else
 	  {
@@ -135,7 +135,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    parent.parent.setStatus("Loading table");
+    setStatus("Loading table");
 
     headerVect = results.getHeaders();
     headers = new String[headerVect.size()];
@@ -232,11 +232,12 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // sort by the first column in ascending order
 
-    parent.parent.setStatus("Sorting table on first column");
+    setStatus("Sorting table on first column");
 
     table.resort(0, true, false);
 
-    parent.parent.setStatus("Query Complete.");
+
+    setStatus("Query Complete.");
 
     // the first time we're called, the table will not be visible, so we
     // don't want to refresh it here..
@@ -265,7 +266,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	try
 	  {
-	    parent.addWindow(session.view_db_object((Invid) key));
+	    wp.addWindow(session.view_db_object((Invid) key));
 	  }
 	catch (RemoteException ex)
 	  {
@@ -287,8 +288,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	
 	if (eObj != null)
 	  {
-	    parent.addWindow(eObj,true);
+	    wp.addWindow(eObj,true);
 	  }
       }
+  }
+  
+  private final void setStatus(String s)
+  {
+    wp.gc.setStatus(s);
   }
 }
