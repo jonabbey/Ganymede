@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,7 +84,7 @@ public class Ganymede {
 
 	debug("Binding GanymedeServer in RMI Registry");
 
-	Naming.rebind("ganymede.server", server);
+	Naming.bind("ganymede.server", server);
       }
     catch (Exception ex)
       {
