@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,7 @@ import com.sun.java.swing.JButton;
 
 public class gclient extends Frame implements treeCallback,ActionListener {
 
-  Session _mySession;
+  Session session;
   glogin _myglogin;
 
   //containerPanel _cPanel;
@@ -50,17 +50,35 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   JButton cancel;
   
   treeControl tree;
-  
-  PopupMenu pMenu = new PopupMenu();
-  MenuItem createMI = null;
-  MenuItem editMI = null;
-  MenuItem viewMI = null;
-  MenuItem inactivateMI = null;
-  MenuItem queryMI = null;
 
-  MenuBar menubar;
-  MenuItem logoutMI;
-  Menu fileMenu;
+  windowPanel
+    wp;
+
+  PopupMenu objectPM;
+  MenuItem
+    objViewMI,
+    objEditMI,
+    objInactivateMI;
+
+  PopupMenu 
+    pMenu = new PopupMenu();
+  
+  MenuItem 
+    createMI = null,
+    editMI = null,
+    viewMI = null,
+    inactivateMI = null,
+    queryMI = null;
+
+  MenuBar 
+    menubar;
+
+  MenuItem 
+    logoutMI,
+    removeAllMI;
+  Menu 
+    windowMenu,
+    fileMenu;
 
   public gclient(Session s,glogin g) {
 
@@ -69,7 +87,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     if (s == null)
       throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");;
 
-    _mySession = s;
+    session = s;
     _myglogin = g;
 
 
@@ -85,9 +103,17 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     fileMenu = new Menu("File");
     logoutMI = new MenuItem("Logout");
     logoutMI.addActionListener(this);
+    removeAllMI = new MenuItem("Remove All Windows");
+    removeAllMI.addActionListener(this);
+    fileMenu.add(removeAllMI);
+    fileMenu.addSeparator();
     fileMenu.add(logoutMI);
+
+    // Window list menu
+    windowMenu = new Menu("Windows");
     
     menubar.add(fileMenu);
+    menubar.add(windowMenu);
     this.setMenuBar(menubar);
     
     //centerPanel.propagateInvalidate();
@@ -120,7 +146,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white, this, images,
-			   pMenu);
+			   null);
 
 
     Box leftBox = new Box(tree, "Objects");
@@ -131,22 +157,30 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     
     add("West", leftP);
 
+    objectPM = new PopupMenu();
+    objViewMI = new MenuItem("View Object");
+    objEditMI = new MenuItem("Edit Object");
+    objInactivateMI = new MenuItem("Inactivate Object");
+    objectPM.add(objViewMI);
+    objectPM.add(objEditMI);
+    objectPM.add(objInactivateMI);
+
     // Build the tree
 
     try
       {
-	Vector  typesV = _myglogin.my_session.getTypes();
+	Vector  typesV = session.getTypes();
 	treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
 	tree.setRoot(typesnode);
 	
 	for (int i=0;i<typesV.size();i++)
 	  {
 	    Base tempBase = null;
-	    treeNode t;
+	    BaseNode t;
 	    try 
 	      {
 		tempBase = (Base)typesV.elementAt(i);
-		t = new treeNode(typesnode,tempBase.getName(),null,true,0,1);
+		t = new BaseNode(typesnode,tempBase.getName(), tempBase, null,true,0,1, pMenu);
 		tree.insertNode(t,false);
 	      }
 	    catch (RemoteException rx)
@@ -174,7 +208,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 		  }
 		else
 		  {
-		    Vector objects =  _myglogin.my_session.query(_query);
+		    Vector objects =  session.query(_query);
 		    if (objects == null)
 		      {
 			System.out.println("objects == null");
@@ -183,9 +217,10 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 		      {
 			for (int j=0 ; j < objects.size(); j++)
 			  {
-			    treeNode objNode = new treeNode(t, 
-							    ((Result)objects.elementAt(j)).toString(), 
-							    null, false, 2,2);
+			    ObjectNode objNode = new ObjectNode(t, 
+								((Result)objects.elementAt(j)).toString(), 
+								((Result)objects.elementAt(j)).getObject(),
+							    null, false, 2,2, objectPM);
 			    tree.insertNode(objNode, false); 
 			  }
 		      }
@@ -213,8 +248,8 @@ public class gclient extends Frame implements treeCallback,ActionListener {
       
     //    ScrollPane _scroll = new ScrollPane();
     //    _scroll.setLayout(new BorderLayout());
-    windowPanel wp = new windowPanel();
-    wp.makeNewWindow("New Window from the client");
+    wp = new windowPanel(windowMenu);
+    
     //_scroll.add(wp);
 
     //rightP.add(_scroll,"Center");
@@ -239,6 +274,16 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
     setSize( d.width / 2, d.height / 2 );
     */
+
+
+    try
+      {
+	session.openTransaction();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not open transaction: " + rx);
+      }
     pack();
     setSize(800, 600);
     show();
@@ -254,16 +299,43 @@ public class gclient extends Frame implements treeCallback,ActionListener {
       if (event.getSource() == cancel)
 	{
 	  System.err.println("cancel button clicked");
+	  try
+	    {
+	      wp.closeEditables();
+	      session.abortTransaction();
+	      session.openTransaction();
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not abort transaction" + rx);
+	    }
 	}
       else if (event.getSource() == commit)
 	{
 	  System.out.println("commit button clicked");
+	  try
+	    {
+	      wp.closeEditables();
+	      session.commitTransaction();
+	      session.openTransaction();
+
+	      tree.refresh();
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not commit transaction" + rx);
+	    }
+	}
+      else if (event.getSource() == removeAllMI)
+	{
+	  wp.closeAll();
 	}
       else if (event.getSource() == logoutMI)
 	{
 	  try
 	    {
-	      _myglogin.my_session.logout();
+	      session.abortTransaction();
+	      session.logout();
 	      this.dispose();
 	      _myglogin.connector.setEnabled(true);
 	      _myglogin._quitButton.setEnabled(true);
@@ -299,17 +371,22 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     if (event.getSource() == createMI)
       {
 	System.out.println("createMI");
-	try
+	if (node instanceof BaseNode)
 	  {
-	    _myglogin.my_session.openTransaction();
-	    _myglogin.my_session.create_db_object((short)1);
-	    _myglogin.my_session.commitTransaction();
-
-
+	    BaseNode baseN = (BaseNode)node;
+	  
+	    try
+	      {
+		wp.addWindow(session.create_db_object(baseN.getBase().getTypeID()), true);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not create object: " + rx);
+	      }
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not create object: " + rx);
+	    System.err.println("not a base node, can't create");
 	  }
       }
     else if (event.getSource() == editMI)
@@ -319,6 +396,32 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     else if (event.getSource() ==  viewMI)
       {
 	System.out.println("viewMI");
+	if (node instanceof BaseNode)
+	  {
+	    BaseNode baseN = (BaseNode)node;
+	    try
+	      {
+		Query _query = new Query(baseN.getBase().getTypeID());
+		Vector results =  session.query(_query);
+		if (results == null)
+		  {
+		    System.out.println("objects == null");
+		  }
+		else
+		  {
+		    
+		    wp.addTableWindow(session, results);
+		  }
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not get query: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.out.println("viewMI from a node other than a BaseNode");
+	  }
       }
     else if (event.getSource() ==  inactivateMI)
       {
@@ -328,6 +431,56 @@ public class gclient extends Frame implements treeCallback,ActionListener {
       {
 	System.out.println("queryMI");	
       }
+    else if (event.getSource() == objViewMI)
+      {
+	if (node instanceof ObjectNode)
+	  {
+	    ObjectNode objectN = (ObjectNode)node;
+	  
+	    try
+	      {
+		wp.addWindow(session.view_db_object(objectN.getObject().getInvid()), false);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not create object: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("not a base node, can't create");
+	  }
+      }
+    else if (event.getSource() ==    objEditMI)
+      {
+	System.out.println("objEditMI");
+	if (node instanceof ObjectNode)
+	  {
+	    ObjectNode objectN = (ObjectNode)node;
+	  
+	    try
+	      {
+		wp.addWindow(session.edit_db_object(objectN.getObject().getInvid()), true);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not create object: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("not a base node, can't create");
+	  }
+      }
+    else if(event.getSource() == objInactivateMI)
+      {
+	System.out.println("objInactivateMI");
+      }
+
+    else
+      {
+	System.err.println("Unknown MI chosen");
+      }
 
   }
 
@@ -336,3 +489,63 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 
   }
 }
+
+/*---------------------------------------------------------------------
+                                                       Class ObjectNode
+---------------------------------------------------------------------*/
+
+class ObjectNode extends arlut.csd.Tree.treeNode {
+
+  private db_object object;
+
+  public ObjectNode(treeNode parent, String text, db_object object, treeNode insertAfter,
+		    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+    {
+      super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+      this.object = object;
+    }
+
+  public db_object getObject()
+    {
+      return object;
+    }
+
+  public void setObject(db_object object)
+    {
+      this.object = object;
+    }
+    
+}
+
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        BaseNode
+
+------------------------------------------------------------------------------*/
+
+class BaseNode extends arlut.csd.Tree.treeNode {
+
+  private Base base;
+
+  /* -- */
+
+  BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
+	   boolean expandable, int openImage, int closedImage, PopupMenu menu)
+  {
+    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+    this.base = base;
+  }
+
+  public Base getBase()
+  {
+    return base;
+  }
+
+  public void setBase(Base base)
+  {
+    this.base = base;
+  }
+}
+

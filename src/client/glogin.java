@@ -8,7 +8,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,7 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 import gjt.ImageCanvas;
+import jdj.*;
 
 import arlut.csd.DataComponent.*;
 import oreilly.Dialog.InfoDialog;
@@ -39,7 +40,7 @@ public class glogin extends java.applet.Applet implements Runnable {
   protected Image ganymede_logo;
   protected TextField username;
   protected TextField passwd;
-  protected Button connector = new Button("Login to Server");
+  protected Button connector;
   protected Button _quitButton;
   protected Label _connectStatus = new Label();
   protected Panel bPanel;
@@ -106,7 +107,8 @@ public class glogin extends java.applet.Applet implements Runnable {
 
 	if (!WeAreApplet)
 	  {
-	    ganymede_logo = Toolkit.getDefaultToolkit().getImage(new URL(gConfig._GANYMEDE_LOGO_URL));
+	    //	    ganymede_logo = Toolkit.getDefaultToolkit().getImage(new URL(gConfig._GANYMEDE_LOGO_URL));
+	    ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
 	  }
 	else
 	  {
@@ -156,6 +158,8 @@ public class glogin extends java.applet.Applet implements Runnable {
 
     _loginHandler = new LoginHandler(this);
 
+    connector = new Button("Login to Server");
+
     connector.addActionListener(_loginHandler);
     
     _quitButton.addActionListener(_loginHandler);
@@ -179,7 +183,7 @@ public class glogin extends java.applet.Applet implements Runnable {
     
     /* RMI initialization stuff. We do this for our iClient object. */
       
-    // System.setSecurityManager(new RMISecurityManager());
+    System.setSecurityManager(new RMISecurityManager());
       
     /* Get a reference to the server */
 
@@ -399,6 +403,8 @@ class LoginHandler implements ActionListener {
 	my_glogin.my_session = my_glogin.my_client.session;
 
 	my_glogin.connector.setEnabled(false);
+	my_glogin._quitButton.setEnabled(false);
+
 
 	if (my_glogin.my_session != null) 
 	  {
@@ -410,23 +416,12 @@ class LoginHandler implements ActionListener {
 	    
 	    // We re-enable the "Login to server" button so that the user can try again.
 	    my_glogin.connector.setEnabled(true);
+	    my_glogin.connector.setEnabled(false);
 	  }
       }
     else if (e.getSource() == my_glogin._quitButton)
       {
-	try 
-	  {
-	    if (my_glogin.my_session != null)
-	      {
-		my_glogin.my_session.logout();
-	      }
-	  }
-	catch (RemoteException ex) 
-	  {
-	  }
-	
 	System.exit(1);
-	
       }
   }
 
@@ -455,7 +450,7 @@ class LoginHandler implements ActionListener {
     catch (Exception e)
       {
 	// Any exception thrown by glclient will be handled here.
-	
+	System.err.println("Error starting client: " + e);
       }
   }
 }
