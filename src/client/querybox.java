@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -217,8 +217,19 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // Main constructor for the querybox window
     
     this.baseHash = baseHash;  
-    this.defaultBase = defaultBase;
     this.shortHash = shortHash;
+    try
+      {
+	// We have to go get a real Base reference to the server, through the
+	// shortHash.  The "base" that we have here is actually a BaseDump, so
+	// we can't call the getFields type methods on it.
+
+	this.defaultBase = (Base)shortHash.get(new Short(defaultBase.getTypeID()));
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Exception loading base: " + rx);
+      }
     
     // - Define the main window
     
@@ -449,7 +460,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     try
       {
-	Vector fields = base.getFields();
+	// We have to go get a real Base reference to the server, through the
+	// shortHash.  The "base" that we have here is actually a BaseDump, so
+	// we can't call the getFields type methods on it.
+	Vector fields = ((Base)shortHash.get(new Short(base.getTypeID()))).getFields();
 	tmpAry = new Vector();
 
 	int count = 0;
@@ -628,7 +642,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
     try
       {
-	Vector fields = base.getFields();
+
+	// We have to go get a real Base reference to the server, through the
+	// shortHash.  The "base" that we have here is actually a BaseDump, so
+	// we can't call the getFields type methods on it.
+
+	Vector fields = ((Base)shortHash.get(new Short(base.getTypeID()))).getFields();
 	Vector EIPfields = new Vector();
 		  
 	for (int j=0; fields != null && (j < fields.size()); j++) 
@@ -716,8 +735,19 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     myAry = new Component[MAXCOMPONENTS];
 
-    fieldChoice = getChoiceFields(base);
-    
+    try
+      {
+	// We have to go get a real Base reference to the server, through the
+	// shortHash.  The "base" that we have here is actually a BaseDump, so
+	// we can't call the getFields type methods on it.
+
+	fieldChoice = getChoiceFields((Base)shortHash.get(new Short(base.getTypeID())));
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not load fieldChoice: " + rx);
+      }
+
     currentField = (String) fieldChoice.getSelectedItem();  
     opChoice = getOpChoice(currentField);
     isNot = getIsNot(currentField);
