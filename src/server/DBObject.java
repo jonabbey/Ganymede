@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.24 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.25 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -644,7 +644,16 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public db_field getField(short id)
   {
-    return (DBField) fields.get(new Short(id));
+    db_field f;
+
+    f = (DBField) fields.get(new Short(id));
+
+    if (f == null)
+      {
+	Ganymede.debug("Couldn't find field " + id);
+      }
+
+    return f;
   }
 
   /**
