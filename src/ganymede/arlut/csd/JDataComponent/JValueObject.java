@@ -8,16 +8,19 @@
    as an appropriate callback handler.
 
    Created: 28 Feb 1997
-   Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2001/06/29 07:31:05 $
+
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   Last Mod Date: $Date$
+   SVN URL: $HeadURL$
+
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996 - 2004
    The University of Texas at Austin.
 
    Contact information
@@ -71,7 +74,7 @@ import java.awt.*;
  * <p>Note that we came up with this message type before Sun introduced
  * the 1.1 AWT event model.  Great minds... ;-)</p>
  *   
- * @version $Revision: 1.13 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
+ * @version $Revision$ $Date$ $Name:  $
  * @author Navin Manohar 
  */
 
