@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/10/08 00:12:13 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/10/08 01:41:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -889,7 +889,7 @@ public class GanymedeScheduler extends Thread {
     if ((currentlyScheduled.remove(handle.name) != null) ||
 	(onDemand.remove(handle.name) != null))
       {
-	if (logStuff)
+	if (logStuff && !handle.name.equals("Idle Timer"))
 	  {
 	    System.err.println("Ganymede Scheduler: running " + handle.name);
 	  }

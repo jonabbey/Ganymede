@@ -10,8 +10,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:54 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/10/08 01:41:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,4 +59,5 @@ import java.rmi.*;
 public interface Server extends Remote {
   Session login(Client client) throws RemoteException;
   adminSession admin(Admin admin) throws RemoteException;
+  boolean up() throws RemoteException;
 }

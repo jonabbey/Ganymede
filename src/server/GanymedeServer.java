@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 1999/10/08 00:12:14 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 1999/10/08 01:41:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -100,6 +100,18 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	throw new RemoteException("Error: attempted to start a second server");
       }
   } 
+
+  /**
+   * <p>Simple RMI test method.. this method is here so that the
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class
+   * can test to see whether it has truly gotten a valid RMI reference
+   * to the server.</p>
+   */
+
+  public boolean up() throws RemoteException
+  {
+    return true;
+  }
 
   /** 
    * <p>Client login method.  Establishes a {@link
