@@ -4,7 +4,7 @@
   A test framework for the baseTable GUI component
 
   Created: 5 June 1996
-  Version: $Revision: 1.1 $ %D%
+  Version: 1.1 96/06/17
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,10 +23,13 @@ import csd.Table.*;
 
 public class testTable extends Applet {
 
-  gridTable table;
-
+  static final boolean debug = false;
   static testTable applet = null;
   static Frame frame = null;
+
+  /* - */
+
+  csd.Table.gridTable table;
 
   Panel p1 = null;
   TextField statusField = null;
@@ -58,12 +61,33 @@ public class testTable extends Applet {
     statusField.setForeground(Color.white);
     add("North", statusField);
 
-    table = new gridTable(colWidths, headers);
+    if (debug)
+      {
+	System.err.println("testTable constructor: constructing gridTable");
+      }
+
+    table = new csd.Table.gridTable(colWidths, headers);
+
+    if (debug)
+      {
+	System.err.println("testTable constructor: constructed gridTable");
+      }
+
     add("Center", table);
+
+    if (debug)
+      {
+	System.err.println("testTable constructor: table added to applet");
+      }
   }
 
   public void start()
   {
+    if (debug)
+      {
+	System.err.println("testTable.start()");
+      }
+
     table.setCellText(0,0, "jonabbey",false);
     table.setCellText(1,0, "okay",false);
     table.setCellText(2,0, "3.14159",false);
@@ -96,6 +120,11 @@ public class testTable extends Applet {
     table.setCellText(1,7, "full time",false);
     table.setCellText(2,7, "Accounting",false);
     table.setCellText(3,7, "Texas A&M",true);
+
+    if (debug)
+      {
+	System.err.println("exiting testTable.start()");
+      }
   }
 
   public static void main(String[] argv)
@@ -107,10 +136,34 @@ public class testTable extends Applet {
 
     /* present the applet */
 
+    if (debug)
+      {
+	System.err.println("XX adding applet to frame");
+      }
+
     frame.add("Center", applet);
+
+    if (debug)
+      {
+	System.err.println("XX resizing frame");
+      }
+
     frame.resize(300, 300);
+
+    if (debug)
+      {
+	System.err.println("XX showing frame");
+      }
+
     frame.show();  
+
     applet.init();
+
+    if (debug)
+      {
+	System.err.println("XX starting applet");
+      }
+
     applet.start();
   }
 }
