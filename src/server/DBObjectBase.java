@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.72 $ %D%
+   Version: $Revision: 1.73 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import arlut.csd.Util.*;
 
 public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
 
-  static boolean debug = false;
+  static boolean debug = true;
 
   public static void setDebug(boolean val)
   {
