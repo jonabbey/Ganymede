@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -333,23 +333,40 @@ public class DBQueryHandler {
 
 		/* -- */
 
-		if (n.comparator == n.EQUALS)
+		// scalar compare?
+
+		if (n.arrayOp == n.NONE)
 		  {
-		    if (n.arrayOp == n.NONE)
-		      {
-			fBytes = (Byte[]) value;
-			oBytes = (Byte[]) n.value;
+		    fBytes = (Byte[]) value;
+		    oBytes = (Byte[]) n.value;
 		    
+		    if (n.comparator == n.EQUALS)
+		      {
 			return compareIPs(fBytes, oBytes);
+		      }
+		    else if (n.comparator == n.STARTSWITH)
+		      {
+			return ipBeginsWith(fBytes, oBytes);
+		      }
+		    else if (n.comparator == n.ENDSWITH)
+		      {
+			return ipEndsWith(fBytes, oBytes);
 		      }
 		    else
 		      {
+			return false;	// invalid comparator
+		      }
+		  }
+		else // vector compare.. EQUALS only
+		  {
+		    if (n.comparator == n.EQUALS)
+		      {
 			oBytes = (Byte[]) n.value;
-
+			
 			switch (n.arrayOp)
 			  {
 			  case n.CONTAINS:
-			
+			    
 			    for (int i = 0; i < values.size(); i++)
 			      {
 				if (compareIPs(oBytes, ((Byte[]) values.elementAt(i))))
@@ -357,18 +374,18 @@ public class DBQueryHandler {
 				    return true;
 				  }
 			      }
-
+			    
 			    return false;
-
+			    
 			  default:
-
+			    
 			    return false;
 			  }
 		      }
-		  }
-		else
-		  {
-		    return false;	// invalid comparator
+		    else
+		      {
+			return false;
+		      }
 		  }
 	      }
 
@@ -576,4 +593,127 @@ public class DBQueryHandler {
 	return true;
       }
   }
+
+  /**
+   *
+   * Returns true if param1 begins with param2.
+   *
+   */
+
+  private static boolean ipBeginsWith(Byte[] param1, Byte[] param2)
+  {
+    Byte[] prefix = ipAddrNoPad(param2);
+
+    /* -- */
+
+    if (prefix.length > param1.length)
+      {
+	return false;
+      }
+    else
+      {
+	for (int i = 0; i < prefix.length; i++)
+	  {
+	    if (prefix[i].byteValue() != param1[i].byteValue())
+	      {
+		return false;
+	      }
+	  }
+	
+	return true;
+      }
+  }
+
+  /**
+   *
+   * Returns true if param1 ends with param2.
+   *
+   */
+
+  private static boolean ipEndsWith(Byte[] param1, Byte[] param2)
+  {
+    Byte[] suffix = ipAddrNoPad(param2);
+
+    /* -- */
+
+    if (suffix.length > param1.length)
+      {
+	return false;
+      }
+    else
+      {
+	for (int i = (param1.length - 1), j = (suffix.length - 1); 
+	     j >= 0;
+	     i--, j--)
+	  {
+	    if (suffix[j].byteValue() != param1[i].byteValue())
+	      {
+		return false;
+	      }
+	  }
+	
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This helper method extracts the leading octets from the supplied
+   * IP address that are not all zeros.  I.e., for the address
+   * 129.0.116.0, ipAddrNoPad() would return 129.0.116, where
+   * for the address 129.116.0.0, ipAddrNoPad() would return
+   * 129.116.<br><br>
+   *
+   * Note that, like all Ganymede code dealing with IP addresses,
+   * Ganymede is using the u2s() and s2u() methods here to handle
+   * encoded unsigned values in the Java signed byte/Byte type/object.
+   *
+   */
+
+  private static Byte[] ipAddrNoPad(Byte[] ipaddr)
+  {
+    int i = ipaddr.length;
+
+    for (; i > 0 &&
+	   (s2u(ipaddr[i-1].byteValue()) == 0); i--);
+
+    Byte[] result = new Byte[i];
+
+    for (i = 0; i < result.length; i++)
+      {
+	result[i] = ipaddr[i];
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This method maps an int value between 0 and 255 inclusive
+   * to a legal signed byte value.
+   *
+   */
+
+  private final static byte u2s(int x)
+  {
+    if ((x < 0) || (x > 255))
+      {
+	throw new IllegalArgumentException("Out of range: " + x);
+      }
+
+    return (byte) (x - 128);
+  }
+
+  /**
+   *
+   * This method maps a u2s-encoded signed byte value to an
+   * int value between 0 and 255 inclusive.
+   *
+   */
+
+  private final static short s2u(byte b)
+  {
+    return (short) (b + 128);
+  }
+
 }
