@@ -657,7 +657,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
 /**
  * <p>JFrame subclass which is used to hold the {@link
- * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Directory Droid
+ * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Ganymede 
  * admin console is run as an application rather than an applet.</p>
  */
 
