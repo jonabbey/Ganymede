@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.200 $
-   Last Mod Date: $Date: 2000/09/17 10:04:35 $
+   Version: $Revision: 1.201 $
+   Last Mod Date: $Date: 2000/09/17 10:15:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.200 $ $Date: 2000/09/17 10:04:35 $
+ * @version $Revision: 1.201 $ $Date: 2000/09/17 10:15:35 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4814,11 +4814,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return Ganymede.createErrorDialog("xml transmission error",
 					  "Error, couldn't successfully send XML schema to xmlclient due to IOException:" +
 					  ex.getMessage());
-      }
-    finally
-      {
-	session.logout();
-	session = null;
       }
   }
 
