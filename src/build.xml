@@ -85,6 +85,9 @@
 
       <include name="arlut/csd/ganymede/DBBaseCategory.class"/>
       <include name="arlut/csd/ganymede/GanymedeXMLSession.class"/>
+
+      <include name="arlut/csd/ganymede/serverAdminAsyncResponder.class"/>
+      <include name="arlut/csd/ganymede/serverClientAsyncResponder.class"/>
       
       <include name="arlut/csd/ganymede/client/FileReceiverBase.class"/>
     </rmic>
