@@ -7,7 +7,7 @@
    can use it wherever.
    
    Created: 7 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,6 +62,26 @@ public class objectCache {
 
   public Vector getListHandles(Object key, boolean includeInactives)
   {
+    return getListHandles(key, includeInactives, false);
+  }
+
+  /**
+   * This method returns a sorted Vector of listHandles for the cache
+   * for <key>.  The vector is essentially a read-out of the current
+   * state of the objectList, and will not track any future changes to
+   * this objectList.
+   *
+   * @param includeInactives if false, the list returned will not include entries
+   * for any inactive objects 
+   *
+   * @param includeNonEditables if false, the list returned will not
+   * include entries for any non-editable objects
+   * 
+   */
+
+  public Vector getListHandles(Object key, boolean includeInactives,
+			       boolean includeNonEditables)
+  {
     objectList list = getList(key);
 
     if (list == null)
@@ -69,7 +89,23 @@ public class objectCache {
 	return null;
       }
 
-    return list.getListHandles(includeInactives);
+    return list.getListHandles(includeInactives, includeNonEditables);
+  }
+
+  /**
+   *
+   * This method returns a sorted Vector of object labels.  The vector
+   * is essentially a read-out of the current state of the objectList,
+   * and will not track any future changes to this objectList.
+   *
+   * @param includeInactives if false, the list returned will not
+   * include entries for any inactive objects
+   *
+   */
+
+  public Vector getLabels(Object key, boolean includeInactives)
+  {
+    return getLabels(key, includeInactives, false);
   }
 
   /**
@@ -81,9 +117,13 @@ public class objectCache {
    * @param includeInactives if false, the list returned will not
    * include entries for any inactive objects
    * 
+   * @param includeNonEditables if false, the list returned will not
+   * include entries for any non-editable objects
+   *
    */
 
-  public Vector getLabels(Object key, boolean includeInactives)
+  public Vector getLabels(Object key, boolean includeInactives,
+			  boolean includeNonEditables)
   {
     objectList list = getList(key);
 
@@ -92,7 +132,7 @@ public class objectCache {
 	return null;
       }
 
-    return list.getLabels(includeInactives);
+    return list.getLabels(includeInactives, includeNonEditables);
   }
 
   /**
@@ -116,13 +156,31 @@ public class objectCache {
 	return null;
       }
 
-    return list.getInvidHandle(invid);
+    return list.getObjectHandle(invid);
   }
-
 
   public void putList(Object key, QueryResult qr)
   {
     idMap.put(key, new objectList(qr));
+  }
+
+  /**
+   *
+   * This method is intended to augment an existing list with
+   * non-editable object handles.
+   *
+   */
+
+  public void augmentList(Object key, QueryResult qr)
+  {
+    objectList list = (objectList) idMap.get(key);
+
+    if (key == null)
+      {
+	throw new RuntimeException("error, no list found with key " + key);
+      }
+
+    list.augmentListWithNonEditables(qr);
   }
 
   public void putList(Object key, objectList list)
