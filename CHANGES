@@ -263,6 +263,8 @@ The Ganymede server and client did not previously support regexp
 matching for IP fields.  The client now provides a 'matching' option
 in the query box for performing regexp searches on IP address fields.
 
+Gil Kloepfer (gil@arlut.utexas.edu) pointed this out.
+
 16. [SERVER] Did a basic reworking of ganymede.db and DBStore structures
 
 I've been laying the groundwork for support for XML database
@@ -352,6 +354,8 @@ method used the QueryResult.append() method to concatenate query
 results, which the gasharl schema kit's emailListCustom class did for
 its Internal Members field.
 
+Thanks to Andrew Helyer (helyer@arlut.utexas.edu) for reporting this.
+
 21. [CLIENT,SERVER] Fixed object description mail from the client
 
 Fixed the client's object mail feature.  Added getSummaryDescription()
@@ -398,6 +402,20 @@ interface was created again with the 'add interface' button.
 
 I've fixed this, so now you can delete and add interfaces all you want
 without losing the ability to choose a previously chosen network.
+
+25. [CLIENT] Fixed default owner dialog logic
+
+Previously, the ganymede client could get confused about the proper
+settings for the default owner dialog (the dialog that pops up to ask
+you what owner group you want to put a soon-to-be created object into)
+if you change personas.
+
+It would be too painful right now to explain the precise situation in
+which the ganymede client wouldn't do the right thing, but it doesn't
+anymore.  It does the right thing.
+
+This is another one of those things that's been bugging me for a long
+time, and I'm glad to see it fixed.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 

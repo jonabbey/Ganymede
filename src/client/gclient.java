@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.170 $
-   Last Mod Date: $Date: 2000/03/01 22:01:07 $
+   Version: $Revision: 1.171 $
+   Last Mod Date: $Date: 2000/03/16 07:20:08 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.170 $ $Date: 2000/03/01 22:01:07 $ $Name:  $
+ * @version $Revision: 1.171 $ $Date: 2000/03/16 07:20:08 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/03/01 22:01:07 $";
+  static String release_date = "$Date: 2000/03/16 07:20:08 $";
   static String release_number = null;
 
   // ---
@@ -3984,10 +3984,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
       }
     
-    if (defaultOwnerDialog == null)
-      {
-	defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
-      }
+    defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
 
     retVal = defaultOwnerDialog.chooseOwner();
 
