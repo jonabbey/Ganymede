@@ -142,6 +142,16 @@ public class XMLDumpContext {
   }
 
   /**
+   * <p>Returns true if this XMLDumpContext was created to write to a
+   * sync channel.</p>
+   */
+
+  public boolean isSyncing()
+  {
+    return this.syncConstraints != null;
+  }
+
+  /**
    * <p>Returns true if the DBObject passed in needs to be synced to
    * this channel.  This version of shouldInclude() assumes that the
    * object passed in is a read-only DBObject.  In this case, the
