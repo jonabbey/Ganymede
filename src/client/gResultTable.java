@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   rowTable table = null;
   JButton refreshButton;
 
+  Container
+    contentPane;
+
   /* -- */
 
   public gResultTable(windowPanel parent, Session session, Query query, String results) throws RemoteException
@@ -61,14 +64,16 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     popMenu.add(viewMI);
     popMenu.add(editMI);
 
-    setLayout(new BorderLayout());
+    contentPane = getContentPane();
+
+    contentPane.setLayout(new BorderLayout());
 
     JBufferedPane buttonPanel = new JBufferedPane();
     refreshButton = new JButton("Refresh Query");
     refreshButton.addActionListener(this);
     buttonPanel.add(refreshButton);
     
-    add("South", buttonPanel);
+    contentPane.add("South", buttonPanel);
 
     loadResults(results);
   }
@@ -192,7 +197,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     if (table == null)
       {
 	table = new rowTable(colWidths, headers, this, popMenu);
-	add("Center", table);
+	contentPane.add("Center", table);
       }
     else
       {
