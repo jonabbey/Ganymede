@@ -11,8 +11,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:46 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/04/07 01:14:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,13 +63,12 @@ import java.util.Hashtable;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This interface provides a means whereby clients can provide
+ * <p>This interface provides a means whereby clients can provide
  * additional information to the server in response to a dialog
- * request.
+ * request.</p>
  *
- * The name for this class is the fault of el Webjefe Felipe Campos,
- * felipe@uts.cc.utexas.edu.
+ * <p>The name for this class is the fault of el Webjefe Felipe Campos,
+ * felipe@uts.cc.utexas.edu.</p>
  *
  * @see arlut.csd.JDialog.StringDialog
  */
@@ -77,7 +76,6 @@ import java.util.Hashtable;
 public interface Ganymediator extends Remote {
 
   /**
-   *
    * This method is used to provide feedback to the server from a client
    * in response to a specific request. 
    *
@@ -89,5 +87,4 @@ public interface Ganymediator extends Remote {
    */
 
   public ReturnVal respond(Hashtable returnHash) throws RemoteException;
-
 }

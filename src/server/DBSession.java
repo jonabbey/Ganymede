@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/04/01 22:17:48 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/04/07 01:14:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.JDialog.*;
  * while DBSession is accessed only by (presumably trusted)
  * server-side code.</p>
  *
- * @version $Revision: 1.63 $ %D%
+ * @version $Revision: 1.64 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -713,21 +713,20 @@ final public class DBSession {
   }
 
   /**
+   * <p>Inactivate an object in the database</p>
    *
-   * Inactivate an object in the database<br><br>
-   *
-   * This method method can only be called in the context of an open
+   * <p>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the only
    * way to obtain a DBEditObject), no other locking is required. This method
    * will take an object out of the DBStore and proceed to do whatever is
-   * necessary to cause that object to be 'inactivated'.
+   * necessary to cause that object to be 'inactivated'.</p>
    *
-   * Note that this method does not check to see whether permission
+   * <p>Note that this method does not check to see whether permission
    * has been obtained to inactivate the object.. that's done in
-   * GanymedeSession.inactivate_db_object().
+   * {@link arlut.csd.GanymedeSession#inactivate_db_object(arlut.csd.ganymede.Invid) 
+   * GanymedeSession.inactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be inactivated
-   *  
    */
 
   public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
@@ -747,7 +746,8 @@ final public class DBSession {
 
       default:
 	return Ganymede.createErrorDialog("Server: Error in DBSession.inactivateDBObject()",
-					  "Error.. can't inactivate an object that has already been inactivated or deleted");
+					  "Error.. can't inactivate an object that has " +
+					  "already been inactivated or deleted");
       }
 
     checkpoint(key);
@@ -788,21 +788,22 @@ final public class DBSession {
   }
 
   /**
+   * <p>Reactivates an object in the database.</p>
    *
-   * Reactivate an object in the database<br><br>
-   *
-   * This method method can only be called in the context of an open
+   * <p>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the only
-   * way to obtain a DBEditObject), no other locking is required. This method
-   * will take an object out of the DBStore and proceed to do whatever is
-   * necessary to cause that object to be 'inactivated'.<br><br>
+   * way to obtain a {@link arlut.csd.ganymede.DBEditObject DBEditObject}),
+   * no other locking is required. This method
+   * will take an object out of the {@link arlut.csd.ganymede.DBStore DBStore}
+   * and proceed to do whatever is
+   * necessary to cause that object to be 'inactivated'.</p>
    *
-   * Note that this method does not specifically check to see whether permission
+   * <p>Note that this method does not specifically check to see whether permission
    * has been obtained to reactivate the object.. that's done in
-   * GanymedeSession.reactivate_db_object().
+   * {@link arlut.csd.GanymedeSession#reactivate_db_object(arlut.csd.ganymede.Invid) 
+   * GanymedeSession.reactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be reactivated
-   *  
    */
 
   public synchronized ReturnVal reactivateDBObject(DBEditObject eObj)

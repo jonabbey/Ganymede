@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 1999/03/17 05:32:48 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 1999/04/07 01:14:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.103 $ %D%
+ * @version $Revision: 1.104 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -3288,15 +3288,13 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object choicesKey()

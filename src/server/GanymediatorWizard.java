@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:05:46 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/04/07 01:14:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import arlut.csd.JDialog.JDialogBuff;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a template for all Wizards implemented on the server.
+ * <p>This class is a template for all Wizards implemented on the server.
  * Custom plug-in GanymediatorWizards may be authored to handle
  * step-by-step interactions with a user.  GanymediatorWizards are
  * typically created on the server when a client attempts an operation
@@ -88,10 +88,13 @@ import arlut.csd.JDialog.JDialogBuff;
  * initially requested action.  If not, it will update its internal state
  * to keep track of where it is with respect to the user, and will return
  * another ReturnVal which requests the client present another dialog and
- * call back this GanymediatorWizard to continue along the process.
+ * call back this GanymediatorWizard to continue along the process.</p>
  *
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
+ *
+ * @version $Revision: 1.11 $ $Date: 1999/04/07 01:14:26 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public abstract class GanymediatorWizard extends UnicastRemoteObject implements Ganymediator {
