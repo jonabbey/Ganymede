@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -72,6 +72,7 @@ import java.util.Vector;
 
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.zipIt;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -113,6 +114,14 @@ import arlut.csd.ganymede.common.SchemaConstants;
 public abstract class GanymedeBuilderTask implements Runnable {
 
   private static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeBuilderTask");
+
 
   private static String currentBackUpDirectory = null;
   private static String oldBackUpDirectory = null;
@@ -203,8 +212,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (shutdownState != null)
       {
-	Ganymede.debug("Aborting builder task " + this.getClass().getName() + 
-		       " for shutdown condition: " + shutdownState);
+	// "Aborting builder task {0} for shutdown condition: {1}"
+	Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
 	return;
       }
 
@@ -247,7 +256,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    synchronized (GanymedeBuilderTask.class) 
 	      {
-		label = "builder:" + id++;
+		// "builder: {0,number,#}"
+		label = ts.l("run.label_pattern", new Integer(id++));
 	      }
 
 	    try
@@ -256,7 +266,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      }
 	    catch (java.rmi.RemoteException ex)
 	      {
-		throw new RuntimeException("bizarro local remote exception " + ex);
+		throw new RuntimeException(ex);
 	      }
 
 	    try
@@ -265,7 +275,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      }
 	    catch (InterruptedException ex)
 	      {
-		Ganymede.debug("Could not run task " + this.getClass().getName() + ", couldn't get dump lock");
+		// "Could not run task {0}, couldn''t get dump lock."
+		Ganymede.debug(ts.l("run.failed_lock_acquisition", this.getClass().getName()));
 		return;
 	      }
 
@@ -321,8 +332,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	
 	if (currentThread.isInterrupted())
 	  {
-	    Ganymede.debug("Builder task " + this.getClass().getName() + 
-			   " interrupted, not doing network build.");
+	    // "Builder task {0} interrupted, not doing network build."
+	    Ganymede.debug(ts.l("run.task_interrupted", this.getClass().getName()));
 	    Ganymede.updateBuildStatus();
 	    return;
 	  }
@@ -339,8 +350,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 		    if (shutdownState != null)
 		      {
-			Ganymede.debug("Aborting builder task " + this.getClass().getName() + 
-				       " build for shutdown condition: " + shutdownState);
+			// "Aborting builder task {0} for shutdown condition: {1}"
+			Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
 			return;
 		      }
 		  }
@@ -456,7 +467,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (fieldIds == null || fieldIds.size() == 0)
       {
-	throw new IllegalArgumentException("Null/empty fieldIds");
+	// "Null or empty fieldIds arguments"
+	throw new IllegalArgumentException(ts.l("baseChanged.empty"));
       }
 
     DBObjectBaseField fieldDef = null;
@@ -500,7 +512,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (lock == null)
       {
-	throw new IllegalArgumentException("Can't call enumerateObjects without a lock");
+	// "Can''t call enumerateObjects without a lock."
+	throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
       }
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
@@ -925,7 +938,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	if (basePath == null || basePath.equals(""))
 	  {
-	    Ganymede.debug("GanymedeBuilder not able to determine backups directory.");
+	    // "GanymedeBuilderTask not able to determine backups directory from Ganymede property file."
+	    Ganymede.debug(ts.l("openBackupDirectory.no_directory_defined"));
+
 	    return;
 	  }
 	
@@ -936,23 +951,25 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (!directory.exists())
       {
-	Ganymede.debug("Warning, can't find ganymede.builder.backup directory " + 
-		       basePath + ", not backing up " + filename);
+	// "Warning, can''t find ganymede.builder.backup directory {0}.  Not backing up {1}."
+	Ganymede.debug(ts.l("openBackupDirectory.no_such_directory", basePath, filename));
+
 	return;
       }
 
     if (!directory.isDirectory())
       {
-	Ganymede.debug("Warning, ganymede.builder.backup path " + basePath +
-		       " is not a directory, not backing up " + filename);
+	// "Warning, ganymede.builder.backup path {0} is not a directory.  Not backing up {1}."
+	Ganymede.debug(ts.l("openBackupDirectory.not_a_directory",  basePath, filename));
+
 	return;
       }
 
     if (!directory.canWrite())
       {
-	Ganymede.debug("Warning, can't write to ganymede.builder.backup path " + 
-		       basePath +
-		       ", not backing up " + filename);
+	// "Warning, can''t write to ganymede.builder.backup path {0}.  Not backing up {1}."
+	Ganymede.debug(ts.l("openBackupDirectory.not_writeable", basePath, filename));
+
 	return;
       }
 
@@ -1030,11 +1047,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      {
 		String zipName = oldBackUpDirectory + ".zip";
 		
-		Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): trying to zip " + oldBackUpDirectory);
+		// "GanymedeBuilderTask.openBackupDirectory(): trying to zip {0}."
+		Ganymede.debug(ts.l("openBackupDirectory.zipping", oldBackUpDirectory));
 		
 		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
 		  {
-		    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): zipped " + zipName);
+		    // "GanymedeBuilderTask.openBackupDirectory(): zipped {0}."
+		    Ganymede.debug(ts.l("openBackupDirectory.zipped", zipName));
 		    FileOps.deleteDirectory(oldBackUpDirectory);
 		  }
 		else
@@ -1047,8 +1066,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 			
 			if (list == null || list.length == 0)
 			  {
-			    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): directory " + 
-					   oldBackUpDirectory + " is empty, deleting");
+			    // "GanymedeBuilderTask.openBackupDirectory(): directory {0} is empty, deleting it."
+			    Ganymede.debug(ts.l("openBackupDirectory.skipping_empty", oldBackUpDirectory));
+
 			    FileOps.deleteDirectory(oldBackUpDirectory);
 			  }
 		      }
@@ -1210,7 +1230,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      {
 		String zipName = dirName + ".zip";
 
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipping " + dirName);
+		// "GanymedeBuilderTask.cleanBackupDirectory(): zipping {0}."
+		Ganymede.debug(ts.l("cleanBackupDirectory.zipping", dirName));
 
 		// it is conceivable that we have successfully zipped
 		// a directory before, but did not delete the
@@ -1223,7 +1244,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		  {
 		    if (zipIt.zipDirectory(dirName, zipName))
 		      {
-			Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + zipName);
+			// "GanymedeBuilderTask.cleanBackupDirectory(): zipped {0}."
+			Ganymede.debug(ts.l("cleanBackupDirectory.zipped", zipName));
 
 			try
 			  {
@@ -1231,8 +1253,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 			  }
 			catch (IOException ex)
 			  {
-			    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): could not remove " + 
-					   dirName);
+			    // "GanymedeBuilderTask.cleanBackupDirectory(): could not remove {0}."
+			    Ganymede.debug(ts.l("cleanBackupDirectory.bad_delete", dirName));
 			  }
 		      }
 		    else
@@ -1245,8 +1267,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 			
 			    if (list == null || list.length == 0)
 			      {
-				Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): directory " + 
-					       dirName + " is empty, deleting");
+				// "GanymedeBuilderTask.cleanBackupDirectory(): directory {0} is empty, deleting it."
+				Ganymede.debug(ts.l("cleanBackupDirectory.skipping_empty", dirName));
+
 				FileOps.deleteDirectory(dirName);
 			      }
 			  }
@@ -1254,14 +1277,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		  }
 		else
 		  {
-		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + dirName + 
-				   " zip file already exists, not deleting.");
+		    // "GanymedeBuilderTask.cleanBackupDirectory(): {0} zip file already exists, not deleting."
+		    Ganymede.debug(ts.l("cleanBackupDirectory.zip_already", dirName));
 		  }
 	      }
 	    else
 	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): don't need to zip " + 
-			       dirName + " yet.");
+		// "GanymedeBuilderTask.cleanBackupDirectory(): don''t need to zip {0} yet."
+		Ganymede.debug(ts.l("cleanBackupDirectory.no_zip_yet", dirName));
 	      }
 	  }
 	catch (NumberFormatException ex)
