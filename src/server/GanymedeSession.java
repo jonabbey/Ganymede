@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.92 $ %D%
+   Version: $Revision: 1.93 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2688,8 +2688,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * View an object from the database.  If the return value is null,
-   * getLastError() should be called for a description of the problem.<br><br>
+   * View an object from the database.  The ReturnVal returned will
+   * carry a db_object reference, which can be obtained by the client
+   * calling ReturnVal.getObject().  If the object could not be
+   * viewed for some reason, the ReturnVal will carry an encoded error
+   * dialog for the client to display.<br><br>
    *
    * view_db_object() can be done at any time, outside of the bounds of
    * any transaction.  view_db_object() returns a snapshot of the object's
@@ -2710,17 +2713,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * access.  Keep in mind, however, that view_db_object clones the
    * DBObject in question, so this method is very heavyweight.
    *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   * 
    * @see arlut.csd.ganymede.Session
+   *
    */
 
-  public db_object view_db_object(Invid invid)
+  public ReturnVal view_db_object(Invid invid)
   {
     return view_db_object(invid, true);
   }
 
   /**
-   * View an object from the database.  If the return value is null,
-   * getLastError() should be called for a description of the problem.<br><br>
+   * View an object from the database.  The ReturnVal returned will
+   * carry a db_object reference, which can be obtained by the client
+   * calling ReturnVal.getObject().  If the object could not be
+   * viewed for some reason, the ReturnVal will carry an encoded error
+   * dialog for the client to display.<br><br>
    *
    * view_db_object() can be done at any time, outside of the bounds of
    * any transaction.  view_db_object() returns a snapshot of the object's
@@ -2741,10 +2750,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * access.  Keep in mind, however, that view_db_object clones the
    * DBObject in question, so this method is very heavyweight.
    *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   * @see arlut.csd.ganymede.Session
+   * 
    */
 
-  public db_object view_db_object(Invid invid, boolean checkPerms)
+  public ReturnVal view_db_object(Invid invid, boolean checkPerms)
   {
+    ReturnVal result;
+    db_object objref;
     DBObject obj;
     PermEntry perm;
 
@@ -2768,7 +2783,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    // return a copy that knows what GanymedeSession is looking at it
 
-	    return new DBObject(obj, this);
+	    objref = new DBObject(obj, this);
+
+	    result = new ReturnVal(true); // success
+	    result.setObject(objref);
+
+	    return result;
 	  }
 	catch (RemoteException ex)
 	  {
@@ -2777,22 +2797,31 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	setLastError("Permission to view object [" + viewObjectLabel(invid)
-		     + " - " + invid + "] denied.");
-	return null;
+	return Ganymede.createErrorDialog("Permissions Error",
+					  "Permission to view object [" + 
+					  viewObjectLabel(invid) +
+					  " - " + invid + "] denied.");
       }
   }
 
   /**
    *
-   * This method provides a handle to an editable
-   * object from the Ganymede database.
+   * Check an object out from the database for editing.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
    *
    * @see arlut.csd.ganymede.Session
+   *
    */
 
-  public db_object edit_db_object(Invid invid)
+  public ReturnVal edit_db_object(Invid invid)
   {
+    ReturnVal result;
+    db_object objref;
     DBObject obj;
 
     /* -- */
@@ -2801,29 +2830,80 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     obj = (DBObject) session.viewDBObject(invid);
 
+    if (obj == null)
+      {
+	return Ganymede.createErrorDialog("Object not found",
+					  "Error, object [" + invid + "] does not appear to exist");
+      }
+
     if (getPerm(obj).isEditable())
       {
 	setLastEvent("edit_db_object: " + obj.getLabel());
-	return session.editDBObject(invid); // *sync* DBSession DBObject
+
+	objref = session.editDBObject(invid);
+
+	if (objref != null)
+	  {
+	    result = new ReturnVal(true);
+	    result.setObject(objref);
+
+	    return result;
+	  }
+	else
+	  {
+	    // someone else is editing it.. who?
+
+	    String edit_username;
+	    String edit_hostname;
+
+	    DBEditObject editing = obj.shadowObject;
+
+	    if (editing != null)
+	      {
+		if (editing.gSession != null)
+		  {
+		    edit_username = editing.gSession.username;
+		    edit_hostname = editing.gSession.clienthost;
+
+		    return Ganymede.createErrorDialog("Error, object already being edited",
+						      "Object [" + viewObjectLabel(invid) +
+						      " - " + invid + 
+						      "] is already being edited by user " +
+						      edit_username + " on host " + edit_hostname);
+		  }
+	      }
+
+	    return Ganymede.createErrorDialog("Error checking object out for editing",
+					      "Error checking out object [" + 
+					      viewObjectLabel(invid) +
+					      " - " + invid + 
+					      "] for editing.\nPerhaps someone else was editing it?");
+	  }
       }
     else
       {
-	setLastError("Permission to edit object [" + viewObjectLabel(invid)
-		     + " - " + invid + "] denied.");
-	return null;
+	return Ganymede.createErrorDialog("Permissions Error",
+					  "Permission to edit object [" + 
+					  viewObjectLabel(invid) +
+					  " - " + invid + "] denied.");
       }
   }
 
   /**
    *
-   * This method provides a handle to a newly
-   * created object of the specified type in the
-   * Ganymede database.
+   * Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
    *
    * @see arlut.csd.ganymede.Session
+   *
    */
 
-  public db_object create_db_object(short type) 
+  public ReturnVal create_db_object(short type) 
   {
     DBObject newObj;
 
@@ -2847,8 +2927,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (ownerList.size() != 1)
 	      {
-		setLastError("Can't create new object, no way of knowing what owner group to place it in");
-		return null;
+		return Ganymede.createErrorDialog("Can't create",
+						  "Can't create new object, no way of knowing what " +
+						  "owner group to place it in");
 	      }
 	  }
 
@@ -2876,34 +2957,45 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (newObj == null)
 	  {
-	    return null;	// in case the createDBObject() method rejected for some reason
+	    return Ganymede.createErrorDialog("Can't create",
+					      "Can't create new object, the operation was refused");
 	  }
       }
     else
       {
 	DBObjectBase base = Ganymede.db.getObjectBase(type);
+	
+	String error;
 
 	if (base == null)
 	  {
-	    setLastError("Permission to create object of *invalid* type " + type + " denied.");
+	    error = "Permission to create object of *invalid* type " + type + " denied.";
 	  }
 	else
 	  {
-	    setLastError("Permission to create object of type " + base.getName() + " denied.");
+	    error = "Permission to create object of type " + base.getName() + " denied.";
 	  }
 
-	return null;
+	return Ganymede.createErrorDialog("Can't create",
+					  error);
       }
 
     setLastEvent("create_db_object: " + newObj.getBase().getName());
 
-    return (db_object) newObj;
+    ReturnVal result = new ReturnVal(true);
+
+    result.setObject(newObj);
+
+    return result;
   }
 
   /**
    *
-   * Clone a new object from object <invid>. If the return value is null,
-   * getLastError() should be called for a description of the problem. <br><br>
+   * Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
+   * will carry a db_object reference, which can be obtained by the
+   * client calling ReturnVal.getObject().  If the object could not
+   * be checked out for editing for some reason, the ReturnVal will
+   * carry an encoded error dialog for the client to display.<br><br>
    *
    * This method must be called within a transactional context.<br><br>
    *
@@ -2911,16 +3003,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * retained is up to the specific code module provided for the
    * invid type of object.
    *
-   * @return the newly created object for editing
-   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *    
    * @see arlut.csd.ganymede.Session
+   *
    */
 
-  public db_object clone_db_object(Invid invid)
+  public ReturnVal clone_db_object(Invid invid)
   {
     checklogin();
-    setLastError("clone_db_object is not yet implemented.");
-    return null;
+
+    return Ganymede.createErrorDialog("Invalid operation",
+				      "clone_db_object is not yet implemented.");	      
   }
 
   /**
@@ -2969,7 +3063,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
-    eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
+    ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
+
+    eObj = (DBEditObject) result.getObject();
 
     if (eObj == null)
       {
@@ -3038,7 +3134,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  vObj.getLabel());
       }
 
-    eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
+    ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
+
+    eObj = (DBEditObject) result.getObject();
 
     if (eObj == null)
       {
