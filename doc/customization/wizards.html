@@ -136,21 +136,47 @@
       </tr>
     </table>
 
-One of the advanced features of the Ganymede system is the
-    server's ability to engage in a special sequence of interactions
-    with the user when the normal course of interactions is not
-    adequate.  These special interaction sequences are handled by the
-    <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
-      GanymediatorWizard</a> class.  Schema kit authors can write
-    their own subclasses of <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
-      GanymediatorWizard</a> to handle such cases.</p>
+    <p>Any method which returns a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    can involve the client in a sequence of dialogs, to ask questions
+    and guide the user through a series of steps to achieve some end.
+    The code on the server which manages this series of dialogs is
+    called a <font color="#ff0000">wizard</font>.  Wizards in the
+    Ganymede server are derived from the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
+    GanymediatorWizard</a> class, and are responsible for providing a
+    series of <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    objects to the client on demand.  The client interacts with the
+    server-side wizard through the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
+    RMI Remote interface.  The <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    object can pass a <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
+    interface to the client at any time, using the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java#setCallback(arlut.csd.ganymede.Ganymediator)">setCallback()</a>
+    method.  If the client sees that a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    object that it gets from the server is carrying a <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    and a <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
+    reference, the client will present the encoded dialog, marshal any
+    results from any encoded GUI widgets into a serialized hashtable,
+    and will pass that hashtable back to the server in the form of a
+    call to the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
+    <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.java#respond(java.util.Hashtable)">respond()</a>
+    method.</p>
     
-      <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
+    <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 27 11:55:19 CDT 1999 -->
     <FONT FACE="Arial,Helvetica"><i>
-<!-- hhmts start -->
-Last modified: Tue Jul 27 16:54:33 CDT 1999
+	<!-- hhmts start -->
+Last modified: Tue Jul 27 17:10:58 CDT 1999
 <!-- hhmts end -->
-    </i></FONT>
+      </i></FONT>
   </body>
 </html>
