@@ -7,8 +7,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/03/30 20:14:21 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/04/01 22:17:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,17 +54,16 @@ import java.util.Vector;
 import java.rmi.RemoteException;
 
 /**
+ * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.DBObject DBObject}
+ * or {@link arlut.csd.ganymede.DBEditObject DBEditObject}, the db_object is used by the
+ * client to get information about and/or make changes to a object held
+ * in the Ganymede server.</p>
  *
- * This interface defines the methods that the client can remotely
- * call on a object held in the Ganymede server.
- *
- * @version $Revision: 1.17 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.18 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *
  */
 
 public interface db_object extends java.rmi.Remote {
-
 
   /**
    *

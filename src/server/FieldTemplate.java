@@ -7,8 +7,8 @@
    
    Created: 5 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:05:41 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/04/01 22:17:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,18 @@ package arlut.csd.ganymede;
                                                                    FieldTemplate
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class is a serializable object used to return all the static information
+ * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
+ * needs to render a specific kind of field.</p>
+ *
+ * <p>The {@link arlut.csd.ganymede.FieldInfo FieldInfo} object is used to return
+ * the value information associated with an actual instance of a field.</p>
+ *
+ * @version $Revision: 1.9 $ $Date: 1999/04/01 22:17:49 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
+ */
 
 public class FieldTemplate implements java.io.Serializable, FieldType {
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 1999/03/22 22:38:25 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 1999/04/01 22:17:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,12 +70,14 @@ import arlut.csd.JDialog.*;
  * be subclassed to provide object management intelligence.<br><br> 
  *
  * A instance of DBEditObject is a copy of a DBObject that has been
- * exclusively checked out from the main database so that a DBSession
+ * exclusively checked out from the main database so that a 
+ * {@link arlut.csd.ganymede.DBSession DBSession}
  * can edit the fields of the object.  The DBEditObject class keeps
  * track of the changes made to fields, keeping things properly
  * synchronized with unique field name spaces.<br><br>
  *
- * All DBEditObjects are obtained in the context of a DBEditSet.  When
+ * All DBEditObjects are obtained in the context of a 
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet} transaction object.  When
  * the DBEditSet is committed, the DBEditObject is made to replace the
  * original object from the DBStore.  If the EditSet is aborted, the
  * DBEditObject is dropped.<br><br>
@@ -85,9 +87,8 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.103 $ $Date: 1999/03/22 22:38:25 $ $Name:  $
+ * @version $Revision: 1.104 $ $Date: 1999/04/01 22:17:46 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/03/30 20:14:19 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/04/01 22:17:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -144,10 +144,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
    * Returns number of elements in vector if this is a vector field.  If
    * this is not a vector field, will return 1. (Should throw exception?)
-   *
    */
 
   public int size()		// returns number of elements in array
@@ -622,7 +620,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Returns the value of this field, if a scalar.
+   * Returns the value of this field, if a scalar.  An IllegalArgumentException
+   * will be thrown if this field is a vector.
    *
    * @see arlut.csd.ganymede.db_field
    *
@@ -943,15 +942,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /** 
+   * <p>Returns a Vector of the values of the elements in this field,
+   * if a vector.</p>
    *
-   * Returns a Vector of the values of the elements in this field,
-   * if a vector.
-   *
-   * This is only valid for vectors.  If the field is a scalar, use
-   * getValue().
+   * <p>This is only valid for vectors.  If the field is a scalar, use
+   * getValue().</p>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public Vector getValues()
@@ -1002,16 +999,16 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
    * <p>Sets the value of an element of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * <p>The ReturnVal resulting from a successful setElement will
+   * encode an order to rescan this field.</p>
    *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
-   *
    */
   
   public final ReturnVal setElement(int index, Object value)
@@ -1073,15 +1070,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
    * <p>Sets the value of an element of this field, if a vector.</p>
    *
    * <p>Server-side method only</p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
-   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  A null result means the
+   * operation was carried out successfully and no information
+   * needed to be passed back about side-effects.</p>
    */
   
   public synchronized ReturnVal setElement(int index, Object value, boolean local)
@@ -1186,15 +1182,15 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
    * <p>Adds an element to the end of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * <p>The ReturnVal resulting from a successful addElement will
+   * encode an order to rescan this field.</p>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public final ReturnVal addElement(Object value)

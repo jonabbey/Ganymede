@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/01/22 18:05:54 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/04/01 22:17:52 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.35 $ %D%
+ * @version $Revision: 1.36 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -471,7 +471,8 @@ public interface Session extends Remote {
   /**
    *
    * This method provides the hook for doing a
-   * fast database dump to a string form.  The StringBuffer
+   * fast database dump to a string form.  The 
+   * {@link arlut.csd.ganymede.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.
    *
@@ -496,14 +497,12 @@ public interface Session extends Remote {
   public QueryResult queryInvids(Vector invidVector) throws RemoteException;
 
   /**
+   * <p>List objects in the database meeting the given query criteria.</p>
    *
-   * List objects in the database meeting the given query criteria.<br><br>
-   *
-   * The database will be read-locked during the query, assuring
-   * a transaction-consistent view of the database.  The StringBuffer
+   * <p>The database will be read-locked during the query, assuring
+   * a transaction-consistent view of the database.  The QueryResult
    * returned comprises a formatted dump of the invid's and
-   * labels of the viewable objects matching the provided query.
-   *
+   * labels of the viewable objects matching the provided query.</p>
    */
 
   QueryResult    query(Query query) throws RemoteException;
@@ -547,117 +546,152 @@ public interface Session extends Remote {
   StringBuffer    viewAdminHistory(Invid invid, Date since) throws RemoteException;
 
   /**
-   * View an object from the database.  The ReturnVal returned will
-   * carry a db_object reference, which can be obtained by the client
-   * calling ReturnVal.getObject().  If the object could not be
+   * <p>View an object from the database.  The ReturnVal returned will
+   * carry a {@link arlut.csd.ganymede.db_object db_object} reference,
+   * which can be obtained by the client
+   * calling {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be
    * viewed for some reason, the ReturnVal will carry an encoded error
-   * dialog for the client to display.<br><br>
+   * dialog for the client to display.</p>
    *
-   * view_db_object() can be done at any time, outside of the bounds of
+   * <p>view_db_object() can be done at any time, outside of the bounds of
    * any transaction.  view_db_object() returns a snapshot of the object's
    * state at the time the view_db_object() call is processed, and will
-   * be transaction-consistent internally.<br><br>
+   * be transaction-consistent internally.</p>
    *
-   * If view_db_object() is called during a transaction, the object
+   * <p>If view_db_object() is called during a transaction, the object
    * will be returned as it stands during the transaction.. that is,
    * if the object has been changed during the transaction, that
    * changed object will be returned, even if the transaction has
    * not yet been committed, and other clients would not be able to
-   * see that version of the object.<br><br>
+   * see that version of the object.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   * 
    */
 
   ReturnVal   view_db_object(Invid invid) throws RemoteException;
 
   /**
-   *
-   * Check an object out from the database for editing.  The ReturnVal
+   * <p>Check an object out from the database for editing.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
-   * by the client calling ReturnVal.getObject().  If the object
-   * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.
+   * by the client calling
+   * {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be checked out for editing for some
+   * reason, the ReturnVal will carry an encoded error dialog for the
+   * client to display.</p>
+   *
+   * <p>Keep in mind that only one Session can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once checked out, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.Session#commitTransaction() commitTransaction()}
+   * or {@link arlut.csd.ganymede.Session#abortTransaction() abortTransaction()}.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *
    */
 
   ReturnVal   edit_db_object(Invid invid) throws RemoteException;
 
   /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
    *
-   * Create a new object of the given type.  The ReturnVal returned
-   * will carry a db_object reference, which can be obtained by the
-   * client calling ReturnVal.getObject().  If the object could not
-   * be created for some reason, the ReturnVal will carry an encoded
-   * error dialog for the client to display.
+   * <p>Keep in mind that only one Session can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.Session#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param type The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *
    */
 
   ReturnVal   create_db_object(short type) throws RemoteException;
 
   /**
-   *
-   * Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
+   * <p>Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
    * will carry a db_object reference, which can be obtained by the
    * client calling ReturnVal.getObject().  If the object could not
-   * be cloned for some reason, the ReturnVal will carry an encoded
-   * error dialog for the client to display.<br><br>
+   * be checked out for editing for some reason, the ReturnVal will
+   * carry an encoded error dialog for the client to display.</p>
    *
-   * This method must be called within a transactional context.<br><br>
+   * <p>This method must be called within a transactional context.</p>
    *
-   * Typically, only certain values will be cloned.  What values are
+   * <p>Typically, only certain values will be cloned.  What values are
    * retained is up to the specific code module provided for the
-   * invid type of object.
+   * invid type of object.</p>
+   *
+   * <p>Note that at the present time, clone_db_object doesn't do anything..
+   * it's a feature that is yet to be developed.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *  
+   *    
+   * @see arlut.csd.ganymede.Session
    */
 
   ReturnVal   clone_db_object(Invid invid) throws RemoteException;
 
   /**
+   * <p>Inactivate an object in the database</p>
    *
-   * Inactivate an object in the database<br><br>
+   * <p>This method must be called within a transactional context.  The object's
+   * change in status will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.Session#commitTransaction() commitTransaction()}.</p>
    *
-   * Objects inactivated will typically be altered to reflect their inactive
+   * <p>Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
    * server for a defined period of time, to allow other network systems
    * to have time to do accounting, clean up, etc., before a user id or
-   * network address is re-used.
-   * 
+   * network address is re-used.</p>
+   *
+   * @return a ReturnVal object if the object could not be inactivated,
+   *         or null if there were no problems
    */
 
   ReturnVal     inactivate_db_object(Invid invid) throws RemoteException;
 
   /**
+   * <p>Reactivates an inactivated object in the database</p>
    *
-   * Reactivates an inactivated object in the database<br><br>
-   *
-   * This method is only applicable to inactivated objects.  For such,
+   * <p>This method is only applicable to inactivated objects.  For such,
    * the object will be reactivated if possible, and the removal date
    * will be cleared.  The object may retain an expiration date,
-   * however.<br><br>
+   * however.</p>
    *
-   * The client should check the returned ReturnVal's
-   * getObjectStatus() method to see whether the re-activated object
-   * has an expiration date set.
-   * 
+   * <p>The client should check the returned ReturnVal's
+   * {@link arlut.csd.ganymede.ReturnVal.getObjectStatus() getObjectStatus()}
+   * method to see whether the re-activated object has an expiration date set.</p>
+   *
+   * <p>This method must be called within a transactional context.  The object's
+   * change in status will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.Session#commitTransaction() commitTransaction()}.</p>
+   *
+   * @see arlut.csd.ganymede.Session
    */
 
   ReturnVal     reactivate_db_object(Invid invid) throws RemoteException;
 
   /**
+   * <p>Remove an object from the database</p>
    *
-   * Remove an object from the database<br><br>
+   * <p>This method must be called within a transactional context.</p>
    *
-   * Certain objects cannot be inactivated, but must instead be
+   * <p>Certain objects cannot be inactivated, but must instead be
    * simply removed on demand.  The active permissions for the client
    * may determine whether a particular type of object may be removed.
+   * Any problems with permissions to remove this object will result
+   * in a dialog being returned in the ReturnVal.</p>
    *
+   * <p>This method must be called within a transactional context.  The object's
+   * removal will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.Session#commitTransaction() commitTransaction()}.</p>
+   *
+   * @return a ReturnVal object if the object could not be inactivated,
+   *         or null if there were no problems
    */
 
   ReturnVal     remove_db_object(Invid invid) throws RemoteException;

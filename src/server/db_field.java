@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/03/30 20:14:21 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/04/01 22:17:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,39 +52,192 @@ package arlut.csd.ganymede;
 import java.rmi.RemoteException;
 import java.util.*;
 
+/**
+ * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.DBField DBField}, the
+ * db_field is used by the client to make changes to a field when editing the
+ * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
+ *
+ * @version $Revision: 1.17 $ $Date: 1999/04/01 22:17:53 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
+ */
+
 public interface db_field extends java.rmi.Remote {
 
+  /**
+   * <p>Returns this field type's static type and constraint information.</p>
+   */
+
   FieldTemplate getFieldTemplate() throws RemoteException;
+
+  /**
+   * <p>Returns a summary of this field's current value and visibility/editability status.</p>
+   */
+
   FieldInfo getFieldInfo() throws RemoteException;
 
+  /**
+   * Returns the schema name for this field.
+   */
+
   String getName() throws RemoteException;
+
+  /**
+   * Returns the field # for this field.
+   */
+
   short getID() throws RemoteException;
+
+  /**
+   * Returns the description of this field from the
+   * schema.
+   */
+
   String getComment() throws RemoteException;
+
+  /**
+   * Returns the description of this field's type from
+   * the schema.
+   */
+
   String getTypeDesc() throws RemoteException;
+
+  /**
+   * Returns the type code for this field from the
+   * schema.
+   */
+
   short getType() throws RemoteException;
+
+  /**
+   * Returns the display order for this field from the schema.
+   */
+
   short getDisplayOrder() throws RemoteException;
+
+  /**
+   * Returns a String representing the value of this field.
+   */
+
   String getValueString() throws RemoteException;
+
+  /**
+   * Returns a String representing a reversible encoding of the
+   * value of this field.  Each field type will have its own encoding,
+   * suitable for embedding in a DumpResult.
+   */
+
   String getEncodingString() throws RemoteException;
 
+  /**
+   * Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.
+   */
+
   boolean isDefined() throws RemoteException;
+
+  /**
+   * Returns true if this field is a vector, false
+   * otherwise.
+   */
+
   boolean isVector() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is editable, false
+   * otherwise.</p>
+   *
+   * <p>Note that DBField are only editable if they are
+   * contained in a subclass of DBEditObject.</p>
+   */
+
   boolean isEditable() throws RemoteException;
+
+  /**
+   * Returns true if this field should be displayed in the
+   * current client context.
+   */
+
   boolean isVisible() throws RemoteException;
+
+  /**
+   * Returns true if this field is a built-in field, common
+   * to all non-embedded objects.
+   */
+
   boolean isBuiltIn() throws RemoteException;
+
+  /**
+   * Returns true if this field is edit in place.
+   */
+
   boolean isEditInPlace() throws RemoteException;
 
   // for scalars
 
+  /**
+   * Returns the value of this field, if a scalar.  An exception
+   * will be thrown if this field is a vector.
+   */
+
   Object getValue() throws RemoteException;
+
+  /**
+   * <p>Sets the value of this field, if a scalar.</p>
+   *
+   * <p>The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.</p>
+   */
+
   ReturnVal setValue(Object value) throws RemoteException;
 
   // for vectors
 
+  /**
+   * Returns number of elements in vector if this is a vector field.  If
+   * this is not a vector field, will return 1. (Should throw exception?)
+   */
+
   int size() throws RemoteException;
 
+  /** 
+   * <p>Returns a Vector of the values of the elements in this field,
+   * if a vector.</p>
+   *
+   * <p>This is only valid for vectors.  If the field is a scalar, use
+   * getValue().</p>
+   */
+
   Vector getValues() throws RemoteException;
+
+  /**
+   * <p>Returns the value of an element of this field,
+   * if a vector.</p>
+   */
+
   Object getElement(int index) throws RemoteException;
+
+  /**
+   * <p>Sets the value of an element of this field, if a vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  A null result means the
+   * operation was carried out successfully and no information
+   * needed to be passed back about side-effects.</p>
+   */
+
   ReturnVal setElement(int index, Object value) throws RemoteException;
+
+  /**
+   * <p>Adds an element to the end of this field, if a vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * <p>The ReturnVal resulting from a successful addElement will
+   * encode an order to rescan this field.</p>
+   */
+
   ReturnVal addElement(Object value) throws RemoteException;
 
   /**

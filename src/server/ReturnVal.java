@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/01/22 18:05:53 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/04/01 22:17:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -232,7 +232,6 @@ public class ReturnVal implements java.io.Serializable {
    * no db_object was returned.
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public db_object getObject()

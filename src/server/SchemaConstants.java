@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/02/10 05:33:42 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/04/01 22:17:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,11 +57,130 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This file defines known constants for pre-defined Schema object
+ * <p>This file defines known constants for pre-defined Schema object
  * types, fields, and certain pre-defined objects that the server
- * depends on for administering default permissions.
+ * depends on for administering default permissions.</p>
  *
+ * <p>
+ * <h3>Fixed object types used for the server's operations</h3>
+ * <table border>
+ * <tr>
+ * <th>Object Name</th>
+ * <th>Object Type ID</th>
+ * <th>Purpose</th>
+ * </tr>
+ * <tr>
+ * <td>Owner Group</td>
+ * <td>0</td>
+ * <td>An association between a collection of admin personae and the collection of
+ * objects they own.</td>
+ * </tr>
+ * <tr>
+ * <td>Admin Persona</td>
+ * <td>1</td>
+ * <td>A record of privileges and owner groups that can be associated
+ * with a user.</td>
+ * </tr>
+ * <tr>
+ * <td>Role</td>
+ * <td>2</td>
+ * <td>A record of permissions by object and field type.  Associated with admin personae.</td>
+ * </tr>
+ * <tr>
+ * <td>User</td>
+ * <td>3</td>
+ * <td>A person who can log in to Ganymede.</td>
+ * </tr>
+ * <tr>
+ * <td>System Event</td>
+ * <td>4</td>
+ * <td>A type of general system event that can be logged and for which mail can be sent to a list of addresses
+ * when it occurs.</td>
+ * </tr>
+ * <tr>
+ * <td>Task</td>
+ * <td>5</td>
+ * <td>A schedulable work routine.</td>
+ * </tr>
+ * <tr>
+ * <td>Object Event</td>
+ * <td>6</td>
+ * <td>A kind of event that can occur in relation to a specific database object, which can be logged
+ * and for which mail can be sent to a list of addresses.</td>
+ * </tr>
+ * </table>
+ * </p>
+ *
+ * <p>
+ * <h3>Common fields present in all DBObjects</h3>
+ * <table border>
+ * <tr>
+ * <th>Field Name</th>
+ * <th>Field ID</th>
+ * <th>Field Type</th>
+ * <th>Purpose</th>
+ * </tr>
+ * <tr>
+ * <td>OwnerListField</td>
+ * <td>0</td>
+ * <td>{@link arlut.csd.ganymede.InvidDBField InvidDBField}</td>
+ * <td>List of owner groups with authority over this object</td>
+ * </tr>
+ * <tr>
+ * <td>ExpirationField</td>
+ * <td>1</td>
+ * <td>{@link arlut.csd.ganymede.DateDBField DateDBField}</td>
+ * <td>date that this object will expire</td>
+ * </tr>
+ * <tr>
+ * <td>RemovalField</td>
+ * <td>2</td>
+ * <td>{@link arlut.csd.ganymede.DateDBField DateDBField}</td>
+ * <td>date that this object will be removed</td>
+ * </tr>
+ * <tr>
+ * <td>NotesField</td>
+ * <td>3</td>
+ * <td>{@link arlut.csd.ganymede.StringDBField StringDBField}</td>
+ * <td>string field for notes for this object</td>
+ * </tr>
+ * <tr>
+ * <td>CreationDateField</td>
+ * <td>4</td>
+ * <td>{@link arlut.csd.ganymede.DateDBField DateDBField}</td>
+ * <td>date that this object was created</td>
+ * </tr>
+ * <tr>
+ * <td>CreatorField</td>
+ * <td>5</td>
+ * <td>{@link arlut.csd.ganymede.StringDBField StringDBField}</td>
+ * <td>string describing the creator of this object</td>
+ * </tr>
+ * <tr>
+ * <td>ModificationDateField</td>
+ * <td>6</td>
+ * <td>{@link arlut.csd.ganymede.DateDBField DateDBField}</td>
+ * <td>date that this object was last modified</td>
+ * </tr>
+ * <tr>
+ * <td>ModifierField</td>
+ * <td>7</td>
+ * <td>{@link arlut.csd.ganymede.StringDBField StringDBField}</td>
+ * <td>string describing the administrator who last modified this object</td>
+ * </tr>
+ * <tr>
+ * <td>BackLinksField</td>
+ * <td>8</td>
+ * <td>{@link arlut.csd.ganymede.InvidDBField InvidDBField}</td>
+ * <td>any miscellaneous pointers pointing to us are kept track of in
+ * this field if we don't have an explicit back-link field set</td>
+ * </tr>
+ * </table>
+ * </p>
+ *
+ * <p>This file contains lots of other constants for fields in the 7 mandatory
+ * object types, but I'm tired of typing, so I'm not going to try to document
+ * them in the javadoc class header right now.</p>
  */
 
 public interface SchemaConstants {

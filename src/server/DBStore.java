@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 1999/02/26 22:25:25 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 1999/04/01 22:17:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,9 +64,25 @@ import arlut.csd.Util.zipIt;
 
 /**
  * <p>DBStore is the main data store class.  Any code that intends to make use
- * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.</p>
+ * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.
+ * DBStore is responsible for actually handling the Ganymede database, and manages
+ * database loads and dumps, locking (in conjunction with 
+ * {@link arlut.csd.ganymede.DBSession DBSession}), the {@link arlut.csd.ganymede.DBJournal journal},
+ * and schema dumping.</p>
  *
- * <p>A user can have any number of DBStore objects active, but there is probably
+ * <p>The DBStore class holds all {@link arlut.csd.ganymede.DBObject DBObject}'s
+ * in memory after the database loading is complete at start-up.  Changes made
+ * to the DBStore are done in transactional contexts using DBSession, which is
+ * responsible for initiating journal changes when individual transactions are
+ * committed to the database.  Periodically, the Ganymede server's 
+ * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} task engine
+ * will schedule a full
+ * {@link arlut.csd.ganymede.DBStore#dump(java.lang.String,boolean,boolean) dump} to
+ * consolidate the journal and update the on-disk database file.  The server will
+ * also do a dump when the server's admin console
+ * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} interface initiates a server shutdown.</p>
+ *
+ * <p>A program could in theory have any number of DBStore objects active, but there is probably
  * no good reason for doing so since a single DBStore can store and cross reference
  * up to 32k different kinds of objects.</p>
  *
@@ -74,6 +90,8 @@ import arlut.csd.Util.zipIt;
  * on exiting a synchronized block because the DBLock classes use DBStore as their
  * synchronization object.  If any do not, then the server can deadlock.</p>
  *
+ * @version $Revision: 1.77 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class DBStore {
@@ -115,14 +133,12 @@ public class DBStore {
   /* -- */
 
   /**
-   *
    * This is the constructor for DBStore.<br><br>
    *
    * Currently, once you construct a DBStore object, all you can do to
    * initialize it is call load().  This API needs to be extended to
    * provide for programmatic bootstrapping, or another tool needs
    * to be produced for the purpose.
-   *
    */
 
   public DBStore()
@@ -599,7 +615,6 @@ public class DBStore {
   }
 
   /**
-   *
    * Dump the schema to disk<br><br>
    *
    * This method dumps the entire database to disk, minus any actual objects.<br><br>
@@ -617,7 +632,6 @@ public class DBStore {
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
    * @see arlut.csd.ganymede.adminSession
-   * 
    */
 
   public synchronized void dumpSchema(String filename, boolean releaseLock) throws IOException
@@ -778,14 +792,12 @@ public class DBStore {
   }
 
   /**
-   *
    * Get a session handle on this database<br><br>
    *
    * This is intended primarily for internal use
    * for database initialization, hence the 'protected'.
    *
    * @param key Identifying key
-   *
    */
 
   protected synchronized DBSession login(Object key)
@@ -817,11 +829,9 @@ public class DBStore {
   }
 
   /**
-   *
    * Do a printable dump of the category hierarchy
    *
    * @param out PrintStream to print to
-   *
    */
 
   public synchronized void printCategoryTreeHTML(PrintWriter out)
@@ -845,11 +855,9 @@ public class DBStore {
   }
 
   /**
-   *
    * Do a printable dump of the object databases
    *
    * @param out PrintStream to print to
-   *
    */
 
   public synchronized void printBases(PrintWriter out)
@@ -874,10 +882,8 @@ public class DBStore {
   }
 
   /**
-   *
    * Returns a vector of Strings, the names of the bases currently
    * defined in this DBStore.
-   *
    */
 
   public synchronized Vector getBaseNameList()
@@ -906,11 +912,9 @@ public class DBStore {
   }
 
   /**
-   *
    * Returns the object definition class for the id class.
    *
    * @param id Type id for the base to be returned
-   *
    */
 
   public DBObjectBase getObjectBase(Short id)
@@ -919,11 +923,9 @@ public class DBStore {
   }
 
   /**
-   *
    * Returns the object definition class for the id class.
    *
    * @param id Type id for the base to be returned
-   *
    */
 
   public DBObjectBase getObjectBase(short id)
@@ -932,11 +934,9 @@ public class DBStore {
   }
 
   /**
-   *
    * Returns the object definition class for the id class.
    *
    * @param baseName Name of the base to be returned
-   *
    */
 
   public synchronized DBObjectBase getObjectBase(String baseName)
@@ -1974,9 +1974,7 @@ public class DBStore {
    */
 
   /**
-   *
    * This method is used to increment the count of checked out objects.
-   *
    */
 
   void checkOut()
@@ -1986,9 +1984,7 @@ public class DBStore {
   }
 
   /**
-   *
    * This method is used to decrement the count of checked out objects.
-   *
    */
 
   void checkIn()

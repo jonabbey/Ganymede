@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 1999/03/19 05:12:58 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 1999/04/01 22:17:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -74,20 +74,25 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This class is the heart of the Ganymede server.</p>
  *
- * This class is the heart of the Ganymede server.<br><br>
- *
- * Each client logged on to the server will hold a reference to a
+ * <p>Each client logged on to the server will hold a reference to a
  * unique GanymedeSession object.  This object provides services to
  * the client, tracks the client's status, manages permissions, and
- * keeps track of the client's transactions.<br><br>
+ * keeps track of the client's transactions.  If the client spends most of
+ * its time talking to individual {@link arlut.csd.ganymede.DBObject DBObject}'s
+ * to make their changes to the database, they have to talk to us to get
+ * access to those objects.  We are responsible for handling the application/presentation
+ * logic for the user, and in turn we talk to {@link arlut.csd.ganymede.DBSession DBSession}
+ * to get most of the actual work done.</p>
  *
- * Most methods in this class are synchronized to avoid race condition
- * security holes between the persona change logic and the actual operations.
+ * <p>Most methods in this class are synchronized to avoid race condition
+ * security holes between the persona change logic and the actual operations.</p>
+ *
+ * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.128 $ %D%
+ * @version $Revision: 1.129 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *   
  */
 
 final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
@@ -124,37 +129,32 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public boolean enableWizards = true;
 
   /**
-   *
-   * If this variable is set to false, no custom wizard code will ever
+   * <p>If this variable is set to false, no custom wizard code will ever
    * be invoked, and required fields will not be forced.  This is
-   * intended primarily for direct database loading. <br><br>
+   * intended primarily for direct database loading.</p>
    *
-   * This variable is not intended ever to be available to the client,
-   * but should only be set by local server code.
-   *   
+   * <p>This variable is not intended ever to be available to the client,
+   * but should only be set by local server code.</p>
    */
   
   public boolean enableOversight = true;
 
   /**
-   *
    * The time that this client initially connected to the server.  Used
    * by the admin console code.
-   *
    */
 
   Date connecttime;
 
   /**
-   * The name that the user is connected to the server under.. this
+   * <p>The name that the user is connected to the server under.. this
    * may be &lt;username&gt;2, &lt;username&gt;3, etc., if the user is
    * connected to the server multiple times.  The username will be
-   * unique on the server at any given time.<br><br>
+   * unique on the server at any given time.</p>
    *
-   * username should never be null.  If a client logs in directly
+   * <p>username should never be null.  If a client logs in directly
    * to a persona, username will be that personaname plus an optional
-   * session id.
-   * 
+   * session id.</p>
    */
 
   String username;
@@ -301,49 +301,43 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   PermMatrix personaPerms;
 
   /**
+   * <p>This variable stores the permission bits that are applicable to generic
+   * objects not specifically owned by this persona.</p>
    *
-   * This variable stores the permission bits that are applicable to generic
-   * objects not specifically owned by this persona.<br><br>
-   *
-   * Each permission object in the Ganymede database includes
+   * <p>Each permission object in the Ganymede database includes
    * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.<br><br>
+   * to objects not owned by the persona.</p>
    *
-   * This variable holds the union of the 'as apply to objects not
+   * <p>This variable holds the union of the 'as apply to objects not
    * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.
-   *  
+   * that apply to the current persona.</p>
    */
 
   PermMatrix defaultPerms;
 
   /**
-   *
    * This variable stores the permission bits that are applicable to
    * objects that the current persona has ownership privilege over and
    * which the current admin has permission to delegate to subordinate
    * roles.  This matrix is always a permissive superset of
    * delegatableDefaultPerms.
-   * 
    */
 
   PermMatrix delegatablePersonaPerms;
 
   /**
-   *
-   * This variable stores the permission bits that are applicable to
+   * <p>This variable stores the permission bits that are applicable to
    * generic objects not specifically owned by this persona and which
    * the current admin has permission to delegate to subordinate
-   * roles.<br><br>
+   * roles.</p>
    *
-   * Each permission object in the Ganymede database includes
+   * <p>Each permission object in the Ganymede database includes
    * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.<br><br>
+   * to objects not owned by the persona.</p>
    *
-   * This variable holds the union of the 'as apply to objects not
+   * <p>This variable holds the union of the 'as apply to objects not
    * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.
-   *   
+   * that apply to the current persona.</p>
    */
 
   PermMatrix delegatableDefaultPerms;
@@ -397,21 +391,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /* -- */
 
   /**
-   *
-   * Constructor for a server-internal GanymedeSession.  Used when
+   * </p>Constructor for a server-internal GanymedeSession.  Used when
    * the server's internal code needs to do a query, etc.  Note that
-   * the Ganymede server will create this fairly early on, and will
+   * the Ganymede server will create one of these this fairly early on, and will
    * keep it around for internal usage.  Note that we don't add
-   * this to the data structures used for the admin console.<br><br>
+   * this to the data structures used for the admin console.</p>
    *
-   * Note that all internal session activities (queries, etc.) are
+   * <p>Note that all internal session activities (queries, etc.) are
    * currently using a single, synchronized DBSession object.. this
    * mean that only one user at a time can currently be processed for
-   * login. 8-(<br><br>
+   * login. 8-(</p>
    * 
-   * Internal sessions, as created by this constructor, have full
-   * privileges to do any possible operation.
-   *
+   * <p>Internal sessions, as created by this constructor, have full
+   * privileges to do any possible operation.</p>
    */
 
   public GanymedeSession() throws RemoteException
@@ -433,23 +425,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Constructor used to create a server-side attachment for a Ganymede
+   * client.</p>
    *
-   * Constructor used to create a server-side attachment for a Ganymede
-   * client.<br><br>
+   * <p>This constructor is called by the GanymedeServer login() method.</p>
    *
-   * This constructor is called by the GanymedeServer login() method.<br><br>
-   *
-   * A Client can log in either as an end-user or as a admin persona.  Typically,
+   * <p>A Client can log in either as an end-user or as a admin persona.  Typically,
    * a client will log in with their end-user name and password, then use
    * selectPersona to gain admin privileges.  The server may allow users to
-   * login directly with an admin persona (supergash, say), if so configured.
+   * login directly with an admin persona (supergash, say), if so configured.</p>
    *
    * @param client Remote object exported by the client, provides id callbacks
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona 
    *
-   * @see arlut.csd.ganymede.GanymedeServer.login()
-   * 
+   * @see arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client)
    */
   
   public GanymedeSession(Client client, String loginName, 
@@ -643,12 +633,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.</p>
    *
-   * This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.<br><br>
-   *
-   * This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.
+   * <p>This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.</p>
    *
    * @see java.rmi.server.Unreferenced
    *
@@ -670,11 +659,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   //************************************************************
 
   /** 
+   * <p>getLastError() returns text explaining the last error condition.</p>
    *
-   * getLastError() returns text explaining the last error condition.<br><br>
-   *
-   * This method is now all-but-deprecated, as most code in the Ganymede
-   * server now uses ReturnVal objects to return error information.
+   * <p>This method is now all-but-deprecated, as most code in the Ganymede
+   * server now uses ReturnVal objects to return error information.</p>
    *
    * @see setLastError
    * @see arlut.csd.ganymede.Session 
@@ -701,15 +689,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Log out this session.  After this method is called, no other
+   * methods may be called on this session object.</p>
    *
-   * Log out this session.  After this method is called, no other
-   * methods may be called on this session object.<br><br>
-   *
-   * This method is partially synchronized, to avoid locking up
-   * the admin console if this user's session has become deadlocked.
+   * <p>This method is partially synchronized, to avoid locking up
+   * the admin console if this user's session has become deadlocked.</p>
    *
    * @see arlut.csd.ganymede.Session
-   * 
    */
 
   public void logout()
@@ -814,19 +800,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to allow a client to request that wizards
+   * <p>This method is used to allow a client to request that wizards
    * not be provided in response to actions by the client.  This
    * is intended to allow non-interactive or non-gui clients to
    * do work without having to go through a wizard interaction
-   * sequence.<br><br>
+   * sequence.</p>
    *
-   * Wizards are enabled by default.
+   * <p>Wizards are enabled by default.</p>
    *
    * @param val If true, wizards will be enabled.
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public void enableWizards(boolean val)
@@ -835,21 +819,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to allow local server-side code to request
+   * <p>This method is used to allow local server-side code to request
    * that no oversight be maintained over changes made to the server
-   * through this GanymedeSession.<br><br>
+   * through this GanymedeSession.</p>
    *
-   * This is intended <b>only</b> for trusted code that does its own
+   * <p>This is intended <b>only</b> for trusted code that does its own
    * checking and validation on changes made to the database.  If
    * oversight is turned off, no wizard code will be called, and the
    * required field logic will be bypassed.  Extreme care must
    * be used in disabling oversight, and oversight should only be
    * turned off for direct loading and other situations where there
    * won't be multi-user use, to avoid breaking constraints that
-   * custom plug-ins count on.<br><br>
+   * custom plug-ins count on.</p>
    *
-   * Oversight is enabled by default.
+   * <p>Oversight is enabled by default.</p>
    *
    * @param val If true, oversight will be enabled.
    * 
@@ -1102,16 +1085,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns a QueryResult of owner groups that the current
+   * <p>This method returns a QueryResult of owner groups that the current
    * persona has access to.  This list is the transitive closure of
    * the list of owner groups in the current persona.  That is, the
    * list includes all the owner groups in the current persona along
-   * with all of the owner groups those owner groups own, and so on.<br><br>
+   * with all of the owner groups those owner groups own, and so on.</p>
    *
-   * Note that getOwnerGroups caches its owner group list in the object
-   * member ownerList for efficiency.
-   *
+   * <p>Note that getOwnerGroups caches its owner group list in the object
+   * member {@link arlut.csd.ganymede.GanymedeSession#ownerList ownerList}
+   * for efficiency.</p>
    */
 
   public synchronized QueryResult getOwnerGroups()
@@ -1305,22 +1287,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method may be used to cause the server to pre-filter any object
+   * <p>This method may be used to cause the server to pre-filter any object
    * listing to only show those objects directly owned by owner groups
    * referenced in the ownerInvids list.  This filtering will not restrict
    * the ability of the client to directly view any object that the client's
    * persona would normally have access to, but will reduce clutter and allow
    * the client to present the world as would be seen by administrator personas
-   * with just the listed ownerGroups accessible.<br><br>
+   * with just the listed ownerGroups accessible.</p>
    *
-   * This method cannot be used to grant access to objects that are
-   * not accessible by the client's adminPersona.<br><br>
+   * <p>This method cannot be used to grant access to objects that are
+   * not accessible by the client's adminPersona.</p>
    *
-   * Calling this method with ownerInvids set to null will turn off the filtering.
+   * <p>Calling this method with ownerInvids set to null will turn off the filtering.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
-   * 
    */
 
   public synchronized ReturnVal filterQueries(Vector ownerInvids)
@@ -1347,7 +1327,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
   }
-
 
   //  Database operations
 
@@ -1404,7 +1383,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * Returns the root of the category tree on the server
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
@@ -1423,13 +1401,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Returns a serialized representation of the basic category
+   * and base structure on the server.</p>
    *
-   * Returns a serialized representation of the basic category
-   * and base structure on the server.<br><br>
-   *
-   * This method is synchronized to avoid any possible deadlock
+   * <p>This method is synchronized to avoid any possible deadlock
    * between DBStore and GanymedeSession, as the CategoryTransport
-   * constructor calls other synchronized methods on GanymedeSession.
+   * constructor calls other synchronized methods on GanymedeSession.</p>
    *
    * @see arlut.csd.ganymede.Category
    * @see arlut.csd.ganymede.Session
@@ -1489,16 +1466,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * Returns a serialized representation of the object types
+   * <p>Returns a serialized representation of the object types
    * defined on the server.  This BaseListTransport object
    * will not include field information.  The client is
    * obliged to call getFieldTemplateVector() on any
-   * bases that it needs field information for.<br><br>
+   * bases that it needs field information for.</p>
    *
-   * This method is synchronized to avoid any possible deadlock
+   * <p>This method is synchronized to avoid any possible deadlock
    * between DBStore and GanymedeSession, as the BaseListTransport
-   * constructor calls other synchronized methods on GanymedeSession
+   * constructor calls other synchronized methods on GanymedeSession</p>
    *
    * @see arlut.csd.ganymede.BaseListTransport
    * @see arlut.csd.ganymede.Session
@@ -1521,11 +1497,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Returns a vector of field definition templates, in display order.</p>
    *
-   * Returns a vector of field definition templates, in display order.<br><br>
-   *
-   * This vector may be cached, as it is static for this object type over
-   * the lifetime of any GanymedeSession.
+   * <p>This vector may be cached, as it is static for this object type over
+   * the lifetime of any GanymedeSession.</p>
    *
    * @see arlut.csd.ganymede.FieldTemplate
    * @see arlut.csd.ganymede.Session
@@ -1561,16 +1536,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return results;
   }
 
-
   /**
-   *
-   * This method call initiates a transaction on the server.  This
+   * <p>This method call initiates a transaction on the server.  This
    * call must be executed before any objects are modified (created,
-   * edited, inactivated, removed).<br><br>
+   * edited, inactivated, removed).</p>
    *
-   * Currently each client can only have one transaction open.. it
+   * <p>Currently each client can only have one transaction open.. it
    * is an error to call openTransaction() while another transaction
-   * is still open, and an error dialog will be returned in that case.<br><br>
+   * is still open, and an error dialog will be returned in that case.</p>
    *
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
@@ -1600,20 +1573,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method call causes the server to checkpoint the current
+   * <p>This method call causes the server to checkpoint the current
    * state of an open transaction on the server.  At any time between
    * the checkpoint() call and a concluding commitTransaction() or
    * abortTransaction() thereafter, the server can be instructed to
    * revert the transaction to the state at the time of this
-   * checkpoint by calling rollback() with the same key.<br><br>
+   * checkpoint by calling rollback() with the same key.</p>
    *
-   * Checkpointing only makes sense in the context of a transaction;
+   * <p>Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.
+   * the server does not have a transaction open.</p>
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public synchronized void checkpoint(String key)
@@ -1632,14 +1603,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method call causes the server to roll back the state
+   * of an open transaction on the server.</p>
    *
-   * This method call causes the server to roll back the state
-   * of an open transaction on the server.<br><br>
-   *
-   * Checkpoints are held in a Stack on the server;  it is never
+   * <p>Checkpoints are held in a Stack on the server;  it is never
    * permissible to try to 'rollforward' to a checkpoint that
    * was itself rolled back.  That is, the following sequence is 
-   * not permissible.<br><br>
+   * not permissible.</p>
    *
    * <pre>
    * checkpoint("1");
@@ -1650,14 +1620,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * rollback("2");
    * </pre>
    *
-   * At the time that the rollback("1") call is made, the server
+   * <p>At the time that the rollback("1") call is made, the server
    * forgets everything that has occurred in the transaction since
    * checkpoint 1.  checkpoint 2 no longer exists, and so the second
-   * rollback call will return false.<br><br>
+   * rollback call will return false.</p>
    *
-   * Checkpointing only makes sense in the context of a transaction;
+   * <p>Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.
+   * the server does not have a transaction open.</p>
    *
    * @return true if the rollback could be carried out successfully.
    * 
@@ -1682,14 +1652,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method causes all changes made by the client to be 'locked in'
+   * <p>This method causes all changes made by the client to be 'locked in'
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients.<br><br>
+   * clients.</p>
    *
-   * If the transaction cannot be committed for some reason,
+   * <p>If the transaction cannot be committed for some reason,
    * commitTransaction() will abort the transaction if abortOnFail is
    * true.  In any case, commitTransaction() will return a ReturnVal
    * indicating whether or not the transaction could be committed, and
@@ -1698,10 +1667,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * transaction remains open and it is up to the client to decide
    * whether to abort the transaction by calling abortTransaction(),
    * or to attempt to fix the reported problem and try another call
-   * to commitTransaction().<br><br>
+   * to commitTransaction().</p>
    *
-   * This method is synchronized to avoid nested-monitor deadlock in
-   * DBSession.commitTransaction().
+   * <p>This method is synchronized to avoid nested-monitor deadlock in
+   * {@link arlut.csd.ganymede.DBSession#commitTransaction() DBSession.commitTransaction()}
+   * </p>.
    *
    * @param abortOnFail If true, the transaction will be aborted if it
    * could not be committed successfully.
@@ -1713,7 +1683,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *         set to false.
    *
    * @see arlut.csd.ganymede.Session 
-   *
    */
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail)
@@ -1764,21 +1733,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method causes all changes made by the client to be 'locked in'
+   * <p>This method causes all changes made by the client to be 'locked in'
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients.<br><br>
+   * clients.</p>
    *
-   * commitTransaction() will return a ReturnVal indicating whether or
+   * <p>commitTransaction() will return a ReturnVal indicating whether or
    * not the transaction could be committed, and whether or not the
    * transaction remains open for further attempts at commit.  If
    * ReturnVal.doNormalProcessing is set to true, the transaction
    * remains open and it is up to the client to decide whether to
    * abort the transaction by calling abortTransaction(), or to
    * attempt to fix the reported problem and try another call to
-   * commitTransaction().
+   * commitTransaction().</p>
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
@@ -1786,6 +1754,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    * 
+   * @see arlut.csd.ganymede.Session 
    */
 
   public ReturnVal commitTransaction()
@@ -1822,21 +1791,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method allows clients to cause mail to be sent from the
+   * <p>This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.<br><br>
+   * sender.</p>
    *
-   * body and HTMLbody are StringBuffer's instead of Strings because RMI
-   * has a 64k serialization limit on the String class.
+   * <p>body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
    * @param subject The subject of this mail, will have 'Ganymede:' prepended
    * by the server.
    * @param body The content of the message.
-   *
    */
 
   public void sendMail(String address, String subject, StringBuffer body)
@@ -1918,18 +1885,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	throw new RuntimeException("IO problem " + ex);
       }
-
   }
 
   /**
-   *
-   * This method allows clients to cause mail to be sent from the
+   * <p>This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.<br><br>
+   * sender.</p>
    *
-   * body and HTMLbody are StringBuffer's instead of Strings because RMI
-   * has a 64k serialization limit on the String class.
+   * <p>body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
@@ -2080,14 +2045,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method allows the client to get a status update on a
+   * specific list of invids.</p>
    *
-   * This method allows the client to get a status update on a
-   * specific list of invids.<br><br>
-   *
-   * If any of the invids are not currently defined in the server, or
+   * <p>If any of the invids are not currently defined in the server, or
    * if the client doesn't have permission to view any of the invids,
    * those invids' status will not be included in the returned
-   * QueryResult.
+   * QueryResult.</p>
    *
    * @param invidVector Vector of Invid's to get the status for.
    *
@@ -2137,14 +2101,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method provides the hook for doing a fast, full or partial,
-   * database dump to a string form.
+   *
+   * This method provides the hook for doing a
+   * fast database dump to a string form.  The 
+   * {@link arlut.csd.ganymede.DumpResult DumpResult}
+   * returned comprises a formatted dump of all visible
+   * fields and objects that match the given query.
    *
    * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
-   *
    * @see arlut.csd.ganymede.Session
-   * 
    */
 
   public synchronized DumpResult dump(Query query)
@@ -2349,13 +2314,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method provides the hook for doing all
    * manner of simple object listing for the Ganymede
    * database.  
-   *
-   * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
    *
    * @see arlut.csd.ganymede.Session
    */
@@ -2367,13 +2328,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is a server-side method for doing object listing
-   * with support for DBEditObject's lookupLabel method.
-   *
-   * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
-   *
+   * Server-side method for doing object listing with support for DBObject's
+   * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel}
+   * method.
    */
 
   public QueryResult query(Query query, DBEditObject perspectiveObject)
@@ -2397,15 +2354,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method provides the hook for doing all
    * manner of internal object listing for the Ganymede
    * database.  Unfiltered.
    *
-   * @return A Vector of Result objects
-   *
-   * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
+   * @return A Vector of {@link arlut.csd.ganymede.Result Result} objects
    */
 
   public Vector internalQuery(Query query)
@@ -2435,12 +2388,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method is the primary Query engine for the Ganymede
+   * databases.  It is used by dump(), query(), and internalQuery().</p>
    *
-   * This method is the primary Query engine for the Ganymede
-   * databases.  It is used by dump(), query(), and internalQuery().<br><br>
-   *
-   * This method is partially synchronized to prevent deadlock problems when
-   * extantLock is null.
+   * <p>This method is partially synchronized to prevent deadlock problems when
+   * extantLock is null.</p>
    *
    * @param query The query to be handled
    * @param internal If true, the query filter setting will not be honored
@@ -2451,9 +2403,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * an IllegalArgumentException will be thrown.
    * @param perspectiveObject There are occasions when the server will want to do internal
    * querying in which the label of an object matching the query criteria is synthesized
-   * for use in a particular context.  If non-null, perspectiveObject's lookupLabel()
+   * for use in a particular context.  If non-null, perspectiveObject's 
+   * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel}
    * method will be used to generate the label for a result entry.
-   *
    */
 
   public synchronized QueryResult queryDispatch(Query query, boolean internal, 
@@ -2964,10 +2916,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This private method takes care of adding an object to a query
    * result, checking permissions and what-not as needed.
-   * 
    */
 
   private final void addResultRow(DBObject obj, Query query, 
@@ -3090,7 +3040,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method is intended as a lightweight way of returning the
    * current label of the specified invid.  No locking is done,
    * and the label returned will be viewed through the context
@@ -3121,7 +3070,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method returns a multi-line string containing excerpts from
    * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
@@ -3172,7 +3120,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method returns a multi-line string containing excerpts from
    * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
@@ -3183,7 +3130,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * or null if permissions are denied to view the history.
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public StringBuffer viewAdminHistory(Invid invid, Date since)
@@ -3232,35 +3178,37 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * View an object from the database.  The ReturnVal returned will
-   * carry a db_object reference, which can be obtained by the client
-   * calling ReturnVal.getObject().  If the object could not be
+   * <p>View an object from the database.  The ReturnVal returned will
+   * carry a {@link arlut.csd.ganymede.db_object db_object} reference,
+   * which can be obtained by the client
+   * calling {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be
    * viewed for some reason, the ReturnVal will carry an encoded error
-   * dialog for the client to display.<br><br>
+   * dialog for the client to display.</p>
    *
-   * view_db_object() can be done at any time, outside of the bounds of
+   * <p>view_db_object() can be done at any time, outside of the bounds of
    * any transaction.  view_db_object() returns a snapshot of the object's
    * state at the time the view_db_object() call is processed, and will
-   * be transaction-consistent internally.<br><br>
+   * be transaction-consistent internally.</p>
    *
-   * If view_db_object() is called during a transaction, the object
+   * <p>If view_db_object() is called during a transaction, the object
    * will be returned as it stands during the transaction.. that is,
    * if the object has been changed during the transaction, that
    * changed object will be returned, even if the transaction has
    * not yet been committed, and other clients would not be able to
-   * see that version of the object.<br><br>
+   * see that version of the object.</p>
    *
-   * NOTE: It is critical that any code that looks at the values of
-   * fields in a DBObject go through a view_db_object() method
+   * <p>NOTE: It is critical that any code that looks at the values of
+   * fields in a {@link arlut.csd.ganymede.DBObject DBObject}
+   * go through a view_db_object() method
    * or else the object will not properly know who owns it, which
    * is critical for it to be able to properly authenticate field
    * access.  Keep in mind, however, that view_db_object clones the
-   * DBObject in question, so this method is very heavyweight.
+   * DBObject in question, so this method is very heavyweight.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    * 
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public ReturnVal view_db_object(Invid invid)
@@ -3338,17 +3286,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * Check an object out from the database for editing.  The ReturnVal
+   * <p>Check an object out from the database for editing.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
-   * by the client calling ReturnVal.getObject().  If the object
-   * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.
+   * by the client calling
+   * {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be checked out for editing for some
+   * reason, the ReturnVal will carry an encoded error dialog for the
+   * client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once checked out, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}
+   * or {@link arlut.csd.ganymede.GanymedeSession#abortTransaction() abortTransaction()}.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public ReturnVal edit_db_object(Invid invid)
@@ -3448,19 +3403,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * Create a new object of the given type.  The ReturnVal
+   * <p>Create a new object of the given type.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
    * by the client calling ReturnVal.getObject().  If the object
    * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public ReturnVal create_db_object(short type)
@@ -3469,19 +3428,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * Create a new object of the given type.  The ReturnVal
+   * <p>Create a new object of the given type.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
    * by the client calling ReturnVal.getObject().  If the object
    * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
    * @param embedded If true, assume the object created is embedded and
    * does not need to have owners set.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *
    */
 
   public ReturnVal create_db_object(short type, boolean embedded)
@@ -3630,23 +3593,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
+   * <p>Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
    * will carry a db_object reference, which can be obtained by the
    * client calling ReturnVal.getObject().  If the object could not
    * be checked out for editing for some reason, the ReturnVal will
-   * carry an encoded error dialog for the client to display.<br><br>
+   * carry an encoded error dialog for the client to display.</p>
    *
-   * This method must be called within a transactional context.<br><br>
+   * <p>This method must be called within a transactional context.</p>
    *
-   * Typically, only certain values will be cloned.  What values are
+   * <p>Typically, only certain values will be cloned.  What values are
    * retained is up to the specific code module provided for the
-   * invid type of object.
+   * invid type of object.</p>
+   *
+   * <p>Note that at the present time, clone_db_object doesn't do anything..
+   * it's a feature that is yet to be developed.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *    
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public ReturnVal clone_db_object(Invid invid)
@@ -3658,15 +3622,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * Inactivate an object in the database<br><br>
+   * <p>Inactivate an object in the database</p>
    *
-   * This method must be called within a transactional context.<br><br>
+   * <p>This method must be called within a transactional context.  The object's
+   * change in status will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
-   * Objects inactivated will typically be altered to reflect their inactive
+   * <p>Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
    * server for a defined period of time, to allow other network systems
    * to have time to do accounting, clean up, etc., before a user id or
-   * network address is re-used.
+   * network address is re-used.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
    *         or null if there were no problems
@@ -3736,17 +3702,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Reactivates an inactivated object in the database</p>
    *
-   * Reactivates an inactivated object in the database<br><br>
-   *
-   * This method is only applicable to inactivated objects.  For such,
+   * <p>This method is only applicable to inactivated objects.  For such,
    * the object will be reactivated if possible, and the removal date
    * will be cleared.  The object may retain an expiration date,
-   * however.<br><br>
+   * however.</p>
    *
-   * The client should check the returned ReturnVal's
-   * getObjectStatus() method to see whether the re-activated object
-   * has an expiration date set.
+   * <p>The client should check the returned ReturnVal's
+   * {@link arlut.csd.ganymede.ReturnVal.getObjectStatus() getObjectStatus()}
+   * method to see whether the re-activated object has an expiration date set.</p>
+   *
+   * <p>This method must be called within a transactional context.  The object's
+   * change in status will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @see arlut.csd.ganymede.Session
    */
@@ -3803,13 +3772,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * Remove an object from the database<br><br>
+   * <p>Remove an object from the database</p>
    *
-   * This method must be called within a transactional context.<br><br>
+   * <p>This method must be called within a transactional context.</p>
    *
-   * Certain objects cannot be inactivated, but must instead be
+   * <p>Certain objects cannot be inactivated, but must instead be
    * simply removed on demand.  The active permissions for the client
    * may determine whether a particular type of object may be removed.
+   * Any problems with permissions to remove this object will result
+   * in a dialog being returned in the ReturnVal.</p>
+   *
+   * <p>This method must be called within a transactional context.  The object's
+   * removal will not be visible to other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
    *         or null if there were no problems

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/03/17 20:13:50 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/04/01 22:17:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,11 +64,20 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
- * GanymedeAdmin is the server-side implementation of the adminSession
+ * <p>GanymedeAdmin is the server-side implementation of the adminSession
  * interface;  GanymedeAdmin provides the means by which privileged users
  * can carry out privileged operations on the Ganymede server, including
- * status monitoring and administrative activities.
+ * status monitoring and administrative activities.</p>
  *
+ * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
+ * GanymedeAdmin implements {@link arlut.csd.ganymede.adminSession adminSession},
+ * providing a hook for the admin console to talk to.  On the other,
+ * GanymedeAdmin contains a lot of static fields and methods which the
+ * server code uses to communicate information to any admin consoles
+ * that are attached to the server at any given time.</p>
+ *
+ * @version $Revision: 1.29 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
@@ -87,10 +96,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   /* -- */
 
   /**
-   *
    * This static method is used to send debug log info to
    * the consoles.
-   *
    */
 
   public static synchronized void setStatus(String status)
@@ -126,10 +133,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This static method is used to send the current transcount
    * to the consoles.
-   *
    */
 
   public static synchronized void updateTransCount()
@@ -152,10 +157,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This static method is used to send the current transcount
    * to an individual consoles.
-   *
    */
 
   public static synchronized void updateTransCount(Admin console)
@@ -176,10 +179,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This static method is used to send the last dump time to
    * the consoles.
-   *
    */
 
   public static synchronized void updateLastDump(Date date)
@@ -189,10 +190,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the last dump time on a all
    * consoles.
-   *
    */
 
   public static synchronized void updateLastDump()
@@ -215,10 +214,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the last dump time on a single
    * console
-   *
    */
 
   public static void updateLastDump(Admin console)
@@ -239,9 +236,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the objects checked out count on all consoles.
-   *
    */
 
   public static synchronized void updateCheckedOut()
@@ -264,10 +259,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the objects checked out count on a single
    * console
-   *
    */
 
   public static synchronized void updateCheckedOut(Admin console)
@@ -307,10 +300,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the number of locks held on a single
    * console
-   *
    */
 
   public static synchronized void updateLocksHeld(Admin console)
@@ -331,10 +322,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method changes the system state and
    * sends it out to the consoles
-   *
    */
 
   public static void setState(String state)
@@ -344,10 +333,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the state on all
    * attached consoles
-   *
    */
 
   public static synchronized void setState()
@@ -370,10 +357,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This method updates the state on a single
    * console
-   *
    */
 
   public static void setState(Admin console)
@@ -394,10 +379,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This static method is used to update the list of connnected users that
    * appears in any admin consoles attached to the Ganymede server.
-   *
    */
 
   public static synchronized void refreshUsers()
@@ -450,10 +433,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * This static method is used to update the list of connnected users that
    * appears in any admin consoles attached to the Ganymede server.
-   *
    */
 
   public static synchronized void refreshTasks()
@@ -492,13 +473,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
+   * <p>This is the GanymedeAdmin constructor, used to create a new
+   * server-side admin console attachment.</p>
    *
-   * This is the GanymedeAdmin constructor, used to create a new
-   * server-side admin console attachment.
-   *
-   * Admin is an RMI remote object exported by the client in the
-   * form of a callback.
-   *
+   * <p>Admin is an RMI remote object exported by the client in the
+   * form of a callback.</p>
    */
 
   public GanymedeAdmin(Admin admin, String adminName, String adminPass) throws RemoteException
@@ -535,7 +514,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     Ganymede.debug("Admin console detached " + new Date());
   }
 
-
   /**
    *
    * Disconnect the remote admin console associated with this object
@@ -557,9 +535,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * Kick all users off of the Ganymede server on behalf of this admin console
-   *
    */
 
   public synchronized boolean killAll()
@@ -581,9 +557,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * Kick a user off of the Ganymede server on behalf of this admin console
-   *
    */
 
   public synchronized boolean kill(String user)
@@ -621,11 +595,9 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
    * Get information about a particular user that 
    * is logged in.  We will eventually want to return
    * a data_object, probably.
-   *
    */
 
   public synchronized String getInfo(String user)
@@ -634,16 +606,10 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
-   * shutdown the server cleanly, on behalf of this admin console.
-   *
-   * right now we don't do any checking to make sure this is kosher
-   * to do, we'll have to do that once we actually start doing anything
-   * in the database.
-   *
+   * <p>shutdown the server cleanly, on behalf of this admin console.</p>
    */
 
- public boolean shutdown()
+  public boolean shutdown()
   {
     GanymedeSession temp;
     Admin atmp;

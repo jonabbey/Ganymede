@@ -7,8 +7,8 @@
    
    Created: 4 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/03/01 22:27:59 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/04/01 22:17:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,10 +56,18 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This class is a serializable object used to return all the value information
+ * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
+ * needs to render a specific field instance, including the current value held
+ * in this field and the current editability/visibility this field has with respect
+ * to the user's {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}..</p>
  *
- * This class is a serializable object to return all the information
- * the container panel needs to render a field.
+ * <p>The {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} object is used to return
+ * the invariant (during the client's connection) type information associated
+ * with the field generically across all objects of the type containing this field.</p>
  *
+ * @version $Revision: 1.8 $ $Date: 1999/04/01 22:17:49 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class FieldInfo implements java.io.Serializable {

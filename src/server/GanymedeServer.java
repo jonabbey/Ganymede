@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/03/10 22:08:44 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 1999/04/01 22:17:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -103,18 +103,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   } 
 
   /**
-   *
-   * Establishes a Session object in the server.  The Session object
+   * <p>Establishes a Session object in the server.  The Session object
    * contains all of the server's knowledge about a given client's
    * status.  This method is to be called by the client via RMI.  In
    * addition to returning a Session RMI reference to the client,
    * login() keeps a local reference to the Ganymede Session object
-   * for the server's bookkeeping.
-   *
-   * Does login() need to be synchronized?  If two threads were doing
-   * login() simultaneously, would they have their own copies of i?
-   * Would clients.addElement() do the right thing?  Is vector.addElement()
-   * synchronized?
+   * for the server's bookkeeping.</p>
    * 
    * @see arlut.csd.ganymede.Server
    */

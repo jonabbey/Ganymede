@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/03/30 20:14:19 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/04/01 22:17:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,32 +65,76 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Class to hold a database object as represented in the DBStore.</p>
+ * <p>Class to hold a typed database object as represented in the Ganymede
+ * {@link arlut.csd.ganymede.DBStore DBStore} database.  Clients can get access to
+ * instances of DBObject for viewing or editing in the form of a
+ * {@link arlut.csd.ganymede.db_object db_object} RMI interface type
+ * from a {@link arlut.csd.ganymede.Session Session} reference.</p>
  *
- * <p>Note that we don't include the object type in the object explicitly.. this
- * is encoded by the objectBase reference.</p>
+ * <p>A DBObject is identified by a unique identifier called an
+ * {@link arlut.csd.ganymede.Invid Invid} and contains a set of
+ * {@link arlut.csd.ganymede.DBField DBField} objects
+ * which hold the actual data values held in the object.  The client typically
+ * interacts with the fields held in this object directly using the
+ * {@link arlut.csd.ganymede.db_field db_field}
+ * remote interface which is returned by the DBObject getField methods.  DBObject
+ * is not directly involved in the client's interaction with the DBFields, although
+ * the DBFields will call methods on the owning DBObject to consult about permissions
+ * and the like.</p>
  *
- * <p>A DBObject does not allow its fields to be directly modified by anyone once the
- * object is instantiated.  When a user wants to edit an object, he gets a handle
- * to it from the DBStore, then calls createShadow to get an editable version
- * of the object.  If the user is satisfied with the changes made to the object,
- * the user will cause the editSet to commit, which will get a write lock on
- * the database, then replace the old version of this object with the modified
- * shadow object.  The shadow object field of the replaced object is cleared,
- * and then someone else can pull the object out for editing.</p>
+ * <p>A plain DBObject is not editable;  all value-changing calls to DBFields contained
+ * in a plain DBObject will reject any change requests.  In order to edit a DBObject,
+ * a client must get access to a {@link arlut.csd.ganymede.DBEditObject DBEditObject}
+ * object derived from the DBObject.  This is typically done by calling
+ * {@link arlut.csd.ganymede.Session#edit_db_object(arlut.csd.ganymede.Invid) edit_db_object}.</p>
+ *
+ * <p>The DBStore contains a single read-only DBObject in its database for each Invid.
+ * In order to change a DBObject, that DBObject must have its 
+ * {@link arlut.csd.ganymede.DBObject#createShadow(arlut.csd.ganymede.DBEditSet) createShadow}
+ * method called.  This is a synchronized method which attaches a new DBEditObject
+ * to the DBObject.  Only one DBEditObject can be created from a single DBObject at
+ * a time, and it must be created in the context of a
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet} transaction object.  Once the DBEditObject
+ * is created, that transaction has exclusive right to make changes to the DBEditObject.  When
+ * the transaction is committed, a new DBObject is created from the values held in the
+ * DBEditObject.  That DBObject is then placed back into the DBStore, replacing the
+ * original DBObject.  If instead the transaction is aborted, the DBObject forgets about
+ * the DBEditObject that had been attached to it and the DBObject is once again available
+ * for other transactions to edit.</p>
+ *
+ * <p>Actually, the above picture is a bit too simple.  The server's DBStore object does
+ * not directly contain DBObjects, but instead contains
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects, which define a type
+ * of DBObject, and contain all DBObjects of that type in turn.  The DBObjectBase
+ * is responsible for making sure that each DBObject has its own unique Invid based
+ * on the DBObjectBase's type id and a unique number for the individual DBObject.</p>
  * 
- * <p>Changes made to the shadow object do not affect the original object until
- * the transaction is committed;  other processes can examine the current
- * contents of the object until commit time.</p>
+ * <p>In terms of type definition, the DBObjectBase object acts as a template for
+ * objects of the type.  Each DBObjectBase contains a set of
+ * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} objects which
+ * define the names and types of DBFields that a DBObject of that type is
+ * meant to store.</p>
  *
- * <p>This is kind of like modern dating.</p>
+ * <p>In addition, each DBObjectBase can be linked to a custom DBEditObject subclass
+ * that oversees all kinds of operations on DBObjects of this kind.  Custom
+ * DBEditObject subclasses can define special logic for object creation, viewing,
+ * and editing, including custom object linking logic, acceptable value constraints, 
+ * and even step-by-step wizard dialog sequences to oversee certain kinds of
+ * operations.</p>
  *
- * <p>The constructors of this object can throw RemoteException because of the
- * UnicastRemoteObject superclass' constructor.</p>
+ * <p>All DBObjects have a certain number of DBFields pre-defined, including an
+ * {@link arlut.csd.ganymede.InvidDBField InvidDBField} listing the owner groups
+ * that this DBObject belongs to, a number of {@link arlut.csd.ganymede.StringDBField StringDBField}s
+ * that contain information about the last admin to modify this DBObject,
+ * {@link arlut.csd.ganymede.DateDBField DateDBField}s recording the creation and
+ * last modification dates of this object, and so on.  See 
+ * {@link arlut.csd.ganymede.SchemaConstants SchemaConstants} for details on the
+ * built-in field types.</p>
  *
- * @version $Revision: 1.67 $ %D% (Created 2 July 1996)
+ * <p>Is all this clear?  Good!</p>
+ *
+ * @version $Revision: 1.68 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *
  */
 
 public class DBObject implements db_object, FieldType, Remote {
@@ -978,7 +1022,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Check this object out from the datastore for editing.  This
    * method is intended to be called by the editDBObject method in
    * DBSession.. createShadow should not be called on an arbitrary
@@ -995,7 +1038,6 @@ public class DBObject implements db_object, FieldType, Remote {
    * might be better incorporated into DBSession as well.</p>
    * 
    * @param editset The transaction to own this shadow.
-   *
    */
 
   synchronized DBEditObject createShadow(DBEditSet editset)

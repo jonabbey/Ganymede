@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/03/17 20:13:49 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/04/01 22:17:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,14 +59,27 @@ import arlut.csd.JDialog.*;
 
 ------------------------------------------------------------------------------*/
 
-/**
- * 
- * <p>DBSession is the DBStore session class.  All normal database
- * interactions are performed through a DBSession object.  The
- * DBSession object provides a handle for monitoring the operations on
- * the database.. who holds what lock, what actions are performed
- * during a lock / transaction / session.</p>
- * 
+/** 
+ * <p>DBSession is the {@link arlut.csd.ganymede.DBStore DBStore} session
+ * class.  All normal database interactions are performed through a
+ * DBSession object.  The DBSession object provides a handle for
+ * monitoring the operations on the database.. who holds what lock,
+ * what actions are performed during a lock / transaction /
+ * session, etc..</p>
+ *
+ * <p>Most particularly, DBSession handles transactions and namespace
+ * logic for the Ganymede server, as well as providing the actual
+ * check-out/create/ check-in methods that 
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} calls.
+ * GanymedeSession tends to have the more high-level
+ * application/permissions logic, while DBSession is more concerned
+ * with internal database issues.  As well, GanymedeSession is
+ * designed to be directly accessed and manipulated by the client,
+ * while DBSession is accessed only by (presumably trusted)
+ * server-side code.</p>
+ *
+ * @version $Revision: 1.63 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 final public class DBSession {
