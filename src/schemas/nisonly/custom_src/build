@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Ganymede NISONLY Customization Build Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+CLASSPATH=${JARDIR}/ganymedeServer.jar:$CLASSDIR
+export CLASSPATH
+
+echo "Compiling NISONLY Customization files"
+
+cd $SOURCE
+
+$JAVAC -deprecation -d $CLASSDIR *.java
+
+echo "Done"
+

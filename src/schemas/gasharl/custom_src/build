@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Ganymede GASH Customization Build Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+CLASSPATH=${JARDIR}/ganymedeServer.jar:$CLASSDIR
+export CLASSPATH
+
+echo "Compiling GASH Customization files"
+
+cd $SOURCE
+
+umask 0113;
+
+$JAVAC -deprecation -d $CLASSDIR *.java
+
+echo "Done"
+

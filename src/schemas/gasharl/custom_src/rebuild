@@ -1,0 +1,94 @@
+#!/opt/bin/perl5
+#
+# Incremental rebuild script
+#
+############################
+
+$config_file = "config.sh";
+
+####
+####
+####
+
+umask 0113;
+
+&get_vars($config_file);
+
+$ENV{'CLASSPATH'}="$jardir/ganymedeServer.jar:$jardir/ganymede.jar:$classdir";
+
+####
+####
+####
+
+opendir CURRENT, "." or die "Can't open current directory, that's no good.\n\n";
+@files = readdir(CURRENT);
+closedir CURRENT;
+
+$file_list = "";
+
+@javafiles = grep /\.java$/, @files;
+
+foreach $file (@javafiles) {
+
+  $mtime = (stat ($file))[9];
+
+  @file = split /\./, $file;
+  $class_file = "$file[0].class";
+
+  # print "Stat $customclassdir/$class_file\n";
+
+  $class_mtime = (stat ("$customclassdir/$class_file"))[9];
+
+  if ($mtime - $class_mtime >= 0)
+    {
+      $file_list = $file_list." $file";
+    }
+}
+
+if ($file_list eq "") {
+  print "There is nothing to compile.\n";
+} else {
+  print "Compiling $file_list\n";
+  system "$javac -d $classdir $file_list\n" || print "Could not finish compiling.\n";
+  print "Done.\n";
+}
+
+##########################################################################
+#
+#                                                                 get_vars
+#
+##########################################################################
+
+sub get_vars {
+  open(CONFIG,"$config_file") || die "Could not open $config_file\n";
+
+  while (<CONFIG>){
+
+    if (/^JAVAC=(.*)/){
+      $javac = $1;
+    }
+
+    if (/^JAR=(.*)/){
+      $jar = $1;
+    }
+
+    if (/^SOURCE=(.*)/){
+      $source = $1;
+    }
+
+    if (/^CLASSDIR=(.*)/){
+      $classdir = $1;
+      $customclassdir = "$1/arlut/csd/ganymede/custom";
+    }
+
+    if (/^JARDIR=(.*)/){
+      $jardir = $1;
+    }
+
+    if (/^TARGETJAR=(.*)/){
+      $targetjar = $1;
+    }
+  } 
+
+  close(CONFIG);
+}  

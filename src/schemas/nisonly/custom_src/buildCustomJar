@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Ganymede GASH Customization Jar Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+echo "Building custom jar file from compiled classes"
+
+cd $CLASSDIR
+
+mv -f $TARGETJAR $TARGETJAR.old > /dev/null 2>&1
+
+jar -cf $TARGETJAR arlut
+
+echo "Done"
