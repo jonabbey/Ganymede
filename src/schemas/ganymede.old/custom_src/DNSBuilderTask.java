@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to DNS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -65,6 +65,11 @@ public class DNSBuilderTask extends GanymedeBuilderTask {
 	if (path == null)
 	  {
 	    throw new RuntimeException("DNSBuilder not able to determine output directory.");
+	  }
+
+	if (!path.endsWith("/"))
+	  {
+	    path = path + "/";
 	  }
       }
 

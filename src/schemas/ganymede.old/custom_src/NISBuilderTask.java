@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,6 +69,11 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	if (path == null)
 	  {
 	    throw new RuntimeException("NISBuilder not able to determine output directory.");
+	  }
+
+	if (!path.endsWith("/"))
+	  {
+	    path = path + "/";
 	  }
       }
 
