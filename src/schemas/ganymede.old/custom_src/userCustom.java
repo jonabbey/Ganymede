@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,6 +190,80 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	return null;		// default
       }
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of DBField will
+   * wind up calling up to here to let us override the normal visibility
+   * process.<br><br>
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.<br><br>
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    DBObject user;
+    Boolean Unix;
+    boolean unix;
+    short fieldid;
+
+    /* -- */
+
+    // by default, return the field definition's visibility
+
+    if (field.getFieldDef().getBase() != this.objectBase)
+      {
+	throw new IllegalArgumentException("field/object mismatch");
+      }
+
+    user = field.getOwner();
+
+    if (user == null)
+      {
+	throw new RuntimeException("Orphaned field?");
+      }
+
+    Unix = (Boolean) user.getFieldValueLocal(userSchema.UNIX);
+
+    if (Unix == null)
+      {
+	unix = false;
+      }
+    else
+      {
+	unix = Unix.booleanValue();
+      }
+
+    fieldid = field.getID();
+
+    switch (fieldid)
+      {
+      case userSchema.UNIXENABLED:
+      case userSchema.UID:
+      case userSchema.LOGINSHELL:
+      case userSchema.HOMEGROUP:
+      case userSchema.GROUPLIST:
+      case userSchema.NETGROUPS:
+      case userSchema.HOMEDIR:
+      case userSchema.VOLUMES:
+
+	if (!unix)
+	  {
+	    return false;
+	  }
+      }
+
+    return field.getFieldDef().isVisible(); 
   }
 
   /**
@@ -862,6 +936,44 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     if (debug)
       {
 	System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+      }
+
+    if (field.getID() == userSchema.UNIX)
+      {
+	if (operation == SETVAL)
+	  {
+	    Boolean enabled = (Boolean) getFieldValueLocal(userSchema.UNIX);
+
+	    if (enabled != null && enabled.booleanValue())
+	      {
+		return Ganymede.createErrorDialog("Can't remove UNIX account",
+						  "Once a user account has a UNIX account created, " +
+						  "it can't be arbitrarily removed.  Things are this way due " +
+						  "to the need to maintain accounting records.\n\n" +
+						  "You can disable this user account's UNIX login if you want.");
+	      }
+
+	    Boolean enabling = (Boolean) param1;
+
+	    if (enabling == null)
+	      {
+		return null;	// ok, whatever.. no rescan
+	      }
+	    
+	    boolean showem = enabling.booleanValue();
+	    
+	    ReturnVal retVal = new ReturnVal(true);
+	    
+	    retVal.addRescanField(userSchema.UNIXENABLED);
+	    retVal.addRescanField(userSchema.UID);
+	    retVal.addRescanField(userSchema.LOGINSHELL);
+	    retVal.addRescanField(userSchema.HOMEGROUP);
+	    retVal.addRescanField(userSchema.NETGROUPS);
+	    retVal.addRescanField(userSchema.HOMEDIR);
+	    retVal.addRescanField(userSchema.VOLUMES);
+	    
+	    return retVal;
+	  }
       }
 
     if (field.getID() == GROUPLIST)
