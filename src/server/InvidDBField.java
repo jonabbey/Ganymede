@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1694,10 +1694,12 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Deletes an element of this field, if a vector.
-   * Returns true on success, false on failure.
-   * If false is returned, the DBSession's
-   * last error value will have been set to
-   * indicate the reason for failure.
+   *
+   * Returns null on success, non-null on failure.
+   *
+   * If non-null is returned, the ReturnVal object
+   * will include a dialog specification that the
+   * client can use to display the error condition.
    *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
@@ -1706,6 +1708,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public ReturnVal deleteElement(int index)
   {
+    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid remote;
 
@@ -1746,7 +1749,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (getFieldDef().isEditInPlace())
 	  {
-	    eObj.getSession().deleteDBObject(remote);
+	    retVal = eObj.getSession().deleteDBObject(remote, false);
+	  }
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;	// go ahead and return our error code
 	  }
 
 	if (values.size() > 0)
@@ -1757,8 +1765,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    defined = false;
 
-	    return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
-					      "Vector is already empty\n");
+	    return null;
 	  }
       }
     else
