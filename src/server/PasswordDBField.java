@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/06/15 02:48:28 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 1999/07/27 19:56:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -417,7 +417,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if ((cryptedPass != origP.cryptedPass) || (uncryptedPass != origP.uncryptedPass))
       {
-	return "\tPassword changed";
+	return "\tPassword changed\n";
       }
     else
       {
