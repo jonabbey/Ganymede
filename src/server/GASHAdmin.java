@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2002/03/02 01:54:56 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2002/03/13 06:17:32 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -185,7 +185,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     new GASHAdmin();		// this constructor sets static admin ref
 
-    JFrame loginFrame = new JFrame("Admin console login");
+    JFrame loginFrame = new GASHAdminLoginFrame("Admin console login", applet);
 
     appletContentPane = loginFrame.getContentPane();
 
@@ -2742,5 +2742,62 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   public void windowOpened(WindowEvent event)
   {
     button3.requestFocus();
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+					                     GASHAdminLoginFrame
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>JFrame subclass which is used to hold the {@link
+ * arlut.csd.ganymede.GASHAdmin GASHAdmin} applet when the Ganymede
+ * admin console is run as an application rather than an applet.</p>
+ */
+
+class GASHAdminLoginFrame extends JFrame {
+
+  static final boolean debug = false;
+  GASHAdmin adminLogin;
+
+  /* -- */
+  
+  public GASHAdminLoginFrame(String title, GASHAdmin adminLogin)
+  {
+    super(title);
+    this.adminLogin = adminLogin;
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+  }
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    if (e.getID() == WindowEvent.WINDOW_CLOSING)
+      {
+	if (debug)
+	  {
+	    System.out.println("Window closing");
+	  }
+
+	if (adminLogin.quitButton.isEnabled())
+	  {
+	    if (debug)
+	      {
+		System.out.println("It's ok to log out.");
+	      }
+
+	    System.exit(0);
+	    super.processWindowEvent(e);
+	  }
+	else if (debug)
+	  {
+	    System.out.println("No log out!");
+	  }
+      }
+    else
+      {
+	super.processWindowEvent(e);
+      }
   }
 }

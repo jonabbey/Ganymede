@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.13 $
-# $Date: 2000/10/10 02:59:08 $
+# $Revision: 1.14 $
+# $Date: 2002/03/13 06:17:31 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -22,7 +22,7 @@
 		     "NameSpaceEditor",
 		     "FieldNode",
 		     "Invid", "NameSpace",
-		     "GASHAdmin", "GASHAdminFrame",
+		     "GASHAdmin", "GASHAdminFrame", "GASHAdminLoginFrame",
 		     "Server", "Session", "SpaceNode",
 		     "ObjectHandle", "Ganymediator", "GanymediatorWizard",
 		     "GanymedeConfig", "adminSession", "XMLSession",
