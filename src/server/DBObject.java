@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2001/02/08 08:12:21 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2001/02/09 01:55:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.115 $ $Date: 2001/02/08 08:12:21 $
+ * @version $Revision: 1.116 $ $Date: 2001/02/09 01:55:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1539,6 +1539,41 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 
 	return index;
+      }
+  }
+
+  /**
+   * <p>This method clears any cached PermEntry value for the
+   * given field id.</p>.
+   */
+
+  public final void clearFieldPerm(short id)
+  {
+    synchronized (fieldAry)
+      {
+	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+
+	short index = hashindex;
+
+	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	  {
+	    if (++index >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+
+		return;
+	      }
+	  }
+
+	if (permCacheAry != null)
+	  {
+	    permCacheAry[index] = null;
+	  }
       }
   }
 
