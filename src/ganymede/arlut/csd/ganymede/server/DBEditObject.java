@@ -153,7 +153,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final static int SETPASSMD5 = 9;
   public final static int SETPASSWINHASHES = 10;
   public final static int SETPASSAPACHEMD5 = 11;
-  public final static int LASTOP = 11;
+  public final static int SETPASSSSHA = 12;
+  public final static int LASTOP = 12;
 
   public final static Date minDate = new Date(Long.MIN_VALUE);
   public final static Date maxDate = new Date(Long.MAX_VALUE);

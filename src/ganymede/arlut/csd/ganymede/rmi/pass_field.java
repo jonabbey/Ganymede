@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -178,7 +178,7 @@ public interface pass_field extends db_field {
    */
 
   public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,
-				String LANMAN, String NTUnicodeMD4, 
+				String LANMAN, String NTUnicodeMD4, String sshaCrypt,
 				boolean local, boolean noWizards) throws RemoteException;
 
 }

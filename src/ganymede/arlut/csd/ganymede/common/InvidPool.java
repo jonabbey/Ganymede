@@ -205,8 +205,8 @@ public class InvidPool implements InvidAllocator {
 	  }
 	else
 	  {
-	    InvidSlot p = table[i].next;
 	    InvidSlot prev = table[i];
+	    InvidSlot p = table[i].next;
 
 	    while (p != null)
 	      {
@@ -265,11 +265,26 @@ public class InvidPool implements InvidAllocator {
 
 class InvidSlot extends SoftReference {
 
+  /**
+   * <p>For linking collision buckets.</p>
+   */
+
   InvidSlot next;
+
+  /**
+   * <p>We have to remember the hash code for the referent Invid so
+   * that we can properly find the hash slot this InvidSlot would have
+   * been contained in before the reference was released.</p>
+   */
+
+  int save_hash;
+
+  /* -- */
 
   InvidSlot(Invid item, ReferenceQueue queue, InvidSlot next)
   {
     super(item, queue);
+    this.save_hash = item.hashCode();
     this.next = next;
   }
 
@@ -278,17 +293,8 @@ class InvidSlot extends SoftReference {
     return (o.equals(get()));
   }
 
-  public int hashcode()
+  public int hashCode()
   {
-    Object item = get();
-    
-    if (item == null)
-      {
-	return 0;
-      }
-    else
-      {
-	return item.hashCode();
-      }
+    return save_hash;
   }
 }

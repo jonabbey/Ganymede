@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -61,7 +61,9 @@ import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.xml.sax.SAXException;
@@ -193,7 +195,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <P>Hashtable mapping Short type ids to
-   * hashes which map local object designations to
+   * hashes which map local object designations (either id Strings or
+   * num Integers from the &lt;object&gt; elements) to
    * actual {@link arlut.csd.ganymede.server.xmlobject xmlobject}
    * records.</P>
    */
@@ -1767,7 +1770,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     XMLItem item;
     boolean committedTransaction = false;
-    int count = 0;
+    int modCount = 0;
+    int totalCount = 0;
 
     /* -- */
 
@@ -1810,20 +1814,22 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    // method without committing the transaction
 		    // our finally clause will log us out
 
-		    ex.printStackTrace();
+		    err.println("Error constructing xmlobject for " + item  + ":\n" + Ganymede.stackTrace(ex));
 
 		    return false;
 		  }
 
-		if (count == 9)
+		if (modCount == 9)
 		  {
 		    System.err.print(".");
-		    count = 0;
+		    modCount = 0;
 		  }
 		else
 		  {
-		    count++;
+		    modCount++;
 		  }
+
+		totalCount++;
 
 		String mode = objectRecord.getMode();
 	    
@@ -1874,7 +1880,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	System.err.println("\n\n");
 
+	err.println("Done scanning XML for <ganydata>, integrating transaction for " + totalCount + " <object> elements.");
+
 	committedTransaction = integrateXMLTransaction();
+
+	if (committedTransaction)
+	  {
+	    err.println("Finished integrating transaction");
+	  }
 
 	return committedTransaction;
       }
@@ -2257,10 +2270,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     boolean success = true;
     ReturnVal attempt;
-    Hashtable editCount = new Hashtable();
-    Hashtable createCount = new Hashtable();
-    Hashtable deleteCount = new Hashtable();
-    Hashtable inactivateCount = new Hashtable();
+    HashMap editCount = new HashMap();
+    HashMap createCount = new HashMap();
+    HashMap deleteCount = new HashMap();
+    HashMap inactivateCount = new HashMap();
 
     /* -- */
 
@@ -2617,11 +2630,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects created:");
 		
-		Enumeration en = createCount.keys();
+		Iterator iter = createCount.keySet().iterator();
 		
-		while (en.hasMoreElements())
+		while (iter.hasNext())
 		  {
-		    String key = (String) en.nextElement();
+		    String key = (String) iter.next();
 		    
 		    err.println("\t" + key + ": " + createCount.get(key));
 		  }
@@ -2631,11 +2644,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects edited:");
 		
-		Enumeration en = editCount.keys();
+		Iterator iter = editCount.keySet().iterator();
 		
-		while (en.hasMoreElements())
+		while (iter.hasNext())
 		  {
-		    String key = (String) en.nextElement();
+		    String key = (String) iter.next();
 		    
 		    err.println("\t" + key + ": " + editCount.get(key));
 		  }
@@ -2645,11 +2658,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects deleted:");
 		
-		Enumeration en = deleteCount.keys();
+		Iterator iter = deleteCount.keySet().iterator();
 		
-		while (en.hasMoreElements())
+		while (iter.hasNext())
 		  {
-		    String key = (String) en.nextElement();
+		    String key = (String) iter.next();
 		    
 		    err.println("\t" + key + ": " + deleteCount.get(key));
 		  }
@@ -2659,11 +2672,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects inactivated:");
 		
-		Enumeration en = inactivateCount.keys();
+		Iterator iter = inactivateCount.keySet().iterator();
 		
-		while (en.hasMoreElements())
+		while (iter.hasNext())
 		  {
-		    String key = (String) en.nextElement();
+		    String key = (String) iter.next();
 		    
 		    err.println("\t" + key + ": " + inactivateCount.get(key));
 		  }
@@ -2687,7 +2700,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * integer in table, keyed by type.
    */
 
-  private void incCount(Hashtable table, String type)
+  private void incCount(HashMap table, String type)
   {
     Integer x = (Integer) table.get(type);
 

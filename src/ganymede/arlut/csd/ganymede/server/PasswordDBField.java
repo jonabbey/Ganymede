@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -1798,14 +1798,15 @@ public class PasswordDBField extends DBField implements pass_field {
   public ReturnVal setAllHashes(String crypt,
 				String md5crypt,
 				String apacheMd5Crypt,
-				String LANMAN, 
-				String NTUnicodeMD4, 
+				String LANMAN,
+				String NTUnicodeMD4,
+				String SSHAText,
 				boolean local, 
 				boolean noWizards)
   {
     ReturnVal retVal;
     DBEditObject eObj;
-    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin;
+    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA;
 
     /* -- */
 
@@ -1820,8 +1821,9 @@ public class PasswordDBField extends DBField implements pass_field {
     settingMD5 = (md5crypt != null && !md5crypt.equals(""));
     settingApacheMD5 = (apacheMd5Crypt != null && !apacheMd5Crypt.equals(""));
     settingWin = (LANMAN != null && !LANMAN.equals("")) || (NTUnicodeMD4 != null && !NTUnicodeMD4.equals(""));
+    settingSSHA = (SSHAText != null && !SSHAText.equals(""));
 
-    if (!settingCrypt && !settingWin && !settingMD5)
+    if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA)
       {
 	// clear it!
 
@@ -1830,31 +1832,58 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // nope, we're setting something.. let's find out what
 
+    if (settingSSHA)
+      {
+	if (!getFieldDef().isSSHAHashed())
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					      "Can't set pre-crypted SSHA hash value into a non-SSHACrypted password field");
+	  }
+
+	if (!SSHAText.startsWith("{SSHA}"))
+	  {
+	    return Ganymede.createErrorDialog("Password Field Error",
+					      "setAllHashes() called with an improperly " +
+					      "formatted SSHA password entry: " + SSHAText);
+	  }
+      }
+
     if (settingWin && !getFieldDef().isWinHashed())
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
 					  "Can't set pre-crypted Samba hash values into a non-WinCrypted password field");
       }
 
-    if (settingMD5 && !getFieldDef().isMD5Crypted())
+    if (settingMD5)
       {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
-					  "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
+	if (!getFieldDef().isMD5Crypted())
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					      "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
+	  }
+
+	if (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1))
+	  {
+	    return Ganymede.createErrorDialog("Password Field Error",
+					      "setAllHashes() called with an improperly " +
+					      "formatted md5Crypt password entry: " + md5crypt);
+	  }
       }
 
-    if (settingMD5 && !getFieldDef().isMD5Crypted())
+    if (settingApacheMD5)
       {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
-					  "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
-      }
+	if (!getFieldDef().isApacheMD5Crypted())
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					      "Can't set pre-crypted Apache md5 hash values into a non-ApacheMD5Crypted password field");
+	  }
 
-    // it's easy to sanity-check md5 hashes
-
-    if (settingApacheMD5 && (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1)))
-      {
-	return Ganymede.createErrorDialog("Password Field Error",
-					  "setAllHashes() called with an improperly " +
-					  "formatted Apache-style md5Crypt password entry: " + apacheMd5Crypt);
+	if (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1))
+	  {
+	    return Ganymede.createErrorDialog("Password Field Error",
+					      "setAllHashes() called with an improperly " +
+					      "formatted Apache-style md5Crypt password entry: " + apacheMd5Crypt);
+	  }
       }
 
     if (settingCrypt && !getFieldDef().isCrypted())
@@ -1916,6 +1945,18 @@ public class PasswordDBField extends DBField implements pass_field {
 		return retVal;
 	      }
 	  }
+
+	if (settingSSHA)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, sshaHash, null);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -1960,6 +2001,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (settingApacheMD5)
 	  {
 	    apacheMd5CryptPass = apacheMd5Crypt;
+	  }
+
+	if (settingSSHA)
+	  {
+	    sshaHash = SSHAText;
 	  }
       }
 

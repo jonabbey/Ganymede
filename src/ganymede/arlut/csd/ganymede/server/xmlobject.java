@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -214,8 +214,8 @@ public class xmlobject {
 
     // handle any attributes in the element
 
-    actionMode = openElement.getAttrStr("action");
-    typeString = openElement.getAttrStr("type");
+    actionMode = openElement.getAttrStr("action").intern();
+    typeString = openElement.getAttrStr("type").intern();
 
     try
       {
@@ -227,6 +227,11 @@ public class xmlobject {
       }
 
     id = openElement.getAttrStr("id"); // may be null
+
+    if (id != null)
+      {
+	id = id.intern();
+      }
 
     Integer numInt = openElement.getAttrInt("num");
 

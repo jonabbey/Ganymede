@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -283,7 +283,7 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
-		value = owner.xSession.reader.getFollowingString(openElement, true);
+		value = owner.xSession.reader.getFollowingString(openElement, true).intern();
 
 		// getFollowingString automatically consumes the field
 		// close element after the string text
@@ -859,7 +859,7 @@ public class xmlfield implements FieldType {
 	owner.xSession.err.println("\nError, found a non-empty vector string element: " + item);
       }
 
-    return item.getAttrStr("val");
+    return item.getAttrStr("val").intern();
   }
 
   public String parseIP(XMLItem item) throws SAXException
@@ -1037,7 +1037,7 @@ public class xmlfield implements FieldType {
 	    // set anything we can.. note that if we transmit null for
 	    // any of the password hash options, it will null the
 	    // password out entirely, so we don't want to transmit a
-	    // null unless all three password options are all null.
+	    // null unless all password options are all null.
 
 	    if (xp.plaintext != null)
 	      {
@@ -1053,7 +1053,9 @@ public class xmlfield implements FieldType {
 	    // we see something like <password/>, with no attributes
 	    // set, we'll wind up clearing the password field entirely
 
-	    result = field.setAllHashes(xp.crypttext, xp.md5text, xp.apachemd5text, xp.lanman, xp.ntmd4, false, false);
+	    result = field.setAllHashes(xp.crypttext, xp.md5text,
+					xp.apachemd5text, xp.lanman,
+					xp.ntmd4, xp.sshatext, false, false);
 
 	    return result;
 	  }
@@ -1666,7 +1668,7 @@ class xInvid {
 	throw new NullPointerException("Bad item!");
       }
 
-    String typeString = item.getAttrStr("type");
+    String typeString = item.getAttrStr("type").intern();
 
     if (typeString == null)
       {
@@ -1675,7 +1677,7 @@ class xInvid {
 	throw new NullPointerException("Bad item!");
       }
 
-    objectId = item.getAttrStr("id");
+    objectId = item.getAttrStr("id").intern();
 
     if (objectId == null)
       {
@@ -1787,6 +1789,7 @@ class xPassword {
   String apachemd5text;
   String lanman;
   String ntmd4;
+  String sshatext;
 
   /* -- */
 
@@ -1811,7 +1814,7 @@ class xPassword {
     ntmd4 = item.getAttrStr("ntmd4");
   }
 
-  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4)
+  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4, String sshatext)
   {
     this.plaintext = plaintext;
     this.crypttext = crypttext;
@@ -1819,6 +1822,7 @@ class xPassword {
     this.apachemd5text = apachemd5text;
     this.lanman = lanman;
     this.ntmd4 = ntmd4;
+    this.sshatext = sshatext;
   }
 
   public String toString()
@@ -1868,6 +1872,13 @@ class xPassword {
       {
 	result.append(" ntmd4=\"");
 	result.append(ntmd4);
+	result.append("\"");
+      }
+
+    if (sshatext != null)
+      {
+	result.append(" ssha=\"");
+	result.append(sshatext);
 	result.append("\"");
       }
 
@@ -1946,7 +1957,7 @@ class xPerm {
 	item = getXSession().getNextItem();
       }
 
-    label = ((XMLElement) item).getName();
+    label = ((XMLElement) item).getName().intern();
 
     String permbits = item.getAttrStr("perm");
 
