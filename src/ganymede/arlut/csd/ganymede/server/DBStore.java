@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -86,6 +86,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.zipIt;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.InvidPool;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -167,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 8;
+  static final byte minor_version = 9;
 
   /**
    * XML version major id
@@ -469,6 +470,7 @@ public final class DBStore implements JythonMap {
 
     DBObjectBase tempBase;
     short baseCount, namespaceCount;
+    int invidPoolSize;
     String file_id;
 
     /* -- */
@@ -528,6 +530,27 @@ public final class DBStore implements JythonMap {
 	if (this.isAtLeast(2, 8))
 	  {
 	    transactionNumber = in.readInt();
+	  }
+
+	// at version 2.9, we started recording the size of our invid
+	// pool
+
+	if (this.isAtLeast(2, 9))
+	  {
+	    invidPoolSize = in.readInt();
+	  }
+	else
+	  {
+	    invidPoolSize = -1;
+	  }
+
+	if (invidPoolSize != -1)
+	  {
+	    Invid.setAllocator(new InvidPool(invidPoolSize));
+	  }
+	else
+	  {
+	    Invid.setAllocator(new InvidPool());
 	  }
 
 	// read in the namespace definitions
@@ -831,7 +854,8 @@ public final class DBStore implements JythonMap {
 	out.writeByte(major_version);
 	out.writeByte(minor_version);
 
-	out.writeInt(transactionNumber);
+	out.writeInt(transactionNumber); // version 2.8
+	out.writeInt(Invid.getCount());	// version 2.9
 
 	namespaceCount = (short) nameSpaces.size();
 

@@ -95,6 +95,27 @@ public final class Invid implements java.io.Serializable {
     System.err.println("I've seen " + counter + " invids created.");
   }
 
+  static final public int getCount()
+  {
+    return counter;
+  }
+
+  /**
+   * <p>This method can be used to prep the Invid class with an {@link
+   * arlut.csd.ganymede.common.InvidAllocator} that will return a
+   * possibly pre-existing Invid object, given a short/int
+   * combination.</p>
+   *
+   * <p>The purpose of this allocator is to allow the Ganymede server to
+   * re-use previously created Invids in the server to minimize memory
+   * usage, in a fashion similar to the Java language's java.lang.String.intern()
+   * scheme.</p>
+   */
+
+  static final public void setAllocator(InvidAllocator newAllocator)
+  {
+    Invid.allocator = newAllocator;
+  }
 
   /**
    * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
@@ -103,9 +124,23 @@ public final class Invid implements java.io.Serializable {
 
   static final public Invid createInvid(short type, int num)
   {
-    counter++;
+    if (allocator == null)
+      {
+	counter++;
+	return new Invid(type, num);
+      }
+    else
+      {
+	Invid newInvid = new Invid(type, num);
+	Invid internedInvid = newInvid.intern();
 
-    return new Invid(type, num).intern();
+	if (newInvid == internedInvid)
+	  {
+	    counter++; // we want to count only unique invids, if we are interning
+	  }
+
+	return internedInvid;
+      }
   }
 
   /**
@@ -142,22 +177,6 @@ public final class Invid implements java.io.Serializable {
       }
   }
 
-  /**
-   * <p>This method can be used to prep the Invid class with an {@link
-   * arlut.csd.ganymede.common.InvidAllocator} that will return a
-   * possibly pre-existing Invid object, given a short/int
-   * combination.</p>
-   *
-   * <p>The purpose of this allocator is to allow the Ganymede server to
-   * re-use previously created Invids in the server to minimize memory
-   * usage, in a fashion similar to the Java language's java.lang.String.intern()
-   * scheme.</p>
-   */
-
-  static final public void setAllocator(InvidAllocator newAllocator)
-  {
-    Invid.allocator = newAllocator;
-  }
 
   // ---
 

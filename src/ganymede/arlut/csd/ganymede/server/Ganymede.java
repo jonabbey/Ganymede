@@ -86,6 +86,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseListTransport;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.InvidPool;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -486,6 +487,8 @@ public class Ganymede {
 	// journal
 
 	firstrun = true;
+
+	Invid.setAllocator(new InvidPool());
 
 	debug(ts.l("main.info_new_dbstore", dbFilename));
 	debug(ts.l("main.info_initializing_schema"));
