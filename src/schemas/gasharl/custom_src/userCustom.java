@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 1999/02/25 04:35:39 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 1999/03/10 21:47:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -159,6 +159,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     ReturnVal retVal;
     boolean success = true;
+    Integer uidVal = new Integer(1001);
 
     /* -- */
 
@@ -171,6 +172,30 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     // need to find a uid for this user
+
+    // see if we have an owner set, check it for our starting uid
+
+    Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    if (owners != null && owners.size() > 0)
+      {
+	Invid primaryOwner = (Invid) owners.elementAt(0);
+
+	DBObject owner = getSession().viewDBObject(primaryOwner);
+
+	if (owner != null)
+	  {
+	    // field 256 in the owner group is the GASHARL starting
+	    // uid/gid
+
+	    uidVal = (Integer) owner.getFieldValueLocal((short) 256);
+
+	    if (uidVal == null)
+	      {
+		uidVal = new Integer(1001);
+	      }
+	  }
+      }
 
     NumericDBField numField = (NumericDBField) getField(UID);
 
@@ -190,8 +215,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
-
-    Integer uidVal = new Integer(1001);
 
     while (!namespace.testmark(editset, uidVal))
       {

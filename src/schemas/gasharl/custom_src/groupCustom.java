@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/03/10 06:05:47 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/03/10 21:47:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -139,6 +139,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   public boolean initializeNewObject()
   {
     ReturnVal retVal;
+    Integer gidVal = new Integer(1001);
 
     /* -- */
 
@@ -151,6 +152,30 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       }
 
     // need to find a gid for this group
+
+    // see if we have an owner set, check it for our starting gid
+
+    Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    if (owners != null && owners.size() > 0)
+      {
+	Invid primaryOwner = (Invid) owners.elementAt(0);
+
+	DBObject owner = getSession().viewDBObject(primaryOwner);
+
+	if (owner != null)
+	  {
+	    // field 256 in the owner group is the GASHARL starting
+	    // uid/gid
+
+	    gidVal = (Integer) owner.getFieldValueLocal((short) 256);
+
+	    if (gidVal == null)
+	      {
+		gidVal = new Integer(1001);
+	      }
+	  }
+      }
 
     NumericDBField numField = (NumericDBField) getField((short) 258);
 
@@ -170,8 +195,6 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     // now, find a gid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
-
-    Integer gidVal = new Integer(1001);
 
     while (!namespace.testmark(editset, gidVal))
       {
