@@ -208,5 +208,8 @@ export CLASSPATH
 # storing Strings in the heap.  This directive may not be recognized
 # in JVMs other than Sun's.. you can remove this directive if you need
 # to in such cases.
+#
+# The -server option is also specific to Sun's JVM, and should be removed
+# if you are running on an IBM JDK.
 
 $JAVA -server $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP -XX:MaxPermSize=$MAXPERMSPACE $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
