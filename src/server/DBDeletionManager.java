@@ -7,8 +7,8 @@
 
    Created: 23 June 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/06/23 23:42:48 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/06/24 18:36:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,8 +107,8 @@ public class DBDeletionManager {
     DBEditObject eObj = obj.shadowObject;
 
     if (eObj != null &&
-	eObj.getStatus() == DBEditObject.DROPPING ||
-	eObj.getStatus() == DBEditObject.DELETING)
+	(eObj.getStatus() == DBEditObject.DROPPING ||
+	 eObj.getStatus() == DBEditObject.DELETING))
       {
 	return false;
       }
@@ -215,6 +215,11 @@ public class DBDeletionManager {
 
   public static synchronized boolean addSessionInvids(DBSession session, Vector invidList)
   {
+    if (invidList == null || invidList.size() == 0)
+      {
+	return true;
+      }
+
     Vector currentList = (Vector) sessions.get(session);
     Vector toAdd = VectorUtils.difference(invidList, currentList);
 
@@ -245,7 +250,14 @@ public class DBDeletionManager {
 
   public static synchronized Vector getSessionCheckpoint(DBSession session)
   {
-    return (Vector) ((Vector) sessions.get(session)).clone();
+    Vector invidList = (Vector) sessions.get(session);
+
+    if (invidList == null)
+      {
+	return new Vector();
+      }
+
+    return (Vector) invidList.clone();
   }
 
   /**

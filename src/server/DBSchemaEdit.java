@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2000/02/29 10:25:47 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2000/06/24 18:36:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -673,7 +673,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     
     tmpBase = (DBObjectBase) newBases.get(new Short(id));
 
-    if (base != null)
+    if (tmpBase != null)
       {
 	parent = tmpBase.getCategory();
 	parent.removeNode(tmpBase);

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2000/06/23 23:42:50 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2000/06/24 18:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,11 +106,11 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.122 $ %D%
+ * @version $Revision: 1.123 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class DBStore {
+public final class DBStore {
 
   // type identifiers used in the object store
 
@@ -2384,7 +2384,15 @@ public class DBStore {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    session.abortTransaction();
+	    try
+	      {
+		session.abortTransaction();
+	      }
+	    finally
+	      {
+		success=true;	// true enough, anyway
+		gSession.logout();
+	      }
 	  }
 
 	gSession.logout();

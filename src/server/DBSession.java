@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/06/23 23:42:50 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/06/24 18:36:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.86 $ %D%
+ * @version $Revision: 1.87 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -759,7 +759,7 @@ final public class DBSession {
    * is in the middle of being deleted 
    */
 
-  public DBObject viewDBObject(short baseID, int objectID, boolean getOriginal)
+  public synchronized DBObject viewDBObject(short baseID, int objectID, boolean getOriginal)
   {
     DBObjectBase base;
     DBObject     obj = null;
@@ -767,48 +767,64 @@ final public class DBSession {
     Integer      objKey;
 
     /* -- */
-    
-    if (isTransactionOpen())
-      {
-	try
-	  {
-	    obj = editSet.findObject(new Invid(baseID, objectID)); // *sync* DBEditSet
-	  }
-	catch (NullPointerException ex)
-	  {
-	    // maybe the transaction got closed?  We're not synchronized here, after all
-	  }
-
-	if (obj != null)
-	  {
-	    if (getOriginal)
-	      {
-		if (obj instanceof DBEditObject && ((DBEditObject) obj).getStatus() == ObjectStatus.DELETING)
-		  {
-		    return ((DBEditObject) obj).getOriginal();
-		  }
-	      }
-
-	    return obj;
-	  }
-      }
 
     baseKey = new Short(baseID);
-
-    base = Ganymede.db.getObjectBase(baseKey); // store may not be set at this point if this object is not checked out
+    base = Ganymede.db.getObjectBase(baseKey);
 
     if (base == null)
       {
 	return null;
       }
 
-    // depend on the objectTable's thread synchronization here
+    // this should be safe, as there shouldn't be any threads doing a
+    // viewDBObject while the schema is being edited, by virtue of the
+    // loginSemaphore.. otherwise, something wacky might happen, like
+    // the DBObjectBase being broken down and having the objectTable
+    // field set to null.
+
+    // We use the DBObjectTable's synchronized get() method so that we
+    // can look up objects even while the DBObjectBase is locked
+    // during another transaction's commit
 
     obj = base.objectTable.get(objectID);
 
-    // do we want to do any kind of logging here?
+    // if we aren't editing anything, we can't possibly have our own
+    // version of the object checked out
 
-    return obj;
+    if (!isTransactionOpen())
+      {
+	return obj;
+      }
+
+    if (obj == null)
+      {
+	// not in transaction.. maybe we created it?
+
+	return editSet.findObject(new Invid(baseID, objectID));
+      }
+
+    // okay, we found it and we've got a transaction open.. see if the
+    // object is being edited and, if so, if it is us that is doing it
+
+    DBEditObject shadow = obj.shadowObject;
+
+    if (shadow == null || shadow.getSession() != this)
+      {
+	return obj;
+      }
+
+    // okay, the object is being edited by us.. if we are supposed to
+    // return the original version of an object being deleted, and
+    // this one is, return the original
+
+    if (getOriginal && shadow.getStatus() == ObjectStatus.DELETING)
+      {
+	return obj;
+      }
+
+    // else return the object being edited
+
+    return shadow;
   }
 
   /**
