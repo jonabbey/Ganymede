@@ -1148,6 +1148,10 @@ server against malicious clients.
 The PermissionMatrixDBField wasn't properly reporting the value
 of a newly created Permission Matrix in the log file.
 
+80. [SERVER] Fixed permissions xml parsing
+
+Fixed the xml parser's handling of permission matrix field objects.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

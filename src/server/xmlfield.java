@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/01/11 23:36:04 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/01/14 07:57:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2001/01/11 23:36:04 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2001/01/14 07:57:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1853,10 +1853,10 @@ class xPerm {
       }
     else
       {
-	view = !((permbits.indexOf('v') != -1) && (permbits.indexOf('V') != -1));
-	edit = !((permbits.indexOf('e') != -1) && (permbits.indexOf('E') != -1));
-	create = !((permbits.indexOf('c') != -1) && (permbits.indexOf('C') != -1));
-	delete = !((permbits.indexOf('d') != -1) && (permbits.indexOf('D') != -1));
+	view = (permbits.indexOf('v') != -1) || (permbits.indexOf('V') != -1);
+	edit = (permbits.indexOf('e') != -1) || (permbits.indexOf('E') != -1);
+	create = (permbits.indexOf('c') != -1) || (permbits.indexOf('C') != -1);
+	delete = (permbits.indexOf('d') != -1) || (permbits.indexOf('D') != -1);
       }
 
     if (objectType && !item.isEmpty())
