@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/07/04 01:11:53 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/07/04 01:13:16 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.45 $ $Date: 2001/07/04 01:11:53 $ $Name:  $
+ * @version $Revision: 1.46 $ $Date: 2001/07/04 01:13:16 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -142,9 +142,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     canChoose,
     mustChoose;
 
-  BevelBorder
-    bborder = new BevelBorder(BevelBorder.RAISED);
-  
   /* -- */
 
   /**
@@ -192,6 +189,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in = new JstringListBox();
     in.setCallback(this);
+
+    BevelBorder
+      bborder = new BevelBorder(BevelBorder.RAISED);
 
     inPanel.setBorder(bborder);
     inPanel.setLayout(new BorderLayout());
