@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2002/01/26 06:02:50 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/01/26 06:04:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.19 $ $Date: 2002/01/26 06:02:50 $
+ * @version $Revision: 1.20 $ $Date: 2002/01/26 06:04:52 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -288,15 +288,6 @@ public class serverAdminProxy implements Admin, Runnable {
     adminEvent newLogEvent;
 
     /* -- */
-
-    if (done)
-      {
-	// we have to throw a remote exception, since that's what
-	// the GanymedeAdmin code expects to receive as a signal
-	// that an admin console needs to be dropped
-
-	throw new RemoteException("serverAdminProxy: console disconnected");
-      }
 
     synchronized (eventBuffer)
       {
