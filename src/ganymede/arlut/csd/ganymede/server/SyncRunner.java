@@ -194,7 +194,7 @@ public class SyncRunner implements Runnable {
 	catch (InterruptedException ex)
 	  {
 	    // "Failure during exec of SyncChannel {0}''s service program "{1}""
-	    Ganymede.debug(ts.l("run.interrupted", getName(), myServiceProgram, ex));
+	    Ganymede.debug(ts.l("run.interrupted", getName(), myServiceProgram));
 	  }
       }
     else
