@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/01/08 03:23:06 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/01/26 04:48:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -922,7 +922,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // construction without having to constantly be adding 6 to the
     // item length.
 
-    lengthlimit = 1024 - name.length() - 6;
+    lengthlimit = 900 - name.length() - 6;
 
     buffer.append(name);
 
@@ -1039,7 +1039,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // construction without having to constantly be adding 6 to the
     // item length.
 
-    lengthlimit = 1024 - name.length() - 6;
+    lengthlimit = 900 - name.length() - 6;
 
     buffer.append(name);
 
