@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,25 +19,30 @@ import java.util.*;
 
 import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
-import tablelayout.*;
+
+import jdj.PackageResources;
+//import tablelayout.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
-public class framePanel extends JInternalFrame implements ChangeListener {
+public class framePanel extends JInternalFrame implements ChangeListener, Runnable {
   
   final static boolean debug = true;
 
   // Indexs for the tabs in the JTabbedPane
   // These numbers have to correspond to the order they are added as tabs,
-  // so they are set to current++ when one is added.
+  // so they are set to current++ when one is added.  -1 means not added yet,
+  // but there is also a boolean for this.
   int 
     current = 0,
     GENERAL = -1,
     REMOVAL_DATE = -1,
     EXPIRATION_DATE = -1,
     HISTORY = -1,
-    OWNER = -1;
+    OWNER = -1,
+    NOTES = -1;
+  
 
   JTabbedPane 
     pane;
@@ -47,29 +52,40 @@ public class framePanel extends JInternalFrame implements ChangeListener {
     general,     // Holds a containerPanel in the ViewportView
     expiration_date,       // Holds a datePanel
     removal_date, 
-    history,     // Holds a historyPanel
-    owner;       // Holds an ownerPanel
+    owner,       // Holds an ownerPanel
+    notes;       // holds a notePanel
 
   boolean
   // _created booleans are true after the corresponding panes are created
     general_created = false,
     expiration_date_created = false,
     removal_date_created = false,
-    history_created = false,
     owner_created = false,
+    notes_created = false,
   // _added booleans are true after the tabs are actually added to the JTabbedPane
     expiration_date_tab_added = false,
-    removal_date_tab_added = false;
+    removal_date_tab_added = false,
+    notes_panel_tab_added = false;
   
   date_field
     exp_field,
-    rem_field;
+    rem_field,
+    creation_date_field,
+    modification_date_field;
+
+  string_field
+    notes_field,
+    creator_field,
+    modifier_field;
 
   Container
     contentPane;
 
   db_field[]
     fields;
+
+  JTextArea
+    notesArea;
 
   int 
     row = 0;
@@ -84,7 +100,11 @@ public class framePanel extends JInternalFrame implements ChangeListener {
     parent;
 
   String 
-    title;
+    title,
+    last_modified_by;
+
+  Date
+    last_modification_date;
 
   public framePanel(db_object object, boolean editable, windowPanel parent, String title)
     {
@@ -97,13 +117,28 @@ public class framePanel extends JInternalFrame implements ChangeListener {
       this.parent = parent;
       this.object = object;
       this.editable = editable;
-  
+
       // Window properties
-      
       setMaximizable(true);
       setResizable(true);
       setClosable(!editable);
       setIconifiable(true);
+
+      setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
+
+      
+      Thread thread = new Thread(this);
+      thread.start();
+
+    }
+
+  public void run()
+    {
+      if (debug)
+	{
+	  System.out.println("Starting thread in framePanel");
+	}
+
 
       contentPane = getContentPane();
 
@@ -126,8 +161,8 @@ public class framePanel extends JInternalFrame implements ChangeListener {
       general = new JScrollPane();
       expiration_date = new JScrollPane();
       removal_date = new JScrollPane();
-      history = new JScrollPane();
       owner = new JScrollPane();
+      notes = new JScrollPane();
 
       try
 	{
@@ -141,12 +176,12 @@ public class framePanel extends JInternalFrame implements ChangeListener {
       // Add the panels to the tabbedPane
       pane.addTab("General", null, general);
       GENERAL = current++;
-      pane.addTab("History", null, history);
-      HISTORY = current++;
       pane.addTab("Owner", null, owner);
       OWNER = current++;
 
-
+      //
+      // Check for dates and notes, if they are set
+      /*
       if (fields != null)
 	{
 	  int type = -1;
@@ -154,6 +189,12 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 	    {
 	      boolean expiration_found = false;
 	      boolean removal_found = false;
+	      boolean notes_found = false;
+	      boolean creation_date_found = false;
+	      boolean creator_found = false;
+	      boolean modification_date_found = false;
+	      boolean modifier_found = false;
+	      
 	      for (int i = 0; i < fields.length ; i++)
 		{
 		  type = fields[i].getID();
@@ -167,7 +208,8 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 			  addExpirationDatePanel();
 			}
 		    }
-		  if (type == SchemaConstants.RemovalField)
+
+		  else if (type == SchemaConstants.RemovalField)
 		    {
 		      rem_field = (date_field)fields[i];
 		      removal_found = true;
@@ -176,7 +218,46 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 			  addRemovalDatePanel();
 			}
 		    }
-		  if (removal_found && expiration_found) // Stop looking
+
+		  else if (type == SchemaConstants.NotesField)
+		    {
+		      notes_field = (string_field)fields[i];
+		      notes_found = true;
+		    }
+		  
+		  else if (type == SchemaConstants.CreationDateField)
+		    {
+		      creation_date_field = (date_field)fields[i];
+		      creation_date_found = true;
+		      
+
+		    }
+		  else if (type == SchemaConstants.CreatorField)
+		    {
+		      creator_field = (string_field)fields[i];
+		      creator_found = true;
+
+		    }
+		  else if (type == SchemaConstants.ModificationDateField)
+		    {
+		      modification_date_field = (date_field)fields[i];
+		      modification_date_found = true;
+		    }
+		  else if (type == SchemaConstants.ModifierField)
+		    {
+		      modifier_field = (string_field)fields[i];
+		      modifier_found = true;
+
+		    }
+
+		  if (creation_date_found && creator_found && notes_found)
+		    {
+		      addNotesPanel();
+		    }
+
+		  if (notes_found && removal_found && expiration_found &&
+		       modifier_found && creator_found && creation_date_found &&
+		       modification_date_found) // Stop looking
 		    {
 		      break;
 		    }
@@ -187,8 +268,49 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 	      throw new RuntimeException("Could not create date panel: " + rx);
 	    }      
 	}
+
+	*/
+
+      try
+	{
+	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
+	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	  notes_field = (string_field)object.getField(SchemaConstants.NotesField);
+	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
+	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
+	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
+	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
+
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get field information: " + rx);
+	}
+
+
       showGeneralTab();
       contentPane.add("Center", pane);
+
+      /*
+      JBufferedPane bottom = new JBufferedPane(false);
+
+      try
+	{
+	  last_modification_date = (Date)modification_date_field.getValue();
+	  last_modified_by = (String)modifier_field.getValue();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get last modified field: " + rx);
+	}
+      
+      //bottom.add(new JLabel("Last modified on: " + last_modification_date + " by " + last_modified_by, JLabel.LEFT));
+	
+
+      //contentPane.add("South", bottom);
+      */
+      contentPane.invalidate();
+      parent.validate();
     }
 
   void create_general_panel()
@@ -197,8 +319,18 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 	{
 	  System.out.println("Creating general panel");
 	}
-      general.setViewportView(new containerPanel(object, editable, parent.parent, parent));
+      
+      containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this);
+      cp.setInsets(new Insets(5,5,10,5));
+
+      general.setViewportView(cp);
       general_created = true;
+      general.invalidate();
+      validate();
+    }
+
+  public void validate_general()
+    {
       general.invalidate();
       validate();
     }
@@ -230,19 +362,6 @@ public class framePanel extends JInternalFrame implements ChangeListener {
     }
 
 
-  void create_history_panel()
-    {
-      if (debug)
-	{
-	  System.out.println("Creating history panel");
-	}
-      history.setViewportView(new historyPanel());
-      history_created = true;
-
-      history.invalidate();
-      validate();
-    }
-
   void create_owner_panel()
     {
       if (debug)
@@ -257,7 +376,7 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 		{
 		  if (fields[i].getID() == SchemaConstants.OwnerListField)
 		    {
-		      owner.setViewportView(new ownerPanel((invid_field)fields[i], editable));
+		      owner.setViewportView(new ownerPanel((invid_field)fields[i], editable, this));
 		      break;
 		    }
 		}
@@ -273,6 +392,27 @@ public class framePanel extends JInternalFrame implements ChangeListener {
       validate();
     }
 
+  void create_notes_panel()
+    {
+      if (debug)
+	{
+	  System.out.println("Creating notes panel");
+	}
+
+      notes.setViewportView(new notesPanel(notes_field, creator_field, creation_date_field, modifier_field,
+					  modification_date_field, editable));
+
+      notes.invalidate();
+      validate();
+    }
+
+
+  /**
+   * These add the tabs to the framePanel, but they don't create the content
+   *
+   * The create_ methods create the actual panes, after the pane is selected.
+   * If you want to create a panel, call addWhateverPanel, then showWhateverPanel.
+   */
   public void addExpirationDatePanel()
     {
       if (! expiration_date_tab_added)
@@ -302,6 +442,20 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 	}
     }
 
+  public void addNotesPanel()
+    {
+      if (! notes_panel_tab_added)
+	{
+	  if (debug)
+	    {
+	      System.out.println("Adding notes tab");
+	    }
+	  
+	  pane.addTab("Notes", null, notes);
+	  NOTES = current++;
+	  notes_panel_tab_added = true;
+	}
+    }
 
 	
   public void showGeneralTab()
@@ -324,14 +478,14 @@ public class framePanel extends JInternalFrame implements ChangeListener {
       pane.setSelectedIndex(OWNER);
     }
 
-  public void showHistoryTab()
+  public void showNotesTab()
     {
-      if (HISTORY == -1)
+      if (NOTES == -1)
 	{
-	  System.out.println("History tab has not been created.");
+	  System.out.println("Notes tab has not been created.");
 	  return;
 	}
-      pane.setSelectedIndex(HISTORY);
+      pane.setSelectedIndex(NOTES);
     }
 
   public void showExpirationDateTab()
@@ -357,7 +511,7 @@ public class framePanel extends JInternalFrame implements ChangeListener {
   // For the ChangeListener
   public void stateChanged(ChangeEvent e)
     {
-      if (general_created && owner_created && expiration_date_created && removal_date_created && history_created)
+      if (general_created && owner_created && expiration_date_created && removal_date_created && notes_created)
 	{
 	  pane.removeChangeListener(this);
 	  return;
@@ -389,12 +543,12 @@ public class framePanel extends JInternalFrame implements ChangeListener {
 	      create_removal_date_panel();
 	    }
 	}
-      else if (index == HISTORY)
+      else if (index == NOTES)
 	{
-	  if (! history_created)
+	  if (! notes_created)
 	    {
-	      parent.parent.setStatus("Creating history panel");
-	      create_history_panel();
+	      parent.parent.setStatus("Creating notes panel");
+	      create_notes_panel();
 	    }
 	}
       else if (index == OWNER)
