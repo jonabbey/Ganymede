@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 17 June 1996
-  Version: $Revision: 1.8 $ %D%
+  Version: $Revision: 1.9 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,7 +31,7 @@ package arlut.csd.JTable;
 import java.awt.*;
 import java.util.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -46,7 +46,7 @@ import com.sun.java.swing.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.8 $ %D% 
+ * @version $Revision: 1.9 $ %D% 
  */
 
 public class gridTable extends baseTable {
