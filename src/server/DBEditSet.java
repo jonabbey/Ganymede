@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -815,8 +815,9 @@ public class DBEditSet {
 
 	    if (Ganymede.log != null)
 	      {
-		if (eObj.getStatus() == DBEditObject.EDITING)
+		switch (eObj.getStatus())
 		  {
+		  case DBEditObject.EDITING:
 		    invids = new Vector();
 		    invids.addElement(eObj.getInvid());
 		   
@@ -842,6 +843,63 @@ public class DBEditSet {
 							    invids,
 							    null));
 		      }
+		    
+		    break;
+
+		  case DBEditObject.CREATING:
+
+		    invids = new Vector();
+		    invids.addElement(eObj.getInvid());
+		   
+		    if (debug)
+		      {
+			System.err.println("Logging event for " + eObj.getLabel());
+		      }
+
+		    // DBEditObject.diff() also works with newly created objects
+
+		    diff = eObj.diff();
+
+		    if (diff != null)
+		      {
+			if (debug)
+			  {
+			    System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
+			  }
+			
+			logEvents.addElement(new DBLogEvent("objectcreated",
+							    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+							    (gSession.personaInvid == null ?
+							     gSession.userInvid : gSession.personaInvid),
+							    gSession.username,
+							    invids,
+							    null));
+		      }
+
+		    break;
+
+		  case DBEditObject.DELETING:
+
+		    invids = new Vector();
+		    invids.addElement(eObj.getInvid());
+		   
+		    if (debug)
+		      {
+			System.err.println("Logging event for " + eObj.getLabel());
+		      }
+
+		    // DBEditObject.diff() does not work for deleted objects.
+
+		    logEvents.addElement(new DBLogEvent("deleteobject",
+							eObj.getTypeDesc() + ":" + eObj.getLabel(),
+							(gSession.personaInvid == null ?
+							 gSession.userInvid : gSession.personaInvid),
+							gSession.username,
+							invids,
+							null));
+
+		    break;
+		    
 		  }
 	      }
 	  }
