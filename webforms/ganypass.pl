@@ -25,7 +25,7 @@ $xmlclient = $xml_path . "/xmlclient";
 # client utils.
 
 if (!-f $xmlclient) {
-  $xmlclient = $xml_path . "bin/xmlclient";
+  $xmlclient = $xml_path . "/bin/xmlclient";
 }
 
 $tmpdir = "/tmp";
