@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -430,7 +430,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * reactivate operation.  We then do the actual work to reactivate
    * the user in this method.
    * 
-   * @see arlutc.csd.ganymede.custom.userReactivateWizard
+   * @see arlut.csd.ganymede.custom.userReactivateWizard
    *
    */
 
