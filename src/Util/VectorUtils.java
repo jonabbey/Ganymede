@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2002/01/14 22:25:57 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2002/01/14 22:27:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ public class VectorUtils {
 
   public static Vector union(Vector vectA, Vector vectB)
   {
-    int threshold;
+    int threshold = 0;
 
     if (vectA != null)
       {
@@ -100,7 +100,7 @@ public class VectorUtils {
 	      {
 		Object obj = vectA.elementAt(i);
 		
-		if (!result.containsElement(obj))
+		if (!result.contains(obj))
 		  {
 		    result.addElement(obj);
 		  }
@@ -113,7 +113,7 @@ public class VectorUtils {
 	      {
 		Object obj = vectB.elementAt(i);
 		
-		if (!result.containsElement(obj))
+		if (!result.contains(obj))
 		  {
 		    result.addElement(obj);
 		  }
