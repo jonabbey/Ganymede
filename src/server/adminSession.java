@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2003/09/05 21:09:40 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2003/09/06 04:03:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.21 $ %D%
+ * @version $Revision: 1.22 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -83,15 +83,6 @@ public interface adminSession extends Remote {
   void        logout() throws RemoteException;
 
   /**
-   * <P>This method lets the admin console explicitly request
-   * a refresh.  Upon being called, the server will call several
-   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
-   * interface to pass current status information to the console.</P>
-   */
-
-  void        refreshMe() throws RemoteException;
-
-  /**
    * <p>This method is used to allow the admin console to retrieve a remote reference to
    * a {@link arlut.csd.ganymede.serverAdminAsyncResponder}, which will allow
    * the admin console to poll the server for asynchronous messages from the server.</p>
@@ -104,6 +95,15 @@ public interface adminSession extends Remote {
    */
 
   AdminAsyncResponder getAsyncPort() throws RemoteException;
+
+  /**
+   * <P>This method lets the admin console explicitly request
+   * a refresh.  Upon being called, the server will call several
+   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
+   * interface to pass current status information to the console.</P>
+   */
+
+  void        refreshMe() throws RemoteException;
 
   /**
    * <p>This method is called by admin console code to force

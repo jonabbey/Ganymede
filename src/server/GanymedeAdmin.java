@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2003/09/05 21:09:39 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2003/09/06 04:03:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.Util.VectorUtils;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.63 $ $Date: 2003/09/05 21:09:39 $
+ * @version $Revision: 1.64 $ $Date: 2003/09/06 04:03:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -213,7 +213,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 	    try
 	      {
-		temp.proxy.changeStatus(stampedLine);
+		temp.asyncPort.changeStatus(stampedLine);
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -247,7 +247,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 	    try
 	      {
-		temp.proxy.changeAdmins(message);
+		temp.asyncPort.changeAdmins(message);
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -550,9 +550,10 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   /**
    * <p>This private static method handles communications link
-   * failures.  Note that the serverAdminProxy will handle single
-   * instances of admin console RemoteExceptions so that only two
-   * RemoteExceptions in sequence will raise a RemoteException.</p>
+   * failures.  Note that the serverAdminAsyncResponder will handle
+   * single instances of admin console RemoteExceptions so that only
+   * two RemoteExceptions in sequence will raise a
+   * RemoteException.</p>
    *
    * <p>Any code that calls this method should call detachBadConsoles()
    * once it has exited any loops over the static consoles vector to
@@ -626,11 +627,11 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   private boolean fullprivs = false;
 
   /**
-   * <p>A server-side proxy that maintains an event queue for the admin
-   * console attached to this GanymedeAdmin object.</p>
+   * <p>A server-side asyncPort that maintains an event queue for the
+   * admin console attached to this GanymedeAdmin object.</p>
    */
 
-  private serverAdminProxy proxy;
+  private serverAdminAsyncResponder asyncPort;
   
   /* -- */
 
@@ -647,7 +648,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
    * calling this constructor.</P>
    */
 
-  public GanymedeAdmin(Admin admin, boolean fullprivs, String adminName, String clientHost) throws RemoteException
+  public GanymedeAdmin(boolean fullprivs, String adminName, String clientHost) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -661,7 +662,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 	GanymedeAdmin.totalMem = Runtime.getRuntime().totalMemory();
       }
 
-    this.proxy = new serverAdminProxy(admin);
+    this.asyncPort = new serverAdminAsyncResponder();
     this.fullprivs = fullprivs;
     this.adminName = adminName;
     this.clientHost = clientHost;
@@ -696,7 +697,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doUpdateTransCount() throws RemoteException
   {
-    proxy.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
+    asyncPort.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
   }
 
   /**
@@ -706,7 +707,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doUpdateLastDump() throws RemoteException
   {
-    proxy.setLastDumpTime(GanymedeAdmin.lastDumpDate);
+    asyncPort.setLastDumpTime(GanymedeAdmin.lastDumpDate);
   }
 
   /**
@@ -716,7 +717,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doUpdateMemState() throws RemoteException
   {
-    proxy.setMemoryState(GanymedeAdmin.freeMem, GanymedeAdmin.totalMem);
+    asyncPort.setMemoryState(GanymedeAdmin.freeMem, GanymedeAdmin.totalMem);
   }
 
   /**
@@ -726,7 +727,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doUpdateCheckedOut() throws RemoteException
   {
-    proxy.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
+    asyncPort.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
   }
 
   /**
@@ -736,7 +737,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doUpdateLocksHeld() throws RemoteException
   {
-    proxy.setLocksHeld(Ganymede.db.lockSync.getLockCount());
+    asyncPort.setLocksHeld(Ganymede.db.lockSync.getLockCount());
   }
 
   /**
@@ -746,7 +747,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doSetState() throws RemoteException
   {
-    proxy.changeState(GanymedeAdmin.state);
+    asyncPort.changeState(GanymedeAdmin.state);
   }
 
   /**
@@ -756,7 +757,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doRefreshUsers(Vector entries) throws RemoteException
   {
-    proxy.changeUsers(entries);
+    asyncPort.changeUsers(entries);
   }
 
   /**
@@ -766,12 +767,12 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   private void doRefreshTasks(Vector scheduleHandles) throws RemoteException
   {
-    proxy.changeTasks(scheduleHandles);
+    asyncPort.changeTasks(scheduleHandles);
   }
 
   /**
    * <p>This public method forces a disconnect of the remote admin console
-   * and cleans up the proxy.</p>
+   * and cleans up the asyncPort.</p>
    *
    * <p>This method *does not* handle removing this GanymedeAdmin
    * console object from the static GanymedeAdmin.consoles Vector, so
@@ -782,7 +783,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public void forceDisconnect(String reason) throws RemoteException
   {
-    proxy.forceDisconnect(reason);
+    asyncPort.forceDisconnect(reason);
   }
 
   public String toString()
@@ -838,9 +839,9 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public void logout(String reason)
   {
-    if (proxy.isAlive())
+    if (asyncPort.isAlive())
       {
-	proxy.shutdown();
+	asyncPort.shutdown();
       }
 
     synchronized (GanymedeAdmin.consoles)
@@ -879,10 +880,29 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * <P>This method lets the admin console explicitly request
-   * a refresh.  Upon being called, the server will call several
-   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
-   * interface to pass current status information to the console.</P>
+   * <p>This method is used to allow the admin console to retrieve a remote reference to
+   * a {@link arlut.csd.ganymede.serverAdminAsyncResponder}, which will allow
+   * the admin console to poll the server for asynchronous messages from the server.</p>
+   *
+   * <p>This is used to allow the server to send admin notifications
+   * to the console, even if the console is behind a network or
+   * personal system firewall.  The serverAdminAsyncResponder blocks
+   * while there is no message to send, and the console will poll for
+   * new messages.</p>
+   */
+
+  public AdminAsyncResponder getAsyncPort() throws RemoteException
+  {
+    return asyncPort;
+  }
+
+  /**
+   * <P>This method lets the admin console explicitly request a
+   * refresh.  Upon being called, the server will call several methods
+   * on the admin console's {@link
+   * arlut.csd.ganymede.serverAdminAsyncResponder
+   * serverAdminAsyncResponder} interface to pass current status
+   * information to the console.</P>
    *
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.adminSession adminSession} remote interface,
@@ -891,8 +911,8 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public void refreshMe() throws RemoteException
   {
-    proxy.setServerStart(Ganymede.startTime);
-    proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+    asyncPort.setServerStart(Ganymede.startTime);
+    asyncPort.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
     doUpdateTransCount();
     doUpdateLastDump();
     doUpdateCheckedOut();
@@ -1388,7 +1408,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 	 try
 	   {
-	     DBSchemaEdit result = new DBSchemaEdit(proxy);
+	     DBSchemaEdit result = new DBSchemaEdit();
 	     return result;
 	   }
 	 catch (RemoteException ex)

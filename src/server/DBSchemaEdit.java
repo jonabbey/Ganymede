@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2001/11/17 00:10:40 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2003/09/06 04:03:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -147,12 +147,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   DBBaseCategory rootCategory;	
 
-  /**
-   * remote client handle
-   */
-
-  Admin console;		
-
   /* -- */
 
   /**
@@ -161,7 +155,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * {@link arlut.csd.ganymede.DBStore DBStore} object.</P>
    */
 
-  public DBSchemaEdit(Admin console) throws RemoteException
+  public DBSchemaEdit() throws RemoteException
   {
     if (debug)
       {
@@ -176,8 +170,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	throw new RuntimeException("can't edit schema without lock");
       }
-
-    this.console = console;
 
     locked = true;
     
@@ -998,8 +990,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     // to us.
 
     rootCategory = null;
-
-    console = null;
 
     this.store = null;
 
