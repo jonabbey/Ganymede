@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.27 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.28 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -197,6 +197,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    * Returns the numeric id of the object in the objectBase
    *
+   * @see arlut.csd.ganymede.db_object
    */
 
   public int getID()
@@ -221,6 +222,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    * Returns the numeric id of the object in the objectBase
    *
+   * @see arlut.csd.ganymede.db_object
    */
 
   public short getTypeID()
@@ -915,7 +917,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    */
 
-  synchronized public String resultDump(DBSession session)
+  synchronized public String resultDump()
   {
     StringBuffer buffer = new StringBuffer();
 
@@ -951,7 +953,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     buffer.append("\n");
 
     return buffer.toString();
-	
   }
 
   /**
