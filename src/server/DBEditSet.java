@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/07/22 05:34:17 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/07/23 04:53:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -139,9 +139,9 @@ public class DBEditSet {
   Vector logEvents = null;
 
   /**
-   * A record of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
+   * <p>A record of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
    * touched by this transaction.  These DBObjectBase's will be locked
-   * when this transaction is committed.
+   * when this transaction is committed.</p>
    */
 
   Hashtable basesModified;
@@ -711,7 +711,7 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit()
   {
-    Vector baseSet;
+    Vector baseSet = new Vector();
     Enumeration enum;
     DBObjectBase base;
     Object key;
@@ -734,7 +734,6 @@ public class DBEditSet {
 
     // determine what bases we need to lock to do this commit
 
-    baseSet = new Vector();
     enum = basesModified.keys();
 
     while (enum.hasMoreElements())
@@ -1275,7 +1274,6 @@ public class DBEditSet {
 	    eObj = (DBEditObject) objects.elementAt(i);
 
 	    base = eObj.getBase();
-	    base.updateTimeStamp();
 
 	    // Create a new DBObject from our DBEditObject and insert
 	    // into the object hash
@@ -1358,6 +1356,24 @@ public class DBEditSet {
 	if (debug)
 	  {
 	    System.err.println(session.key + ": DBEditSet.commit(): releasing write lock");
+	  }
+
+	// very last thing, touch all the bases' time stamps.. we do
+	// this as late as possible to minimize the chance that a
+	// builder task run in response to a previous commit records
+	// its lastRunTime after we, the next transaction committed,
+	// gets our timestamps updated.
+
+	for (int i = 0; i < baseSet.size(); i++)
+	  {
+	    base = (DBObjectBase) baseSet.elementAt(i);
+
+	    if (debug)
+	      {
+		Ganymede.debug("DBEditSet.commit(): Touching " + base + "'s timestamp");
+	      }
+
+	    base.updateTimeStamp();
 	  }
 
 	releaseWriteLock("successful commit");
@@ -1445,8 +1461,6 @@ public class DBEditSet {
 
 	objects.removeElement(eObj);
       }
-
-    basesModified.clear();
 
     // undo all namespace modifications associated with this editset
 

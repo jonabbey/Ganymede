@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/06/15 02:48:24 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/07/23 04:54:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -94,6 +94,7 @@ import arlut.csd.Util.zipIt;
 public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
   protected Date lastRunTime;
+  protected Date oldLastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
   String basePath;
@@ -113,6 +114,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
       success2 = false;
 
     /* -- */
+
 
     try
       {
@@ -134,13 +136,36 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	    Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
 	  }
 
+	// update our time as soon as possible, so that any changes
+	// that are made in the database after we release the dump
+	// lock will have a time stamp after our 'last build' time
+	// stamp.
+
+	if (lastRunTime == null)
+	  {
+	    lastRunTime = new Date();
+	  }
+	else
+	  {
+	    if (oldLastRunTime == null)
+	      {
+		oldLastRunTime = new Date(lastRunTime.getTime());
+	      }
+	    else
+	      {
+		oldLastRunTime.setTime(lastRunTime.getTime());
+	      }
+
+	    lastRunTime.setTime(System.currentTimeMillis());
+	  }
+
 	success1 = this.builderPhase1();
 
 	// release the lock, and so on
-
+	
 	if (session != null)
 	  {
-	    session.logout();
+	    session.logout();	// will clear the dump lock
 	    session = null;
 	    lock = null;
 	  }
@@ -166,18 +191,6 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 		lock = null;
 	      }
 	  }
-
-	if (success2)
-	  {
-	    if (lastRunTime == null)
-	      {
-		lastRunTime = new Date();
-	      }
-	    else
-	      {
-		lastRunTime.setTime(System.currentTimeMillis());
-	      }
-	  }
       }
   }
 
@@ -191,7 +204,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
   protected final boolean baseChanged(short baseid)
   {
-    if (lastRunTime == null)
+    if (oldLastRunTime == null)
       {
 	return true;
       }
@@ -205,7 +218,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	  }
 	else 
 	  {
-	    return base.lastChange.after(lastRunTime);
+	    return base.lastChange.after(oldLastRunTime);
 	  }
       }
   }

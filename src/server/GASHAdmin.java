@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/07/08 05:01:31 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/07/23 04:53:59 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -91,6 +91,8 @@ import arlut.csd.Util.*;
 
 public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
+  static final boolean debug = false;
+
   /**
    * We assume that we're only ever going to have one console running in
    * any given JVM, we keep track of it here as a convenience.
@@ -163,7 +165,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  }
 	else
 	  {
-	    System.out.println("Successfully loaded properties from file " + argv[0]);
+	    if (debug)
+	      {
+		System.err.println("Successfully loaded properties from file " + argv[0]);
+	      }
 	  }
       }
 
@@ -206,7 +211,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public void stop()
   {
-    System.err.println("applet stop()");
+    if (debug)
+      {
+	System.err.println("applet stop()");
+      }
 
     if (admin != null)
       {
@@ -222,7 +230,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public void destroy()
   {
-    System.err.println("applet destroy()");
+    if (debug)
+      {
+	System.err.println("applet destroy()");
+      }
 
     if (admin != null)
       {
@@ -356,7 +367,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       {
 	if (try_number++ > 5)
 	  {
-	    System.out.println("I've tried five times to connect, but I can't do it.  Maybe the server is down?");
+	    System.err.println("I've tried five times to connect, but I can't do it.  Maybe the server is down?");
 
 	    break;
 	  }
@@ -448,7 +459,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	if (admin == null)
 	  {
 	    password.setText("");
-	    System.out.println("Could not get admin.");
+	    System.err.println("Could not get admin.");
 	    return;
 	  }
 
@@ -471,7 +482,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  }
 	catch (RemoteException rx)
 	  {
-	    System.out.println("Problem trying to refresh: " + rx);
+	    System.err.println("Problem trying to refresh: " + rx);
 	  }
       }
   }
@@ -586,7 +597,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   static iAdmin admin = null;
-
+  static final boolean debug = false;
   static String debugFilename = null;
 
   // ---
@@ -1065,7 +1076,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   {
     if (event.getSource() == quitMI)
       {
-	System.err.println("Quitting");
+	if (debug)
+	  {
+	    System.err.println("Quitting");
+	  }
 
 	this.disconnect();
       }
@@ -1082,7 +1096,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	if (dumpDialog.DialogShow() != null)
 	  {
-	    System.err.println("Affirmative dump request");
+	    if (debug)
+	      {
+		System.err.println("Affirmative dump request");
+	      }
 
 	    try
 	      {
@@ -1128,7 +1145,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
-	    System.err.println("Affirmative invid test request");
+	    if (debug)
+	      {
+		System.err.println("Affirmative invid test request");
+	      }
 
 	    try
 	      {
@@ -1176,7 +1196,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	if (shutdownDialog.DialogShow() != null)
 	  {
-	    System.err.println("Affirmative shutdown request");
+	    if (debug)
+	      {
+		System.err.println("Affirmative shutdown request");
+	      }
 
 	    boolean success = true;
 
@@ -1261,11 +1284,17 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   public void rowMenuPerformed(Object key, ActionEvent e)
   {
-    System.err.println("rowMenuPerformed");
+    if (debug)
+      {
+	System.err.println("rowMenuPerformed");
+      }
 
     if (e.getSource() == killUserMI)
       {
-	System.err.println("kill " + key + " selected");
+	if (debug)
+	  {
+	    System.err.println("kill " + key + " selected");
+	  }
 
 	killVictim = (String) key;
 
@@ -1274,7 +1303,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 			     "Are you sure you want to disconnect user " + key + "?",
 			     "Yes", "No", question).DialogShow() != null)
 	  {
-	    System.err.println("Affirmative kill request");
+	    if (debug)
+	      {
+		System.err.println("Affirmative kill request");
+	      }
 
 	    if (killVictim != null)
 	      {
@@ -1291,7 +1323,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	else
 	  {
-	    System.err.println("Negative kill request");
+	    if (debug)
+	      {
+		System.err.println("Negative kill request");
+	      }
 	    killVictim = null;
 	  }
       }
@@ -1406,7 +1441,10 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	return;
       }
 
-    System.err.println("Got Admin");
+    if (debug)
+      {
+	System.err.println("Got Admin");
+      }
   }
 
   private StringDialog getDialog()
@@ -1769,7 +1807,10 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     /* -- */
 
-    System.err.println("Trying to get SchemaEdit handle");
+    if (debug)
+      {
+	System.err.println("Trying to get SchemaEdit handle");
+      }
 
     try
       {
@@ -1786,7 +1827,10 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
     else
       {
-	System.err.println("Got SchemaEdit handle");
+	if (debug)
+	  {
+	    System.err.println("Got SchemaEdit handle");
+	  }
 	
 	schemaFrame = new GASHSchema("Schema Editor", editor);
       }
@@ -1869,7 +1913,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	      {
 		if (debug)
 		  {
-		    System.out.println("iAdmin.handleReturnVal(): Sending result to callback: " + dialogResults);
+		    System.err.println("iAdmin.handleReturnVal(): Sending result to callback: " + dialogResults);
 		  }
 
 		// send the dialog results to the server
@@ -1878,7 +1922,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
 		if (debug)
 		  {
-		    System.out.println("iAdmin.handleReturnVal(): Received result from callback.");
+		    System.err.println("iAdmin.handleReturnVal(): Received result from callback.");
 		  }
 	      }
 	    catch (RemoteException ex)
@@ -1890,7 +1934,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	  {
 	    if (debug)
 	      {
-		System.out.println("iAdmin.handleReturnVal(): No callback, breaking");
+		System.err.println("iAdmin.handleReturnVal(): No callback, breaking");
 	      }
 
 	    break;		// we're done
@@ -1903,16 +1947,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	  {
 	    if (retVal.didSucceed())
 	      {
-		System.out.println("iAdmin.handleReturnVal(): returning success code");
+		System.err.println("iAdmin.handleReturnVal(): returning success code");
 	      }
 	    else
 	      {
-		System.out.println("iAdmin.handleReturnVal(): returning failure code");
+		System.err.println("iAdmin.handleReturnVal(): returning failure code");
 	      }
 	  }
 	else
 	  {
-	    System.out.println("iAdmin.handleReturnVal(): returning null retVal (success)");
+	    System.err.println("iAdmin.handleReturnVal(): returning null retVal (success)");
 	  }
       }
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 1999/07/21 05:38:19 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 1999/07/23 04:53:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -202,6 +202,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    */
 
   int maxid;
+
+  /**
+   * Timestamp for the last time this DBObjectBase was
+   * changed, used by GanymedeBuilderTasks to determine
+   * whether a particular build sequence is necessary.
+   */
+
   Date lastChange;
 
   boolean reallyLoading;
