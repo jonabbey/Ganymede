@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -584,6 +584,8 @@ final public class DBSession {
 
     retVal = eObj.remove();
 
+    // the remove logic can entirely bypass our normal finalize logic
+
     if (retVal != null && !retVal.didSucceed())
       {
 	if (retVal.getCallback() == null)
@@ -768,6 +770,28 @@ final public class DBSession {
       {
 	editSet.checkpoint(name);
       }
+  }
+
+  /**
+   *
+   * Convenience pass-through method
+   * 
+   * @see arlut.csd.ganymede.DBEditSet#popCheckpoint()
+   *
+   */
+
+  public final boolean popCheckpoint(String name)
+  {
+    DBCheckPoint point = null;
+
+    /* -- */
+
+    if (editSet != null)
+      {
+	point = editSet.popCheckpoint(name);
+      }
+
+    return (point != null);
   }
 
   /**
