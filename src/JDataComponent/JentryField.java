@@ -12,8 +12,8 @@ package arlut.csd.JDataComponent;
 import java.awt.*;
 import java.awt.event.*;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.text.*;
+import javax.swing.*;
+import javax.swing.text.*;
 
 //---------------------------------------------------------------------
 //                                                 class JentryField

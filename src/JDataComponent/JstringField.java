@@ -4,15 +4,15 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
 
 package arlut.csd.JDataComponent;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.text.*;
+import javax.swing.*;
+import javax.swing.text.*;
 
 import java.awt.*;
 import java.awt.event.*;

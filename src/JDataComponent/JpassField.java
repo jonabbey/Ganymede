@@ -14,7 +14,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 
 package arlut.csd.JDataComponent;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.awt.event.*;
 import java.awt.*;

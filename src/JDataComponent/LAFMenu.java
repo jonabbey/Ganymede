@@ -7,7 +7,7 @@
 
 package arlut.csd.JDataComponent;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -85,7 +85,7 @@ public class LAFMenu extends JMenu implements ActionListener{
 	    root.validate();
 	  }
       } 
-    catch (com.sun.java.swing.UnsupportedLookAndFeelException e)
+    catch (javax.swing.UnsupportedLookAndFeelException e)
       {
 	if (allowCallback)
 	  {

@@ -18,8 +18,8 @@ import java.net.*;
 
 import jdj.PackageResources;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 import arlut.csd.JTable.*;
 
@@ -149,7 +149,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	System.out.println("-Adding new StringSelector-");
       }
     
-    setBorder(new com.sun.java.swing.border.EtchedBorder());
+    setBorder(new javax.swing.border.EtchedBorder());
 
     this.parent = parent;
     this.editable = editable;

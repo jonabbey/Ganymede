@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,8 +19,8 @@ import java.awt.event.*;
 
 import java.rmi.*;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.text.*;
+import javax.swing.*;
+import javax.swing.text.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

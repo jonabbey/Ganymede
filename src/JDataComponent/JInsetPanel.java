@@ -5,7 +5,7 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 public class JInsetPanel extends JPanel {
   

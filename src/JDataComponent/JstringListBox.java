@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.20 $ %D%
+ Version: $Revision: 1.21 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,8 +14,8 @@
 
 package arlut.csd.JDataComponent;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;

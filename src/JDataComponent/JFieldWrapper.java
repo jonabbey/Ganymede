@@ -1,10 +1,8 @@
-
 /*
    JFieldWrapper.java
-
    
    Created: 1 Oct 1996
-   Version: 1.1 97/07/16
+   Version: $Revision: 1.6 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -25,9 +23,15 @@
 
 package arlut.csd.JDataComponent;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.awt.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   JFieldWrapper
+
+------------------------------------------------------------------------------*/
 
 public class JFieldWrapper extends JPanel {
 

@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -20,7 +20,7 @@ import java.net.*;
 import java.rmi.*;
 import java.awt.event.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import jdj.PackageResources;
 

@@ -5,7 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,7 +15,7 @@ package arlut.csd.JDataComponent;
 
 import java.awt.*;
 import java.util.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import arlut.csd.Util.WordWrap;
 
