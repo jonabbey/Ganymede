@@ -1,12 +1,25 @@
-/* 
+/*
+
+   stringThing.java
+
    Resource class for use with StringDialog.java
+   
+   Created: 16 June 1997
+   Version: $Revision: 1.5 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.JDialog;
 
-import java.lang.String;
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     stringThing
 
-public class stringThing {
+------------------------------------------------------------------------------*/
+
+public class stringThing implements java.io.Serializable {
 
   String stringLabel;
   String value;
@@ -35,5 +48,4 @@ public class stringThing {
   {
     return multiline;
   }
-
 }
