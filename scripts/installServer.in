@@ -3,19 +3,26 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.28 $
-# $Date: 2000/12/03 11:55:19 $
+# $Revision: 1.29 $
+# $Date: 2000/12/05 23:09:51 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
 ############################################################
 
 use File::Copy;
+use Cwd;
 use English;
 
 $perlname = "<#PERLEXE#>";
 $homedir = $ENV{HOME};
 &removelastslash($homedir);
+
+# Make sure our current working directory is in the same directory as
+# the script
+
+$rootdir = &dirname($0);
+chdir($rootdir);
 
 # This script needs to get a several pieces of information from
 # the user, including:
@@ -128,12 +135,10 @@ foreach $step (@steps) {
     if (($step eq "SERVERINSTALL") ||
 	($step eq "JVM")) {
 
-      # process unqualified ~ expansion
-      
-      $vars{$step} =~ s/\~\//$homedir\//g;
+      $vars{$step} = &canonify($vars{$step});
 
       if ($vars{$step} !~ /^\//) {
-	print "*Relative pathnames not allowed, please enter a full path.\n";
+	print "*Pathname could not be resolved, please enter a full path.\n";
 	$success = 0;
       }
     }
@@ -162,7 +167,6 @@ if (!-e $vars{"JVM"}."/java") {
 # can we make the server install directory?
 
 if (!-d $vars{"SERVERINSTALL"}) {
-  &removelastslash($vars{"SERVERINSTALL"});
   mkdir($vars{"SERVERINSTALL"}, 0750) or die "*Couldn't make the server install directory*\n"; 
   print "Made the server install directory ok\n";
 } else {
@@ -488,3 +492,112 @@ sub identifyjvm {
     }
 }
 
+#########################################################################
+#
+#                                                                 resolve
+#
+# input: $dir - absolute pathname of current directory
+#        $link - string containing the readlink() results for a 
+#                symbolic link in $dir to be processed
+#
+# returns: absolute pathname of the target of the symbolic link
+#
+#########################################################################
+sub resolve{
+    my($dir, $link) = @_;
+    my(@alinkp, $d, $alinkp);
+
+    # make array representations of
+    # the current directory and symbolic link
+
+    # if we have a leading / in our $dir or $link,
+    # we'll need to shift to get rid of the leading
+    # empty array element
+  
+    @dirp=split(/\//, $dir);
+    shift(@dirp) if (!($dirp[0]));
+    @linkp=split(/\//, $link);
+    shift(@linkp) if (!($linkp[0]));
+
+    # @alinkp is an array that we will build to contain the absolute link
+    # target pathname.  If the link does not begin with a /, it is a relative link,
+    # and we need to place our current directory into the @alinkp array.  
+
+    if ($link !~ /^\//) {
+	@alinkp=@dirp;
+    }
+
+    # modify the @alinkp array according
+    # to each path component of the @linkp array
+    # (an array representation of the symbolic link
+    # given to us), to arrive at the ultimate absolute
+    # pathname of the symbolic link
+
+    $d = shift(@linkp);
+
+    while ($d) {
+	if ($d eq "..") {
+	    pop(@alinkp);
+	}
+	elsif ($d ne "."){		       
+	    push(@alinkp, $d);
+	}
+	$d=shift(@linkp);
+    }
+
+    $"='/';
+
+    # perl functions return the value of the last expression
+    # in the subroutine
+
+    $alinkp="/@alinkp";
+}
+
+#########################################################################
+#
+#                                                                canonify
+#
+# input: $pathname - a directory or filename path, may be relative
+# or use ~ to represent the current user's home directory
+#
+# returns: absolute location of the givevn pathname
+#
+#########################################################################
+sub canonify {
+  my ($pathname) = @_;
+  my ($homedir);
+
+  $pathname = &removelastslash($pathname);
+
+  if (!(($pathname =~ /^\//) || ($pathname =~ /^~\//))) {
+    $pathname = &resolve(cwd(), $pathname);
+  }
+
+  if ($pathname =~ /^~\//) {
+    $homedir = $ENV{'HOME'};
+    &removelastslash($homedir);
+    $pathname = s/\~\//$homedir\//g;
+  }
+
+  return $pathname;
+}
+ 
+######################################################################### 
+#
+#                                                                 dirname
+#
+# input: 1) a filename path
+#
+# return: the directory containing the filename given
+#
+######################################################################### 
+sub dirname{
+  my ($dirpath) = @_;
+  my (@comps);
+
+  $dirpath = &canonify($dirpath);
+
+  @comps = split(/\//, $dirpath);
+  pop @comps;
+  return join('/', @comps);
+}
