@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1037,6 +1037,49 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	return null;
+      }
+
+    // our maxDate() and isDateLimited() methods have pre-filtered any
+    // non-null expiration date for us.. just need to check to see
+    // whether the field can be cleared here.
+
+    if ((field.getID() == SchemaConstants.ExpirationField) && value == null)
+      {
+	if (deleting)
+	  {
+	    // approve it, everything's being cleaned out.
+
+	    return null;
+	  }
+
+	try
+	  {
+	    Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
+	    
+	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
+	    
+	    Boolean expDateRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.EXPIRE);
+	    
+	    if (expDateRequired.booleanValue())
+	      {
+		return Ganymede.createErrorDialog("Schema Error",
+						  "This user requires an expiration date because of its " +
+						  "user category.");
+	      }
+	    else
+	      {
+		// ok, then
+		
+		return null;
+	      }
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // ah, no category or limit set.. go ahead and let em do
+	    // it
+
+	    return null;
+	  }
       }
 
     // when we rename a user, we have lots to do.. a number of other
