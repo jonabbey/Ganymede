@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -100,6 +100,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     sPane;
 
   treeControl tree;
+
+  // The top lines
+  JBufferedPane
+    leftTop,
+    rightTop;
+
+  JBorderedPane
+    leftBorder,
+    rightBorder;
+
+  public JLabel
+    leftL,
+    rightL,
+    timerLabel;
+
+  connectedTimer
+    timer;
 
   windowPanel
     wp;
@@ -279,9 +296,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Make the menu bar
     menubar = new MenuBar();
+    
 
     // File menu
     fileMenu = new Menu("File");
+    //fileMenu.setBackground(ClientColor.menu);
+    //fileMenu.setForeground(ClientColor.menuText);
     logoutMI = new MenuItem("Logout");
     logoutMI.addActionListener(this);
     removeAllMI = new MenuItem("Remove All Windows");
@@ -301,9 +321,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Window list menu
     windowMenu = new Menu("Windows");
+    //windowMenu.setBackground(ClientColor.menu);
+    //windowMenu.setForeground(ClientColor.menuText);
 
     // Look and Feel menu
     LandFMenu = new Menu("Look");
+    //LandFMenu.setBackground(ClientColor.menu);
+    //LandFMenu.setForeground(ClientColor.menuText);
     roseMI = new MenuItem("Rose");
     roseMI.addActionListener(this);
     win95MI = new MenuItem("Win95");
@@ -371,11 +395,27 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     tree.setMinimumWidth(200);
 
     //    Box leftBox = new Box(tree, "Objects");
-
-    InsetPanel leftP = new InsetPanel();
+    JBufferedPane leftP = new JBufferedPane(false);
     leftP.setLayout(new BorderLayout());
     leftP.add("Center", tree);
+
+    leftTop = new JBufferedPane(false);
+    leftTop.setInsets(new Insets(4,4,4,4));
     
+    leftL = new JLabel("Objects");
+    leftTop.setLayout(new BorderLayout());
+    leftTop.setBackground(ClientColor.menu);
+    leftTop.setForeground(ClientColor.menuText);
+    leftTop.add("Center", leftL);
+
+    leftBorder = new JBorderedPane();
+    leftBorder.setLayout(new BorderLayout());
+    //leftBorder.setBorder(BorderFactory.createBezelBorder(1));
+    leftBorder.setBorder(BorderFactory.createGroovedBorder());
+    leftBorder.add("Center", leftTop);
+
+    leftP.add("North", leftBorder);
+
     objectPM = new treeMenu();
     objViewMI = new MenuItem("View Object");
     objEditMI = new MenuItem("Edit Object");
@@ -410,12 +450,33 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // The right panel which will contain the windowPanel
 
     JBufferedPane rightP = new JBufferedPane(true);
-
+    rightP.setBackground(ClientColor.background);
+    rightP.setBuffered(true);
     rightP.setLayout(new BorderLayout());
 
     wp = new windowPanel(this, windowMenu);
 
     rightP.add("Center", wp);
+
+    rightL = new JLabel("Open objects");
+    
+    rightTop = new JBufferedPane(false);
+    rightTop.setBackground(ClientColor.menu);
+    rightTop.setForeground(ClientColor.menuText);
+    rightTop.setInsets(new Insets(4,4,4,4));
+    rightTop.setLayout(new BorderLayout());
+    rightTop.add("West", rightL);
+
+    timerLabel = new JLabel();
+    timer = new connectedTimer(timerLabel, 1000);
+    rightTop.add("East", timerLabel);
+
+    rightBorder = new JBorderedPane();
+    rightBorder.setLayout(new BorderLayout());
+    rightBorder.setBorder(BorderFactory.createGroovedBorder());
+    rightBorder.add("Center", rightTop);
+
+    rightP.add("North", rightBorder);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
     JBufferedPane bottomButtonP = new JBufferedPane(false);
@@ -448,11 +509,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     add("Center",sPane);
 
     JBufferedPane statusBar = new JBufferedPane(false);
+    statusBar.setBackground(ClientColor.menu);
+    statusBar.setForeground(ClientColor.menuText);
     statusBar.setLayout(new BorderLayout());
     statusLabel = new TextField();
     statusLabel.setEditable(false);
-    statusLabel.setBackground(Color.white);
-    statusBar.add("West", new JLabel("Status:"));
+    statusLabel.setBackground(ClientColor.menu);
+    statusLabel.setForeground(ClientColor.menuText);
+    JLabel l = new JLabel("Status: ");
+    l.setBackground(ClientColor.menu);
+    l.setForeground(ClientColor.menuText);
+    statusBar.add("West", l);
     statusBar.add("Center", statusLabel);
     add("South", statusBar);
 
@@ -466,6 +533,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	throw new RuntimeException("Could not open transaction: " + rx);
       }
+
+    timer.start();
     pack();
     setSize(800, 600);
     show();
@@ -1027,6 +1096,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   {
     try
       {
+	timer.stop();
 	session.logout();
 	this.dispose();
 	_myglogin.enableButtons(true);
