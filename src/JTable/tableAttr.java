@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 4 June 1996
-  Version: $Revision: 1.6 $ %D%
+  Version: $Revision: 1.7 $ %D%
   Module By: Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -66,6 +66,8 @@ public class tableAttr {
       }
     else
       {
+	System.err.println("Null component c, setting height and baseline to 0");
+
 	this.fontMetric = null;
 	height = 0;
 	baseline = 0;
@@ -89,6 +91,9 @@ public class tableAttr {
   {
     if (font == null)
       {
+	System.err.println("font null ptr");
+	System.err.println("Setting baseline and height to 0");
+
 	fontMetric = null;
 	baseline = 0;
 	height = 0;
