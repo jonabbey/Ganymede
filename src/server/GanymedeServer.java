@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 1999/07/26 22:22:09 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 1999/07/30 16:15:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -708,9 +708,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	try
 	  {
-	    if (Ganymede.db.schemaEditInProgress ||
-		Ganymede.db.sweepInProgress)
+	    if (Ganymede.db.schemaEditInProgress)
 	      {
+		Ganymede.debug("GanymedeServer.sweepInvids(): aborting.. schema edit in progress");
+		return false;
+	      }
+
+	    if (Ganymede.db.sweepInProgress)
+	      {
+		Ganymede.debug("GanymedeServer.sweepInvids(): aborting.. sweep already in progress");
 		return false;
 	      }
 	    
@@ -729,6 +735,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     while (enum1.hasMoreElements())
       {
 	base = (DBObjectBase) enum1.nextElement();
+
+	Ganymede.debug("GanymedeServer.sweepInvids(): sweeping " + base);
 
 	// loop 2: iterate over the objects in the current object base
 
@@ -833,6 +841,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	Ganymede.db.notifyAll(); // for lock code
       }
 
+    Ganymede.debug("GanymedeServer.sweepInvids(): completed");
+
     return swept;
   }
 
@@ -914,7 +924,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    object = (DBObject) enum2.nextElement();
 
-	    Ganymede.debug("Testing invid links for object " + object.getLabel());
+	    //	Ganymede.debug("Testing invid links for object " + object.getLabel());
 
 	    // loop over the fields in this object	    
 

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/07/26 22:22:08 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/07/30 16:15:47 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1162,8 +1162,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	if (invidTestDialog == null)
 	  {
 	    invidTestDialog = new StringDialog(this,
-					       "Invid Sweep/Test",
-					       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
+					       "Invid Test",
+					       "Are you sure you want to trigger a full invid consistency test?\n"+
+					       "It may take awhile.",
 					       "Yes", "No", question);
 	  }
 
@@ -1189,14 +1190,18 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	if (invidTestDialog == null)
 	  {
 	    invidTestDialog = new StringDialog(this,
-					       "Invid Sweep/Test",
-					       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
+					       "Invid Sweep",
+					       "Are you sure you want to trigger a full invid sweep?\n"+
+					       "It may take awhile.",
 					       "Yes", "No", question);
 	  }
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
-	    System.err.println("Affirmative invid sweep request");
+	    if (debug)
+	      {
+		System.err.println("Affirmative invid sweep request");
+	      }
 
 	    try
 	      {
