@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.20 $
-# $Date: 2000/10/06 23:39:18 $
+# $Revision: 1.21 $
+# $Date: 2000/10/10 04:24:59 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -395,6 +395,26 @@ close OUTPUT;
 
 print "\nCustomizing ganymede runServer script\n";
 
+# first we need to determine if we are running java 1.1 or java 1.2 or greater
+
+$version = &identifyjvm($vars{"JVM"}."/java");
+
+if ($version == 2)
+  {
+    $template = "scripts/runServer.template2";
+  }
+else if ($version == 1)
+  {
+    $template = "scripts/runServer.template";
+  }
+else
+  {
+    print "\nWarning, couldn't find " . $vars{"JVM"} . "/java.  Installing a Java 1.2/1.3 configured runServer script.\n";
+    $template = "scripts/runServer.template2";
+  }
+
+# now we need to configure and install it
+
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
@@ -402,7 +422,7 @@ print "\nCustomizing ganymede runServer script\n";
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
-open INPUT, "scripts/runServer.template" or die "Couldn't open runServer template!";
+open INPUT, "$template" or die "Couldn't open $template!";
 open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";
 
 while (<INPUT>) {
@@ -893,3 +913,35 @@ sub removelastslash{
 	chop $_[0];
     }
 }
+
+######################################################################### 
+#
+#                                                             identifyjvm
+# input: filename of the jvm executable
+#
+# returns: 0 if the jvm couldn't be tested, 1 if it was JDK 1.1 based,
+# 2 if it was 1.2 or 1.3 based
+#
+#
+######################################################################### 
+sub identifyjvm {
+  my ($jvm) = @_;
+  my $versionString;
+
+  if (!-f $jvm) {
+    return 0;
+  }
+
+  $versionString = `$jvm -version`;
+
+  if (($versionString =~ /1\.2/) ||
+      ($versionString =~ /1\.3/))
+    {
+      return 2;
+    }
+  else
+    {
+      return 1;
+    }
+}
+

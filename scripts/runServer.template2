@@ -86,7 +86,7 @@ echo
 #
 # For JDK 1.2 and 1.3
 
-#$JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+$JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
 
 #			     ----====----
 
@@ -108,4 +108,4 @@ echo
 #
 # For JDK 1.1
 
-$JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+#$JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
