@@ -374,4 +374,49 @@ class DBNameSpaceHandle implements Cloneable {
     persistentFieldInvid = null;
     shadowField = null;
   }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (owner != null)
+      {
+	result.append("owner == " + owner.toString());
+      }
+
+    if (result.length() != 0)
+      {
+	result.append(", ");
+      }
+
+    if (original)
+      {
+	result.append("original");
+      }
+    else
+      {
+	result.append("!original");
+      }
+
+    if (inuse)
+      {
+	result.append(", inuse");
+      }
+    else
+      {
+	result.append(", !inuse");
+      }
+
+    if (shadowField != null)
+      {
+	result.append(", shadowField == " + shadowField.toString());
+      }
+
+    if (shadowFieldB != null)
+      {
+	result.append(", shadowFieldB == " + shadowFieldB.toString());
+      }
+
+    return result.toString();
+  }
 }
