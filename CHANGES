@@ -829,6 +829,24 @@ I should have done this before.
 The vector field GUI component now includes a count number, to make it
 easy to see how many items are in the field.
 
+56. [CLIENT] Windows now kept within bounds
+
+It turns out that the default Swing window resize/move logic made it
+possible to resize/pull windows above the top of the inner desktop,
+such that the title bar was no longer accessible.  Richard Mach here
+at ARL:UT graciously pointed out this problem, and it turned out to be
+pretty easy to fix.
+
+The Ganymede client will now block attempts to resize or pull a window
+out of the visibility area to the top and left.
+
+57. [CLIENT] Fixed owner panel on view windows
+
+The right-menu popup menus weren't enabled on view object windows in
+the owner panel.  Now, you can view any object and be able to
+right-click on the items in the owner list to directly view or edit
+the owner groups that own that object.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

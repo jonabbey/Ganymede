@@ -90,8 +90,8 @@ issues that Ganymede is going to need to address as the lab moves into
 the 21st century.  Jay Scott contributed work on a new version of the
 GASH schema's build kit (which is not yet included with the Ganymede
 distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
-Gramann, Andrew Helyer and others made helpful reports on gaps and
-problems with Ganymede.
+Gramann, Andrew Helyer, Richard Mach, and others made helpful reports
+on gaps and problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions the
 course of evaluating the Ganymede code for use on an SGL project.
