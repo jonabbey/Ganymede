@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/01/08 03:23:06 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/01/29 02:30:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -871,7 +871,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	    try
 	      {
 		String hexdigit = "[abcdef0123456789]";
-		String separator = "[-:]";
+		String separator = ":";
 
 		regexp = new gnu.regexp.RE("^" + hexdigit + hexdigit + "?" + separator +
 					   hexdigit + hexdigit + "?" + separator +
@@ -894,9 +894,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return Ganymede.createErrorDialog("Bad Ethernet Address",
 					      "You entered an invalid ethernet address (" + etherString +
-					      ")\n\nEthernet addresses should be in the form of 6 - or :" +
-					      " separated hex bytes.\n\nExamples:\n01:a2:cc:4:12:2d\n" +
-					      "5-12-09-1a-ff-0");
+					      ")\n\nEthernet addresses should be in the form of 6 :" +
+					      " separated hex bytes.\n\nExample:\n01:a2:cc:04:12:2d\n");
 	  }
 	else
 	  {
