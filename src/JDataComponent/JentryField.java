@@ -41,35 +41,18 @@ abstract public class JentryField extends JTextField implements FocusListener{
   public JentryField(int columns) 
   {
     super(columns);
-    enableEvents(AWTEvent.KEY_EVENT_MASK);
     setEnabled(true);
     setEditable(true);
 
     addFocusListener(this);
 
-    // disable tab insertion
+    enableEvents(AWTEvent.KEY_EVENT_MASK); 
 
-    //    Keymap binding = getKeymap();
-    //    binding.addActionForKeyStroke(KeyStroke.getKeyStroke('\t'),
-    //				  new ("null action"));
   }
 
   ///////////////////
   // Class Methods //
   ///////////////////
-
-  /**
-   *
-   * Hack to get a border around us.
-   *
-   */
-
-  //  public void paint(Graphics g)
-  //  {
-  //    super.paint(g);
-  //    g.setColor(Color.black);
-  //    g.drawRect(0, 0, getBounds().width-1, getBounds().height-1);
-  //  }
 
   /**
    *  returns true if the value in the JentryField has 
@@ -241,6 +224,45 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     setValueAttr(valueAttr,repaint);
   } 
+
+  /**
+   *
+   * We only want certain keystrokes to be registered by the field.
+   *
+   * This method overrides the processKeyEvent() method in JComponent and
+   * gives us a way of intercepting characters that we don't want in our
+   * string field.
+   *
+   */
+
+  protected void processKeyEvent(KeyEvent e)
+  {
+    // always pass through useful editing keystrokes.. this seems to be
+    // necessary because backspace and delete apparently have defined
+    // Unicode representations, so they don't match CHAR_UNDEFINED below
+
+    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
+	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
+	(e.getKeyCode() == KeyEvent.VK_END) ||
+	(e.getKeyCode() == KeyEvent.VK_HOME))
+      {
+	super.processKeyEvent(e);
+      }
+
+    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
+    // through things like backspace, arrow keys, etc.
+
+    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+      {
+	super.processKeyEvent(e);
+      }
+    else if (isAllowed(e.getKeyChar()))
+      {
+	super.processKeyEvent(e);
+      }
+
+    // otherwise, we ignore it
+  }
 
   public void focusLost(FocusEvent e)
   {
