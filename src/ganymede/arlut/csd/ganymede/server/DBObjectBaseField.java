@@ -1495,6 +1495,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     String _okChars = null;
     String _badChars = null;
     String _regexp = null;
+    String _regexp_desc = null;
     boolean _multiline = false;
     String _namespace = null;
     ReturnVal retVal;
@@ -1564,6 +1565,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    else if (child.matches("regexp"))
 	      {
 		_regexp = child.getAttrStr("val");
+		_regexp_desc = child.getAttrStr("desc");
 	      }
 	    else if (child.matches("multiline"))
 	      {
@@ -1653,6 +1655,16 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	return Ganymede.createErrorDialog("xml",
 					  "fielddef could not set regular expression: " + _regexp + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setRegexpDesc(_regexp_desc);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set regular expression description: " + _regexp_desc + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
       }
