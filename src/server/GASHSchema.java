@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -214,7 +214,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridx = 0;
     gbc.gridy = 0;
-    gbc.weightx = 0.50;
+    gbc.weightx = 1.0;
     gbc.weighty = 1.0;
     gbl.setConstraints(leftBox, gbc);
 
@@ -224,7 +224,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridx = 1;
     gbc.gridy = 0;
-    gbc.weightx = 0.50;
+    gbc.weightx = 1.0;
     gbc.weighty = 1.0;
     gbl.setConstraints(rightBox, gbc);
 
@@ -675,6 +675,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	    if (ob instanceof String) 
 	      {
 		String label = (String)ob;
+		System.out.println(label + "=" + results.get(label));
 	      }
 	    if (ob instanceof Boolean)
 	      {
@@ -685,7 +686,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 		// checkboxField doesn't even do anything yet.
 		// Weird, huh?
 	      }
-	    System.out.println(label + "=" + results.get(label));
+
 	  }
 	System.out.println("That's it for the hash");
 
