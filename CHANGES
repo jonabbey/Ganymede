@@ -1,11 +1,11 @@
 Ganymede Release 1.0
-March ??, 2001
+April ??, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0pre1 to 1.0 -------------------
 
-RELEASE DATE: March ??, 2001
+RELEASE DATE: April ??, 2001
 
 1.[SERVER] Made server do better server-side cleanup for stuck clients
 
@@ -132,7 +132,7 @@ Now, the admin console will append the stack trace information for
 any RMI remote exception to the console's log area, where it may be
 seen.
 
-11. [Client] Cleaned up resource retention on the Ganymede GUI client
+11. [CLIENT] Cleaned up resource retention on the Ganymede GUI client
 
 The Ganymede client was doing very little in the way of cleaning up
 allocated structures.  So little, in fact, that it was retaining
@@ -147,6 +147,18 @@ growth on the Ganymede server.
 I need to do some experimentation with the modified client to be sure,
 however.  Either this change to the client will help reduce memory
 bloat on the server, or I'm running into an RMI bug, I think.
+
+12. [CLIENT] Made the client's query window non-modal
+
+The client's query window's modality was causing the JpopUpCalendar to
+lock up when someone tried to edit the date and time of a time field
+search.  Making the query window non-modal takes care of this.
+
+In addition, I reworked the way that threading is handled for the
+'waiting for query' animation and table window display to make sure
+rendering operations for them are handled on the GUI thread, which
+should help avoid some exception traces that were occasionally
+being thrown on the client.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
