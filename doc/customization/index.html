@@ -1224,6 +1224,15 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField)">canCloneField()</a>
+	</td>
+	<td>
+	  Customization method used to indicate whether a given field in an object
+	  should be cloned by the default field-cloning logic.
+	</td>
+      </tr>
+      <tr>
+	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#cloneObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">cloneObject()</a>
 	</td>
 	<td>
@@ -1323,6 +1332,28 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<td>
 	  Used to do type-specific object initialization after the Ganymede server
 	  has gotten the object ready for editing.
+	</td>
+      </tr>
+    </table>
+
+    <h3>DBEditObject methods invoked during object cloning</h3>
+
+    <table border="1">
+	<th>Method</th>
+	<th>Purpose</th>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#cloneFromObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, boolean)">cloneFromObject()</a>
+	</td>
+	<td>
+	<p>This method actually does the work to clone an object.  The default logic in this
+	method clones all fields in the source object for which
+	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField)">canCloneField()</a> returns true.  For some
+	custom subclasses, you will want to override this method, call super.cloneObject(),
+	and then provide logic to initialize new fields.</p>
+
+	<p>This method is called on a newly created instance of DBEditObject, and fills
+	its fields in by calling <a href="../javadoc/arlut/csd/ganymede/DBField.html#copyFieldTo(arlut.csd.ganymede.DBField,boolean)">copyFieldTo()</a> on each field in the original object.</p>
 	</td>
       </tr>
     </table>
