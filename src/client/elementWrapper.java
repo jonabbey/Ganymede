@@ -90,6 +90,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	remove = new JButton(vp.wp.removeImageIcon);
 	remove.setBorderPainted(false);
+	remove.setOpaque(false);
 	remove.setFocusPainted(false);
 	remove.setMargin(new Insets(0,0,0,0));
 	remove.setToolTipText("Delete this element");
@@ -106,7 +107,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  {
 	    title = new JLabel("Component");
 	  }
-	System.out.println("Adding mouse listener. in the elementWrapper");
+	
+	
 	title.setForeground(Color.white);
 	title.addMouseListener(this);
 
