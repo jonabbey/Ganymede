@@ -73,6 +73,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
 import java.util.Hashtable;
@@ -396,66 +397,24 @@ public class Ganymede {
       {
 	System.out.println(ts.l("main.ok_propload", propFilename));
       }
-
-    // see whether our RMI registry currently has ganymede.server
-    // bound.. doesn't matter much, but useful for logging
-
-    boolean inUse = true;
-
-    try
-      {
-	String rmiServerURL = "rmi://" + 
-	  java.net.InetAddress.getLocalHost().getHostName() + ":" + 
-	  registryPortProperty + "/ganymede.server";
-
-	Remote obj = Naming.lookup(rmiServerURL); // hopefully we'll throw an exception here
-
-	if (obj instanceof Server)
-	  {
-	    Server serv = (Server) obj;
-	    
-	    if (serv.up())	// another exception opportunity
-	      {
-		System.err.println(ts.l("main.error_already_running", rmiServerURL));
-		System.exit(1);
-	      }
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	inUse = false;		// this is what we want to have happen
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	System.err.println("MalformedURL:" + ex);
-      }
-    catch (java.net.UnknownHostException ex)
-      {
-	System.err.println("UnknownHost:" + ex);
-      }
-    catch (RemoteException ex)
-      {
-	ex.printStackTrace();
-	// we expect to see a RemoteException if we had an old
-	// server bound
-      }
-
-    // inUse can be true if we were able to lookup an RMI object by
-    // name, yet not able to actually talk to it, which would happen
-    // if an old server bound on this system had died/been killed
-    // without restarting the rmi registry process
-
-    if (inUse)
-      {
-	System.err.println(ts.l("main.info_reusing_registry"));
-      }
-
+    
     // Create our GanymedeRMIManager to handle RMI exports.  We need
     // to create this before creating our DBStore, as some of the
     // components of DBStore are to be made accessible through RMI
 
     Ganymede.rmi = new GanymedeRMIManager(55555, true);
 
+   /* Start up the RMI registry thread. */
+    try
+      {
+        Ganymede.rmi.startRMIRegistry(registryPortProperty);
+      }
+    catch (RemoteException ex)
+      {
+        System.err.println(ts.l("main.error_starting_rmiregistry"));
+        throw new RuntimeException(ex.getMessage());
+      }    
+    
     // if debug=<filename> was specified on the command line, tell the
     // RMI system to log RMI calls and exceptions that occur in
     // response to RMI calls.
@@ -750,7 +709,7 @@ public class Ganymede {
 
 	// tell the RMI registry where to find the server
 
-	Naming.rebind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
+	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
 		      server);
       }
     catch (Exception ex)

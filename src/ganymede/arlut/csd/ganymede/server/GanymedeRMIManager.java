@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.Enumeration;
@@ -118,6 +119,28 @@ public class GanymedeRMIManager {
 	this.csf = new RMISSLClientSocketFactory();
 	this.ssf = new RMISSLServerSocketFactory();
       }
+  }
+  
+  /**
+   * <p>Creates and starts a remote object registry on the specified port.</p>
+   * 
+   * <p>This has the same effect as running the <pre>rmiregistry</pre> command
+   * that is bundled with the JDK.</p>
+   * 
+   * @param port
+   * @throws RemoteException
+   */
+  public void startRMIRegistry(int port) throws RemoteException
+  {
+    /* TODO: When you pass in the client and server socket factories,
+     * you get a bizarre error:
+     * 
+     * "non-JRMP server at remote endpoint"
+     * 
+     * I don't know what this means, but we'll need to sort that out
+     * if we want to SSL-encrypt rmiregistry traffic.
+     */
+    LocateRegistry.createRegistry(port);
   }
 
   /**
