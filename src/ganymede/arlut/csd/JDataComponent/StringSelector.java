@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -219,8 +219,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.add("Center", new JScrollPane(in));
 
     inTitle.setText(org_in.concat(" : 0"));
-    inTitle.setHorizontalAlignment( SwingConstants.LEFT );
-    inTitle.setMargin( new Insets(0,0,0,0) );
+    //    inTitle.setHorizontalAlignment( SwingConstants.LEFT );
+    //    inTitle.setMargin( new Insets(0,0,0,0) );
     inTitle.addActionListener(this);
 
     inPanel.add("North", inTitle);
@@ -261,8 +261,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	// If we need an out box, build it now.
 
 	outTitle.setText(org_out.concat(": 0"));
-	outTitle.setHorizontalAlignment( SwingConstants.LEFT );
-	outTitle.setMargin( new Insets(0,0,0,0) );
+	//	outTitle.setHorizontalAlignment( SwingConstants.LEFT );
+	//	outTitle.setMargin( new Insets(0,0,0,0) );
 	outTitle.addActionListener(this);
 
 	out = new JstringListBox();
