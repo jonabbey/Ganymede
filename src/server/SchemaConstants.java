@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -124,7 +124,7 @@ public interface SchemaConstants {
 
   /* builder classes */
 
-  final static short BuilderBase = 5; // Records of DBBuilderTask classes we want to attach to the server
+  final static short BuilderBase = 5; // Records of GanymedeBuilderTask classes we want to attach to the server
 
   final static short BuilderTaskName = 100; // name of this builder task (i.e., DNSBuilder, NISBuilder)
   final static short BuilderTaskClass = 101; // what is the fully qualified classname for this builder task?
