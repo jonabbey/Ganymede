@@ -3,10 +3,10 @@
    User.java
 
    Class to load and store the data from a line in the
-   BSD master.passwd file
+   Linux passwd file
    
    Created: 22 August 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,9 +50,6 @@ public class User {
   String homePhone;
   String directory;
   String shell;
-  String classification;
-  int lastchange;
-  int expire;
 
   boolean valid;
   StreamTokenizer tokens;
@@ -139,29 +136,6 @@ public class User {
     if (debug)
       {
 	System.out.println("gid = '" + gid + "'");
-      }
-
-    classification = getNextBit(tokens, false);
-
-    if (debug)
-      {
-	System.out.println("classification = '" + classification + "'");
-      }
-
-    String changeString = getNextBit(tokens);
-    lastchange = new Integer(changeString).intValue();
-
-    if (debug)
-      {
-	System.out.println("lastchange = '" + lastchange + "'");
-      }
-    
-    String expireString = getNextBit(tokens);
-    expire = new Integer(expireString).intValue();
-
-    if (debug)
-      {
-	System.out.println("expire = '" + expire + "'");
       }
 
     fullname = getNextBit(tokens);
