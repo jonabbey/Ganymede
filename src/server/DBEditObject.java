@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -877,10 +877,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * Initialize a newly created DBEditObject.
    *
-   * When this method is called, the DBEditObject has
-   * been created and all fields defined in the
-   * controlling DBObjectBase have been instantiated
-   * without defined values.<br><br>
+   * When this method is called, the DBEditObject has been created,
+   * its ownership set, and all fields defined in the controlling
+   * DBObjectBase have been instantiated without defined
+   * values.<br><br>
    *
    * This method is responsible for filling in any default
    * values that can be calculated from the DBSession
@@ -896,7 +896,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * involve symmetry relationships could be problematic. <br><br>
    *
    * This method should be overridden in subclasses.
-   *
+   * 
    */
 
   public boolean initializeNewObject()
