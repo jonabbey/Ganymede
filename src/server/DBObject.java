@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,7 +49,7 @@ import java.rmi.server.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.13 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.14 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -392,6 +392,10 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
 	  case INVID:
 	    tmp = new InvidDBField(this, in, definition);
+	    break;
+
+	  case PERMISSIONMATRIX:
+	    tmp = new PermissionMatrixDBField(this, in, definition);
 	    break;
 	  }
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -251,6 +251,10 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 	      case INVID:
 		tmp = new InvidDBField(this, fieldDef);
 		break;
+
+	      case PERMISSIONMATRIX:
+		tmp = new PermissionMatrixDBField(this, fieldDef);
+		break;
 	      }
 
 	    if (tmp != null)
@@ -337,6 +341,10 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 	      case INVID:
 		tmp = new InvidDBField(this, (InvidDBField) field);
 		break;
+
+	      case PERMISSIONMATRIX:
+		tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
+		break;
 	      }
 
 	    if (tmp != null)
@@ -381,6 +389,10 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 		    
 		  case INVID:
 		    tmp = new InvidDBField(this, fieldDef);
+		    break;
+
+		  case PERMISSIONMATRIX:
+		    tmp = new PermissionMatrixDBField(this, fieldDef);
 		    break;
 		  }
 
