@@ -58,6 +58,7 @@ package arlut.csd.ddroid.server;
 
 import arlut.csd.ddroid.common.*;
 import arlut.csd.ddroid.rmi.*;
+import arlut.csd.Util.TranslationService;
 
 import java.io.*;
 import java.util.*;
@@ -177,7 +178,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   {
     super();			// UnicastRemoteObject initialization
 
-    ts = new TranslationService("arlut.csd.ddroid.server.GanymedeServer");
+    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeServer");
  
     if (server == null)
       {
