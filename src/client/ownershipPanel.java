@@ -275,7 +275,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
 	QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField,
 					       QueryDataNode.EQUALS, 
-					       QueryDataNode.CONTAINSANY, 
+					       QueryDataNode.CONTAINS, 
 					       parent.parent.getObjectInvid());
 
 	qResult = parent.parent.getgclient().getSession().query(new Query(type, node));
