@@ -156,7 +156,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * the menu bar.</p>
    */
 
-  Hashtable windowList = new Hashtable();
+  private Hashtable windowList = new Hashtable();
   
   /**
    * This is used as the wait image in other classes.  Currently, it
@@ -223,7 +223,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     // toggleToolBarMI was added to windowMenu in client
     // but we need to name it here so we can reference 
-    // it in updateMenu. Note assumption that it is first item
+    // it in updateWindowMenu. Note assumption that it is first item
     // in original windowMenu.
 
     this.toggleToolBarMI = windowMenu.getItem(0);
@@ -242,7 +242,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     removeAllMI.setMnemonic('r');
     removeAllMI.addActionListener(this);
 
-    updateMenu();
+    updateWindowMenu();
 
     setBackground(ClientColor.background);
   }
@@ -400,27 +400,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		    title = "View: " + title;
 		  }
 	      }
-
-	    if (debug)
-	      {
-		System.out.println("Setting title to: " + title);
-	      }
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not get label of object: " + rx);
 	  }
     
-	// Create a unique title for the new window
-
-	temp = title;
-	int num = 2;
-
-	while (windowList.containsKey(title))
-	  {
-	    title = temp + num++;
-	  }
-
 	framePanel w = null;
 
 	try
@@ -456,7 +441,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      {
 		public Object run() throws Exception
 		{
-		  return new framePanel(localFinalInvid, localObject, localEditable, localWindowPanel, localTitle, localIsNewlyCreated);
+		  framePanel foxFP = new framePanel(localFinalInvid, localObject, localEditable, localWindowPanel, localIsNewlyCreated);
+		  localWindowPanel.setWindowTitle(foxFP, localTitle);
+		  return foxFP;
 		}
 	      }
 						    );
@@ -467,8 +454,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	w.setOpaque(true);
     
-	windowList.put(title, w);
-	
 	w.setBounds(0, 0, 500,400);
 	placeWindow(w);
 	
@@ -486,7 +471,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	setSelectedWindow(w);
 	
-	updateMenu();
+	updateWindowMenu();
       }
     finally
       {
@@ -572,13 +557,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public boolean isOpenForEdit(Invid invid)
   {
-    Enumeration e = windowList.keys();
+    Object ary[];
 
     /* -- */
 
-    while (e.hasMoreElements())
+    synchronized (windowList)
       {
-	Object o = windowList.get(e.nextElement());
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	Object o = ary[i];
 
 	if (o instanceof framePanel)
 	  {
@@ -591,7 +581,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	    if (fp.isEditable() && fp.getObjectInvid().equals(invid))
 	      {
-	      	return true;
+		return true;
 	      }
 	  }
       }
@@ -606,21 +596,31 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public boolean isApprovedForClosing(Invid invid)
   {
-    Enumeration e = windowList.keys();
+    Object ary[];
 
     /* -- */
 
-    while (e.hasMoreElements())
+    synchronized (windowList)
       {
-	Object o = windowList.get(e.nextElement());
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	Object o = ary[i];
 
 	if (o instanceof framePanel)
 	  {
 	    framePanel fp = (framePanel) o;
 
+	    // we may have a view window and an edit window, so we
+	    // need to scan over all editable windows, not just stop
+	    // when we see a non-editable window with the invid we are
+	    // looking for.
+
 	    if (fp.isEditable() && fp.getObjectInvid().equals(invid))
 	      {
-	      	return fp.isApprovedForClosing();
+		return fp.isApprovedForClosing();
 	      }
 	  }
       }
@@ -647,17 +647,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param query The Query whose results are being shown in this window, used to
    * refresh the query on command.
    * @param results The results of the query that is being shown in this window.
-   * @param title The title to be placed on the window when created.
    */
 
-  public void addTableWindow(Session session, Query query, 
-			     DumpResult results, String title)
+  public void addTableWindow(Session session, Query query, DumpResult results)
   {
     gResultTable 
       rt = null;
-
-    String 
-      temp = title;
 
     int
       num;
@@ -713,24 +708,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	rt.setClosable(true);
 	rt.setMaximizable(true);
 	rt.setIconifiable(true);
-
 	rt.addInternalFrameListener(this);
-
-	// Figure out the title
-
-	temp = title;
-	num = 2;
-
-	while (windowList.containsKey(title))
-	  {
-	    title = temp + num++;
-	  }
-	  
-	// System.out.println("Setting title for query table to " + title);
-
-	rt.setTitle(title);
-
-	windowList.put(title, rt);
 
 	placeWindow(rt);
 	  
@@ -738,7 +716,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	rt.setVisible(true);	// for Kestrel
 	setSelectedWindow(rt);
 
-	updateMenu();
+	updateWindowMenu();
 	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	setStatus("Done.");
 	rt.getToolBar().grabFocus();
@@ -810,42 +788,34 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Returns an Enumeration of all the internal windows currently being shown in
-   * the client.</p>
-   */
-
-  public Enumeration getWindows()
-  {
-    return windowList.elements();
-  }
-
-  /**
    * Returns a vector of framePanels of all the editable windows.
    */
 
   public Vector getEditables()
   {
     Vector editables = new Vector();
-    JInternalFrame w;
-    Enumeration windows;
+    Object ary[];
 
     /* -- */
-    
-    windows = windowList.keys();      
 
-    while (windows.hasMoreElements())
+    synchronized (windowList)
       {
-	w = (JInternalFrame)windowList.get(windows.nextElement());
+	ary = windowList.values().toArray();
+      }
 
-	if (w instanceof framePanel)
+    for (int i = 0; i < ary.length; i++)
+      {
+	Object o = ary[i];
+
+	if (o instanceof framePanel)
 	  {
-	    if (((framePanel)w).isEditable())
+	    if (((framePanel)o).isEditable())
 	      {
-		editables.addElement(w);
+		editables.addElement(o);
 	      }
 	  }
       }
-  
+
     return editables;
   }
 
@@ -858,27 +828,30 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeEditables()
   {
-    Enumeration windows;
+    Object ary[];
 
     /* -- */
-    
-    windows = windowList.keys();      
 
-    while (windows.hasMoreElements())
+    synchronized (windowList)
       {
-	Object o  = windowList.get(windows.nextElement());
+	ary = windowList.values().toArray();
+      }
 
+    for (int i = 0; i < ary.length; i++)
+      {
+	Object o  = ary[i];
+	
 	if (o instanceof framePanel)
 	  {
 	    framePanel w = (framePanel)o;
-	    
+		
 	    if (w.isEditable())
 	      {
 		if (debug)
 		  {
 		    System.err.println("closing editables.. " + w.getTitle());
 		  }
-
+		
 		try
 		  {
 		    w.closingApproved = true;
@@ -902,105 +875,155 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeAll(boolean askNoQuestions)
   {
-    JInternalFrame w;
-    Enumeration windows;
+    Object ary[];
 
     /* -- */
 
-    windows = windowList.keys();
-
-    while (windows.hasMoreElements())
+    synchronized (windowList)
       {
-	w = (JInternalFrame)windowList.get(windows.nextElement());
+	ary = windowList.values().toArray();
+      }
 
-	if (!w.isClosable())
-	  {
-	    w.setClosable(true);
-	  }
+    for (int i = 0; i < ary.length; i++)
+      {
+	JInternalFrame o = (JInternalFrame) ary[i];
 	
-	if (debug)
+	if (o instanceof framePanel)
 	  {
-	    System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
-	  }
-
-	try
-	  {
-	    if (askNoQuestions)
+	    framePanel w = (framePanel)o;
+		
+	    if (!w.isClosable())
 	      {
-		if (w instanceof framePanel)
-		  {
-		    ((framePanel) w).stopNow();	// stop all container threads asap
-		    ((framePanel) w).closingApproved = true;
-		  }
+		w.setClosable(true);
+	      }
+	
+	    if (debug)
+	      {
+		System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
 	      }
 
-	    w.setClosed(true);
-	  }
-	catch (java.beans.PropertyVetoException ex)
-	  {
-	    // user decided against this one..
+	    try
+	      {
+		if (askNoQuestions)
+		  {
+		    if (w instanceof framePanel)
+		      {
+			((framePanel) w).stopNow();	// stop all container threads asap
+			((framePanel) w).closingApproved = true;
+		      }
+		  }
+
+		w.setClosed(true);
+	      }
+	    catch (java.beans.PropertyVetoException ex)
+	      {
+		// user decided against this one..
+	      }
 	  }
       }
   }
 
   /**
    *
-   * This method attempts to close an internal window in the client.  This
-   * method will not close windows (as for newly created objects) that are
-   * not set to be closeable.
+   * This method attempts to close an internal window in the client,
+   * as identified by title.  This method will not close windows (as
+   * for newly created objects) that are not set to be closeable.
    *
    */
 
   public void closeWindow(String title)
   {
     JInternalFrame w;
-    Enumeration windows;
       
     /* -- */
     
     setStatus("Closing a window");
     
-    windows = windowList.keys();
-    
-    while (windows.hasMoreElements())
+    w = (JInternalFrame)windowList.get(title);
+
+    if (w != null && w.isClosable())
       {
-	w = (JInternalFrame)windowList.get(windows.nextElement());
-	  
-	if (w.getTitle().equals(title))
+	if (debug)
 	  {
-	    if (w.isClosable())
-	      {
-		if (debug)
-		  {
-		    System.err.println("windowPanel.java closing " + title);
-		  }
-
-		if (w instanceof framePanel)
-		  {
-		    ((framePanel) w).closingApproved = true;
-		  }
-
-		try 
-		  {
-		    w.setClosed(true);
-		  }
-		catch (java.beans.PropertyVetoException ex)
-		  {
-		    // okay, so the user decided against it.
-		  }
-	      }
-	    else
-	      {
-		setStatus("You can't close that window.");
-	      }
-	    break;
+	    System.err.println("windowPanel.java closing " + title);
 	  }
+
+	if (w instanceof framePanel)
+	  {
+	    ((framePanel) w).closingApproved = true;
+	  }
+
+	try 
+	  {
+	    w.setClosed(true);
+	  }
+	catch (java.beans.PropertyVetoException ex)
+	  {
+	    // okay, so the user decided against it.
+	  }
+      }
+    else
+      {
+	setStatus("You can't close that window.");
       }
       
     setStatus("Done");
   }
 
-  public JMenu updateMenu()
+  /**
+   * <p>This method handles the generation and setting of a unique
+   * window title for a window that we are displaying.  The titles for
+   * all windows are tracked in windowPanel's windowList, and this
+   * method takes care of updating windowList as necessary with the
+   * new title.</p>
+   *
+   * <p>This method can also be used to change a pre-existing window's
+   * title, in which case the old title is removed from the windowList in favor
+   * of the new one.</p>
+   */
+
+  public String setWindowTitle(JInternalFrame frame, String proposedTitle)
+  {
+    String title = proposedTitle;
+    int num = 2;
+    Enumeration en;
+
+    /* -- */
+
+    synchronized (windowList)
+      {
+	// if the frame we're dealing with is already in the windowList
+	// hash, remove the old title.
+
+	en = windowList.keys();
+
+	while (en.hasMoreElements())
+	  {
+	    String enTitle = (String) en.nextElement();
+	    JInternalFrame enWindow = (JInternalFrame) windowList.get(enTitle);
+
+	    if (enWindow == frame)
+	      {
+		windowList.remove(enTitle);
+	      }
+	  }
+
+	// now find a title for the window and set it
+	
+	while (windowList.containsKey(title))
+	  {
+	    title = proposedTitle + " <" + num++ + ">";
+	  }
+	
+	windowList.put(title, frame);
+      }
+
+    frame.setTitle(title);
+
+    return title;		// in case the caller cares about what unique title we wound up with
+  }
+
+  public JMenu updateWindowMenu()
   {
     Enumeration windows;
     Object obj;
@@ -1023,37 +1046,40 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     windowMenu.add(removeAllMI);
     windowMenu.addSeparator();
 
-    windows = windowList.keys();      
-
-    while (windows.hasMoreElements())
+    synchronized (windowList)
       {
-	obj = windowList.get(windows.nextElement());
-	MI = null;
+	windows = windowList.keys();      
 
-	if (obj instanceof framePanel)
+	while (windows.hasMoreElements())
 	  {
-	    if (debug)
+	    obj = windowList.get(windows.nextElement());
+	    MI = null;
+
+	    if (obj instanceof framePanel)
 	      {
-		System.out.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+		if (debug)
+		  {
+		    System.out.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+		  }
+		
+		MI = new JMenuItem(((framePanel)obj).getTitle());
+	      }
+	    else if (obj instanceof gResultTable)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Adding menu item: " + ((gResultTable)obj).getTitle());
+		  }
+		
+		MI = new JMenuItem(((gResultTable)obj).getTitle());
 	      }
 
-	    MI = new JMenuItem(((framePanel)obj).getTitle());
-	  }
-	else if (obj instanceof gResultTable)
-	  {
-	    if (debug)
+	    if (MI != null)
 	      {
-		System.out.println("Adding menu item: " + ((gResultTable)obj).getTitle());
+		MI.setActionCommand("showWindow");
+		MI.addActionListener(this);
+		windowMenu.add(MI);
 	      }
-
-	    MI = new JMenuItem(((gResultTable)obj).getTitle());
-	  }
-
-	if (MI != null)
-	  {
-	    MI.setActionCommand("showWindow");
-	    MI.addActionListener(this);
-	    windowMenu.add(MI);
 	  }
       }
 
@@ -1078,18 +1104,67 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
+  /**
+   * <p>This method causes all query result windows to be refreshed,
+   * with each query window's query re-issued to the Ganymede
+   * server.</p>
+   */
+
   public void refreshTableWindows()
   {
-    Object obj;
-    Enumeration en = windowList.keys();
+    Object ary[];
 
-    while (en.hasMoreElements())
+    /* -- */
+
+    synchronized (windowList)
       {
-	obj = windowList.get(en.nextElement());
+	ary = windowList.values().toArray();
+      }
 
-	if (obj instanceof gResultTable)
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] instanceof gResultTable)
 	  {
-	    ((gResultTable)obj).refreshQuery();
+	    ((gResultTable) ary[i]).refreshQuery();
+	  }
+      }
+  }
+
+  /**
+   * <p>This method takes an {@link arlut.csd.ganymede.common.Invid}
+   * and a {@link arlut.csd.ganymede.common.ReturnVal} that encode
+   * field refresh information, and update any open windows with the
+   * appropriate information.</p>
+   *
+   * <p>If invid is set, the only windows which will be refreshed are
+   * those that are presenting that object for display or editing.  If
+   * it is null, all object windows will be refreshed.</p>
+   *
+   * <p>The retVal parameter can hold a list of fields that need to be
+   * refreshed, or an encoding that forces a refresh of all fields.  If
+   * the retVal parameter is null, all fields on all windows that
+   * match the invid parameter will be refreshed.</p>
+   *
+   * <p>If both invid and retVal are null, all fields in all object windows
+   * will be refreshed.</p>
+   */
+
+  public void refreshObjectWindows(Invid invid, ReturnVal retVal)
+  {
+    Object ary[];
+
+    /* -- */
+
+    synchronized (windowList)
+      {
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] instanceof framePanel)
+	  {
+	    ((framePanel) ary[i]).updateContainerPanels(invid, retVal);
 	  }
       }
   }
@@ -1141,7 +1216,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	
 	windowList.remove(oldTitle);
 	
-	updateMenu();
+	updateWindowMenu();
       }
 
     if (debug)

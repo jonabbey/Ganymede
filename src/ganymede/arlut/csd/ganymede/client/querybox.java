@@ -841,7 +841,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
-		gc.wp.addTableWindow(gc.session, query, bufferRef, "Query results: " + bufferRef.resultSize() + " entries");
+		gc.wp.addTableWindow(gc.session, query, bufferRef);
 	      }
 	    });
 	  }

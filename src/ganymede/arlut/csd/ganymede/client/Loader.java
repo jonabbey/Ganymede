@@ -328,10 +328,22 @@ public class Loader extends Thread {
 
   public String getObjectType(Invid objId)
   {
+    return this.getObjectType(objId.getType());
+  }
+
+  /**
+   * <p>Returns the type name for a given object type number.</p>
+   *
+   * <p>If the loader thread hasn't yet downloaded that information, this
+   * method will block until the information is available.</p>
+   */
+
+  public String getObjectType(short typeId)
+  {
     try
       {
 	Hashtable baseMap = getBaseMap(); // block
-	BaseDump base = (BaseDump) baseMap.get(new Short(objId.getType()));
+	BaseDump base = (BaseDump) baseMap.get(new Short(typeId));
 
 	return base.getName();
       }

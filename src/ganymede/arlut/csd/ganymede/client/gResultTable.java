@@ -122,7 +122,7 @@ import arlut.csd.ganymede.rmi.Session;
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
@@ -524,6 +524,26 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	table.refreshTable();
       }
+
+    // set our title with the result count
+
+    String queryType = null;
+
+    if (query.objectName != null)
+      {
+	queryType = query.objectName;
+      }
+    else if (query.objectType != -1)
+      {
+	queryType = wp.getgclient().loader.getObjectType(query.objectType);
+      }
+    else
+      {
+	queryType = "<unknown>";
+      }
+
+    wp.setWindowTitle(this, "Query: [" + queryType + "] results: " + rows + " entries");
+    wp.updateWindowMenu();
   }
 
   public void rowSelected(Object key)

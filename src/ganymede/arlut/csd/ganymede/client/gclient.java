@@ -2181,26 +2181,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    System.out.println("gclient.handleReturnVal(): updating invid: " + invid);
 	  }
 
-	Enumeration windows = wp.getWindows();
-
-	// Loop over each window
-
-	while (windows.hasMoreElements())
-	  {
-	    Object o = windows.nextElement();
-
-	    if (o instanceof framePanel)
-	      {
-		framePanel fp = (framePanel)o;
-
-		if (debug)
-		  {
-		    System.out.println("Checking framePanel: " + fp.getTitle());
-		  }
-
-		fp.updateContainerPanels(invid, retVal);
-	      }
-	  }
+	wp.refreshObjectWindows(invid, retVal);
       }
 
     if (debug)
@@ -2686,26 +2667,29 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // First get rid of deleted nodes
     //
 
-    Enumeration deleted = deleteHash.keys();
-
-    while (deleted.hasMoreElements())
+    synchronized (deleteHash)
       {
-	invid = (Invid)deleted.nextElement();
-	node = (InvidNode)invidNodeHash.get(invid);
+	Enumeration deleted = deleteHash.keys();
 
-	if (node != null)
+	while (deleted.hasMoreElements())
 	  {
-	    if (debug)
+	    invid = (Invid)deleted.nextElement();
+	    node = (InvidNode)invidNodeHash.get(invid);
+	    
+	    if (node != null)
 	      {
-		System.out.println("gclient.refreshTreeAfterCommit(): Deleteing node: " + node.getText());
+		if (debug)
+		  {
+		    System.out.println("gclient.refreshTreeAfterCommit(): Deleteing node: " + node.getText());
+		  }
+		
+		tree.deleteNode(node, false);
+		invidNodeHash.remove(invid);
 	      }
-
-	    tree.deleteNode(node, false);
-	    invidNodeHash.remove(invid);
 	  }
-      }
     
-    deleteHash.clear();
+	deleteHash.clear();
+      }
 
     //
     // Now change the created nodes
@@ -3393,6 +3377,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void viewObject(Invid invid, String objectType)
   {
+    if (deleteHash.containsKey(invid))
+      {
+	// This one has been deleted
+	showErrorMessage("Client Warning",
+			 "This object has already been deleted.\n\n" +
+			 "Cancel this transaction if you do not wish to delete this object after all.",
+			 getErrorImage());
+	return;
+      }
+
     try
       {
 	ReturnVal rv = handleReturnVal(session.view_db_object(invid));
@@ -4038,24 +4032,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     updateTreeAfterFilterChange(tree.getRoot());
     tree.refresh();
 
-    Enumeration windows = wp.getWindows();
+    // update all our object editing windows so that we can refresh
+    // the choice lists.. ? -- not sure why this logic is being done
+    // here, actually.. this dates back to revision 4596, Oct 30, 2001
 
-    // Loop over each window
-    
-    while (windows.hasMoreElements())
-      {
-	Object o = windows.nextElement();
-	
-	if (o instanceof framePanel)
-	  {
-	    framePanel fp = (framePanel)o;
-
-	    if (fp.isEditable())
-	      {
-		fp.updateContainerPanels();
-	      }
-	  }
-      }
+    wp.refreshObjectWindows(null, null);
   }
 
   /**
@@ -4486,48 +4467,51 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
-    Enumeration dels = deleteHash.keys();
-    
-    while (dels.hasMoreElements())
+    synchronized (deleteHash)
       {
-	invid = (Invid)dels.nextElement();
-	info = (CacheInfo)deleteHash.get(invid);
-	
-	list = cachedLists.getList(info.getBaseID());	    
-	
-	if (list != null)
+	Enumeration dels = deleteHash.keys();
+    
+	while (dels.hasMoreElements())
 	  {
-	    if (createHash.containsKey(invid))
+	    invid = (Invid)dels.nextElement();
+	    info = (CacheInfo)deleteHash.get(invid);
+	
+	    list = cachedLists.getList(info.getBaseID());	    
+	
+	    if (list != null)
 	      {
-		if (debug)
+		if (createHash.containsKey(invid))
 		  {
-		    System.out.println("Can't fool me: you just created this object!");
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.out.println("This one is hashed, sticking it back in.");
-		  }
-		
-		handle = info.getOriginalObjectHandle();
-
-		if (handle != null)
-		  {
-		    list.addObjectHandle(handle);
-		    node = (InvidNode)invidNodeHash.get(invid);
-
-		    if (node != null)
+		    if (debug)
 		      {
-			node.setHandle(handle);
+			System.out.println("Can't fool me: you just created this object!");
+		      }
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.out.println("This one is hashed, sticking it back in.");
+		      }
+		
+		    handle = info.getOriginalObjectHandle();
+
+		    if (handle != null)
+		      {
+			list.addObjectHandle(handle);
+			node = (InvidNode)invidNodeHash.get(invid);
+			
+			if (node != null)
+			  {
+			    node.setHandle(handle);
+			  }
 		      }
 		  }
 	      }
+	    
+	    deleteHash.remove(invid);
+	    setIconForNode(invid);
 	  }
-
-	deleteHash.remove(invid);
-	setIconForNode(invid);
       }
     
     node = null;
@@ -4536,34 +4520,37 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     info = null;
 
     // Next up is created list: remove all the added stuff.
-    
-    Enumeration created = createHash.keys();
-    
-    while (created.hasMoreElements())
-      {
-	invid = (Invid) created.nextElement();
-	info = (CacheInfo)createHash.get(invid);
-	
-	list = cachedLists.getList(info.getBaseID());
 
-	if (list != null)
+    synchronized (createHash)
+      {
+	Enumeration created = createHash.keys();
+    
+	while (created.hasMoreElements())
 	  {
-	    if (debug)
+	    invid = (Invid) created.nextElement();
+	    info = (CacheInfo)createHash.get(invid);
+	    
+	    list = cachedLists.getList(info.getBaseID());
+	    
+	    if (list != null)
 	      {
-		System.out.println("This one is hashed, taking a created object out.");
+		if (debug)
+		  {
+		    System.out.println("This one is hashed, taking a created object out.");
+		  }
+	    
+		list.removeInvid(invid);
 	      }
 	    
-	    list.removeInvid(invid);
-	  }
-
-	createHash.remove(invid);
-	
-	node = (InvidNode)invidNodeHash.get(invid);
-
-	if (node != null)
-	  {
-	    tree.deleteNode(node, false);
-	    invidNodeHash.remove(invid);
+	    createHash.remove(invid);
+	    
+	    node = (InvidNode)invidNodeHash.get(invid);
+	    
+	    if (node != null)
+	      {
+		tree.deleteNode(node, false);
+		invidNodeHash.remove(invid);
+	      }
 	  }
       }
 
@@ -4572,14 +4559,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // Now go through changed list and revert any names that may be needed
 
     Vector changedInvids = new Vector();
-    Enumeration changed = changedHash.keys();
 
-    while (changed.hasMoreElements())
+    synchronized (changedHash)
       {
-	changedInvids.addElement(changed.nextElement());
-      }
+	Enumeration changed = changedHash.keys();
 
-    changedHash.clear();
+	while (changed.hasMoreElements())
+	  {
+	    changedInvids.addElement(changed.nextElement());
+	  }
+
+	changedHash.clear();
+      }
 
     refreshChangedObjectHandles(changedInvids, true);
 
@@ -4850,9 +4841,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     viewObject(new Invid(invidString));
   }
 
-  public void addTableWindow(Session session, Query query, DumpResult buffer, String title)
+  public void addTableWindow(Session session, Query query, DumpResult buffer)
   {
-    wp.addTableWindow(session, query, buffer, title);
+    wp.addTableWindow(session, query, buffer);
   }
   
   protected void processWindowEvent(WindowEvent e) 
@@ -5092,8 +5083,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			setStatus("List returned from server on base " + tempText +
 				  " - building table");
 		    
-			thisGclient.wp.addTableWindow(thisGclient.getSession(), q,
-						      buffer, "Query results: " + buffer.resultSize() + " entries");
+			thisGclient.wp.addTableWindow(thisGclient.getSession(), q, buffer);
 		      }
 		  }
 		finally
@@ -5201,22 +5191,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    if (deleteHash.containsKey(invidN.getInvid()))
-	      {
-		// This one has been deleted
-		showErrorMessage("Client Warning",
-				 "This object has already been deleted.\n\n" +
-				 "Cancel this transaction if you do not wish to delete this object after all.",
-				 getErrorImage());
-	      }
-	    else
-	      {
-		viewObject(invidN.getInvid(), invidN.getTypeText());
-	      }
-	  }
-	else
-	  {
-	    System.err.println("not an object node, can't create");
+	    viewObject(invidN.getInvid(), invidN.getTypeText());
 	  }
       }
     else if (event.getActionCommand().equals("Edit Object"))
@@ -5230,23 +5205,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    if (deleteHash.containsKey(invidN.getInvid()))
-	      {
-		showErrorMessage("Client Warning",
-				 "This object has already been deleted.\n\n" +
-				 "Cancel this transaction if you do not wish to delete this object after all.",
-				 getErrorImage());
-	      }
-	    else
-	      {
-		Invid invid = invidN.getInvid();
-		
-		editObject(invid, invidN.getTypeText());
-	      }
-	  }
-	else
-	  {
-	    System.err.println("not an object node, can't create");
+	    editObject(invidN.getInvid(), invidN.getTypeText());
 	  }
       }
     else if (event.getActionCommand().equals("Clone Object"))
@@ -5260,23 +5219,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    if (deleteHash.containsKey(invidN.getInvid()))
-	      {
-		showErrorMessage("Client Warning",
-				 "This object has already been deleted.\n\n" +
-				 "Cancel this transaction if you do not wish to delete this object after all.",
-				 getErrorImage());
-	      }
-	    else
-	      {
-		Invid invid = invidN.getInvid();
-		
-		cloneObject(invid);
-	      }
-	  }
-	else
-	  {
-	    System.err.println("not an object node, can't clone");
+	    cloneObject(invidN.getInvid());
 	  }
       }
     else if (event.getActionCommand().equals("Delete Object"))
@@ -5294,10 +5237,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    Invid invid = invidN.getInvid();
 
 	    deleteObject(invid, true);
-	  }
-	else  // Should never get here, but just in case...
-	  {
-	    System.out.println("Not a InvidNode node, can't delete this.");
 	  }
       }
     else if(event.getActionCommand().equals("Inactivate Object"))

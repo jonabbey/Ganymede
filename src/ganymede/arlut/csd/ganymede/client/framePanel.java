@@ -357,12 +357,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * @param object RMI reference to a server-side database object
    * @param editable If true, the database object is being edited by this window
    * @param winP The JDesktopPane container for this window
-   * @param title Title for this window
    * @param isCreating if true, this window is for a newly created object, and will
    * be treated specially when closing this window.
    */
 
-  public framePanel(Invid invid, db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
+  public framePanel(Invid invid, db_object object, boolean editable, windowPanel winP, boolean isCreating)
   {
     this.invid = invid;
     this.wp = winP;
@@ -388,7 +387,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     setClosable(true);
 
     setIconifiable(true);
-    setTitle(title);
 
     /*
       we want to be able to take control of closing ourselves.
