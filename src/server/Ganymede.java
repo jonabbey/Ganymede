@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -466,7 +466,19 @@ public class Ganymede {
 
 	System.out.println(rootname + " password reset to value specified in Ganymede properties file");
 
-	internalSession.commitTransaction();
+	retval = internalSession.commitTransaction();
+
+	if (retval != null && !retval.didSucceed())
+	  {
+	    // if doNormalProcessing is true, the
+	    // transaction was not cleared, but was
+	    // left open for a re-try.  Abort it.
+
+	    if (retval.doNormalProcessing)
+	      {
+		internalSession.abortTransaction();
+	      }
+	  }
       }
 
     if (false)

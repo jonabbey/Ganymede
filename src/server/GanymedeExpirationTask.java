@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -178,6 +178,18 @@ public class GanymedeExpirationTask implements Runnable {
 	  }
 	
 	retVal = mySession.commitTransaction();
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    // if doNormalProcessing is true, the
+	    // transaction was not cleared, but was
+	    // left open for a re-try.  Abort it.
+
+	    if (retVal.doNormalProcessing)
+	      {
+		mySession.abortTransaction();
+	      }
+	  }
 
 	mySession.logout();
 
