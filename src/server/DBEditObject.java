@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.159 $
-   Last Mod Date: $Date: 2001/12/04 07:03:35 $
+   Version: $Revision: 1.160 $
+   Last Mod Date: $Date: 2001/12/05 18:42:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.159 $ $Date: 2001/12/04 07:03:35 $ $Name:  $
+ * @version $Revision: 1.160 $ $Date: 2001/12/05 18:42:59 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3174,7 +3174,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public synchronized ReturnVal commitPhase1()
   {
     committing = true;
-    return consistencyCheck(this);
+
+    if (getGSession().enableOversight)
+      {
+	return consistencyCheck(this);
+      }
+    else
+      {
+	return true;
+      }
   }
 
   /**
