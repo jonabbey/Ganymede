@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.166 $
-   Last Mod Date: $Date: 2002/03/29 03:57:56 $
+   Version: $Revision: 1.167 $
+   Last Mod Date: $Date: 2002/08/21 06:58:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.166 $ $Date: 2002/03/29 03:57:56 $ $Name:  $
+ * @version $Revision: 1.167 $ $Date: 2002/08/21 06:58:50 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1313,10 +1313,30 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * <p>This method should be defined to return true in DBEditObject subclasses
+   * which provide a getLabelHook() method.</p>
+   *
+   * <p>If this method is not redefined to return true in any subclasses which
+   * define a getLabelHook() method, then searches on objects of this type
+   * may not properly reflect the desired label.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean useLabelHook()
+  {
+    return false;		// by default, no labelhook
+  }
+
+  /**
    * <p>Hook to allow intelligent generation of labels for DBObjects
    * of this type.  Subclasses of DBEditObject should override
    * this method to provide for custom generation of the
    * object's label type</p>
+   *
+   * <p>If you override this method to define a custom labelHook method
+   * for a DBEditObject subclass, you _must_ also override the
+   * useLabelHook() method to return true.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */

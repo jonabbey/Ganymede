@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.258 $
-   Last Mod Date: $Date: 2002/08/03 01:40:28 $
+   Version: $Revision: 1.259 $
+   Last Mod Date: $Date: 2002/08/21 06:58:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.258 $ $Date: 2002/08/03 01:40:28 $
+ * @version $Revision: 1.259 $ $Date: 2002/08/21 06:58:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3015,6 +3015,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObject obj;
     DBLock rLock = null;
     boolean returnContainingObject = false;
+    boolean scanUsingLabelHook = false;
 
     /* -- */
 
@@ -3135,29 +3136,44 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // we're looking for the label of an object
 
-	    if (base.getLabelField() != -1)
+	    if (base.getObjectHook().useLabelHook())
 	      {
-		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+		scanUsingLabelHook = true;
 	      }
 	    else
 	      {
-		// this object type has no label field, so we can't
-		// reliably scan for it
-
-		return null;
+		if (base.getLabelField() != -1)
+		  {
+		    fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+		  }
+		else
+		  {
+		    // this object type has no label field and no
+		    // getLabelHook() label method, so we can't
+		    // reliably scan for it
+		    
+		    return null;
+		  }
 	      }
 	  }
 
-	if (fieldDef == null)
+	if (!scanUsingLabelHook && fieldDef == null)
 	  {
-	    Ganymede.debug("ERROR: wound up with a null label fieldDef in query optimizer for base " + base);
+	    Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer for base " + base);
 	    Ganymede.debug("       query node: " + node);
 	    return null;
 	  }
 
-	// now we've got the field definition.. is it tracked in a namespace hash?
+	// now we've either got a field definition that we can try to
+	// do a direct look up on, or we will be scanning labels using
+	// the label hook
 
-	if (fieldDef.namespace != null)
+	// if we're not scanning on the label hook, see if we have a
+	// hash namespace constraint on the field we're searching
+	// against, and if so, do a direct hash lookup rather than
+	// iterating over the object base
+
+	if (!scanUsingLabelHook && fieldDef.namespace != null)
 	  {
 	    // aha!  We've got an optimized case!
 	    

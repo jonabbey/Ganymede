@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.139 $
-   Last Mod Date: $Date: 2002/08/07 18:39:20 $
+   Version: $Revision: 1.140 $
+   Last Mod Date: $Date: 2002/08/21 06:58:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,7 +152,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.139 $ $Date: 2002/08/07 18:39:20 $
+ * @version $Revision: 1.140 $ $Date: 2002/08/21 06:58:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -701,9 +701,12 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public String getLabel()
   {
-    String result;
+    String result = null;
 
-    result = objectBase.objectHook.getLabelHook(this);
+    if (objectBase.getObjectHook().useLabelHook())
+      {
+	result = objectBase.objectHook.getLabelHook(this);
+      }
 
     if (result == null)
       {
@@ -770,9 +773,7 @@ public class DBObject implements db_object, FieldType, Remote {
     // label..  if so, there is no label field per se, and we'll
     // return null.
 
-    String result = objectBase.objectHook.getLabelHook(this);
-
-    if (result != null)
+    if (objectBase.getObjectHook().useLabelHook())
       {
 	return null;
       }
@@ -808,9 +809,7 @@ public class DBObject implements db_object, FieldType, Remote {
     // label..  if so, there is no label field per se, and we'll
     // return null.
 
-    String result = objectBase.objectHook.getLabelHook(this);
-
-    if (result != null)
+    if (objectBase.getObjectHook().useLabelHook())
       {
 	return -1;
       }
