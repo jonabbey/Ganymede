@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.108 $ %D%
+   Version: $Revision: 1.109 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -456,6 +456,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Look and Feel menu
 
     LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
+    LandFMenu.setMnemonic('l');
     LandFMenu.setCallback(this);
 
     // Personae menu
@@ -504,7 +505,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Help menu
 
     helpMenu = new JMenu("Help");
+    helpMenu.setMnemonic('h');
     showHelpMI = new JMenuItem("Help");
+    showHelpMI.setMnemonic('h');
     showHelpMI.addActionListener(this);
     helpMenu.add(showHelpMI);
 
@@ -512,14 +515,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     // This uses action commands, so you don't need to globally declare these
     JMenuItem showAboutMI = new JMenuItem("About Ganymede");
+    showAboutMI.setMnemonic('a');
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
 
     JMenuItem showCreditsMI = new JMenuItem("Credits");
+    showCreditsMI.setMnemonic('c');
     showCreditsMI.addActionListener(this);
     helpMenu.add(showCreditsMI);
 
     JMenuItem showMOTDMI = new JMenuItem("Message of the day");
+    showMOTDMI.setMnemonic('m');
     showMOTDMI.addActionListener(this);
     helpMenu.add(showMOTDMI);
 
