@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -272,12 +272,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // logout the client, abort any DBSession transaction going
 
-    if (session.lock != null)
-      {
-	session.lock.abort();
-	session.lock = null;
-      }
-
+    session.releaseAllReadLocks();
     session.logout();
  
     GanymedeServer.sessions.removeElement(this);
@@ -533,6 +528,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Enumeration enum;
     Integer key;
     DBObject obj;
+    DBReadLock rLock;
 
     /* -- */
 
@@ -566,7 +562,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     try
       {
-	session.openReadLock(baseLock);	// wait for it
+	rLock = session.openReadLock(baseLock);	// wait for it
       }
     catch (InterruptedException ex)
       {
@@ -628,7 +624,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // need to check in here to see if we've had the lock yanked
 
-    while (session.isLocked() && enum.hasMoreElements())
+    while (session.isLocked(rLock) && enum.hasMoreElements())
       {
 	key = (Integer) enum.nextElement();
 	obj = (DBObject) base.objectHash.get(key);
@@ -655,13 +651,13 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
-    if (!session.isLocked())
+    if (!session.isLocked(rLock))
       {
 	setLastError("lock interrupted");
 	return null;
       }
     
-    session.releaseReadLock();
+    session.releaseReadLock(rLock);
 
     Ganymede.debug("Query: " + username + " : released read lock");
 
@@ -689,6 +685,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Integer key;
     DBObject obj;
     PermEntry perm;
+    DBReadLock rLock;
 
     /* -- */
 
@@ -722,7 +719,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     try
       {
-	session.openReadLock(baseLock);	// wait for it
+	rLock = session.openReadLock(baseLock);	// wait for it
       }
     catch (InterruptedException ex)
       {
@@ -736,7 +733,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // need to check in here to see if we've had the lock yanked
 
-    while (session.isLocked() && enum.hasMoreElements())
+    while (session.isLocked(rLock) && enum.hasMoreElements())
       {
 	key = (Integer) enum.nextElement();
 	obj = (DBObject) base.objectHash.get(key);
@@ -768,13 +765,13 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
-    if (!session.isLocked())
+    if (!session.isLocked(rLock))
       {
 	setLastError("lock interrupted");
 	return null;
       }
     
-    session.releaseReadLock();
+    session.releaseReadLock(rLock);
 
     Ganymede.debug("Query: " + username + " : released read lock");
 
@@ -799,6 +796,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Enumeration enum;
     Integer key;
     DBObject obj;
+    DBReadLock rLock;
 
     /* -- */
 
@@ -832,7 +830,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     try
       {
-	session.openReadLock(baseLock);	// wait for it
+	rLock = session.openReadLock(baseLock);	// wait for it
       }
     catch (InterruptedException ex)
       {
@@ -846,7 +844,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // need to check in here to see if we've had the lock yanked
 
-    while (session.isLocked() && enum.hasMoreElements())
+    while (session.isLocked(rLock) && enum.hasMoreElements())
       {
 	key = (Integer) enum.nextElement();
 	obj = (DBObject) base.objectHash.get(key);
@@ -858,13 +856,13 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
-    if (!session.isLocked())
+    if (!session.isLocked(rLock))
       {
 	setLastError("lock interrupted");
 	return null;
       }
     
-    session.releaseReadLock();
+    session.releaseReadLock(rLock);
 
     Ganymede.debug("Query: " + username + " : released read lock");
 
