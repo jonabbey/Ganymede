@@ -245,11 +245,11 @@ public class JstringArea extends JTextArea implements FocusListener {
 
 	    if (str.equals(""))
 	      {
-		b = my_parent.setValuePerformed(new JValueObject(this, null, JValueObject.SET));
+		b = my_parent.setValuePerformed(new JSetValueObject(this, null));
 	      }
 	    else
 	      {
-		b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+		b = my_parent.setValuePerformed(new JSetValueObject(this, str));
 	      }
 	  }
 	catch (RemoteException re)

@@ -442,7 +442,7 @@ public class JstringField extends JentryField {
 	
 	try 
 	  {
-	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET)))
+	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, str)))
 	      {
 		value = str;
 		return 1;
