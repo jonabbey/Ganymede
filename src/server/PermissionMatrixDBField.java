@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -285,6 +285,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	pe = new PermEntry(in);
 	matrix.put(key, pe);
       }
+
+    defined = true;
   }
 
   public synchronized String getValueString()
