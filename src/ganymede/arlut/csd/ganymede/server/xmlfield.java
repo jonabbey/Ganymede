@@ -1044,39 +1044,41 @@ public class xmlfield implements FieldType {
 		    return null;
 		  }
 	      }
-	    
-	    if (addValues != null)
+	    else
 	      {
-		result = field.addElements(addValues);
-
-		if (result != null && !result.didSucceed())
+		if (addValues != null)
 		  {
-		    return result;
-		  }
-	      }
-
-	    if (addIfNotPresentValues != null)
-	      {
-		Vector newValues = VectorUtils.difference(addIfNotPresentValues, field.getValuesLocal());
-
-		if (newValues.size() != 0)
-		  {
-		    result = field.addElements(newValues);
+		    result = field.addElements(addValues);
 		    
 		    if (result != null && !result.didSucceed())
 		      {
 			return result;
 		      }
 		  }
-	      }
-
-	    if (delValues != null)
-	      {
-		result = field.deleteElements(delValues);
-
-		if (result != null && !result.didSucceed())
+		
+		if (addIfNotPresentValues != null)
 		  {
-		    return result;
+		    Vector newValues = VectorUtils.difference(addIfNotPresentValues, field.getValuesLocal());
+		    
+		    if (newValues.size() != 0)
+		      {
+			result = field.addElements(newValues);
+			
+			if (result != null && !result.didSucceed())
+			  {
+			    return result;
+			  }
+		      }
+		  }
+
+		if (delValues != null)
+		  {
+		    result = field.deleteElements(delValues);
+		    
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
 		  }
 	      }
 	  }
@@ -1161,40 +1163,42 @@ public class xmlfield implements FieldType {
 			return null;
 		      }
 		  }
-
-		if (addIfNotPresentValues != null)
+		else
 		  {
-		    Vector invidValues = getExtantInvids(addIfNotPresentValues);
-		    Vector newValues = VectorUtils.difference(invidValues, field.getValuesLocal());
-
-		    if (newValues.size() != 0)
+		    if (addIfNotPresentValues != null)
 		      {
-			result = field.addElements(newValues);
+			Vector invidValues = getExtantInvids(addIfNotPresentValues);
+			Vector newValues = VectorUtils.difference(invidValues, field.getValuesLocal());
+			
+			if (newValues.size() != 0)
+			  {
+			    result = field.addElements(newValues);
+			    
+			    if (result != null && !result.didSucceed())
+			      {
+				return result;
+			      }
+			  }
+		      }
+		    
+		    if (addValues != null)
+		      {
+			result = field.addElements(getExtantInvids(addValues));
 			
 			if (result != null && !result.didSucceed())
 			  {
 			    return result;
 			  }
 		      }
-		  }
-	    
-		if (addValues != null)
-		  {
-		    result = field.addElements(getExtantInvids(addValues));
 		    
-		    if (result != null && !result.didSucceed())
+		    if (delValues != null)
 		      {
-			return result;
-		      }
-		  }
-		
-		if (delValues != null)
-		  {
-		    result = field.deleteElements(getExtantInvids(delValues));
-		    
-		    if (result != null && !result.didSucceed())
-		      {
-			return result;
+			result = field.deleteElements(getExtantInvids(delValues));
+			
+			if (result != null && !result.didSucceed())
+			  {
+			    return result;
+			  }
 		      }
 		  }
 	      }
@@ -1215,18 +1219,20 @@ public class xmlfield implements FieldType {
 		    needToBeCreated = getNonRegisteredObjects(setValues);
 		    needToBeRemoved = VectorUtils.difference(currentValues, getExtantInvids(setValues));
 		  }
-
-		if (addIfNotPresentValues != null || addValues != null)
+		else
 		  {
-		    needToBeCreated = VectorUtils.union(getNonRegisteredObjects(addIfNotPresentValues),
-							getNonRegisteredObjects(addValues));
-		    needToBeEdited = VectorUtils.union(getExtantObjects(addIfNotPresentValues),
-						       getExtantObjects(addValues));
-		  }
+		    if (addIfNotPresentValues != null || addValues != null)
+		      {
+			needToBeCreated = VectorUtils.union(getNonRegisteredObjects(addIfNotPresentValues),
+							    getNonRegisteredObjects(addValues));
+			needToBeEdited = VectorUtils.union(getExtantObjects(addIfNotPresentValues),
+							   getExtantObjects(addValues));
+		      }
 
-		if (delValues != null)
-		  {
-		    needToBeRemoved = getExtantInvids(delValues);
+		    if (delValues != null)
+		      {
+			needToBeRemoved = getExtantInvids(delValues);
+		      }
 		  }
 
 		if (needToBeCreated != null)
