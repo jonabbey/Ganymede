@@ -779,6 +779,23 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
+   * <p>This method returns a reference to the runnable registered
+   * in the scheduler by the given name.</p>
+   */
+
+  public synchronized Runnable getTask(String name)
+  {
+    scheduleHandle handle = findHandle(name);
+
+    if (handle == null)
+      {
+	return null;
+      }
+
+    return handle.task;
+  }
+
+  /**
    * <p>Private helper to find a given handle by name amongst the
    * various internal structures.  Unsynchronized, so call from
    * a synchronized method if you care.</p>
