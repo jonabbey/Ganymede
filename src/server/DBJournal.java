@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ import java.util.*;
 
 public class DBJournal implements ObjectStatus {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public static void setDebug(boolean val)
   {
@@ -256,121 +256,133 @@ public class DBJournal implements ObjectStatus {
 
     try
       {
-	if (jFile.readUTF().compareTo(OPENTRANS) != 0)
+	while (true)
 	  {
-	    if (debug)
+	    if (jFile.readUTF().compareTo(OPENTRANS) != 0)
 	      {
-		System.err.println("DBJournal.load(): Transaction open string mismatch");
+		if (debug)
+		  {
+		    System.err.println("DBJournal.load(): Transaction open string mismatch");
+		  }
+		throw new IOException();
 	      }
-	    throw new IOException();
-	  }
-	else
-	  {
-	    if (debug)
+	    else
 	      {
-		System.err.println("DBJournal.load(): Transaction open string match OK");
+		if (debug)
+		  {
+		    System.err.println("DBJournal.load(): Transaction open string match OK");
+		  }
 	      }
-	  }
 
-	EOFok = false;
+	    EOFok = false;
 
-	transaction_time = jFile.readLong();
-	transactionDate = new Date(transaction_time);
+	    transaction_time = jFile.readLong();
+	    transactionDate = new Date(transaction_time);
 
-	if (debug)
-	  {
+	    //	    if (debug)
+	    //	      {
+
 	    System.err.println("Transaction: " + transactionDate);
-	  }
 
-	// read object information
+	    //	      }
 
-	object_count = jFile.readInt();
+	    // read object information
 
-	if (debug)
-	  {
-	    System.err.println("Objects In Transaction: " + object_count);
-	  }
+	    object_count = jFile.readInt();
 
-	if (object_count > 0)
-	  {
-	    dirty = true;
-	  }
-
-	for (int i = 0; i < object_count; i++)
-	  {
-	    operation = jFile.readByte();
-	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
-
-	    switch (operation)
+	    if (debug)
 	      {
-	      case CREATE:
-		
-		obj = new DBObject(base, jFile, true);
-		
-		if (debug)
-		  {
-		    System.err.print("Create: ");
-		    obj.print(System.err);
-		  }
-
-		entries.addElement(new JournalEntry(base, obj.id, obj));
-
-		break;
-
-	      case EDIT:
-
-		obj = new DBObject(base, jFile, true);
-
-		if (!base.objectHash.containsKey(new Integer(obj.id)))
-		  {
-		    System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
-		  }
-
-		if (debug)
-		  {
-		    System.err.print("Edit: ");
-		    obj.print(System.err);
-		  }
-
-		entries.addElement(new JournalEntry(base, obj.id, obj));
-
-		break;
-
-	      case DELETE:
-
-		obj_id = jFile.readShort();
-
-		if (debug)
-		  {
-		    System.err.println("Delete: " + base.object_name + ":" + obj_id);
-		  }
-		
-		entries.addElement(new JournalEntry(base, obj_id, null));
-		break;
+		System.err.println("Objects In Transaction: " + object_count);
 	      }
+
+	    if (object_count > 0)
+	      {
+		dirty = true;
+	      }
+
+	    for (int i = 0; i < object_count; i++)
+	      {
+		operation = jFile.readByte();
+		obj_type = jFile.readShort();
+		base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
+
+		switch (operation)
+		  {
+		  case CREATE:
+		
+		    obj = new DBObject(base, jFile, true);
+		
+		    System.err.print("Create: " + obj.getInvid());
+
+		    if (debug)
+		      {
+			obj.print(System.err);
+		      }
+
+		    entries.addElement(new JournalEntry(base, obj.id, obj));
+
+		    break;
+
+		  case EDIT:
+
+		    obj = new DBObject(base, jFile, true);
+
+		    if (!base.objectHash.containsKey(new Integer(obj.id)))
+		      {
+			System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
+		      }
+
+		    System.err.print("Edit: " + obj.getInvid());
+
+		    if (debug)
+		      {
+			System.err.print("Edit: ");
+			obj.print(System.err);
+		      }
+
+		    entries.addElement(new JournalEntry(base, obj.id, obj));
+
+		    break;
+
+		  case DELETE:
+
+		    obj_id = jFile.readShort();
+
+		    System.err.println("Delete: " + base.object_name + ":" + obj_id);
+
+		    if (debug)
+		      {
+			System.err.println("Delete: " + base.object_name + ":" + obj_id);
+		      }
+		
+		    entries.addElement(new JournalEntry(base, obj_id, null));
+		    break;
+		  }
+	      }
+
+	    if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
+		(jFile.readLong() != transaction_time))
+	      {
+		throw new IOException();
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("Transaction " + transactionDate + " successfully read from Journal.");
+		System.err.println("Integrating transaction into DBStore memory image.");
+	      }
+
+	    // okay, process this transaction
+
+	    System.err.println("Processing " + entries.size());
+
+	    for (int i = 0; i < entries.size(); i++)
+	      {
+		((JournalEntry) entries.elementAt(i)).process(store);
+	      }
+
+	    EOFok = true;
 	  }
-
-	if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
-	    (jFile.readLong() != transaction_time))
-	  {
-	    throw new IOException();
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Transaction " + transactionDate + " successfully read from Journal.");
-	    System.err.println("Integrating transaction into DBStore memory image.");
-	  }
-
-	// okay, process this transaction
-
-	for (int i = 0; i < entries.size(); i++)
-	  {
-	    ((JournalEntry) entries.elementAt(i)).process(store);
-	  }
-
-	EOFok = true;
       }
     catch (EOFException ex)
       {
@@ -391,8 +403,6 @@ public class DBJournal implements ObjectStatus {
 	    throw new IOException();
 	  }
       }
-
-    return true;
   }
 
   /**
@@ -702,7 +712,7 @@ class JournalEntry {
 		    // because we are just setting up the namespace, not
 		    // manipulating it in the context of an editset
 
-		    for (int j = 0; j < fields[i].size(); i++)
+		    for (int j = 0; j < fields[i].size(); j++)
 		      {
 			definition.namespace.uniqueHash.put(fields[i].key(j), 
 							    new DBNameSpaceHandle(null, true, fields[i]));
