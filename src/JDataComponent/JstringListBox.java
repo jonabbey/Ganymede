@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2001/06/29 20:01:42 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2001/06/29 20:05:08 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.32 $ $Date: 2001/06/29 20:01:42 $ $Name:  $
+ * @version $Revision: 1.33 $ $Date: 2001/06/29 20:05:08 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -155,7 +155,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     addMouseListener(this);
     addMouseMotionListener(this);
-    setDragEnabled(true);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     getSelectionModel().addListSelectionListener(this);
   }
