@@ -1,11 +1,11 @@
 Ganymede Release 1.0.5
-July ??, 2001
+July 24, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 
-RELEASE DATE: July ??, 2001
+RELEASE DATE: July 24, 2001
 
 1. [DISTRIB] Fixed a number of bugs for JDK 1.4 compatibility
 
@@ -20,6 +20,21 @@ serialization logic.
 Sun's excellent Java Web Start provides the best way yet to launch the
 Ganymede clients on Windows.  I have made changes to installWeb to
 support the Java Web Start option in the Ganymede launcher.
+
+3. [CLIENT] Fixed java.security.AccessControlException in client
+
+On some versions of the JDK, the client, when running as an applet,
+was refusing to allow changes to the animated build status icon in
+response to RMI callbacks from the server.  This robbed the user of
+valuable feedback and resulted in java.security.AccessControlException
+messages being thrown on the server in response to the client
+notification call.
+
+I have added a new 'SecurityLaunderThread' to the client, which waits
+for build status messages from the server and updates the build status
+icon.  Since the SecurityLaunderThread was started by the client and
+not by the RMI system, it has proper permissions to play with the
+Swing Event Queue, and everything works properly.
 
 -------------------- Changes from 1.03 to 1.04 -------------------
 
