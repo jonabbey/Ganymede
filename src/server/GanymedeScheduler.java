@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/12/03 05:38:31 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/12/03 13:04:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -206,6 +206,8 @@ public class GanymedeScheduler extends Thread {
       }
     catch (ClassNotFoundException ex)
       {
+	ex.printStackTrace();
+
 	System.err.println("GanymedeScheduler.registerTaskObject(): class definition could not be found: " + ex);
 	classdef = null;
 	return;
