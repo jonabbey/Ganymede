@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.66 $ %D%
+    Version: $Revision: 1.67 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -93,6 +93,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   //int row = 0;			// we'll use this to keep track of rows added as we go along
 
   boolean
+    isCreating,
     editable;
 
   JProgressBar
@@ -175,6 +176,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			JProgressBar progressBar, 
 			boolean loadNow)
   {
+    this(object, editable, gc, window, frame, progressBar, loadNow, false);
+  }
+
+  public containerPanel(db_object object, 
+			boolean editable, 
+			gclient gc,			
+			windowPanel window, 
+			framePanel frame, 
+			JProgressBar progressBar, 
+			boolean loadNow,
+			boolean isCreating)
+  {
     super(false);
 
     /* -- */
@@ -194,6 +207,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.editable = editable;
     this.frame = frame;
     this.progressBar = progressBar;
+    this.isCreating = isCreating;
 
     // initialize layout
 
@@ -879,7 +893,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // put us back on as an item listener so we are live for updates
 	    // from the user again
-	    
+
+	    cb.repaint();
 	    cb.addItemListener(this);
 	  }
 	else if (comp instanceof JInvidChooser)
@@ -1025,11 +1040,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // put us back on as an item listener so we are live for updates
 	    // from the user again
 
+	    chooser.repaint();
 	    chooser.addItemListener(this);
 	  }
 	else if (comp instanceof JLabel)
 	  {
 	    ((JLabel)comp).setText((String)field.getValue());
+	  }
+	else if (comp instanceof JButton)
+	  {
+	    // This is an invid field, non-editable.
+	    Invid inv = (Invid)((invid_field)field).getValue();
+	    ((JButton)comp).setText(gc.getSession().viewObjectLabel(inv));
 	  }
 	else if (comp instanceof JpassField)
 	  {
@@ -2438,7 +2460,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this);
+    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
     objectHash.put(vp, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
