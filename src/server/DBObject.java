@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2001/08/14 16:42:02 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2001/08/15 03:47:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.130 $ $Date: 2001/08/14 16:42:02 $
+ * @version $Revision: 1.131 $ $Date: 2001/08/15 03:47:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1465,6 +1465,9 @@ public class DBObject implements db_object, FieldType, Remote {
    * collisions, but we don't need an extra 'next' pointer in the
    * DBField class, saving us 4 bytes of memory for every field of
    * every object in the database.</p>.
+   *
+   * <p>This method will throw an exception if a field with a matching
+   * field id is not already present in the fieldAry.</p>
    */
 
   public final void replaceField(DBField field)
@@ -1492,8 +1495,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    if (index == hashindex)
 	      {
 		// couldn't find it
-
-		return;
+		throw new RuntimeException("Error, DBObject.replaceField could not find matching field");
 	      }
 	  }
 
@@ -2218,6 +2220,8 @@ public class DBObject implements db_object, FieldType, Remote {
     return results;
   }
 
+
+
   /**
    * <p>Generate a complete printed representation of the object,
    * suitable for printing to a debug or log stream.</p>
@@ -2225,7 +2229,23 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public void print(PrintStream out)
   {
-    print(new PrintWriter(out));
+    out.print(this.getPrintString());
+  }
+
+  /**
+   * <p>Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.</p>
+   */
+
+  public String getPrintString()
+  {
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    this.print(writer);
+    writer.close();
+
+    return stringTarget.toString();
   }
 
   /**
@@ -2283,21 +2303,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	      }
 	  } 
       }   
-  }
-
-  /**
-   * <p>This method takes the print method and dumps it to a String</p>
-   */
-
-  public String toFullString()
-  {
-    StringWriter stringTarget = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringTarget);
-
-    this.print(writer);
-    writer.close();
-
-    return stringTarget.toString();
   }
 
   /**

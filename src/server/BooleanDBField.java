@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2001/04/16 04:54:23 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2001/08/15 03:47:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -265,11 +265,6 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public synchronized String getValueString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (value == null)
       {
 	return "null";

@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/04/16 04:54:26 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/08/15 03:47:18 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -217,11 +217,6 @@ public class FloatDBField extends DBField implements float_field {
 
   public synchronized String getValueString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (value == null)
       {
 	return "null";

@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2001/08/14 16:42:02 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/08/15 03:47:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,7 +75,7 @@ import java.rmi.RemoteException;
 
 public class DBObjectDeltaRec implements FieldType {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
@@ -258,17 +258,16 @@ public class DBObjectDeltaRec implements FieldType {
 
 	    fieldName = fieldDef.getName();
 
-	    if (debug)
-	      {
-		System.err.println(">> DBObjectDeltaRec():  Reading delta for field " + 
-				   fieldName + ":" + fieldcode);
-	      }
-
 	    status = "Reading deletion boolean for field " + i;
 
 	    if (in.readBoolean())
 	      {
 		// we're deleting this field
+
+		if (debug)
+		  {
+		    System.err.println("Reading field deletion record field (" + fieldName + ":" + fieldcode + ") for field " + i);
+		  }
 
 		fieldRecs.addElement(new fieldDeltaRec(fieldcode, null));
 		continue;
@@ -291,25 +290,10 @@ public class DBObjectDeltaRec implements FieldType {
 
 	    scalar = in.readBoolean();
 
-	    if (debug)
-	      {
-		System.err.println(">> DBObjectDeltaRec(): field " + i + 
-				   ", field = " + fieldName);
-
-		if (scalar)
-		  {
-		    System.err.println(">> DBObjectDeltaRec(): " + fieldName +
-				       " is a scalar record");
-		  }
-		else
-		  {
-		    System.err.println(">> DBObjectDeltaRec(): field " + 
-				       fieldName + " is a vector diff record");
-		  }
-	      }
-
 	    if (scalar)
 	      {
+		fieldDeltaRec f_r = null;
+
 		// ok, need to identify the type and read in a field
 
 		switch (typecode)
@@ -322,8 +306,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new BooleanDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new BooleanDBField(null, in, fieldDef));
+
 		    break;
 
 		  case NUMERIC:
@@ -334,8 +318,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new NumericDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new NumericDBField(null, in, fieldDef));
+
 		    break;
 
  		  case FLOAT:
@@ -346,8 +330,8 @@ public class DBObjectDeltaRec implements FieldType {
  			System.err.println(status);
  		      }
 		    
- 		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
- 							   new FloatDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new FloatDBField(null, in, fieldDef));
+
  		    break;
 
 		  case DATE:
@@ -358,8 +342,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new DateDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new DateDBField(null, in, fieldDef));
+
 		    break;
 
 		  case STRING:
@@ -370,8 +354,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new StringDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new StringDBField(null, in, fieldDef));
+
 		    break;
 
 		  case INVID:
@@ -382,8 +366,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new InvidDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new InvidDBField(null, in, fieldDef));
+
 		    break;
 
 		  case PERMISSIONMATRIX:
@@ -394,8 +378,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new PermissionMatrixDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new PermissionMatrixDBField(null, in, fieldDef));
+
 		    break;
 
 		  case PASSWORD:
@@ -406,8 +390,8 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new PasswordDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new PasswordDBField(null, in, fieldDef));
+
 		    break;
 
 		  case IP:
@@ -418,9 +402,29 @@ public class DBObjectDeltaRec implements FieldType {
 			System.err.println(status);
 		      }
 
-		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
-							   new IPDBField(null, in, fieldDef)));
+		    f_r = new fieldDeltaRec(fieldcode, new IPDBField(null, in, fieldDef));
+
 		    break;
+		  }
+
+		fieldRecs.addElement(f_r);
+
+		if (debug)
+		  {
+		    // oh, this is such a hack.  we can't use the
+		    // getValueString() method on a DBField without
+		    // the field having a pointer to a container
+		    // object so that it can look up its field
+		    // definition to make a vector/scalar
+		    // determination.
+
+		    // set the owner so the toString() can resolve everything
+
+		    f_r.scalarValue.setOwner(baseDef.getObjectHook());
+		    
+		    System.err.println("Value: " + f_r.toString());
+
+		    f_r.scalarValue.setOwner(null);
 		  }
 	      }
 	    else
@@ -611,7 +615,7 @@ public class DBObjectDeltaRec implements FieldType {
 
 	if (debug)
 	  {
-	    System.err.println("Emitting field " + fdRec.fieldcode + " for invid " + invid.toString());
+	    System.err.println("Emitting fieldDeltaRec:\n\t" + fdRec.toString());
 	  }
 
 	out.writeShort(fdRec.fieldcode);
@@ -768,7 +772,6 @@ public class DBObjectDeltaRec implements FieldType {
 	  {
 	    fieldRec.scalarValue.setOwner(copy);
 
-	    copy.clearField(fieldRec.fieldcode);
 	    copy.replaceField(fieldRec.scalarValue);
 
 	    continue;
@@ -812,5 +815,23 @@ public class DBObjectDeltaRec implements FieldType {
       }
 
     return copy;
+  }
+
+  public String toString()
+  {
+    StringBuffer buf = new StringBuffer();
+
+    buf.append("DBObjectDeltaRec: invid ");
+    buf.append(invid);
+    buf.append("\n");
+
+    for (int i = 0; i < fieldRecs.size(); i++)
+      {
+	fieldDeltaRec fr = (fieldDeltaRec) fieldRecs.elementAt(i);
+	buf.append(fr.toString());
+	buf.append("\n");
+      }
+
+    return buf.toString();
   }
 }

@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/08/14 16:42:02 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/08/15 03:47:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,6 +50,8 @@
 
 package arlut.csd.ganymede;
 
+import arlut.csd.Util.StringUtils;
+
 import java.io.*;
 import java.util.*;
 
@@ -84,7 +86,7 @@ import java.util.*;
 
 public class DBJournal implements ObjectStatus {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public static void setDebug(boolean val)
   {
@@ -389,7 +391,7 @@ public class DBJournal implements ObjectStatus {
 		      {
 			System.err.println("Create: " + obj.getInvid());
 
-			obj.print(System.err);
+			printObject(obj);
 		      }
 
 		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
@@ -409,6 +411,18 @@ public class DBJournal implements ObjectStatus {
 
 		    obj = delta.applyDelta(original);
 
+		    // we have to do the delta.toString() after we apply the delta so that
+		    // the scalarValue fields get parented
+
+		    if (debug)
+		      {
+			System.err.println("Delta read:\n\t" + StringUtils.replaceStr(delta.toString(),"\n","\n\t") + "\n");
+
+			System.err.println("DBJournal.load(): original object, before delta edit:");
+
+			printObject(original);
+		      }
+
 		    if (!base.objectTable.containsKey(obj.getID()))
 		      {
 			System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
@@ -416,8 +430,9 @@ public class DBJournal implements ObjectStatus {
 
 		    if (debug)
 		      {
-			System.err.print("Edit: ");
-			obj.print(System.err);
+			System.err.println("DBJournal.load(): object after delta edit:");
+
+			printObject(obj);
 		      }
 
 		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
@@ -556,8 +571,8 @@ public class DBJournal implements ObjectStatus {
 
 		if (debug)
 		  {
-		    System.err.print("Creating object:\n\t");
-		    eObj.print(System.err);
+		    System.err.println("Creating object:");
+		    printObject(eObj);
 		  }
 		break;
 
@@ -570,8 +585,11 @@ public class DBJournal implements ObjectStatus {
 		
 		if (debug)
 		  {
-		    System.err.print("Editing object:\n\t");
-		    eObj.print(System.err);
+		    System.err.print("Wrote object edit record:\n\t");
+
+		    System.err.println(StringUtils.replaceStr(delta.toString(),"\n","\n\t"));
+
+		    //		    printObject(eObj);
 		  }
 
 		break;
@@ -583,16 +601,17 @@ public class DBJournal implements ObjectStatus {
 
 		if (debug)
 		  {
-		    System.err.print("Deleting object:\n\t");
-		    System.err.println(eObj.objectBase.object_name + " : " + eObj.getID());
+		    System.err.println("Wrote object deletion record:");
+		    System.err.println("\t" + eObj.objectBase.object_name + " : " + eObj.getID());
 		  }
 		break;
 
 	      case DROPPING:
 		if (debug)
 		  {
-		    System.err.print("Dropping object:\n\t");
-		    eObj.print(System.err);
+		    System.err.println("Dropping object:");
+
+		    printObject(eObj);
 		  }
 		break;
 	      }
@@ -674,6 +693,15 @@ public class DBJournal implements ObjectStatus {
 	jFile.readLong();		// date is there for others to look at
       }
   }
+
+  private void printObject(DBObject obj)
+  {
+    String objectStr = obj.getPrintString();
+    
+    objectStr = StringUtils.replaceStr(objectStr, "\n", "\n\t");
+    
+    System.err.println("\t" + objectStr);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -722,7 +750,7 @@ class JournalEntry {
     if (debug)
       {
 	System.err.println("JournalEntry.process():");
-	System.err.println(this.toString());
+	System.err.println("\t" + StringUtils.replaceStr(this.toString(), "\n", "\n\t"));
       }
 
     if (obj == null)
@@ -873,9 +901,7 @@ class JournalEntry {
   {
     if (base != null && obj != null)
       {
-	return "base: " + base.toString() + "\n" +
-	  "id: " + id + "\n" +
-	  "obj: \n" + obj.toFullString();
+	return obj.getPrintString();
       }
     else if (base != null)
       {
@@ -887,7 +913,7 @@ class JournalEntry {
       {
 	return "base: null\n" +
 	  "id: " + id + "\n" +
-	  "obj: \n" + obj.toFullString();
+	  "obj: \n" + obj.getPrintString();
       }
     else
       {

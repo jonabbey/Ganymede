@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2001/06/01 01:49:59 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2001/08/15 03:47:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -560,11 +560,21 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
+   * <P>This method returns a text encoded value for this DBField
+   * without checking permissions.</P>
    *
-   * Returns a String representing the value of this field.
+   * <P>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the 
+   * {@link arlut.csd.ganymede.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm()} 
+   * method.</P>
    *
-   * @see arlut.csd.ganymede.db_field
-   *
+   * <P>If this method checked permissions and the getPerm() method
+   * failed for some reason and tried to report the failure using
+   * object.getLabel(), as it does at present, the server could get
+   * into an infinite loop.</P>
    */
 
   abstract public String getValueString();

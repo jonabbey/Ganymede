@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 2001/06/13 22:58:35 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 2001/08/15 03:47:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -668,11 +668,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public synchronized String getValueString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (this.isDefined())
       {
 	StringBuffer result = new StringBuffer();

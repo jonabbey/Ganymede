@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2001/07/27 01:57:57 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2001/08/15 03:47:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -869,11 +869,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public synchronized String getValueString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     StringBuffer result = new StringBuffer();
     PermEntry entry = null;
     String key = null;

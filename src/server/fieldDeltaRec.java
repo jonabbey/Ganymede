@@ -8,15 +8,16 @@
    
    Created: 7 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:57 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/08/15 03:47:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -50,6 +51,7 @@
 
 package arlut.csd.ganymede;
 
+import arlut.csd.Util.VectorUtils;
 import java.util.*;
 
 /*------------------------------------------------------------------------------
@@ -160,4 +162,34 @@ class fieldDeltaRec {
       }
   }
 
+  /**
+   * <p>This method generates a diagnostic representation of this fieldDeltaRec.</p>
+   *
+   * <p>This method will probably fail with an exception if the field 'scalarValue'
+   * has not been initialized with a plausible owner.</p>
+   */
+
+  public String toString()
+  {
+    if (!vector)
+      {
+	if (scalarValue == null)
+	  {
+	    return "<field: " + fieldcode + ", *deleting*>";
+	  }
+
+	return "<field: " + fieldcode + ", new val = " + scalarValue.getValueString() + ">";
+      }
+
+    StringBuffer result = new StringBuffer();
+
+    result.append("<field: ");
+    result.append(fieldcode);
+    result.append(", adding: ");
+    result.append(VectorUtils.vectorString(addValues));
+    result.append(", deleting: ");
+    result.append(VectorUtils.vectorString(delValues));
+
+    return result.toString();
+  }
 }

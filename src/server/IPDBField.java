@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/04/16 04:54:26 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/08/15 03:47:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -891,21 +891,11 @@ public class IPDBField extends DBField implements ip_field {
     return (Byte[]) getVectVal().elementAt(index);
   }
 
-  public String getValueString()
-  {
-    return getValueString(false);
-  }
-
-  public synchronized String getValueString(boolean local)
+  public synchronized String getValueString()
   {
     String result = "";
 
     /* -- */
-
-    if (!local && !verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
 
     if (!isVector())
       {
