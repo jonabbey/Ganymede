@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -488,7 +488,7 @@ public class JstringField extends JentryField implements KeyListener{
 
 	    value = str;
 		
-	    changed = true;
+	    changed = false;
 	  }
       }
   }
