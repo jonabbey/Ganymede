@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,7 +97,6 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   String password;
   String shell;
-  String forward;
 
   /**
    *
@@ -174,8 +173,6 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 			 userObject.shellChoices.getLabels(),
 			 (String) stringfield.getValueLocal());
 
-	dialog.addString("Forwarding Address");
-	    
 	retVal.setDialog(dialog);
 	retVal.setCallback(this); // have the client get back to us
 	
@@ -203,12 +200,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 	      }
 	  } 
 
-	forward = (String) returnHash.get("Forwarding Address");
 	shell = (String) returnHash.get("Shell");
 	password = (String) returnHash.get("New Password");
 
 	// and do the inactivation.. userObject will consult us for
-	// forward, shell, and password
+	// shell and password
 	    
 	retVal = userObject.reactivate(this);
 
