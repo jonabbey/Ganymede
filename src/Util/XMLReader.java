@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/12/04 04:06:03 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/12/04 04:14:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -155,7 +155,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     this.bufferSize = bufferSize;
 
-    if (true) // optimize for single processor
+    if (false) // optimize for single processor
       {
 	this.highWaterMark = bufferSize - 5;
 	this.lowWaterMark = 5;
@@ -729,13 +729,13 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       {
 	if (!done)
 	  {
-	    close();
 	    ex.printStackTrace();
-	    System.err.println("XMLReader parse error: " + ex.getMessage());
 
-	    System.err.println("Dumping circleBuffer");
+	    err.println("XMLReader parse error: " + ex.getMessage());
+	    err.println("Leading context:");
+	    err.println(circleBuffer.getContents());
 
-	    System.err.println(circleBuffer.getContents());
+	    close();
 
 	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
 	  }
