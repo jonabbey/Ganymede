@@ -3,8 +3,8 @@
 # Ganymede client build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.6 $
-# Date: $Date: 1999/04/06 20:56:36 $
+# Version: $Revision: 1.7 $
+# Date: $Date: 1999/04/15 22:34:01 $
 #
 ############################################################
 
@@ -28,11 +28,11 @@ echo "Compiling $COMPNAME"
 umask 022;
 
 CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
-$JAVAC -J-mx128m -deprecation -d $CLASSDIR *.java
+$JAVAC -J-mx128m -deprecation -d $TARGETDIR *.java
 
 echo "Building rmi stubs and skeletons"
 
-$JAVADIR/rmic -d $CLASSDIR arlut.csd.ganymede.client.ClientBase
+$JAVADIR/rmic -d $TARGETDIR arlut.csd.ganymede.client.ClientBase
 
 # Return to our last directory
 
