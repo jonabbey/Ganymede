@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -466,7 +466,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	invid = (Invid) inv.getElement(i);
 
-	personaObject = (DBObject) Ganymede.internalSession.view_db_object(invid);
+	// it's okay to use viewDBObject() here, because we are always
+	// going to be doing this for internal purposes
+
+	personaObject = session.viewDBObject(invid);
 
 	if (personaObject.getLabel().equals(persona))
 	  {
@@ -566,6 +569,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		continue;
 	      }
+
+	    // it's okay to use session.viewDBObject here because we
+	    // are always going to be doing this operation for supergash's
+	    // benefit.  Objects that are pulled directly from the hashes
+	    // don't have owners, and so will always grant us access.
 
 	    owner = session.viewDBObject(inv);
 
@@ -1015,8 +1023,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     QueryResult temp_result = queryDispatch(query, false, false);
 
-    /* -- */
-
     if (temp_result != null)
       {
 	Invid invid;
@@ -1027,7 +1033,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    invid = (Invid) enum.nextElement();
 
-	    result.addRow(session.viewDBObject(invid), this);
+	    // unfortunately, we do need to use view_db_object here.. this
+	    // involves a copy of each object being made for our benefit,
+	    // but this is necessary so that we don't see fields in a particular
+	    // object that we shouldn't.
+	    //
+	    // let's hope that JVM's get real good about garbage collection.
+
+	    result.addRow((DBObject) view_db_object(invid, false), this);
 	  }
       }
 
@@ -1161,11 +1174,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (embedded)
       {
-	Ganymede.debug("Query on embedded type");
+	// Ganymede.debug("Query on embedded type");
+
+	System.err.println("Query on embedded type");
       }
     else
       {
-	Ganymede.debug("Query on non-embedded type");
+	// Ganymede.debug("Query on non-embedded type");
+
+	System.err.println("Query on non-embedded type");
       }
 
     // are we able to optimize the query into a direct lookup?
@@ -1236,6 +1253,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		     resultobject.editset.equals(session.editSet)))
 		  {
 		    addResultRow(resultobject, query, result, internal);
+
+		    System.err.println("Returning result from optimized query");
+
 		    return result;
 		  }
 	      }
@@ -1276,7 +1296,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		       (obj.getTypeID() != containingBase.getTypeID()))
 		  {
 		    dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
-		    obj = (DBObject) view_db_object((Invid) dbf.getValue());
+		    
+		    // okay to use session.viewDBObject() here because addResultRow
+		    // does its own permissions checking if necessary
+		    
+		    obj = session.viewDBObject((Invid) dbf.getValue());
 		  }
 
 		if (obj == null)
@@ -1332,7 +1356,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				   (obj.getTypeID() != containingBase.getTypeID()))
 			      {
 				dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
-				obj = (DBObject) view_db_object((Invid) dbf.getValue());
+
+				// it's okay to use session.viewDBObject() here because
+				// addResultRow() does its own permissions checking
+
+				obj = session.viewDBObject((Invid) dbf.getValue());
 			      }
 			
 			    if (obj == null)
@@ -1433,10 +1461,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public String viewObjectLabel(Invid invid)
   {
-    // should we try to check permissions here?  This would
-    // make this operation a bit heavier.. there's little
-    // harm in allowing viewing of object labels if they
-    // have the invid, is there?
+    // We don't check permissions here, as we use session.viewDBObject().
+    //
+    // We have made the command decision that finding the label for an
+    // invid is not something we need to guard against.  Using
+    // session.viewDBObject() here makes this a much more lightweight
+    // operation.
 
     try
       {
@@ -1471,7 +1501,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    obj = (DBObject) session.viewDBObject(invid);
+    // we do our own permissions checking, so we can use session.viewDBObject().
+
+    obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -1526,7 +1558,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    obj = (DBObject) session.viewDBObject(invid);
+    // we do our own permissions checking, so we can use session.viewDBObject().
+
+    obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -1564,10 +1598,45 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * not yet been committed, and other clients would not be able to
    * see that version of the object.
    *
+   * NOTE: It is critical that any code that looks at the values of
+   * fields in a DBObject go through a view_db_object() method
+   * or else the object will not properly know who owns it, which
+   * is critical for it to be able to properly authenticate field
+   * access.
+   *
    * @see arlut.csd.ganymede.Session
    */
 
   public synchronized db_object view_db_object(Invid invid)
+  {
+    return view_db_object(invid, true);
+  }
+
+  /**
+   * View an object from the database.  If the return value is null,
+   * getLastError() should be called for a description of the problem.
+   *
+   * view_db_object() can be done at any time, outside of the bounds of
+   * any transaction.  view_db_object() returns a snapshot of the object's
+   * state at the time the view_db_object() call is processed, and will
+   * be transaction-consistent internally.
+   *
+   * If view_db_object() is called during a transaction, the object
+   * will be returned as it stands during the transaction.. that is,
+   * if the object has been changed during the transaction, that
+   * changed object will be returned, even if the transaction has
+   * not yet been committed, and other clients would not be able to
+   * see that version of the object.
+   *
+   * NOTE: It is critical that any code that looks at the values of
+   * fields in a DBObject go through a view_db_object() method
+   * or else the object will not properly know who owns it, which
+   * is critical for it to be able to properly authenticate field
+   * access.
+   *
+   */
+
+  public synchronized db_object view_db_object(Invid invid, boolean checkPerms)
   {
     DBObject obj;
     PermEntry perm;
@@ -1581,7 +1650,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	throw new NullPointerException("argh!! null-o in view_db_object on invid " + invid.toString());
       }
 
-    if (getPerm(obj).isVisible())
+    if (!checkPerms || getPerm(obj).isVisible())
       {
 	try
 	  {
@@ -1797,7 +1866,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (userInvid != null)
       {
-	return (DBObject) view_db_object(userInvid);
+	// okay to use session.viewDBObject() here, because
+	// getUser() is only used for internal purposes,
+	// and we don't need or want to do permissions checking
+
+	return session.viewDBObject(userInvid);
       }
     
     return null;
@@ -2137,6 +2210,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (permTimeStamp == null || !permTimeStamp.before(permBase.lastChange))
       {
+	// it's okay to use session.viewDBObject() here because the self permissions
+	// object is a unique object that all instances of GanymedeSession must
+	// have access to.
+
 	selfPermObj = session.viewDBObject(selfPermissionObjectInvid);
 
 	PermissionMatrixDBField field = (PermissionMatrixDBField) selfPermObj.getField(SchemaConstants.PermMatrix);
