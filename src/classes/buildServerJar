@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.15 $
-# Date: $Date: 1999/11/05 21:06:35 $
+# Version: $Revision: 1.16 $
+# Date: $Date: 2000/01/29 02:30:13 $
 #
 ############################################################
 
@@ -81,6 +81,7 @@ ln -s ../MD5Crypt.class .
 
 ./sync_tree
 ./sync_tree.gnu
+./sync_tree.xml
 
 $JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class messageObject.class MD5*.class
 
