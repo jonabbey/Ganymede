@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2001/06/28 05:09:31 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2001/07/06 06:37:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1070,7 +1070,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// reset the forwarding address
 
-	if (reactivateWizard.forward != null)
+	if (reactivateWizard.forward != null && !reactivateWizard.forward.equals(""))
 	  {
 	    stringfield = (StringDBField) getField(EMAILTARGET);
 	
