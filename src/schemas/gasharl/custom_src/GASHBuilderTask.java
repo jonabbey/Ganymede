@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/03/27 20:35:41 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/04/04 05:17:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,6 +53,7 @@ package arlut.csd.ganymede.custom;
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
+import arlut.csd.Util.VectorUtils;
 
 import java.util.*;
 import java.text.*;
@@ -1680,17 +1681,86 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * 
-   * This method generates a file that can be used to synchronize passwords
-   * and accounts to an NT system.
+   * <P>This method generates a file that can be used to synchronize
+   * passwords and accounts to an NT PDC and to Samba, and the like.</P>
    *
+   * <P>This method writes out a file 'rshNT.txt', which contains information
+   * on user and group creation, status change, rename, inactivation, and
+   * deletion.</P>
+   *
+   * <P>The file is structured along the lines of a traditional Windows
+   * .INI file, as follows:</P>
+   *
+   * <PRE>
+   * [Create/Update]
+   * broccol:oldname:dwEsx8zlWOM/PA:Jonathan Abbey:S321:CSD,3199,3357681
+   * amy::dwEsx8zlWOM/PA:Amy Bush:S222:CSD,3028,
+   * [Inactivate]
+   * oldaccount
+   * [Delete]
+   * [Create/Update Groups]
+   * omssys:oldname:broccol,amy,omara,mulvaney
+   * omsovr::abc,gomod,gojo,kneuper,cb,luna
+   * [Inactivate Groups]
+   * oldgroup
+   * [Delete Groups]
+   * </PRE>
+   *
+   * <P>In this file, there are six sections.  The 'Create/Update' sections
+   * provide the current state of the user or group.  If the user or
+   * group was renamed since the last time the update was propagated
+   * to NT/Samba, the old name will be inserted after the first
+   * colon, where oldname is, above.  The inactivate sections list
+   * users and groups that are currently inactivated.  The delete
+   * sections list users and groups that have recently been deleted,
+   * and which need to be removed from the Samba/NT databases.</P>
+   *
+   * <P>In actuality, the way the Ganymede server is structured, this
+   * method has no way of reporting on users and groups that have been
+   * renamed or deleted in the server; the GASHBuilderTask is executed
+   * after the transaction in which a deletion or rename occurs has
+   * already been committed.  To get around this problem, the userCustom
+   * and groupCustom classes are constructed so that whenever a user or
+   * group is renamed or deleted, an external script is run which, among
+   * other things, writes a note to a file indicating that the user or
+   * group was renamed or deleted.  The rshNT.txt file emitted by this
+   * method needs to be processed by an external perl script 
+   * (ntsamba.pl, currently), which takes the notes on user and group
+   * rename and deletion, merges that information with the information
+   * we write out in this method, and then passes the expanded
+   * rshNT.txt file to both Samba and our NT PDC.</P>
+   *
+   * <P>This necessity for external scratchpad files is ugly, but
+   * necessary unless very significant modifications are made to the
+   * Ganymede server.  The Ganymede server would have to be able
+   * to provide builder tasks the ability to scan backwards in time
+   * through the database, which it currently cannot do, or the
+   * server would have to tie transaction commit synchronously to
+   * the builder task system.  In either case, a tricky problem, so
+   * for now we just work around it.</P>
+   *
+   * <P>Sooner or later, the Ganymede server may need to have some
+   * support for differential changes added.  The current Ganymede
+   * server mechanisms really only suits the case where the builder
+   * tasks simply write out the current state of the database without
+   * recourse to earlier states.</P>
+   *
+   * <P>Alternatively, the NT/Samba support could be reimplemented in
+   * a fashion whereby the perl code on NT and/or Samba are responsible
+   * for remembering at all times the known state of users and groups
+   * created by Ganymede, and to delete users and groups that are
+   * missing in a future dump.  User and group renaming would still need
+   * to be explicitly handled by the Ganymede server in some fashion,
+   * though.</P>
    */
 
   private boolean writeNTfile()
   {
     PrintWriter rshNT = null;
     DBObject user;
+    DBObject group;
     Enumeration users;
+    Enumeration groups;
     Vector inactives = new Vector();
 
     try
@@ -1728,16 +1798,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    
 	    String password = passField.getPlainText();
 
-	    if (password == null || password.equals(""))
-	      {
-		continue;
-	      }
-
 	    // ok, we've got a user with valid plaintext password
 	    // info.  Write it.
 
 	    rshNT.print(escapeString(user.getLabel()));
-	    rshNT.print("::");
+	    rshNT.print("::");	// leave a space for rename info to be inserted later
 	    rshNT.print(escapeString(password));
 
 	    String fullname = (String) user.getFieldValueLocal((short) 257); // FULLNAME
@@ -1761,6 +1826,67 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	rshNT.println("[Delete]");
+
+	// user deletion information is inserted by the external
+	// ntsamba.pl script
+
+	rshNT.println("[Create/Update Groups]");
+
+	inactives = new Vector();
+
+	// first we write out account groups for the NT file
+
+	groups = enumerateObjects((short) 257);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		inactives.addElement(group.getLabel());
+		continue;
+	      }
+
+	    rshNT.print(escapeString(group.getLabel()));
+	    rshNT.print("::");	// skip rename info for now
+	    
+	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+
+	    rshNT.println(escapeString(usersField.getValueString()));
+	  }
+
+	// second we write out user netgroups
+
+	groups = enumerateObjects((short) 270);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		inactives.addElement(group.getLabel());
+		continue;
+	      }
+
+	    rshNT.print(escapeString(group.getLabel()));
+	    rshNT.print("::");	// skip rename info for now
+	    
+	    rshNT.println(escapeString(VectorUtils.vectorString(netgroupMembers(group))));
+	  }
+
+	rshNT.println("[Inactivate Groups]");
+
+	for (int i = 0; i < inactives.size(); i++)
+	  {
+	    rshNT.println(inactives.elementAt(i));
+	  }
+
+	rshNT.println("[Delete Groups]");
+
+	// group and netgroup deletion information is inserted by the
+	// external ntsamba.pl script
       }
     finally
       {
@@ -1768,6 +1894,65 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     return true;
+  }
+
+  /**
+   * <P>This method generates a transitive closure of the members of a
+   * user netgroup, including all users in all member netgroups,
+   * recursively.</P> 
+   */
+
+  private Vector netgroupMembers(DBObject object)
+  {
+    return netgroupMembers(object, null, null);
+  }
+
+  private Vector netgroupMembers(DBObject object, Vector oldMembers, Hashtable graphCheck)
+  {
+    if (oldMembers == null)
+      {
+	oldMembers = new Vector();
+      }
+
+    if (graphCheck == null)
+      {
+	graphCheck = new Hashtable();
+      }
+
+    // make sure we don't get into an infinite loop if someone made
+    // the user netgroup graph circular
+
+    if (graphCheck.containsKey(object.getInvid()))
+      {
+	return oldMembers;
+      }
+    else
+      {
+	graphCheck.put(object.getInvid(), object.getInvid());
+      }
+
+    // add users in this Netgroup to oldMembers
+
+    InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
+
+    oldMembers = VectorUtils.union(oldMembers, 
+				   VectorUtils.stringVector(users.getValueString(), ", "));
+
+    // recursively add in users in any netgroups in this netgroup
+
+    InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
+
+    for (int i = 0; i < subGroups.size(); i++)
+      {
+	DBObject subGroup = getObject(subGroups.value(i));
+
+	if (!subGroup.isInactivated())
+	  {
+	    oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
+	  }
+      }
+
+    return oldMembers;
   }
 
   /** 
@@ -1778,6 +1963,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private String escapeString(String in)
   {
+    if (in == null)
+      {
+	return "";
+      }
+
     StringBuffer buffer = new StringBuffer();
     char[] ary = in.toCharArray();
 
