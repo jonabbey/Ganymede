@@ -219,6 +219,7 @@ public class FileOps {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
     InputStream iStream = p.getInputStream();
     InputStream eStream = p.getErrorStream();
+    byte[] buffer = new byte[4096];
 
     try
       {
@@ -247,7 +248,8 @@ public class FileOps {
 		try
 		  {
 		    int size = iStream.available();
-		    iStream.skip(size);
+		    iStream.read(buffer, 0, (int) Math.min(4096, size));
+		    //		    iStream.skip(size);
 		  }
 		catch (IOException exc)
 		  {
