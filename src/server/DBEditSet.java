@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2002/03/14 21:45:35 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2002/03/14 22:37:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -964,13 +964,7 @@ public class DBEditSet {
 	baseSet = commit_lockBases(); // may block
 	committedObjects = commit_handlePhase1();
 	commit_handlePhase2(committedObjects);
-	commit_createLogEvents(committedObjects);
-	commit_persistTransaction();
-	commit_logTransaction();
-	commit_replaceObjects(committedObjects);
-	commit_updateNamespaces();
-	DBDeletionManager.releaseSession(session);
-	commit_updateBases(baseSet);
+	commit_integrateChanges(committedObjects, baseSet);
 	releaseWriteLock();
 	this.deconstruct();
 
@@ -1188,6 +1182,9 @@ public class DBEditSet {
    * <p>This private helper method for the commit() method records
    * the creation/modification timestamp for the vector of
    * committed objects, then calls commitPhase2() on them.</p>
+   *
+   * @param committedObjects Vector of DBEditObjects that have been
+   * created, changed, or deleted during this transaction
    */
 
   private final void commit_handlePhase2(Vector committedObjects)
@@ -1266,155 +1263,35 @@ public class DBEditSet {
   }
 
   /**
-   * <p>Private helper method for commit() that integrates committed objects
-   * back into the DBStore hashes.</p>
-   */ 
-
-  private final void commit_replaceObjects(Vector committedObjects)
-  {
-    DBEditObject eObj;
-    DBObjectBase base;
-
-    /* -- */
-
-    int committedObjectsSize = committedObjects.size();
-    
-    for (int i = 0; i < committedObjectsSize; i++)
-      {
-	eObj = (DBEditObject) committedObjects.elementAt(i);
-
-	base = eObj.getBase();
-
-	// Create a new DBObject from our DBEditObject and insert
-	// into the object hash
-
-	switch (eObj.getStatus())
-	  {
-	  case ObjectStatus.CREATING:
-	  case ObjectStatus.EDITING:
-
-	    // we need to update DBStore.backPointers to take into account
-	    // the changes made to this object.
-
-	    syncObjBackPointers(eObj);
-
-	    // Create a read-only version of eObj, with all fields
-	    // reset to checked-in status, put it into our object hash
-
-	    // note that this new DBObject will not include any
-	    // transient fields which self-identify as undefined
-
-	    base.objectTable.put(new DBObject(eObj));
-
-	    // (note that we can't use a no-sync put above, since
-	    // we don't prevent asynchronous viewDBObject().
-
-	    if (getGSession() != null)
-	      {
-		getGSession().checkIn();
-	      }
-
-	    base.store.checkIn(); // update checkout count
-
-	    break;
-
-	  case ObjectStatus.DELETING:
-
-	    // we need to update DBStore.backPointers to take into account
-	    // the changes made to this object.
-
-	    syncObjBackPointers(eObj);
-
-	    // Deleted objects had their deletion finalization done before
-	    // we ever got to this point.  
-
-	    // Note that we don't try to release the id for previously
-	    // registered objects.. the base.releaseId() method really
-	    // can only handle popping object id's off of a stack, and
-	    // can't do anything for object id's unless the id was the
-	    // last one allocated in that base, which is unlikely
-	    // enough that we don't worry about it here.
-
-	    base.objectTable.remove(eObj.getID());
-
-	    // (note that we can't use a no-sync remove above, since
-	    // we don't prevent asynchronous viewDBObject().
-
-	    session.GSession.checkIn();
-	    base.store.checkIn(); // count it as checked in once it's deleted
-	    break;
-
-	  case ObjectStatus.DROPPING:
-
-	    // don't need to update backpointers, since this object was
-	    // created and destroyed within this transaction
-
-	    // dropped objects had their deletion finalization done before
-	    // we ever got to this point.. 
-
-	    base.releaseId(eObj.getID()); // relinquish the unused invid
-
-	    if (getGSession() != null)
-	      {
-		getGSession().checkIn();
-	      }
-
-	    base.store.checkIn(); // count it as checked in once it's deleted
-	    break;
-	  }
-      }
-  }
-
-  /**
-   * <p>Private helper method for commit() which causes all namespaces to update
-   * themselves in conjunction with a commit.</p>
-   */
-
-  private final void commit_updateNamespaces()
-  {
-    // we don't synchronize on dbStore.nameSpaces, the nameSpaces
-    // vector should never have elements added or deleted while we are
-    // in the middle of a transaction, since that is only done during
-    // schema editing
-    
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
-      {
-	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
-      }
-  }
-
-  /**
-   * <p>Private helper method for commit() which causes all bases that were
-   * touched by this transaction to be updated.</p>
+   * <p>This private helper method for commit() integrates all
+   * committed objects back into the DBStore, handling on-disk change
+   * journaling, transaction logging, namespaces, and more.</p>
    *
-   * <p>This should be run as late as possible in the commit() sequence
-   * to minimize the chance that a previously scheduled builder task
-   * completes and updates its lastRunTime field after we have touched
-   * the timestamps on the changed bases.</p>
+   * @param committedObjects Vector of DBEditObjects that have been
+   * created, changed, or deleted during this transaction
+   *
+   * @param baseSet Vector of DBObjectBases that contain objects
+   * created, changed, or deleted during this transaction
    */
 
-  private final void commit_updateBases(Vector baseSet)
+  private final void commit_integrateChanges(Vector committedObjects, Vector baseSet) throws CommitFatalException
   {
-    DBObjectBase base;
-
-    for (int i = 0; i < baseSet.size(); i++)
-      {
-	base = (DBObjectBase) baseSet.elementAt(i);
-	
-	base.updateTimeStamp();
-	
-	// and, very important, update the base's snapshot vector
-	// so that any new queries that are issued will proceed
-	// against the new state of objects in this base
-	
-	base.updateIterationSet();
-      }
+    commit_createLogEvents(committedObjects);
+    commit_persistTransaction();
+    commit_logTransaction();
+    commit_replaceObjects(committedObjects);
+    commit_updateNamespaces();
+    DBDeletionManager.releaseSession(session);
+    commit_updateBases(baseSet);
   }
 
   /**
    * <p>This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to
    * objects during the committed transaction.</p>
+   *
+   * @param committedObjects Vector of DBEditObjects that have been created, changed, or deleted
+   * during this transaction
    */
 
   private final void commit_createLogEvents(Vector committedObjects)
@@ -1760,7 +1637,7 @@ public class DBEditSet {
    * <p>Will throw a CommitException if a failure was detected.</p>
    */
 
-  private final void commit_persistTransaction() throws CommitException
+  private final void commit_persistTransaction() throws CommitFatalException
   {
     try
       {
@@ -1823,6 +1700,158 @@ public class DBEditSet {
     
     logEvents.removeAllElements();
     logEvents = null;
+  }
+
+  /**
+   * <p>Private helper method for commit() that integrates committed
+   * objects back into the DBStore hashes.</p>
+   *
+   * @param committedObjects Vector of DBEditObjects that have been
+   * created, changed, or deleted during this transaction
+   */
+
+  private final void commit_replaceObjects(Vector committedObjects)
+  {
+    DBEditObject eObj;
+    DBObjectBase base;
+
+    /* -- */
+
+    int committedObjectsSize = committedObjects.size();
+    
+    for (int i = 0; i < committedObjectsSize; i++)
+      {
+	eObj = (DBEditObject) committedObjects.elementAt(i);
+
+	base = eObj.getBase();
+
+	// Create a new DBObject from our DBEditObject and insert
+	// into the object hash
+
+	switch (eObj.getStatus())
+	  {
+	  case ObjectStatus.CREATING:
+	  case ObjectStatus.EDITING:
+
+	    // we need to update DBStore.backPointers to take into account
+	    // the changes made to this object.
+
+	    syncObjBackPointers(eObj);
+
+	    // Create a read-only version of eObj, with all fields
+	    // reset to checked-in status, put it into our object hash
+
+	    // note that this new DBObject will not include any
+	    // transient fields which self-identify as undefined
+
+	    base.objectTable.put(new DBObject(eObj));
+
+	    // (note that we can't use a no-sync put above, since
+	    // we don't prevent asynchronous viewDBObject().
+
+	    if (getGSession() != null)
+	      {
+		getGSession().checkIn();
+	      }
+
+	    base.store.checkIn(); // update checkout count
+
+	    break;
+
+	  case ObjectStatus.DELETING:
+
+	    // we need to update DBStore.backPointers to take into account
+	    // the changes made to this object.
+
+	    syncObjBackPointers(eObj);
+
+	    // Deleted objects had their deletion finalization done before
+	    // we ever got to this point.  
+
+	    // Note that we don't try to release the id for previously
+	    // registered objects.. the base.releaseId() method really
+	    // can only handle popping object id's off of a stack, and
+	    // can't do anything for object id's unless the id was the
+	    // last one allocated in that base, which is unlikely
+	    // enough that we don't worry about it here.
+
+	    base.objectTable.remove(eObj.getID());
+
+	    // (note that we can't use a no-sync remove above, since
+	    // we don't prevent asynchronous viewDBObject().
+
+	    session.GSession.checkIn();
+	    base.store.checkIn(); // count it as checked in once it's deleted
+	    break;
+
+	  case ObjectStatus.DROPPING:
+
+	    // don't need to update backpointers, since this object was
+	    // created and destroyed within this transaction
+
+	    // dropped objects had their deletion finalization done before
+	    // we ever got to this point.. 
+
+	    base.releaseId(eObj.getID()); // relinquish the unused invid
+
+	    if (getGSession() != null)
+	      {
+		getGSession().checkIn();
+	      }
+
+	    base.store.checkIn(); // count it as checked in once it's deleted
+	    break;
+	  }
+      }
+  }
+
+  /**
+   * <p>Private helper method for commit() which causes all namespaces to update
+   * themselves in conjunction with a commit.</p>
+   */
+
+  private final void commit_updateNamespaces()
+  {
+    // we don't synchronize on dbStore.nameSpaces, the nameSpaces
+    // vector should never have elements added or deleted while we are
+    // in the middle of a transaction, since that is only done during
+    // schema editing
+    
+    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+      {
+	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
+      }
+  }
+
+  /**
+   * <p>Private helper method for commit() which causes all bases that
+   * were touched by this transaction to be updated.</p>
+   *
+   * <p>This should be run as late as possible in the commit()
+   * sequence to minimize the chance that a previously scheduled
+   * builder task completes and updates its lastRunTime field after we
+   * have touched the timestamps on the changed bases.</p>
+   *
+   * @param baseSet Vector of DBObjectBases that contain objects
+   * created, changed, or deleted during this transaction
+   */
+
+  private final void commit_updateBases(Vector baseSet)
+  {
+    DBObjectBase base;
+
+    for (int i = 0; i < baseSet.size(); i++)
+      {
+	base = (DBObjectBase) baseSet.elementAt(i);
+	
+	base.updateTimeStamp();
+	
+	// and, very important, update the base's snapshot vector
+	// so that any new queries that are issued will proceed
+	// against the new state of objects in this base
+	
+	base.updateIterationSet();
+      }
   }
 
   /**
