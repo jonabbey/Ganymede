@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/05/24 00:48:35 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/05/25 23:59:24 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -59,6 +59,7 @@ import org.xml.sax.*;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.Vector;
+import java.util.Hashtable;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -71,7 +72,7 @@ import java.util.Vector;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2000/05/24 00:48:35 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/05/25 23:59:24 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -115,11 +116,11 @@ public class xmlobject {
   int num = -1;
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlfield xmlfield}
-   * objects.</p>
+   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.client.xmlfield xmlfield}
+   * names to xmlfield objects.</p>
    */
 
-  Vector fields = null;
+  Hashtable fields = null;
 
   /**
    * <p>Reference to server-side object, if we have already created it/got a reference
@@ -174,7 +175,7 @@ public class xmlobject {
 
     // okay, we should contain some fields, then
 
-    fields = new Vector();
+    fields = new Hashtable();
 
     XMLItem nextItem = xmlclient.xc.getNextItem();
 
@@ -189,7 +190,7 @@ public class xmlobject {
 
 	    //	    System.err.println("Added new field: " + field.toString());	
 
-	    fields.addElement(field);
+	    fields.put(field.getName(), field);
 	  }
 	else
 	  {
@@ -272,9 +273,25 @@ public class xmlobject {
 	throw new IllegalArgumentException("mode must be 0, 1, or 2.");
       }
 
-    for (int i = 0; i < fields.size(); i++)
+    // we want to create/register the fields in their display order..
+    // this is to cohere with the expectations of custom server-side
+    // code, which may need to have higher fields set before accepting
+    // choices for lower fields
+
+    Vector templateVector = xmlclient.xc.loader.getTemplateVector(type);
+
+    for (int i = 0; i < templateVector.size(); i++)
       {
-	xmlfield field = (xmlfield) fields.elementAt(i);
+	FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
+
+	xmlfield field = (xmlfield) fields.get(template.getName());
+
+	if (field == null)
+	  {
+	    // missing field, no big deal.  just skip it.
+
+	    continue;
+	  }
 
 	if (field.fieldDef.isInvid() && mode == 0)
 	  {
@@ -358,9 +375,24 @@ public class xmlobject {
 
     result.append(">\n");
 
-    for (int i = 0; i < fields.size(); i++)
+    // add the fields in the server's display order
+
+    Vector templateVector = xmlclient.xc.loader.getTemplateVector(type);
+
+    for (int i = 0; i < templateVector.size(); i++)
       {
-	result.append("\t" + fields.elementAt(i) + "\n");
+	FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
+
+	xmlfield field = (xmlfield) fields.get(template.getName());
+
+	if (field == null)
+	  {
+	    // missing field, no big deal.  just skip it.
+
+	    continue;
+	  }
+
+	result.append("\t" + field + "\n");
       }
 
     result.append("</object>");

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/05/24 21:18:36 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/05/25 23:59:23 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.rmi.server.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2000/05/24 21:18:36 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2000/05/25 23:59:23 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -93,10 +93,10 @@ public class xmlfield implements FieldType {
 
   xmlobject owner;
 
-  Object value;			// if scalar
-  Vector setValues;		// if vector
-  Vector delValues;		// if vector
-  Vector addValues;		// if vector
+  Object value = null;		// if scalar
+  Vector setValues = null;	// if vector
+  Vector delValues = null;	// if vector
+  Vector addValues = null;	// if vector
 
   /* -- */
 
@@ -132,35 +132,59 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	Boolean bValue = parseBoolean(nextItem);
-
-	if (bValue != null)
+	if (nextItem.matchesClose(name))
 	  {
-	    value = bValue;
+	    value = null;
+	    return;
+	  }
+	else
+	  {
+	    Boolean bValue = parseBoolean(nextItem);
+
+	    if (bValue != null)
+	      {
+		value = bValue;
+	      }
 	  }
       }
     else if (fieldDef.getType() == FieldType.NUMERIC)
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	Integer iValue = parseNumeric(nextItem);
-
-	if (iValue != null)
+	if (nextItem.matchesClose(name))
 	  {
-	    value = iValue;
+	    value = null;
+	    return;
+	  }
+	else
+	  {
+	    Integer iValue = parseNumeric(nextItem);
+
+	    if (iValue != null)
+	      {
+		value = iValue;
+	      }
 	  }
       }
     else if (fieldDef.getType() == FieldType.DATE)
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	// System.err.println("Parsing date for item " + nextItem);
-
-	Date dValue = parseDate(nextItem);
-
-	if (dValue != null)
+	if (nextItem.matchesClose(name))
 	  {
-	    value = dValue;
+	    value = null;
+	    return;
+	  }
+	else
+	  {
+	    // System.err.println("Parsing date for item " + nextItem);
+
+	    Date dValue = parseDate(nextItem);
+
+	    if (dValue != null)
+	      {
+		value = dValue;
+	      }
 	  }
       }
     else if (fieldDef.getType() == FieldType.STRING)
@@ -189,8 +213,16 @@ public class xmlfield implements FieldType {
 	if (!fieldDef.isArray())
 	  {
 	    nextItem = xmlclient.xc.getNextItem();
-	    
-	    value = new xInvid(nextItem);
+	   
+	    if (nextItem.matchesClose(name))
+	      {
+		value = null;
+		return;
+	      }
+	    else
+	      {
+		value = new xInvid(nextItem);
+	      }
 	  }
 	else
 	  {
@@ -237,14 +269,22 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	try
+	if (nextItem.matchesClose(name))
 	  {
-	    xPassword pValue = new xPassword(nextItem);
-	    value = pValue;
+	    value = null;
+	    return;
 	  }
-	catch (NullPointerException ex)
+	else
 	  {
-	    ex.printStackTrace();
+	    try
+	      {
+		xPassword pValue = new xPassword(nextItem);
+		value = pValue;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		ex.printStackTrace();
+	      }
 	  }
       }
     else if (fieldDef.getType() == FieldType.IP)
@@ -253,7 +293,15 @@ public class xmlfield implements FieldType {
 	  {
 	    nextItem = xmlclient.xc.getNextItem();
 
-	    value = parseIP(nextItem);
+	    if (nextItem.matchesClose(name))
+	      {
+		value = null;
+		return;
+	      }
+	    else
+	      {
+		value = parseIP(nextItem);
+	      }
 	  }
 	else
 	  {
@@ -269,11 +317,19 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	Double fValue = parseFloat(nextItem);
-
-	if (fValue != null)
+	if (nextItem.matchesClose(name))
 	  {
-	    value = fValue;
+	    value = null;
+	    return;
+	  }
+	else
+	  {
+	    Double fValue = parseFloat(nextItem);
+
+	    if (fValue != null)
+	      {
+		value = fValue;
+	      }
 	  }
       }
 
@@ -321,6 +377,7 @@ public class xmlfield implements FieldType {
 	    if (canDoSetMode)
 	      {
 		setMode = true;
+		setValues = new Vector();
 		modeStack.push("set");
 	      }
 	    else
@@ -386,10 +443,10 @@ public class xmlfield implements FieldType {
 	      {
 		if (setMode)
 		  {
-		    if (setValues == null)
-		      {
-			setValues = new Vector();
-		      }
+		    // we made sure to create setValues when we
+		    // entered setMode, so that we can cope with
+		    // <field><set></set></field> to clear all
+		    // elements in a field.
 
 		    setValues.addElement(newValue);
 		  }
@@ -665,7 +722,16 @@ public class xmlfield implements FieldType {
 		    return result;
 		  }
 
-		return field.addElements(setValues);
+		if (setValues.size() > 0)
+		  {
+		    return field.addElements(setValues);
+		  }
+		else
+		  {
+		    // skip a pointless server call
+
+		    return new ReturnVal(true);
+		  }
 	      }
 	    else if (addValues != null)
 	      {
@@ -748,7 +814,16 @@ public class xmlfield implements FieldType {
 			newValues.addElement(invid);
 		      }
 
-		    return field.addElements(newValues);
+		    if (newValues.size() > 0)
+		      {
+			return field.addElements(newValues);
+		      }
+		    else
+		      {
+			// skip a pointless server call
+
+			return new ReturnVal(true);
+		      }
 		  }
 		else if (addValues != null)
 		  {
@@ -885,6 +960,15 @@ public class xmlfield implements FieldType {
       }
 
     return null;
+  }
+
+  /**
+   * <p>Returns the non-XML-encoded name of this field.</p>
+   */
+
+  public String getName()
+  {
+    return fieldDef.getName();
   }
 
   /**
