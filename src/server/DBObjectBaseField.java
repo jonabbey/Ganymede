@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -678,6 +678,18 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   public boolean isPassword()
   {
     return (field_type == PASSWORD);
+  }
+
+  /**
+   * 
+   * Returns true if this field is of IP type 
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isIP()
+  {
+    return (field_type == IP);
   }
   
   /**
