@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2000/11/04 02:12:05 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2000/11/04 02:17:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1147,7 +1147,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		    throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
 		  }
 
-		if (xmldebug)
+		if (false)
 		  {
 		    err.println("Setting XML on new field " + item);
 		  }
@@ -1163,7 +1163,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	    else
 	      {
-		if (xmldebug)
+		if (false)
 		  {
 		    err.println("Setting XML on field " + item);
 		  }
