@@ -5,7 +5,10 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/01/20 18:08:19 $
+   Release: $Name:  $
+
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,14 +24,16 @@ import java.text.SimpleDateFormat;
 
 import javax.swing.*;
 import javax.swing.border.*;
-//import javax.swing.event.*;
 
-import jdj.PackageResources;
-
+import arlut.csd.Util.PackageResources;
 import arlut.csd.ganymede.*;
-
 import arlut.csd.JDataComponent.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      notesPanel
+
+------------------------------------------------------------------------------*/
 
 public class notesPanel extends JPanel implements KeyListener{
 

@@ -4,10 +4,12 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.120 $ %D%
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 1999/01/20 18:08:17 $
+   Release: $Name:  $
+
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.ganymede.client;
@@ -21,8 +23,6 @@ import java.net.*;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.*;
-
-import jdj.*;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.JDialog.JErrorDialog;

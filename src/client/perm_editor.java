@@ -5,7 +5,10 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/01/20 18:08:19 $
+   Release: $Name:  $
+
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,7 +21,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
-import jdj.PackageResources; 
+import arlut.csd.Util.PackageResources; 
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.JSeparator;

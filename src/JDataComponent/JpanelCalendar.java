@@ -4,17 +4,19 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.1 $ %D%
-   Module By: Navin Manohar
-   Applied Research Laboratories, The University of Texas at Austin
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/20 18:08:03 $
+   Release: $Name:  $
 
+   Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
+   Applied Research Laboratories, The University of Texas at Austin
 */
 
 package arlut.csd.JCalendar;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.JDataComponent.*;
-import jdj.PackageResources;
+import arlut.csd.Util.PackageResources;
 
 import java.awt.*;
 import java.util.*;

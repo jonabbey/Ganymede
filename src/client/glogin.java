@@ -9,11 +9,14 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/01/20 18:08:18 $
+   Release: $Name:  $
+
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
-
 */
+
 package arlut.csd.ganymede.client;
 
 import javax.swing.*;
@@ -27,12 +30,10 @@ import java.rmi.server.*;
 import java.io.*;
 import java.util.*;
 
-import jdj.*;
-
 import arlut.csd.JDialog.*;
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.ParseArgs;
-
+import arlut.csd.Util.PackageResources;
 
 /*------------------------------------------------------------------------------
                                                                            class

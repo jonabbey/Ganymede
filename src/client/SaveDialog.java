@@ -5,10 +5,12 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: ??
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/20 18:08:16 $
+   Release: $Name:  $
+
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.ganymede.client;
@@ -64,7 +66,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     historyInfo;
 
   Image
-    saveImage = jdj.PackageResources.getImageResource(this, "SaveDialog.gif", getClass());
+    saveImage = arlut.csd.Util.PackageResources.getImageResource(this, "SaveDialog.gif", getClass());
 
   SaveDialog(Frame owner, boolean forMail)
   {

@@ -5,7 +5,10 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/01/20 18:08:02 $
+   Release: $Name:  $
+
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -22,7 +25,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-import jdj.PackageResources;
+import arlut.csd.Util.PackageResources;
 
 import arlut.csd.JCalendar.*;
 import arlut.csd.JDataComponent.*;

@@ -9,26 +9,27 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.45 $ %D%
+  Version: $Revision: 1.46 $
+  Last Mod Date: $Date: 1999/01/20 18:08:19 $
+  Release: $Name:  $
+
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
 
-
 package arlut.csd.ganymede.client;
 
-//import arlut.csd.ganymede.client.*;
 import arlut.csd.ganymede.*;
 
 import java.awt.event.*;
 import java.awt.*;
 
 import arlut.csd.JDataComponent.*;
+import arlut.csd.Util.PackageResources;
+
 import java.util.*;
 import java.rmi.*;
 import java.net.*;
-
-import jdj.PackageResources;
 
 import javax.swing.*;
 import javax.swing.border.*;

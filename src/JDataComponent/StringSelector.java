@@ -5,10 +5,12 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/01/20 18:08:03 $
+   Release: $Name:  $
+
    Module By: Mike Mulvaney, Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.JDataComponent;
@@ -20,12 +22,11 @@ import java.util.*;
 import java.rmi.*;
 import java.net.*;
 
-import jdj.PackageResources;
-
 import javax.swing.*;
 import javax.swing.border.*;
 
 import arlut.csd.JTable.*;
+import arlut.csd.Util.PackageResources;
 
 /*------------------------------------------------------------------------------
                                                                            class

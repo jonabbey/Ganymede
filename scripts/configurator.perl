@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.22 $
-# $Date: 1999/01/20 01:14:21 $
+# $Revision: 1.23 $
+# $Date: 1999/01/20 18:07:43 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -99,14 +99,12 @@ sub write_makefile {
 
 classfiles:
 	\@echo "Building Ganymede sources"
-	\@cd $rootdir/src/jdj; \\
-	build		
+	\@cd $rootdir/src/Util; \\
+	build
 	\@cd $rootdir/src/Qsmtp; \\
 	build		
 	\@cd $rootdir/src/jcrypt; \\
 	build		
-	\@cd $rootdir/src/Util; \\
-	build
 	\@cd $rootdir/src/JDataComponent; \\
 	build
 	\@cd $rootdir/src/JTree; \\
@@ -288,7 +286,6 @@ $javadir = $ENV{GJAVA};
 
 @configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$rootdir/src/classes",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$rootdir/src/classes",
-	  "$rootdir/src/jdj", "Image Resources Class", "$rootdir/src/classes",
 	  "$rootdir/src/Util", "Ganymede Utility Classes", "$rootdir/src/classes",
 	  "$rootdir/src/JTable", "Ganymede Table Classes", "$rootdir/src/classes",
 	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$rootdir/src/classes",
@@ -328,8 +325,7 @@ while ($#schemas > 0) {
 # rewrite the header to properly specify the location of perl on this
 # system.
 
-@rebuilds=("$rootdir/src/jdj",
-	   "$rootdir/src/Util",
+@rebuilds=("$rootdir/src/Util",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
 	   "$rootdir/src/server",

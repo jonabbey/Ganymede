@@ -5,10 +5,12 @@
    Non-serializable Resource class for use with StringDialog.java
    
    Created: 16 June 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/01/20 18:08:02 $
+   Release: $Name:  $
+
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.JDialog;
@@ -159,7 +161,7 @@ public class DialogRsrc {
 	  }
 	else
 	  {
-	    image = jdj.PackageResources.getImageResource(frame, imageName, frame.getClass());
+	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, frame.getClass());
 
 	    imageCache.put(imageName, image);
 	  }
