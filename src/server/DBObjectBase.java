@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -125,6 +125,20 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     bf.array = true;
 
     fieldHash.put(new Short((short)0), bf);
+
+    /* And our 1 field, the expiration date. */
+
+    bf = new DBObjectBaseField(this);
+    
+    bf.field_name = "Expiration Date";
+    bf.field_code = 1;
+    bf.field_type = FieldType.DATE;
+    bf.field_order = 1;
+    bf.editable = false;
+    bf.removable = false;
+
+    fieldHash.put(new Short((short)1), bf);
+
   }
 
   /**
@@ -496,17 +510,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       {
 	maxid--;
       }
-  }
-
-  /**
-   * return an enumeration of the current objects
-   * in this DBObjectBase.. we need to make this
-   * dependent on a DBReadLock in some fashion.
-   */
-
-  public DBEnum elements()
-  {
-    return new DBEnum(this);
   }
 
   /**
@@ -1119,6 +1122,31 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
 
     original = null;
+  }
+
+  /**
+   *
+   * This method is used to update base references in objects
+   * after this base has replaced an old version via the
+   * SchemaEditor.
+   *
+   */
+
+  synchronized void updateBaseRefs()
+  {
+    Enumeration enum;
+    DBObject obj;
+
+    /* -- */
+
+    enum = objectHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	obj = (DBObject) enum.nextElement();
+	
+	obj.objectBase = this;
+      }
   }
 
   // the following methods are used to manage locks on this base
