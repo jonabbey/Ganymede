@@ -3224,83 +3224,80 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      {
 		scanUsingLabelHook = true;
 	      }
-	    else
+
+	    // we'll scanUsingLabelHook if we can, but we'll still
+	    // check out the label field as well if the object base
+	    // we're looking at has a label field.  May not make much
+	    // sense, but "be strict on output, and lenient on input".
+	    // A query parameter counts as input under those terms.
+
+	    if (base.getLabelField() != -1)
 	      {
-		fieldDef = null;
+		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+	      }
 
-		if (base.getLabelField() != -1)
+	    // We may have a fieldDef for a direct lookup, and we
+	    // might have a unique value label hook, but we are still
+	    // going to check to see if we've been given a
+	    // properly-formated
+	    // DBObject.getDefaultUniqueLabel()-style label, just in
+	    // case the user gave us one for some reason.
+
+	    if (node.value instanceof String)
+	      {
+		String testLabel = (String) node.value;
+
+		if (testLabel != null && testLabel.endsWith("]"))
 		  {
-		    fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
-
-		    // if we are not name-space constrained, we still
-		    // need to look at the results of the
-		    // getDefaultUniqueLabel() call.
-
-		    if (fieldDef.getNameSpace() == null)
-		      {
-			fieldDef = null;
-		      }
-		  }
-
-		if (fieldDef == null)
-		  {
-		    // this object type has no unique label field and
-		    // no getLabelHook() label method that guarantees
-		    // uniqueness.. see if the value we're matching
-		    // against fits the pattern of an automatically
-		    // generated label, and if so do a direct look up
-		    // for it, if we can
-
-		    // otherwise we give up
-
-		    if (!(node.value instanceof String))
-		      {
-			return null;
-		      }
-
-		    String testLabel = (String) node.value;
-
-		    if (testLabel == null || !testLabel.endsWith("]"))
-		      {
-			return null;
-		      }
-
 		    int braceIndex = testLabel.lastIndexOf('[');
-
-		    if (braceIndex == -1)
+			
+		    if (braceIndex != -1)
 		      {
-			// bad string pattern, we can't match against
-			// the automatic label
+			// if we really match the
+			// getDefaultUniqueLabel() output, we need to
+			// have a number in braces prefixed with the
+			// name of the object base we're searching on.
+			// If we see this pattern, we'll try to do a
+			// direct lookup on the Invid encoded thereby
 
-			return null;
+			String numberString = testLabel.substring(braceIndex+1, testLabel.length()-1);
+			String baseLabel = testLabel.substring(0, braceIndex);
+			String matchingBaseLabel = base.getName();
+
+			if (matchingBaseLabel != null && matchingBaseLabel.equals(baseLabel))
+			  {
+			    int index = 0;
+			    boolean localSuccess = false;
+
+			    try
+			      {
+				index = Integer.parseInt(numberString);
+				localSuccess = true;
+			      }
+			    catch (NumberFormatException ex)
+			      {
+			      }
+			    
+			    if (localSuccess)
+			      {
+				DBObject resultobject = session.viewDBObject(Invid.createInvid(base.getTypeID(), index));
+				
+				if (resultobject != null)
+				  {
+				    if (testLabel.equals(resultobject.getDefaultUniqueLabel()))
+				      {
+					addResultRow(resultobject, query, result, internal, perspectiveObject);
+					return result;
+				      }
+				    else
+				      {
+					// this really shouldn't ever happen
+					throw new RuntimeException("ASSERT: getDefaultUniqueLabel() mismatch");
+				      }
+				  }
+			      }
+			  }
 		      }
-
-		    // now we expect that we've got a number.. look
-		    // for the last '[', and take the chars between it
-		    // and the last ']' as an invid number to pull
-
-		    String numberString = testLabel.substring(braceIndex+1, testLabel.length()-1);
-
-		    int index = 0;
-
-		    try
-		      {
-			index = Integer.parseInt(numberString);
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			return null; // bad number == bad label == give up
-		      }
-
-		    DBObject resultobject = session.viewDBObject(Invid.createInvid(base.getTypeID(), index));
-
-		    if (resultobject == null || !testLabel.equals(resultobject.getDefaultUniqueLabel()))
-		      {
-			return null;
-		      }
-
-		    addResultRow(resultobject, query, result, internal, perspectiveObject);
-		    return result;
 		  }
 	      }
 	  }
