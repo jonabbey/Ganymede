@@ -67,6 +67,12 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import arlut.csd.JDataComponent.JAddValueObject;
+import arlut.csd.JDataComponent.JAddVectorValueObject;
+import arlut.csd.JDataComponent.JErrorValueObject;
+import arlut.csd.JDataComponent.JDeleteValueObject;
+import arlut.csd.JDataComponent.JDeleteVectorValueObject;
+import arlut.csd.JDataComponent.JParameterValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
@@ -85,7 +91,7 @@ import arlut.csd.ddroid.rmi.invid_field;
  * @author Mike Mulvaney
  */
 
-public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
+public class ownerPanel extends JPanel implements JsetValueCallback {
 
   boolean debug = false;
 
@@ -163,19 +169,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     add("Center", holdOnPanel);
     invalidate();
     fp.validate();
-
-    // spin off a thread to load the panel.
-    
-    Thread thread = new Thread(this);
-    thread.start();
-  }
-
-  public void run()
-  {
-    if (debug)
-      {
-	System.out.println("Starting new thread");
-      }
 
     if (field == null)
       {
@@ -385,14 +378,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	return false;
       }
 
-    if (o.getOperationType() == JValueObject.ERROR)
+    if (o instanceof JErrorValueObject)
       {
 	fp.getgclient().setStatus((String)o.getValue());
       }
-    else if (o.getOperationType() == JValueObject.PARAMETER) 
+    else if (o instanceof JParameterValueObject)
       {  // From the popup menu
 	
-	JValueObject v = o; // because this code was originally used with a v
+	JParameterValueObject v = (JParameterValueObject) o; // because this code was originally used with a v
 	String command = (String)v.getParameter();
 	  
 	if (command.equals("Edit object"))
@@ -454,7 +447,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	
 	try
 	  {
-	    if (o.getOperationType() == JValueObject.ADD)
+	    if (o instanceof JAddValueObject)
 	      {
 		retVal = field.addElement(invid);
 
@@ -465,7 +458,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.ADDVECTOR)
+	    else if (o instanceof JAddVectorValueObject)
 	      {
 		retVal = field.addElements((Vector) o.getValue());
 
@@ -476,7 +469,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.DELETE)
+	    else if (o instanceof JDeleteValueObject)
 	      {
 		retVal = field.deleteElement(invid);
 
@@ -487,7 +480,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.DELETEVECTOR)
+	    else if (o instanceof JDeleteVectorValueObject)
 	      {
 		retVal = field.deleteElements((Vector) o.getValue());
 

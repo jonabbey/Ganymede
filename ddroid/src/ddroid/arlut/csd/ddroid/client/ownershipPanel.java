@@ -68,6 +68,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
+import arlut.csd.JDataComponent.JAddValueObject;
+import arlut.csd.JDataComponent.JAddVectorValueObject;
+import arlut.csd.JDataComponent.JDeleteValueObject;
+import arlut.csd.JDataComponent.JDeleteVectorValueObject;
+import arlut.csd.JDataComponent.JParameterValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
@@ -512,7 +517,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     // First, are we being given a menu operation from StringSelector?
     
-    if (e.getOperationType() == JValueObject.PARAMETER)
+    if (e instanceof JParameterValueObject)
       {
 	if (debug)
 	  {
@@ -552,7 +557,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	    println("Unknown action command from popup: " + command);
 	  }
       }
-    else if (e.getOperationType() == JValueObject.ADD)
+    else if (e instanceof JAddValueObject)
       {
 	if (debug)
 	  {
@@ -575,7 +580,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	    throw new RuntimeException("Could not add value to list: " + rx);
 	  }
       }
-    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+    else if (e instanceof JAddVectorValueObject)
       {
 	if (debug)
 	  {
@@ -598,7 +603,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	    throw new RuntimeException("Could not add values to list: " + rx);
 	  }
       }
-    else if (e.getOperationType() == JValueObject.DELETE)
+    else if (e instanceof JDeleteValueObject)
       {
 	if (debug)
 	  {
@@ -621,7 +626,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	    throw new RuntimeException("Could not delete value from list: " + rx);
 	  }
       }
-    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+    else if (e instanceof JDeleteVectorValueObject)
       {
 	if (debug)
 	  {

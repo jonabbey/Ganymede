@@ -78,6 +78,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.ddroid.common.FieldInfo;
@@ -1293,7 +1294,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    short index = (short)compVector.indexOf(ew.getComponent());
 	
-	    if (v.getOperationType() == JValueObject.ERROR)
+	    if (v instanceof JErrorValueObject)
 	      {
 		setStatus((String)v.getValue());
 		returnValue = false;

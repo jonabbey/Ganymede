@@ -70,6 +70,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.ddroid.common.Invid;
 
@@ -409,7 +410,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (evt.getSource() == remove) 
       {
-	JValueObject v = new JValueObject(this,"remove");
+	JValueObject v = new JSetValueObject(this,"remove");
 	vp.setValuePerformed(v);
       }
     else if (evt.getSource() == expand)

@@ -98,6 +98,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
 import org.python.core.PySystemState;
 
 import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.LAFMenu;
 import arlut.csd.JDataComponent.listHandle;
@@ -4898,7 +4899,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public boolean setValuePerformed(JValueObject o)
   {
-    if (o.getOperationType() == JValueObject.ERROR)
+    if (o instanceof JErrorValueObject)
       {
 	showErrorMessage("Client Error",
 			 (String)o.getValue(),
@@ -5852,7 +5853,7 @@ class PersonaListener implements ActionListener {
 		
 	    gc.ownerGroups = null;
 	    gc.clearCaches();
-	    gc.loader.clear();  // This reloads the hashes
+	    gc.loader.clear();  // This reloads the hashes on a new background thread
 	    gc.cancelTransaction();
 	    gc.buildTree();
 	    gc.currentPersonaString = newPersona;

@@ -82,6 +82,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JAddValueObject;
+import arlut.csd.JDataComponent.JAddVectorValueObject;
+import arlut.csd.JDataComponent.JDeleteValueObject;
+import arlut.csd.JDataComponent.JParameterValueObject;
+import arlut.csd.JDataComponent.JDeleteVectorValueObject;
+import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JfloatField;
@@ -1618,7 +1624,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
-    if (v.getOperationType() == JValueObject.ERROR)
+    if (v instanceof JErrorValueObject)
       {
 	gc.showErrorMessage((String)v.getValue());
 	return true;
@@ -1706,7 +1712,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // First, are we being given a menu operation from StringSelector?
 	
-	    if (v.getOperationType() == JValueObject.PARAMETER)
+	    if (v instanceof JParameterValueObject)
 	      {
 		if (debug)
 		  {
@@ -1759,7 +1765,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		try
 		  {
-		    if (v.getOperationType() == JValueObject.ADD)
+		    if (v instanceof JAddValueObject)
 		      {
 			if (debug)
 			  {
@@ -1768,7 +1774,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			returnValue = field.addElement(v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.ADDVECTOR)
+		    else if (v instanceof JAddVectorValueObject)
 		      {
 			if (debug)
 			  {
@@ -1777,7 +1783,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			returnValue = field.addElements((Vector) v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.DELETE)
+		    else if (v instanceof JDeleteValueObject)
 		      {
 			if (debug)
 			  {
@@ -1786,7 +1792,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			returnValue = field.deleteElement(v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.DELETEVECTOR)
+		    else if (v instanceof JDeleteVectorValueObject)
 		      {
 			if (debug)
 			  {
@@ -1814,19 +1820,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		try
 		  {
-		    if (v.getOperationType() == JValueObject.ADD)
+		    if (v instanceof JAddValueObject)
 		      {
 			returnValue = field.addElement(v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.ADDVECTOR)
+		    else if (v instanceof JAddVectorValueObject)
 		      {
 			returnValue = field.addElements((Vector) v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.DELETE)
+		    else if (v instanceof JDeleteValueObject)
 		      {
 			returnValue = field.deleteElement(v.getValue());
 		      }
-		    else if (v.getOperationType() == JValueObject.DELETEVECTOR)
+		    else if (v instanceof JDeleteVectorValueObject)
 		      {
 			returnValue = field.deleteElements((Vector) v.getValue());
 		      }

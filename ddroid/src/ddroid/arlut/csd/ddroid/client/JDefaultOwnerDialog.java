@@ -63,6 +63,10 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import arlut.csd.JDataComponent.JAddValueObject;
+import arlut.csd.JDataComponent.JAddVectorValueObject;
+import arlut.csd.JDataComponent.JDeleteValueObject;
+import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
@@ -121,15 +125,16 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getOperationType() == JValueObject.ADD)
+    if (e instanceof JAddValueObject)
       {
 	if (debug)
 	  {
 	    System.out.println("Adding element");
 	  }
+
 	chosen.addElement(e.getValue());
       }
-    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+    else if (e instanceof JAddVectorValueObject)
       {
 	Vector newElements = (Vector) e.getValue();
 
@@ -138,7 +143,7 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	    chosen.addElement(newElements.elementAt(i));
 	  }
       }
-    else if (e.getOperationType() == JValueObject.DELETE)
+    else if (e instanceof JDeleteValueObject)
       {
 	if (debug)
 	  {
@@ -146,7 +151,7 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	  }
 	chosen.removeElement(e.getValue());
       }
-    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+    else if (e instanceof JDeleteVectorValueObject)
       {
 	Vector newElements = (Vector) e.getValue();
 
