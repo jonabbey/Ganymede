@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -117,6 +117,7 @@ public class DBEditSet {
     while (enum.hasMoreElements())
       {
 	obj = (DBObject) enum.nextElement();
+
 	if (obj.getInvid().equals(invid))
 	  {
 	    return obj;
@@ -323,6 +324,11 @@ public class DBEditSet {
 	return false;
       }
 
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
+      }
+
     // phase one complete, go ahead and have all our
     // objects do their 2nd level commit processes
 
@@ -331,6 +337,11 @@ public class DBEditSet {
 	eObj = (DBEditObject) objects.elementAt(i);
 
 	eObj.commitPhase2();
+      }
+
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): phase 2 committed");
       }
 
     // and make the changes in our in-memory hashes..
@@ -375,6 +386,11 @@ public class DBEditSet {
 	  }
       }
 
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): transaction objects integrated into in-memory hashes");
+      }
+
     // confirm all namespace modifications associated with this editset
     // and release namespace values that correspond with old
     // object / field values.
@@ -384,7 +400,22 @@ public class DBEditSet {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
       }
 
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): namespace changes committed");
+      }
+
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): releasing write lock");
+      }
+
     wLock.release();
+
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): released write lock");
+      }
 
     // null our vector to speed GC
 
