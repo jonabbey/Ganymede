@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.2 $
-# $Date: 1999/01/21 16:56:12 $
+# $Revision: 1.3 $
+# $Date: 1999/01/21 19:33:37 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -115,13 +115,10 @@ Testing configuration information
 
 ENDCONFIG
 
-$success = 1; # Assume success until we find out otherwise
-
 # java command found ok?
 
 if (!-e $vars{"JVM"}."/java") {
   die "*Can't find the java command*\n\nAborting..";
-  $success = 0;
 } else {
   print "Found the java command ok\n";
 }
@@ -129,12 +126,9 @@ if (!-e $vars{"JVM"}."/java") {
 # swing jars found?
 
 if (!-e $vars{"SWINGJARS"}."/swingall.jar") {
-  print "*Can't find the swingall jar*\n";
-  print $vars{"SWINGJARS"}."/swingall.jar";
-  $swingfound = 0;
+  die "Can't find the swingall jar ".$vars{"SWINGJARS"}."/swingall.jar";
 } else {
   print "Found the swing jar ok\n";
-  $swingfound = 1;
 }
 
 # can we make the client install directory?
@@ -152,9 +146,7 @@ print "Installing";
 
 $installdir = $vars{"CLIENTINSTALL"};
 
-if ($swingfound) {
-  &makedir("$installdir/bin", 0750); print ".";
-}
+&makedir("$installdir/bin", 0750); print ".";
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/html", 0750); print ".";
 &makedir("$installdir/html/activator", 0750); print ".";
@@ -172,92 +164,88 @@ link("$installdir/jars/password.jar", "$installdir/html/activator/password.jar")
 link("$installdir/jars/password.jar", "$installdir/html/hotjava/password.jar"); print ".";
 copydir("password", "$installdir/password"); print ".";
 
-if ($swingfound) {
-  copy($vars{"SWINGJARS"}."/swingall.jar", "$installdir/html/hotjava/swingall.jar"); print ".";
-}
+copy($vars{"SWINGJARS"}."/swingall.jar", "$installdir/html/hotjava/swingall.jar"); print ".";
 
 # Copy and process the properties file into place
 
-if ($swingfound) {
-  %clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
-		    "ganymede.rootname" => $vars{"SUPERNAME"});
+%clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		  "ganymede.rootname" => $vars{"SUPERNAME"});
 
-  open INPUT, $template or die "Couldn't open client properties template!";
-  open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";
+open INPUT, $template or die "Couldn't open client properties template!";
+open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";
 
-  print "\nCustomizing client.properties\n";
+print "\nCustomizing client.properties\n";
 
-  while (<INPUT>) {
+while (<INPUT>) {
     
     if (!/^([^\#=]*)=/) {
-      print OUTPUT $_;
+	print OUTPUT $_;
     } elsif (defined $clientconvert{$1}) {
-      print OUTPUT "$1=$clientconvert{$1}\n";
+	print OUTPUT "$1=$clientconvert{$1}\n";
     } else {
-      print "Error.. unrecognized template entry $1 - copying template value\n";
-      print OUTPUT $_;
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
     }
-  }
+}
   
-  close INPUT;
-  close OUTPUT;
+close INPUT;
+close OUTPUT;
 
-  # Copy and process the ganymede script into place
+# Copy and process the ganymede script into place
 
-  print "\nCustomizing ganymede script\n";
+print "\nCustomizing ganymede script\n";
   
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => "$installdir/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
   
-  open INPUT, "scripts/ganymede.template" or die "Couldn't open ganymede template!";
-  open OUTPUT, ">$installdir/bin/ganymede" or die "Couldn't write ganymede";
+open INPUT, "scripts/ganymede.template" or die "Couldn't open ganymede template!";
+open OUTPUT, ">$installdir/bin/ganymede" or die "Couldn't write ganymede";
   
-  while (<INPUT>) {
+while (<INPUT>) {
     
     if (!/^([A-Z]*)=/) {
-      print OUTPUT $_;
+	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
-      print OUTPUT "$1=$runconvert{$1}\n";
+	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
-      print "Error.. unrecognized template entry $1 - copying template value\n";
-      print OUTPUT $_;
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
     }
-  }
+}
 
-  close INPUT;
-  close OUTPUT;
+close INPUT;
+close OUTPUT;
 
-  chmod 0750, "$installdir/bin/ganymede";
+chmod 0750, "$installdir/bin/ganymede";
 
-  # Copy and process the ganymedeAdmin script into place
+# Copy and process the ganymedeAdmin script into place
 
-  print "\nCustomizing ganymedeAdmin script\n";
+print "\nCustomizing ganymedeAdmin script\n";
 
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => "$installdir/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymedeAdmin.jar");
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymedeAdmin.jar");
 
-  open INPUT, "scripts/ganymedeAdmin.template" or die "Couldn't open ganymedeAdmin template!";
-  open OUTPUT, ">$installdir/bin/ganymedeAdmin" or die "Couldn't write ganymedeAdmin";
+open INPUT, "scripts/ganymedeAdmin.template" or die "Couldn't open ganymedeAdmin template!";
+open OUTPUT, ">$installdir/bin/ganymedeAdmin" or die "Couldn't write ganymedeAdmin";
 
-  while (<INPUT>) {
+while (<INPUT>) {
     
     if (!/^([A-Z]*)=/) {
-      print OUTPUT $_;
+	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
-      print OUTPUT "$1=$runconvert{$1}\n";
+	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
-      print "Error.. unrecognized template entry $1 - copying template value\n";
-      print OUTPUT $_;
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
     }
-  }
-  
-  close INPUT;
-  close OUTPUT;
+}
 
-  chmod 0750, "$installdir/bin/ganymedeAdmin";
-} # end if ($swingfound)			
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/ganymedeAdmin";
 
 # Copy and process the changePassword script into place
 
@@ -271,7 +259,6 @@ open INPUT, "scripts/changePassword.template" or die "Couldn't open changePasswo
 open OUTPUT, ">$installdir/bin/changePassword" or die "Couldn't write changePassword";
 
 while (<INPUT>) {
-  
   if (!/^([A-Z]*)=/) {
     print OUTPUT $_;
   } elsif (defined $runconvert{$1}) {
