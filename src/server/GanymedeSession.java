@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.191 $
-   Last Mod Date: $Date: 2000/07/13 21:33:15 $
+   Version: $Revision: 1.192 $
+   Last Mod Date: $Date: 2000/07/26 00:42:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.191 $ $Date: 2000/07/13 21:33:15 $
+ * @version $Revision: 1.192 $ $Date: 2000/07/26 00:42:12 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3059,7 +3059,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    synchronized (ns)
 	      {
-		DBField resultfield;
+		DBField resultfield = null;
 
 		// if we are looking to match against an IP address
 		// field and we were given a String, we need to
@@ -3068,7 +3068,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		if (fieldDef.isIP() && node.value instanceof String)
 		  {
-		    resultfield = ns.lookup(IPDBField.genIPV4bytes((String) node.value));
+		    Byte[] ipBytes = null;
+
+		    try
+		      {
+			ipBytes = IPDBField.genIPV4bytes((String) node.value);
+		      }
+		    catch (IllegalArgumentException ex)
+		      {
+		      }
+		    
+		    if (ipBytes != null)
+		      {
+			resultfield = ns.lookup(ipBytes);
+		      }
 
 		    // it's hard to tell here whether any fields of
 		    // this type will accept IPv6 bytes, so if we
@@ -3077,7 +3090,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    if (resultfield == null)
 		      {
-			resultfield = ns.lookup(IPDBField.genIPV6bytes((String) node.value));
+			try
+			  {
+			    ipBytes = IPDBField.genIPV6bytes((String) node.value);
+			  }
+			catch (IllegalArgumentException ex)
+			  {
+			  }
+		    
+			if (ipBytes != null)
+			  {
+			    resultfield = ns.lookup(ipBytes);
+			  }
 		      }
 		  }
 		else
