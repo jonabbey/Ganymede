@@ -11,8 +11,8 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/02/16 11:32:03 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/10/05 20:06:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.1 $ $Date: 2000/02/16 11:32:03 $
+ * @version $Revision: 1.2 $ $Date: 2000/10/05 20:06:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {
@@ -100,7 +100,7 @@ public class serverClientProxy implements Runnable {
    * Client isn't responding.</p>
    */
 
-  private int maxBufferSize = 5; // we shouldn't even need this many
+  private int maxBufferSize = 15; // we shouldn't even need this many
 
   /**
    * <p>Our remote reference to the Client</p>
