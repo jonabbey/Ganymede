@@ -3,15 +3,16 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/08/05 22:05:46 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2004/02/05 22:05:14 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -57,7 +58,7 @@ import javax.swing.text.*;
 
 ------------------------------------------------------------------------------*/
 
-public class JstringArea extends JTextArea implements FocusListener{
+public class JstringArea extends JTextArea implements FocusListener {
 
   final static boolean debug = false;
 
@@ -284,7 +285,7 @@ public class JstringArea extends JTextArea implements FocusListener{
   }
 
   /**
-   *  Stub function that is overriden is subclasses of JentryField
+   *  Stub function that is overriden in subclasses of JentryField
    *
    */
 
@@ -395,8 +396,8 @@ public class JstringArea extends JTextArea implements FocusListener{
     JFrame frame = new JFrame();
 
     JstringArea area = new JstringArea();
-    area.setDisallowedChars("asdf");
-    frame.getContentPane().add(area);
+    //    area.setDisallowedChars("asdf");
+    frame.getContentPane().add(new JScrollPane(area));
 
     area.setCallback(new JsetValueCallback() {
       public boolean setValuePerformed(JValueObject o) {
