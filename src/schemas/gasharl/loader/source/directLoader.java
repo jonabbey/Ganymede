@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1540,6 +1540,8 @@ public class directLoader {
     pass_field p_field;
     User userObj;
     Invid categoryInvid;
+    Date now = new Date();
+    Calendar cal = Calendar.getInstance();
 
     /* -- */
 
@@ -1614,11 +1616,25 @@ public class directLoader {
 	      }
 	  }
 
-	// if we have an expiration date, set that
+	// if we have an expiration date, set the expiration or
+	// removal date, as appropriate.
 
 	if (userObj.expirationDate != null)
 	  {
-	    current_obj.setFieldValueLocal(SchemaConstants.ExpirationField, userObj.expirationDate);
+	    if (userObj.expirationDate.before(now))
+	      {
+		// the expiration time has already passed.. set the
+		// removal date (x + 3 months) instead
+
+		cal.setTime(userObj.expirationDate);
+		cal.add(Calendar.MONTH, 3);
+
+		current_obj.setFieldValueLocal(SchemaConstants.RemovalField, cal.getTime());
+	      }
+	    else
+	      {
+		current_obj.setFieldValueLocal(SchemaConstants.ExpirationField, userObj.expirationDate);
+	      }
 	  }
 
 	// set the social security #
