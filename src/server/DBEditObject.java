@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1276,7 +1276,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
 
     // we want to delete / null out all fields.. this will take care
-    // of invid links and namespace allocations.
+    // of invid links, embedded objects, and namespace allocations.
 
     enum = fields.elements();
 
