@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -347,10 +347,16 @@ public class IPDBField extends DBField implements ip_field {
 		mark(this.value); // we aren't clearing the old value after all
 	      }
 
-	    setLastError("value " + bytes + " already taken in namespace");
-
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					      "IP address already in use\n" + getLastError());
+	    if (bytes.length > 4)
+	      {
+		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						  "IP address already in use : " + genIPV6string(bytes));
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						  "IP address already in use : " + genIPV4string(bytes));
+	      }
 	  }
       }
 
@@ -391,8 +397,16 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(this.value);
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					  "Could not finalize IP address\n" + getLastError());
+	if (bytes.length > 4)
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+					      "Could not finalize IP address : " + genIPV6string(bytes));
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+					      "Could not finalize IP address : " + genIPV4string(bytes));
+	  }
       }
   }
 
@@ -472,10 +486,16 @@ public class IPDBField extends DBField implements ip_field {
 	  {
 	    mark(values.elementAt(index)); // we aren't clearing the old value after all
 
-	    setLastError("value " + value + " already taken in namespace");
-
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setElement()",
-					      "IP address already in use\n" + getLastError());
+	    if (bytes.length > 4)
+	      {
+		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						  "IP address already in use : " + genIPV6string(bytes));
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+						  "IP address already in use : " + genIPV4string(bytes));
+	      }
 	  }
       }
 
@@ -503,8 +523,16 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(values.elementAt(index));
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.setElement()",
-					  "Could not finalize IP address\n" + getLastError());
+	if (bytes.length > 4)
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+					      "Could not finalize IP address : " + genIPV6string(bytes));
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
+					      "Could not finalize IP address : " + genIPV4string(bytes));
+	  }
       }
   }
 
