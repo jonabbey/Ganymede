@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -241,6 +241,13 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	    if (groupChoice.getLabel(i).equals(group))
 	      {
 		found = true;
+
+		// right now, this might fail if the user is in a group that the
+		// current admin doesn't have permission to edit.  Unlinking for
+		// groups is free (see groupCustom), but adding, even adding to
+		// the home users field for users that are already in the superset
+		// users list is not automatically permitted.  This may change.
+
 		retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
 		break;
 	      }
