@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.12 $
-# $Date: 1999/07/09 05:07:10 $
+# $Revision: 1.13 $
+# $Date: 1999/08/27 18:39:01 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -341,7 +341,7 @@ while (<INPUT>) {
   } elsif (defined $propconvert{$1}) {
     print OUTPUT "$1=$propconvert{$1}\n";
   } else {
-    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print "No customized value for template entry $1 - copying value from template\n";
     print OUTPUT $_;
   }
 }
