@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -87,7 +87,6 @@ import arlut.csd.JDataComponent.JstringField;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.JErrorDialog;
-import arlut.csd.JDialog.JInsetPanel;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTree.treeCallback;
 import arlut.csd.JTree.treeControl;
