@@ -4839,7 +4839,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	return;
       }
 
-    viewObject(new Invid(invidString));
+    viewObject(Invid.createInvid(invidString));
   }
 
   public void addTableWindow(Session session, Query query, DumpResult buffer)

@@ -413,7 +413,7 @@ public class DumpResult implements java.io.Serializable, List {
 	    tempString.append(chars[index++]);
 	  }
 
-	invids.addElement(new Invid(tempString.toString()));
+	invids.addElement(Invid.createInvid(tempString.toString()));
 
 	index++;		// skip over |
 

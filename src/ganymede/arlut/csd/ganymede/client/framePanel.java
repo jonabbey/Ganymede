@@ -478,7 +478,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	    if (id == SchemaConstants.OwnerBase)
 	      {
-		if (getObjectInvid().equals(new Invid((short)0, 1)))
+		if (getObjectInvid().equals(Invid.createInvid((short)0, 1)))
 		  {
 		    if (debug)
 		      {

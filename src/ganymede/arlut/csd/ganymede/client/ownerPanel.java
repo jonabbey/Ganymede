@@ -266,7 +266,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (availableOwners != null)
       {
-	Invid supergash = new Invid((short)0, 1); // This is supergash
+	Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
 
 	for (int i = 0; i < availableOwners.size(); i++)
 	  {
@@ -333,7 +333,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
 	if (available != null)
 	  {
-	    Invid supergash = new Invid((short)0, 1); // This is supergash
+	    Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
 	    
 	    for (int i = 0; i < available.size(); i++)
 	      {

@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -87,31 +87,49 @@ import java.io.IOException;
 public final class Invid implements java.io.Serializable {
 
   static final long serialVersionUID = 5357151693275369893L;
+  static private InvidAllocator allocator = null;
 
   /**
-   * <p>Receive Factory method for Invid's.  Does nothing fancy now, could
-   * be used to do Invid caching/pooling sometime if we so desire.</p>
+   * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
+   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
    */
 
   static final public Invid createInvid(short type, int num)
   {
-    return new Invid(type, num);
+    if (allocator == null)
+      {
+	return new Invid(type, num);
+      }
+    else
+      {
+	Invid result = allocator.findInvid(type, num);
+
+	if (result == null)
+	  {
+	    result = new Invid(type, num);
+	  }
+
+	allocator.storeInvid(result);
+	return result;
+      }
   }
 
   /**
-   * <p>Factory method for Invid's.  Does nothing fancy now, could
-   * be used to do Invid caching/pooling sometime if we so desire.</p>
+   * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
+   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
    */
 
   static final public Invid createInvid(DataInput in) throws IOException
   {
-    return new Invid(in.readShort(), in.readInt());
+    return createInvid(in.readShort(), in.readInt());
   }
 
   /**
-   * <P>Factory method for Invid's.  String should be a pair of colon
+   * <p>Factory method for Invid's.  String should be a pair of colon
    * separated numbers, in the form 5:134 where the first number is
-   * the short type and the second is the int object number.</P>
+   * the short type and the second is the int object number. Can do
+   * efficient memory re-use if an {@link
+   * arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
    */
 
   static final public Invid createInvid(String string)
@@ -121,13 +139,30 @@ public final class Invid implements java.io.Serializable {
 
     try
       {
-	return new Invid(Short.valueOf(first).shortValue(), 
-			 Integer.valueOf(last).intValue());
+	return createInvid(Short.valueOf(first).shortValue(), 
+			   Integer.valueOf(last).intValue());
       }
     catch (NumberFormatException ex)
       {
 	throw new IllegalArgumentException("bad string format " + ex);
       }
+  }
+
+  /**
+   * <p>This method can be used to prep the Invid class with an {@link
+   * arlut.csd.ganymede.common.InvidAllocator} that will return a
+   * possibly pre-existing Invid object, given a short/int
+   * combination.</p>
+   *
+   * <p>The purpose of this allocator is to allow the Ganymede server to
+   * re-use previously created Invids in the server to minimize memory
+   * usage, in a fashion similar to the Java language's java.lang.String.intern()
+   * scheme.</p>
+   */
+
+  static final public void setAllocator(InvidAllocator newAllocator)
+  {
+    Invid.allocator = newAllocator;
   }
 
   // ---
@@ -137,7 +172,7 @@ public final class Invid implements java.io.Serializable {
 
   // constructors
 
-  public Invid(short type, int num) 
+  private Invid(short type, int num) 
   {
     this.type = type;
     this.num = num;
@@ -149,7 +184,7 @@ public final class Invid implements java.io.Serializable {
    *
    */
 
-  public Invid(DataInput in) throws IOException
+  private Invid(DataInput in) throws IOException
   {
     type = in.readShort();
     num = in.readInt();
@@ -162,7 +197,7 @@ public final class Invid implements java.io.Serializable {
    * and the second is the int object number.</P>
    */
 
-  public Invid(String string)
+  private Invid(String string)
   {
     String first = string.substring(0, string.indexOf(':'));
     String last = string.substring(string.indexOf(':')+1);
