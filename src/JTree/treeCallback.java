@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
    
   Created: 3 March 1997
-  Version: $Revision: 1.2 $ %D%
+  Version: $Revision: 1.3 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,9 +41,9 @@ package arlut.csd.JTree;
  * of user activities on a treeControl.
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D%
+ * @version $Revision: 1.3 $ %D%
  *
- * @see arlut.csd.Tree.treeControl
+ * @see arlut.csd.JTree.treeControl
  */
 
 public interface treeCallback {
@@ -54,7 +54,7 @@ public interface treeCallback {
    *
    * @param node The node selected in the tree.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeSelected(treeNode node);
@@ -67,7 +67,7 @@ public interface treeCallback {
    * @param someNodeSelected If true, this node is being unselected by the selection
    *                         of another node.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeUnSelected(treeNode node, boolean someNodeSelected);
@@ -79,7 +79,7 @@ public interface treeCallback {
    *
    * @param node The node selected in the tree.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
 
@@ -109,7 +109,7 @@ public interface treeCallback {
    *
    * @param node The node selected in the tree.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeDoubleClicked(treeNode node);
