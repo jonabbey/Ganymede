@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,6 +52,16 @@ public class Ganymede {
   public static Date startTime = new Date();
   public static String debugFilename = null;
   public static boolean developSchema = false;
+
+  /**
+   *
+   * If true, GanymedeSession will export any objects being viewed,
+   * edited, or created before returning it to the client.  This will
+   * be false during direct loading, which should double load speed.
+   * 
+   */
+
+  public static boolean remotelyAccessible = true;
 
   public static GanymedeServer server;
   public static GanymedeSession internalSession;
@@ -389,6 +399,8 @@ public class Ganymede {
     File dataFile;
 
     /* -- */
+
+    remotelyAccessible = false;
 
     Ganymede.dbFilename = dbFilename;
 
