@@ -7,8 +7,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2002/03/08 06:01:19 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2002/03/08 06:39:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import java.util.*;
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>
  *
- * @version $Revision: 1.6 $ $Date: 2002/03/08 06:01:19 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2002/03/08 06:39:54 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -212,37 +212,10 @@ public class VecSortInsert implements Compare {
   }
 
   /**
-   * <p>Constructor.  By not specifying a comparator, an ordinary
-   * string comparison will be performed on elements inserted.</p>
+   * This static method does the work.
    */
 
-  public VecSortInsert()
-  {
-    this.comparator = this;
-  }
-
-  /**
-   * <p>Constructor.  If comparator is null, an ordinary string
-   * comparison will be performed on elements inserted.</p>
-   */
-
-  public VecSortInsert(Compare comparator)
-  {
-    this.comparator = comparator;
-
-    if (this.comparator == null)
-      {
-	this.comparator = this;
-      }
-  }
-
-  /**
-   *
-   * This method does the work.
-   *
-   */
-
-  public void insert(Vector objects, Object element)
+  public static void insert(Vector objects, Object element, Compare comparator)
   {
     int low, high, mid;
 
@@ -257,6 +230,11 @@ public class VecSortInsert implements Compare {
 
 	objects.addElement(element);
 	return;
+      }
+
+    if (comparator == null)
+      {
+	comparator = new VecSortInsert();
       }
 
     // java integer division rounds towards zero
@@ -325,6 +303,40 @@ public class VecSortInsert implements Compare {
 
 	//	printTest(objects.size(), low, mid, high);
       }
+  }
+
+  /**
+   * <p>Constructor.  By not specifying a comparator, an ordinary
+   * string comparison will be performed on elements inserted.</p>
+   */
+
+  public VecSortInsert()
+  {
+    this.comparator = this;
+  }
+
+  /**
+   * <p>Constructor.  If comparator is null, an ordinary string
+   * comparison will be performed on elements inserted.</p>
+   */
+
+  public VecSortInsert(Compare comparator)
+  {
+    this.comparator = comparator;
+
+    if (this.comparator == null)
+      {
+	this.comparator = this;
+      }
+  }
+
+  /**
+   * This method does the work.
+   */
+
+  public void insert(Vector objects, Object element)
+  {
+    VecSortInsert.insert(objects, element, this.comparator);
   }
 
   /**
