@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,17 +26,19 @@ public class PermEntry implements java.io.Serializable {
   boolean visible;
   boolean editable;
   boolean create;
+  boolean delete;
 
-  static public final PermEntry fullPerms = new PermEntry(true, true, true);
-  static public final PermEntry noPerms = new PermEntry(false, false, false);
+  static public final PermEntry fullPerms = new PermEntry(true, true, true, true);
+  static public final PermEntry noPerms = new PermEntry(false, false, false, false);
 
   /* -- */
 
-  public PermEntry(boolean visible, boolean editable, boolean create)
+  public PermEntry(boolean visible, boolean editable, boolean create, boolean delete)
   {
     this.visible = visible;
     this.editable = editable;
     this.create = create;
+    this.delete = delete;
   }
 
   public PermEntry(DataInput in) throws IOException
@@ -49,6 +51,7 @@ public class PermEntry implements java.io.Serializable {
     this.visible = orig.visible;
     this.editable = orig.editable;
     this.create = orig.create;
+    this.delete = orig.delete;
   }
 
   public boolean equals(Object obj)
@@ -69,15 +72,19 @@ public class PermEntry implements java.io.Serializable {
 
     pe = (PermEntry) obj;
 
-    return ((visible == pe.visible) && (editable == pe.editable) && (create == pe.create));
+    return ((visible == pe.visible) && 
+	    (editable == pe.editable) && 
+	    (create == pe.create) &&
+	    (delete == pe.delete));
   }
 
   void emit(DataOutput out) throws IOException
   {
-    out.writeShort(3);
+    out.writeShort(4);
     out.writeBoolean(visible);
     out.writeBoolean(editable);
     out.writeBoolean(create);
+    out.writeBoolean(delete);
   }
 
   void receive(DataInput in) throws IOException
@@ -93,9 +100,19 @@ public class PermEntry implements java.io.Serializable {
     visible = in.readBoolean();
     editable = in.readBoolean();
     create = in.readBoolean();
+
+    if (entrySize >= 4)
+      {
+	delete = in.readBoolean();
+      }
+    else
+      {
+	delete = false;
+      }
   }
 
   /**
+   *
    * This method returns true if the this entry in a PermMatrix is granted
    * visibility privilege.
    *
@@ -107,6 +124,7 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
+   *
    * This method returns true if the this entry in a PermMatrix is granted
    * editing privilege.
    *
@@ -118,6 +136,7 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
+   *
    * This method returns true if the this entry in a PermMatrix is granted
    * creation privilege.
    *
@@ -126,6 +145,18 @@ public class PermEntry implements java.io.Serializable {
   public boolean isCreatable()
   {
     return create;
+  }
+
+  /**
+   *
+   * This method returns true if the this entry in a PermMatrix is granted
+   * deletion privilege.
+   *
+   */ 
+
+  public boolean isDeletable()
+  {
+    return delete;
   }
 
   public final PermEntry union(PermEntry p)
@@ -138,7 +169,8 @@ public class PermEntry implements java.io.Serializable {
       {
 	return new PermEntry(p.visible || visible,
 			     p.editable || editable,
-			     p.create || create);
+			     p.create || create,
+			     p.delete || delete);
       }
   }
 
@@ -151,7 +183,8 @@ public class PermEntry implements java.io.Serializable {
 
     return new PermEntry(p.visible && visible,
 			 p.editable && editable,
-			 p.create && create);
+			 p.create && create,
+			 p.delete && delete);
   }
 
   /**
@@ -167,6 +200,7 @@ public class PermEntry implements java.io.Serializable {
     result = "visible : " + (visible ? "true" : "false");
     result += " editable : " + (editable ? "true" : "false");
     result += " create : " + (create ? "true" : "false");
+    result += " deletable : " + (delete ? "true" : "false");
 
     return result;
   }
