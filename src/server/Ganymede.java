@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -316,6 +316,8 @@ public class Ganymede {
       }
     else
       {
+	firstrun = true;
+
 	debug("No DBStore exists under filename " + dbFilename + ", not loading");
 	debug("Initializing new schema");
 	db.initializeSchema();
@@ -335,6 +337,8 @@ public class Ganymede {
 	debug("Creating " + rootname + " object");
 	db.initializeObjects();
 	debug(rootname + " object created");
+
+	firstrun = false;
       }
 
     debug("Initializing Security Manager");
