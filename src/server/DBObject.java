@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.59 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.60 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -61,6 +61,7 @@ import arlut.csd.JDialog.*;
 public class DBObject implements db_object, FieldType, Remote {
 
   static boolean debug = false;
+  final static boolean debugEmit = false;
 
   public static void setDebug(boolean val)
   {
@@ -737,20 +738,43 @@ public class DBObject implements db_object, FieldType, Remote {
 
     if (fields.size() == 0)
       {
-	System.err.println("**** Error: writing object with no fields: " + objectBase.getName() + " <" + id + ">");
+	Ganymede.debug("**** Error: writing object with no fields: " + 
+		       objectBase.getName() + " <" + id + ">");
       }
 
     out.writeShort(fields.size());
 
-    //    System.err.println("emitting fields");
-   
     enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
 	field = (DBField) enum.nextElement();
-	out.writeShort(field.getID());
-	field.emit(out);
+
+	// We should never see an undefined field in our field table
+	// at this point.  There used to be a condition that would
+	// allow an undefined field to get here if the schema for a
+	// field had been changed by the schema editor while the
+	// database contained instances of that field, but that
+	// shouldn't be the case anymore.
+
+	if (debugEmit)
+	  {
+	    if (field.isDefined())
+	      {
+		out.writeShort(field.getID());
+		field.emit(out);
+	      }
+	    else
+	      {
+		Ganymede.debug("**** DBObject.emit(): " + getTypeName() + ":" + 
+			       getLabel() + " has an undefined field " + field.getName());
+	      }
+	  }
+	else
+	  {
+	    out.writeShort(field.getID());
+	    field.emit(out);
+	  }
       }
   }
 
@@ -1583,7 +1607,10 @@ public class DBObject implements db_object, FieldType, Remote {
    * pointers when the base changes.  This happens when the schema is
    * edited.. this method is called on all objects under a
    * DBObjectBase to make the object point and its fields point to the
-   * new version of the DBObjectBase and DBObjectBaseFields.
+   * new version of the DBObjectBase and DBObjectBaseFields.  This
+   * method also takes care of cleaning out any fields that have become
+   * undefined due to a change in the schema for the field, as in a
+   * change from a vector to a scalar field, or vice-versa.
    *
    */
 
@@ -1591,12 +1618,28 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     this.objectBase = newBase;
 
+    Vector tmpFieldVec = new Vector();
     Enumeration enum = fields.elements();
+    DBField field;
 
     while (enum.hasMoreElements())
       {
-	DBField field = (DBField) enum.nextElement();
+	field = (DBField) enum.nextElement();
 	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
+
+	if (!field.isDefined())
+	  {
+	    tmpFieldVec.addElement(field);
+	  }
+      }
+
+    for (int i = 0; i < tmpFieldVec.size(); i++)
+      {
+	field = (DBField) tmpFieldVec.elementAt(i);
+
+	fields.removeNoSync(field.getID());
+
+	System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getName());
       }
   }
 
