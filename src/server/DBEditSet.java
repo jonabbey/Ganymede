@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -194,6 +194,36 @@ public class DBEditSet {
    *
    * @param name An identifier for the checkpoint to take off
    * the checkpoint stack.
+
+   * @return null if the checkpoint could not be found on the
+   * stack, or the DBCheckPoint object representing the state
+   * of the transaction at the checkpoint time if the checkpoint
+   * could be found.
+   *
+   */
+
+  public DBCheckPoint popCheckpoint(String name)
+  {
+    return popCheckpoint(name, false);
+  }
+
+  /**
+   *
+   * This method is used to pop a checkpoint off the checkpoint
+   * stack.  This method is equivalent to a rollback where the
+   * checkpoint information is taken off the stack, but this
+   * DBEditSet's state is not reverted.<br><br>
+   *
+   * Any checkpoints that were placed on the stack after
+   * the checkpoint matching &lt;name&gt; will also be
+   * removed from the checkpoint stack.
+   *
+   * @param name An identifier for the checkpoint to take off
+   * the checkpoint stack.
+   *
+   * @param inRollback If true, popCheckpoint will not actually
+   * pop the checkpoint states out of the DBStore namespaces,
+   * leaving that for rollback() to finish up.
    *
    * @return null if the checkpoint could not be found on the
    * stack, or the DBCheckPoint object representing the state
@@ -202,7 +232,7 @@ public class DBEditSet {
    *
    */
 
-  public synchronized DBCheckPoint popCheckpoint(String name)
+  public synchronized DBCheckPoint popCheckpoint(String name, boolean inRollback)
   {
     DBCheckPoint point = null;
     boolean found;
@@ -243,13 +273,16 @@ public class DBEditSet {
 	  }
       }
 
-    // we don't synchronize on dbStore, the odds are zip that a
-    // namespace will be created or deleted while we are in the middle
-    // of a transaction.  Go ahead and clear out the namespace checkpoint.
-
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    if (!inRollback)
       {
-	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
+	// we don't synchronize on dbStore, the odds are zip that a
+	// namespace will be created or deleted while we are in the middle
+	// of a transaction.  Go ahead and clear out the namespace checkpoint.
+	
+	for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+	  {
+	    ((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
+	  }
       }
 
     if (found)
@@ -291,7 +324,7 @@ public class DBEditSet {
 	System.err.println("DBEditSet.rollback(): rollback key " + name);
       }
 
-    point = popCheckpoint(name);
+    point = popCheckpoint(name, true);
 
     if (point == null)
       {
