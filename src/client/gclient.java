@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.115 $ %D%
+   Version: $Revision: 1.116 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -203,6 +203,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   Image
     errorImage = null,
     search,
+    queryIcon,
     pencil,
     trash,
     creation,
@@ -571,6 +572,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
     
     search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
+    queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
@@ -1713,6 +1715,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     JPanel panel = new JPanel(new BorderLayout());
     panel.setBorder(BorderFactory.createEmptyBorder(0,4,0,4));
+
+    JPanel toolPanel = new JPanel(new BorderLayout());
+    JPanel personaPanel = new JPanel(new BorderLayout());
+
     JToolBar toolBar = new JToolBar();
     toolBar.setBorderPainted(true);
     Insets insets = new Insets(0,0,0,0);
@@ -1755,7 +1761,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBar.add(b);
 
-    panel.add("West", toolBar);
+    b = new JButton("Query", new ImageIcon(queryIcon));
+    b.setActionCommand("compose a query");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    b.setToolTipText("Compose a query");
+    b.setMargin(insets);
+    b.addActionListener(this);
+    toolBar.add(b);
+
+    toolPanel.add("Center",toolBar);
 
     // if we just have a single persona, don't hassle with
     // a personaCombo
@@ -1785,12 +1800,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	PInnerpanel.add("Center", new JLabel("Persona:", SwingConstants.RIGHT));
 	PInnerpanel.add("East", personaCombo);
 	POuterpanel.add("South", PInnerpanel);
-	panel.add("East", POuterpanel);
+
+	personaPanel.add("Center",POuterpanel);
+
+	panel.add("East",personaPanel);
       }
     else if (debug)
       {
 	System.out.println("No personas.");
       }
+
+    panel.add("Center",toolPanel);
 
     return panel;
   }
@@ -3834,7 +3854,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	
 	commitTransaction();
       }
-    else if (source == menubarQueryMI)
+    else if ((source == menubarQueryMI) || (command.equals("compose a query")))
       {
 	if (my_querybox == null)
 	  {
