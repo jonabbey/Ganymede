@@ -1,11 +1,11 @@
 Ganymede Release 0.96
-January ??, 1999
+January 29, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.95 to 0.96 -------------------
 
-RELEASE DATE: January ??, 1999
+RELEASE DATE: January 29, 1999
 
 1. [DISTRIBUTION] Fixes to the distribution set
 
@@ -57,6 +57,12 @@ The userCustom object in the gasharl schema was not properly
 differentiating between the case of wizard-led inactivation and
 automated inactivation in handling checkpointing and rollback.
 
+Note that I'm not really maintaining the 'gash' schema at this point..
+I'm concentrating on getting gasharl to the point where we can use it
+here in the lab.  At some point someone is going to have to take on
+the task of doing a generic DNS schema that lots of people can easily
+use, but it's not me right now.
+
 6. [SERVER] Added GanymedeValidationTask
 
 Added GanymedeValidationTask, a task that scans through the entire
@@ -66,7 +72,23 @@ required fields.
 7. [ADMIN CONSOLE] Added a clear log button
 
 Added a clear log button to the admin console, to allow admins to
-reset the log display.
+reset the log display on the admin console.
+
+8. [CLIENT] Various cosmetic tweaks
+
+Mike did a nice help system, with index and what-not implemented in
+HTML, but we never wrote any content for it, so I've taken the help
+menu item out of the help menu for the time being.
+
+Put the release info and copyright info in the about.. dialog.
+
+There are a couple of places in the client that were throwing
+NullPointer exceptions due to Swing's choice of behaviors.  We were
+catching it, but reporting it to stderr.  Now we just stay silent
+about it.
+
+Modified the glogin applet so that it gives a better appearance when
+invoked in a web browser.
 
 -------------------- Changes from 0.94 to 0.95 -------------------
 
