@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,6 +84,7 @@ public class objectList {
 
     /* -- */
 
+    invids = new Hashtable();
     handles = result.getHandles();
 
     activeHandles = (Vector) handles.clone(); // quickly dup the vector of handles
