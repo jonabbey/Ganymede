@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -526,6 +526,31 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   public Object key()
   {
     return new Integer(owner.getID());
+  }
+
+  /**
+   *
+   * We always return null here..
+   *
+   */
+
+  public Object getValue()
+  {
+    return null;
+  }
+
+  /** 
+   *
+   * Returns an Object carrying the value held in this field.<br><br>
+   *
+   * This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.
+   *
+   */
+
+  public Object getValueLocal()
+  {
+    return null;
   }
 
   /**
