@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2002/01/23 20:05:03 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/08/02 09:14:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,18 +200,44 @@ public class VectorUtils {
 	return false;
       }
 
-    Hashtable workSet = new Hashtable(vectA.size());
-    
-    for (int i = 0; i < vectA.size(); i++)
+    if ((vectA.size() + vectB.size()) > 10)		// ass, again
       {
-	workSet.put(vectA.elementAt(i), vectA.elementAt(i));
-      }
-
-    for (int i = 0; i < vectB.size(); i++)
-      {
-	if (workSet.containsKey(vectB.elementAt(i)))
+	Hashtable workSet = new Hashtable(vectA.size());
+	
+	for (int i = 0; i < vectA.size(); i++)
 	  {
-	    return true;
+	    workSet.put(vectA.elementAt(i), vectA.elementAt(i));
+	  }
+	
+	for (int i = 0; i < vectB.size(); i++)
+	  {
+	    if (workSet.containsKey(vectB.elementAt(i)))
+	      {
+		return true;
+	      }
+	  }
+      }
+    else 
+      {
+	if (vectA.size() > vectB.size())
+	  {
+	    for (int i = 0; i < vectA.size(); i++)
+	      {
+		if (vectB.contains(vectA.elementAt(i)))
+		  {
+		    return true;
+		  }
+	      }
+	  }
+	else
+	  {
+	    for (int i = 0; i < vectB.size(); i++)
+	      {
+		if (vectA.contains(vectB.elementAt(i)))
+		  {
+		    return true;
+		  }
+	      }
 	  }
       }
 
