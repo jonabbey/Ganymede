@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99
-April 16, 1999
+Ganymede Developer Release 0.99.1
+May 26, 1999
 CREDITS
 ---------------------------------------------
 
@@ -109,6 +109,7 @@ Sheilagh O'Hare, martini@fc.net - design brilliance
 Frederick Dickey, frederick.j.dickey@boeing.com - packaging bug report
 Lewis Muhlenkamp, lewism@tt.comm.mot.com - packaging, client bug reports
 Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de - packaging reports
+Andy Johnson, andyjohnson@engineer.com - build script bug reports
 
 --
 
@@ -125,4 +126,6 @@ Ganymede by permission of the author.
 The Qsmtp class was originally written by James Driscoll
 (maus@io.com), and placed into the public domain.  See
 http://www.io.com/~maus/JavaPage.html for details and additional free
-Java code.
+Java code. Note that the version of Qstmp packaged with Ganymede has
+been significantly modified, to provide more convenient use and
+rudimentary MIME support.

@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99
-April 16, 1999
+Ganymede Developer Release 0.99.1
+May 26, 1999
 THINGSTODO
 ---------------------------------------------
 
@@ -28,12 +28,12 @@ there's a good way of avoiding that work.
 
 Right now the gasharl schema kit is the most fully developed and
 tested schema, but the gasharl schema kit does not include a full
-and working NIS/DNS build system.  We're looking to have the gasharl
-schema in production in the lab by the end of February, 1999.  
+and working NIS/DNS build system.
 
-Shortly therafter we should have a ganymede 1.0 release with
-everything required to use the gasharl schema for those sites
-currently running GASH.
+We are currently developing enhanced DNS support through the use of an
+XML layer to replace the old gash hosts_info file.  We intend to
+support DNS fairly comprehensively with this software, but it is not
+yet ready for release.
 
 2) Scalability issues
 

@@ -1,11 +1,11 @@
 Ganymede Release 0.99.1
-May ??, 1999
+May 26, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99 to 0.99.1 -------------------
 
-RELEASE DATE: May ??, 1999
+RELEASE DATE: May 26, 1999
 
 1. [SERVER] Made decodeDB omit built-in field types by default
 
@@ -52,12 +52,15 @@ findLabeledObject() which allows the client to quickly get an invid
 from an object type and name without having to use the full Query()
 method.
 
+This method is used by client/rpcpass.java.
+
 6. [CLIENT] Added client/rpcpass.java to support Linux NIS rpc.yppasswdd
 
 Added a program 'rpcpass' to the client distribution.  rpcpass is
-designed to be used with a version of the Linux NISkit's rpc.yppasswdd
-daemon, to allow Ganymede user data to be changed in response to the
-yppasswd, chfn, and chsh programs.
+designed to be used with the -x/--execute option present in versions
+1.3.6.92 and later of the Linux NISkit's rpc.yppasswdd daemon
+(included in the ypserv distribution), to allow NIS password change
+operations to be propagated to Ganymede.
 
 When run, rpcpass reads a single line from stdin,
 which should be of the form
@@ -78,10 +81,33 @@ there are any problems, these will be described in a
 report to stdout, which rpc.yppasswdd will take as a failure
 signal.
 
-Note that while the modified rpc.yppasswdd daemon may pass gcos
-information to rpcpass, the gecos field is formatted differently
-on different operating systems, and so rpcpass does not attempt
-to handle it at all.
+Note that while the rpc.yppasswdd daemon may pass gcos information to
+rpcpass, the gecos field is formatted differently on different
+operating systems, and so rpcpass does not attempt to handle it at
+all.
+
+Of course, any program can use the rpcpass program to propagate
+password/shell change requests to Ganymede, not just the Linux NIS
+kit's rpc.yppasswdd daemon.
+
+7. [SOURCE] Fixed a couple more PATH problems with building sources
+
+A couple of fixes relating to doing source builds with '.' not in
+one's PATH.
+
+EXECUTING: src/server/build
+  ERROR     :  buildrmi: command not found
+  FILE FIXED: src/server/build
+  PREV LINE :  buildrmi
+  NEW LINE  :  ./buildrmi
+
+EXCECUTING: src/classes/buildJar
+  ERROR     :  sync_tree: command not found
+  FILE FIXED: src/classes/buildJar
+  PREV LINE :  sync_tree 
+  NEW LINE  :  ./sync_tree
+
+Reported by Andy Johnson (andyjohnson@engineer.com).
 
 -------------------- Changes from 0.98 to 0.99 -------------------
 
