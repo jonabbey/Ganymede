@@ -5,7 +5,7 @@
    This file is a management class for object event-class records in Ganymede.
    
    Created: 9 July 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -246,7 +246,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    *  
    */
 
-  public boolean finalizeSetValue(DBField field, Object value)
+  public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
@@ -254,15 +254,15 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
 	if (value == null)
 	  {
-	    return true;
+	    return null;
 	  }
 
 	DBObjectBase base = Ganymede.db.getObjectBase((String) value);
 
-	setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
+	return setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
       }
 
-    return true;
+    return null;
   }
 
   /**

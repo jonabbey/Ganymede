@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,7 +78,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * 
    */
 
-  public boolean finalizeSetValue(DBField field, Object value)
+  public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     String str, name;
     DBSession session = editset.getSession();
@@ -99,7 +99,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	return refreshLabelField(null, (Invid) value);
       }
 
-    return true;
+    return null;
   }
 
   /**
@@ -108,10 +108,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    *
    */
 
-  private boolean refreshLabelField(String descrip, Invid userInvid)
+  private ReturnVal refreshLabelField(String descrip, Invid userInvid)
   {
-    ReturnVal result;
-
     if (descrip == null)
       {
 	StringDBField nameField = (StringDBField) getField(SchemaConstants.PersonaNameField);
@@ -134,23 +132,17 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (getInvid().getNum() <= 2)
       {
-	result = setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
-
-	return (result == null || result.didSucceed());
+	return setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
       }
 
     if (userInvid == null || descrip == null)
       {
-	result = setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
-
-	return (result == null || result.didSucceed());
+	return setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
       }
 
     String username = this.getGSession().viewObjectLabel(userInvid);
 
-    result = setFieldValueLocal(SchemaConstants.PersonaLabelField, username + ":" + descrip);
-
-    return (result == null || result.didSucceed());
+    return setFieldValueLocal(SchemaConstants.PersonaLabelField, username + ":" + descrip);
   }
 
   /**
