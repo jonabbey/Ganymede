@@ -18,6 +18,10 @@ $perlname = "<#PERLEXE#>";
 $homedir = $ENV{HOME};
 &removelastslash($homedir);
 
+# We need to remember the name of the GNU regexp jar file we're using
+
+$gnuregexp = "gnu-regexp-1.1.4.jar";
+
 # Make sure our current working directory is in the same directory as
 # the script
 
@@ -99,7 +103,7 @@ if (!$failure) {
 
 if (!-f "jars/ganymedeServer.jar") {
   print "Error couldn't find ganymedeServer.jar file.\n";
-  print "Be sure and do a 'make jars' after building the Ganymede server.\n";
+  print "Be sure and do an 'ant jars' after building the Ganymede server.\n";
   exit;
 }
 
@@ -167,7 +171,7 @@ if (!-e $vars{"JVM"}."/java") {
 # can we make the server install directory?
 
 if (!-d $vars{"SERVERINSTALL"}) {
-  mkdir($vars{"SERVERINSTALL"}, 0700) or die "*Couldn't make the server install directory*\n"; 
+  mkdir($vars{"SERVERINSTALL"}, 0700) or die "*Couldn't make the server install directory*\n";
   print "Made the server install directory ok\n";
 } else {
   print "Found the server install directory ok\n";
@@ -206,6 +210,7 @@ copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
 copy("jars/ganymedeServer.jar", "$installdir/jars/ganymedeServer.jar"); print ".";
+copy("jars/$gnuregexp", "$installdir/jars/$gnuregexp"); print ".";
 
 # for the xmlclient, go ahead and install the client jar file
 
@@ -289,7 +294,7 @@ if ($version == 2) {
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/schema/custom.jar",
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/$gnuregexp:$installdir/schema/custom.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
@@ -359,12 +364,12 @@ chmod 0750, "$installdir/bin/logscan.pl";
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/ganymede.properties",
 	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
-  
+
 open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
 open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
-  
+
 while (<INPUT>) {
-    
+
     if (!/^([A-Z]*)=/) {
 	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
@@ -396,14 +401,14 @@ Done
 
 ENDFINAL
 
-######################################################################### 
+#########################################################################
 #
 #                                                                 makedir
 #
 # input: 1) a directory to make
 #        2) octal chmod bits
 #
-######################################################################### 
+#########################################################################
 sub makedir{
   my ($dirpath, $chmod) = @_;
 
@@ -412,14 +417,14 @@ sub makedir{
   }
 }
 
-######################################################################### 
+#########################################################################
 #
 #                                                                 copydir
 #
 # input: 1) a directory to copy from
 #        2) directory target
 #
-######################################################################### 
+#########################################################################
 sub copydir{
   my ($source, $target) = @_;
   my (@dirs, $file);
@@ -448,16 +453,16 @@ sub copydir{
   }
 }
 
-######################################################################### 
+#########################################################################
 #
 #                                                         removelastslash
 #
 # input: a pathname to test
 #
-# this function will remove a trailing slash from the directory name 
+# this function will remove a trailing slash from the directory name
 # input
 #
-######################################################################### 
+#########################################################################
 sub removelastslash{
   if ($_[0] =~ /\/$/) {
     chop $_[0];
@@ -466,7 +471,7 @@ sub removelastslash{
   return $_[0];
 }
 
-######################################################################### 
+#########################################################################
 #
 #                                                             identifyjvm
 # input: filename of the jvm executable
@@ -475,7 +480,7 @@ sub removelastslash{
 # 2 if it was 1.2 or 1.3 based
 #
 #
-######################################################################### 
+#########################################################################
 sub identifyjvm {
   my ($jvm) = @_;
   my $versionString;
@@ -503,7 +508,7 @@ sub identifyjvm {
 #                                                                 resolve
 #
 # input: $dir - absolute pathname of current directory
-#        $link - string containing the readlink() results for a 
+#        $link - string containing the readlink() results for a
 #                symbolic link in $dir to be processed
 #
 # returns: absolute pathname of the target of the symbolic link
@@ -519,7 +524,7 @@ sub resolve{
     # if we have a leading / in our $dir or $link,
     # we'll need to shift to get rid of the leading
     # empty array element
-  
+
     @dirp=split(/\//, $dir);
     shift(@dirp) if (!($dirp[0]));
     @linkp=split(/\//, $link);
@@ -527,7 +532,7 @@ sub resolve{
 
     # @alinkp is an array that we will build to contain the absolute link
     # target pathname.  If the link does not begin with a /, it is a relative link,
-    # and we need to place our current directory into the @alinkp array.  
+    # and we need to place our current directory into the @alinkp array.
 
     if ($link !~ /^\//) {
 	@alinkp=@dirp;
@@ -545,7 +550,7 @@ sub resolve{
 	if ($d eq "..") {
 	    pop(@alinkp);
 	}
-	elsif ($d ne "."){		       
+	elsif ($d ne "."){
 	    push(@alinkp, $d);
 	}
 	$d=shift(@linkp);
@@ -587,8 +592,8 @@ sub canonify {
 
   return $pathname;
 }
- 
-######################################################################### 
+
+#########################################################################
 #
 #                                                                 dirname
 #
@@ -596,7 +601,7 @@ sub canonify {
 #
 # return: the directory containing the filename given
 #
-######################################################################### 
+#########################################################################
 sub dirname{
   my ($dirpath) = @_;
   my (@comps);
