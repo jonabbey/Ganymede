@@ -120,6 +120,13 @@ As with all properties defined in the ganymede.properties file, the
 server must be stopped and restarted for any changes in the properties
 file to take effect.
 
+7. [SERVER] Improved logging/email for embedded object modifications
+
+All informational logging of changes made to embedded objects now
+includes the name of the top-level object which holds the embedded
+object.  For our usage, this makes it possible to tell what system
+was involved when an interface definition was changed.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
