@@ -8,7 +8,7 @@ SVN URL: $HeadURL$
 --------------------------------------------------------------------------------
 
 This directory contains RMI remote interface definitions for the
-Directory Droid server.  Clients and the admin console need access to
+Ganymede server.  Clients and the admin console need access to
 these interfaces so that they can talk to objects whose classes are
 typically defined in the server directory.
 
