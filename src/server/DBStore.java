@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -157,7 +157,7 @@ public class DBStore {
 
 	if (debug)
 	  {
-	    System.err.println("DBStore load(): file version " + file_major + ":" + file_minor);
+	    System.err.println("DBStore load(): file version " + file_major + "." + file_minor);
 	  }
 
 	if (file_major != major_version)
@@ -316,6 +316,8 @@ public class DBStore {
     File dbFile = null;
     FileOutputStream outStream = null;
     DataOutputStream out = null;
+    FileOutputStream textOutStream = null;
+    PrintWriter textOut = null;
     Enumeration basesEnum;
     short baseCount, namespaceCount, categoryCount;
     DBDumpLock lock = null;
@@ -383,6 +385,13 @@ public class DBStore {
 	  {
 	    ((DBObjectBase) basesEnum.nextElement()).emit(out);
 	  } 
+
+	// and dump the schema out in a human readable form
+	
+	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema");
+	textOut = new PrintWriter(textOutStream);
+	//	printBases(textOut);
+	printCategoryTree(textOut);
       }
     catch (IOException ex)
       {
@@ -407,7 +416,17 @@ public class DBStore {
 	if (outStream != null)
 	  {
 	    outStream.close();
-	  }	      
+	  }
+
+	if (textOut != null)
+	  {
+	    textOut.close();
+	  }
+
+	if (textOutStream != null)
+	  {
+	    textOutStream.close();
+	  }
       }
 
     if (journal != null)
@@ -441,13 +460,27 @@ public class DBStore {
 
   /**
    *
+   * <p>Do a printable dump of the category hierarchy</p>
+   *
+   *
+   * @param out PrintStream to print to
+   *
+   */
+
+  public synchronized void printCategoryTree(PrintWriter out)
+  {
+    rootCategory.print(out, "");
+  }
+
+  /**
+   *
    * <p>Do a printable dump of the object databases</p>
    *
    * @param out PrintStream to print to
    *
    */
 
-  public synchronized void printBases(PrintStream out)
+  public synchronized void printBases(PrintWriter out)
   {
     Enumeration enum;
 
@@ -457,7 +490,7 @@ public class DBStore {
 
     while (enum.hasMoreElements())
       {
-	((DBObjectBase) enum.nextElement()).print(out);
+	((DBObjectBase) enum.nextElement()).print(out, "");
       }
   }
 
@@ -675,20 +708,18 @@ public class DBStore {
 	adminCategory.addNode(b, false, false);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminGroupField;
+	bf.field_order = bf.field_code = SchemaConstants.AdminGroupField;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Group";
-	bf.field_order = 2;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If this boolean is true, this administrator object represents a group of administrators";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminNameField;
+	bf.field_order = bf.field_code = SchemaConstants.AdminNameField;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
-	bf.field_order = 3;
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
@@ -698,11 +729,10 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminPasswordField;
+	bf.field_order = bf.field_code = SchemaConstants.AdminPasswordField;
 	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
 	bf.maxLength = 8;
-	bf.field_order = 4;
 	bf.removable = false;
 	bf.editable = false;
 	bf.crypted = true;
@@ -710,24 +740,22 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminMembersField;
+	bf.field_order = bf.field_code = SchemaConstants.AdminMembersField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Members";
 	bf.array = true;
-	bf.field_order = 5;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Members of this admin group";
-	bf.allowedTarget = 0;
+	bf.allowedTarget = SchemaConstants.AdminBase;
 	bf.targetField = 6;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminGroupsField;
+	bf.field_order = bf.field_code = SchemaConstants.AdminGroupsField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Groups";
 	bf.array = true;
-	bf.field_order = 6;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Admin group this administrative account is a member of";
@@ -736,10 +764,9 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminAssocUser;
+	bf.field_order = bf.field_code = SchemaConstants.AdminAssocUser;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "User";
-	bf.field_order = 7;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If this administrative account is a user admin, the user account";
@@ -748,10 +775,9 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminPrivs;
+	bf.field_order = bf.field_code = SchemaConstants.AdminPrivs;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Privileges";
-	bf.field_order = 8;
 	bf.allowedTarget = SchemaConstants.PermBase;
 	bf.array = true;
 	bf.removable = false;
@@ -760,12 +786,11 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.AdminObjectsOwned;
+	bf.field_order = bf.field_code = SchemaConstants.AdminObjectsOwned;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
 	bf.targetField = 0;	// owner list field
-	bf.field_order = 9;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
@@ -879,13 +904,21 @@ public class DBStore {
 
     session.openTransaction();
 
-    DBEditObject eO =(DBEditObject) session.createDBObject((short) 0); // create a new admin object
+    DBEditObject eO =(DBEditObject) session.createDBObject(SchemaConstants.AdminBase); // create a new admin object
 
     StringDBField s = (StringDBField) eO.getField("Name");
     s.setValue("supergash");
     
     PasswordDBField p = (PasswordDBField) eO.getField("Password");
     p.setPlainTextPass(GanymedeConfig.newSGpass); // default supergash password
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.AdminBase); // create a new admin object
+
+    s = (StringDBField) eO.getField("Name");
+    s.setValue("monitor");
+    
+    p = (PasswordDBField) eO.getField("Password");
+    p.setPlainTextPass("display"); // default supergash password
     
     session.commitTransaction();
   }
