@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.9 $ %D%
+  Version: $Revision: 1.10 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import com.sun.java.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.9 $ %D%
+ * @version $Revision: 1.10 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -1705,6 +1705,10 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	backing = createImage(getBounds().width, getBounds().height);
 	bg = backing.getGraphics();
       }
+
+    // set our font.
+
+    bg.setFont(font);
 
     // and draw our tree
 
