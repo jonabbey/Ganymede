@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1102,7 +1102,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     synchronized (base)
       {
-	enum = base.sortedFields.elements();;
+	enum = base.sortedFields.elements();
 	
 	while (enum.hasMoreElements())
 	  {
@@ -1438,11 +1438,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	
 	if (query.permitList == null)
 	  {
-	    // If they haven't specified the list of fields they want back, make
-	    // sure we don't show them built in fields and we don't show them the
-	    // objects owned field in the OwnerBase.. that could entail many
-	    // thousands of objects listed.  If they really, really want to see
-	    // them, let them say so explicitly.
+	    // If they haven't specified the list of fields they want
+	    // back, make sure we don't show them built in fields and
+	    // we don't show them the objects owned field in the
+	    // OwnerBase.. that could entail many thousands of objects
+	    // listed.  If they really, really want to see them, let
+	    // them say so explicitly.
 
 	    if (!field.isBuiltIn() && 
 		!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
@@ -1502,9 +1503,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // DumpResult.addRow() uses the GanymedeSession reference
 	    // we pass in to handle per-field permissions
 	    //
-	    // using view_db_object() here would be disastrous, because
-	    // it would entail making duplicates of all objects matching
-	    // our query
+	    // using view_db_object() here would be disastrous,
+	    // because it would entail making duplicates of all
+	    // objects matching our query
 
 	    result.addRow(session.viewDBObject(invid), this);
 	  }
@@ -1689,9 +1690,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    return result;
 	  }
 
-	// we're looking at a data field.. determine which field we're looking
-	// at, find the dictionary definition for that field, see if it is
-	// in a namespace so we can do a direct lookup via a namespace hash.
+	// we're looking at a data field.. determine which field we're
+	// looking at, find the dictionary definition for that field,
+	// see if it is in a namespace so we can do a direct lookup
+	// via a namespace hash.
 
 	if (node.fieldId >= 0)
 	  {
@@ -1738,10 +1740,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		DBField resultfield = ns.lookup(node.value);
 
-		// note that DBNameSpace.lookup() will always point us to a field
-		// that is currently in the main database, so we don't need to
-		// worry that the namespace slot is pointing to a field in a
-		// checked-out object.
+		// note that DBNameSpace.lookup() will always point us
+		// to a field that is currently in the main database,
+		// so we don't need to worry that the namespace slot
+		// is pointing to a field in a checked-out object.
 		
 		if (resultfield == null)
 		  {
@@ -1750,8 +1752,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		else
 		  {
 		    // a namespace can map across different field and
-		    // object types.. make sure we've got an instance of
-		    // the right kind of field
+		    // object types.. make sure we've got an instance
+		    // of the right kind of field
 
 		    if (resultfield.definition != fieldDef)
 		      {
@@ -1857,8 +1859,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			   " : completed query over primary hash, releasing read lock");
       }
 
-    // find any objects created or being edited in the current transaction that
-    // match our criteria that we didn't see before
+    // find any objects created or being edited in the current
+    // transaction that match our criteria that we didn't see before
 
     if (session.isTransactionOpen())
       {
@@ -1935,6 +1937,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   *
    * This private method takes care of adding an object to a query
    * result, checking permissions and what-not as needed.
    * 
@@ -2007,8 +2010,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
-	    // we don't have a transaction open, so there's no worry about us
-	    // having a different version of the object open in our transaction
+	    // we don't have a transaction open, so there's no worry
+	    // about us having a different version of the object open
+	    // in our transaction
 	    
 	    result.addRow(obj, perm.isEditable());
 	  }
@@ -2067,7 +2071,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    // we do our own permissions checking, so we can use session.viewDBObject().
+    // we do our own permissions checking, so we can use
+    // session.viewDBObject().
 
     obj = session.viewDBObject(invid);
 
@@ -2244,6 +2249,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   *
    * This method provides a handle to an editable
    * object from the Ganymede database.
    *
@@ -2271,6 +2277,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   *
    * This method provides a handle to a newly
    * created object of the specified type in the
    * Ganymede database.
@@ -2309,8 +2316,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	Vector ownerInvids = new Vector();
 
-	// we may have either a vector of Invids in newObjectOwnerInvids, or
-	// a query result containing a list of a single Invid
+	// we may have either a vector of Invids in
+	// newObjectOwnerInvids, or a query result containing a list
+	// of a single Invid
 	
 	if (newObjectOwnerInvids != null)
 	  {
@@ -2404,7 +2412,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("inactivate_db_object: " + eObj.getLabel());
 
-    // note!  DBEditObject's finalizeInactivate() method does the event logging
+    // note!  DBEditObject's finalizeInactivate() method does the
+    // event logging
 
     return session.inactivateDBObject(eObj);
   }
@@ -2448,7 +2457,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("reactivate_db_object: " + eObj.getLabel());
 
-    // note!  DBEditObject's finalizeReactivate() method does the event logging
+    // note!  DBEditObject's finalizeReactivate() method does the
+    // event logging
 
     return session.reactivateDBObject(eObj);
   }
@@ -2541,9 +2551,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (userInvid != null)
       {
-	// okay to use session.viewDBObject() here, because
-	// getUser() is only used for internal purposes,
-	// and we don't need or want to do permissions checking
+	// okay to use session.viewDBObject() here, because getUser()
+	// is only used for internal purposes, and we don't need or
+	// want to do permissions checking
 
 	return session.viewDBObject(userInvid);
       }
