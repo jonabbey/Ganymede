@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,7 +86,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * 
    */
   
-  GanymedeSession(Client client) throws RemoteException
+  GanymedeSession(Client client, DBObject adminObject) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -135,6 +135,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     // construct our DBSession
 
     session = new DBSession(Ganymede.db, null, client.getName());
+    session.adminObject = adminObject;
 
     GanymedeServer.sessions.addElement(this);
     GanymedeAdmin.refreshUsers();
@@ -310,18 +311,22 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * Currently each client can only have one transaction open.. it
    * is an error to call openTransaction() while another transaction
    * is still open, and an exception will be thrown.
+   *
+   * @param describe An optional string containing a comment to be
+   * stored in the modification history for objects modified by this
+   * transaction.
    * 
    * @see arlut.csd.ganymede.Session
    */
 
-  public void openTransaction()
+  public void openTransaction(String describe)
   {
     if (session.editSet != null)
       {
 	throw new IllegalArgumentException("transaction already opened");
       }
 
-    session.openTransaction();
+    session.openTransaction(describe);
   }
 
   /**
