@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,8 +22,8 @@ import java.util.*;
 
 import gjt.Box;
 
-import csd.Table.*;
-import csd.Dialog.YesNoDialog;
+import arlut.csd.Table.*;
+import arlut.csd.Dialog.YesNoDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -40,6 +40,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private GASHAdminFrame frame = null;
   private Server server = null;
   private adminSession aSession = null;
+  Frame schemaFrame;
 
   /* -- */
 
@@ -143,6 +144,44 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.dumpDB();
   }
 
+  void pullSchema() throws RemoteException
+  {
+    SchemaEdit editor = null;
+
+    System.err.println("Trying to get SchemaEdit handle");
+
+    try
+      {
+	editor = aSession.editSchema();
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("editSchema() exception: " + ex);
+      }
+
+    if (editor == null)
+      {
+	System.err.println("null editor handle");
+      }
+    else
+      {
+	System.err.println("Got SchemaEdit handle");
+	
+	schemaFrame = new GASHSchema("Schema Editor", editor);
+      }
+
+    //    try
+    //      {
+    //	editor.release();
+    //      }
+    //    catch (RemoteException ex)
+    //      {
+    //	System.err.println("release() exception: " + ex);
+    //      }
+
+    //    System.err.println("Released SchemaEdit handle");
+  }
+
 }
 
 /*------------------------------------------------------------------------------
@@ -164,6 +203,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   Menu controlMenu = null;
   MenuItem quitMI = null;
   MenuItem dumpMI = null;
+  MenuItem schemaMI = null;
   MenuItem shutdownMI = null;
 
   PopupMenu popMenu = null;
@@ -204,11 +244,15 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     shutdownMI = new MenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
 
+    schemaMI = new MenuItem("Edit Schema");
+    schemaMI.addActionListener(this);
+
     quitMI = new MenuItem("Close Console");
     quitMI.addActionListener(this);
 
     controlMenu.add(dumpMI);
     controlMenu.add(shutdownMI);
+    controlMenu.add(schemaMI);
     controlMenu.addSeparator();
     controlMenu.add(quitMI);
 
@@ -393,6 +437,17 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     else if (event.getSource() == shutdownMI)
       {
 	shutdownDialog.show();
+      }
+    else if (event.getSource() == schemaMI)
+      {
+	try
+	  {
+	    admin.pullSchema();
+	  }
+	catch (RemoteException e)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server");
+	  }
       }
     else if (event.getSource() == shutdownDialog)
       {
