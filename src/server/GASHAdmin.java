@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2000/10/09 05:51:49 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2000/10/09 21:51:49 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -634,15 +634,17 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenu controlMenu = null;
   JMenuItem quitMI = null;
   JMenuItem dumpMI = null;
-  JMenuItem dumpSchemaMI = null;
-  JMenuItem reloadClassesMI = null;
+  JMenuItem killAllMI = null;
   JMenuItem schemaMI = null;
   JMenuItem shutdownMI = null;
+
+  JMenu debugMenu = null;
   JMenuItem runInvidTestMI = null;
   JMenuItem runInvidSweepMI = null;
   JMenuItem runEmbeddedTestMI = null;
   JMenuItem runEmbeddedSweepMI = null;
-  JMenuItem killAllMI = null;
+  JMenuItem dumpSchemaMI = null;
+  JMenuItem reloadClassesMI = null;
 
   JPopupMenu popMenu = null;
   JMenuItem killUserMI = null;
@@ -721,16 +723,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     this.adminPanel = adminPanel;
 
     mbar = new JMenuBar();
-    controlMenu = new JMenu("Control", false);
+    controlMenu = new JMenu("Control", false); // no tear-off
 
     dumpMI = new JMenuItem("Dump Database");
     dumpMI.addActionListener(this);
-
-    dumpSchemaMI = new JMenuItem("Dump Schema");
-    dumpSchemaMI.addActionListener(this);
-
-    reloadClassesMI = new JMenuItem("Reload Custom Classes");
-    reloadClassesMI.addActionListener(this);
 
     shutdownMI = new JMenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
@@ -741,37 +737,47 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     schemaMI = new JMenuItem("Edit Schema");
     schemaMI.addActionListener(this);
 
-    runInvidTestMI = new JMenuItem("Run Invid Test");
-    runInvidTestMI.addActionListener(this);
-
-    runInvidSweepMI = new JMenuItem("Run Invid Sweep");
-    runInvidSweepMI.addActionListener(this);
-
-    runEmbeddedTestMI = new JMenuItem("Run Embedded Test");
-    runEmbeddedTestMI.addActionListener(this);
-
-    runEmbeddedSweepMI = new JMenuItem("Run Embedded Sweep");
-    runEmbeddedSweepMI.addActionListener(this);
-
     quitMI = new JMenuItem("Close Console");
     quitMI.addActionListener(this);
 
     controlMenu.add(shutdownMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
-    controlMenu.add(reloadClassesMI);
-    controlMenu.add(runInvidTestMI);
-    controlMenu.add(runInvidSweepMI);
-    controlMenu.add(runEmbeddedTestMI);
-    controlMenu.add(runEmbeddedSweepMI);
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
-    controlMenu.add(dumpSchemaMI);
     controlMenu.addSeparator();
-    controlMenu.add(new arlut.csd.JDataComponent.LAFMenu(this));
+    controlMenu.add(new arlut.csd.JDataComponent.LAFMenu(this)); // ??
     controlMenu.add(quitMI);
 
+    debugMenu = new JMenu("Debug", false); // no tear-off
+
+    runInvidTestMI = new JMenuItem("Test Invid Integrity");
+    runInvidTestMI.addActionListener(this);
+
+    runInvidSweepMI = new JMenuItem("Repair Invid Integrity");
+    runInvidSweepMI.addActionListener(this);
+
+    runEmbeddedTestMI = new JMenuItem("Test Embedded Integrity");
+    runEmbeddedTestMI.addActionListener(this);
+
+    runEmbeddedSweepMI = new JMenuItem("Repair Embedded Integrity");
+    runEmbeddedSweepMI.addActionListener(this);
+
+    dumpSchemaMI = new JMenuItem("Dump Schema");
+    dumpSchemaMI.addActionListener(this);
+
+    reloadClassesMI = new JMenuItem("Reload Custom Classes");
+    reloadClassesMI.addActionListener(this);
+
+    debugMenu.add(runInvidTestMI);
+    debugMenu.add(runInvidSweepMI);
+    debugMenu.add(runEmbeddedTestMI);
+    debugMenu.add(runEmbeddedSweepMI);
+    debugMenu.add(dumpSchemaMI);
+    debugMenu.add(reloadClassesMI);
+
     mbar.add(controlMenu);
+    mbar.add(debugMenu);
 
     setJMenuBar(mbar);
 
