@@ -1176,6 +1176,7 @@ need to move to an incremental model for synchronization.</p>
 	<tr><td><b>minor_version</b></td><td>A minor version number for the Ganymede Sync Channel transaction format.</td></tr>
 	<tr><td><b>channel</b></td><td>The name of the Sync Channel that generated this XML file.</td></tr>
 	<tr><td><b>user</b></td><td>The name of the Ganymede user or admin that committed this transaction.</td></tr>
+	<tr><td><b>number</b></td><td>Unique number for this transaction, the number of transactions committed by this Ganymede server prior to this one.  Also the filename of this file.</td></tr>
 	<tr><td><b>time</b></td><td>Java time code marking the time this transaction was written.  Interpreted as the number of milliseconds since Midnight, January 1, 1970 UTC.</td></tr>
       </table>
     </div>
@@ -1205,6 +1206,15 @@ need to move to an incremental model for synchronization.</p>
     fields that the <code class="type">Sync Channel</code> was
     configured to write.  This will usually just be fields that have
     changed.</p>
+
+    <p>(There is yet a third difference, having to do with how
+    embedded objects are handled.  In <a
+    href="../xml.html"><b>xmlclient</b></a>'s normal output, embedded
+    objects are embedded in place, while in Sync Channel output,
+    embedded object trees are simply represented as flat lists of <a
+    href="../xml/data.html#INVID"><b>&lt;invid&gt;</b></a> elements.
+    This is pretty obscure, but if you're dealing with embedded
+    objects in your Ganymede schema, you'll see what we mean.)</p>
 
     <p>If a field did change during the transaction, its before state
     will be written in the &lt;before&gt; element, and its after state
