@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2001/11/17 00:10:40 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2001/11/17 00:24:09 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -185,6 +185,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   public GASHSchema(String title, SchemaEdit editor, JMenuItem schemaMI)
   {
     super(title);
+
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK); // we want to process window closed events
 
     this.schemaMI = schemaMI;
     this.editor = editor;
