@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/02/11 07:07:05 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/09/13 21:32:25 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -96,7 +96,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.24 $ $Date: 2000/02/11 07:07:05 $ $Name:  $
+ * @version $Revision: 1.25 $ $Date: 2000/09/13 21:32:25 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
@@ -119,6 +119,17 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   JPanel
     inPanel = new JPanel(),
     outPanel = new JPanel();
+
+  JLabel
+    inTitle = new JLabel(),
+    outTitle = new JLabel();
+  int
+    incount,
+    outcount;
+    
+  String
+    org_in,
+    org_out;
 
   JButton
     addCustom;
@@ -270,6 +281,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
 			String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
   {
+    org_in = inLabel;
+    org_out = outLabel;
+
     if (debug)
       {
 	System.out.println("-Adding new StringSelector-");
@@ -345,7 +359,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setLayout(new BorderLayout());
 
     inPanel.add("Center", new JScrollPane(in));
-    inPanel.add("North", new JLabel(inLabel));
+    incount = chosen.size();
+    inTitle.setText(org_in.concat(" : " + String.valueOf(chosen.size())));
+    inPanel.add("North", inTitle);
 
     if (editable)
       {
@@ -391,7 +407,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    String label = null;
 	    listHandle lh = null;
-
+	    int out_items = 0;
 	    for (int i = 0; i < available.size(); i++)
 	      {
 		if (available.elementAt(i) instanceof listHandle)
@@ -409,6 +425,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		if (!in.containsItem(lh))
 		  {
 		    outVector.addElement(lh);
+		    out_items++;
 		  }
 		else
 		  {
@@ -418,6 +435,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		      }
 		  }
 	      }
+	    outcount = out_items;
+	    outTitle.setText(org_out.concat(" : " + String.valueOf(outcount)));	    
 	  }
       }
 
@@ -437,7 +456,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	outPanel.setBorder(bborder);
 	outPanel.setLayout(new BorderLayout());
 	outPanel.add("Center", new JScrollPane(out));
-	outPanel.add("North", new JLabel(outLabel));
+	outPanel.add("North", outTitle);
 	outPanel.add("South", add);
 
 	gbc.fill = gbc.BOTH;
@@ -1222,6 +1241,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	if (out != null)
 	  {
 	    out.removeItem(item);
+	    outcount--;
+	    outTitle.setText(org_out.concat(" : " + String.valueOf(outcount)));	    
+	    //outPanel.add("North", outTitle
 	  }
 
 	if (debug)
@@ -1240,6 +1262,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	if (! in.containsItem(item))
 	  {
 	    in.addItem(item);
+	    incount++;
+	    inTitle.setText(org_in.concat(" : " + String.valueOf(incount)));
 	  }
 
 	if (debug)
@@ -1273,12 +1297,16 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     in.removeItem(item);
+    incount--;
+    inTitle.setText(org_in.concat(" : " + String.valueOf(incount)));	    
 
     // If the item is already in there, don't add it.
 
     if ((out != null)  &&  (! out.containsItem(item)))
       {
 	out.addItem(item);
+	outcount++;
+        outTitle.setText(org_out.concat(" : " + String.valueOf(outcount)));	    
       }
 
     remove.setEnabled(false);
