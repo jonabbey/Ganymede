@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.70 $ %D%
+   Version: $Revision: 1.71 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -245,6 +245,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     buttonPane = new JPanel();
 
+
+
     okButton = new JButton("ok");
     okButton.addActionListener(this);
 
@@ -253,6 +255,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     buttonPane.add(okButton);
     buttonPane.add(cancelButton);
+
+    buttonPane.setBorder(loweredBorder);
 
     getContentPane().add("South", buttonPane);
 
