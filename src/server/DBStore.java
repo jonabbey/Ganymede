@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -491,6 +491,8 @@ public class DBStore {
       }
     catch (InterruptedException ex)
       {
+	Ganymede.debug("DBStore.dumpSchema(): dump lock establish interrupted, schema not dumped");
+	return;
       }
     
     // Move the old version of the file to a backup
