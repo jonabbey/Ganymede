@@ -86,7 +86,7 @@ abstract public class JentryField extends JTextField implements FocusListener{
     
 
   /**
-   *  Stub function that is overriden is subclasses of JentryField
+   *  Stub function that is overriden in subclasses of JentryField
    *
    */
 
@@ -116,6 +116,7 @@ abstract public class JentryField extends JTextField implements FocusListener{
 	(e.getKeyCode() == KeyEvent.VK_END) ||
 	(e.getKeyCode() == KeyEvent.VK_HOME))
       {
+	System.out.println("It's a backspace, delte, end , or home.");
 	super.processKeyEvent(e);
       }
 
@@ -124,11 +125,17 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
       {
+	System.out.println("Key is undefined, allowing it.");
 	super.processKeyEvent(e);
       }
     else if (isAllowed(e.getKeyChar()))
       {
+	System.out.println("isAllowed returned ok.");
 	super.processKeyEvent(e);
+      }
+    else
+      {
+	System.out.println("isAllowed returned false.");
       }
 
     // otherwise, we ignore it
