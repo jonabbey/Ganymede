@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 1999/06/15 02:48:21 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 1999/06/18 22:43:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.81 $ %D%
+ * @version $Revision: 1.82 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class DBStore {
@@ -254,6 +254,30 @@ public class DBStore {
    */
 
   public synchronized void load(String filename, boolean reallyLoad)
+  {
+    load(filename, reallyLoad, true);
+  }
+
+  /**
+   * <p>Load the database from disk.</p>
+   *
+   * <p>This method loads both the database type definition and database
+   * contents from a single disk file.</p>
+   *
+   * <p>Note that this method does _not_ do a this.notifyAll() upon
+   * returning, this is acceptable because we are assuming we will
+   * never call load() on a DBStore with locks held.</p>
+   *
+   * @param filename Name of the database file
+   * @param reallyLoad if true, we'll actually fully load the database.
+   * If false, we'll just get the schema loaded so we can report on it.
+   * @param loadJournal if true, process and consolidate the journal
+   * on loading.
+   * @see arlut.csd.ganymede.DBJournal
+   */
+
+  public synchronized void load(String filename, boolean reallyLoad,
+				boolean loadJournal)
   {
     FileInputStream inStream = null;
     BufferedInputStream bufStream = null;
@@ -402,7 +426,7 @@ public class DBStore {
 
     lockHash = new Hashtable(baseCount); // reset lockHash
 
-    if (reallyLoad)
+    if (loadJournal)
       {
 	try 
 	  {
@@ -2131,4 +2155,3 @@ public class DBStore {
   }
 
 }
-

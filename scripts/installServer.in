@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.8 $
-# $Date: 1999/04/28 08:19:28 $
+# $Revision: 1.9 $
+# $Date: 1999/06/18 22:43:10 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -399,6 +399,28 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/decodeDB";
+
+# Copy and process the permdecodeDB script into place
+
+open INPUT, "scripts/permdecodeDB.template" or die "Couldn't open permdecodeDB template!";
+open OUTPUT, ">$installdir/bin/permdecodeDB" or die "Couldn't write permdecodeDB";
+
+while (<INPUT>) {
+
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/permdecodeDB";
 
 # Copy and process the stopServer script into place
 

@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/06/15 02:48:32 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/06/18 22:43:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -182,42 +182,4 @@ public interface perm_field extends db_field {
    */
 
   public ReturnVal setPerm(Base base, PermEntry entry) throws RemoteException;
-
-  /**
-   * <P>Sets the default permission entry to apply to fields under base
-   * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
-   * permission is set for a base, all new fields created under that
-   * base will take the default permissions entry.  If the schema editor
-   * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.</P>
-   *
-   * <P>This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}.</P>
-   *
-   * <P>This operation may only be performed by a
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} 
-   * with supergash-level privileges, for security's sake.</P>
-   */
-
-  public ReturnVal setDefaultFieldsPerm(short baseID, PermEntry entry) throws RemoteException;
-
-  /**
-   * <P>Sets the default permission entry to apply to fields under base
-   * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
-   * permission is set for a base, all new fields created under that
-   * base will take the default permissions entry.  If the schema editor
-   * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.</P>
-   *
-   * <P>This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}.</P>
-   *
-   * <P>This operation may only be performed by a
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} 
-   * with supergash-level privileges, for security's sake.</P>
-   */
-
-  public ReturnVal setDefaultFieldsPerm(Base base, PermEntry entry) throws RemoteException;
 }

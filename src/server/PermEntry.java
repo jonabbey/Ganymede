@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/06/15 02:48:29 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/06/18 22:43:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -164,7 +164,8 @@ public class PermEntry implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the this entry in a PermMatrix is granted
+   * This method returns true if the this entry in a
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix} is granted
    * visibility privilege.
    *
    */ 
@@ -176,7 +177,8 @@ public class PermEntry implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the this entry in a PermMatrix is granted
+   * This method returns true if the this entry in a
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix} is granted
    * editing privilege.
    *
    */ 
@@ -188,7 +190,8 @@ public class PermEntry implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the this entry in a PermMatrix is granted
+   * This method returns true if the this entry in a 
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix} is granted
    * creation privilege.
    *
    */ 
@@ -200,7 +203,8 @@ public class PermEntry implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the this entry in a PermMatrix is granted
+   * This method returns true if the this entry in a
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix} is granted
    * deletion privilege.
    *
    */ 
@@ -236,6 +240,68 @@ public class PermEntry implements java.io.Serializable {
 			 p.editable && editable,
 			 p.create && create,
 			 p.delete && delete);
+  }
+
+  /**
+   * <P>This method returns a textual description
+   * of the changes between this PermEntry and &lt;p&gt;</P>
+   */
+
+  public final String difference(PermEntry p)
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (visible && (p == null || !p.visible))
+      {
+	addString(result, "+ visible");
+      }
+
+    if (p != null && p.visible && !visible)
+      {
+	addString(result, "- visible");
+      }
+
+    if (editable && (p == null || !p.editable))
+      {
+	addString(result, "+ editable");
+      }
+
+    if (p != null && p.editable && !editable)
+      {
+	addString(result, "- editable");
+      }
+
+    if (create && (p == null || !p.create))
+      {
+	addString(result, "+ create");
+      }
+
+    if (p != null && p.create && !create)
+      {
+	addString(result, "- create");
+      }
+
+    if (delete && (p == null || !p.delete))
+      {
+	addString(result, "+ delete");
+      }
+
+    if (p != null && p.delete && !delete)
+      {
+	addString(result, "- delete");
+      }
+
+    return result.toString();
+  }
+
+  private void addString(StringBuffer x, String y)
+  {
+    if (x.length() > 0)
+      {
+	x.append(", ");
+      }
+
+    x.append(y);
   }
 
   /**

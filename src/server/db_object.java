@@ -7,8 +7,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/05/07 05:21:37 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/06/18 22:43:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.rmi.RemoteException;
  * client to get information about and/or make changes to a object held
  * in the Ganymede server.</p>
  *
- * @version $Revision: 1.19 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.20 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -134,6 +134,14 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public db_field getField(String fieldname) throws RemoteException;
+
+  /**
+   * <P>Returns the name of a field from this object.</P>
+   *
+   * @param id The field code for the desired field of this object.
+   */
+
+  public String getFieldName(short id) throws RemoteException;
 
   /**
    *

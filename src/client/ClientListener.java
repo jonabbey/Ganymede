@@ -8,8 +8,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/05/07 05:19:39 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/06/18 22:43:13 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -55,12 +55,13 @@ package arlut.csd.ganymede.client;
 
 ------------------------------------------------------------------------------*/
 
-/**
+/** 
+ * <P>An interface to complement the {@link
+ * arlut.csd.ganymede.client.ClientBase ClientBase} class.  This
+ * interface must be implemented by any code that creates uses
+ * ClientBase to talk to the Ganymede server.</P>
  *
- * An interface to complement the ClientBase class.  This interface
- * must be implemented by any code that creates uses ClientBase to
- * talk to the Ganymede server.
- *
+ * @see arlut.csd.ganymede.client.ClientEvent
  */
 
 public interface ClientListener {

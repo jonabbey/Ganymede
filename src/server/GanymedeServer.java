@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 1999/06/09 03:33:40 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 1999/06/18 22:43:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -101,16 +101,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
   } 
 
-  /**
-   * <p>Establishes a Session object in the server.  The Session object
-   * contains all of the server's knowledge about a given client's
-   * status.  This method is to be called by the client via RMI.  In
-   * addition to returning a Session RMI reference to the client,
-   * login() keeps a local reference to the Ganymede Session object
-   * for the server's bookkeeping.</p>
+  /** 
+   * <p>Client login method.  Establishes a {@link
+   * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
+   * server for the client, and returns a {@link
+   * arlut.csd.ganymede.Session Session} remote reference to the
+   * client.  The GanymedeSession object contains all of the server's
+   * knowledge about a given client's status., and is tracked by
+   * the GanymedeServer object for statistics and for the admin
+   * console's monitoring support.</P>
    * 
-   * @see arlut.csd.ganymede.Server
-   */
+   * @see arlut.csd.ganymede.Server */
 
   public synchronized Session login(Client client) throws RemoteException
   {

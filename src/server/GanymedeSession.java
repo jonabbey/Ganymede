@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 1999/06/15 02:48:25 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 1999/06/18 22:43:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -74,30 +74,63 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is the heart of the Ganymede server.</p>
+ * <P>User-level session object in the Ganymede server.  Each client
+ * that logs in to the Ganymede server through the {@link
+ * arlut.csd.ganymede.GanymedeServer GanymedeServer} {@link
+ * arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client)
+ * login()} method gets a GanymedeSession object, which oversees that
+ * client's interactions with the server.  The client talks to its
+ * GanymedeSession object through the {@link
+ * arlut.csd.ganymede.Session Session} RMI interface, making calls to
+ * access schema information and database objects in the server.</P>
  *
- * <p>Each client logged on to the server will hold a reference to a
- * unique GanymedeSession object.  This object provides services to
- * the client, tracks the client's status, manages permissions, and
- * keeps track of the client's transactions.  If the client spends most of
- * its time talking to individual {@link arlut.csd.ganymede.DBObject DBObject}'s
- * to make their changes to the database, they have to talk to us to get
- * access to those objects.  We are responsible for handling the application/presentation
- * logic for the user, and in turn we talk to {@link arlut.csd.ganymede.DBSession DBSession}
- * to get most of the actual work done.</p>
+ * <P>The GanymedeSession class provides query and editing services to
+ * the client, tracks the client's status, and manages permissions.
+ * Most of the actual database handling is done through a second,
+ * database-layer session object called a {@link
+ * arlut.csd.ganymede.DBSession DBSession} that GanymedeSession
+ * maintains for each user.  GanymedeSession methods like {@link
+ * arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid)
+ * view_db_object()} and {@link
+ * arlut.csd.ganymede.GanymedeSession#edit_db_object(arlut.csd.ganymede.Invid)
+ * edit_db_object()} make calls on the DBSession to actually access
+ * {@link arlut.csd.ganymede.DBObject DBObjects} in the Ganymede
+ * database.  The client then receives a serialized {@link
+ * arlut.csd.ganymede.ReturnVal ReturnVal} which may include a remote
+ * {@link arlut.csd.ganymede.db_object db_object} reference so that
+ * the client can directly talk to the DBObject or
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} over RMI.</P>
+ *
+ * <P>Once a GanymedeSession is created by the GanymedeServer's login()
+ * method, the client is considered to be authenticated, and may make
+ * as many Session calls as it likes, until the GanymedeSession's
+ * {@link arlut.csd.ganymede.GanymedeSession#logout() logout()} method
+ * is called.  If the client dies or loses its network connection to 
+ * the Ganymede server for more than 10 minutes, the RMI system will
+ * automatically call GanymedeSession's
+ * {@link arlut.csd.ganymede.GanymedeSession#unreferenced() unreferenced()}
+ * method, which will log the client out from the server.</P>
+ *
+ * <P>The Ganymede server is transactional, and the client must call
+ * {@link
+ * arlut.csd.ganymede.GanymedeSession#openTransaction(java.lang.String)
+ * openTransaction()} before making any changes via edit_db_object()
+ * or other editing methods.  In turn, changes made by the client
+ * using the edit_db_object() and related methods will not actually be
+ * 'locked-in' to the Ganymede database until the {@link
+ * arlut.csd.ganymede.GanymedeSession#commitTransaction()
+ * commitTransaction()} method is called.</P>
  *
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
- *
- * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.135 $ %D%
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ * @version $Revision: 1.136 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
@@ -118,12 +151,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   int objectsCheckedOut = 0;
 
   /**
-   *
-   * This variable tracks whether or not the client desires to have
+   * <P>This variable tracks whether or not the client desires to have
    * wizards presented.  If this is false, custom plug-in code
-   * for the object types stored in the GanymedeServer may either
-   * refuse certain operations or will resort to taking a default action.
-   *
+   * for the object types stored in the
+   * {@link arlut.csd.ganymede.DBStore DBStore} may either
+   * refuse certain operations or will resort to taking a default action.</P>
    */
   
   public boolean enableWizards = true;
@@ -188,43 +220,38 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   String lastError;
 
   /**
-   *
-   * The current status message for this client.  The GanymedeAdmin code
+   * <P>The current status message for this client.  The 
+   * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} code
    * that manages the admin consoles will consult this String when it
-   * updates the admin consoles.
-   *
+   * updates the admin consoles.</P>
    */
 
   String status = null;
 
   /**
-   *
-   * Description of the last action recorded for this client.  The
-   * GanymedeAdmin code that manages the admin consoles will consult
-   * this String when it updates the admin consoles.
-   * 
+   * <P>Description of the last action recorded for this client.  The
+   * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}
+   * code that manages the admin consoles will consult
+   * this String when it updates the admin consoles.</P>
    */
 
   String lastEvent = null;
 
   /**
-   *
-   * Our DBSession object.  DBSession is the generic DBStore access
+   * <P>Our DBSession object.  DBSession is the generic DBStore access
    * layer.  A GanymedeSession is layered on top of a DBSession to
    * provide access control and remote access via RMI.  The DBSession
    * object is accessible to server-side code only and provides
-   * transaction support.
-   * 
+   * transaction support.</P>
    */
 
   DBSession session;
 
   /**
-   *
-   * A GanymedeSession can have a single wizard active.  If this variable
-   * is non-null, a custom type-specific DBEditObject subclass has instantiated
-   * a wizard to interact with the user.
-   *
+   * <P>A GanymedeSession can have a single wizard active.  If this variable
+   * is non-null, a custom type-specific
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclass has instantiated
+   * a wizard to interact with the user.</P>
    */
 
   GanymediatorWizard wizard = null;
@@ -246,12 +273,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   Date personaTimeStamp = null;
 
   /**
-   *
-   * A reference to our current persona object.  We save this so
+   * <P>A reference to our current persona object.  We save this so
    * we can look up owner groups and what not more quickly.  An
    * end-user logged in without any extra privileges will have
-   * a null personaObj value. 
-   *
+   * a null personaObj value.</P>
    */
 
   DBObject personaObj = null;
@@ -291,11 +316,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   Date permTimeStamp;
 
   /**
-   *
-   * This variable stores the permission bits that are applicable to objects
+   * <P>This variable stores the permission bits that are applicable to objects
    * that the current persona has ownership privilege over.  This matrix
-   * is always a permissive superset of defaultPerms.
-   *
+   * is always a permissive superset of
+   * {@link arlut.csd.ganymede.GanymedeSession#defaultPerms defaultPerms}.</P>
    */
 
   PermMatrix personaPerms;
@@ -316,11 +340,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   PermMatrix defaultPerms;
 
   /**
-   * This variable stores the permission bits that are applicable to
+   * <P>This variable stores the permission bits that are applicable to
    * objects that the current persona has ownership privilege over and
    * which the current admin has permission to delegate to subordinate
    * roles.  This matrix is always a permissive superset of
-   * delegatableDefaultPerms.
+   * {@link arlut.csd.ganymede.GanymedeSession#delegatableDefaultPerms
+   * delegatableDefaultPerms}.</P>
    */
 
   PermMatrix delegatablePersonaPerms;
@@ -343,47 +368,43 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   PermMatrix delegatableDefaultPerms;
 
   /**
-   *
-   * A reference to the Ganymede object storing our default permissions,
+   * <P>A reference to the Ganymede {@link arlut.csd.ganymede.DBObject DBObject}
+   * storing our default permissions,
    * or the permissions that applies when we are not in supergash mode
-   * and we do not have any ownership over the object in questin.
-   *
+   * and we do not have any ownership over the object in question.</P>
    */
 
   DBObject defaultObj;
 
   /**
-   *
-   * This variable is a vector of object references (Invid's) to the owner groups
+   * <P>This variable is a vector of object references
+   * ({@link arlut.csd.ganymede.Invid Invid}'s) to the owner groups
    * that the client has requested newly created objects be placed in.  While
    * this vector is not-null, any new objects created will be owned by the list
-   * of ownergroups held here.
-   *
+   * of ownergroups held here.</P>
    */
 
   Vector newObjectOwnerInvids = null;
 
   /**
-   *
-   * This variable is a vector of object references (Invid's) to the
+   * <P>This variable is a vector of object references (Invid's) to the
    * owner groups that the client has requested the listing of objects
    * be restricted to.  That is, the client has requested that the
    * results of Queries and Dumps only include those objects owned by
    * owner groups in this list.  This feature is used primarily for
    * when a client is logged in with supergash privileges, but the
-   * user wants to restrict the visibility of objects for convenience.
-   * 
+   * user wants to restrict the visibility of objects for convenience.</P>
    */
 
   Vector visibilityFilterInvids = null;
 
-  /**
-   *
-   * This variable caches the results of the getOwnerGroups() method.  It
-   * stores the list of owner groups that the current persona has any
-   * kind of membership in, either through direct membership or by being
-   * a member of a group that owns other owner groups.
-   *
+  /** 
+   * <P>This variable caches the results of the {@link
+   * arlut.csd.ganymede.GanymedeSession#getOwnerGroups()
+   * getOwnerGroups()} method.  It stores the list of owner groups
+   * that the current persona has any kind of membership in, either
+   * through direct membership or by being a member of a group that
+   * owns other owner groups.</P> 
    */
 
   QueryResult ownerList = null;
@@ -398,7 +419,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * this to the data structures used for the admin console.</p>
    *
    * <p>Note that all internal session activities (queries, etc.) are
-   * currently using a single, synchronized DBSession object.. this
+   * currently using a single, synchronized GanymedeSession object.. this
    * mean that only one user at a time can currently be processed for
    * login. 8-(</p>
    * 
@@ -428,7 +449,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <p>Constructor used to create a server-side attachment for a Ganymede
    * client.</p>
    *
-   * <p>This constructor is called by the GanymedeServer login() method.</p>
+   * <p>This constructor is called by the
+   * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer}
+   * {@link arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+   * method.</p>
    *
    * <p>A Client can log in either as an end-user or as a admin persona.  Typically,
    * a client will log in with their end-user name and password, then use
@@ -533,11 +557,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method is used by the server to increment the admin
    * console's display of the number of objects this user session has
    * checked out and/or created.
-   *
    */
 
   public synchronized void checkOut()
@@ -547,28 +569,39 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
    * This method is used by the server to decrement the admin
    * console's display of the number of objects this user session has
    * checked out and/or created.
-   *
    */
 
   public synchronized void checkIn()
   {
     objectsCheckedOut--;
+
+    if (objectsCheckedOut < 0)
+      {
+	try
+	  {
+	    throw new RuntimeException("Ganymede session for " + username +
+				       " had a checkIn() cause objectsCheckedOut go negative");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+      }
+
     GanymedeAdmin.refreshUsers();
   }
 
-  /**
-   *
-   * This method is used to flag an error condition that the client
-   * can then call getLastError() to look up.  This system functions
-   * similarly to the errno system in C, and has similar problems
-   * in a multi-thread environment.  Most Ganymede code now uses
-   * ReturnVal objects to pass back error information in response
-   * to a client operation.
-   *
+  /** 
+   * <P>This method is used to flag an error condition that the
+   * client can then call getLastError() to look up.  This system
+   * functions similarly to the errno system in C, and has similar
+   * problems in a multi-thread environment.  Most Ganymede code now
+   * uses {@link arlut.csd.ganymede.ReturnVal ReturnVal} objects to
+   * pass back error information in response to a client
+   * operation.</P>
    */
 
   void setLastError(String status)
@@ -578,11 +611,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * If the server decides this person needs to get off (if the user
+   * <P>If the server decides this person needs to get off (if the user
    * times out, is forced off by an admin, or if the server is going
-   * down), it will call this method to knock them off.
-   * 
+   * down), it will call this method to knock them off.</P>
    */
 
   void forceOff(String reason)
@@ -1560,10 +1591,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    * <p>This method call causes the server to checkpoint the current
    * state of an open transaction on the server.  At any time between
-   * the checkpoint() call and a concluding commitTransaction() or
-   * abortTransaction() thereafter, the server can be instructed to
+   * the checkpoint() call and a concluding
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()} or
+   * {@link arlut.csd.ganymede.GanymedeSession#abortTransaction() abortTransaction()}
+   * thereafter, the server can be instructed to
    * revert the transaction to the state at the time of this
-   * checkpoint by calling rollback() with the same key.</p>
+   * checkpoint by calling 
+   * {@link arlut.csd.ganymede.GanymedeSession#rollback(java.lang.String) rollback()}
+   * with the same key.</p>
    *
    * <p>Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
@@ -2890,13 +2925,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This private method takes care of intersecting the result
+   * <P>This private method takes care of intersecting the result
    * of a query operation against any linked queries to filter
    * a cluster of queries.  This is only of interest when performing
    * a query on both embedded and non-embedded fields of a given
-   * object type.
-   * 
+   * object type.</P>
    */
 
   private final QueryResult intersectQueries(Query query, QueryResult temp_result, DBLock rLock)
@@ -4046,6 +4079,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result = object.getBase().getObjectHook().permExpand(this, object);
 
+    if (result == null)
+      {
+	result = PermEntry.noPerms;
+      }
+
     // make sure we have personaPerms up to date
 
     updatePerms(false);		// *sync*
@@ -4057,8 +4095,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     useSelfPerm = (userInvid != null) && userInvid.equals(object.getInvid());
 
-    // We also want to check to see whether the custom logic for this
-    // object type wants to grant ownership of this object.
+    // If we aren't editing ourselves, go ahead and check to see
+    // whether the custom logic for this object type wants to grant
+    // ownership of this object.
 
     if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
       {
@@ -4071,72 +4110,48 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (useSelfPerm || personaMatch(object))
       {
-	if (result == null)
-	  {
-	    result = personaPerms.getPerm(object.getTypeID());
-
-	    if (result == null)
-	      {
-		return PermEntry.noPerms;
-	      }
-	    else
-	      {
-		return result;
-	      }
-	  }
-	else
-	  {
-	    return result.union(personaPerms.getPerm(object.getTypeID()));
-	  }
+	return result.union(personaPerms.getPerm(object.getTypeID()));
       }
     else
       {
-	if (result == null)
-	  {
-	    result = defaultPerms.getPerm(object.getTypeID());
-
-	    if (result == null)
-	      {
-		return PermEntry.noPerms;
-	      }
-	    else
-	      {
-		return result;
-	      }
-	  }
-	else
-	  {
-	    return result.union(defaultPerms.getPerm(object.getTypeID()));
-	  }
+	return result.union(defaultPerms.getPerm(object.getTypeID()));
       }
   }
 
   /**
-   *
-   * This method takes the administrator's current
+   * <P>This method takes the administrator's current
    * persona, considers the owner groups the administrator
    * is a member of, checks to see if the object is owned
    * by that group, and determines the appropriate permission
-   * bits for the field in the object.
+   * bits for the field in the object.</P>
    *
+   * <P>This method duplicates the logic of
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm(object)}
+   * internally for efficiency.  This method is called quite
+   * a lot in the server.</P>
    */
 
   final public PermEntry getPerm(DBObject object, short fieldId)
   {
-    PermEntry objPerm;
-    PermEntry result;
-    DBObject containingObj;
+    PermEntry objPerm = null;	// permissions for the object
+    PermEntry result = null;	// permissions for the field
+    PermEntry overrideFieldPerm = null;
+    PermEntry expandFieldPerm = null;
+
+    PermEntry overrideObjPerm = null;
+    PermEntry expandObjPerm = null;
+
+    DBObject containingObj;	// top-level object for ownership test
     boolean useSelfPerm = false;
     InvidDBField inf = null;
     Invid inv = null;
-    DBField field;
-    boolean forceObjPerm = false;
+    boolean forceOverrideObjPerm = false;
 
     /* -- */
 
     if (object == null)
       {
-	return null;
+	return null;		// Garbage-in, Garbage-out
       }
 
     if (supergashMode)
@@ -4144,32 +4159,31 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return PermEntry.fullPerms;
       }
 
-    // does this object type have an override?
+    // does this object type have an override for this field?
 
-    result = object.getBase().getObjectHook().permOverride(this, object, fieldId);
+    overrideFieldPerm = object.getBase().getObjectHook().permOverride(this, object, fieldId);
 
-    if (result != null)
+    if (overrideFieldPerm != null)
       {
-	return result;
+	if (debug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(obj,field): Found permOverride for object " + 
+			       object + ", field = " + object.getFieldName(fieldId) + 
+			       "\n Returning override obj perm: " + overrideFieldPerm);
+	  }
+
+	result = overrideFieldPerm;
       }
-
-    // no override.. do we have an expansion?
-
-    result = object.getBase().getObjectHook().permExpand(this, object, fieldId);
+    else
+      {
+	// no override.. do we have an expansion?
+	
+	expandFieldPerm = object.getBase().getObjectHook().permExpand(this, object, fieldId);
+      }
 
     // find the top-level object if we were passed an embedded object
     
     containingObj = getContainingObj(object);
-
-    // make sure we have personaPerms up to date
-
-    updatePerms(false);		// *sync*
-
-    // if we are operating on behalf of an end user and the object in
-    // question happens to be that user's record, we may gain some
-    // permissions for this object
-
-    useSelfPerm = userInvid != null && userInvid.equals(containingObj.getInvid());
 
     // we need to get the object permission so that we can inherit
     // permisisons when not specified for the field.. we do this here
@@ -4178,31 +4192,37 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // does this object type have an override?
 
-    objPerm = containingObj.getBase().getObjectHook().permOverride(this, containingObj);
+    overrideObjPerm = containingObj.getBase().getObjectHook().permOverride(this, containingObj);
 
-    if (objPerm == null)
+    if (overrideObjPerm == null)
       {
-	objPerm = containingObj.getBase().getObjectHook().permExpand(this, containingObj);
-      }
-    else
-      {
-	forceObjPerm = true;
+	expandObjPerm = containingObj.getBase().getObjectHook().permExpand(this, containingObj);
       }
 
-    // no permissions 
+    // if we are operating on behalf of an end user and the object in
+    // question happens to be that user's record, we may gain some
+    // permissions for this object
 
-    if (objPerm == null)
-      {
-	objPerm = PermEntry.noPerms;
-      }
+    useSelfPerm = userInvid != null && userInvid.equals(containingObj.getInvid());
 
-    // We also want to check to see whether the custom logic for this
+    // If we haven't already determined that we are treating object as
+    // an owned object, check to see whether the custom logic for this
     // object type wants to grant ownership of this object.
 
     if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
       {
 	useSelfPerm = true;
+
+	if (debug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(obj,field): we are self-perming object " + 
+			       object + ", field = " + object.getFieldName(fieldId));
+	  }
       }
+
+    // make sure we have personaPerms up to date
+
+    updatePerms(false);		// *sync*
 
     // look to see if we have permissions set for the object.. this will
     // be our default permissions for each field in the object unless
@@ -4210,40 +4230,56 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (useSelfPerm || personaMatch(containingObj))
       {
-	if (!forceObjPerm)
+	if (debug)
 	  {
-	    objPerm = objPerm.union(personaPerms.getPerm(containingObj.getTypeID()));
+	    System.err.println("GanymedeSession.getPerm(obj,field): we are treating object " + 
+			       object + ", field = " + object.getFieldName(fieldId) +
+			       " as owned");
 	  }
 
-	if (result == null)
+	// if we aren't forced to use a perm override, look up permissions for this
+	// object using the normal ownership/role logic
+
+	if (overrideObjPerm == null)
 	  {
-	    result = personaPerms.getPerm(object.getTypeID(), fieldId);
+	    objPerm = personaPerms.getPerm(containingObj.getTypeID());
 	  }
-	else
-	  {
-	    result = result.union(personaPerms.getPerm(object.getTypeID(), fieldId));
-	  }
+
+	result = personaPerms.getPerm(object.getTypeID(), fieldId);
       }
     else
       {
-	if (!forceObjPerm)
+	if (debug)
 	  {
-	    objPerm = objPerm.union(defaultPerms.getPerm(containingObj.getTypeID()));
+	    System.err.println("GanymedeSession.getPerm(obj,field): we don't own object " + 
+			       object + ", field = " + object.getFieldName(fieldId));
 	  }
 
-	if (result == null)
+	// if we aren't forced to use a perm override, look up permissions for this
+	// object using the normal ownership/role logic
+
+	if (overrideObjPerm == null)
 	  {
-	    result = defaultPerms.getPerm(object.getTypeID(), fieldId);
+	    objPerm = defaultPerms.getPerm(containingObj.getTypeID());
 	  }
-	else
+
+	result = defaultPerms.getPerm(object.getTypeID(), fieldId);
+      }
+
+    if (overrideObjPerm != null)
+      {
+	objPerm = overrideObjPerm;
+      }
+    else
+      {
+	if (expandObjPerm != null)
 	  {
-	    result = result.union(defaultPerms.getPerm(object.getTypeID(), fieldId));
+	    objPerm = expandObjPerm.union(objPerm);
 	  }
       }
 
     if (objPerm == null)
       {
-	System.err.println("GanymedeSession.getPerm(object, field): null starting point.. AGH!");
 	return PermEntry.noPerms;
       }
 
@@ -4252,6 +4288,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// we've got no per-field permissions set, so we'll give
 	// default access to this field, according to the permissions
 	// applicable to the containing object.
+
+	// this happens a lot for the built-in field types, like
+	// backlinks, notes, etc., since the client's permissions
+	// editor doesn't allow permissions to be set on those
+	// fields currently
+
+	if (debug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(obj,field): Found no field permission for object " + object +
+			       ", field = " + object.getFieldName(fieldId) +
+			       "\n Returning default obj perm: " + objPerm);
+	  }
 	
 	return objPerm;
       }
@@ -4261,27 +4309,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// object's permissions and the field's permissions.. we can
 	// never look at a field in an object we can't look at.
 
-	return result.intersection(objPerm);
+	if (overrideFieldPerm == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("GanymedeSession.getPerm(obj,field): Found field permission for object " + object +
+				   ", field = " + object.getFieldName(fieldId));
+
+		System.err.println("Field perm: " + result.union(expandFieldPerm));
+		System.err.println("Obj perm: " + objPerm);
+		System.err.println("Intersection: " + result.union(expandFieldPerm).intersection(objPerm));
+	      }
+
+	    return result.union(expandFieldPerm).intersection(objPerm);
+	  }
+	else
+	  {
+	    return overrideFieldPerm.intersection(objPerm);
+	  }
       }
   }
 
   /**
-   *
-   * This method returns the generic permissions for a object type.
+   * <P>This method returns the generic permissions for a object type.
    * This is currently used primarily to check to see whether a user
-   * has privileges to create an object of a specific type.<br><br>
+   * has privileges to create an object of a specific type.</P>
    *
-   * This method takes the administrator's current persona's set of
+   * <P>This method takes the administrator's current persona's set of
    * appropriate permission matrices, does a binary OR'ing of the
    * permission bits for the given base, and returns the effective
-   * permission entry.<br><br>
+   * permission entry.</P>
    * 
    * @param includeOwnedPerms If true, this method will return the
    * permission that the current persona would have for an object that
    * was owned by the current persona.  If false, this method will
    * return the default permissions that apply to objects not owned by
    * the persona.
-   * 
    */
 
   final PermEntry getPerm(short baseID, boolean includeOwnedPerms)
@@ -4321,21 +4384,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns the current persona's default permissions for
+   * <P>This method returns the current persona's default permissions for
    * a base and field.  This permission applies generically to objects
    * that are not owned by this persona and to objects that are
-   * owned.<br><br>
+   * owned.</P>
    *
-   * This is used by the Dump code to determine whether a field should
+   * <P>This is used by the
+   * {@link arlut.csd.ganymede.GanymedeSession#dump(arlut.csd.ganymede.Query) dump()} 
+   * code to determine whether a field should
    * be added to the set of possible fields to be returned at the
-   * time that the dump results are being prepared.<br><br>
+   * time that the dump results are being prepared.</P>
    *
    * @param includeOwnedPerms If true, this method will return the permission
    * that the current persona would have for an object that was owned
    * by the current persona.  If false, this method will return the default
    * permissions that apply to objects not owned by the persona.
-   *  
    */
 
   final PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
@@ -4396,10 +4459,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This convenience method resets defaultPerms from the default permission
-   * object in the Ganymede database.
-   *
+   * <P>This convenience method resets defaultPerms from the default
+   * permission object in the Ganymede database.</P>
    */
 
   private final void resetDefaultPerms()
@@ -4424,11 +4485,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This non-exported method is used to generate a comprehensive permissions
+   * <P>This non-exported method is used to generate a comprehensive permissions
    * matrix that applies to all objects owned by the active persona for this
-   * user.
+   * user.</P>
    *
+   * @param forceUpdate If false, updatePerms() will do nothing if the Ganymede
+   * permissions database has not been changed since updatePerms() was last
+   * called in this GanymedeSession.
    */
 
   final synchronized void updatePerms(boolean forceUpdate)
@@ -4708,17 +4771,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	System.err.println("GanymedeSession.updatePerms(): finished full permissions recalc for " + 
 			   (personaName == null ? username : personaName));
+
+	System.err.println("personaPerms = \n\n" + personaPerms);
+	System.err.println("\n\ndefaultPerms = \n\n" + defaultPerms);
       }
     
     return;
   }
 
   /**
-   *
-   * This method gives access to the DBObject for the administrator's
-   * persona record, if any.  This is used by DBSession to get the
-   * label for the administrator for record keeping.
-   * 
+   * <P>This method gives access to the DBObject for the administrator's
+   * persona record, if any.  This is used by
+   * {@link arlut.csd.ganymede.DBSession DBSession} to get the
+   * label for the administrator for record keeping.</P>
    */
   
   public DBObject getPersona()
@@ -4727,12 +4792,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns a reference to the DBSession object encapsulated
+   * <P>This method returns a reference to the 
+   * {@link arlut.csd.ganymede.DBSession DBSession} object encapsulated
    * by this GanymedeSession object.  This is intended to be used by
-   * subclasses of DBEditObject that might not necessarily be in the
-   * arlut.csd.ganymede package.
-   *
+   * subclasses of {@link arlut.csd.ganymede.DBEditObject DBEditObject}
+   * that might not necessarily be in the arlut.csd.ganymede package.</P>
    */
 
   public DBSession getSession()

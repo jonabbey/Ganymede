@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/06/15 02:48:21 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/06/18 22:43:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -60,25 +60,37 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <p>DBSession is the {@link arlut.csd.ganymede.DBStore DBStore} session
- * class.  All normal database interactions are performed through a
- * DBSession object.  The DBSession object provides a handle for
- * monitoring the operations on the database.. who holds what lock,
- * what actions are performed during a lock / transaction /
- * session, etc..</p>
+ * <p>DBSession is the Ganymede server's
+ * {@link arlut.csd.ganymede.DBStore DBStore}-level session class.  Each
+ * client or server process that interacts with the Ganymede database
+ * must eventually do so through a DBSession object.  Clients and
+ * server processes generally interact directly with a
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}, by way of
+ * the {@link arlut.csd.ganymede.Session Session} interface on the
+ * part of the client.  The GanymedeSession talks to the DBSession class
+ * to actually interact with the database.</P>
  *
  * <p>Most particularly, DBSession handles transactions and namespace
  * logic for the Ganymede server, as well as providing the actual
- * check-out/create/ check-in methods that 
- * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} calls.
+ * check-out/create/ check-in methods that GanymedeSession calls. 
  * GanymedeSession tends to have the more high-level
  * application/permissions logic, while DBSession is more concerned
  * with internal database issues.  As well, GanymedeSession is
  * designed to be directly accessed and manipulated by the client,
  * while DBSession is accessed only by (presumably trusted)
- * server-side code.</p>
+ * server-side code, that needs to bypass the security logic in
+ * GanymedeSession.</p>
  *
- * @version $Revision: 1.67 $ %D%
+ * <P>The DBSession contains code and logic to actually manipulate the
+ * Ganymede database (the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase},
+ * {@link arlut.csd.ganymede.DBObject DBObject}, and
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} objects held
+ * in the DBStore).  The DBSession class connects to the extensive 
+ * transaction logic implemented in the {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+ * class, as well as the database locking handled by the
+ * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
+ * 
+ * @version $Revision: 1.68 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -211,6 +223,13 @@ final public class DBSession {
    * <P>The created object will be given an object id.
    * The {@link arlut.csd.ganymede.DBEditObject DBEditObject} can 
    * be queried to determine its invid.</P>
+   *
+   * <P>The created DBEditObject will have its fields initialized
+   * by the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook}
+   * custom DBEditObject's
+   * {@link arlut.csd.ganymede.DBEditObject#initializeNewObject() initializeNewObject()}
+   * method.</P>
    *
    * <P>This method will return null if the object could
    * not be constructed and initialized for some reason.</P>
@@ -394,6 +413,13 @@ final public class DBSession {
    * <P>The created object will be given an object id.
    * The {@link arlut.csd.ganymede.DBEditObject DBEditObject}
    * can be queried to determine its invid.</P>
+   *
+   * <P>The created DBEditObject will have its fields initialized
+   * by the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook}
+   * custom DBEditObject's
+   * {@link arlut.csd.ganymede.DBEditObject#initializeNewObject() initializeNewObject()}
+   * method.</P>
    *
    * <P>This method will return null if the object could
    * not be constructed and initialized for some reason.</P>
@@ -1059,7 +1085,9 @@ final public class DBSession {
    *
    * <P>This method is *not* synchronized.  This method must
    * only be called by code synchronized on this DBSession
-   * instance.</P>
+   * instance, as for instance {@link arlut.csd.ganymede.DBSession#logout() logout()},
+   * {@link arlut.csd.ganymede.DBSession#abortTransaction() abortTransaction()}, and
+   * and {@link arlut.csd.ganymede.DBSession#commitTransaction() commitTransaction()}.</P>
    */
 
   public void releaseAllLocks()

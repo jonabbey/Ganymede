@@ -7,8 +7,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:05 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/06/18 22:43:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,6 +56,17 @@ import java.util.*;
                                                                    VecSortInsert
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>This class is used to do an ordered insert using a binary search.  
+ * It's designed for speed.  Used in the Ganymede client to efficiently
+ * add new items to the client's object tree.  Uses the
+ * {@link arlut.csd.Util.Compare Compare} interface for ordering
+ * comparisons.</P>
+ *
+ * @version $Revision: 1.3 $ $Date: 1999/06/18 22:43:11 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public class VecSortInsert {
 

@@ -6,8 +6,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:05 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/06/18 22:43:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -48,12 +48,31 @@
 
 package arlut.csd.Util;
 
-/* from Fundamentals of Data Structures in Pascal, 
-        Ellis Horowitz and Sartaj Sahni,
-	Second Edition, p.339
-	Computer Science Press, Inc.
-	Rockville, Maryland
-	ISBN 0-88175-165-0 */
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       QuickSort
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>QuickSort implementation for Object array.  Uses the
+ * {@link arlut.csd.Util.Compare Compare} interface for item
+ * comparisons.</P>
+ *
+ * <P>Algorithm from</P>
+ *
+ * <PRE>
+ *      Fundamentals of Data Structures in Pascal, 
+ *      Ellis Horowitz and Sartaj Sahni,
+ *	Second Edition, p.339
+ *	Computer Science Press, Inc.
+ *	Rockville, Maryland
+ *	ISBN 0-88175-165-0
+ * </PRE>
+ *
+ * @version $Revision: 1.4 $ $Date: 1999/06/18 22:43:11 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public class QuickSort {
 

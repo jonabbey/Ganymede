@@ -6,8 +6,8 @@
    
    Created: 12 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:04:06 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/06/18 22:43:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,6 +53,17 @@ package arlut.csd.Util;
                                                                         WordWrap
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Handy word wrap module.  This class provides the static
+ * {@link arlut.csd.Util.WordWrap#wrap(java.lang.String, int, java.lang.String) wrap()}
+ * method for word-wrapping text strings.</P>
+ *
+ * <P>Used in the Ganymede client and server for utilitarian word-wrapping.</P>
+ *
+ * @version $Revision: 1.5 $ $Date: 1999/06/18 22:43:12 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public class WordWrap {
 

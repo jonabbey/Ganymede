@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 1999/06/15 02:48:18 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 1999/06/18 22:43:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.72 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.73 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1300,6 +1300,24 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
       }
 
+    return null;
+  }
+
+  /**
+   * <P>Returns the name of a field from this object.</P>
+   *
+   * @param id The field code for the desired field of this object.
+   */
+
+  public String getFieldName(short id)
+  {
+    DBField field = fields.get(id);
+
+    if (field != null)
+      {
+	return field.toString();
+      }
+    
     return null;
   }
 

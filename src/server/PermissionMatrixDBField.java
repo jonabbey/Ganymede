@@ -3,12 +3,12 @@
    PermissionMatrixDBField.java
 
    This class defines the permission matrix field used in the
-   'Admin' DBObjectBase class.
+   'Role' DBObjectBase class.
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/06/15 02:48:29 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 1999/06/18 22:43:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,8 @@ import arlut.csd.JDialog.*;
 /** 
  * <P>PermissionMatrixDBField is a subclass of {@link
  * arlut.csd.ganymede.DBField DBField} for the storage and handling of
- * permission matrix fields (used only in the Role objects) in the
+ * permission matrix fields (used only in the Role
+ * {@link arlut.csd.ganymede.DBObject DBObjects}) in the
  * {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
  * server.</P>
  *
@@ -76,7 +77,7 @@ import arlut.csd.JDialog.*;
  * methods are non-functional.  Instead, there are special methods used to set or
  * access permission information from the specially coded Hashtable held by
  * a PermissionMatrixDBField.  This Hashtable maps strings encoded by the
- * {@link arlut.csd.ganymede.PermissionMatrixDBField#matrixEntry(short, java.lang.String)
+ * {@link arlut.csd.ganymede.PermissionMatrixDBField#matrixEntry(short, short)
  * matrixEntry()} methods to {@link arlut.csd.ganymede.PermEntry PermEntry}
  * objects, which hold create, edit, view, and delete bits.</P>
  *
@@ -224,10 +225,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 		  {
 		    fieldname = "[base]";
 		  }
-		else if (fieldId.equals("default"))
-		  {
-		    fieldname = "[Default]";
-		  }
 		else
 		  {
 		    try
@@ -263,6 +260,17 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
 
     return fieldname;
+  }
+
+  /**
+   * <P>Returns true if the given String encodes the identity of
+   * a {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} and
+   * not a field within a DBObjectBase.</P>
+   */
+
+  private boolean isBasePerm(String matrixEntry)
+  {
+    return (matrixEntry.indexOf("::") != -1);
   }
 
   /**
@@ -306,7 +314,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	  {
 	    fieldId = entry.substring(sepIndex+1);
 	    
-	    if (!fieldId.equals(":") && !fieldId.equals("default"))
+	    if (!fieldId.equals(":"))
 	      {
 		try
 		  {
@@ -340,6 +348,62 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * contents held in matrix.
    *
    */
+
+  public void debugdump(PermissionMatrixDBField me)
+  {
+    Enumeration enum;
+    String key;
+    PermEntry entry;
+    short basenum;
+    String basename;
+    Hashtable baseHash = new Hashtable();
+    Vector vec;
+
+    /* -- */
+
+    System.err.println("PermMatrix DebugDump");
+
+    enum = me.matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	entry = (PermEntry) me.matrix.get(key);
+
+	basename = decodeBaseName(key);
+
+	if (baseHash.containsKey(basename))
+	  {
+	    vec = (Vector) baseHash.get(basename);
+	  }
+	else
+	  {
+	    vec = new Vector();
+	    baseHash.put(basename, vec);
+	  }
+
+	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
+      }
+
+    enum = baseHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	//	System.err.println("\nBase - " + key + "\n");
+
+	vec = (Vector) baseHash.get(key);
+
+	for (int i = 0; i < vec.size(); i++)
+	  {
+	    System.err.println(me.toString() + " " + key + ":" + vec.elementAt(i));
+	  }
+
+	System.err.println();
+      }
+  }
 
   public static void debugdump(PermMatrix matrix)
   {
@@ -387,7 +451,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	    baseHash.put(basename, vec);
 	  }
 
-	vec.addElement(decodeFieldName(key) + " " + entry.toString());
+	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
       }
 
     enum = baseHash.keys();
@@ -396,15 +460,81 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	key = (String) enum.nextElement();
 
-	System.err.println("Base - " + key);
+	//	System.err.println("\nBase - " + key + "\n");
 
 	vec = (Vector) baseHash.get(key);
 
 	for (int i = 0; i < vec.size(); i++)
 	  {
-	    System.err.println("\t" + vec.elementAt(i));
+	    System.err.println(key + ":" + vec.elementAt(i));
 	  }
+
+	System.err.println();
       }
+  }
+
+  /**
+   * This method generates a string version of the debugdump
+   * output.
+   */
+
+  static String debugdecode(Hashtable matrix)
+  {
+    StringBuffer result = new StringBuffer();
+    Enumeration enum;
+    String key;
+    PermEntry entry;
+    short basenum;
+    String basename;
+    Hashtable baseHash = new Hashtable();
+    Vector vec;
+
+    /* -- */
+
+    result.append("PermMatrix DebugDump\n");
+
+    enum = matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	entry = (PermEntry) matrix.get(key);
+
+	basename = decodeBaseName(key);
+
+	if (baseHash.containsKey(basename))
+	  {
+	    vec = (Vector) baseHash.get(basename);
+	  }
+	else
+	  {
+	    vec = new Vector();
+	    baseHash.put(basename, vec);
+	  }
+
+	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
+      }
+
+    enum = baseHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	//	result.append("\nBase - " + key + "\n");
+
+	vec = (Vector) baseHash.get(key);
+
+	for (int i = 0; i < vec.size(); i++)
+	  {
+	    result.append(key + ":" + vec.elementAt(i) + "\n");
+	  }
+
+	result.append("\n");
+      }
+
+    return result.toString();
   }
 
   // ---
@@ -644,6 +774,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     /* -- */
 
+    if (debug)
+      {
+	debugdump(matrix);
+      }
+
     // If we have invalid entries, we're just going to throw them out,
     // forget they even existed..  this is reasonable
     // because matrix is private to this class.. PermissionMatrixDBField
@@ -654,11 +789,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // schema editing.  Since normally the database/schema needs to be
     // dumped after changing the schema, this is an appropriate place
     // to do the cleanup.
-
-    if (debug)
-      {
-	debugdump(matrix);
-      }
 
     clean();
 
@@ -726,21 +856,19 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.<br><br>
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public String getDiffString(DBField orig)
   {
-    PermissionMatrixDBField origP;
     StringBuffer result = new StringBuffer();
+    PermissionMatrixDBField origP;
 
     /* -- */
 
@@ -749,16 +877,86 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("bad field comparison");
       }
 
+    clean();
+
     origP = (PermissionMatrixDBField) orig;
 
-    if (!origP.equals(this))
-      {
-	return "\tPermission Matrix Changes.. Descriptive Code Not Yet Implemented";
-      }
-    else
+    if (origP.equals(this))
       {
 	return null;
       }
+    
+    Vector myKeys = new Vector();
+    Vector origKeys = new Vector();
+
+    Enumeration enum = matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	myKeys.addElement(enum.nextElement());
+      }
+
+    enum = origP.matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	origKeys.addElement(enum.nextElement());
+      }
+
+    PermEntry entryA = null;
+    PermEntry entryB = null;
+
+    Vector keptKeys = arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
+    Vector newKeys = arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
+    Vector lostKeys = arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
+
+    for (int i = 0; i < keptKeys.size(); i++)
+      {
+	String key = (String) keptKeys.elementAt(i);
+
+	entryA = (PermEntry) matrix.get(key);
+	entryB = (PermEntry) origP.matrix.get(key);
+
+	if (!entryA.equals(entryB))
+	  {
+	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+			  " -- " + entryA.difference(entryB));
+	    result.append("\n");
+	  }
+      }
+
+    for (int i = 0; i < newKeys.size(); i++)
+      {
+	String key = (String) newKeys.elementAt(i);
+
+	entryA = (PermEntry) matrix.get(key);
+
+	if (isBasePerm(key))
+	  {	
+	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+			  " -- " + entryA.difference(null));
+	    result.append("\n");
+	  }
+	else
+	  {
+	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+			  " -- " + entryA.difference(null) + " (was undefined)");
+	    result.append("\n");
+	  }
+      }
+
+    for (int i = 0; i < lostKeys.size(); i++)
+      {
+	String key = (String) lostKeys.elementAt(i);
+
+	entryB = (PermEntry) origP.matrix.get(key);
+
+	result.append(decodeBaseName(key) + " " + decodeFieldName(key) + 
+		      " -- Lost " + entryB);
+	result.append("\n");
+      }
+
+    return result.toString();
   }
 
   /**
@@ -824,18 +1022,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(short baseID, short fieldID)
   {
-    PermEntry result;
-
-    /* -- */
-
-    result = (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
-
-    if (result == null)
-      {
-	result = (PermEntry) matrix.get(matrixEntry(baseID, "default"));
-      }
-
-    return result;
+    return (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
@@ -861,21 +1048,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(Base base, BaseField field)
   {
-    PermEntry result;
-
-    /* -- */
-
     try
       {
-	result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
-						    field.getID()));
-	if (result == null)
-	  {
-	    result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
-							"default"));
-	  }
-
-	return result;
+	return (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
+						  field.getID()));
       }
     catch (RemoteException ex)
       {
@@ -1044,90 +1220,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   * <P>Sets the default permission entry to apply to fields under base
-   * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
-   * permission is set for a base, all new fields created under that
-   * base will take the default permissions entry.  If the schema editor
-   * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.</P>
-   *
-   * <P>This operation will fail if this
-   * PermissionMatrixDBField is not editable.</P>
-   *
-   * <P>This operation may only be performed by a
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
-   * with supergash-level privileges, for security's sake.</P>
-   *
-   * @see arlut.csd.ganymede.perm_field
-   * @see arlut.csd.ganymede.PermEntry 
-   */
-
-  public ReturnVal setDefaultFieldsPerm(Base base, PermEntry entry)
-  {
-    try
-      {
-	return setDefaultFieldsPerm(base.getTypeID(), entry);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote: " + ex);
-      }
-  }
-
-  /**
-   * <P>Sets the default permission entry to apply to fields under base
-   * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
-   * permission is set for a base, all new fields created under that
-   * base will take the default permissions entry.  If the schema editor
-   * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.</P>
-   *
-   * <P>This operation will fail if this
-   * PermissionMatrixDBField is not editable.</P>
-   *
-   * <P>This operation may only be performed by a 
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
-   * with supergash-level privileges, for security's sake.</P>
-   *
-   * @see arlut.csd.ganymede.perm_field
-   * @see arlut.csd.ganymede.PermEntry 
-   */
-
-  public ReturnVal setDefaultFieldsPerm(short baseID, PermEntry entry)
-  {
-    if (isEditable())
-      {
-	// it's too hard to make sure that setting all the bits under
-	// a base is acceptable for non-supergash admins.. we only
-	// do this during bulk-loading anyway, so just reject it
-	// if we're not supergash.
-
-	if (owner.gSession != null && owner.gSession.isSuperGash())
-	  {
-	    matrix.put(matrixEntry(baseID, "default"), entry);
-	  }
-	else 
-	  {
-	    return Ganymede.createErrorDialog("Permissions Error",
-					      "Only supergash can bulk-load permissions under a base.");
-	  }
-      }
-    else
-      {
-	throw new IllegalArgumentException("not an editable field");
-      }
-
-    if (debug)
-      {
-	System.err.println("PermissionMatrixDBField: base " + baseID + " set to " + entry);
-      }
-
-    defined = true;
-
-    return null;
-  }
-
-  /**
    * <P>This internal method is used to cull out any entries in this
    * permissions field that are non-operative, either by referring to
    * an object/field type that does not exist, or by being redundant.</P>
@@ -1169,156 +1261,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	      }
 	  }
       }
-
-    // okay, now we want to clean out redundant or non-sensical
-    // entries
-
-    String basename;
-    Hashtable baseHash = new Hashtable();
-    Vector vec;
-
-    /* -- */
-
-    // generate a mapping of basename -> Vector(base/field key)
-
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
-      {
-	key = (String) keys.nextElement();
-	pe = (PermEntry) matrix.get(key);
-
-	basename = decodeBaseName(key);
-
-	if (baseHash.containsKey(basename))
-	  {
-	    vec = (Vector) baseHash.get(basename);
-	  }
-	else
-	  {
-	    vec = new Vector();
-	    baseHash.put(basename, vec);
-	  }
-
-	vec.addElement(key);
-      }
-
-    // for each basename, if it has no perms, and none of the
-    // base/field keys under it have no perms, clear out those
-    // entries.
-
-    keys = baseHash.keys();
-
-    while (keys.hasMoreElements())
-      {
-	key = (String) keys.nextElement();
-
-	boolean deleteit = true;
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
-	  {
-	    if (!((PermEntry) matrix.get(vec.elementAt(i))).equals(PermEntry.noPerms))
-	      {
-		deleteit = false;
-	      }
-	  }
-
-	// if none of the entries for the given base grant any
-	// permissions, ditch them all.
-
-	if (deleteit)
-	  {
-	    for (int i = 0; i < vec.size(); i++)
-	      {
-		String entryKey = (String) vec.elementAt(i);
-
-		if (debug)
-		  {
-		    System.err.println("**** PermissionMatrixDBField.clean(): throwing out pointless entry " + 
-				       decodeBaseName(entryKey) + " " + 
-				       decodeFieldName(entryKey) + " ---- " + 
-				       matrix.get(entryKey).toString());
-		  }
-
-		matrix.remove(entryKey);
-	      }
-
-	  }
-      }
-
-    // for each basename, remove any field entries that are merely duplicative
-    // of the base's default
-
-    keys = baseHash.keys();
-
-    while (keys.hasMoreElements())
-      {
-	key = (String) keys.nextElement();
-
-	short basenum;
-
-	try
-	  {
-	    basenum = Ganymede.db.getObjectBase(key).getTypeID();
-	  }
-	catch (NullPointerException ex)
-	  {
-	    continue;
-	  }
-
-	String defaultKey = matrixEntry(basenum, "default");
-	String baseKey = matrixEntry(basenum);
-	PermEntry defaultEntry = (PermEntry) matrix.get(defaultKey);
-
-	if (defaultEntry == null)
-	  {
-	    continue;
-	  }
-
-	// okay, this base has a default record.. get the entries for this base
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
-	  {
-	    String entryKey = (String) vec.elementAt(i);
-
-	    // we don't want to test the default entry itself, nor the
-	    // entry for the base as a whole.
-
-	    if (defaultKey.equals(entryKey) || baseKey.equals(entryKey))
-	      {
-		continue;
-	      }
-
-	    if (debug)
-	      {
-		System.err.println("**** PermissionMatrixDBField.clean(): throwing out redundant entry " + 
-				   decodeBaseName(entryKey) + " " + 
-				   decodeFieldName(entryKey) + " ---- " + 
-				   matrix.get(entryKey).toString());
-	      }
-
-	    if (matrix.get(entryKey).equals(defaultEntry))
-	      {
-		matrix.remove(entryKey);
-	      }
-	  }
-      }
-  }
-
-  /**
-   * <P>Private method to generate a key for use in
-   * our internal Hashtable, used to encode the default
-   * permission for a given {@link arlut.csd.ganymede.DBObjectBase
-   * DBObjectBase}.</P>
-   */
-
-  private String matrixEntry(short baseID, String text)
-  {
-    return (baseID + ":" + text);
   }
 
   /**
@@ -1473,6 +1415,18 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new RuntimeException("Error, don't recognize field name.. should be 'Owned Object Bits' or " +
 				   "'Default Bits'.");
       }
+  }
+
+  /**
+   *
+   * This method does a dump to System.err of the permission
+   * contents held in this field.
+   *
+   */
+
+  public void debugdump()
+  {
+    debugdump(this);
   }
 }
 

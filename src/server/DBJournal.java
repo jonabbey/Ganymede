@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/06/09 04:03:56 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/06/18 22:43:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -141,7 +141,7 @@ public class DBJournal implements ObjectStatus {
 
     if (this.store == null || this.filename == null)
       {
-	throw new RuntimeException("bad parameter");
+	throw new IllegalArgumentException("bad parameter");
       }
 
     if (debug)

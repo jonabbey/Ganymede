@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/06/15 02:48:18 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/06/18 22:43:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,8 @@ public abstract class DBLock {
    * identify the lock in the {@link arlut.csd.ganymede.DBStore DBStore}'s
    * {@link arlut.csd.ganymede.DBStore#lockHash DBStore.lockHash}.  The
    * establish() methods in the DBLock subclasses consult the DBStore.lockHash
-   * to make sure that no DBSession ever possesses more than one write lock,
+   * to make sure that no {@link arlut.csd.ganymede.DBSession DBSession}
+   * ever possesses more than one write lock,
    * to prevent deadlocks from occuring in the server.</P>
    */
 
@@ -135,7 +136,8 @@ public abstract class DBLock {
   /**
    * <P>Will be true if a DBLock is successfully locked.</P>
    *
-   * <P>Should not be directly consulted outside of the DBLock class hierarchy.</P>
+   * <P>Should not be directly accessed outside of the DBLock class hierarchy
+   * (unfortunately Java has no support for 'accessible to subclasses only').</P>
    */
 
   boolean locked = false;

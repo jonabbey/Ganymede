@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 1999/05/26 23:17:31 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 1999/06/18 22:43:27 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,12 +63,23 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Client side interface definition for the Ganymede Session Object.  The
- * Ganymede Session object holds the state for a Ganymede client's session
- * with the Ganymede server.  The Ganymede session will also provide the
- * primary interface for accessing ganymede db objects.</p>
+ * <P>Client side interface definition for the
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} class.  The Session
+ * interface is provided to the client by the
+ * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer}'s 
+ * {@link arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+ * method, and provides the client with an RMI reference that can be used
+ * to communicate with the Ganymede server.</P>
  *
- * @version $Revision: 1.38 $ %D%
+ * <P>Many of the methods in this interface, when called, will return
+ * remote object references that the client can in turn interact with
+ * to perform operations on the server.  These include the
+ * {@link arlut.csd.ganymede.db_object db_object} reference that can
+ * be returned as part of a {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+ * return value, and the {@link arlut.csd.ganymede.db_field db_field}
+ * references that are obtained from the db_object references.</P>
+ *
+ * @version $Revision: 1.39 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession

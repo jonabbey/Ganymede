@@ -7,13 +7,84 @@ CHANGES
 
 RELEASE DATE: June ??, 1999
 
-1. [DOCUMENTATION]
+1. [DOCUMENTATION] Improved javadocs
 
 Lots more improvements to the source code javadocs.  Improving the
 javadocs is an ongoing project.. I really want to make it possible to
 get a very good feel for how the entire system works on a technical
 level by simply browsing through the javadocs.  It's an interesting
-exercise.
+exercise, and a continuing one.  If you find yourself puzzling about
+something in the code, please let me know so I can document it better.
+
+2. [SERVER] Improved DBLock, DBObjectBase classes slightly
+
+Added some more explicit lock status check methods to DBObjectBase.
+Modified GanymedeAdmin's schema edit status check to use the
+new DBObjectBase.isLocked() method.
+
+Pulled some methods and variables from the DBLock subclasses up to
+DBLock.  Added DBLock.isLocked(Vector) to safely test a lock against a
+vector of DBObjectBases.  Modified GanymedeSession.queryDispatch() to
+use the new method, and to verify that the database remains read
+locked at the completion of the query loop.  (the user could have been
+knocked off via the admin console, etc.).
+
+Documented all the pieces of the lock system in the Javadocs.
+
+3. [SERVER DISTRIB] Added permdecodeDB command
+
+permdecodeDB will take an existing ganymede.db file and report on
+the permissions bits encoded by roles in the database.  Useful
+for debugging permissions code problems.  See #4 below.
+
+4. [SERVER] Corrected, simplified server's permissions system
+
+The Ganymede server's permissions system had a complex and (as it
+turned out) broken system for inheriting 'default permissions' for
+fields in an object.  Previously, an object type could have a default
+permissions bitset registered, and any fields in that object for which
+permissions had not been explicitly set would take on the default
+value.  This was intended to support reasonable behavior for newly
+created fields, but the code to implement this had problems in some
+odd cases.  The notion of an explicitly recorded default permission
+set for fields that differed from the permissions on an object type
+itself has been removed.  In keeping with this, the
+setDefaultFieldPerms() methods on both PermissionMatrixDBField and
+perm_field have been taken away.  The permissions logic has been
+simplified, and better documented in the javadocs.
+
+Now, when new fields are added to object types through the
+schema editor, all Role objects will grant the permission for the
+object as a whole to the new fields.  If you run the permissions
+editor in the client on a Role object's permissions fields, you can
+change this default.
+
+Since the Ganymede client's permissions editor dialog had no code for
+calling the setDefaultFieldPerms() methods on perm_field, this change
+shouldn't affect any custom work people have done.  The gash and
+gasharl ganymede.schema files did ship in 0.99.1 with a default
+permission set on a few object types.  People using a ganymede.db file
+derived from a gash or gasharl ganymede.schema may find that they need
+to use the permissions editor to correct problems in the GASH Admin
+Role object's permissions bits.
+
+5. [SERVER] Changes to permissions fields now descriptively logged 
+
+If an administrator makes changes to the permission bits in a Role
+object, the server's log will now record the precise changes, which
+will be visible in the Role object's history panel.  
+
+The history recorded may be a bit deceptive in the case where a field
+which previously had no explicit field-level permissions set has them
+set..  if the object type has a permission of view/create/edit, and
+you edit the field's permission to set it to view/edit only, the log
+file will show that the field gained view and edit, when it
+effectively lost create, which was previously inherited.
+
+6. [SERVER] Miscellaneous methods added
+
+Added debugging toString() to DBField, PermMatrix classes.
+Added getFieldName(short) to DBObject, db_object.
 
 -------------------- Changes from 0.99 to 0.99.1 -------------------
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 1999/05/26 23:17:23 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 1999/06/18 22:43:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,19 +75,35 @@ import arlut.csd.JDialog.*;
  * track of the changes made to fields, keeping things properly
  * synchronized with unique field name spaces.</p>
  *
- * <p>All DBEditObjects are obtained in the context of a 
+ * <p>Generally, DBEditObjects are obtained in the context of a 
  * {@link arlut.csd.ganymede.DBEditSet DBEditSet} transaction object.  When
- * the DBEditSet is committed, the DBEditObject is made to replace the
- * original object from the DBStore.  If the EditSet is aborted, the
+ * the DBEditSet is committed, a new {@link arlut.csd.ganymede.DBObject DBObject}
+ * is created from the contents of the DBEditObject and is made to replace the
+ * original object in the DBStore.  If the EditSet is aborted, the
  * DBEditObject is dropped.</p>
+ *
+ * <P>There is one case, however, in which a DBEditObject will be
+ * present in the server outside of a DBEditSet context, and that is
+ * the DBEditObject instance used for the
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
+ * {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook} customization
+ * object.  In this case, a DBEditObject of the appropriate subclass is
+ * created using the
+ * {@link arlut.csd.ganymede.DBEditObject#DBEditObject(arlut.csd.ganymede.DBObjectBase) first constructor variant}.
+ * A wide variety of methods in the server will make method calls on 
+ * the DBObjectBase objectHook to allow a custom DBEditObject subclass to customize
+ * the server's behavior.</P>
+ *
+ * <P>See the DBEditObject subclassing guide for more information generally on
+ * DBEditObject customization.</P>
  *
  * <p><b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
  * synchronized methods in DBEditObject and in subclasses thereof do not
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.108 $ $Date: 1999/05/26 23:17:23 $ $Name:  $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ * @version $Revision: 1.109 $ $Date: 1999/06/18 22:43:17 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
@@ -169,10 +185,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /* -- */
 
-  /**
-   * <p>Dummy constructor, is responsible for creating a DBEditObject strictly
-   * for the purpose of having a handle to call customization methods on.</p>
-   */
+  /** 
+   * <p>Dummy constructor, is responsible for creating a DBEditObject
+   * strictly for the purpose of having a handle to call our
+   * pseudostatic customization methods on.</p> 
+   *
+   * <P>This is the version of the constructor that the
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s 
+   * {@link arlut.csd.ganymede.DBObjectBase#createHook() createHook()}
+   * method uses to create the {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook}
+   * object.</P>
+   **/
 
   public DBEditObject(DBObjectBase base)
   {
@@ -182,7 +205,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>Creation constructor, is responsible for creating a new editable
-   * object with all fields listed in the DBObjectBaseField instantiated
+   * object with all fields listed in the
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} instantiated
    * but undefined.</p>
    *
    * <p>This constructor is not really intended to be overriden in subclasses.
@@ -741,7 +765,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * the permissions specified by this method for access to the
    * given object, and no further elaboration of the permission
    * will be performed.  Note that this override capability does
-   * not apply to operations performed in supergash mode.</p>
+   * not apply to operations performed in supergash mode.</P>
+   *
+   * <P>Note as well that this permOverride() has no effect when
+   * creating new objects of this type. Take a look at overriding
+   * {@link arlut.csd.ganymede.DBEditObject#canCreate(arlut.csd.ganymede.Session) canCreate()}
+   * if you need to provide an exception to the normal permissions
+   * system for creating new objects.</p>
    *
    * <p>This method should be used very sparingly.</p>
    *
@@ -763,7 +793,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>If this method returns null, the default permissions mechanism
    * will be followed.  If not, the permissions system will grant
    * the union of the permissions specified by this method for access to the
-   * given object.</p>
+   * given object.</P>
+   *
+   * <P>Note as well that this permExpand() has no effect when
+   * creating new objects of this type. Take a look at overriding
+   * {@link arlut.csd.ganymede.DBEditObject#canCreate(arlut.csd.ganymede.Session) canCreate()}
+   * if you need to provide an exception to the normal permissions
+   * system for creating new objects.</p>
    *
    * <p>This method is essentially different from permOverride() in that
    * the permissions system will not just take the result of this
@@ -786,17 +822,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * purposes.</p>
    *
    * <p>If this method returns null, the default permissions mechanism
-   * will be followed.  If not, the permissions system will grant
-   * the permissions specified by this method for access to the
-   * given field, and no further elaboration of the permission
-   * will be performed.  Note that this override capability does
-   * not apply to operations performed in supergash mode.</p>
+   * will be followed.  If not, the permissions system will grant the
+   * permissions specified by this method for access to the given
+   * field, and no further elaboration of the permission will be
+   * performed.  If permOverride() returns a non-null value for a
+   * given field, permExpand() will not be consulted for that field.
+   * Just as with permExpand(), this method can never cause greater
+   * permissions to be granted to a field than is available to the
+   * object as a whole, and this override capability does not
+   * apply to operations performed in supergash mode.</P>
    *
    * <p>This method should be used very sparingly.</p>
    *
    * <p>To be overridden in DBEditObject subclasses.</p>
    *
-   * <p><b>*PSEUDOSTATIC*</b></p>
+   * <p><b>*PSEUDOSTATIC*</b></p> 
    */
 
   public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
@@ -810,9 +850,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * for special purposes.</p>
    *
    * <p>If this method returns null, the default permissions mechanism
-   * will be followed.  If not, the permissions system will grant
-   * the union of the permissions specified by this method for access to the
-   * given field.</p>
+   * will be followed.  If not, the permissions system will grant the
+   * union of the permissions returned by this method and those
+   * determined normally by GanymedeSession's default field
+   * permissions logic.  This method can never cause greater
+   * permissions to be granted to a field than is available to the
+   * object as a whole, and the results of permExpand() will have
+   * no effect on operations performed in supergash mode.</P>
    *
    * <p>This method is essentially different from permOverride() in that
    * the permissions system will not just take the result of this
@@ -821,7 +865,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * <p>To be overridden in DBEditObject subclasses.</p>
    *
-   * <p><b>*PSEUDOSTATIC*</b></p>
+   * <p><b>*PSEUDOSTATIC*</b></p> 
    */
 
   public PermEntry permExpand(GanymedeSession session, DBObject object, short fieldid)
@@ -1041,7 +1085,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return false;
   }
-
 
   /**
    * <p>Hook to allow the cloning of an object.  If this object type
@@ -2234,7 +2277,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * commit() routine, this object CAN NOT refuse commit()
    * at a subsequent point.  Once commitPhase1() is called,
    * the object CAN NOT be changed until the transaction
-   * is either fully committed or abandoned.</p>
+   * is either committed, abandoned, or released from the 
+   * commit process by the
+   * {@link arlut.csd.ganymede.DBEditObject#release(boolean) release()}
+   * method.</p>
    *
    * <p>This method is intended to be subclassed by application
    * objects that need to include extra-Ganymede processes
@@ -2276,13 +2322,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * cases in which change to an object would result in an external
    * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Ganymede server</b>, the process invokation should be placed here,
-   * rather than in commitPhase1().</p>
+   * Ganymede server</b>, the process invocation should be placed here,
+   * rather than in
+   * {@link arlut.csd.ganymede.DBEditObject#commitPhase1() commitPhase1()}.</p>
+   *
+   * <P>commitPhase2() is generally the last method called on a
+   * DBEditObject before it is discarded by the server in the
+   * {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.DBEditSet#commit() commit()} method.</P>
    *
    * <p>Subclasses that override this method may wish to make this method 
    * synchronized.</p>
-   *
-   * @see arlut.csd.ganymede.DBEditSet
    */
 
   public void commitPhase2()

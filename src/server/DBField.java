@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/06/15 02:48:17 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/06/18 22:43:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -109,15 +109,17 @@ import arlut.csd.JDialog.*;
  * single value to be held, but StringDBField, InvidDBField, and
  * IPDBField support vectors of values.</P>
  *
- * <P>The Ganymede client can directly access fields in RMI-published objects
- * using the {@link arlut.csd.ganymede.db_field db_field} RMI interface.  Each
- * concrete subclass of DBField has its own special RMI interface which provides
- * special methods for the client.  Adding a new data type to the Ganymede server
- * will involve creating a new DBField subclass, as well as a new RMI interface
- * for any special field methods.  All client code would also need to be modified
- * to be aware of the new field type.  DBObjectBaseField and DBObject would also
- * need to be modified to be aware of the new field type for schema editing and
- * object loading.  The schema editor would have to be modified as well.</P>
+ * <P>The Ganymede client can directly access fields in RMI-published
+ * objects using the {@link arlut.csd.ganymede.db_field db_field} RMI
+ * interface.  Each concrete subclass of DBField has its own special
+ * RMI interface which provides special methods for the client.
+ * Adding a new data type to the Ganymede server will involve creating
+ * a new DBField subclass, as well as a new RMI interface for any
+ * special field methods.  All client code would also need to be
+ * modified to be aware of the new field type.  DBObjectBaseField,
+ * DBEditObject and DBObject would also need to be modified to be
+ * aware of the new field type for schema editing, customization, and object loading.
+ * The schema editor would have to be modified as well.</P>
  *
  * <P>But you can do it if you absolutely have to.  Just be careful and take a good
  * look around at the code.</P>
@@ -391,6 +393,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   {
     return getFieldDef().getName();
   }
+
 
   /**
    *
@@ -2035,10 +2038,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   abstract public ReturnVal verifyNewValue(Object o);
 
-  /**
-   * Overridable method to verify that the current
-   * DBSession / DBEditSet has permission to read
-   * values from this field.
+  /** 
+   * <P>Overridable method to verify that the current {@link
+   * arlut.csd.ganymede.DBSession DBSession} / {@link
+   * arlut.csd.ganymede.DBEditSet DBEditSet} has permission to read
+   * values from this field.</P>
    */
 
    public boolean verifyReadPermission()
@@ -2332,5 +2336,17 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     return original;
   }
+
+  /**
+   *
+   * For debugging
+   *
+   */
+
+  public String toString()
+  {
+    return "[" + owner.toString() + ":" + getName() + "]";
+  }
+
 }
 

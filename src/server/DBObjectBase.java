@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 1999/06/15 02:48:19 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 1999/06/18 22:43:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -309,12 +309,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   // Customization Management Object
 
   /**
-   * <P>Each DBObjectBase can have an instantiation of a custom DBEditObject subclass
+   * <P>Each DBObjectBase can have an instantiation of a custom
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclass
    * to respond to a number of 'pseudostatic' method calls which customize
    * the Ganymede server's behavior when dealing with objects of this DBObjectBase's
-   * type.</P>
+   * type.  The DBObjectBase 
+   * {@link arlut.csd.ganymede.DBObjectBase#createHook() createHook()} method
+   * is responsible for loading the custom DBEditObject subclass
+   * ({@link arlut.csd.ganymede.DBObjectBase#classdef classdef}) from
+   * the {@link arlut.csd.ganymede.DBObjectBase#classname classname}
+   * specified in the ganymede.db schema section.</P>
    *
-   * <P>If this DBObjectBase
+   * <P>objectHook should never be null while the server is in operation. If the
+   * Ganymede schema definition data in the ganymede.db file does not specify
+   * a special class for this object type's objectHook, DBObjectBase should have
+   * an instance of the base DBEditObject class here.</P>
+   *
+   * <P>See the Ganymede DBEditObject subclassing/customization guide for a lot
+   * more details on the use of DBEditObjects as objectHooks.</P>
    */
 
   DBEditObject objectHook;	
@@ -1108,10 +1120,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
   }
 
-  /**
-   * <p>This method is used to create a DBEditObject subclass handle, to
-   * allow various classes to make calls to overridden static methods
-   * for DBEditObject subclasses.</p>
+  /** 
+   * <p>This method is used to create a DBEditObject subclass handle
+   * ({@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook}),
+   * to allow various classes to make calls to overridden static
+   * methods for DBEditObject subclasses.</p> 
    */
 
   DBEditObject createHook() throws RemoteException
@@ -1197,7 +1210,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * DBSession.createDBObject() to create new objects.</p>
    *
    * @param editset The transaction this object is to be created in
-   *
    */
 
   DBEditObject createNewObject(DBEditSet editset)

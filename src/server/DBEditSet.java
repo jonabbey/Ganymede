@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/05/26 23:17:24 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/06/18 22:43:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -695,16 +695,17 @@ public class DBEditSet {
    * will leave the transaction open for a subsequent commit() attempt,
    * or an abort().</p>
    *
-   * <p>The returned ReturnVal will have doNormalProcessing set to false if
-   * the transaction was completely aborted.  Both DBSession and the client
-   * should take a false doNormalProcessing boolean as an indicator that
-   * the transaction was simply wiped out and a new transaction should
-   * be opened for subsequent activity.  A true doNormalProcessing value
-   * indicates that the client can try the commit again at a later time,
-   * or manually cancel.</p>
+   * <p>The returned {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * will have doNormalProcessing set to false if the transaction was
+   * completely aborted.  Both {@link arlut.csd.ganymede.DBSession
+   * DBSession} and the client should take a false doNormalProcessing
+   * boolean as an indicator that the transaction was simply wiped out
+   * and a new transaction should be opened for subsequent activity.
+   * A true doNormalProcessing value indicates that the client can try
+   * the commit again at a later time, or manually cancel.</p>
    *
    * @return a ReturnVal indicating success or failure, or null on success
-   * without comment.
+   * without comment.  
    */
 
   public synchronized ReturnVal commit()
@@ -1265,7 +1266,7 @@ public class DBEditSet {
 		// Create a read-only version of eObj, with all fields
 		// reset to checked-in status, put it into our object hash
 
-		base.objectTable.put(new DBObject(eObj)); 
+		base.objectTable.put(new DBObject(eObj));
 
 		// (note that we can't use a no-sync put above, since
 		// we don't prevent asynchronous viewDBObject().

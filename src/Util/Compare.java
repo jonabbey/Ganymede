@@ -6,8 +6,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:03 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/06/18 22:43:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,6 +47,22 @@
 */
 
 package arlut.csd.Util;
+
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                         Compare
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>This interface provides a common comparator operator that can be implemented
+ * for use with {@link arlut.csd.Util.QuickSort QuickSort}, 
+ * {@link arlut.csd.Util.VecQuickSort VecQuickSort}, and
+ * {@link arlut.csd.Util.VecSortInsert VecSortInsert}.
+ *
+ * @version $Revision: 1.3 $ $Date: 1999/06/18 22:43:10 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public interface Compare {
 

@@ -7,8 +7,8 @@
    
    Created: 9 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:30 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/06/18 22:43:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,16 @@ import java.util.*;
                                                                 DBBaseFieldTable
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>A customized variant of the java.util.Hashtable class that is
+ * tuned for use in managing
+ * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}s
+ * in a Ganymede {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}.</P>
+ * 
+ * @version $Revision: 1.3 $ %D%, Created: 9 June 1998
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ */
 
 public class DBBaseFieldTable {
 
