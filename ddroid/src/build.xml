@@ -126,7 +126,7 @@ refresh the jar files.
   </target>
 
   <target name ="validate">
-    <exec executable="verification/resource_validator.pl">
+    <exec executable="verification/resource_validator.pl" failonerror="true">
       <arg file="."/>
     </exec>
 
