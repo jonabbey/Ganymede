@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2001/06/01 01:35:02 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2001/06/01 01:50:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -245,7 +245,7 @@ public class ReturnVal implements java.io.Serializable {
    * a the text of any encoded dialog box describing the problem.  This
    * method is intended for text-mode clients that do not support the
    * full callback/wizard features that the
-   * {@link arlut.csd.ganymede.JDialog.JDialogBuff JDialogBuff} 
+   * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff} 
    * class supports.</p>
    *
    * <p>This method (or getDialog() for GUI clients) should be checked

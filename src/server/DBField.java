@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2001/06/01 01:35:00 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2001/06/01 01:49:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,8 +75,7 @@ import arlut.csd.Util.*;
  *
  * <P>DBFields are the actual carriers of field value in the Ganymede
  * server.  Each {@link arlut.csd.ganymede.DBObject DBObject} holds a
- * set of DBFields in a {@link arlut.csd.ganymede.DBFieldTable
- * DBFieldTable}.  Each DBField is associated with a {@link
+ * set of DBFields in an array.  Each DBField is associated with a {@link
  * arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} field
  * definition (see {@link arlut.csd.ganymede.DBField#getFieldDef()
  * getFieldDef()}) by way of its owner's type and it's own field code,
