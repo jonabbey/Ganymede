@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 1999/02/11 03:07:58 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 1999/02/12 20:40:13 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -191,6 +191,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   private boolean
+    toolToggle = true,
     showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
   
@@ -210,6 +211,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   protected JComboBox
     personaCombo = null;  // ComboBox showing current persona on the toolbar
+
+  JToolBar 
+    toolBar;
+  JPanel 
+    toolBarP,
+    personaPanel;
+
+
 
   JFilterDialog
     filterDialog = null;
@@ -341,7 +350,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * logged in.
    *
    */
-
   public gclient(Session s, glogin g)
   {
     JPanel
@@ -406,9 +414,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     fileMenu.setMnemonic('f');
     fileMenu.setDelay(0);
 
-    //    toggleToolBarMI = new JMenuItem("Toggle Toolbar");
-    //    toggleToolBarMI.setMnemonic('t');
-    //    toggleToolBarMI.addActionListener(this);
+    toggleToolBarMI = new JMenuItem("Toggle Toolbar");
+    toggleToolBarMI.setMnemonic('t');
+    toggleToolBarMI.addActionListener(this);
 
     logoutMI = new JMenuItem("Logout");
     logoutMI.setMnemonic('l');
@@ -428,7 +436,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     fileMenu.add(clearTreeMI);
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
-    //    fileMenu.add(toggleToolBarMI);
+    //fileMenu.add(toggleToolBarMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
 
@@ -486,7 +494,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     windowMenu = new JMenu("Windows");
     windowMenu.setMnemonic('w');
-
+    windowMenu.add(toggleToolBarMI);
    
     // Look and Feel menu
 
@@ -732,11 +740,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
     
+    toolBarP = createToolbar();
     if (showToolbar)
       {
-	getContentPane().add("North", createToolbar());
+	getContentPane().add("North", toolBarP);
       }
-
+    
     commit = new JButton("Commit");
     commit.setEnabled(false);
     commit.setOpaque(true);
@@ -1808,8 +1817,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     Insets insets = new Insets(0,0,0,0);
 
     JPanel toolBarPanel = new JPanel(new BorderLayout());
-    JPanel personaPanel = new JPanel(new BorderLayout());
-    JToolBar toolBar = new JToolBar();
+    personaPanel = new JPanel(new BorderLayout());
+    toolBar = new JToolBar();
 
     toolBar.setBorderPainted(true);
     toolBar.setFloatable(false);
@@ -3927,6 +3936,21 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	throw new RuntimeException("Could not open new transaction: " + rx);
       }
   }
+
+  void toggleToolBar() {
+    // toggle appearance of the toolbar
+    if (toolToggle == true) {
+      toolBarP.remove(toolBar);
+      toolToggle = false;
+    } 
+    else if (toolToggle == false)
+      { 
+	toolBarP.add("Center",toolBar);
+	getContentPane().add("North", toolBarP);
+	toolToggle = true;
+      }
+    getContentPane().validate();
+  }
   
   // ActionListener Methods
   
@@ -4021,12 +4045,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    logout();
 	  }
       }
-
     else if (source == toggleToolBarMI)
       {
-	// toggle appearance of the toolbar
+	toggleToolBar();
       }
-
     else if (command.equals("create new object"))
       {
 	createObjectDialog();
