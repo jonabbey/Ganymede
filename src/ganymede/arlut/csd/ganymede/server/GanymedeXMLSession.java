@@ -67,6 +67,7 @@ import java.util.Vector;
 import org.xml.sax.SAXException;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLCloseElement;
 import arlut.csd.Util.XMLElement;
@@ -265,7 +266,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * <p>We set it true here so that we avoid any race conditions.</p>
    */
 
-  private boolean parsing = true;
+  private booleanSemaphore parsing = new booleanSemaphore(true);
 
   /**
    * <p>This flag is used to track whether the background parser thread
@@ -424,7 +425,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     session.checklogin();
 
-    if (parsing)
+    if (parsing.isSet())
       {
 	try
 	  {
@@ -533,7 +534,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // if the parser thread has completed, then parsing will be false
     // and the XML reader will have already been closed
 
-    if (parsing)
+    if (parsing.isSet())
       {
 	if (debug)
 	  {
@@ -541,6 +542,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 
 	reader.close();		// this will cause the XML Reader to halt
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession closing already closed reader");
+	  }
       }
   }
 
@@ -559,6 +567,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (session != null)
       {
+	// set our underlying GanymedeSession's xSession to null so
+	// that it will take things seriously when we tell it that it
+	// is unreferenced.
+
+	session.setXSession(null);
 	session.unreferenced();
       }
   }
@@ -780,7 +793,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     finally
       {
-	parsing = false;
+	parsing.set(false);
 
 	if (reader != null)
 	  {

@@ -1059,6 +1059,19 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void unreferenced()
   {
+    /* the xmlclient may well drop reference to us (the
+       GanymedeSession), as all it really cares about is the
+       GanymedeXMLSession..  if we have an xSession reference, assume
+       that all is well.. the GanymedeXMLSession has its own
+       unreferenced method that can handle dead xml clients, after
+       all.
+    */
+
+    if (xSession != null)
+      {
+	return;
+      }
+
     if (loggedInSemaphore.isSet())
       {
 	forceOff(ts.l("unreferenced.reason"));
