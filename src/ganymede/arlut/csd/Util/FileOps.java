@@ -237,7 +237,6 @@ public class FileOps {
 	      {
 		System.err.println("Calling subprocess exitValue()");
 		return p.exitValue();
-		System.err.println("Returned from calling subprocess exitValue()");
 	      }
 	    catch (IllegalThreadStateException ex)
 	      {
