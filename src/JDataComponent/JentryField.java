@@ -5,7 +5,7 @@
    use textfields.  The subclasses of this class should be used.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin 
 
@@ -54,11 +54,11 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     addFocusListener(this);
 
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
-
     // try to force a validate so that NT isn't so bitchy
 
     setColumns(columns);
+
+    setDocument(new JentryDocument(this));
   }
 
   ///////////////////
@@ -100,7 +100,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
   /**
    *  Stub function that is overriden in subclasses of JentryField
-   *
    */
 
   public boolean isAllowed(char ch)
@@ -112,44 +111,16 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     return true;
   }
-  
+
   /**
+   * Returns the maximum acceptable size of this field
    *
-   * We only want certain keystrokes to be registered by the field.
-   *
-   * This method overrides the processKeyEvent() method in JComponent and
-   * gives us a way of intercepting characters that we don't want in our
-   * string field.
-   *
+   * If no max size has been set, will return -1.
    */
 
-  protected void processKeyEvent(KeyEvent e)
+  public int getMaxStringSize()
   {
-    // always pass through useful editing keystrokes.. this seems to be
-    // necessary because backspace and delete apparently have defined
-    // Unicode representations, so they don't match CHAR_UNDEFINED below
-
-    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
-	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
-	(e.getKeyCode() == KeyEvent.VK_END) ||
-	(e.getKeyCode() == KeyEvent.VK_HOME))
-      {
-	super.processKeyEvent(e);
-      }
-
-    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
-    // through things like backspace, arrow keys, etc.
-
-    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
-      {
-	super.processKeyEvent(e);
-      }
-    else if (isAllowed(e.getKeyChar()))
-      {
-	super.processKeyEvent(e);
-      }
-
-    // otherwise, we ignore it
+    return -1;
   }
 
   public void focusLost(FocusEvent e)
@@ -167,6 +138,50 @@ abstract public class JentryField extends JTextField implements FocusListener{
     if (debug)
       {
 	System.out.println("focusGained");
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  JentryDocument
+
+------------------------------------------------------------------------------*/
+
+class JentryDocument extends PlainDocument {
+
+  private JentryField field;
+
+  public JentryDocument(JentryField field)
+  {
+    this.field = field;
+  }
+
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    for (int i = 0; i < str.length(); i++)
+      {
+	char c = str.charAt(i);
+
+	if (!field.isAllowed(c) ||
+	     (field.getMaxStringSize() != -1 && 
+	      field.getMaxStringSize() - buffer.length() <= 0))
+	  {
+	    Toolkit.getDefaultToolkit().beep();
+	  }
+	else
+	  {
+	    buffer.append(c);
+	  }
+      }
+
+    if (buffer.length() != 0)
+      {
+	super.insertString(offset, buffer.toString(), a);
       }
   }
 }
