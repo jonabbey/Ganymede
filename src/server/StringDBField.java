@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/03/27 21:54:47 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/04/04 08:29:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -372,7 +372,7 @@ public class StringDBField extends DBField implements string_field {
       {
 	if (i > 0)
 	  {
-	    result.append(", ");
+	    result.append(",");
 	  }
 	
 	result.append(entries[i]);

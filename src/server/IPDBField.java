@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/03/27 21:54:44 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/04/04 08:29:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -928,7 +928,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	if (!result.equals(""))
 	  {
-	    result = result + ", ";
+	    result = result + ",";
 	  }
 
 	if (isIPV6())
