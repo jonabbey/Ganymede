@@ -7,8 +7,8 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.20 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.21 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -29,45 +29,43 @@ import arlut.csd.JDialog.*;
 
 /**
  *
- * This class provides a report on the status of the client's requested operation.
- * It is intended to be returned by a call on the server to make a change to
- * the database.<br><br>
+ * This class provides a report on the status of the client's
+ * requested operation.  It is intended to be returned by a call on
+ * the server to make a change to the database.<br><br>
  *
- * Included in this object is a general success code, a list of field id's that
- * need to be rescanned in the relevant object, if applicable, a dialog resource
- * that can provide a description of a dialog box to be presented to the user,
- * and an optional callback that the client can call with the results of the
- * dialog box if necessary.<br><br>
+ * Included in this object is a general success code, a list of
+ * objects and fields that need to be rescanned, if applicable, a
+ * dialog resource that can provide a description of a dialog box to
+ * be presented to the user, and an optional callback that the client
+ * can call with the results of the dialog box if necessary.<br><br>
  *
  * Note that operations that succeed without needing any further information
  * or action on the part of the client will simply return null.<br><br>
  *
- * If a non-null ReturnVal object is passed back, one of two things may be true.
- * didSucceed() may return true, in which case the operation was successful, but
- * there may be an informational dialog returned and/or a list of fields that
- * need to be updated in the relevant object in response to the successful update.
- * <br><br>
+ * If a non-null ReturnVal object is passed back, one of two things
+ * may be true.  didSucceed() may return true, in which case the
+ * operation was successful, but there may be an informational dialog
+ * returned and/or a list of objects and fields that need to be
+ * updated in response to the successful update.  <br><br>
  *
- * Alternatively, didSucceed() may return false, in which case the operation either
- * could not succeed or is incomplete.  In this case, doRescan() will return false,
- * and getDialog() should return a valid JDialogBuff().  If the operation is
- * simply incomplete pending more data from the user, getCallback() will return
- * a non-null value.  In this case, the user should be presented the dialog box,
- * and the results of that dialog should be passed to the callback.  The callback
- * will in return pass back another ReturnVal object.  The server may walk the
- * user through an iterative set of dialogs to finally complete the desired
- * operation.
+ * Alternatively, didSucceed() may return false, in which case the
+ * operation either could not succeed or is incomplete.  In this case,
+ * doRescan() will return false, and getDialog() should return a valid
+ * JDialogBuff().  If the operation is simply incomplete pending more
+ * data from the user, getCallback() will return a non-null value.  In
+ * this case, the user should be presented the dialog box, and the
+ * results of that dialog should be passed to the callback.  The
+ * callback will in return pass back another ReturnVal object.  The
+ * server may walk the user through an iterative set of dialogs to
+ * finally complete the desired operation.
  *
  * @see arlut.csd.JDialog.JDialogBuff
  * @see arlut.csd.JDialog.DialogRsrc
  * @see arlut.csd.JDialog.StringDialog
  * @see arlut.csd.ganymede.Ganymediator
- *
- */
+ * */
 
 public class ReturnVal implements java.io.Serializable {
-
-  static final long serialVersionUID = -4832305680354355493L;
 
   static final boolean debug = false;
 
@@ -80,14 +78,58 @@ public class ReturnVal implements java.io.Serializable {
 
   boolean success;
   byte status;
+
+  /**
+   *
+   * A Serializable Invid that can be returned in response to certain
+   * operations on the server.
+   *
+   */
+
   Invid newObjectInvid = null;
+
+  /**
+   *
+   * A Remote handle to a db_object on the server returned for use by
+   * the client.
+   * 
+   */
+
   db_object remoteObjectRef = null;
 
+  /**
+   *
+   * A Serializable StringBuffer representation of objects and fields
+   * that need to be rescanned.
+   * 
+   */
+
   private StringBuffer rescanList;
+
+  /**
+   *
+   * A Serializable Dialog Definition
+   *
+   */
+
   private JDialogBuff dialog;
+
+  /**
+   *
+   * A Remote handle to a Wizard object on the server
+   *
+   */
+
   private Ganymediator callback;
 
-  private Hashtable objRescanHash;
+  /**
+   *
+   * Maps Invid's to RescanBuf's.  Used on the client-side
+   * post-serialization.
+   * 
+   */
+
+  private transient Hashtable rescanHash = null;
 
   /**
    *
@@ -197,9 +239,8 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the server is requesting that 
-   * fields in the object referenced by the client's preceding call 
-   * to the server be reprocessed.<br><br>
+   * This method returns true if this ReturnVal encodes rescan
+   * information for one or more fields in on or more objects.<br><br>
    *
    * This method will never return true if didSucceed() returns
    * false, and need not be checked in that case.
@@ -213,16 +254,53 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    *
+   * This method returns a Vector of Invid objects, corresponding to
+   * those objects which need to have some field rescan work done.
+   * 
+   */
+
+  public Vector getRescanObjectsList()
+  {
+    Vector result = new Vector();
+    Enumeration enum;
+
+    /* -- */
+
+    if (!doRescan())
+      {
+	return result;
+      }
+
+    breakOutRescanList();
+
+    enum = rescanHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	result.addElement(enum.nextElement());
+      }
+    
+    return result;
+  }
+
+  /**
+   *
    * This method returns true if the server is requesting that all
    * fields in the object referenced by the client's preceding call 
    * to the server be reprocessed.
    *
    */
 
-  public boolean rescanAll()
+  public boolean rescanAll(Invid objID)
   {
-    if (rescanList != null &&
-	rescanList.toString().equals("all"))
+    if (!doRescan())
+      {
+	return false;
+      }
+
+    breakOutRescanList();
+
+    if (rescanHash.containsKey(objID) && rescanHash.get(objID).equals("all"))
       {
 	return true;
       }
@@ -238,38 +316,23 @@ public class ReturnVal implements java.io.Serializable {
    *
    */
   
-  public Vector getRescanList()
+  public Vector getRescanList(Invid objID)
   {
-    if (rescanList == null ||
-	rescanList.toString().equals("all"))
+    if (!doRescan())
       {
 	return null;
       }
 
-    Vector results = new Vector();
-    int index = 0;
-    String temp1 = rescanList.toString();
-    String temp2;
+    breakOutRescanList();
 
-    while (temp1.indexOf('|', index) != -1)
+    Object result = rescanHash.get(objID);
+
+    if (result == null || result.equals("all"))
       {
-	temp2 = temp1.substring(index, temp1.indexOf('|', index));
-
-	try
-	  {
-	    results.addElement(new Short(temp2));
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    throw new RuntimeException("bad numeric value " + temp2 + "\n" + ex.getMessage());
-	  }
-
-	// let's get the next bit
-
-	index = temp1.indexOf('|', index) + 1;
+	return null;
       }
 
-    return results;
+    return (Vector) result;
   }
 
   /**
@@ -298,52 +361,109 @@ public class ReturnVal implements java.io.Serializable {
 	buffer.append("none in this object");
       }
 
-    if (objRescanHash != null)
-      {
-	Enumeration keys = objRescanHash.keys();
-
-	while (keys.hasMoreElements())
-	  {
-	    Object key = keys.nextElement();
-	    ReturnVal retVal = (ReturnVal) objRescanHash.get(key);
-
-	    buffer.append("\nRescan info for object " + key + ":\n");
-	    buffer.append(retVal.dumpRescanInfo());
-	  }
-      }
-
     return buffer.toString();
   }
 
   /**
    *
-   * This method returns a hashtable mapping invid's to
-   * ReturnVal objects.  The intent of this is to allow
-   * a server method to make changes to a number of
-   * objects that the client might be concerned with (be
-   * currently displaying, etc.), and to provide details
-   * on status changes for those objects.<br><br>
+   * This private method converts the rescanList StringBuffer to
+   * a Hashtable (rescanHash) that maps Invid's to either Vector of
+   * Short's or "all".
    *
-   * For instance, a method might make a change on the
-   * server that would oblige the client to perform
-   * a refresh on a particular field in another object
-   * that it is displaying.  In such a case, the hashtable
-   * returned by this method would map the invid of the
-   * object to a ReturnVal that specified a list of
-   * fields to rescan.<br><br>
-   *
-   * The ReturnVal's encoded for other objects will
-   * not specify a dialog or callback.  Likewise, the
-   * success value has undefined meaning.
-   *
-   * @return null if there was no associated object returnval's
-   * specified by the server for this ReturnVal.
-   * 
    */
-  
-  public Hashtable getObjResultSet()
+
+  private void breakOutRescanList()
   {
-    return objRescanHash;
+    if (rescanHash != null)
+      {
+	return;
+      }
+
+    rescanHash = new Hashtable();
+    decodeRescanList(rescanList, rescanHash);
+  }
+
+  /**
+   *
+   * This method takes a StringBuffer encoded as follows:
+   *
+   * 263:170|all|271:131|31|57|286:41|all|310:4|134|13|92|
+   *
+   * and returns a Hashtable mapping Invid's to the rescan information
+   * for that Invid, where the rescan information will either be the
+   * String "all", indicating that all fields need to be rescanned, or
+   * a Vector of Short's specifying field id's to be rescanned for
+   * that object.
+   *
+   * @param buffer The StringBuffer to be decoded.
+   * @param original The Hashtable to put the results into.. this method
+   * will put into original the Union of the field rescan information
+   * specified in original and the rescan information held in buffer.
+   *  
+   * @return A reference to original.
+   */
+
+  private Hashtable decodeRescanList(StringBuffer buffer, Hashtable original)
+  {
+    if (buffer == null)
+      {
+	return null;
+      }
+
+    if (original == null)
+      {
+	throw new IllegalArgumentException("Can't have a null original hash.");
+      }
+
+    /* - */
+
+    int lastIndex = 0;
+    int nextIndex;
+    String tmpString = buffer.toString();
+    String atom;
+    Invid invid = null;
+
+    /* -- */
+
+    while (lastIndex < tmpString.length())
+      {
+	nextIndex = tmpString.indexOf('|', lastIndex);
+
+	atom = tmpString.substring(lastIndex, nextIndex);
+
+	if (atom.indexOf(':') != -1)
+	  {
+	    invid = new Invid(atom);
+	  }
+	else if (atom.equals("all"))
+	  {
+	    original.put(invid, atom);
+	  }
+	else
+	  {
+	    Vector vec;
+
+	    if (original.containsKey(invid) && !original.get(invid).equals("all"))
+	      {
+		vec = (Vector) original.get(invid);
+		vec.addElement(new Short(atom));
+	      }
+	    else if (!original.containsKey(invid))
+	      {
+		vec = new Vector();
+		vec.addElement(new Short(atom));
+
+		original.put(invid, vec);
+	      }
+
+	    // else we've already got 'all' specified for this invid, so we
+	    // don't need to do anything else.
+	  }
+
+	lastIndex = nextIndex + 1;
+      }
+
+    return original;
   }
 
   // ---------------------------------------------------------------------------
@@ -360,7 +480,6 @@ public class ReturnVal implements java.io.Serializable {
     this.success = success;
     this.doNormalProcessing = doNormalProcessing;
     rescanList = null;
-    objRescanHash = null;
     dialog = null;
     callback = null;
     status = NONE;
@@ -369,7 +488,6 @@ public class ReturnVal implements java.io.Serializable {
   public void clear()
   {
     rescanList = null;
-    objRescanHash = null;
     dialog = null;
     callback = null;
     status = NONE;
@@ -389,9 +507,9 @@ public class ReturnVal implements java.io.Serializable {
    *
    */
 
-  public ReturnVal unionRescan(ReturnVal retVal)
+  public synchronized ReturnVal unionRescan(ReturnVal retVal)
   {
-    if (retVal == null)
+    if ((retVal == null) || (retVal == this))
       {
 	return this;
       }
@@ -400,56 +518,75 @@ public class ReturnVal implements java.io.Serializable {
 
     if (retVal.rescanList != null)
       {
+	// if our rescanList is null, take theirs.
+
 	if (rescanList == null)
 	  {
 	    rescanList = new StringBuffer();
-	  }
-	
-	if (retVal.rescanList.toString().equals("all"))
-	  {
-	    if (debug)
-	      {
-		System.err.println("ReturnVal.unionRescan(): setting full rescan");
-	      }
-
-	    setRescanAll();
+	    rescanList.append(retVal.rescanList.toString());
 	  }
 	else
 	  {
-	    if (debug)
-	      {
-		System.err.println("ReturnVal.unionRescan(): adding field rescan buf:" +
-				   retVal.rescanList.toString());
-	      }
+	    Hashtable result = new Hashtable();
 
-	    rescanList.append(retVal.rescanList.toString());
-	  }
-      }
+	    decodeRescanList(retVal.rescanList, result);
+	    decodeRescanList(rescanList, result);
 
-    // add any rescan objects requested by retVal
-
-    if (retVal.objRescanHash != null)
-      {
-	Enumeration enum = retVal.objRescanHash.keys();
-
-	Invid objid;
-	ReturnVal otherobj;
-
-	while (enum.hasMoreElements())
-	  {
-	    objid = (Invid) enum.nextElement();
-	    otherobj = (ReturnVal) retVal.objRescanHash.get(objid);
-
-	    if (debug)
-	      {
-		System.err.println("ReturnVal.unionRescan(): adding rescan object " + objid);
-	      }
-
-	    addRescanObject(objid, otherobj);
+	    encodeRescanList(result);
 	  }
       }
 
     return this;
+  }
+
+  /**
+   *
+   * This method takes a Hashtable mapping Invid's to Vectors
+   * of Short field identifiers or the String "all" and generates
+   * the StringBuffer to be serialized down to the client.
+   *
+   */
+
+  private void encodeRescanList(Hashtable rescanTable)
+  {
+    Enumeration enum;
+    Invid invid;
+
+    /* -- */
+
+    if (rescanList == null)
+      {
+	rescanList = new StringBuffer();
+      }
+    else
+      {
+	rescanList.setLength(0);
+      }
+
+    enum = rescanTable.keys();
+
+    while (enum.hasMoreElements())
+      {
+	invid = (Invid) enum.nextElement();
+
+	rescanList.append(invid.toString());
+	rescanList.append("|");
+	
+	if (rescanTable.get(invid).equals("all"))
+	  {
+	    rescanList.append("all|");
+	  }
+	else
+	  {
+	    Vector fields = (Vector) rescanTable.get(invid);
+
+	    for (int i = 0; i < fields.size(); i++)
+	      {
+		rescanList.append(fields.elementAt(i).toString());
+		rescanList.append("|");
+	      }
+	  }
+      }
   }
 
   public void setStatus(byte status)
@@ -462,51 +599,52 @@ public class ReturnVal implements java.io.Serializable {
     this.status = status;
   }
 
-  public void setRescanAll()
+  /**
+   *
+   * This method makes a note in this ReturnVal to have the
+   * client rescan all fields in object objID.
+   *
+   */
+
+  public synchronized void setRescanAll(Invid objID)
   {
-    if (rescanList == null)
-      {
-	rescanList = new StringBuffer();
-      }
-    else
-      {
-	rescanList.setLength(0);
-      }
-
-    rescanList.append("all");
-  }
-
-  public void addRescanField(short fieldID)
-  {
-    if (rescanList == null)
-      {
-	rescanList = new StringBuffer();
-      }
-    else
-      {
-	if (rescanList.toString().equals("all"))
-	  {
-	    return;
-	  }
-      }
-
     if (debug)
       {
-	System.err.println("ReturnVal.addRescanField(" + fieldID+")");
+	System.err.println("ReturnVal.setRescanAll(" + objID + ")");
       }
 
-    rescanList.append(fieldID);
-    rescanList.append("|");
+    if (rescanList == null)
+      {
+	rescanList = new StringBuffer();
+      }
+
+    rescanList.append(objID.toString());
+    rescanList.append("|all|");
   }
 
-  public void addRescanObject(Invid objid, ReturnVal retVal)
+  /**
+   *
+   * This method makes a note in this ReturnVal to have the
+   * client rescan field fieldID in object objID.
+   *
+   */
+
+  public synchronized void addRescanField(Invid objID, short fieldID)
   {
-    if (objRescanHash == null)
+    if (debug)
       {
-	objRescanHash = new Hashtable();
+	System.err.println("ReturnVal.addRescanField(" + objID + ", " + fieldID + ")");
       }
 
-    objRescanHash.put(objid, retVal);
+    if (rescanList == null)
+      {
+	rescanList = new StringBuffer();
+      }
+
+    rescanList.append(objID.toString());
+    rescanList.append("|");
+    rescanList.append(fieldID);
+    rescanList.append("|");
   }
 
   public void setCallback(Ganymediator callback)
