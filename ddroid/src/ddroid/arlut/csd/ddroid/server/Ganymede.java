@@ -733,9 +733,11 @@ public class Ganymede {
       {
 	debug(ts.l("main.info_setup_okay"));
       }
-
+    
+    /*
     jythonServer = new JythonServer();
     jythonServer.run();
+    */
     
     debug(ts.l("main.info_ready"));
   }
