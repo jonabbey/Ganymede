@@ -9,8 +9,8 @@
 
    Created: 6 May 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/29 00:55:50 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/03/29 02:03:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -376,8 +376,10 @@ public class rpcpass implements ClientListener {
 	catch (RemoteException ex)
 	  {
 	  }
-
-	System.exit(0);
+	finally
+	  {
+	    System.exit(0);
+	  }
       }
   }
 
