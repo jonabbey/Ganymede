@@ -7,7 +7,7 @@ CHANGES
 
 RELEASE DATE: March ??, 2001
 
-1.[SERVER] Made server do server-side cleanup for abnormally stuck clients
+1.[SERVER] Made server do better server-side cleanup for stuck clients
 
 The RMI system has the ability to get into a state where a TCP/IP
 handling thread waits indefinitely for communication from a client.
@@ -32,6 +32,24 @@ about hanging disconnect threads clogging up the server.
 The server and admin console now collaborate to display the amount of
 free memory and the total amount of memory taken up by the server, to
 be updated once a minute by a new Memory Status Updater task.
+
+3. [SERVER] Added the garbage collection task back in
+
+I added back in the on-demand garbage collection task, which is an
+interesting thing to play with now that the admin console shows memory
+usage on the server.  It looks like System.gc() doesn't do much of
+anything under the HotSpot server VM.  Not too surprising, as the
+HotSpot server VM is already optimized for continual, incremental
+garbage collection.
+
+4. [SERVER] Cleaned up setLastEvent() usage in GanymedeSession
+
+I cleaned up usage of the diagnostic setLastEvent() stuff in
+GanymedeSession.  Viewing or editing objects that contain embedded
+objects will no longer cause notification for the embedded stuff to be
+sent to the client.  In addition, all setLastEvent()-style
+notification for non-interactive sessions has been turned off, to
+reduce the overhead during XML bulk-loading.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
