@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/04/14 19:04:03 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/07/15 01:06:04 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -64,7 +64,6 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>A simple customizable dialog with support for a variety of data
  * field components.</p>
  *
@@ -78,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.52 $ $Date: 1999/04/14 19:04:03 $ $Name:  $
+ * @version $Revision: 1.53 $ $Date: 1999/07/15 01:06:04 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -359,7 +358,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	if (debug)
 	  {
-	    System.out.println("null objects vector");
+	    System.err.println("null objects vector");
 	  }
 
 	pack();
@@ -372,7 +371,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	if (debug)
 	  {
-	    System.out.println("no fields to add to StringDialog");
+	    System.err.println("no fields to add to StringDialog");
 	  }
 
 	pack();
@@ -385,14 +384,14 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 	if (debug)
 	  {
-	    System.out.println("number: " + numberOfObjects + " current: " + i);
+	    System.err.println("number: " + numberOfObjects + " current: " + i);
 	  }
 
 	if (element instanceof stringThing)
 	  {
 	    if (debug)
 	      {
-		System.out.println("Adding string field(JstringField)");
+		System.err.println("Adding string field(JstringField)");
 	      }
 		    
 	    stringThing st = (stringThing) element;
@@ -424,7 +423,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.out.println("Adding date field(JdateField)");
+		System.err.println("Adding date field(JdateField)");
 	      }
 		    
 	    dateThing dt = (dateThing) element;
@@ -477,16 +476,20 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.out.println("Adding password field(JpasswordField)");
+		System.err.println("Adding password field(JpasswordField)");
 	      }
 
 	    passwordThing pt = (passwordThing)element;
+
+	    // new password, so we're not trying to validate against
+	    // an existing password.. we'll want to give the user a
+	    // double password field so that they can validate
 
 	    if (pt.isNew())
 	      {
 		if (debug)
 		  {
-		    System.out.println("This password is new.");
+		    System.err.println("This password is new.");
 		  }
 
 		JpassField sf = new JpassField(null, true, 10,100,true);
@@ -499,7 +502,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		if (debug)
 		  {
-		    System.out.println("This password is not new.");
+		    System.err.println("This password is not new.");
 		  }
 
 		JpasswordField sf = new JpasswordField();
@@ -515,7 +518,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.out.println("Adding boolean field (JcheckboxField)");
+		System.err.println("Adding boolean field (JcheckboxField)");
 	      }
 
 	    booleanThing bt = (booleanThing)element;
@@ -531,7 +534,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.out.println("Adding choice field (JComboBox)");
+		System.err.println("Adding choice field (JComboBox)");
 	      }
 
 	    choiceThing ct = (choiceThing)element;
@@ -540,21 +543,21 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 	    if (debug)
 	      {
-		System.out.println("Getting choice lists");
+		System.err.println("Getting choice lists");
 	      }
 
 	    Vector items = ct.getItems();
 
 	    if (debug)
 	      {
-		System.out.println("Got choice lists");
+		System.err.println("Got choice lists");
 	      }
 
 	    if (items == null)
 	      {
 		if (debug)
 		  {
-		    System.out.println("Nothing to add to Choice, empty vector");
+		    System.err.println("Nothing to add to Choice, empty vector");
 		  }
 	      }
 	    else
@@ -583,7 +586,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  }
 	else
 	  {
-	    System.out.println("StringDialog constructor: Item " + i + " is of unknown type");
+	    System.err.println("StringDialog constructor: Item " + i + " is of unknown type");
 	  }
       }
 
@@ -617,7 +620,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	
 	if (debug)
 	  {
-	    System.out.println("Checking component: " + c);
+	    System.err.println("Checking component: " + c);
 	  }
 	
 	if (c instanceof JstringField)
@@ -653,7 +656,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.out.println("This is a JpasswordField, number " + i);
+		System.err.println("This is a JpasswordField, number " + i);
 	      }
 	    
 	    JpasswordField pf = (JpasswordField) c;
@@ -708,7 +711,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
     if (debug)
       {
-	System.out.println("Done invoking.");
+	System.err.println("Done invoking.");
       }
 
     return valueHash;
@@ -755,7 +758,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	
 	if (debug)
 	  {
-	    System.out.println("Loading value for field: " + label);
+	    System.err.println("Loading value for field: " + label);
 	  }
 
 	try
@@ -775,6 +778,12 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    else if (c instanceof JpasswordField)
 	      {
 		JpasswordField pf = (JpasswordField) c;
+	    
+		valueHash.put(label, new String(pf.getPassword()));
+	      }
+	    else if (c instanceof JpassField)
+	      {
+		JpassField pf = (JpassField) c;
 	    
 		valueHash.put(label, new String(pf.getPassword()));
 	      }

@@ -5,8 +5,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:03:59 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/07/15 01:06:04 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -530,7 +530,6 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       }
   }
   
-
   public void keyPressed(KeyEvent e) {}
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e)
@@ -546,8 +545,5 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	    
 	  }
       }
-    
   }
-
-
 }

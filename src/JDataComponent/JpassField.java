@@ -3,8 +3,8 @@
    
    Created: 22 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:03:59 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/07/15 01:06:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,7 +59,7 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *  JpassField serves as an abstract base class for all Fields that use textfields.
+ *  <p>JpassField serves as a base class for all Fields that use textfields.
  *  The subclasses of this class should be used.
  */
 
@@ -88,6 +88,8 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
   String
     value1 = null,
     value2 = null;
+
+  String validatedPass = null;
 
   /* -- */
 
@@ -301,9 +303,11 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
 	if ((value1 != null) && (value2 != null) && (value1.equals(value2)))
 	  {
+	    validatedPass = value2;
+
 	    try
 	      {
-		if (!my_parent.setValuePerformed(new JValueObject(this, value1)))
+		if (my_parent != null && !my_parent.setValuePerformed(new JValueObject(this, value1)))
 		  {
 		    if (debug)
 		      {
@@ -351,6 +355,7 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 	    field2.setText(null);
 	    value1 = null;
 	    value2 = null;
+	    validatedPass = null;
 
 	    return false;
 	  }
@@ -365,10 +370,16 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
     return true;
   }
 
-  ///////////////////
-  // Class Methods //
-  ///////////////////
+  /**
+   * <p>Returns the plain text password if it has been
+   * validly set.</p>
+   */
 
+  public String getPassword()
+  {
+    return validatedPass;
+  }
+  
   /**
    *  returns true if the value in the JpassField has 
    *  been modified.
