@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -688,13 +688,13 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	// Wizard check
 	
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -916,13 +916,13 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -1065,13 +1065,13 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -1186,13 +1186,13 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1596,13 +1596,13 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 	
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -1736,13 +1736,13 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -1851,13 +1851,13 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -2089,13 +2089,13 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (newRetVal != null)
+	if (retVal != null && !retVal.doNormalProcessing)
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
       }
 
@@ -2140,13 +2140,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (getFieldDef().isEditInPlace())
 	  {
-	    retVal = eObj.getSession().deleteDBObject(remote);
+	    newRetVal = eObj.getSession().deleteDBObject(remote);
 	  }
 
-	if (retVal != null && !retVal.didSucceed())
+	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
 	    eObj.getSession().rollback(checkKey);
-	    return retVal;	// go ahead and return our error code
+	    return newRetVal;	// go ahead and return our error code
 	  }
 
 	// success
