@@ -6,7 +6,7 @@
    BSD passwd, master.passwd, and group files.
    
    Created: 30 July 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -95,6 +95,30 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 	catch (IOException ex)
 	  {
 	    System.err.println("BSDBuilderTask.builderPhase1(): couldn't open master.passwd file: " + ex);
+	  }
+	
+	if (out != null)
+	  {
+	    DBObject user;
+	    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+	    while (users.hasMoreElements())
+	      {
+		user = (DBObject) users.nextElement();
+
+		writeMasterUserLine(user, out);
+	      }
+
+	    out.close();
+	  }
+
+	try
+	  {
+	    out = openOutFile(path + "passwd");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("BSDBuilderTask.builderPhase1(): couldn't open passwd file: " + ex);
 	  }
 	
 	if (out != null)
@@ -268,7 +292,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
    *
    * The lines in this file look like the following.
    *
-   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
+   * broccol:*:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
@@ -276,6 +300,128 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
    */
 
   private void writeUserLine(DBObject object, PrintWriter writer)
+  {
+    String username;
+    int uid;
+    int gid;
+    String name;
+    String room;
+    String officePhone;
+    String homePhone;
+    String directory;
+    String shell;
+
+    Vector invids;
+    Invid groupInvid;
+    DBObject group;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
+
+    uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
+
+    // get the gid
+    
+    groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
+
+    if (groupInvid == null)
+      {
+	System.err.println("BSDBuilder.writeUserLine(): null gid for user " + username);
+	gid = -1;
+      }
+    else
+      {
+	group = getObject(groupInvid);
+
+	if (group == null)
+	  {
+	    System.err.println("BSDBuilder.writeUserLine(): couldn't get reference to home group");
+
+	    gid = -1;
+	  }
+	else
+	  {
+	    Integer gidInt = (Integer) group.getFieldValueLocal(groupSchema.GID);
+
+	    if (gidInt == null)
+	      {
+		System.err.println("BSDBuilder.writeUserLine(): couldn't get gid value");
+
+		gid = -1;
+	      }
+	    else
+	      {
+		gid = gidInt.intValue();
+	      }
+	  }
+      }
+
+    name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+    room = (String) object.getFieldValueLocal(userSchema.ROOM);
+    officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
+    homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
+    directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
+    shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+
+    // now build our output line
+
+    result.append(username);
+    result.append(":*:");	// don't write out the passwd, assume shadow use.
+    result.append(Integer.toString(uid));
+    result.append(":");
+    result.append(Integer.toString(gid));
+    result.append(":");
+    result.append(name);
+
+    if (room != null && !room.equals(""))
+      {
+	result.append(",");
+	result.append(room);
+      }
+
+    if (homePhone != null && !officePhone.equals(""))
+      {
+	result.append(",");
+	result.append(officePhone);
+      }
+
+    if (homePhone != null && !homePhone.equals(""))
+      {
+	result.append(",");
+	result.append(homePhone);
+      }
+
+    result.append(":");
+    result.append(directory);
+    result.append(":");
+    result.append(shell);
+
+    if (result.length() > 1024)
+      {
+	System.err.println("BSDBuilder.writeUserLine(): Warning!  user " + 
+			   username + " overflows the BSD line length!");
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a line to the master.passwd BSD source file.
+   *
+   * The lines in this file look like the following.
+   *
+   * broccol:393T6k3e/9/w2:12003:12010:user:0:0:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   *
+   */
+
+  private void writeMasterUserLine(DBObject object, PrintWriter writer)
   {
     String username;
     String cryptedPass;
@@ -310,7 +456,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-	System.err.println("BSDBuilder.writeUserLine(): null password for user " + username);
+	System.err.println("BSDBuilder.writeMasterUserLine(): null password for user " + username);
 	cryptedPass = "**Nopass**";
       }
 
@@ -322,7 +468,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 
     if (groupInvid == null)
       {
-	System.err.println("BSDBuilder.writeUserLine(): null gid for user " + username);
+	System.err.println("BSDBuilder.writeMasterUserLine(): null gid for user " + username);
 	gid = -1;
       }
     else
@@ -331,7 +477,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 
 	if (group == null)
 	  {
-	    System.err.println("BSDBuilder.writeUserLine(): couldn't get reference to home group");
+	    System.err.println("BSDBuilder.writeMasterUserLine(): couldn't get reference to home group");
 
 	    gid = -1;
 	  }
@@ -341,7 +487,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 
 	    if (gidInt == null)
 	      {
-		System.err.println("BSDBuilder.writeUserLine(): couldn't get gid value");
+		System.err.println("BSDBuilder.writeMasterUserLine(): couldn't get gid value");
 
 		gid = -1;
 	      }
@@ -404,7 +550,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("BSDBuilder.writeGroupLine(): Warning!  user " + 
+	System.err.println("BSDBuilder.writeMasterUserLine(): Warning!  user " + 
 			   username + " overflows the BSD line length!");
       }
 
