@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,8 +52,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   DBSession session;
 
+  DBObjectBase personaBase = null;
   Date personaTimeStamp;
   DBObject personaObj;		// our current persona object
+
+  DBObjectBase permBase = null;
+  Date permTimeStamp;
+  DBObject selfPermObj;
+  PermMatrix selfPerm = null;
+
+  Invid selfPermissionObjectInvid = new Invid(SchemaConstants.PermBase,
+					      SchemaConstants.PermSelfUserObj);
   Invid personaInvid;
   Invid userInvid;
 
@@ -785,8 +794,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients, or to subsequent queries and view_db_object() calls by
-   * this client.
+   * clients.
    *
    * If the transaction cannot be committed for some reason,
    * commitTransaction() will instead abort the transaction.  In any
@@ -898,6 +906,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Ganymede.debug("Processing dump query");
     Ganymede.debug("Searching for matching objects of type " + base.getName());
+
+    // if we're an end user looking at the user base, we'll want to be able to see
+    // the fields that the user could see for his own record
+
+    if (!supergashMode && userInvid != null && 
+	base.getTypeID() == SchemaConstants.UserBase)
+      {
+	update_selfPerm();
+      }
     
     if (embedded)
       {
@@ -915,7 +932,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     baseLock.addElement(base);
 
-    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+    Ganymede.debug("dump(): " + username + " : opening read lock on " + base.getName());
 
     try
       {
@@ -927,7 +944,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;		// we're probably being booted off
       }
 
-    Ganymede.debug("Query: " + username + " : got read lock");
+    Ganymede.debug("dump(): " + username + " : got read lock");
 
     // Figure out which fields we want to return
 
@@ -948,12 +965,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  }
 		else
 		  {
+		    // if selfPerm isn't null, we're going to want to check to see if what fields
+		    // the user would be able to see of this object type.. even though selfPerms
+		    // are only intended to apply to the user's own object record, we need to
+		    // get those fields enabled here so that when we later come across the user's
+		    // own record, we'll be able to properly dump it.
+
 		    if (getPerm(base.getTypeID(), field.getID()).isVisible())
 		      {
 			fieldDefs.addElement(field);
 		      }
+		    else if (selfPerm != null && selfPerm.getPerm(base.getTypeID(), field.getID()).isVisible())
+		      {
+			fieldDefs.addElement(field);
+		      }
 		  }
-
 	      }
 	  }
 	else if (query.permitList.get(field.getKey()) != null)
@@ -964,7 +990,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
+		// if selfPerm isn't null, we're going to want to check to see if what fields
+		// the user would be able to see of this object type.. even though selfPerms
+		// are only intended to apply to the user's own object record, we need to
+		// get those fields enabled here so that when we later come across the user's
+		// own record, we'll be able to properly dump it.
+		
 		if (getPerm(base.getTypeID(), field.getID()).isVisible())
+		  {
+		    fieldDefs.addElement(field);
+		  }
+		else if (selfPerm != null && selfPerm.getPerm(base.getTypeID(), field.getID()).isVisible())
 		  {
 		    fieldDefs.addElement(field);
 		  }
@@ -977,144 +1013,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result = new DumpResult(fieldDefs);
 
-    enum = base.objectHash.keys();
+    QueryResult temp_result = queryDispatch(query, false, false);
 
-    // need to check in here to see if we've had the lock yanked
+    /* -- */
 
-    while (session.isLocked(rLock) && enum.hasMoreElements())
+    if (temp_result != null)
       {
-	key = (Integer) enum.nextElement();
-	obj = (DBObject) base.objectHash.get(key);
+	Invid invid;
 
-	// since we're accessing obj from the objectBase hash directly,
-	// permission checking won't be done here.. this means that
-	// the query handler could match on a field that we wouldn't
-	// actually have access to.. this will need to be dealt with.
-
-	if (DBQueryHandler.matches(query, obj))
-	  {
-	    if (embedded)
-	      {
-		while ((obj != null) && 
-		       obj.isEmbedded() && 
-		       (obj.getTypeID() != containingBase.getTypeID()))
-		  {
-		    dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
-		    obj = (DBObject) view_db_object((Invid) dbf.getValue());
-		  }
-
-		if (obj.getTypeID() != containingBase.getTypeID())
-		  {
-		    // wrong container type
-
-		    Ganymede.debug("Error, couldn't find parent of proper type");
-		    continue;	// try next match
-		  }
-
-		if (obj == null)
-		  {
-		    Ganymede.debug("Error, couldn't find a containing object for an embedded query");
-		    continue;	// try next match
-		  }
-	      }
-
-	    if (supergashMode)
-	      {
-		if (!query.filtered || filterMatch(obj))
-		  {
-		    DBEditObject x;
-
-		    if (session.isTransactionOpen())
-		      {
-			x = session.editSet.findObject(obj.getInvid());
-
-			if (x == null)
-			  {
-			    result.addRow(obj, this);
-			  }
-			else
-			  {
-			    if (x.getStatus() != ObjectStatus.DELETING &&
-				x.getStatus() != ObjectStatus.DROPPING)
-			      {
-				result.addRow(x, this);
-			      }
-			  }
-		      }
-		    else
-		      {
-			result.addRow(obj, this);
-		      }
-		  }
-	      } 
-	    else
-	      {
-		PermEntry perm;
-
-		/* -- */
-
-		perm = getPerm(obj);
-
-		if ((!query.editableOnly && perm.isVisible()) ||
-		    (query.editableOnly && perm.isEditable()))
-		  {
-		    if (!query.filtered || filterMatch(obj))
-		      {
-			DBEditObject x;
-
-			if (session.isTransactionOpen())
-			  {
-			    x = session.editSet.findObject(obj.getInvid());
-
-			    if (x == null)
-			      {
-				result.addRow(obj, this);
-			      }
-			    else
-			      {
-				if (x.getStatus() != ObjectStatus.DELETING &&
-				    x.getStatus() != ObjectStatus.DROPPING)
-				  {
-				    result.addRow(x, this);
-				  }
-			      }
-			  }
-			else
-			  {
-			    result.addRow(obj, this);
-			  }
-		      }
-		  }
-	      }
-	  }
-      }
-
-    if (!session.isLocked(rLock))
-      {
-	setLastError("lock interrupted");
-	return null;
-      }
-
-    if (session.isTransactionOpen())
-      {
-	enum = session.editSet.objects.elements();
-
-	DBEditObject x;
+	enum = temp_result.invidHash.keys();
 
 	while (enum.hasMoreElements())
 	  {
-	    x = (DBEditObject) enum.nextElement();
+	    invid = (Invid) enum.nextElement();
 
-	    if (x.getStatus() == ObjectStatus.CREATING)
-	      {
-		result.addRow(x, this);
-	      }
+	    result.addRow(session.viewDBObject(invid), this);
 	  }
       }
-    
-    session.releaseReadLock(rLock);
-
-    Ganymede.debug("Query: " + username + " : released read lock");
 
     return result;
   }
@@ -1133,7 +1048,58 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized QueryResult query(Query query)
   {
-    QueryResult result = new QueryResult();
+    return queryDispatch(query, false, true);
+  }
+
+  /**
+   *
+   * This method provides the hook for doing all
+   * manner of internal object listing for the Ganymede
+   * database.  Unfiltered.
+   *
+   * @see arlut.csd.ganymede.Query
+   * @see arlut.csd.ganymede.Result
+   */
+
+  public synchronized Vector internalQuery(Query query)
+  {
+    Vector result = new Vector();
+    QueryResult internalResult = queryDispatch(query, true, false);
+    Invid key;
+    String val;
+    Enumeration enum;
+
+    /* -- */
+
+    if (internalResult != null)
+      {
+	enum = internalResult.invidHash.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    key = (Invid) enum.nextElement();
+	    val = (String) internalResult.invidHash.get(key);
+
+	    result.addElement(new Result(key, val));
+	  }
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This method is the primary Query engine for the Ganymede
+   * databases
+   *
+   * @param query The query to be handled
+   * @param internal Should the query filter setting be honored?
+   *
+   */
+
+  public synchronized QueryResult queryDispatch(Query query, boolean internal, boolean forTransport)
+  {
+    QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
     DBObjectBase containingBase = null;
     Vector baseLock = new Vector();
@@ -1202,6 +1168,80 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	Ganymede.debug("Query on non-embedded type");
       }
 
+    // are we able to optimize the query into a direct lookup?
+
+    if ((query.root instanceof QueryDataNode) &&
+	((QueryDataNode) query.root).comparator == QueryDataNode.EQUALS)
+      {
+	// we have a simple search for value == query.. is the field
+	// being checked hashed in a namespace?
+
+	QueryDataNode node = (QueryDataNode) query.root;
+	DBObjectBaseField fieldDef;
+
+	/* -- */
+
+	if (node.fieldId != -1)
+	  {
+	    fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+	  }
+	else if (node.fieldname != null)
+	  {
+	    fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+	  }
+	else
+	  {
+	    setLastError("Couldn't find field identifier in query optimizer");
+	    return null;
+	  }
+
+	if (fieldDef.namespace != null)
+	  {
+	    // aha!  We've got an optimized case!
+	    
+	    System.err.println("Eureka!  Optimized query!");
+
+	    DBObject resultobject;
+	    DBNameSpace ns = fieldDef.namespace;
+	    DBField resultfield = ns.lookup(node.value);
+
+	    /* -- */
+
+	    if (resultfield == null)
+	      {
+		return result;	// no result
+	      }
+	    else
+	      {
+		// a namespace can map across different field and
+		// object types.. make sure we've got an instance of
+		// the right kind of field
+
+		if (resultfield.definition != fieldDef)
+		  {
+		    return result; // no match
+		  }
+
+		resultobject = resultfield.owner;
+	      }
+		    
+	    // Note that the namespace could point us into an object that
+	    // is currently checked out by another transaction.. make sure
+	    // that we have the right to see this object
+	    
+	    synchronized (resultobject)
+	      {
+		if (!(resultobject instanceof DBEditObject) ||
+		    (session != null && resultobject.editset != null &&
+		     resultobject.editset.equals(session.editSet)))
+		  {
+		    addResultRow(resultobject, query, result, internal);
+		    return result;
+		  }
+	      }
+	  }
+      }
+
     baseLock.addElement(base);
 
     Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
@@ -1246,202 +1286,139 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  }
 	      }
 
-	    if (supergashMode)
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
-		  }
-
-		if (!query.filtered || filterMatch(obj))
-		  {
-		    DBEditObject x;
-
-		    if (session.isTransactionOpen())
-		      {
-			x = session.editSet.findObject(obj.getInvid());
-
-			if (x == null)
-			  {
-			    result.addRow(obj);
-			  }
-			else
-			  {
-			    if (x.getStatus() != ObjectStatus.DELETING &&
-				x.getStatus() != ObjectStatus.DROPPING)
-			      {
-				result.addRow(x);
-			      }
-			  }
-		      }
-		    else
-		      {
-			result.addRow(obj);
-		      }
-		  }
-	      } 
-	    else
-	      {
-		perm = getPerm(obj);
-
-		if ((!query.editableOnly && perm.isVisible()) ||
-		    (query.editableOnly && perm.isEditable()))
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
-		      }
-			
-		    if (!query.filtered || filterMatch(obj))
-		      {
-			DBEditObject x;
-
-			if (session.isTransactionOpen())
-			  {
-			    x = session.editSet.findObject(obj.getInvid());
-
-			    if (x == null)
-			      {
-				result.addRow(obj);
-			      }
-			    else
-			      {
-				if (x.getStatus() != ObjectStatus.DELETING &&
-				    x.getStatus() != ObjectStatus.DROPPING)
-				  {
-				    result.addRow(x);
-				  }
-			      }
-			  }
-			else
-			  {
-			    result.addRow(obj);
-			  }
-		      }
-		  }
-	      }
+	    addResultRow(obj, query, result, internal);
 	  }
       }
 
-    if (!session.isLocked(rLock))
-      {
-	setLastError("lock interrupted");
-	return null;
-      }
+    session.releaseReadLock(rLock);
+
+    Ganymede.debug("Query: " + username + " : completed query over primary hash, releasing read lock");
+
+    // find any objects created or being edited in the current transaction that
+    // match our criteria
 
     if (session.isTransactionOpen())
       {
-	enum = session.editSet.objects.elements();
+	Ganymede.debug("Query: " + username + " : scanning intratransaction objects");
 
-	DBEditObject x;
-
-	while (enum.hasMoreElements())
+	synchronized(session.editSet)
 	  {
-	    x = (DBEditObject) enum.nextElement();
+	    enum = session.editSet.objects.elements();
 
-	    if (x.getStatus() == ObjectStatus.CREATING)
+	    DBEditObject x;
+
+	    while (enum.hasMoreElements())
 	      {
-		result.addRow(x);
+		x = (DBEditObject) enum.nextElement();
+
+		// don't consider objects we already have stored in the result
+
+		if (result.containsInvid(x.getInvid()))
+		  {
+		    continue;
+		  }
+
+		if (x.getStatus() == ObjectStatus.CREATING ||
+		    x.getStatus() == ObjectStatus.EDITING)
+		  {
+		    if (DBQueryHandler.matches(query, x))
+		      {
+			obj = x;
+
+			if (embedded)
+			  {
+			    while ((obj != null) && 
+				   obj.isEmbedded() && 
+				   (obj.getTypeID() != containingBase.getTypeID()))
+			      {
+				dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
+				obj = (DBObject) view_db_object((Invid) dbf.getValue());
+			      }
+			
+			    if (obj == null)
+			      {
+				Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+				continue;	// try next match
+			      }
+			  }
+
+			addResultRow(obj, query, result, internal);
+		      }
+		  }
 	      }
 	  }
+
+	Ganymede.debug("Query: " + username + " : completed scanning intratransaction objects");
       }
     
-    session.releaseReadLock(rLock);
-
-    Ganymede.debug("Query: " + username + " : released read lock");
-
     return result;
   }
 
-  /**
-   *
-   * This method provides the hook for doing all
-   * manner of internal object listing for the Ganymede
-   * database.  Unfiltered.
-   *
-   * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
-   */
-
-  public synchronized Vector internalQuery(Query query)
+  private final void addResultRow(DBObject obj, Query query, QueryResult result, boolean internal)
   {
-    Vector result = new Vector();
-    DBObjectBase base = null;
-    Vector baseLock = new Vector();
-    Enumeration enum;
-    Integer key;
-    DBObject obj;
-    DBReadLock rLock;
+    PermEntry perm;
 
     /* -- */
 
-    if (query == null)
+    if (!supergashMode && !internal)
       {
-	setLastError("null query");
-	return null;
-      }
+	perm = getPerm(obj);
 
-    // objectType will be -1 if the query is specifying the
-    // base with the base's name
-
-    if (query.objectType != -1)
-      {
-	base = Ganymede.db.getObjectBase(query.objectType);
-      }
-    else if (query.objectName != null)
-      {
-	base = Ganymede.db.getObjectBase(query.objectName);
-      }
-
-    if (base == null)
-      {
-	setLastError("No such base");
-	return null;
-      }
-
-    baseLock.addElement(base);
-
-    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
-
-    try
-      {
-	rLock = session.openReadLock(baseLock);	// wait for it
-      }
-    catch (InterruptedException ex)
-      {
-	setLastError("lock interrupted");
-	return null;		// we're probably being booted off
-      }
-
-    Ganymede.debug("Query: " + username + " : got read lock");
-
-    enum = base.objectHash.keys();
-
-    // need to check in here to see if we've had the lock yanked
-
-    while (session.isLocked(rLock) && enum.hasMoreElements())
-      {
-	key = (Integer) enum.nextElement();
-	obj = (DBObject) base.objectHash.get(key);
-
-	if (DBQueryHandler.matches(query, obj))
+	if ((query.editableOnly || !perm.isVisible()) &&
+	    (!query.editableOnly || !perm.isEditable()))
 	  {
-	    //	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
-	    result.addElement(new Result(obj.getInvid(), obj.getLabel()));
+	    return;		// permissions prohibit us from adding this result
 	  }
       }
 
-    if (!session.isLocked(rLock))
+    if (debug)
       {
-	setLastError("lock interrupted");
-	return null;
+	Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
       }
     
-    session.releaseReadLock(rLock);
+    if (internal || !query.filtered || filterMatch(obj))
+      {
+	DBEditObject x;
+	
+	if (session.isTransactionOpen())
+	  {
+	    // Do we have a version of this object checked out?
 
-    Ganymede.debug("Query: " + username + " : released read lock");
+	    x = session.editSet.findObject(obj.getInvid());
 
-    return result;
+	    if (x == null)
+	      {
+		// nope, go ahead and return the object as we found it in the
+		// main hash
+		
+		result.addRow(obj);
+	      }
+	    else
+	      {
+		// yup we found it.. if we are deleting or dropping it, we don't want 
+		// to return it
+		
+		if (x.getStatus() != ObjectStatus.DELETING &&
+		    x.getStatus() != ObjectStatus.DROPPING)
+		  {
+		    // ok, we're editing it or creating it.. now, does it still meet
+		    // the search criteria?
+		    
+		    if (DBQueryHandler.matches(query, x))
+		      {
+			result.addRow(x);
+		      }
+		  }
+	      }
+	  }
+	else
+	  {
+	    // we don't have a transaction open, so there's no worry about us
+	    // having a different version of the object open in our transaction
+	    
+	    result.addRow(obj);
+	  }
+      }
   }
 
   /**
@@ -1846,6 +1823,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     PermEntry result;
     DBObject localObj;
+    boolean useSelfPerm = false;
 
     /* -- */
 
@@ -1858,6 +1836,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	return PermEntry.fullPerms;
       }
+    
+    // if we're looking at an embedded object, lets cascade up and find the top-level
+    // ancestor
 
     localObj = object;
 
@@ -1890,32 +1871,48 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!personaMatch(localObj))
       {
-	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
+	// nope, so look to our default permissions
 
 	result = defaultPerms.getPerm(localObj.getTypeID());
+      }
+    else
+      {
+	// yup, use our persona's permissions
+	
+	result = personaPerms.getPerm(localObj.getTypeID());
+      }
 
-	if (result == null)
+    // if we are operating on behalf of an end user and the object in
+    // question happens to be that user's record, we may gain some
+    // permissions for this object
+
+    if (userInvid != null && userInvid.equals(localObj.getInvid()))
+      {
+	update_selfPerm();
+	useSelfPerm = true;
+      }
+
+    if (result == null)
+      {
+	if (useSelfPerm && selfPerm != null)
+	  {
+	    return selfPerm.getPerm(localObj.getTypeID());
+	  }
+	else
 	  {
 	    return PermEntry.noPerms;
+	  }
+      }
+    else
+      {
+	if (useSelfPerm && selfPerm != null)
+	  {
+	    return selfPerm.getPerm(localObj.getTypeID()).union(result);
 	  }
 	else
 	  {
 	    return result;
 	  }
-      }
-
-    // ok, we know our persona has ownership.. return the
-    // permission entry for this object
-
-    result = personaPerms.getPerm(localObj.getTypeID());
-
-    if (result == null)
-      {
-	return PermEntry.noPerms;
-      }
-    else
-      {
-	return result;
       }
   }
 
@@ -1933,6 +1930,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     PermEntry objPerm;
     PermEntry result;
+    DBObject localObj;
+    boolean useSelfPerm = false;
 
     /* -- */
 
@@ -1946,39 +1945,93 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return PermEntry.fullPerms;
       }
 
-    objPerm = getPerm(object);
+    // if we're looking at an embedded object, lets cascade up and find the top-level
+    // ancestor
+
+    localObj = object;
+
+    while (localObj != null && localObj.isEmbedded())
+      {
+	InvidDBField inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField); // container
+
+	if (inf == null)
+	  {
+	    setLastError("getPerm() error.. couldn't find owner of embedded object " + object.getLabel());
+	  }
+
+	Invid inv = (Invid) inf.getValueLocal();
+
+	if (inv == null)
+	  {
+	    setLastError("getPerm() error <2>.. couldn't find owner of embedded object " + object.getLabel());
+	  }
+
+	localObj = session.viewDBObject(inv);
+      }
+
+    if (localObj == null)
+      {
+	setLastError("getPerm() error <3>.. couldn't find owner of embedded object" + object.getLabel());
+      }
+
+    // look to see if we have permissions set for the object.. this will
+    // be our default permissions for each field in the object unless
+    // we have an explicit other permission for the field
+
+    objPerm = getPerm(localObj);
 
     // is our current persona an owner of this object in some
     // fashion?
 
-    if (!personaMatch(object))
+    if (!personaMatch(localObj))
       {
 	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
 
-	result = defaultPerms.getPerm(object.getTypeID(), fieldId);
+	result = defaultPerms.getPerm(localObj.getTypeID(), fieldId);
+      }
+    else
+      {
+	// ok, we know our persona has ownership.. return the
+	// permission entry for this object
+	
+	result = personaPerms.getPerm(localObj.getTypeID(), fieldId);
+      }
 
-	if (result == null)
+    // if we are operating on behalf of an end user and the object in
+    // question happens to be that user's record, we may gain some
+    // permissions for this object
+
+    if (userInvid != null && userInvid.equals(localObj.getInvid()))
+      {
+	update_selfPerm();
+	useSelfPerm = true;
+      }
+
+    if (result == null)
+      {
+	if (useSelfPerm && selfPerm != null)
 	  {
-	    return PermEntry.noPerms;
+	    // System.err.println("getPerm(2): Returning self permission access for user's object, field: " + fieldId);
+
+	    return selfPerm.getPerm(localObj.getTypeID(), fieldId);
+	  }
+	else
+	  {
+	    return objPerm;
+	  }
+      }
+    else
+      {
+	if (useSelfPerm && selfPerm != null)
+	  {
+	    // System.err.println("getPerm(2): Returning union and intersection of self permission access, field: " + fieldId);
+
+	    return selfPerm.getPerm(localObj.getTypeID(), fieldId).union(result).intersection(objPerm);
 	  }
 	else
 	  {
 	    return result.intersection(objPerm);
 	  }
-      }
-
-    // ok, we know our persona has ownership.. return the
-    // permission entry for this object
-
-    result = personaPerms.getPerm(object.getTypeID(), fieldId);
-
-    if (result == null)
-      {
-	return PermEntry.noPerms;
-      }
-    else
-      {
-	return result.intersection(objPerm);
       }
   }
 
@@ -2069,6 +2122,52 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
+   * This method insures that an up-to-date copy of the selfPermObj
+   * permission object is loaded to provide the getPerm() methods with
+   * the ability to rapidly verify a user's permission to view himself.
+   *
+   */
+  
+  private final synchronized void update_selfPerm()
+  {
+    if (permBase == null)
+      {
+	permBase = Ganymede.db.getObjectBase(SchemaConstants.PermBase);
+      }
+
+    if (permTimeStamp == null || !permTimeStamp.before(permBase.lastChange))
+      {
+	selfPermObj = session.viewDBObject(selfPermissionObjectInvid);
+
+	PermissionMatrixDBField field = (PermissionMatrixDBField) selfPermObj.getField(SchemaConstants.PermMatrix);
+
+	if (field == null)
+	  {
+	    System.err.println("update_selfPerm(): Error: no PermMatrix field in selfperm object");
+	  }
+	else
+	  {
+	    selfPerm = field.getMatrix();
+	    
+	    if (selfPerm == null)
+	      {
+		System.err.println("update_selfperm(): Error: PermMatrix field's value is null in selfperm object");
+	      }
+	  }
+	
+	if (permTimeStamp == null)
+	  {
+	    permTimeStamp = new Date();
+	  }
+	else
+	  {
+	    permTimeStamp.setTime(System.currentTimeMillis());
+	  }
+      }
+  }
+
+  /**
+   *
    * This non-exported method is used to generate a comprehensive permissions
    * matrix that applies to all objects owned by the active persona for this
    * user.
@@ -2077,128 +2176,148 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   final synchronized void updatePerms()
   {
-    DBObjectBase personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
-
-    /* -- */
-
-    if (personaTimeStamp == null || personaTimeStamp.before(personaBase.lastChange))
+    if (personaBase == null)
       {
-	if (personaInvid != null)
+	personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
+      }
+
+    if (personaTimeStamp != null && !personaTimeStamp.before(personaBase.lastChange))
+      {
+	return;
+      }
+
+    if (personaInvid != null)
+      {
+	personaObj = session.viewDBObject(personaInvid);
+      }
+    else
+      {
+	personaObj = null;
+      }
+    
+    DBObject defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
+
+    if (defaultObj != null)
+      {
+	PermissionMatrixDBField permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix);
+
+	if (permField != null)
 	  {
-	    personaObj = session.viewDBObject(personaInvid);
+	    defaultPerms = permField.getMatrix();
 	  }
 	else
 	  {
-	    personaObj = null;
+	    Ganymede.debug("GanymedeSession.updatePerms(): Couldn't find get permission field from default privs object");
 	  }
+      }
+    else
+      {
+	Ganymede.debug("GanymedeSession.updatePerms(): ERROR!  Couldn't find default privs object");
+      }
+    
+    // if we're not locked into supergash mode (for internal sessions, etc.), lets find
+    // out whether we're in supergash mode currently
+    
+    if (!beforeversupergash)
+      {
+	supergashMode = false;
 
-	DBObject defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
-
-	if (defaultObj != null)
+	if (personaObj == null)
 	  {
-	    defaultPerms = new PermMatrix((PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix));
+	    personaPerms = new PermMatrix(defaultPerms);
+	    return;
 	  }
 	else
 	  {
-	    Ganymede.debug("GanymedeSession.updatePerms(): ERROR!  Couldn't find default privs object");
-	  }
-
-	// if we're not locked into supergash mode (for internal sessions, etc.), lets find
-	// out whether we're in supergash mode currently
-
-	if (!beforeversupergash)
-	  {
-	    supergashMode = false;
-
-	    if (personaObj == null)
-	      {
-		personaPerms = new PermMatrix(defaultPerms);
-		return;
-	      }
-	    else
-	      {
-		InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
-		Invid inv;
+	    InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
+	    Invid inv;
 		
+	    if (idbf != null)
+	      {
+		Vector vals = idbf.getValuesLocal();
+
+		// loop over the owner groups this persona is a member of, see if it includes
+		// the supergash owner group
+		    
+		for (int i = 0; i < vals.size(); i++)
+		  {
+		    inv = (Invid) vals.elementAt(i);
+			
+		    if (inv.getNum() == SchemaConstants.OwnerSupergash)
+		      {
+			supergashMode = true;
+			Ganymede.debug("GanymedeSession.updatePerms(): setting supergashMode to true");
+			break;
+		      }
+		  }
+	      }
+
+	    if (!supergashMode)
+	      {
+		// since we're not in supergash mode, we need to take into account the
+		// operational privileges granted us by the default permission matrix
+		// and all the permission matrices associated with this persona.  Calculate
+		// the union of all of the applicable permission matrices.
+
+		personaPerms = new PermMatrix(defaultPerms);
+
+		idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
+
 		if (idbf != null)
 		  {
 		    Vector vals = idbf.getValuesLocal();
 
-		    // loop over the owner groups this persona is a member of, see if it includes
-		    // the supergash owner group
+		    // calculate the union of all permission matrices in effect for this persona
+
+		    PermissionMatrixDBField pmdbf;
+		    DBObject pObj;
 		    
 		    for (int i = 0; i < vals.size(); i++)
 		      {
 			inv = (Invid) vals.elementAt(i);
-			
-			if (inv.getNum() == SchemaConstants.OwnerSupergash)
-			  {
-			    supergashMode = true;
-			    Ganymede.debug("GanymedeSession.updatePerms(): setting supergashMode to true");
-			    break;
-			  }
-		      }
-		  }
-
-		if (!supergashMode)
-		  {
-		    // since we're not in supergash mode, we need to take into account the
-		    // operational privileges granted us by the default permission matrix
-		    // and all the permission matrices associated with this persona.  Calculate
-		    // the union of all of the applicable permission matrices.
-
-		    personaPerms = new PermMatrix(defaultPerms);
-
-		    idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
-
-		    if (idbf != null)
-		      {
-			Vector vals = idbf.getValuesLocal();
-
-			// calculate the union of all permission matrices in effect for this persona
-
-			PermissionMatrixDBField pmdbf;
-			DBObject pObj;
-		    
-			for (int i = 0; i < vals.size(); i++)
-			  {
-			    inv = (Invid) vals.elementAt(i);
 			    
-			    pObj = session.viewDBObject(inv);
+			pObj = session.viewDBObject(inv);
+			
+			//	 Ganymede.debug("GanymedeSession.updatePerms(): adding perms for " + pObj.getLabel());
 
-			    //	 Ganymede.debug("GanymedeSession.updatePerms(): adding perms for " + pObj.getLabel());
+			if (pObj != null)
+			  {
+			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermMatrix);
 
-			    if (pObj != null)
+			    if (pmdbf != null)
 			      {
-				pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermMatrix);
-
-				if (pmdbf != null)
-				  {
-				    personaPerms = personaPerms.union(pmdbf);
-				  }
+				personaPerms = personaPerms.union(pmdbf);
 			      }
 			  }
 		      }
 		  }
 	      }
 	  }
-
-	// remember the last time we pulled personaPerms / defaultPerms
-
-	if (personaTimeStamp == null)
-	  {
-	    personaTimeStamp = new Date();
-	  }
-	else
-	  {
-	    personaTimeStamp.setTime(System.currentTimeMillis());
-	  }
       }
 
+    // remember the last time we pulled personaPerms / defaultPerms
+
+    if (personaTimeStamp == null)
+      {
+	personaTimeStamp = new Date();
+      }
+    else
+      {
+	personaTimeStamp.setTime(System.currentTimeMillis());
+      }
+    
     return;
   }
 
-  DBObject getPersona()
+  /**
+   *
+   * This method gives access to the DBObject for the administrator's
+   * persona record, if any.  This is used by DBSession to get the
+   * label for the administrator for record keeping.
+   * 
+   */
+  
+  public DBObject getPersona()
   {
     return personaObj;
   }
