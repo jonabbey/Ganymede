@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -281,6 +281,7 @@ public class IPDBField extends DBField implements ip_field {
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -330,6 +331,20 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     eObj = (DBEditObject) owner;
+
+    if (!local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
 
     // check to see if we can do the namespace manipulations implied by this
     // operation
@@ -381,7 +396,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	this.newValue = null;
 
-	return null;
+	return retVal;
       }
     else
       {
@@ -425,6 +440,7 @@ public class IPDBField extends DBField implements ip_field {
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -473,6 +489,20 @@ public class IPDBField extends DBField implements ip_field {
 
     eObj = (DBEditObject) owner;
 
+    if (!local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
     // check to see if we can do the namespace manipulations implied by this
     // operation
 
@@ -509,7 +539,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	defined = true;
 	
-	return null;
+	return retVal;
       }
     else
       {
@@ -551,6 +581,7 @@ public class IPDBField extends DBField implements ip_field {
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -604,6 +635,20 @@ public class IPDBField extends DBField implements ip_field {
 
     eObj = (DBEditObject) owner;
 
+    if (!local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
     ns = getNameSpace();
 
     if (ns != null)
@@ -621,7 +666,7 @@ public class IPDBField extends DBField implements ip_field {
       {
 	values.addElement(bytes);
 	defined = true;
-	return null;
+	return retVal;
       } 
     else
       {
