@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.14 $ %D%
+  Version: $Revision: 1.15 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.14 $ %D% 
+ * @version $Revision: 1.15 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -567,12 +567,12 @@ public class rowTable extends baseTable implements ActionListener {
 
 	if (e.getSource() == SortByMI)
 	  {
-	    resort(menuCol, true);
+	    resort(menuCol, true, true);
 	  }
 
 	if (e.getSource() == RevSortByMI)
 	  {
-	    resort(menuCol, false);
+	    resort(menuCol, false, true);
 	  }
       }
 
@@ -598,10 +598,14 @@ public class rowTable extends baseTable implements ActionListener {
 
   }
 
-  public void resort(int column, boolean forward)
+  public void resort(int column, boolean forward, boolean repaint)
   {
     new rowSorter(rows, forward, this, column).sort();
-    refreshTable();
+
+    if (repaint)
+      {
+	refreshTable();
+      }
   }
 
 }
