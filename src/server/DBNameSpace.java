@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -425,6 +425,115 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     if (debug)
       {
 	System.err.println(editSet.session.key + ": DBNameSpace.mark(): mark obtained succesfully");
+      }
+
+    return true;
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                       reserve()
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>This method reserves a value so that the given editSet is
+   * assured of being able to use this value at some point before the
+   * transaction is commited or canceled.  reserve() is different from
+   * mark() in that there is no field specified to be holding the
+   * value, and that when the transaction is committed or canceled,
+   * the value will be returned to the available list.  During the
+   * transaction, the transaction code can mark the value at any time
+   * with assurance that they will be able to do so.</p>
+   *
+   * <p>If a transaction attempts to reserve() a value that is already
+   * being held by an object in the transaction, reserve() will return
+   * true, even though a subsequent mark() attempt would fail.  reserve()
+   * only guarantees that the transaction can use that value someplace,
+   * not that it hasn't already been used in the transaction.</p>
+   *
+   * @param editset The transaction claiming the unique value <value>
+   * @param value The unique value that transaction editset is attempting to claim
+   *
+   * @return true if the value could be reserved in the given editSet.
+   *
+   */
+
+  synchronized public boolean reserve(DBEditSet editSet, Object value)
+  {
+    DBNameSpaceHandle handle;
+    
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println(editSet.getSession().getKey() +
+			   ": DBNameSpace.reserve(): enter");
+      }
+
+    // Is this value already taken?
+
+    if (uniqueHash.containsKey(value))
+      {
+	if (debug)
+	  {
+	    System.err.println(editSet.session.key +
+			       ": DBNameSpace.reserve(): uniqueHash contains key " + 
+			       value);
+	  }
+	
+	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+	if (handle.owner != editSet)
+	  {
+	    // either someone else is manipulating this value, or an object
+	    // stored in the database holds this value.  We would need to
+	    // pull that object out of the database and unmark the value on
+	    // that object before we could mark that value someplace else.
+
+	    if (debug)
+	      {
+		System.err.println(editSet.session.key +
+				   ": DBNameSpace.reserve(): we don't own handle");
+	      }
+
+	    return false;	// somebody else owns it
+	  }
+	else
+	  {
+	    // we own it.. it may or may not be in use in an object
+	    // already, but it's ours, at least
+
+	    return true;
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println(editSet.session.key +
+			       ": DBNameSpace.reserve(): value not in uniqueHash");
+	  }
+
+	// we're creating a new value, the current value isn't held in the namespace
+
+	handle = new DBNameSpaceHandle(editSet, false, null);
+
+	// we're reserving it now, but it's not actually in use yet.
+
+	handle.inuse = false;
+	handle.shadowField = null;
+	
+	uniqueHash.put(value, handle);
+
+	remember(editSet, value);
+      }
+
+    if (debug)
+      {
+	System.err.println(editSet.session.key +
+			   ": DBNameSpace.reserve(): mark obtained succesfully");
       }
 
     return true;
@@ -982,22 +1091,43 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
 class DBNameSpaceHandle {
 
-  DBEditSet owner;		// if this value is currently being shuffled
-				// by a transaction, this is the transaction
+  /**
+   * if this value is currently being shuffled
+   * by a transaction, this is the transaction
+   */
 
-  boolean original;		// remember if the value was in use at the
-				// start of the transaction
+  DBEditSet owner;
 
-  boolean inuse;		// is the value currently in use?
+  /**
+   * remember if the value was in use at the
+   * start of the transaction
+   */
 
-  DBField field;		// so the namespace hash can be used as an index
-				// field always points to the field that contained
-				// this value at the time this field was last
-				// committed in a transaction
+  boolean original;
 
-  DBField shadowField;		// if this handle is currently being edited
-				// by an editset, shadowField points to the
-				// new field
+  /**
+   * is the value currently in use?
+   */
+
+  boolean inuse;
+
+  /**
+   * so the namespace hash can be used as an index
+   * field always points to the field that contained
+   * field always points to the field that contained
+   * this value at the time this field was last
+   * committed in a transaction
+   */
+
+  DBField field;
+
+  /**
+   * if this handle is currently being edited
+   * by an editset, shadowField points to the
+   * new field
+   */
+
+  DBField shadowField;
 
   /* -- */
 
