@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,6 +98,47 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
+  /**
+   *
+   * Returns true if obj is a field with the same value(s) as
+   * this one.<br><br>
+   *
+   * This method is ok to be synchronized because it does not
+   * call synchronized methods on any other object.
+   *
+   */
+
+  public synchronized boolean equals(Object obj)
+  {
+    if (!(obj.getClass().equals(this.getClass())))
+      {
+	return false;
+      }
+
+    PasswordDBField f = (PasswordDBField) obj;
+
+    return f.key().equals(this.key());
+  }
+
+  /**
+   *
+   * Object value of DBField.  Used to represent value in value hashes.
+   * Subclasses need to override this method in subclass.
+   *
+   */
+
+  public Object key()
+  {
+    if (definition.isCrypted())
+      {
+	return cryptedPass;
+      }
+    else
+      {
+	return uncryptedPass;
+      }
+  }
+
   public Object clone()
   {
     try
@@ -167,13 +208,30 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (definition.isCrypted())
 	  {
 	    cryptedPass = in.readUTF();
+
+	    if (cryptedPass.equals(""))
+	      {
+		cryptedPass = null;
+	      }
+
 	    uncryptedPass = null;
 	  }
 	else
 	  {
 	    uncryptedPass = in.readUTF();
+
+	    if (uncryptedPass.equals(""))
+	      {
+		uncryptedPass = null;
+	      }
+
 	    cryptedPass = null;
 	  }
+      }
+
+    if (cryptedPass != null || uncryptedPass != null)
+      {
+	defined = true;
       }
   }
 
@@ -560,7 +618,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
 		if (debug)
 		  {
-		    System.err.println("Receiving plain text pass.. crypted = " + cryptedPass + ", plain = " + text);
+		    System.err.println("PasswordDBField.setPlainTextPass(): Setting plain text pass.. crypted = " + 
+				       cryptedPass + ", plain = " + uncryptedPass);
 		  }
 
 		defined = true;
@@ -569,6 +628,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	      {
 		cryptedPass = null;
 		uncryptedPass = null;
+
+		if (debug)
+		  {
+		    System.err.println("PasswordDBField.setPlainTextPass(): Clearing password");
+		  }
 
 		defined = false;
 	      }
@@ -579,6 +643,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	    uncryptedPass = text;
 
 	    defined = (uncryptedPass != null);
+
+	    if (debug)
+	      {
+		System.err.println("PasswordDBField.setPlainTextPass(): Clearing crypt, setting plain: " + uncryptedPass);
+	      }
 	  }
       }
 
