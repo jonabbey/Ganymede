@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1968,10 +1968,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				       oldCategory.getName() + " onto " + newCategory.getName());
 		  }
 
-		category.setDisplayOrder(0);
-
-		oldCategory.removeNode(category.getName());
-		newCategory.addNode((CategoryNode) category, false, true);
+		newCategory.moveCategoryNode(category.getPath(), 0);
 
 		CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, targetNode, null, true);
 
@@ -2399,28 +2396,20 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 	      }
 
-	    if (newCategory.equals(oldCategory))
+	    if (debug)
 	      {
-		if (debug)
-		  {
-		    System.err.println("Moving within the same category");
-		  }
-
-		if (category.getDisplayOrder() < displayOrder)
-		  {
-		    displayOrder--;
-		  }
+		System.err.println("Moving category " + category.getPath() +
+				   ", displayOrder = " + category.getDisplayOrder());
 	      }
+	    
+	    newCategory.moveCategoryNode(category.getPath(), displayOrder);
 
 	    if (debug)
 	      {
-		System.err.println("new displayOrder = " + displayOrder);
+		System.err.println("Moved category " + category.getPath() +
+				   ", displayOrder = " + category.getDisplayOrder());
 	      }
-
-	    oldCategory.removeNode(category.getName());
-
-	    category.setDisplayOrder(displayOrder);
-	    newCategory.addNode((CategoryNode) category, true, true);
+	    
 
 	    CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
