@@ -84,7 +84,7 @@ public class personaPanel extends JPanel implements ActionListener{
       }
 
     // Create the middle, content pane
-    middle = new JTabbedPane();
+    middle = new JTabbedPane(JTabbedPane.BOTTOM);
     JPanel middleP = new JPanel(new BorderLayout());
     middleP.setBorder(new TitledBorder("Personas"));
     middleP.add("Center", middle);
@@ -104,7 +104,16 @@ public class personaPanel extends JPanel implements ActionListener{
 
     for (int i = 0; i< total; i++)
       {
-	personaContainer pc = new personaContainer((Invid)personas.elementAt(i), i, editable, this);
+	personaContainer pc = null;
+	try
+	  {
+	    pc = new personaContainer((Invid)personas.elementAt(i), i, editable && field.isEditable(), this);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not check if the field is editable: " + rx);
+	  }
+
 	panels.put(new Integer(i), pc);
 	Thread t = new Thread(pc);
 	t.start();
@@ -328,10 +337,17 @@ class personaContainer extends JScrollPane implements Runnable{
 	  }
 	else if (editable)
 	  {
+	    boolean thisPanelEditable = editable;
 	    db_object object = pp.fp.getgclient().getSession().edit_db_object(invid);
+	    if (object == null)
+	      {
+		object = pp.fp.getgclient().getSession().view_db_object(invid);
+		thisPanelEditable = false;
+	      }
+
 	    pp.middle.setTitleAt(index, object.getLabel());
 	    containerPanel cp = new containerPanel(object,
-						   editable,
+						   thisPanelEditable,
 						   pp.fp.getgclient(), 
 						   pp.fp.getWindowPanel(), 
 						   pp.fp,
@@ -368,8 +384,6 @@ class personaContainer extends JScrollPane implements Runnable{
     this.invalidate();
     pp.validate();
 
-    // oh man this takes a long time.
-    //this.notifyAll();
   }
 
   public synchronized void waitForLoad()
