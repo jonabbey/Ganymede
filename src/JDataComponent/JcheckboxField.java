@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,7 +84,22 @@ public class JcheckboxField extends JCheckbox implements ItemListener {
   public JcheckboxField()
   {
     super();
+    
+    /*    if (font == null)
+      {
+	font = new Font("Helvetica", FONT.plain, 12);
+      }
+    if (fg == null)
+      {
+	fg = Color.black;
+      }
+    if (bg == null)
+      {
+	bg = Color.grey;
+      }
+      */
 
+    System.out.println("Creating new JcomponentAttr");
     this.valueAttr = new JcomponentAttr(null,getFont(),getForeground(),getBackground());
     
     value = false;
@@ -227,7 +242,7 @@ public class JcheckboxField extends JCheckbox implements ItemListener {
       }
 
     this.valueAttr = attributes;
-
+    
     super.setFont(attributes.font);
     super.setForeground(attributes.fg);
     super.setBackground(attributes.bg);
@@ -239,8 +254,6 @@ public class JcheckboxField extends JCheckbox implements ItemListener {
   }
 
   /**
-   * sets the label of this JcheckboxField
-   *
    * deprecated
    *
    */
@@ -299,8 +312,11 @@ public class JcheckboxField extends JCheckbox implements ItemListener {
    */
   public void setValueFont(Font f,boolean repaint)
   {
-    valueAttr.setFont(f);
-
+    if (f != null)
+      {
+	valueAttr.setFont(f);
+      }
+    
     setValueAttr(valueAttr,repaint);
   }
 
