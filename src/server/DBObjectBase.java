@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -292,7 +292,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
     else
       {
-	label_id = 0;
+	label_id = -1;
       }
 
     // read in the objects belonging to this ObjectBase
@@ -675,8 +675,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   /**
    *
-   * Returns the field namefor the field designated as this object's
-   * primary label field.
+   * Returns the field name for the field designated as this object's
+   * primary label field.  null is returned if no label has been
+   * designated.
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -684,6 +685,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   public String getLabelFieldName()
   {
     BaseField bf;
+
+    /* -- */
+
+    if (label_id == -1)
+      {
+	return null;
+      }
     
     bf = getField(label_id);
 
@@ -834,6 +842,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
+    if (fieldName == null)
+      {
+	label_id = -1;
+	return;
+      }
+
     bF = getField(fieldName);
 
     if (bF == null)
@@ -865,7 +879,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
-    if (null == getField(fieldID))
+    if ((fieldID != -1) && (null == getField(fieldID)))
       {
 	throw new IllegalArgumentException("invalid fieldID");
       }
