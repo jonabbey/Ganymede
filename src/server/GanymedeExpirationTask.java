@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -65,6 +65,8 @@ public class GanymedeExpirationTask implements Runnable {
 	    Ganymede.debug("Expiration Task: Couldn't establish session");
 	    return;
 	  }
+
+	mySession.enableWizards(false);
 	
 	ReturnVal retVal = mySession.openTransaction("expiration task");
 
@@ -121,7 +123,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		retVal = mySession.inactivate_db_object(invid, false);
+		retVal = mySession.inactivate_db_object(invid);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -163,7 +165,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		retVal = mySession.remove_db_object(invid, false);
+		retVal = mySession.remove_db_object(invid);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
