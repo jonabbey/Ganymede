@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -318,6 +318,8 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
       }
 
+    results.addElement(user.getLabel()); // add their 'end-user' persona
+
     return results;
   }
 
@@ -346,6 +348,18 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     if (user == null)
       {
 	return false;
+      }
+
+    // if they are selecting their username, go ahead and 
+    // clear out the persona privs and return true
+
+    if (user.getLabel().equals(persona))
+      {
+	personaObject = null;
+	personaInvid = null;
+	personaTimeStamp = null;
+	updatePerms();
+	return true;
       }
 
     inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
