@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/02/10 05:33:41 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/03/10 22:08:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,6 +152,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    Ganymede.db.notifyAll(); // for lock code
 	  }
       }
+
+    // force logins to lowercase so we can keep track of things
+    // cleanly..  we do a case insensitive match against user/persona
+    // name later on, but we want to have a canonical name to track
+    // multiple logins with.
     
     clientName = client.getName().toLowerCase();
     clientPass = client.getPassword();
@@ -189,8 +194,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// versions of the database or new.  Going forward we'll
 	// want to match here against the PersonaLabelField.
 
-	root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName),
-			       new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName));
+	root = new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName);
 
 	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
