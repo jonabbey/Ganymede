@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 1999/07/22 05:34:17 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 1999/08/18 23:49:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.116 $ $Date: 1999/07/22 05:34:17 $ $Name:  $
+ * @version $Revision: 1.117 $ $Date: 1999/08/18 23:49:39 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1452,7 +1452,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * its ownership set, and all fields defined in the controlling
    * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * have been instantiated without defined
-   * values.</p>
+   * values.  If this DBEditObject is an embedded type, it will
+   * have been linked into its parent object before this method
+   * is called.</p>
    *
    * <p>This method is responsible for filling in any default
    * values that can be calculated from the 
@@ -1460,12 +1462,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * associated with the editset defined in this DBEditObject.</p>
    *
    * <p>If initialization fails for some reason, initializeNewObject()
-   * will return false.  If the owning GanymedeSession is not in
-   * bulk-loading mode (i.e., enableOversight is true),
-   * {@link arlut.csd.ganymede.DBSession#createDBObject(short, arlut.csd.ganymede.Invid, java.util.Vector) 
-   * DBSession.createDBObject()} will checkpoint the transaction before
-   * calling this method.  If this method returns false, the calling
-   * method will rollback the transaction.  This method has no
+   * will return a ReturnVal with an error result..  If the owning
+   * GanymedeSession is not in bulk-loading mode (i.e.,
+   * GanymedeSession.enableOversight is true), {@link
+   * arlut.csd.ganymede.DBSession#createDBObject(short, arlut.csd.ganymede.Invid, java.util.Vector)
+   * DBSession.createDBObject()} will checkpoint the transaction
+   * before calling this method.  If this method returns a failure code, the
+   * calling method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
    * checkpoint/rollback logic will take care of that.</p>
    *
@@ -1474,12 +1477,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * so it is the responsibility of this method to handle any checkpointing
    * needed.</p>
    *
-   * <p>This method should be overridden in subclasses.</p>
+   * <p>This method should be overridden in subclasses.</p> 
    */
 
-  public boolean initializeNewObject()
+  public ReturnVal initializeNewObject()
   {
-    return true;
+    return null;
   }
 
   /**

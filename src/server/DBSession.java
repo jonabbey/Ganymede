@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 1999/08/14 00:49:04 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 1999/08/18 23:49:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.73 $ %D%
+ * @version $Revision: 1.74 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -363,19 +363,29 @@ final public class DBSession {
 
 	editSet.addObject(e_object);
 
-	// do any work that the custom code for this object wants to have
-	// done
-
-	if (!e_object.initializeNewObject())
+	if (!base.isEmbedded())
 	  {
-	    if (checkpointset)
-	      {
-		rollback(ckp_label);
-		checkpointset = false;
-	      }
+	    // do any work that the custom code for this object wants
+	    // to have done
 
-	    return Ganymede.createErrorDialog("Initialization Error",
-					      "Couldn't initialize new object");
+	    // note that we're not doing this for embedded objects,
+	    // because we want to defer the initializeNewObject() call
+	    // until the embedded object has been linked to its
+	    // parent, which is done by
+	    // InvidDBField.createNewEmbedded().
+
+	    retVal = e_object.initializeNewObject();
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		if (checkpointset)
+		  {
+		    rollback(ckp_label);
+		    checkpointset = false;
+		  }
+
+		return retVal;
+	      }
 	  }
 
 	// okay, we're good, and we won't need to revert to the checkpoint.  

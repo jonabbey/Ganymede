@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 1999/06/25 01:47:50 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 1999/08/18 23:49:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.107 $ %D%
+ * @version $Revision: 1.108 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2879,14 +2879,65 @@ public final class InvidDBField extends DBField implements invid_field {
 	    setLastError("InvidDBField debug: successfully added " + newObj);
 	  }
 
-	if (retVal == null)
+	// now we need to initialize the new embedded object, since we
+	// defer that activity for embedded objects until after we
+	// get the embedded object linked to the parent
+
+	boolean checkpointset = false;
+	DBSession session = eObj.getSession();
+	String ckp_label = eObj.getLabel() + "addEmbed";
+
+	if (eObj.getGSession().enableOversight)
 	  {
-	    retVal = new ReturnVal(true);
+	    session.checkpoint(ckp_label);
+	    checkpointset = true;
 	  }
 
-	retVal.setInvid(newObj);
+	try
+	  {
+	    retVal = embeddedObj.initializeNewObject();
 
-	return retVal.unionRescan(newRetVal);
+	    if (retVal == null || retVal.didSucceed())
+	      {
+		// sweet, success, forget the checkpoint
+
+		if (checkpointset)
+		  {
+		    session.popCheckpoint(ckp_label);
+		    checkpointset = false;
+		  }
+
+		if (retVal == null)
+		  {
+		    retVal = new ReturnVal(true);
+		  }
+
+		retVal.setInvid(newObj);
+	    
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		// crap, failure. rollback the checkpoint
+
+		if (checkpointset)
+		  {
+		    session.rollback(ckp_label);
+		    checkpointset = false;
+		  }
+
+		return retVal;
+	      }
+	  }
+	finally
+	  {
+	    // ups, something tanked.  rollback.
+
+	    if (checkpointset)
+	      {
+		session.rollback(ckp_label);
+	      }
+	  }
       } 
     else
       {
