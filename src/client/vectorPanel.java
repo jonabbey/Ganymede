@@ -1,4 +1,3 @@
-
 /*
    GASH 2
 
@@ -9,8 +8,8 @@
    or edit in place (composite) objects.
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/04/06 04:17:02 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/10/29 16:12:26 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
@@ -95,7 +94,7 @@ import javax.swing.border.*;
  * @see arlut.csd.ganymede.invid_field
  * @see arlut.csd.ganymede.ip_field
  * 
- * @version $Revision: 1.50 $ $Date: 1999/04/06 04:17:02 $ $Name:  $
+ * @version $Revision: 1.51 $ $Date: 1999/10/29 16:12:26 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -398,12 +397,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		if (editable)
 		  {
 		    ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(inv));
-		    object = rv.getObject();
+		    object = (db_object) rv.getObject();
 		  }
 		else
 		  {
 		    ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(inv));
-		    object = rv.getObject();
+		    object = (db_object) rv.getObject();
 		  }
 
 		// create a containerPanel, but don't load it yet.. the elementWrapper will
@@ -503,7 +502,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    System.err.println("XX** Invid for new embedded object is " + invid);
 		  }
 		
-		db_object object = (gc.handleReturnVal(gc.getSession().edit_db_object(invid))).getObject();
+		db_object object = (db_object) (gc.handleReturnVal(gc.getSession().edit_db_object(invid))).getObject();
 		
 		if (local_debug)
 		  {
@@ -969,7 +968,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  {
 		    // create the new containerPanel.. don't pre-load it..
 
-		    containerPanel newcp = new containerPanel(rv.getObject(),
+		    containerPanel newcp = new containerPanel(((db_object) rv.getObject()),
 							      editable,
 							      gc,
 							      wp, container.frame,

@@ -9,8 +9,8 @@
 
    Created: 6 May 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/10/25 16:36:58 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/10/29 16:12:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -275,7 +275,7 @@ public class rpcpass implements ClientListener {
 
 	    if (attempt.didSucceed())
 	      {
-		userObj = attempt.getObject();
+		userObj = (db_object) attempt.getObject();
 	      }
 	    else
 	      {

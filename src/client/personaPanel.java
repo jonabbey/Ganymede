@@ -6,8 +6,8 @@
    
    Created: 6 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/07/26 22:19:53 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/29 16:12:25 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -176,7 +176,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    if (thisOneEditable)
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(thisInvid));
-		db_object ob = rv.getObject();
+		db_object ob = (db_object) rv.getObject();
 
 		if (ob == null)
 		  {
@@ -186,7 +186,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		      }
 		    
 		    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
-		    ob = Vrv.getObject();
+		    ob = (db_object) Vrv.getObject();
 		    
 		    if (ob == null)
 		      {
@@ -205,7 +205,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    else
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
-		db_object ob = rv.getObject();
+		db_object ob = (db_object) rv.getObject();
 
 		if (ob == null)
 		  {
@@ -268,7 +268,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    
 	    // Create the object
 	    ReturnVal rv = fp.getgclient().handleReturnVal(fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase));
-	    db_object newObject = rv.getObject();
+	    db_object newObject = (db_object) rv.getObject();
 	    Invid user = fp.getObjectInvid();
 
 	    gc.somethingChanged();

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.160 $
-   Last Mod Date: $Date: 1999/10/26 20:02:06 $
+   Version: $Revision: 1.161 $
+   Last Mod Date: $Date: 1999/10/29 16:12:24 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.160 $ $Date: 1999/10/26 20:02:06 $ $Name:  $
+ * @version $Revision: 1.161 $ $Date: 1999/10/29 16:12:24 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/10/26 20:02:06 $";
+  static String release_date = "$Date: 1999/10/29 16:12:24 $";
   static String release_number = null;
 
   // ---
@@ -885,17 +885,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     objectRemovePM = new treeMenu();
     objectRemovePM.add(new MenuItem("View Object"));
     objectRemovePM.add(new MenuItem("Edit Object"));
+    objectRemovePM.add(new MenuItem("Clone Object"));
     objectRemovePM.add(new MenuItem("Delete Object"));
 
     objectInactivatePM = new treeMenu();
     objectInactivatePM.add(new MenuItem("View Object"));
     objectInactivatePM.add(new MenuItem("Edit Object"));
+    objectInactivatePM.add(new MenuItem("Clone Object"));
     objectInactivatePM.add(new MenuItem("Delete Object"));
     objectInactivatePM.add(new MenuItem("Inactivate Object"));
 
     objectReactivatePM = new treeMenu();
     objectReactivatePM.add(new MenuItem("View Object"));
     objectReactivatePM.add(new MenuItem("Edit Object"));
+    objectReactivatePM.add(new MenuItem("Clone Object"));
     objectReactivatePM.add(new MenuItem("Delete Object"));
     objectReactivatePM.add(new MenuItem("Reactivate Object"));
 
@@ -2917,7 +2920,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	ReturnVal rv = handleReturnVal(session.edit_db_object(invid));
 
-	db_object o = rv.getObject();
+	db_object o = (db_object) rv.getObject();
 
 	if (o == null)
 	  {
@@ -2960,6 +2963,119 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * @param type Type of object to be created
    */
 
+  public db_object cloneObject(Invid origInvid)
+  {
+    Invid invid = null;
+    db_object obj = null;
+
+    /* -- */
+
+    // if the admin is a member of more than one owner group, ask what
+    // owner groups they want new objects to be placed in
+
+    if (!defaultOwnerChosen)
+      {
+	chooseDefaultOwner(false);
+      }
+    
+    setWaitCursor();
+
+    try
+      {
+	try
+	  {
+	    ReturnVal rv = handleReturnVal(session.clone_db_object(invid));
+	    obj = (db_object) rv.getObject();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Exception creating new object: " + rx);
+	  }
+
+	// we'll depend on handleReturnVal() above showing the user a rejection
+	// dialog if the object create was rejected
+
+	if (obj == null)
+	  {
+	    return null;
+	  }
+
+	try
+	  {
+	    invid = obj.getInvid();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get invid: " + rx);
+	  }
+
+	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
+       
+	wp.addWindow(obj, true, null, true);
+
+	Short typeShort = new Short(invid.getType());
+    
+	if (cachedLists.containsList(typeShort))
+	  {
+	    objectList list = cachedLists.getList(typeShort);
+	    list.addObjectHandle(handle);
+	  }
+    
+	// If the base node is open, deal with the node.
+
+	BaseNode baseN = null;
+
+	if (shortToBaseNodeHash.containsKey(typeShort))
+	  {
+	    baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
+
+	    if (baseN.isLoaded())
+	      {
+		InvidNode objNode = new InvidNode(baseN, 
+						  handle.getLabel(),
+						  invid,
+						  null, false,
+						  OPEN_FIELD_CREATE,
+						  CLOSED_FIELD_CREATE,
+						  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
+						  handle);
+	    
+		createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
+
+		invidNodeHash.put(invid, objNode);
+		setIconForNode(invid);
+
+		tree.insertNode(objNode, true);  // the true means the tree will refresh
+	      }
+	    else
+	      {
+		// this hash is used when creating the node for the object
+		// in the tree.  This way, if a new object is created
+		// before the base node is expanded, the new object will
+		// have the correct icon.
+
+		createdObjectsWithoutNodes.put(invid, baseN);
+	      }
+	  }
+	
+	somethingChanged();
+      }
+    finally
+      {
+	setNormalCursor();
+      }
+
+    return obj;
+  }
+
+  /** 
+   * <p>Creates a new object on the server and opens a new
+   * client {@link arlut.csd.ganymede.client.framePanel framePanel}
+   * window to allow the user to edit the new object.</p>
+   *
+   * @param type Type of object to be created
+   */
+
   public db_object createObject(short type)
   {
     Invid invid = null;
@@ -2982,7 +3098,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	try
 	  {
 	    ReturnVal rv = handleReturnVal(session.create_db_object(type));
-	    obj = rv.getObject();
+	    obj = (db_object) rv.getObject();
 	  }
 	catch (RemoteException rx)
 	  {
@@ -3090,7 +3206,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     try
       {
 	ReturnVal rv = handleReturnVal(session.view_db_object(invid));
-	db_object object = rv.getObject();
+	db_object object = (db_object) rv.getObject();
 
 	// we'll assume handleReturnVal() will display any rejection
 	// dialogs from the server
@@ -4842,7 +4958,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	else
 	  {
-	    System.err.println("not a base node, can't create");
+	    System.err.println("not an object node, can't create");
 	  }
       }
     else if (event.getActionCommand().equals("Edit Object"))
@@ -4869,7 +4985,34 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	else
 	  {
-	    System.err.println("not a base node, can't create");
+	    System.err.println("not an object node, can't create");
+	  }
+      }
+    else if (event.getActionCommand().equals("Clone Object"))
+      {
+	if (treeMenuDebug)
+	  {
+	    System.out.println("objEditMI");
+	  }
+
+	if (node instanceof InvidNode)
+	  {
+	    InvidNode invidN = (InvidNode)node;
+
+	    if (deleteHash.containsKey(invidN.getInvid()))
+	      {
+		showErrorMessage("This object has already been deleted.");
+	      }
+	    else
+	      {
+		Invid invid = invidN.getInvid();
+		
+		cloneObject(invid);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("not an object node, can't clone");
 	  }
       }
     else if (event.getActionCommand().equals("Delete Object"))

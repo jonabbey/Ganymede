@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/08/26 23:05:32 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/10/29 16:12:26 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -80,7 +80,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.69 $ $Date: 1999/08/26 23:05:32 $ $Name:  $
+ * @version $Revision: 1.70 $ $Date: 1999/10/29 16:12:26 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -342,7 +342,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    if (editable)
 	      {
 		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(i));
-		object = rv.getObject();
+		object = (db_object) rv.getObject();
 
 		if (object == null)
 		  {
@@ -352,7 +352,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      }
 	    else
 	      {
-		object = (gc.handleReturnVal(gc.getSession().view_db_object(i))).getObject();
+		object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(i))).getObject();
 
 		if (object == null)
 		  {

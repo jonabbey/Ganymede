@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/04/14 19:04:40 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/10/29 16:12:25 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1344,7 +1344,7 @@ class QueryRow implements ItemListener {
 	compareChoice.addItem("Same Week As");
 	compareChoice.addItem("Same Month As");
       }
-    else if (field.isNumeric())
+    else if (field.isNumeric() || field.isFloat())
       {
 	compareChoice.addItem("==");
 	compareChoice.addItem("<");
@@ -1472,6 +1472,20 @@ class QueryRow implements ItemListener {
 	    operand = new JnumberField();
 	    addOperand = true;
 	  }
+      }
+    else if (field.isFloat())
+      {
+ 	if (!(operand instanceof JfloatField))
+ 	  {
+ 	    if (operand != null)
+ 	      {
+ 		operand.setVisible(false);
+ 		operandContainer.remove(operand);
+ 	      }
+ 
+ 	    operand = new JfloatField();
+ 	    addOperand = true;
+ 	  }
       }
     else if (field.isBoolean())
       {
@@ -1642,6 +1656,11 @@ class QueryRow implements ItemListener {
       {
 	JnumberField numField = (JnumberField) operand;
 	value = numField.getValue();
+      }
+    else if (operand instanceof JfloatField)
+      {
+	JfloatField floatField = (JfloatField) operand;
+	value = floatField.getValue();
       }
     else if (operand instanceof JdateField)
       {

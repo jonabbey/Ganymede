@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 1999/10/27 06:08:55 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 1999/10/29 16:12:23 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.109 $ $Date: 1999/10/27 06:08:55 $ $Name:  $
+ * @version $Revision: 1.110 $ $Date: 1999/10/29 16:12:23 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1050,6 +1050,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    ((JnumberField)comp).setValue(value);
 	  }
+ 	else if (comp instanceof JfloatField)
+ 	  {
+ 	    Double value = (Double)currentInfo.getValue();
+ 
+ 	    // we don't need to worry about turning off callbacks
+ 	    // here because JfloatField only sends callbacks on
+ 	    // focus loss
+ 
+ 	    ((JfloatField)comp).setValue(value);
+ 	  }
 	else if (comp instanceof JCheckBox)
 	  {
 	    Boolean value = (Boolean)currentInfo.getValue();
@@ -1576,6 +1586,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if ((v.getSource() instanceof JstringField) ||
 	    (v.getSource() instanceof JnumberField) ||
+ 	    (v.getSource() instanceof JfloatField) ||
 	    (v.getSource() instanceof JIPField) ||
 	    (v.getSource() instanceof JdateField) ||
 	    (v.getSource() instanceof JstringArea))
@@ -2171,7 +2182,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  case FieldType.NUMERIC:
 	    addNumericField(field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
+ 	  case FieldType.FLOAT:
+ 	    addFloatField(field, fieldInfo, fieldTemplate);
+ 	    break;
+
 	  case FieldType.DATE:
 	    addDateField(field, fieldInfo, fieldTemplate);
 	    break;
@@ -2952,6 +2967,54 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	nf.setToolTipText(comment);
       }
     
+    addRow(nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+  }
+
+   /**
+    * <p>private helper method to instantiate a numeric field in this
+    * container panel</p>
+    *
+    * @param field Remote reference to database field to be associated with a gui component
+    * @param fieldInfo Downloaded value and status information for this field
+    * @param fieldTemplate Downloaded static field type information for this field
+    */
+ 
+  private void addFloatField(db_field field, 
+ 			     FieldInfo fieldInfo, 
+ 			     FieldTemplate fieldTemplate) throws RemoteException
+  {
+    if (debug)
+      {
+ 	println("Adding float field");
+      }
+    
+    JfloatField nf = new JfloatField();
+ 
+    objectHash.put(nf, field);
+    shortToComponentHash.put(new Short(fieldInfo.getID()), nf);
+ 		      
+    Double value = (Double)fieldInfo.getValue();
+ 
+    if (value != null)
+      {
+ 	nf.setValue(value.doubleValue());
+      }
+    
+    if (editable && fieldInfo.isEditable())
+      {
+ 	nf.setCallback(this);
+      }
+ 
+    nf.setEditable(editable && fieldInfo.isEditable());
+    nf.setColumns(40);
+ 
+    String comment = fieldTemplate.getComment();
+ 
+    if (comment != null && !comment.equals(""))
+      {
+ 	nf.setToolTipText(comment);
+      }
+     
     addRow(nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
