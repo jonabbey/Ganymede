@@ -63,6 +63,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -71,6 +73,7 @@ import java.util.Properties;
 import org.xml.sax.SAXException;
 
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.XMLEndDocument;
 import arlut.csd.Util.XMLError;
 import arlut.csd.Util.XMLItem;
@@ -104,6 +107,12 @@ public final class xmlclient implements ClientListener, Runnable {
   public static final boolean debug = false;
 
   /**
+   * <p>TranslationService object for handling string localization.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.xmlclient");
+
+  /**
    * <p>This major version number is compared with the "major"
    * attribute in the Ganymede XML document element.  xmlclient won't
    * try to read Ganymede XML files whose major number is too high</p>
@@ -128,6 +137,7 @@ public final class xmlclient implements ClientListener, Runnable {
   public String xmlFilename = null;
   public String username = null;
   public String password = null;
+  public String syncChannel = null;
   private boolean dumpSchema = false;
   private boolean dumpData = false;
   private boolean doTest = false;
@@ -203,7 +213,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	  }
 	else
 	  {
-	    System.err.println("\nXML submission failed.");
+	    System.err.println();
+	    // "XML submission failed."
+	    System.err.println(ts.l("main.failed"));
 	  }
       }
     catch (Exception ex)
@@ -214,6 +226,22 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	xc.terminate(1);
       }
+  }
+
+  /**
+   * This is a convenience method used by the server to get a
+   * stack trace from a throwable object in String form.
+   */
+
+  static public String stackTrace(Throwable thing)
+  {
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    thing.printStackTrace(writer);
+    writer.close();
+
+    return stringTarget.toString();
   }
 
   /**
@@ -234,7 +262,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (propFilename == null)
       {
-	System.err.println("Ganymede xmlclient: Error, must specify properties on Java invocation line");
+	// "Ganymede xmlclient: Error, must specify properties on Java invocation line"
+	System.err.println(ts.l("init.noprops"));
 	System.exit(1);
       }
     else
@@ -242,16 +271,19 @@ public final class xmlclient implements ClientListener, Runnable {
 	ok = loadProperties(propFilename);
       }
 
-    username = ParseArgs.getArg("username", argv);
+    // "username"
+    username = ParseArgs.getArg(ts.l("global.userArg"), argv);
 
     if (username == null)
       {
 	username = "supergash";
       }
 
-    password = ParseArgs.getArg("password", argv);
+    // "password"
+    password = ParseArgs.getArg(ts.l("global.passArg"), argv);
     
-    String bufferString = ParseArgs.getArg("bufsize", argv);
+    // "bufsize"
+    String bufferString = ParseArgs.getArg(ts.l("global.bufArg"), argv);
 
     if (bufferString != null)
       {
@@ -261,33 +293,42 @@ public final class xmlclient implements ClientListener, Runnable {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't recognize bufsize argument: " + bufferString);
+	    // "Couldn''t recognize bufsize argument: {0}"
+	    System.err.println(ts.l("init.badBuf", bufferString));
 	    ok = false;
 	  }
       }
 
-    if (ParseArgs.switchExists("dumpschema", argv))
+    // "dumpschema"
+    if (ParseArgs.switchExists(ts.l("global.dumpSchemaArg"), argv))
       {
 	dumpSchema = true;
 	dumpData = false;
 	return;
       }
 
-    if (ParseArgs.switchExists("dumpdata", argv))
+    // "dumpdata"
+    if (ParseArgs.switchExists(ts.l("global.dumpDataArg"), argv))
       {
 	dumpData = true;
 	dumpSchema = false;
+
+	// "sync"
+	syncChannel = ParseArgs.getArg(ts.l("global.syncArg"), argv);
+
 	return;
       }
     
-    if (ParseArgs.switchExists("dump", argv))
+    // "dump"
+    if (ParseArgs.switchExists(ts.l("global.dumpArg"), argv))
       {
 	dumpData = true;
 	dumpSchema = true;
 	return;
       }
-    
-    if (ParseArgs.switchExists("test", argv))
+
+    // "test"
+    if (ParseArgs.switchExists(ts.l("global.testArg"), argv))
       {
 	doTest = true;
       }
@@ -298,7 +339,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!xmlFile.exists())
       {
-	System.err.println("Ganymede xmlclient: Error, file " + xmlFilename + " does not exist");
+	// "Ganymede xmlclient: Error, file {0} does not exist"
+	System.err.println(ts.l("init.badFile", xmlFilename));
 	ok = false;
       }
 
@@ -311,11 +353,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
   public void printUsage()
   {
-    System.err.println("Usage:");
-    System.err.println("1: xmlclient [username=<username>] [password=<password>] <xmlfile>");
-    System.err.println("2: xmlclient [username=<username>] [password=<password>] -dump");
-    System.err.println("3: xmlclient [username=<username>] [password=<password>] -dumpschema");
-    System.err.println("4: xmlclient [username=<username>] [password=<password>] -dumpdata");
+    // "Usage:\n\
+    // 1: xmlclient [username=<username>] [password=<password>] <xmlfile>\n \
+    // 2: xmlclient [username=<username>] [password=<password>] -dump\n\
+    // 3: xmlclient [username=<username>] [password=<password>] -dumpschema\n\
+    // 4: xmlclient [username=<username>] [password=<password>] -dumpdata [sync=<sync channel>]"
+
+    System.err.println(ts.l("printUsage.text"));
   }
 
   public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException, NotBoundException, MalformedURLException
@@ -346,13 +390,15 @@ public final class xmlclient implements ClientListener, Runnable {
 	    
 	    try
 	      {
-		System.err.print("Password for \"" + username + "\":");
+		// Password for "{0}":
+		System.err.print(ts.l("global.passPrompt", username));
 		password = in.readLine();
 		System.err.println();
 	      }
 	    catch (java.io.IOException ex)
 	      {
-		throw new RuntimeException("Exception getting input: " + ex.getMessage());
+		// "Exception getting input: {0}"
+		throw new RuntimeException(ts.l("global.inputException", ex.toString()));
 	      }
 	  }
 	else
@@ -371,7 +417,8 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Throwable ex)
       {
-	System.err.println("Error connecting to the server: " + ex.getMessage());
+	// "Error connecting to the server:\n{0}"
+	System.err.println(ts.l("global.errorConnecting", stackTrace(ex)));
 	return false;
       }
 
@@ -379,7 +426,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (session == null)
       {
-	System.err.println("Error, couldn't log in to server.. bad username or password?");
+	// "Error, couldn''t log in to server.. bad username or password?"
+	System.err.println(ts.l("global.badLogin"));
 	return false;
       }
 
@@ -389,7 +437,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (sendData && !sendSchema)
       {
-	retVal = session.getDataXML();
+	retVal = session.getDataXML(syncChannel);
       }
     else if (sendSchema && !sendData)
       {
@@ -453,8 +501,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	if (!(startDocument instanceof XMLStartDocument))
 	  {
-	    System.err.println("XML parser error: first element " + startDocument + 
-			       " not XMLStartDocument");
+	    // "XML parser error: first element {0} is not XMLStartDocument"
+	    System.err.println(ts.l("global.badBeginParse", startDocument));
 	    return;
 	  }
 
@@ -462,8 +510,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	if (!docElement.matches("ganymede"))
 	  {
-	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
-	    System.err.println("Unrecognized XML element: " + docElement);
+	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
+	    System.err.println(ts.l("global.badDocElement", xmlFilename, docElement));
 	    return;
 	  }
 	else
@@ -498,7 +546,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!scanXML())
       {
-	System.err.println("Bad xml integrity");
+	// "Bad XML integrity"
+	System.err.println(ts.l("doSendChanges.badScan"));
 
 	return false;		// malformed in some way
       }
@@ -514,8 +563,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	// for the user's password, but since it is off, we can't
 	// really prompt for a missing user name here.
 
-	System.err.println("Ganymede xmlclient: Error, must specify Ganymede account name in <ganymede> element, or on");
-	System.err.println("command line.");
+	// "Ganymede xmlclient: Error, must specify Ganymede account name in <ganymede> element or on\ncommand line."
+
+	System.err.println(ts.l("doSendChanges.noUsername"));
 	printUsage();
 	return false;
       }
@@ -529,15 +579,18 @@ public final class xmlclient implements ClientListener, Runnable {
 	    // get an input stream so we can get the password from the user if we have to
 	    
 	    in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-	    
+
 	    try
 	      {
-		System.out.print("Password for \"" + username + "\":");
+		// Password for "{0}":
+		System.err.print(ts.l("global.passPrompt", username));
 		password = in.readLine();
+		System.err.println();
 	      }
 	    catch (java.io.IOException ex)
 	      {
-		throw new RuntimeException("Exception getting input: " + ex.getMessage());
+		// "Exception getting input: {0}"
+		throw new RuntimeException(ts.l("global.inputException", ex.toString()));
 	      }
 	  }
 	else
@@ -556,7 +609,8 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Throwable ex)
       {
-	System.err.println("Error connecting to the server: " + ex.getMessage());
+	// "Error connecting to the server:\n{0}"
+	System.err.println(ts.l("global.errorConnecting", stackTrace(ex)));
 	return false;
       }
 
@@ -564,11 +618,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (xSession == null)
       {
-	System.err.println("Error, couldn't log in to server.. bad username or password?");
+	// "Error, couldn''t log in to server.. bad username or password?"
+	System.err.println(ts.l("global.badLogin"));
 	return false;
       }
 
-    System.out.println("Sending XML to server.");
+    // "Sending XML to server."
+    System.err.println(ts.l("doSendChanges.transmitting"));
 
     // logged in !  start our error stream retrieval thread
 
@@ -722,8 +778,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	if (!(startDocument instanceof XMLStartDocument))
 	  {
-	    System.err.println("XML parser error: first element " + startDocument + 
-			       " not XMLStartDocument");
+	    // "XML parser error: first element {0} is not XMLStartDocument"
+	    System.err.println(ts.l("global.badBeginParse", startDocument));
 	    return false;
 	  }
 
@@ -736,8 +792,8 @@ public final class xmlclient implements ClientListener, Runnable {
 	  }
 	else if (!docElement.matches("ganymede"))
 	  {
-	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
-	    System.err.println("Unrecognized XML element: " + docElement);
+	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
+	    System.err.println(ts.l("global.badDocElement", xmlFilename, docElement));
 	    return false;
 	  }
 
@@ -746,15 +802,15 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	if (majorI == null || majorI.intValue() > majorVersion)
 	  {
-	    System.err.println("Error, the ganymede document element " + docElement +
-			       " does not contain a compatible major version number");
+	    // "Error, the ganymede Document Element {0} does not contain a compatible major version number."
+	    System.err.println(ts.l("scanXML.badMajor", docElement));
 	    return false;
 	  }
 
 	if (minorI == null)
 	  {
-	    System.err.println("Error, the ganymede document element " + docElement +
-			       " does not contain a minor version number");
+	    // "Error, the ganymede Document Element {0} does not contain a minor version number."
+	    System.err.println(ts.l("scanXML.badMinor", docElement));
 	    return false;
 	  }
 
@@ -819,7 +875,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (serverHostProperty == null)
       {
-	System.err.println("Couldn't get the server host property");
+	// "Couldn''t get the server host property"
+	System.err.println(ts.l("loadProperties.noServerHost"));
 	success = false;
       }
 
@@ -835,8 +892,8 @@ public final class xmlclient implements ClientListener, Runnable {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
+	    // "Couldn''t parse the ganymede.registryPort property"
+	    System.err.println(ts.l("loadProperties.noRegistryPort", registryPort));
 	  }
       }
 
@@ -871,7 +928,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	if (item instanceof XMLWarning)
 	  {
-	    System.err.println("Warning!: " + item);
+	    // "Warning!: {0}"
+	    System.err.println(ts.l("getNextItem.warning", item));
 	    item = null;	// trigger retrieval of next, and check for warning
 	  }
       }

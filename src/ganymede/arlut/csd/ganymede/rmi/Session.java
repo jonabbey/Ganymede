@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -747,9 +747,14 @@ public interface Session extends Remote {
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p> 
+   *
+   * @param syncChannel The name of the sync channel whose constraints
+   * we want to apply to this dump.  May be null if the client wants
+   * an unfiltered dump.
    */
 
-  public ReturnVal getDataXML() throws RemoteException;
+
+  public ReturnVal getDataXML(String syncChannel) throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of

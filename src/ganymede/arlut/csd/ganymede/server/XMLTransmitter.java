@@ -104,8 +104,16 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   private BigPipedInputStream inpipe;
   private boolean doSendData;
   private boolean doSendSchema;
+  private String syncChannel;
 
-  public XMLTransmitter(boolean sendData, boolean sendSchema) throws IOException, RemoteException
+  /**
+   * <p>This constructor creates the XMLTransmitter used to send XML data from
+   * the Ganymede server down to the xmlclient.  A XMLTransmitter serves
+   * as an RMI exported object that the xmlclient can continually poll
+   * to download chunks of XML.</p>
+   */
+
+  public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel) throws IOException, RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -122,11 +130,13 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
     // we need to get a thread to dump the XML schema in the
     // background to our pipe
 
+    final String myFinalSyncChannel = syncChannel;
+
     Thread dumpThread = new Thread(new Runnable() {
 	public void run() {
 	  try
 	    {
-	      Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema);
+	      Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema, myFinalSyncChannel);
 	    }
 	  catch (IOException ex)
 	    {

@@ -4716,7 +4716,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getSchemaXML() throws NotLoggedInException
   {
-    return this.getXML(false, true);
+    return this.getXML(false, true, null);
   }
 
   /**
@@ -4729,11 +4729,16 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p> 
+   *
+   * @param syncChannel The name of the sync channel whose constraints
+   * we want to apply to this dump.  May be null if the client wants
+   * an unfiltered dump.
    */
 
-  public ReturnVal getDataXML() throws NotLoggedInException
+  public ReturnVal getDataXML(String syncChannel) throws NotLoggedInException
   {
-    return this.getXML(true, false);
+    Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
+    return this.getXML(true, false, syncChannel);
   }
 
   /**
@@ -4750,7 +4755,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getXMLDump() throws NotLoggedInException
   {
-    return this.getXML(true, true);
+    return this.getXML(true, true, null);
   }
 
   /**
@@ -4760,7 +4765,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transmission.</p>
    */
 
-  private ReturnVal getXML(boolean sendData, boolean sendSchema) throws NotLoggedInException
+  private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel) throws NotLoggedInException
   {
     checklogin();
 
@@ -4785,7 +4790,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(sendData, sendSchema);
+	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel);
       }
     catch (IOException ex)
       {

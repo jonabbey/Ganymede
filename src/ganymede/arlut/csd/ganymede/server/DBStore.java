@@ -1010,11 +1010,15 @@ public final class DBStore implements JythonMap {
    * @param dumpSchema If true, the emitted file will include the
    * schema definition
    *
+   * @param syncChannel The name of the sync channel whose constraints
+   * we want to apply to this dump.  May be null if the client wants
+   * an unfiltered dump.
+   *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -1024,7 +1028,7 @@ public final class DBStore implements JythonMap {
     outStream = new FileOutputStream(filename);
     bufStream = new BufferedOutputStream(outStream);
 
-    this.dumpXML(bufStream, dumpDataObjects, dumpSchema);
+    this.dumpXML(bufStream, dumpDataObjects, dumpSchema, syncChannel);
   }
 
   /**
@@ -1052,16 +1056,21 @@ public final class DBStore implements JythonMap {
    * @param dumpSchema If true, the emitted file will include the
    * schema definition
    *
+   * @param syncChannel The name of the sync channel whose constraints
+   * we want to apply to this dump.  May be null if the client wants
+   * an unfiltered dump.
+   *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema) throws IOException
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel) throws IOException
   {
     XMLDumpContext xmlOut = null;
     
     DBDumpLock lock = null;
     DBNameSpace ns;
+    SyncRunner syncConstraint = null;
 
     /* -- */
     
@@ -1072,7 +1081,8 @@ public final class DBStore implements JythonMap {
 
     if (!dumpDataObjects && !dumpSchema)
       {
-	throw new IllegalArgumentException("not dumping data objects, not dumping schema.. what should i do?");
+	// "One of dumpDataObjects and dumpSchema must be true."
+	throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
       }
 
     lock = new DBDumpLock(this);
@@ -1090,12 +1100,23 @@ public final class DBStore implements JythonMap {
 	System.err.println("DBStore.dumpXML(): got dump lock");
       }
 
+    if (dumpDataObjects && !dumpSchema && syncChannel != null)
+      {
+	syncConstraint = Ganymede.getSyncChannel(syncChannel);
+
+	if (syncConstraint == null)
+	  {
+	    // "No such sync channel defined: {0}"
+	    throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
+	  }
+      }
+
     try
       {
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 				    false, // don't dump plaintext passwords needlessly
 				    false, // don't include creator/modifier data
-				    null); // we're not doing a constrained sync dump
+				    syncConstraint);
 
 	if (debug)
 	  {
@@ -1177,7 +1198,10 @@ public final class DBStore implements JythonMap {
 		  {
 		    DBObject x = (DBObject) en.nextElement();
 
-		    x.emitXML(xmlOut);
+		    if (xmlOut.mayInclude(x))
+		      {
+			x.emitXML(xmlOut);
+		      }
 		  }
 	      }
 
