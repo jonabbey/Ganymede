@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:21 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/02/25 04:55:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -207,36 +207,5 @@ public class groupCustom extends DBEditObject implements SchemaConstants {
       }
 
     return false;
-  }
-
-  /**
-   *
-   * Customization method to verify whether this object type has an inactivation
-   * mechanism.
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public boolean canBeInactivated()
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Customization method to verify whether the group has permission
-   * to inactivate a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for inactivating by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public boolean canInactivate(DBSession session, DBEditObject object)
-  {
-    return true;
   }
 }
