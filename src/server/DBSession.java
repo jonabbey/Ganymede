@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2001/09/24 21:47:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.101 $ %D%
+ * @version $Revision: 1.102 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -167,6 +167,14 @@ final public class DBSession {
    */
 
   Object key;
+
+  /**
+   * <p>This flag will be set to true if this session is busy
+   * trying to commit or abandon a transaction, and no new objects
+   * should be editable by this transaction.</p>
+   */
+
+  private boolean terminating = false;
 
 
   /* -- */
@@ -279,6 +287,11 @@ final public class DBSession {
     if (editSet == null)
       {
 	throw new RuntimeException("createDBObject called outside of a transaction");
+      }
+
+    if (isTerminating())
+      {
+	throw new RuntimeException("createDBObject called during transaction commit/abort");
       }
 
     base = store.getObjectBase(object_type);
@@ -608,6 +621,11 @@ final public class DBSession {
 	throw new RuntimeException("editDBObject called outside of a transaction");
       }
 
+    if (isTerminating())
+      {
+	throw new RuntimeException("editDBObject called during transaction commit/abort");
+      }
+
     obj = viewDBObject(baseID, objectID);
 
     if (obj == null)
@@ -857,6 +875,11 @@ final public class DBSession {
     if (editSet == null)
       {
 	throw new RuntimeException("deleteDBObject called outside of a transaction");
+      }
+
+    if (isTerminating())
+      {
+	throw new RuntimeException("deleteDBObject called during transaction commit/abort");
       }
 
     obj = viewDBObject(baseID, objectID);
@@ -1500,6 +1523,8 @@ final public class DBSession {
 	throw new IllegalArgumentException("transaction already open.");
       }
 
+    terminating = false;
+
     editSet = new DBEditSet(store, this, describe, interactive);
   }
 
@@ -1558,29 +1583,38 @@ final public class DBSession {
 	System.err.println(key + ": commiting editset");
       }
 
-    retVal = editSet.commit(); // *synchronized*
-
-    if (retVal == null || retVal.didSucceed())
+    try
       {
-	Ganymede.debug(key + ": committed transaction " + editSet.description);
-	editSet = null;
-      }
-    else
-      {
-	// The DBEditSet.commit() method will set retVal.doNormalProcessing true
-	// if the problem that prevented commit was transient.. i.e., missing
-	// fields, lock not available, etc.
+	terminating = true;
 
-	// If we had an IO error or some unexpected exception or the
-	// like, doNormalProcessing will be false, and the transaction
-	// will have been wiped out by the commit logic.  In this case,
-	// there's nothing that can be done, the transaction is dead
-	// and gone.
-
-	if (!retVal.doNormalProcessing)
+	retVal = editSet.commit(); // *synchronized*
+	
+	if (retVal == null || retVal.didSucceed())
 	  {
+	    Ganymede.debug(key + ": committed transaction " + editSet.description);
 	    editSet = null;
 	  }
+	else
+	  {
+	    // The DBEditSet.commit() method will set retVal.doNormalProcessing true
+	    // if the problem that prevented commit was transient.. i.e., missing
+	    // fields, lock not available, etc.
+	    
+	    // If we had an IO error or some unexpected exception or the
+	    // like, doNormalProcessing will be false, and the transaction
+	    // will have been wiped out by the commit logic.  In this case,
+	    // there's nothing that can be done, the transaction is dead
+	    // and gone.
+	    
+	    if (!retVal.doNormalProcessing)
+	      {
+		editSet = null;
+	      }
+	  }
+      }
+    finally
+      {
+	terminating = false;
       }
 
     return retVal;		// later on we'll figure out how to do this right
@@ -1630,6 +1664,8 @@ final public class DBSession {
 	  {
 	    if (editSet.wLock.inEstablish)
 	      {
+		terminating = true;
+
 		try
 		  {
 		    editSet.wLock.abort();
@@ -1665,6 +1701,11 @@ final public class DBSession {
     return (editSet != null);
   }
 
+  /**
+   * <p>This method returns true if this session is carrying out a
+   * transaction on behalf of an interactive client.</p>
+   */
+
   public synchronized boolean isInteractive()
   {
     if (editSet == null)
@@ -1673,6 +1714,16 @@ final public class DBSession {
       }
 
     return editSet.isInteractive();
+  }
+
+  /**
+   * <p>This method returns true if this session is in the middle of committing
+   * or aborting this session's transaction.</p>
+   */
+
+  public boolean isTerminating()
+  {
+    return terminating;
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2001/08/18 06:16:26 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2001/09/24 21:47:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -253,6 +253,11 @@ public class DBEditSet {
   {
     return session;
   }
+
+  /**
+   * <p>This method returns true if this transaction is being carried
+   * out by an interactive client.</p>
+   */
 
   public boolean isInteractive()
   {
@@ -944,7 +949,7 @@ public class DBEditSet {
       }
 
     // we don't want to have any chance of leaving commit with the
-    // write lock still established.
+    // write lock still established
 
     try
       {

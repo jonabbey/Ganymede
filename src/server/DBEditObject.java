@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.153 $
-   Last Mod Date: $Date: 2001/07/27 01:38:37 $
+   Version: $Revision: 1.154 $
+   Last Mod Date: $Date: 2001/09/24 21:47:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.153 $ $Date: 2001/07/27 01:38:37 $ $Name:  $
+ * @version $Revision: 1.154 $ $Date: 2001/09/24 21:47:43 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1044,14 +1044,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>Customization method to verify overall consistency of
-   * a DBObject.  While default code has not yet been
-   * written for this method, it may need to have its
-   * parameter list modified to include the controlling
-   * {@link arlut.csd.ganymede.DBSession DBSession}
-   * to allow coordination of {@link arlut.csd.ganymede.DBLock DBLock}
-   * and the the use of 
-   * {@link arlut.csd.ganymede.DBEditSet#findObject(arlut.csd.ganymede.DBObject) DBEditSet.findObject()}
-   * to get a transaction-consistent view of related objects.</p>
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ganymede.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
    *
    * <p>To be overridden in DBEditObject subclasses.</p>
    *
