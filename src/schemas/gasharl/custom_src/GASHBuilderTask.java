@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2001/07/23 21:54:49 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/07/31 23:18:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2455,6 +2455,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String primaryUser = null;
     String MACstring = null;
     String IPstring = null;
+    String ownerString = null;
 
     /* -- */
 
@@ -2534,11 +2535,33 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		continue;
 	      }
 
+	    try
+	      {
+		ownerString = object.getField(SchemaConstants.OwnerListField).getValueString();
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+
 	    result.append(IPstring);
 	    result.append("|");
 	    result.append(MACstring);
 	    result.append("|");
 	    result.append(local_sysname);
+	    result.append("|");
+	    
+	    if (ownerString == null || ownerString.equals(""))
+	      {
+		result.append("supergash");
+	      }
+	    else
+	      {
+		result.append(ownerString);
+	      }
+
 	    result.append("|");
 	    result.append(room);
 	    result.append("|");
