@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/05/19 04:43:25 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/10/26 08:42:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -69,6 +69,7 @@ import com.jclark.xml.sax.*;
 
 public class XMLElement extends XMLItem {
 
+  public XMLItem[] children;
   String name;
   Hashtable attributes;
   boolean empty;
@@ -99,6 +100,50 @@ public class XMLElement extends XMLItem {
 	    attributes.put(label, value);
 	  }
       }
+  }
+
+  /**
+   * <P>This method returns an array of children under this item,
+   * or null if there are none.</P>
+   */
+
+  public XMLItem[] getChildren()
+  {
+    return children;
+  }
+
+  /**
+   * <P>This method sets an array of XMLItem references to be
+   * this XMLItem's children.</P>
+   */
+
+  public void setChildren(XMLItem[] children)
+  {
+    this.children = children;
+  }
+
+
+  /**
+   * <P>This method unlinks this XMLItem and any subnodes of
+   * it from each other, as well as clearing this XMLItem's
+   * parent reference.  After this is called, children
+   * and parent will both be null-valued.</P>
+   */
+
+  public void dissolve()
+  {
+    parent = null;
+
+    if (children != null)
+      {
+	for (int i = 0; i < children.length; i++)
+	  {
+	    children[i].dissolve();
+	    children[i] = null;
+	  }
+      }
+
+    children = null;
   }
 
   /**
@@ -300,5 +345,31 @@ public class XMLElement extends XMLItem {
       }
 
     return buffer.toString();
+  }
+
+  /**
+   * <P>This debug method prints out this item and all items
+   * under this item if this item is the top node in a
+   * tree.</P>
+   */
+
+  public void debugPrintTree(int indentLevel)
+  {
+    for (int i = 0; i < indentLevel; i++)
+      {
+	System.err.print("  ");
+      }
+
+    System.err.println(this.toString());
+
+    if (children != null)
+      {
+	indentLevel++;
+
+	for (int i = 0; i < children.length; i++)
+	  {
+	    children[i].debugPrintTree(indentLevel);
+	  }
+      }
   }
 }

@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/10/25 21:31:07 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/10/26 08:42:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,6 @@ import java.util.Enumeration;
 public abstract class XMLItem {
 
   public XMLItem parent;
-  public XMLItem[] children;
 
   /* -- */
 
@@ -96,7 +95,7 @@ public abstract class XMLItem {
 
   public XMLItem[] getChildren()
   {
-    return children;
+    return null;
   }
 
   /**
@@ -114,7 +113,7 @@ public abstract class XMLItem {
 
   public void setChildren(XMLItem[] children)
   {
-    this.children = children;
+    throw new IllegalArgumentException("not an XMLElement.");
   }
 
   /**
@@ -127,17 +126,6 @@ public abstract class XMLItem {
   public void dissolve()
   {
     parent = null;
-
-    if (children != null)
-      {
-	for (int i = 0; i < children.length; i++)
-	  {
-	    children[i].dissolve();
-	    children[i] = null;
-	  }
-      }
-
-    children = null;
   }
 
   /**
@@ -281,15 +269,5 @@ public abstract class XMLItem {
       }
 
     System.err.println(this.toString());
-
-    if (children != null)
-      {
-	indentLevel++;
-
-	for (int i = 0; i < children.length; i++)
-	  {
-	    children[i].debugPrintTree(indentLevel);
-	  }
-      }
   }
 }
