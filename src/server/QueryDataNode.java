@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,18 +19,18 @@ package arlut.csd.ganymede;
 
 public class QueryDataNode extends QueryNode {
 
-  static final byte FIRST = 1;
+  static public final byte FIRST = 1;
 
-  static final byte EQUALS = 1;
-  static final byte LESS = 2;
-  static final byte LESSEQ = 3;
-  static final byte GREAT = 4;
-  static final byte GREATEQ = 5;
-  static final byte NOCASEEQ = 6; // case insensitive string equals
-  static final byte STARTSWITH = 7;
-  static final byte ENDSWITH = 8;
-  static final byte UNDEFINED = 9;
-  static final byte LAST = 9;
+  static public final byte EQUALS = 1;
+  static public final byte LESS = 2;
+  static public final byte LESSEQ = 3;
+  static public final byte GREAT = 4;
+  static public final byte GREATEQ = 5;
+  static public final byte NOCASEEQ = 6; // case insensitive string equals
+  static public final byte STARTSWITH = 7;
+  static public final byte ENDSWITH = 8;
+  static public final byte UNDEFINED = 9;
+  static public final byte LAST = 9;
 
   /* - */
 
