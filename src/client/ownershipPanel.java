@@ -80,6 +80,8 @@ public class ownershipPanel extends JPanel implements ItemListener {
     bases = new JComboBox();
     bp.add(bases);
     Vector baseList = parent.getgclient().getBaseList();
+    Hashtable baseNames = parent.getgclient().getBaseNames();
+    Hashtable baseToShort = parent.getgclient().getBaseToShort();
     paneHash = new Hashtable();
     try
       {
@@ -96,11 +98,11 @@ public class ownershipPanel extends JPanel implements ItemListener {
 	      }
 	    else
 	      {
-		String name = b.getName();
+		String name = (String)baseNames.get(b);
 		bases.addItem (name);
 		objectPane p = new objectPane(editable, 
 					      this,
-					      b.getTypeID(),
+					      ((Short)baseToShort.get(b)).shortValue(),
 					      field);
 		paneHash.put(name, p);
 		center.add(name, p);
@@ -122,7 +124,10 @@ public class ownershipPanel extends JPanel implements ItemListener {
     parent.validate();
     System.out.println("Done in thread, she's loaded!");
 
-    cards.first(center);
+    JPanel emptyP = new JPanel();
+    center.add("empty", emptyP);
+
+    cards.show(center, "empty");
   }
 
 
