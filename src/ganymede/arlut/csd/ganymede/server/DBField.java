@@ -2042,7 +2042,10 @@ public abstract class DBField implements Remote, db_field {
 	      {
 		if (!valuesLeft.containsKey(approvedValues.elementAt(i)))
 		  {
-		    ns.unmark(editset, approvedValues.elementAt(i));
+		    if (!ns.unmark(editset, approvedValues.elementAt(i), this))
+		      {
+			throw new RuntimeException(ts.l("global.bad_unmark", approvedValues.elementAt(i), this));
+		      }
 		  }
 	      }
 	  }
@@ -2500,7 +2503,10 @@ public abstract class DBField implements Remote, db_field {
 	      {
 		if (!valuesLeft.containsKey(valuesToDelete.elementAt(i)))
 		  {
-		    ns.unmark(editset, valuesToDelete.elementAt(i));
+		    if (!ns.unmark(editset, valuesToDelete.elementAt(i), this))
+		      {
+			throw new RuntimeException(ts.l("global.bad_unmark", valuesToDelete.elementAt(i), this));
+		      }
 		  }
 	      }
 	  }
@@ -2707,7 +2713,7 @@ public abstract class DBField implements Remote, db_field {
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean unmark()
+  void unmark()
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -2719,12 +2725,15 @@ public abstract class DBField implements Remote, db_field {
 
     if (namespace == null)
       {
-	return false;
+	return;
       }
 
     if (!isVector())
       {
-	return namespace.unmark(editset, this.key());
+	if (!namespace.unmark(editset, this.key(), this))
+	  {
+	    throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
+	  }
       }
     else
       {
@@ -2732,21 +2741,22 @@ public abstract class DBField implements Remote, db_field {
 	  {
 	    for (int i = 0; i < size(); i++)
 	      {
-		if (!namespace.testunmark(editset, key(i)))
+		if (!namespace.testunmark(editset, key(i), this))
 		  {
-		    return false;
+		    throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
 		  }
 	      }
 	
 	    for (int i = 0; i < size(); i++)
 	      {
-		if (!namespace.unmark(editset, key(i)))
+		if (!namespace.unmark(editset, key(i), this))
 		  {
-		    throw new RuntimeException("error: testunmark / unmark inconsistency");
+		    // "Error: testunmark() / unmark() inconsistency"
+		    throw new RuntimeException(ts.l("unmark.testunmark_problem"));
 		  }
 	      }
 
-	    return true;
+	    return;
 	  }
       }
   }
@@ -2783,7 +2793,7 @@ public abstract class DBField implements Remote, db_field {
 	return true;		// no previous value
       }
 
-    return namespace.unmark(editset, value);
+    return namespace.unmark(editset, value, this);
   }
 
   /** 
@@ -3329,5 +3339,4 @@ public abstract class DBField implements Remote, db_field {
         return obj;
       }
   }
-  
 }

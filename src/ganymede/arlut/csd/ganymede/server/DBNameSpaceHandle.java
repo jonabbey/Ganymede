@@ -123,6 +123,27 @@ class DBNameSpaceHandle implements Cloneable {
 
   DBField shadowField;
 
+  /**
+   * <P>Non-interactive transactions need to be able to shuffle
+   * namespace values between two fields in the data store, even if
+   * the operation to mark the unique value for association with a
+   * second field is done before the operation to unlink the unique
+   * value from the persistently stored field is done.</P>
+   *
+   * <P>To support this, we have both shadowField and shadowFieldB,
+   * along the lines of the A-B-C values used in swapping values
+   * between two memory locations with the aid of a third.</P>
+   *
+   * <P>This is the 'B' shadowField because it is not a firm
+   * association, and cannot be one unless and until the original
+   * persistent field that contains the constrained value is made to
+   * release the value.  At the time the constrained value is released
+   * from the earlier field, shadowField will be set to shadowFieldB,
+   * and shadowFieldB will be cleared.</P>
+   */
+
+  DBField shadowFieldB;
+
   /* -- */
 
   public DBNameSpaceHandle(DBEditSet owner, boolean originalValue)
@@ -268,6 +289,37 @@ class DBNameSpaceHandle implements Cloneable {
     return shadowField;
   }
 
+  /**
+   * <p>If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method may be used to
+   * set a pointer to the editable DBField which aspires to contain
+   * the constrained value in the active transaction.</p>
+   *
+   * <p>This is the 'B' shadowField because it is not a firm
+   * association, and cannot be one unless and until the original
+   * persistent field that contains the constrained value is made to
+   * release the value.  At the time the constrained value is released
+   * from the earlier field, shadowField will be set to shadowFieldB,
+   * and shadowFieldB will be cleared.</p>
+   */
+
+  public void setShadowFieldB(DBField newShadow)
+  {
+    shadowFieldB = newShadow;
+  }
+
+  /**
+   * <p>If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method will return a
+   * pointer to the editable DBField which is proposed to contain the
+   * constrained value once the existing use of the value is cleared.</p>
+   */
+
+  public DBField getShadowFieldB()
+  {
+    return shadowFieldB;
+  }
+
 
   public Object clone()
   {
@@ -281,6 +333,16 @@ class DBNameSpaceHandle implements Cloneable {
       {
 	throw new RuntimeException(ex.getMessage());
       }
+  }
+
+  /**
+   * <p>This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.</p>
+   */
+
+  public boolean matches(DBField field)
+  {
+    return (this.matches(field.getOwner().getInvid(), field.getID()));
   }
 
   /**

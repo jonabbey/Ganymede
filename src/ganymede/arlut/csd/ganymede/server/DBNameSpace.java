@@ -702,18 +702,33 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    // we own it
 
-	    // if this namespace value is still being used in the
-	    // namespace, we can't mark this value.  they need to
-	    // unmark the value in one place before they can mark it
-	    // in another.
+	    // If we are an interactive transaction, we can't mark
+	    // this value if this namespace value is still being used
+	    // in the namespace.  they need to unmark the value in one
+	    // place before they can mark it in another.
+
+	    // if we're not interactive, we'll remember the proposed
+	    // new field association in our handle's shadowFieldB
+	    // variable.. if we later unmark the original association,
+	    // we'll promote the shadowFieldB association to
+	    // shadowField 'A'.
 
 	    if (handle.inuse)
 	      {
-		return false;
+		if (editSet.isInteractive() || handle.getShadowFieldB() != null)
+		  {
+		    return false;
+		  }
+		else
+		  {
+		    handle.setShadowFieldB(field);
+		  }
 	      }
-
-	    handle.inuse = true;
-	    handle.setShadowField(field);
+	    else
+	      {
+		handle.inuse = true;
+		handle.setShadowField(field);
+	      }
 
 	    // we don't have to have the transaction record remember
 	    // the value since we should already have this value noted
@@ -919,7 +934,7 @@ public final class DBNameSpace implements NameSpace {
    *
    */
 
-  public synchronized boolean testunmark(DBEditSet editSet, Object value)
+  public synchronized boolean testunmark(DBEditSet editSet, Object value, DBField oldField)
   {
     if (this.saveHash != null)
       {
@@ -943,6 +958,10 @@ public final class DBNameSpace implements NameSpace {
 	    if (handle.owner != editSet)
 	      {
 		return false;	// somebody else owns it
+	      }
+	    else if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+	      {
+		return false;	// we don't think that value should be associated with that field
 	      }
 	    else
 	      {
@@ -970,14 +989,21 @@ public final class DBNameSpace implements NameSpace {
    *
    * @param editSet The transaction that is freeing value.
    * @param value The unique value being tentatively marked as unused.
+   * @param oldField The old DBField that the namespace value is being
+   * unmarked for
    * 
    */
 
-  public synchronized boolean unmark(DBEditSet editSet, Object value)
+  public synchronized boolean unmark(DBEditSet editSet, Object value, DBField oldField)
   {
     if (this.saveHash != null)
       {
 	throw new RuntimeException("still in schema edit");
+      }
+
+    if (oldField == null || editSet == null)
+      {
+	throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -1023,8 +1049,59 @@ public final class DBNameSpace implements NameSpace {
 		// we own it, but we don't want to change the original
 		// value, which we will need if we abort this editset
 
-		handle.inuse = false;
-		handle.setShadowField(null);
+		if (editSet.isInteractive())
+		  {
+		    handle.inuse = false;
+		    handle.setShadowField(null);
+		  }
+		else
+		  {
+		    // if we're non-interactive (as in the xmlclient),
+		    // we should only be unsetting field associations
+		    // that pre-dated this transaction.  We don't
+		    // expect the xmlclient to set an association and
+		    // then break it.  Nonetheless, I'll go ahead and
+		    // check oldField against both shadowFields held
+		    // in the handle, just in case some
+		    // non-interactive transaction does try to make
+		    // and then break a namespace mark
+
+		    if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+		      {
+			throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
+		      }
+
+		    // likewise, I really don't expect
+		    // getShadowFieldB() to be equal to the oldField,
+		    // but I'll let it handle that case in the event
+		    // we do have some very weird non-interactive
+		    // client talking to us.
+
+		    // What we're really wanting to do here, however,
+		    // is to handle the case where we are unmarking a
+		    // previously persistent association, in which
+		    // case we will let the shadowFieldB become the
+		    // primary association
+
+		    // otherwise if we have no shadowFieldB waiting on
+		    // deck, we do what we normally do to clear the
+		    // handle from being used
+
+		    if (handle.getShadowFieldB() == oldField)
+		      {
+			handle.setShadowFieldB(null);
+		      }
+		    else if (handle.getShadowFieldB() != null)
+		      {
+			handle.setShadowField(handle.getShadowFieldB());
+			handle.setShadowFieldB(null);
+		      }
+		    else
+		      {
+			handle.inuse = false;
+			handle.setShadowField(null);
+		      }
+		  }
 	      }
 	  }
 
@@ -1175,6 +1252,7 @@ public final class DBNameSpace implements NameSpace {
 		// the field bound to the namespace value.
 
 		handle.setShadowField(null);
+		handle.setShadowFieldB(null);
 		handle.owner = null;
 		handle.inuse = true;
 	      }
@@ -1212,6 +1290,57 @@ public final class DBNameSpace implements NameSpace {
       }
 
     return true;
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                         verify_noninteractive()
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>This method returns null if the given transaction doesn't have
+   * any shadowFieldB's outstanding.  This is the desired case.  If
+   * the given transaction has some values with shadowFieldB's set,
+   * that means that those unique values are left "bound" to more than
+   * one field, which is an error that non-interactive clients can run
+   * into.</p>
+   *
+   * <p>In the latter case, we return a vector of namespace values
+   * that are in conflict at transaction commit time.</p>
+   */
+
+  public Vector verify_noninteractive(DBEditSet editSet)
+  {
+    DBNameSpaceTransaction tRecord;
+    Enumeration en;
+    Object value;
+    DBNameSpaceHandle handle;
+    Vector results = null;
+
+    /* -- */
+
+    tRecord = getTransactionRecord(editSet);
+
+    en = tRecord.getReservedEnum();
+    
+    while (en.hasMoreElements())
+      {
+	value = en.nextElement();
+	handle = getHandle(value);
+
+	if (handle.getShadowFieldB() != null)
+	  {
+	    if (results == null)
+	      {
+		results = new Vector();
+	      }
+
+	    results.addElement(value);
+	  }
+      }
+
+    return results;
   }
 
   /*----------------------------------------------------------------------------
@@ -1260,6 +1389,7 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    handle.owner = null;
 	    handle.setShadowField(null);
+	    handle.setShadowFieldB(null);
 	    handle.inuse = true;
 	  }
 	else
@@ -1324,8 +1454,18 @@ public final class DBNameSpace implements NameSpace {
 
 	if (handle.inuse)
 	  {
+	    // note that the DBEditSet commit logic should have
+	    // rejected the transaction if any of our handles still
+	    // have a shadowFieldB set at this late date.. let's just
+	    // verify that here
+
+	    if (handle.getShadowFieldB() != null)
+	      {
+		throw new RuntimeException("ASSERT: " + editSet.session.key + ": DBNameSpace.commit().. lingering shadowFieldB!");
+	      }
+
 	    handle.owner = null;
-	    handle.setPersistentField(handle.shadowField);
+	    handle.setPersistentField(handle.getShadowField());
 	    handle.setShadowField(null);
 	  }
 	else
