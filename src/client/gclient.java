@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 1999/02/25 02:24:26 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 1999/02/25 04:34:55 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -738,11 +738,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     objectInactivatePM = new treeMenu();
     objectInactivatePM.add(new MenuItem("View Object"));
     objectInactivatePM.add(new MenuItem("Edit Object"));
+    objectInactivatePM.add(new MenuItem("Delete Object"));
     objectInactivatePM.add(new MenuItem("Inactivate Object"));
 
     objectReactivatePM = new treeMenu();
     objectReactivatePM.add(new MenuItem("View Object"));
-    objectReactivatePM.add(new MenuItem("Edit Object"));;
+    objectReactivatePM.add(new MenuItem("Edit Object"));
+    objectReactivatePM.add(new MenuItem("Delete Object"));
     objectReactivatePM.add(new MenuItem("Reactivate Object"));
 
     try
@@ -810,7 +812,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     JPanel bottomBar = new JPanel(false);
     bottomBar.setLayout(new BorderLayout());
 
-
     statusLabel.setEditable(false);
     statusLabel.setOpaque(false);
     statusLabel.setBorder(statusBorder);
@@ -835,6 +836,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	ReturnVal rv = session.openTransaction("gclient");
 	handleReturnVal(rv);
+
 	if ((rv != null) && (!rv.didSucceed()))
 	  {
 	    throw new RuntimeException("Could not open transaction.");
@@ -892,7 +894,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setStatus("Ready.", 0);
   }
   
-
   /**
    * Returns a vector of FieldTemplates.
    *
