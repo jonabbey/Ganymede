@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2002/08/21 04:53:52 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2003/02/10 21:24:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,6 +210,15 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
    * clone, etc.), this customization method will actually do the work.</p>
+   *
+   * @param session The DBSession that the new object is to be created in
+   * @param origObj The object we are cloning
+   * @param local If true, fields that have choice lists will not be checked against
+   * those choice lists and read permissions for each field will not be consulted.
+   * The canCloneField() method will still be consulted, however.
+   *
+   * @return A standard ReturnVal status object.  May be null on success, or
+   * else may carry a dialog with information on problems and a success flag.
    */
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
@@ -290,6 +299,20 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    workingVolume = (DBEditObject) session.editDBObject(newInvid);
 	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
 	    tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+
+	    if (tmpVal != null && tmpVal.getDialog() != null)
+	      {
+		resultBuf.append("\n\n");
+		resultBuf.append(tmpVal.getDialog().getText());
+	    
+		problem = true;
+	      }
+
+	    // clear the ethernet MAC address field in the interface,
+	    // since we don't want to duplicate MAC addresses when we
+	    // clone a system.
+	    
+	    tmpVal = workingVolume.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
 
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
