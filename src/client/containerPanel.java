@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.38 $ %D%
+    Version: $Revision: 1.39 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,7 @@ import java.util.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
-
+import arlut.csd.Util.VecQuickSort;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   containerPanel
@@ -36,6 +36,7 @@ import arlut.csd.JDataComponent.*;
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
   static final boolean debug = true;
+  static final boolean debug_persona = false;
 
   // -- 
   
@@ -382,6 +383,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else if (comp instanceof JComboBox)
 	      {
+		((JComboBox)comp).removeItemListener(this);
 		Object o = field.getValue();
 		if (o instanceof String)
 		  {
@@ -433,6 +435,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		    JComboBox cb = (JComboBox)comp;
 		    cb.removeAllItems();
+
+		    // sort choices here.
+		    choices = sortStringVector(choices);
+
 		    for (int i = 0; i < choices.size(); i++)
 		      {
 			cb.addItem((String)choices.elementAt(i));
@@ -466,6 +472,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			System.out.println("I am not expecting this type in JComboBox: " + field);
 		      }
 		  }
+		((JComboBox)comp).addItemListener(this);
 	      }
 	    else if (comp instanceof JLabel)
 	      {
@@ -1100,7 +1107,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("Getting choices");
+		System.out.println("Key is null, Getting choices");
 	      }
 	    qr = field.choices();
 	  }
@@ -1120,7 +1127,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		qr =field.choices();
 		if (qr != null)
 		  {
-		    gc.cachedLists.put(id, qr);
+		    gc.cachedLists.put(id, qr.getListHandles());
 		  }
 	      }
 	  }
@@ -1249,6 +1256,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		choiceHandles = field.choices().getListHandles();
 		gc.cachedLists.put(key, choiceHandles);
+
+		// debuging stuff
+		if (debug_persona)
+		  {
+		    System.out.println();
+		    
+		    for (int i = 0; i < choiceHandles.size(); i++)
+		      {
+			System.out.println(" choices: " + (listHandle)choiceHandles.elementAt(i));
+		      }
+		    
+		    System.out.println();
+		  }
 	      }
 	      
 	  }
@@ -1411,6 +1431,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	String currentChoice = (String) fieldInfo.getValue();
 	boolean found = false;
 	    
+	// sort choices
+	choices = sortStringVector(choices);
+
 	for (int j = 0; j < choices.size(); j++)
 	  {
 	    String thisChoice = (String)choices.elementAt(j);
@@ -1768,6 +1791,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	combo.addItem(noneHandle);
 	
+	choices = sortListHandleVector(choices);
+
 	for (int j = 0; j < choices.size(); j++)
 	  {
 	    listHandle thisChoice = (listHandle) choices.elementAt(j);
@@ -1900,6 +1925,70 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		
     addRow( ipf, fieldTemplate.getName(), fieldInfo.isVisible());
     
+  }
+
+  Vector sortListHandleVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  listHandle aF, bF;
+	  
+	  aF = (listHandle) a;
+	  bF = (listHandle) b;
+	  int comp = 0;
+	  
+	  comp =  aF.toString().compareTo(bF.toString());
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
+  }
+
+  Vector sortStringVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  String aF, bF;
+	  
+	  aF = (String) a;
+	  bF = (String) b;
+	  int comp = 0;
+	  
+	  comp =  aF.compareTo(bF);
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
   }
 
   /**
