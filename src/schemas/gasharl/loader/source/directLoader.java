@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 1999/03/01 22:27:28 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 1999/03/03 00:33:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -369,6 +369,13 @@ public class directLoader {
 	    // differed..
 
 	    current_obj.setFieldValueLocal((short) 256, new Integer(ogRec.lowuid));
+
+	    if (ogRec.approval_address != null)
+	      {
+		current_field = current_obj.getField((short) 257); // approval list
+
+		((DBField) current_field).addElementLocal(ogRec.approval_address);
+	      }
 	  }
 
 	commitTransaction();

@@ -7,8 +7,8 @@
    
    Created: 29 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/02/26 22:52:07 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/03/03 00:33:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -85,6 +85,8 @@ public class Admin {
   int highgid;
   String code;
   String mask;
+  String address;
+  String approval_address;
 
   // instance constructor
 
@@ -167,13 +169,42 @@ public class Admin {
 	System.out.println("mask = '" + mask + "'");
       }
 
-    // get to the end of line.. skip the email info at the end
+    // skip second mask
 
-    // System.err.println("HEY! Token = " + token + ", ttype = " + tokens.ttype);
+    getNextBit(tokens);
+
+    // skip third mask
+
+    getNextBit(tokens);
+
+    // skip fourth mask
+
+    getNextBit(tokens);
+
+    // skip fifth mask
+
+    getNextBit(tokens);
+
+    // get the email address for this admin
+
+    address = getNextBit(tokens);
+
+    if (address != null)
+      {
+	System.out.println("Hey, found address: " + address);
+
+	approval_address = getNextBit(tokens);
+      }
+
+    if (approval_address != null)
+      {
+	System.out.println("Hey, found address: " + approval_address);
+      }
+
+    // shouldn't be anything left, but just in case..
 
     while ((tokens.ttype != StreamTokenizer.TT_EOL) && (tokens.ttype != StreamTokenizer.TT_EOF))
       {
-	// System.err.print(".");
 	tokens.nextToken();
       }
 
@@ -182,8 +213,10 @@ public class Admin {
 
   public void display()
   {
-    System.out.println("Admin: " + name + ", pass: " + password + ", mask = " + mask + ", lowuid: " + lowuid + ", highuid: " + highuid);
+    System.out.println("Admin: " + name + ", pass: " + password + ", mask = " + mask +
+		       "\n\tlowuid: " + lowuid + ", highuid: " + highuid);
     System.out.println("\tlowgid: " + lowgid + ", highgid: " + highgid);
+    System.out.println("\taddress: " + address + ", approval_address: " + approval_address);
   }
   
   private String getNextBit(StreamTokenizer tokens) throws IOException

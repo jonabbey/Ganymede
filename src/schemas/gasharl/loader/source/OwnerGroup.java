@@ -7,8 +7,8 @@
    
    Created: 30 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/02/26 22:52:08 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/03 00:33:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,6 +67,7 @@ public class OwnerGroup {
   int lowgid;
   int highgid;
   String prefix;
+  String approval_address;
   Vector admins;
 
   // instance constructor
@@ -95,7 +96,7 @@ public class OwnerGroup {
    *
    */
 
-  public OwnerGroup(int lowuid, int highuid, int lowgid, int highgid, String prefix)
+  public OwnerGroup(int lowuid, int highuid, int lowgid, int highgid, String prefix, String approval_address)
   {
     this.lowuid = lowuid;
     this.highuid = highuid;
@@ -103,6 +104,7 @@ public class OwnerGroup {
     this.highgid = highgid;
     this.prefix = prefix;
     this.objInvid = null;
+    this.approval_address = approval_address;
 
     if (this.prefix.indexOf('*') != -1)
       {
@@ -121,7 +123,7 @@ public class OwnerGroup {
 
   public OwnerGroup(Admin entry)
   {
-    this(entry.lowuid, entry.highuid, entry.lowgid, entry.highgid, entry.mask);
+    this(entry.lowuid, entry.highuid, entry.lowgid, entry.highgid, entry.mask, entry.approval_address);
   }
 
   public boolean equals(int lowuid, int highuid, int lowgid, int highgid, String prefix)
@@ -306,6 +308,7 @@ public class OwnerGroup {
   public String toString()
   {
     String result = objInvid == null ? "null " : (objInvid.toString() + " ");
+    result += "<notify: " + approval_address + "> ";
     result += "[" + lowuid + "," + highuid + "], [" + lowgid + "," + highgid + "], [" + prefix + "], (";
 
     for (int i = 0; i < admins.size(); i++)
