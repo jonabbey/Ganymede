@@ -25,6 +25,9 @@ up for listening on the client/console system, and full functionality
 is achieved even in the presence of a client-side system/personal
 firewall.
 
+This change also speeds up login and noticeably reduces the memory
+loading on the server.  A win/win/win deal.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 10, 2003
