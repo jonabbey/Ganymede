@@ -8,8 +8,8 @@
    
    Created: 26 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2003/02/27 03:38:51 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/02/28 03:55:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,16 +78,56 @@ import java.sql.Timestamp;
  * arlut.csd.ganymede.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2003/02/27 03:38:51 $
+ * @version $Revision: 1.5 $ $Date: 2003/02/28 03:55:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class DBLogPostGreSQLController implements DBLogController {
 
-  static int primaryKey = 0;
+  private static Hashtable databases = new Hashtable();
+
+  /**
+   * <p>Factory method for creating DBLogPostGreSQLController.  Static
+   * synchronized so that we can be sure not to create multiple
+   * controllers per database.</p>
+   */
+
+  public synchronized static DBLogPostGreSQLController createController(String hostname,
+									String databaseName, 
+									String username,
+									String password) throws ClassNotFoundException, SQLException
+  {
+    DBLogPostGreSQLController controller = new DBLogPostGreSQLController(hostname, databaseName,
+									 username, password);
+
+    return controller;
+  }
+
+  /**
+   * <p>Factory method for creating DBLogPostGreSQLController.  Static
+   * synchronized so that we can be sure not to create multiple
+   * controllers per database.</p>
+   */
+
+  public synchronized static DBLogPostGreSQLController createController(String hostname,
+									String databaseName, 
+									int port,
+									String username,
+									String password) throws ClassNotFoundException, SQLException
+  {
+    DBLogPostGreSQLController controller = new DBLogPostGreSQLController(hostname, 
+									 databaseName,
+									 port,
+									 username,
+									 password);
+
+    return controller;
+  }
 
   // ---
 
+  int primaryKey = 0;
+  String url = null;
   Connection con = null;
   PreparedStatement statement = null;
   PreparedStatement emailState = null;
@@ -102,13 +142,19 @@ public class DBLogPostGreSQLController implements DBLogController {
   String transactionID = null;
   Vector transInvids = null;
 
-  public DBLogPostGreSQLController(String hostname,
-				   String databaseName,
-				   String username, 
-				   String password) throws ClassNotFoundException, SQLException
-  {
-    String url;
+  /**
+   * <p>Private constructor for DBLogPostGreSQLController.  Use the
+   * static {@link
+   * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
+   * java.lang.String, java.lang.String, java.lang.String)
+   * createController} method to create instances of this class.</p>
+   */
 
+  private DBLogPostGreSQLController(String hostname,
+				    String databaseName,
+				    String username, 
+				    String password) throws ClassNotFoundException, SQLException
+  {
     /* -- */
 
     Class.forName("org.postgresql.Driver");
@@ -122,15 +168,43 @@ public class DBLogPostGreSQLController implements DBLogController {
 	url = "jdbc:postgresql://" + hostname + "/" + databaseName;
       }
 
+    if (databases.containsKey(url))
+      {
+	throw new IllegalArgumentException("already have a DBLogPostGreSQLController open on url " + url);
+      }
+    else
+      {
+	databases.put(url, Boolean.TRUE);
+      }
+
+    if (databases.containsKey(url))
+      {
+	throw new IllegalArgumentException("already have a DBLogPostGreSQLController open on url " + url);
+      }
+    else
+      {
+	databases.put(url, Boolean.TRUE);
+      }
+
     con = DriverManager.getConnection(url, username, password);
+    
+    primaryKey = getNextKey();
   } 
 
 
-  public DBLogPostGreSQLController(String hostname,
-				   String databaseName,
-				   int port,
-				   String username, 
-				   String password) throws ClassNotFoundException, SQLException
+  /**
+   * <p>Private constructor for DBLogPostGreSQLController.  Use the
+   * static {@link
+   * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
+   * java.lang.String, int, java.lang.String, java.lang.String)
+   * createController} method to create instances of this class.</p>
+   */
+
+  private DBLogPostGreSQLController(String hostname,
+				    String databaseName,
+				    int port,
+				    String username, 
+				    String password) throws ClassNotFoundException, SQLException
   {
     String url;
 
@@ -148,7 +222,30 @@ public class DBLogPostGreSQLController implements DBLogController {
       }
 
     con = DriverManager.getConnection(url, username, password);
+
+    primaryKey = getNextKey();
   } 
+
+  private synchronized int getNextKey() throws SQLException
+  {
+    int max = 0;
+
+    /* -- */
+
+    Statement stmt = con.createStatement();
+
+    ResultSet rs = stmt.executeQuery("select MAX(event_id) from event");
+
+    // we should only get one row
+
+    while (rs.next())
+      {
+	max = rs.getInt(1);
+	max = max +1;
+      }
+
+    return max;
+  }
 
   /**
    * <p>This method writes the given event to the persistent storage managed by
@@ -157,7 +254,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * @param event The DBLogEvent to be recorded
    */
 
-  public void writeEvent(DBLogEvent event)
+  public synchronized void writeEvent(DBLogEvent event)
   {
     if (con == null)
       {
@@ -464,7 +561,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * controller.</p>
    */
 
-  public void close()
+  public synchronized void close()
   {
     if (con != null)
       {
@@ -477,6 +574,10 @@ public class DBLogPostGreSQLController implements DBLogController {
 	  }
 
 	con = null;
+
+	databases.remove(url);
+
+	url = null;
       }
   }
 }
