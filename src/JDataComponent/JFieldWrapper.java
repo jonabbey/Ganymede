@@ -32,7 +32,7 @@ import gjt.Box;
 
 public class JFieldWrapper extends JBufferedPane {
 
-  Component my_field = null;
+  JComponent my_field = null;
 
   public JFieldWrapper(String fieldname)
   {
@@ -46,7 +46,7 @@ public class JFieldWrapper extends JBufferedPane {
     add("West",l);
   }
 
-  public JFieldWrapper(String fieldname,Component field)
+  public JFieldWrapper(String fieldname,JComponent field)
   {
     this(fieldname);
 
