@@ -80,10 +80,10 @@ $Author$
         margin-top: 3em;
         font-variant: small-caps;
         font-size: x-large;
-        border-left: 2em solid #cfc;
-        border-top: 2px solid #cfc;
-        padding-left: .5em;
-        padding-top: .25em;
+        background-color: #cfc;
+        padding: .5em;
+        border: 1px solid #c9d1d7;
+        color: #222;
     }
 
     h3 {
@@ -91,8 +91,11 @@ $Author$
         font-variant: small-caps;
         font-size: large;
         color: #900;
-        border-left: 2em solid #ccf;
-        padding-left: 1em;
+    }
+
+    h3:before {
+        content: "\00BB \0020";
+        color: #666;
     }
 
     h4 {
