@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -144,7 +144,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
       progressPanel = new JPanel();
-      progressPanel.setBorder(new EmptyBorder(new Insets(30,30,30,30)));
+      progressPanel.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
       progressBar = new JProgressBar();
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
@@ -260,7 +260,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this, progressBar);
 
-      cp.setBorder(new EmptyBorder(new Insets(10,10,10,10)));
+      cp.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
       general.setViewportView(cp);
       //general.setViewportView(progressBar);
