@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/07/03 04:32:19 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/07/03 17:52:15 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -49,6 +49,8 @@
 */
 
 package arlut.csd.JDataComponent;
+
+import arlut.csd.Util.Compare;
 
 import java.awt.event.*;
 import java.awt.*;
@@ -93,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.43 $ $Date: 2001/07/03 04:32:19 $ $Name:  $
+ * @version $Revision: 1.44 $ $Date: 2001/07/03 17:52:15 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -638,7 +640,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * Update the StringSelector.
    */
 
-  public void update(Vector available, boolean sortAvailable, Vector chosen, boolean sortChosen)
+  public void update(Vector available, boolean sortAvailable, Compare availComparator,
+		     Vector chosen, boolean sortChosen, Compare chosenComparator)
   {
     if (available == null)
       {
@@ -672,7 +675,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    out.load(available, -1, sortAvailable, null);
+	    out.load(available, -1, sortAvailable, availComparator);
 	  }
 	catch (Exception e)
 	  {
@@ -682,7 +685,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	in.load(chosen, -1, sortChosen, null);
+	in.load(chosen, -1, sortChosen, chosenComparator);
       }
     catch (Exception e)
       {
