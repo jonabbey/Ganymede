@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,6 +79,8 @@ public class ReturnVal implements java.io.Serializable {
   boolean success;
   byte status;
   Invid newObjectInvid = null;
+  db_object remoteObjectRef = null;
+
   private StringBuffer rescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
@@ -140,6 +142,21 @@ public class ReturnVal implements java.io.Serializable {
   public Invid getInvid()
   {
     return newObjectInvid;
+  }
+
+  /**
+   * This method is used to get a remote db_object reference that the
+   * server wants to return to the client.  Used particularly for
+   * Session.create_db_object() / Session.edit_db_object(), or null if
+   * no db_object was returned.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public db_object getObject()
+  {
+    return remoteObjectRef;
   }
 
   /**
@@ -449,5 +466,18 @@ public class ReturnVal implements java.io.Serializable {
   public void setInvid(Invid invid)
   {
     this.newObjectInvid = invid;
+  }
+
+  /**
+   *
+   * This method is used to set a db_object reference that the client
+   * can retrieve from us in those cases where a method on the server
+   * really does need to return a db_object _and_ a return val.
+   * 
+   */
+
+  public void setObject(db_object object)
+  {
+    this.remoteObjectRef = object;
   }
 }
