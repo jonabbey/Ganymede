@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,11 +36,14 @@ public class notesPanel extends JPanel{
   int 
     row = 0;
 
+  JPanel
+    center;
+  
   JTextArea
     notesArea;
 
   framePanel 
-    parent;
+    fp;
 
   string_field
     notes_field;
@@ -51,39 +54,36 @@ public class notesPanel extends JPanel{
     createdOn,
     modifiedOn;
 
+  GridBagLayout
+    gbl;
+
+  GridBagConstraints
+    gbc;
+
   public notesPanel(string_field notes_field, string_field creator_field, 
 		    date_field creation_date_field, string_field modifier_field,
-		    date_field modification_date_field, boolean editable, framePanel parent)
+		    date_field modification_date_field, boolean editable, framePanel fp)
     {
       if (debug)
 	{
 	  System.out.println("Creating notes panel");
 	}
       
-      this.parent = parent;
+      this.fp = fp;
       this.notes_field = notes_field;
 
-      //setLayout(new BorderLayout(5,5));
-      //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-      setLayout(new GridLayout(2,1));
+      setBorder(fp.wp.emptyBorder5);
 
-      JPanel topPane = new JPanel(false);
-      //topPane.setLayout(new BoxLayout(topPane, BoxLayout.Y_AXIS));
-      topPane.setLayout(new GridLayout(2,1));
+      center = new JPanel(false);
+      setLayout(new BorderLayout());
+      add("West", center);
 
-      JPanel createdPane = new JPanel(false);
-      //createdPane.setLayout(new BoxLayout(createdPane, BoxLayout.Y_AXIS));
-      createdPane.setLayout(new GridLayout(2,2));
-      createdPane.setBorder(new TitledBorder("Creation Information"));
+      gbc = new GridBagConstraints();
+      gbl = new GridBagLayout();
+      center.setLayout(gbl);
 
-      JPanel modPane = new JPanel(false);
-      //modPane.setLayout(new BoxLayout(modPane, BoxLayout.Y_AXIS));
-      modPane.setLayout(new GridLayout(2,2));
-      modPane.setBorder(new TitledBorder("Modification Information"));
-
-      topPane.add(createdPane);
-      //topPane.add(Box.createVerticalStrut(3));
-      topPane.add(modPane);
+      gbc.anchor = GridBagConstraints.NORTHWEST;
+      gbc.insets = new Insets(6,6,6,6);
 
       String creator = null;
       Date creation_date = null;
@@ -104,7 +104,8 @@ public class notesPanel extends JPanel{
 	  throw new RuntimeException("Could not get creation info: " + rx);
 	}
 
-      createdBy = new JTextField(20);
+      createdBy = new JTextField(30);
+
       if (creator == null)
 	{
 	  createdBy.setText("No creator set for this object.");
@@ -114,7 +115,10 @@ public class notesPanel extends JPanel{
 	  createdBy.setText(creator);
 	}
 
-      createdOn = new JTextField(20);
+      addRow(createdBy, "Created By:");
+
+      createdOn = new JTextField(30);
+
       if (creation_date == null)
 	{
 	  createdOn.setText("No creation date has been set for this object.");
@@ -124,13 +128,9 @@ public class notesPanel extends JPanel{
 	  createdOn.setText(dateformat.format(creation_date));
 	}
 
-      createdPane.add(new JLabel("Created on:"));
-      createdPane.add(createdOn);
-      
-      createdPane.add(new JLabel("Created by:"));
-      createdPane.add(createdBy);
+      addRow(createdOn, "Created On:");
 
-      modifiedBy = new JTextField(20);
+      modifiedBy = new JTextField(30);
       if (modifier == null)
 	{
 	  modifiedBy.setText("No information about the last modifier.");
@@ -140,7 +140,9 @@ public class notesPanel extends JPanel{
 	  modifiedBy.setText(modifier);
 	}
 
-      modifiedOn = new JTextField(20);
+      addRow(modifiedBy, "Modified By:");
+
+      modifiedOn = new JTextField(30);
       if (mod_date == null)
 	{
 	  modifiedOn.setText("No last modification date");
@@ -150,28 +152,24 @@ public class notesPanel extends JPanel{
 	  modifiedOn.setText(dateformat.format(mod_date));
 	}
 
-      modPane.add(new JLabel("Modified by:"));
-      modPane.add(modifiedBy);
+      addRow(modifiedOn, "Modified on:");
 
-      modPane.add(new JLabel("Modified on:"));
-      modPane.add(modifiedOn);
-
-      //add("North", topPane);
-      add(topPane);
       
-      //notesArea = new JTextArea(null, 30,15, JTextArea.SCROLLBARS_NONE);
-      //notesArea = new JTextArea(30,15);
       notesArea = new JTextArea();
-      notesArea.setBorder(new TitledBorder("Notes"));
+      EmptyBorder eb = fp.wp.emptyBorder5;
+      TitledBorder tb = new TitledBorder("Notes");
+      notesArea.setBorder(new CompoundBorder(tb,eb));
 
-      if (debug)
-	{
-	  System.out.println("Columns= " + notesArea.getColumns());
-	  System.out.println("Rows =   " + notesArea.getRows());
-	}
+      gbc.weighty = 1.0;
+      gbc.weightx = 0.0;
 
-      add(notesArea);
-      //add("Center", bottomPane);
+      gbc.gridx = 0;
+      gbc.gridy = row;
+      //gbc.gridwidth = 2;
+      gbc.gridwidth = GridBagConstraints.REMAINDER;
+      gbc.fill = GridBagConstraints.BOTH;
+      gbl.setConstraints(notesArea, gbc);
+      center.add(notesArea);
 
       if (notes_field != null)
 	{
@@ -204,14 +202,27 @@ public class notesPanel extends JPanel{
 	}
     }
 
-  void addRow(Container cont, String label, JComponent comp, int row)
+  void addRow(JComponent comp, String title)
   {
-    JLabel l = new JLabel(label);
-    l.setOpaque(true);
-    l.setBackground(ClientColor.ComponentBG);
-    comp.setBackground(ClientColor.ComponentBG);
-    cont.add("0 " + row + " lthwHW", l);
-    cont.add("1 " + row + " lthwHW", comp);
+
+    JLabel l = new JLabel(title);
+    
+    gbc.weightx = 0.0;
+    gbc.fill = GridBagConstraints.NONE;
+
+    gbc.gridwidth = 1;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+    gbl.setConstraints(l, gbc);
+    center.add(l);
+
+    gbc.gridx = 1;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbl.setConstraints(comp, gbc);
+    center.add(comp);
+
+    row++;
+
   }
 
 
