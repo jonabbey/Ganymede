@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/02/01 04:15:06 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/01 04:16:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.4 $ $Date: 2000/02/01 04:15:06 $
+ * @version $Revision: 1.5 $ $Date: 2000/02/01 04:16:40 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -100,7 +100,7 @@ public class serverAdminProxy implements Admin, Runnable {
    * admin console isn't responding.</p>
    */
 
-  private int maxBufferSize = 15; // only 9 kinds of things, most of which we coalesce/replace
+  private int maxBufferSize = 15; // only 10 kinds of things, most of which we coalesce/replace
 
   /**
    * <p>Our remote reference to the admin console client</p>
