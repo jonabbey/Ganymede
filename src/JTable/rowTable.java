@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.5 $ %D% 
+ * @version $Revision: 1.6 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -441,6 +441,15 @@ public class rowTable extends baseTable {
     return index.containsKey(key);
   }
 
+  /**
+   * Return an enumeration of the keys in the table
+   *
+   */
+
+  public Enumeration keys()
+  {
+    return index.keys();
+  }
 
 }
 
