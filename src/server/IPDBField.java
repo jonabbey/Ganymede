@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -283,26 +283,33 @@ public class IPDBField extends DBField implements ip_field {
 	throw new IllegalArgumentException("scalar method called on a vector field");
       }
 
-    if (value instanceof String)
+    if (value == null)
       {
-	String input = (String) value;
-
-	if (input.indexOf(':') == -1)
-	  {
-	    bytes = genIPV4bytes(input);
-	  }
-	else
-	  {
-	    bytes = genIPV6bytes(input);
-	  }
-      }
-    else if (!(value instanceof Byte[]))
-      {
-	throw new IllegalArgumentException("invalid type argument");
+	bytes = null;
       }
     else
       {
-	bytes = (Byte[]) value;
+	if (value instanceof String)
+	  {
+	    String input = (String) value;
+
+	    if (input.indexOf(':') == -1)
+	      {
+		bytes = genIPV4bytes(input);
+	      }
+	    else
+	      {
+		bytes = genIPV6bytes(input);
+	      }
+	  }
+	else if (!(value instanceof Byte[]))
+	  {
+	    throw new IllegalArgumentException("invalid type argument");
+	  }
+	else
+	  {
+	    bytes = (Byte[]) value;
+	  }
       }
 
     if (!verifyNewValue(bytes))
@@ -320,7 +327,7 @@ public class IPDBField extends DBField implements ip_field {
 
     if (ns != null)
       {
-	unmark(this.value);
+	unmark(this.value);	// our old value
 
 	if (!mark(bytes))
 	  {
