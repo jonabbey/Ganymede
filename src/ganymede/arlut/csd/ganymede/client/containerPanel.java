@@ -640,9 +640,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		// If we are a persona panel, hide the associated user field.
 		    
-		if (((type== SchemaConstants.OwnerBase) && 
-		     (ID == SchemaConstants.OwnerObjectsOwned))
-		    || (ID == SchemaConstants.BackLinksField)
+		if ((ID == SchemaConstants.BackLinksField)
 		    || ((type == SchemaConstants.UserBase) && 
 			(ID == SchemaConstants.UserAdminPersonae))
 		    || ((ID == SchemaConstants.ContainerField) && 

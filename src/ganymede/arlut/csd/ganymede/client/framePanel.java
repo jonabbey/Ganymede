@@ -293,8 +293,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     modifier_field;
 
   invid_field 
-    persona_field,
-    objects_owned_field;
+    persona_field;
 
   boolean 
     editable;
@@ -481,6 +480,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		  }
 		else
 		  {
+		    /* XXX
+		       all of this needs to be redone
+
 		    if (stopped.isSet())
 		      {
 			return;
@@ -489,6 +491,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    objects_owned = new JScrollPane();
 		    pane.addTab("Objects Owned", null, objects_owned);
 		    objects_owned_index = current++;
+
+		       XXX
+		    */
 		  }
 	      }
 	    else if (id == SchemaConstants.UserBase)
@@ -1282,6 +1287,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     validate();
   }
   
+  /*
+    XXX
+    all of this needs to be reworked, the ownershipPanel and everything, because
+    the Owner Group DBObjectBase no longer includes an OwnerObjectsOwned field.  We'll
+    have to synthesize a special panel which will present a virtualized viewing/editing
+    display based on discrete queries on the server rather than InvidDBField RMI calls.
+    XXX 
+  */
+
   void create_objects_owned_panel()
   {
     if (debug)
@@ -1549,8 +1563,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
     else if (index == objects_owned_index)
       {
-	setStatus("Creating objects owned panel");
-	create_objects_owned_panel();
+	// setStatus("Creating objects owned panel");
+	//	create_objects_owned_panel();
       }
     else if (index == personae_index)
       {
