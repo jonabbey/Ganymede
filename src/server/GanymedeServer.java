@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   static GanymedeServer server = null;
   static Vector sessions = new Vector();
-  static Hashtable activeUsers = new Hashtable(); 
+  static Hashtable activeUsers = new Hashtable();
+  static Hashtable userLogOuts = new Hashtable();
   private int limit;
 
   /* -- */
@@ -127,7 +128,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     Vector results = Ganymede.internalSession.internalQuery(userQuery);
 
-    for (int i = 0; !found && (i < results.size()); i++)
+    // results.size() really shouldn't be any larger than 1, since we
+    // are doing a match on username and username is managed by a
+    // namespace in the schema.
+
+    for (int i = 0; !found && results != null && (i < results.size()); i++)
       {
 	user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	
@@ -138,6 +143,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    found = true;
 	  }
       }
+
+    // if we didn't find a user, perhaps they tried logging in by
+    // entering their persona name directly?  For the time being we
+    // are allowing this, so we'll go ahead and look for a matching
+    // persona.
 
     if (!found)
       {
@@ -288,8 +298,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   /**
    *
-   * This method is used by GanymedeSession.login() to find
-   * a unique name for a session.  It is matched with
+   * This method is to handle user logout.  It is matched with
    * registerActiveUser(), above.
    *
    */
@@ -300,6 +309,116 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	activeUsers.remove(username);
       }
+  }
+
+  /**
+   *
+   * This method retrieves a message from a specified directory in the
+   * Ganymede installation and
+   * 
+   */
+
+  public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
+					    boolean html)
+  {
+    if ((key.indexOf('/') != -1) || (key.indexOf('\\') != -1))
+      {
+	throw new IllegalArgumentException("Error, attempt to use path separator in message key.");
+      }
+
+    if (html)
+      {
+	key = key + ".html";
+      }
+    else
+      {
+	key = key + ".text";
+      }
+
+    if (Ganymede.messageDirectoryProperty == null)
+      {
+	Ganymede.debug("GanymedeServer.getTextMessage(): messageDirectoryProperty not set.  Can't provide " + key);
+	return null;
+      }
+
+    /* - */
+
+    String filename = arlut.csd.Util.PathComplete.completePath(Ganymede.messageDirectoryProperty) + key;
+    File messageFile;
+
+    /* -- */
+
+    messageFile = new File(filename);
+
+    if (!messageFile.exists() || ! messageFile.isFile())
+      {
+	return null;
+      }
+
+    if (userToDateCompare != null)
+      {
+	Date lastlogout = (Date) userLogOuts.get(userToDateCompare);
+
+	if (lastlogout != null)
+	  {
+	    Date timestamp = new Date(messageFile.lastModified());
+
+	    if (lastlogout.after(timestamp))
+	      {
+		return null;
+	      }
+	  }
+      }
+
+    // okay, read and copy!
+
+    BufferedReader in = null;
+    StringBuffer result = null;
+
+    try
+      {
+	in = new BufferedReader(new FileReader(messageFile));
+
+	result = new StringBuffer();
+
+	try
+	  {
+	    String line = in.readLine();
+
+	    while (line != null)
+	      {
+		result.append(line);
+		result.append("\n");
+		line = in.readLine();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("IOException in GanymedeServer.getTextMessage(" + 
+			   filename + "):\n" + ex.getMessage());
+	    Ganymede.debug(result.toString());
+	  }
+      }
+    catch (FileNotFoundException ex)
+      {
+	Ganymede.debug("getTextMessage(" + key + "): FileNotFoundException");
+	return null;
+      }
+    finally
+      {
+	if (in != null)
+	  {
+	    try
+	      {
+		in.close();
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+
+    return result;
   }
 
   /**
