@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.64 $ %D%
+   Version: $Revision: 1.65 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   Vector values;
   DBObject owner;
   DBObjectBaseField definition;
-  boolean defined;
 
   DBField next = null;		// required for use with DBFieldTable
   short fieldID = -1;
@@ -361,9 +360,84 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    *
    */
 
-  public final boolean isDefined()
+  public synchronized boolean isDefined()
   {
-    return defined;
+    if (isVector())
+      {
+	if (values != null && values.size() > 0)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+    else
+      {
+	if (value != null)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of DBField will
+   * implement this in different ways.  Any namespace values claimed
+   * by the field will be released, and when the transaction is
+   * committed, this field will be released.
+   * 
+   */
+
+  public synchronized ReturnVal setUndefined(boolean local)
+  {
+    if (isVector())
+      {
+	if (!isEditable(local))	// *sync* GanymedeSession possible
+	  {
+	    return Ganymede.createErrorDialog("Couldn't clear field",
+					      "DBField.setUndefined(): couldn't " +
+					      "clear a vector element from field " +
+					      getName());
+	  }
+
+	// we know we're editable, so..
+
+	ReturnVal tempResult = null;
+
+	DBSession session = ((DBEditObject) owner).getSession();
+	String key = "DBField.setUndefined:" + new Date();
+
+	session.checkpoint(key);
+
+	while ((tempResult == null || tempResult.didSucceed()) && 
+	       values.size() > 0)
+	  {
+	    tempResult = deleteElement(0, local);
+	  }
+
+	if (tempResult != null && !tempResult.didSucceed())
+	  {
+	    session.rollback(key);
+	  }
+	else
+	  {
+	    session.popCheckpoint(key);
+	  }
+	
+	return tempResult;
+      }
+    else
+      {
+	return setValue(null, local);
+      }
   }
 
   /**
@@ -793,12 +867,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	if (value != null)
 	  {
 	    this.value = value;
-	    defined = true;
 	  }
 	else
 	  {
 	    this.value = null;
-	    defined = false;	// the key
 	  }
 
 	this.newValue = null;
@@ -1047,8 +1119,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	values.setElementAt(value, index);
 
-	defined = true;
-	
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
 	// we'll want to combine with that from our 
@@ -1198,7 +1268,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     if (newRetVal == null || newRetVal.didSucceed()) 
       {
 	values.addElement(value);
-	defined = true;
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -1327,8 +1396,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.removeElementAt(index);
-
-	defined = (values.size() > 0);
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -2104,17 +2171,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  {
 	    this.value = oldval;
 	  }
-      }
-
-    // and we need to restore our defined bit.
-
-    if (oldval == null)
-      {
-	this.defined = false;
-      }
-    else
-      {
-	this.defined = true;
       }
   }
 
