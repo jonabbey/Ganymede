@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.150 $
-   Last Mod Date: $Date: 2001/01/27 03:15:42 $
+   Version: $Revision: 1.151 $
+   Last Mod Date: $Date: 2001/01/27 03:29:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.150 $ %D%
+ * @version $Revision: 1.151 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1748,7 +1748,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (!tmp.equals(oldInvid))
 	  {
-	    throw new RuntimeException("dissolve called with an unbound invid (scalar)");
+	    throw new RuntimeException("dissolve called with an unbound invid (scalar).. requested to unbind " + oldInvid +
+				       ", but current value = " + tmp + ". I am " + this.toString());
 	  }
 
 	ReturnVal retVal = eObj.finalizeSetValue(this, null);
