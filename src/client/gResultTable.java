@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,6 +89,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     Vector results = null;
 
+    parent.parent.setStatus("Querying server");
+
     if (query != null)
       {
 	try
@@ -103,6 +105,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	if (buffer == null)
 	  {
 	    System.err.println("null query dump result");
+	    parent.parent.setStatus("No results");
 	  }
 	else
 	  {
@@ -128,6 +131,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     /* -- */
 
     System.err.println("result size = " + results.length());
+
+    parent.parent.setStatus("Loading table");
 
     chars = results.toCharArray();
 
@@ -159,7 +164,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	index++;		// skip past |
 
-	System.err.println("Header[" + headerVect.size() + "]: " + tempString.toString());
+	//	System.err.println("Header[" + headerVect.size() + "]: " + tempString.toString());
 
 	headerVect.addElement(tempString.toString());
       }
@@ -283,7 +288,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // sort by the first column in ascending order
 
+    parent.parent.setStatus("Sorting table on first column");
+
     table.resort(0, true, false);
+
+    parent.parent.setStatus("Query Complete.");
 
     // the first time we're called, the table will not be visible, so we
     // don't want to refresh it here..
