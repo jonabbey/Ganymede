@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import com.sun.java.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.7 $ %D%
+ * @version $Revision: 1.8 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -1453,6 +1453,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   private Color fgColor;
   private Color bgColor;
   private Color lineColor = Color.black;
+  private Color dragLineColor = Color.black;
 
   private FontMetrics fontMetric;
   private int rowHeight;
@@ -1605,6 +1606,8 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  {
 	    y = (ctrl.dragAboveNode.row + 1) * ctrl.row_height - (rowAscent / 2) + (ctrl.row_height / 2);
 	  }
+
+	g.setColor(dragLineColor);
 
 	g.drawLine(0, y - v_offset, backing.getWidth(this), y - v_offset);
       }
