@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2001/08/15 03:56:57 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2001/08/15 04:27:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.132 $ $Date: 2001/08/15 03:56:57 $
+ * @version $Revision: 1.133 $ $Date: 2001/08/15 04:27:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -388,7 +388,11 @@ public class DBObject implements db_object, FieldType, Remote {
 
     synchronized (original.fieldAry)
       {
-	fieldAry = new DBField[original.fieldAry.length];
+	// make fieldAry big enough to hold all fields defined, because
+	// DBObjectDeltaRec uses this constructor when doing
+	// journal edits to an object
+
+	fieldAry = new DBField[objectBase.fieldTable.size()];
 
 	// put any defined fields into the object we're going
 	// to commit back into our DBStore
@@ -399,7 +403,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	    
 	    if (field == null)
 	      {
-		System.err.println("XXZZ weird, null field in dbobject copy constructor");
 		continue;
 	      }
 	    
