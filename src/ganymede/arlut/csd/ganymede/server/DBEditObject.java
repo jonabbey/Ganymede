@@ -1510,17 +1510,69 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @param sourceObj The object that contains the Invid to be written out.
    * @param targetObj The object that the invid resolves to.
    * @param syncChannel The name of the Sync Channel that this Invid is being written to.
-   * @param getOriginal If true and the foreign sync keys are being
+   * @param forceOriginal If true and the foreign sync keys are being
    * generated in a transactional context (as in the incremental Sync
    * Channel writes), getForeignSyncKeys() will attempt to resolve the
-   * original version of the object.
+   * extra attributes against the original version of the object targeted
+   * by invid.
    */
 
   public String[] getForeignSyncKeys(Invid invid, DBObject sourceObj, DBObject targetObj,
-				     String syncChannel, boolean getOriginal)
+				     String syncChannel, boolean forceOriginal)
   {
     return null;
   }
+
+  /**
+   * <p>This method provides a hook that can be used by subclasses of
+   * DBEditObject to return a list of attribute names and attribute
+   * values to include when writing out &lt;invid&gt; elements that
+   * point to them during a sync channel operation.  This method
+   * differs from {@link
+   * arlut.csd.ganymede.server.DBEditObject#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,
+   * arlut.csd.ganymede.server.DBObject,
+   * arlut.csd.ganymede.server.DBObject, java.lang.String, boolean)}
+   * in that this method adds extra attributes to &lt;invid&gt;
+   * elements pointing to objects of this kind, where
+   * getForeignSyncKeys() adds extra attributes to &lt;invid&gt;
+   * elements that point from objects of this kind.</p>
+   *
+   * <P>The point of this is to allow DBEditObject subclasses to
+   * inject additional data into a transactional sync record so that
+   * external sync channel service code can have enough information to
+   * identify a relationship that was made or broken within the
+   * tranaction.  For instance, if you are synchronizing to an LDAP
+   * structure with the XML Sync Channel mechanism, you might want all
+   * of your &lt;invid&gt; elements that point to Users to include a
+   * dn attribute that provides the fully qualified LDAP DN for the
+   * User object.</p>
+   *
+   * <p>The array returned should have an even number of values.  The
+   * first value should be an attribute name, the second should be
+   * the value for that attribute name, the third should be another
+   * attribute name, and etc.</p>
+   *
+   * <p>It is an error to return an attribute name that conflicts with
+   * the set pre-defined for use with the &lt;invid&gt; XML element.
+   * This includes <code>type</code>, <code>num</code>, <code>id</code>,
+   * and <code>oid</code>.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param myObj The object that is being targetted by an &lt;invid&gt; element.
+   * @param syncChannel The name of the Sync Channel that the &lt;invid&gt; is being written to.
+   * @param forceOriginal If true and the foreign sync keys are being
+   * generated in a transactional context (as in the incremental Sync
+   * Channel writes), getMySyncKeys() will attempt to resolve the
+   * extra attributes against the original version of any objects resolved during
+   * generation of the extra attributes.
+   */
+
+  public String[] getMyExtraInvidAttributes(DBObject myObj, String syncChannel, boolean forceOriginal)
+  {
+    return null;
+  }
+
 
   /* -------------------- editing/creating Customization hooks -------------------- 
 
