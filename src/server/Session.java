@@ -11,15 +11,15 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/03/30 22:05:38 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2003/09/05 00:14:33 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -48,7 +48,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -80,7 +81,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.52 $ %D%
+ * @version $Revision: 1.53 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -160,6 +161,19 @@ public interface Session extends Remote {
    */
 
   StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws RemoteException;
+
+  /**
+   * <p>This method is used to allow the client to retrieve a remote reference to
+   * a {@link arlut.csd.ganymede.serverClientAsyncResponder}, which will allow
+   * the client to poll the server for asynchronous messages from the server.</p>
+   *
+   * <p>This is used to allow the server to send build status change notifications and
+   * shutdown notification to the client, even if the client is behind a network
+   * or personal system firewall.  The serverClientAsyncResponder blocks while there
+   * is no message to send, and the client will poll for new messages.</p>
+   */
+
+  ClientAsyncResponder getAsyncPort() throws RemoteException;
 
   /**
    * <p>This method returns the identification string that the server
