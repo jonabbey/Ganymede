@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2001/06/26 05:28:30 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2001/06/26 06:29:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1386,10 +1386,23 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
+   * This method is used to specify the earliest acceptable date
+   * for the specified {@link arlut.csd.ganymede.DateDBField DateDBField}.
+   */
+
+  public Date minDate(DBField field)
+  {
+    if (field.getID() == userSchema.PASSWORDCHANGETIME)
+      {
+	return new Date(); // no values in the past, thanks
+      }
+
+    return super.minDate(field);
+  }
+
+  /**
    * This method is used to specify the latest acceptable date
-   * for the specified field.
-   *
+   * for the specified {@link arlut.csd.ganymede.DateDBField DateDBField}.
    */
 
   public Date maxDate(DBField field)
