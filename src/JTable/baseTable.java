@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.14 $ %D%
+  Version: $Revision: 1.15 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.14 $ %D%
+ * @version $Revision: 1.15 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -247,7 +247,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
       }
 
     cols = new Vector(colWidths.length);
-    colPos = new Vector(colWidths.length+1);
+    colPos = new Vector(colWidths.length + 1);
     origTotalWidth = 0;
 
     for (int i = 0; i < colWidths.length; i++)
@@ -255,7 +255,13 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	cols.addElement(new tableCol(this, headers[i], colWidths[i],
 				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
+	
+	colPos.addElement(new Integer(0));
       }
+
+    // and one to grow one for the last pole
+
+    colPos.addElement(new Integer(0));
 
     // initialize our vector of tableRow's
     // we don't actually allocate cells until they are set
@@ -950,6 +956,41 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
       }
   }
 
+  public synchronized void deleteColumn(int index, boolean reportion)
+  {
+    tableRow row;
+    tableCol col;
+
+    /* -- */
+
+    if (cols.size() == 1)
+      {
+	return;			// can't delete only column
+      }
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+	row.removeElementAt(index);
+      }
+
+    cols.removeElementAt(index);
+    colPos.removeElementAt(colPos.size()-1); // doesn't matter which, we're about to recalc it
+
+    if (reportion)
+      {
+	int newWidth = origTotalWidth / cols.size();
+
+	for (int i=0; i<cols.size(); i++)
+	  {
+	    col = (tableCol) cols.elementAt(i);
+	    col.origWidth = col.width = newWidth; 
+	  }
+      }
+
+    reShape();
+  }
+
 
   // -------------------- Click / Selection Methods --------------------
 
@@ -1232,7 +1273,13 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	cols.addElement(new tableCol(this, headers[i], colWidths[i],
 				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
+
+	colPos.addElement(new Integer(0));
       }
+
+    // and one to grow on for our last pole
+
+    colPos.addElement(new Integer(0));
 
     rows = new Vector();
 
@@ -2658,11 +2705,10 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	  {
 	    // we are not scaled
 
-	    tableCol priorCol, thisCol, nextCol;
+	    tableCol priorCol, thisCol;
 
 	    priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
 	    thisCol = (tableCol) rt.cols.elementAt(colDrag);
-	    nextCol = (tableCol) rt.cols.elementAt(colDrag+1);
 
 	    if (debug)
 	      {
@@ -2685,11 +2731,10 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	  {
 	    // we are probably scaled
 
-	    tableCol priorCol, thisCol, nextCol;
+	    tableCol priorCol, thisCol;
 
 	    priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
 	    thisCol = (tableCol) rt.cols.elementAt(colDrag);
-	    nextCol = (tableCol) rt.cols.elementAt(colDrag+1);
 
 	    if (debug)
 	      {
@@ -3040,6 +3085,16 @@ class tableRow {
   tableRow(int size)
   {
     this.cells = new Vector(size);
+
+    for (int i = 0; i < size; i++)
+      {
+	this.cells.addElement(new tableCell());
+      }
+  }
+
+  void removeElementAt(int index)
+  {
+    cells.removeElementAt(index);
   }
 
   tableCell elementAt(int index)
