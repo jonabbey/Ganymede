@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 1999/11/16 08:00:58 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 1999/11/19 20:37:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.82 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.83 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -802,11 +802,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	keynum = field.getID();
 	key = new Short(keynum);
 
-	if (keynum == SchemaConstants.BackLinksField)
-	  {
-	    continue;	// don't write out the backlinks field
-	  }
-
 	if (fieldsToEmit.contains(key))
 	  {
 	    out.writeShort(key.shortValue());
@@ -893,7 +888,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
-    out.writeInt(getID());
+    out.writeInt(getID());	// write out our object id
 
     if (fields.size() == 0)
       {
@@ -918,11 +913,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (debugEmit)
 	  {
-	    if (field.getID() == SchemaConstants.BackLinksField)
-	      {
-		continue;	// don't write out the backlinks fieldn
-	      }
-
 	    if (field.isDefined())
 	      {
 		out.writeShort(field.getID());
@@ -936,11 +926,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 	else
 	  {
-	    if (field.getID() == SchemaConstants.BackLinksField)
-	      {
-		continue;	// don't write out the backlinks fieldn
-	      }
-
 	    out.writeShort(field.getID());
 	    field.emit(out);
 	  }
@@ -1038,6 +1023,8 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	  case INVID:
 	    tmp = new InvidDBField(this, in, definition);
+
+	    // at 1.17 we started ignoring back links field.
 
 	    if (fieldcode == SchemaConstants.BackLinksField)
 	      {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 1999/11/16 08:00:59 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 1999/11/19 20:37:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -406,24 +406,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	    addField(bf);
 
-	    /* And our 8 field, the backlinks field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Back Links";
-	    bf.field_code = SchemaConstants.BackLinksField;
-	    bf.field_type = FieldType.INVID;
-	    bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
-	    bf.targetField = -1;	// procedure for handling deletion and what not..
-	    bf.field_order = 8;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-	    bf.array = true;
-	    bf.visibility = false;	// we don't want the client to show the backlinks field
-
-	    addField(bf);
-
 	    // note that we won't have an expiration date or removal date
 	    // for an embedded object
 	  }
@@ -541,24 +523,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.editable = false;
 	    bf.removable = false;	
 	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    /* And our 8 field, the backlinks field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Back Links";
-	    bf.field_code = SchemaConstants.BackLinksField;
-	    bf.field_type = FieldType.INVID;
-	    bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
-	    bf.targetField = -1;	// procedure for handling deletion and what not..
-	    bf.field_order = 8;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-	    bf.array = true;
-	    bf.visibility = false;	// we don't want the client to show the backlinks field
 
 	    addField(bf);
 	  }
@@ -711,17 +675,40 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    size = fieldTable.size();
+    // calculate what fields we want to emit.  We're going to
+    // skip any backlinks field we see, since we stopped using
+    // those fields as of file version 1.17.
 
-    out.writeShort((short) size); // should have no more than 32k fields
+    Vector fieldsToEmit = new Vector();
 
     enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
-	((DBObjectBaseField) enum.nextElement()).emit(out);
+	DBObjectBaseField fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	if (fieldDef.getID() != SchemaConstants.BackLinksField)
+	  {
+	    fieldsToEmit.addElement(fieldDef);
+	  }
       }
     
+    // okay, we have the field definitions we're actually going to
+    // write.  put out the field count
+
+    size = fieldsToEmit.size();
+
+    out.writeShort((short) size); // should have no more than 32k fields
+
+    // and write out the field definitions
+
+    for (int i = 0; i < fieldsToEmit.size(); i++)
+      {
+	DBObjectBaseField fieldDef = (DBObjectBaseField) fieldsToEmit.elementAt(i);
+
+	fieldDef.emit(out);
+      }
+
     if ((store.major_version >= 1) && (store.minor_version >= 1))
       {
 	out.writeShort(label_id);	// added at file version 1.1
@@ -869,15 +856,38 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    size = fieldTable.size();
+    // calculate what fields we want to emit.  We're going to
+    // skip any backlinks field we see, since we stopped using
+    // those fields as of file version 1.17.
 
-    out.writeShort((short) size); // should have no more than 32k fields
+    Vector fieldsToEmit = new Vector();
 
     enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
-	((DBObjectBaseField) enum.nextElement()).emit(out);
+	DBObjectBaseField fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	if (fieldDef.getID() != SchemaConstants.BackLinksField)
+	  {
+	    fieldsToEmit.addElement(fieldDef);
+	  }
+      }
+    
+    // okay, we have the field definitions we're actually going to
+    // write.  put out the field count
+
+    size = fieldsToEmit.size();
+
+    out.writeShort((short) size); // should have no more than 32k fields
+
+    // and write out the field definitions
+
+    for (int i = 0; i < fieldsToEmit.size(); i++)
+      {
+	DBObjectBaseField fieldDef = (DBObjectBaseField) fieldsToEmit.elementAt(i);
+
+	fieldDef.emit(out);
       }
     
     if ((store.major_version >= 1) && (store.minor_version >= 1))
@@ -992,7 +1002,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    System.err.println("DBObjectBaseField.receive(): " + field);
 	  }
 
-	addField(field);
+	// at file version 1.17, we stopped using the backlinks
+	// field.. don't register it in this object type.
+
+	if (field.getID() != SchemaConstants.BackLinksField)
+	  {
+	    addField(field);
+	  }
       }
 
     sortFields();

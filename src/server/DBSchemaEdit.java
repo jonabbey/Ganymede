@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/06/09 04:03:57 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 1999/11/19 20:37:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -296,7 +296,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	DBObjectBase base = (DBObjectBase) getBase(SchemaConstants.UserBase);
 	Vector fields = base.getFields();
-	short nextId = 0;
+	short nextId = 9;	// remember SchemaConstants.BackLinksField(8) is a pariah
 
 	/* -- */
 
