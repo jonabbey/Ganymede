@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1275,7 +1275,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	buffer.append(getTypeDesc());
 	buffer.append(" ");
 	buffer.append(getLabel());
-	buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at");
+	buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
 	buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
 	buffer.append(".");
 	
