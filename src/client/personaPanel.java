@@ -126,7 +126,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    Invid thisInvid = (Invid)personas.elementAt(i);
 	    if (thisOneEditable)
 	      {
-		db_object ob = gc.getSession().edit_db_object(thisInvid);
+		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(thisInvid));
+		db_object ob = rv.getObject();
 		if (ob == null)
 		  {
 		    if (debug)
@@ -134,7 +135,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 			System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
 		      }
 
-		    ob = gc.getSession().view_db_object(thisInvid);
+		    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
+		    ob = Vrv.getObject();
 		
 		    if (ob == null)
 		      {
@@ -152,7 +154,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      }
 	    else
 	      {
-		db_object ob = gc.getSession().view_db_object(thisInvid);
+		ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
+		db_object ob = rv.getObject();
 		if (ob == null)
 		  {
 		    System.out.println("Whoa, got a null object(view), skipping.");
@@ -213,7 +216,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      }
 	    
 	    // Create the object
-	    db_object newObject = fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
+	    ReturnVal rv = fp.getgclient().handleReturnVal(fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase));
+	    db_object newObject = rv.getObject();
 	    Invid user = fp.getObjectInvid();
 
 	    gc.somethingChanged();
