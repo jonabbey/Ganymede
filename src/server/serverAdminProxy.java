@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/02/02 01:06:21 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/02/02 18:36:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.7 $ $Date: 2000/02/02 01:06:21 $
+ * @version $Revision: 1.8 $ $Date: 2000/02/02 18:36:33 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -101,6 +101,13 @@ public class serverAdminProxy implements Admin, Runnable {
    */
 
   private int maxBufferSize = 15; // only 10 kinds of things, most of which we coalesce/replace
+
+  /**
+   * <p>If we have a CHANGESTATUS log append event in the eventBuffer, we'll
+   * keep a pointer to it here so we don't have to search for it in changeStatus().</p>
+   */
+
+  private adminEvent logAppendEvent = null;
 
   /**
    * <p>Our remote reference to the admin console client</p>
@@ -205,11 +212,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setServerStart(Date date) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.SETSERVERSTART, date);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.SETSERVERSTART, date));
   }
 
   /**
@@ -219,11 +222,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setLastDumpTime(Date date) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.SETLASTDUMPTIME, date);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.SETLASTDUMPTIME, date));
   }
 
   /**
@@ -233,11 +232,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setTransactionsInJournal(int trans) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.SETTRANSACTIONS, new Integer(trans));
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.SETTRANSACTIONS, new Integer(trans)));
   }
 
   /**
@@ -247,11 +242,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setObjectsCheckedOut(int objs) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.SETOBJSCHECKOUT, new Integer(objs));
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.SETOBJSCHECKOUT, new Integer(objs)));
   }
 
   /**
@@ -261,11 +252,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setLocksHeld(int locks) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.SETLOCKSHELD, new Integer(locks));
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.SETLOCKSHELD, new Integer(locks)));
   }
 
   /**
@@ -275,11 +262,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeState(String state) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.CHANGESTATE, state);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.CHANGESTATE, state));
   }
 
   /**
@@ -300,17 +283,21 @@ public class serverAdminProxy implements Admin, Runnable {
   public void changeStatus(String status, boolean timeLabelled) throws RemoteException
   {
     adminEvent event;
+    StringBuffer stampedLineBuffer = new StringBuffer();
     String stampedLine;
 
     /* -- */
 
     if (!timeLabelled)
       {
-	stampedLine = new Date() + " " + status + "\n";
+	stampedLineBuffer.append((new Date()).toString());
+	stampedLineBuffer.append(" ");
+	stampedLineBuffer.append(status);
+	stampedLineBuffer.append("\n");
       }
     else
       {
-	stampedLine = status;
+	stampedLineBuffer.append(status);
       }
 
     synchronized (eventBuffer)
@@ -320,26 +307,34 @@ public class serverAdminProxy implements Admin, Runnable {
 	    return;
 	  }
 
-	for (int i = 0; i < eventBuffer.size(); i++)
+	// if we have another changeStatus event in the eventBuffer,
+	// go ahead and append the new log entry directly to its
+	// StringBuffer
+
+	if (logAppendEvent != null)
 	  {
-	    event = (adminEvent) eventBuffer.elementAt(i);
-	    
-	    if (event.method == event.CHANGESTATUS)
-	      {
-		// coalesce this append to the log message
+	    // coalesce this append to the log message
 
-		String oldText = (String) event.param;
-		String newText = oldText + stampedLine;
-		event.param = newText;
-
-		return;
-	      }
+	    StringBuffer buffer = (StringBuffer) logAppendEvent.param;
+	    buffer.append(stampedLineBuffer.toString());
+	    return;
 	  }
 
 	// if we didn't find an event to append to, go ahead and add a
-	// new CHANGESTATUS log update event
+	// new CHANGESTATUS log update event to the eventBuffer
 
-	addEvent(new adminEvent(adminEvent.CHANGESTATUS, stampedLine));
+	adminEvent newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, stampedLineBuffer);
+
+	// queue the log evennt
+
+	addEvent(newLogEvent);
+
+	// if we didn't get an exception on the addEvent call, save a
+	// pointer to the newLogEvent so that later calls to
+	// changeStatus can directly append more text until such time
+	// as our commThread can send the log event to the console
+
+	logAppendEvent = newLogEvent;
       }
   }
 
@@ -350,11 +345,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeAdmins(String adminStatus) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.CHANGEADMINS, adminStatus);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.CHANGEADMINS, adminStatus));
   }
 
   /**
@@ -367,11 +358,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeUsers(Vector entries) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.CHANGEUSERS, entries);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.CHANGEUSERS, entries));
   }
 
   /**
@@ -384,11 +371,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeTasks(Vector tasks) throws RemoteException
   {
-    adminEvent newEvent = new adminEvent(adminEvent.CHANGETASKS, tasks);
-
-    /* -- */
-
-    replaceEvent(newEvent);
+    replaceEvent(new adminEvent(adminEvent.CHANGETASKS, tasks));
   }
 
   /**
@@ -422,13 +405,25 @@ public class serverAdminProxy implements Admin, Runnable {
 
 	    event = (adminEvent) eventBuffer.elementAt(0);
 	    eventBuffer.removeElementAt(0);
+
+	    // if we are dequeuing a changeStatus log append event,
+	    // clear the direct pointer to it used by changeStatus().
+
+	    if (event == logAppendEvent)
+	      {
+		logAppendEvent = null;
+	      }
 	  }
 
 	try
 	  {
 	    event.dispatch(remoteConsole);
 
-	    errorCondition = null; // we won't execute this if a remote exception is thrown
+	    // if we didn't get an exception above, clear the
+	    // errorCondition variable to indicate a successful RMI
+	    // call.
+
+	    errorCondition = null; 
 	  }
 	catch (RemoteException ex)
 	  {
@@ -689,7 +684,7 @@ class adminEvent {
 	break;
 
       case CHANGESTATUS:
-	remoteConsole.changeStatus((String) param);
+	remoteConsole.changeStatus(((StringBuffer) param).toString());
 	break;
 
       case CHANGEADMINS:
