@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.167 $
-   Last Mod Date: $Date: 2002/08/21 06:58:50 $
+   Version: $Revision: 1.168 $
+   Last Mod Date: $Date: 2003/03/10 19:31:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.167 $ $Date: 2002/08/21 06:58:50 $ $Name:  $
+ * @version $Revision: 1.168 $ $Date: 2003/03/10 19:31:29 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3632,21 +3632,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	if (added.length() > 0)
 	  {
 	    result.append("Fields Added:\n\n");
-	    result.append(added);
+	    result.append(added.toString()); // no StringBuffer param until 1.4
 	    result.append("\n");
 	  }
 
 	if (changed.length() > 0)
 	  {
 	    result.append("Fields changed:\n\n");
-	    result.append(changed);
+	    result.append(changed.toString()); // no StringBuffer param until 1.4
 	    result.append("\n");
 	  }
 
 	if (deleted.length() > 0)
 	  {
 	    result.append("Fields Deleted:\n\n");
-	    result.append(deleted);
+	    result.append(deleted.toString()); // no StringBuffer param until 1.4
 	    result.append("\n");
 	  }
 
