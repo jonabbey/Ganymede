@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.244 $
-   Last Mod Date: $Date: 2001/07/27 04:24:40 $
+   Version: $Revision: 1.245 $
+   Last Mod Date: $Date: 2001/07/30 05:59:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.244 $ $Date: 2001/07/27 04:24:40 $
+ * @version $Revision: 1.245 $ $Date: 2001/07/30 05:59:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5621,7 +5621,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") returning override perm");
 	  }
 
-	return overrideFieldPerm.intersection(objectPerm);	
+	// allow field create perm even if they don't have object create perm
+
+	PermEntry temp = overrideFieldPerm.intersection(objectPerm);
+
+	// add back the create bit if the field is creatable
+
+	if (overrideFieldPerm.isCreatable())
+	  {
+	    temp = temp.union(PermEntry.getPermEntry(false, false, true, false));
+	  }
+	
+	return temp;
       }
     
     fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
@@ -5695,7 +5706,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	return fieldPerm.union(expandFieldPerm).intersection(objectPerm);
+	// allow field create perm even if they don't have object create perm
+
+	PermEntry temp = fieldPerm.union(expandFieldPerm);
+	PermEntry temp2 = temp.intersection(objectPerm);
+
+	// add back the create bit if the field is creatable
+
+	if (temp.isCreatable())
+	  {
+	    temp = temp2.union(PermEntry.getPermEntry(false, false, true, false));
+	  }
+	
+	return temp;
       }
   }
 

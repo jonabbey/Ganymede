@@ -105,6 +105,38 @@ Ganymede comes out.
 
 I've also done a fair amount of rework of the xmlclient documentation.
 
+8. [SERVER] Made the server use a default address for email if necessary
+
+The Ganymede server typically sends mail out for actions taken by
+admins on behalf of the admin's email address.  That is, Admin Persona
+objects have an 'email address' field, and when the Ganymede server
+sends out mail in response to that admin's actions, mail from Ganymede
+is sent with the admin's address used as the 'From:' header.
+
+Previously, if Ganymede could not determine an email address to use
+for an admin, it would try to send mail out with a null return
+address, which caused the mail attempt to fail.
+
+Martin Vogt <vogt@itwm.uni-kl.de> reported this bug, and the proper
+fix for it, back in March of 2000, but I didn't realize how likely
+this problem was to affect new users until I did some testing
+of a fresh install on a new system.
+
+9. [SERVER] Fixed field/object permission interaction
+
+Previously, the GanymedeSession.getPerm() method filtered per-field
+permission bits against the permission bits for the object as a whole.
+
+This makes sense for the view and edit bits, as you can't view or edit
+a field if you can't view or edit the object it is contained in, but
+it does not make sense for the create bit, as it might well be
+appropriate to be able to create a new field in a pre-existing object
+that you can edit, even if you don't have the right to create a new
+object of the type.
+
+The server is now smart enough to avoid filtering the create bit
+for a field against the create bit for its object.
+
 -------------------- Changes from 1.03 to 1.04 -------------------
 
 RELEASE DATE: July 9, 2001
