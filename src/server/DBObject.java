@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.23 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.24 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -68,14 +68,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   /* - */
 
   boolean customizer = false;
-  DBObjectBase objectBase;
-  int id;			// 32 bit id - the object's invariant id
-  Hashtable fields;
+  protected DBObjectBase objectBase;
+  protected int id;			// 32 bit id - the object's invariant id
+  protected Hashtable fields;
 
   DBEditObject shadowObject;	// if this object is being edited or removed, this points
 				// to the shadow that manages the changes
   
-  DBEditSet editset;		// transaction that this object has been checked out in
+  protected DBEditSet editset;	// transaction that this object has been checked out in
 				// care of.
 
   /* -- */
