@@ -1,13 +1,13 @@
 
    Ganymede
    
-Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 5 - 13 December
-                                     2000
+    Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13
+                                 December 2000
                                        
      _________________________________________________________________
                                       
    Note: If you are reading this as the INSTALL text file in the Ganymede
-   distribution directory, you are missing a bunch of hyperlinks that
+   distribution directory, you are missing a bunch of hyper-links that
    link to extra information about many topics discussed. If you can,
    view this document with a web browser as doc/install.html.
    
@@ -18,7 +18,7 @@ _0. Overview_
    server, the Ganymede client suite, and the schema kit.
    
    The server acts as a central repository and control system, storing
-   your network directory information in its built-on object database and
+   your network directory information in its built-in object database and
    updating various network services when changes are made. The server is
    designed to be installed on a UNIX system, and depends on Java and
    Perl to carry out its internal and external operations.
@@ -123,23 +123,22 @@ _2. Configuring the Distribution for Your Site_
 
    The Ganymede distribution comes packaged with all of the Java classes
    for the server and clients pre-compiled and packaged up into jar files
-   (located under the _jars_ directory in the distribution directory). It
-   is not necessary to compile anything in order to install the Ganymede
-   server and clients, but you do have to run the configure script in the
-   distribution directory in order to prepare the distribution for
-   installation. The configure script is a custom-written Bourne shell
-   script which searches around on your system to find Perl 5 and Java,
-   and then uses that information to bootstrap the rest of the
-   installation process.
+   (located under the _jars/_ directory in the distribution directory).
+   It is not necessary to compile anything in order to install the
+   Ganymede server and clients, but you do have to run the configure
+   script in the distribution directory in order to prepare the
+   distribution for installation. The configure script is a
+   custom-written Bourne shell script which searches around on your
+   system to find Perl 5 and Java, and then uses that information to
+   bootstrap the rest of the installation process.
    
-   When you run configure, it will copy a few scripts from the _scripts_
+   When you run configure, it will copy a few scripts from the _scripts/_
    directory into the top-level distribution directory, editing them to
    set the proper location for the Perl interpreter on your system, and
    otherwise setting everything up for you to proceed with installation.
    These scripts are installClient, installWeb and installServer. You
-   will use these scripts to include the command-line UNIX clients, the
-   web applet clients, and the server itself, respectively. More on this
-   in a bit.
+   will use these scripts to install the command-line UNIX clients, the
+   web applet clients, and the server itself, respectively.
    
    In addition, the configure script goes through the _src_ directory and
    sets up scripts that can be used to compile the Ganymede sources.
@@ -166,10 +165,11 @@ _3. Installing the Server_
    These questions include the following:
    
    _Where are the jdk binaries located?_
-          This is just asking where your systems java binaries are. The
-          configure script will provide attempt to provide a reasonable
-          default for this question, so you should just be able to hit
-          enter for this question.
+          This is just asking for the directory that contains your
+          system's java binaries. The configure script will attempt to
+          provide a reasonable default for this question, but you may
+          have to correct it if you have more than one version of java
+          installed on your system and it chooses wrong.
           
    _Where should the server tree be installed?_
           This question is asking where you want to install the server at
@@ -217,8 +217,8 @@ _3. Installing the Server_
           out mail using the name of the user whose action triggered
           mail, but for things like system shutdown/restart, etc. it
           needs an email address to go by. If this email address is not
-          valid, users who receive mail from Ganymede will have their
-          replies bounce.
+          valid, users who reply to system event mail from Ganymede will
+          have their replies bounce.
           
    _What name do you want the Ganymede superuser account to have?_
           The default 'supergash' name is probably okay here, but you can
@@ -290,13 +290,13 @@ _4. Installing A Schema Kit_
    
    When you download and unpack a schema kit, you should find
    documentation that will walk you through the installation process.
-   Essentially it comes down to running a _installKit_ script, which.
-   will ask you where you installed your server and where Java is, and
-   will then create a _schema_ directory under your server directory.
-   This directory should include:
+   Essentially it comes down to running a _installKit_ script, which will
+   ask you where you installed your server and where Java is, and will
+   then create a _schema_ directory under your server directory. This
+   directory should include:
    
-     * a _custom.jar_ file that includes the Java classes added to your
-       server by the schema kit
+     * a _custom.jar_ file that includes the Java classes to be added to
+       your server by the schema kit
      * a _src/_ directory that contains all of the Java source code that
        was compiled into the custom.jar file.
      * a _scripts/_ directory, that contains various Perl scripts used by
@@ -346,15 +346,14 @@ _5. Running the Ganymede Server_
    and error messages as it runs, and you really want to capture this
    information.
    
-   You can view the server's log as the server runs while keeping the
-   server's output doing to the server.log file by doing
+   You can view the server's log as the server runs with the tail
+   command, using the -f option, as follows:
    
       server% tail -f server.log
 
    That way, if your window is killed or you absent-mindedly hit ctrl-c,
-   you will only kill off the tail process which is displaying the log
-   file as it is being written. You want the server itself to run in the
-   background, undisturbed.
+   you will only kill off the tail command. You want the server itself to
+   run in the background, undisturbed.
    
    The _installServer_ script is smart enough to try and identify the
    version of Java you are running, and to install a version of runServer
@@ -383,8 +382,7 @@ _5. Running the Ganymede Server_
    possibility of exceptions in the server, I'd recommend you leave the
    debug=xxx parameter as you find it. The _installServer_ script will
    install the runServer script with the debug option set to generate a
-   _debug.log_ file in your server's top-level directory. This is just
-   what you want, unless you know that it isn't.
+   _debug.log_ file in your server's top-level directory.
    
    While the server is running, you should see two separate Java
    processes running, one for the rmiregistry, and one for the Ganymede
@@ -411,9 +409,8 @@ _5. Running the Ganymede Server_
    process, so you will have to do a bit of manual cleanup to get rid of
    it if it bothers you to leave it running. Otherwise, the Ganymede
    server will re-attach to the rmiregistry when you restart the server,
-   but you'll see an exception message when the server starts back up, as
-   the runServer tries and fails to start a new rmiregistry process on
-   the same port.
+   but you'll see an exception message displayed when the runServer tries
+   and fails to start a new rmiregistry process on the same port.
    
    If you know that you don't want to start the server back up again, it
    is perfectly fine to go ahead and use the Unix kill command to kill
@@ -423,23 +420,23 @@ _5. Running the Ganymede Server_
    
 _6. Loading Data Into the Server_
 
-   Now you have installed the server, installed the schema kit into the
-   server directory, and started the server up. You can now proceed to
-   use the schema kit to load data into the server.
+   Now you have installed the server, integrated a schema kit into the
+   server directory, and started the server running. You can now proceed
+   to use the schema kit to load data into the server.
    
-   When you first install the Ganymede server, the server looks in its
+   When you first run the Ganymede server, the server will look in its
    _db/_ directory for its ganymede.db file. When it doesn't find it, it
-   will initialize itself with the default database definition. The
-   Ganymede server will only know about those objects and fields that
-   have been built into it. The server will know nothing about any sort
-   of data that you are interested in, unless it happens to be something
-   that the server itself needs to know about for its own operations. You
-   need to somehow tell it about the data types you are interested in,
-   and then actually get your data loaded into the server.
+   will initialize itself with its default database configuration. The
+   Ganymede server will only know about those objects and fields that it
+   uses for its own operations. Before the Ganymede server can handle the
+   data for your network's directories, you will need to define your
+   custom object and field types in the Ganymede server.
    
    The Ganymede admin console has an 'Edit Schema' menu item which you
-   can use to bring up a graphical schema editor that will allow you to
-   edit the server's database schema as your needs dictate.
+   can use to bring up a graphical schema editor. With the schema editor,
+   you can define new object types and define fields within the object
+   types. Designing and implementing a new schema definition is a bit
+   involved, and is beyond the scope of this installation guide.
    
    Fortunately for you, though, you're using a schema kit, so we will
    just let it do that work. For the rest of this discussion, we'll
@@ -501,19 +498,18 @@ _7. Installing UNIX Client Files_
    end-user client and the admin console. Both can be run from a UNIX
    command line with a shell script that will run java on them, or from a
    web browser with support for the full 1.1 JDK standard. There is
-   nothing to stop you from running either client on a Win32 box, but you
-   will have to develop .bat files to run the code on your own. The
-   clients are themselves totally portable, however, as they are simply
-   Java jar files.
+   nothing to stop you from running either client on a Win32 box, but if
+   you want to run the Ganymede clients on a Windows system outside of
+   the context of a web browser, you will have to develop .bat files to
+   run the code on your own. The clients are themselves totally portable,
+   however, as they are simply Java jar files.
    
    We have provided an install script for installing the Ganymede clients
    on a UNIX system. installClient will prompt you for the name of the
    machine that will be running your Ganymede server, and the directory
    which will contain the bin, html, and jars directories. The install
    script will then customize and install scripts for you so that the
-   end-user client and admin console can easily be run. Of course, that
-   the server has to be up and running to run either the main client or
-   the console.
+   end-user client and admin console can easily be run.
    
    Don't try to install the client and server into the same directory..
    the two are meant to be installed separately, in separate directories.
@@ -523,13 +519,13 @@ _7. Installing UNIX Client Files_
    
 _8. Prepare web access clients_
 
-   The installWeb script is used to install the files necessary for
-   serving on a web server to support client access to Ganymede from a
-   web browser with a modern Java runtime. installWeb installs a bunch of
-   files into a designated directory, including an index.html file, the
-   ganymede.jar and ganymedeAdmin.jar, and a bunch of individual html
-   files linked to the index.html file, all customized for your Ganymede
-   server's location.
+   The installWeb script is used to install, on your UNIX system, the
+   html, cgi, and java files needed to support client access to Ganymede
+   from a web browser. installWeb installs a bunch of files into a
+   designated directory, including an index.html file, the ganymede.jar
+   and ganymedeAdmin.jar, and a bunch of individual html files linked to
+   the index.html file, all customized for your Ganymede server's
+   location.
    
    Java applets run in a security "sandbox", which keeps downloaded code
    from being able to cause mischief on your machine. One of the
@@ -587,14 +583,9 @@ _8. Prepare web access clients_
    an orderly fashion, but the shut-down is unavoidable, so be sure not
    to disturb the applet frame while you are using the client or console.
    
-   In addition to the Ganymede client and admin console, installWeb will
-   also install a simple password-change utility/applet. This program
-   hasn't been maintained in a while, and may not be working properly
-   currently.
-   
      _________________________________________________________________
                                       
    
     Jonathan Abbey
     
-   Last modified: Fri Dec 15 17:22:16 CST 2000
+   Last modified: Mon Dec 18 01:33:54 CST 2000

@@ -1,18 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 5 - 13 December 2000</title>
+    <title>Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13 December 2000</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 5 - 13 December 2000</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13 December 2000</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
 in the Ganymede distribution directory, you are missing a bunch of
-hyperlinks that link to extra information about many topics discussed.
+hyper-links that link to extra information about many topics discussed.
 If you can, view this document with a web browser as
 <code>doc/install.html</code>.</p>
 
@@ -27,7 +27,7 @@ that need to be installed in order to use it.  These parts are the
 Ganymede server, the Ganymede client suite, and the schema kit.</p>
 
 <p>The server acts as a central repository and control system, storing
-your network directory information in its built-on object database and
+your network directory information in its built-in object database and
 updating various network services when changes are made.  The server
 is designed to be installed on a UNIX system, and depends on Java and
 Perl to carry out its internal and external operations.</p>
@@ -147,7 +147,7 @@ and ask for the details.</p>
 
 <p>The Ganymede distribution comes packaged with all of the Java
 classes for the server and clients pre-compiled and packaged up into
-jar files (located under the <b>jars</b> directory in the distribution
+jar files (located under the <b>jars/</b> directory in the distribution
 directory).  It is not necessary to compile anything in order to
 install the Ganymede server and clients, but you do have to run the <a
 href="glossary.html#configure">configure</a> script in the
@@ -158,16 +158,15 @@ on your system to find Perl 5 and Java, and then uses that information
 to bootstrap the rest of the installation process.</p>
 
 <p>When you run <a href="glossary.html#configure">configure</a>, it
-will copy a few scripts from the <b>scripts</b> directory into the
+will copy a few scripts from the <b>scripts/</b> directory into the
 top-level distribution directory, editing them to set the proper
 location for the Perl interpreter on your system, and otherwise
 setting everything up for you to proceed with installation.  These
 scripts are <a href="glossary.html#installClient">installClient</a>,
 <a href="glossary.html#installWeb">installWeb</a> and <a
 href="glossary.html#installServer">installServer</a>.  You will use
-these scripts to include the command-line UNIX clients, the web applet
-clients, and the server itself, respectively.  More on this in a
-bit.</p>
+these scripts to install the command-line UNIX clients, the web applet
+clients, and the server itself, respectively.</p>
     
 <p>In addition, the <a href="glossary.html#configure">configure</a>
 script goes through the <b>src</b> directory and sets up scripts that
@@ -202,10 +201,13 @@ directory.</p>
 
 <dl>
 <dt><b>Where are the jdk binaries located?</b></dt>
-<dd><p>This is just asking where your systems java binaries are.
-The configure script will provide attempt to provide a reasonable
-default for this question, so you should just be able to hit enter for
-this question.</p></dd>
+<dd>
+	<p>This is just asking for the directory that contains your
+	system's java binaries.  The configure script will attempt to
+	provide a reasonable default for this question, but you may
+	have to correct it if you have more than one version of java
+	installed on your system and it chooses wrong.</p>
+</dd>
 
 <dt><b>Where should the server tree be installed?</b></dt>
 <dd>
@@ -265,8 +267,8 @@ this question.</p></dd>
 	out mail using the name of the user whose action triggered
 	mail, but for things like system shutdown/restart, etc. it
 	needs an email address to go by.  If this email address is not
-	valid, users who receive mail from Ganymede will have their
-	replies bounce.</p>
+	valid, users who reply to system event mail from Ganymede will
+	have their replies bounce.</p>
 </dd>
 
 <dt><b>What name do you want the Ganymede superuser account to have?</b></dt>
@@ -364,12 +366,12 @@ requirements.</p>
 <p>When you download and unpack a schema kit, you should find
 documentation that will walk you through the installation process.
 Essentially it comes down to running a <b>installKit</b> script,
-which.  will ask you where you installed your server and where Java
+which will ask you where you installed your server and where Java
 is, and will then create a <b>schema</b> directory under your server
 directory.  This directory should include:</p>
 
 <ul>
-      <li>a <b>custom.jar</b> file that includes the Java classes
+      <li>a <b>custom.jar</b> file that includes the Java classes to be
       added to your server by the schema kit</li>
 
       <li>a <b>src/</b> directory that contains all of the Java source
@@ -439,17 +441,17 @@ from the server into a log file.  The Ganymede server will print out
 status and error messages as it runs, and you really want to capture
 this information.</p>
 
-<p>You can view the server's log as the server runs while keeping
-the server's output doing to the server.log file by doing</p>
+<p>You can view the server's log as the server runs with the
+<code>tail</code> command, using the <code>-f</code> option, as
+follows:</p>
 
 <pre>
       server% tail -f server.log
 </pre>
 
 <p>That way, if your window is killed or you absent-mindedly hit
-ctrl-c, you will only kill off the tail process which is displaying
-the log file as it is being written.  You want the server itself
-to run in the background, undisturbed.</p>
+ctrl-c, you will only kill off the <code>tail</code> command.  You
+want the server itself to run in the background, undisturbed.</p>
 
 <p>The <b>installServer</b> script is smart enough to try and identify
 the version of Java you are running, and to install a version of
@@ -486,8 +488,7 @@ the <code>debug=xxx</code> parameter as you find it.  The
 <b>installServer</b> script will install the <a
 href="glossary.html#runServer">runServer</a> script with the debug
 option set to generate a <b>debug.log</b> file in your server's
-top-level directory.  This is just what you want, unless you know that
-it isn't.</p>
+top-level directory.</p>
 
 <p>While the server is running, you should see two separate Java
 processes running, one for the rmiregistry, and one for the Ganymede
@@ -516,9 +517,9 @@ on clean up work on start up in such cases.</p>
 process, so you will have to do a bit of manual cleanup to get rid of
 it if it bothers you to leave it running.  Otherwise, the Ganymede
 server will re-attach to the rmiregistry when you restart the server,
-but you'll see an exception message when the server starts back up, as
-the <a href="glossary.html#runServer">runServer</a> tries and fails to
-start a new rmiregistry process on the same port.</p>
+but you'll see an exception message displayed when the <a
+href="glossary.html#runServer">runServer</a> tries and fails to start
+a new rmiregistry process on the same port.</p>
 
 <p>If you know that you don't want to start the server back up again,
 it is perfectly fine to go ahead and use the Unix <code>kill</code>
@@ -532,25 +533,25 @@ any other Java services that are running on your system.</p>
       </tr>
     </table> 
 
-<p>Now you have installed the server, installed the schema kit into
-the server directory, and started the server up.  You can now proceed
+<p>Now you have installed the server, integrated a schema kit into the
+server directory, and started the server running.  You can now proceed
 to use the schema kit to load data into the server.</p>
 
-<p>When you first install the Ganymede server, the server looks in its
+<p>When you first run the Ganymede server, the server will look in its
 <b>db/</b> directory for its <a
 href="glossary.html#ganymede.db">ganymede.db</a> file.  When it
-doesn't find it, it will initialize itself with the default database
-definition.  The Ganymede server will only know about those objects
-and fields that have been built into it.  The server will know nothing
-about any sort of data that you are interested in, unless it happens
-to be something that the server itself needs to know about for its own
-operations.  You need to somehow tell it about the data types you
-are interested in, and then actually get your data loaded into the
+doesn't find it, it will initialize itself with its default database
+configuration.  The Ganymede server will only know about those objects
+and fields that it uses for its own operations.  Before the Ganymede
+server can handle the data for your network's directories, you will
+need to define your custom object and field types in the Ganymede
 server.</p>
 
 <p>The Ganymede admin console has an 'Edit Schema' menu item which you
-can use to bring up a graphical schema editor that will allow you to
-edit the server's database schema as your needs dictate.</p>
+can use to bring up a graphical schema editor.  With the schema
+editor, you can define new object types and define fields within the
+object types.  Designing and implementing a new schema definition is a
+bit involved, and is beyond the scope of this installation guide.</p>
 
 <p>Fortunately for you, though, you're using a schema kit, so we
 will just let it do that work.  For the rest of this discussion,
@@ -620,14 +621,16 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
       </tr>
     </table> 
     
-    <p>There are two primary clients for Ganymede.  We will call these the
-    end-user client and the admin console.  Both can be run from a UNIX
-    command line with a shell script that will run java on them, or from
-    a web browser with support for the full 1.1 JDK standard.  There is
-    nothing to stop you from running either client on a Win32 box, but
-    you will have to develop .bat files to run the code on your own.  The
-    clients are themselves totally portable, however, as they are simply
-    Java jar files.</p>
+    <p>There are two primary clients for Ganymede.  We will call these
+    the end-user client and the admin console.  Both can be run from a
+    UNIX command line with a shell script that will run java on them,
+    or from a web browser with support for the full 1.1 JDK standard.
+    There is nothing to stop you from running either client on a Win32
+    box, but if you want to run the Ganymede clients on a Windows
+    system outside of the context of a web browser, you will have to
+    develop .bat files to run the code on your own.  The clients are
+    themselves totally portable, however, as they are simply Java jar
+    files.</p>
     
     <p>We have provided an install script for installing the Ganymede
     clients on a UNIX system.  <a
@@ -636,8 +639,7 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     directory which will contain the bin, html, and jars
     directories. The install script will then customize and install
     scripts for you so that the end-user client and admin console can
-    easily be run.  Of course, that the server has to be up and
-    running to run either the main client or the console.</p>
+    easily be run.</p>
 
     <p>Don't try to install the client and server into the same
     directory.. the two are meant to be installed separately, in separate
@@ -652,12 +654,12 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     </table> 
     
     <p>The <a href="glossary.html#installWeb">installWeb</a> script is
-    used to install the files necessary for serving on a web
-    server to support client access to Ganymede from a web browser
-    with a modern Java runtime.  
-    <a href="glossary.html#installWeb">installWeb</a> installs a bunch of
-    files into a designated directory, including an index.html file,
-    the <a href="glossary.html#ganymede.jar">ganymede.jar</a> and <a
+    used to install, on your UNIX system, the html, cgi, and java
+    files needed to support client access to Ganymede from a web
+    browser.  <a href="glossary.html#installWeb">installWeb</a>
+    installs a bunch of files into a designated directory, including
+    an index.html file, the <a
+    href="glossary.html#ganymede.jar">ganymede.jar</a> and <a
     href="glossary.html#ganymedeAdmin.jar">ganymedeAdmin.jar</a>, and
     a bunch of individual html files linked to the index.html file,
     all customized for your Ganymede server's location.</p>
@@ -723,17 +725,11 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     shut-down is unavoidable, so be sure not to disturb the applet
     frame while you are using the client or console.</p>
     
-    <p>In addition to the Ganymede client and admin console, <a
-    href="glossary.html#installWeb">installWeb</a> will also install a
-    simple password-change utility/applet.  This program hasn't been
-    maintained in a while, and may not be working properly
-    currently.</p>
-
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Fri Dec 15 17:22:16 CST 2000
+Last modified: Mon Dec 18 01:33:54 CST 2000
 <!-- hhmts end -->
   </body>
 </html>

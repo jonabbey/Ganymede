@@ -1,7 +1,21 @@
-Ganymede Developer Release 3
-May 28, 1998
+Ganymede Release 1.0 prerelease beta 5
+December 18, 2000
 GASH README
 ----------------------------
+
+This schema kit has only loosely been maintained over the last
+couple of years, and has not yet been restructured to work with
+the 1.0 server. The builder tasks will need to be revised somewhat, as
+the base class definition has been changed.  The old installServer
+script has been revised so that it won't do the configuration and
+installation of this old-style schema kit any more.
+
+Basically, you're better off waiting for 1.0 to mess with this
+stuff, unless you're really motivated, in which case be sure
+and write to the Ganymede discussion list at ganymede@arlut.utexas.edu
+to report on your efforts.
+
+---
 
 As of dev3, the GASH schema module is nearly fully functional to the
 level supported by GASH 1.03g, minus the ARL-specific features.
