@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/05/12 22:10:30 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2001/06/04 15:33:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -495,6 +495,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    Invid interfaceInvid = (Invid) interfaces.elementAt(i);
 	    DBObject interfaceObj = (DBObject) getSession().viewDBObject(interfaceInvid);
 	    Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+
+	    if (netInvid == null)
+	      {
+		Ganymede.debug("Missing netinvid in object " + this.toString());
+		continue;
+	      }
+
 	    DBObject netObj = (DBObject) getSession().viewDBObject(netInvid);
 	    String netLabel = netObj.getLabel();
 
