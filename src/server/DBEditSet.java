@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -95,7 +95,7 @@ public class DBEditSet {
    *
    */
 
-  public synchronized DBEditObject findObject(DBObject object)
+  public DBEditObject findObject(DBObject object)
   {
     return findObject(object.getInvid());
   }
@@ -742,6 +742,9 @@ public class DBEditSet {
 
 	    try
 	      {
+		// Create a read-only version of eObj, with all fields
+		// reset to checked-in status, put it into our object hash
+
 		base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
 		base.store.checkIn(); // update checkout count
 	      }
