@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class DBBaseCategory extends UnicastRemoteObject implements Category, CategoryNode {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   //
 
@@ -95,6 +95,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     if (parent != null)
       {
 	this.baseHash = parent.baseHash;
+	this.editor = parent.editor;
       }
 
     contents = new Vector();
