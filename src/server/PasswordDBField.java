@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -156,6 +156,34 @@ public class PasswordDBField extends DBField implements pass_field {
     value = in.readUTF();
   }
 
+  public Object getValue()
+  {
+    Object result;
+
+    /* -- */
+
+    try
+      {
+	result = super.getValue();
+      }
+    catch (IllegalArgumentException ex)
+      {
+	return null;
+      }
+
+    // we can safely return the password if it's
+    // stored in hash crypted form.
+
+    if (crypted())
+      {
+	return result;
+      }
+    else
+      {
+	return "<Password>";
+      }
+  }
+
   // ****
   //
   // type specific value accessors
@@ -194,7 +222,16 @@ public class PasswordDBField extends DBField implements pass_field {
 	return "null";
       }
 
-    return this.value();
+    // only return the password value if it is hash-crypted
+
+    if (crypted())
+      {
+	return (String) value;
+      }
+    else
+      {
+	return "<Password>";
+      }
   }
 
   // ****
@@ -286,6 +323,19 @@ public class PasswordDBField extends DBField implements pass_field {
     
     return true;
   }
+
+  /**
+   *
+   * Returns true if the password stored in this field is hash-crypted.
+   *
+   * @see arlut.csd.ganymede.pass_field
+   */
+
+  public boolean crypted()
+  {
+    return (definition.isCrypted());
+  }
+
 
   /**
    *
