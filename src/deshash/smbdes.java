@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/03/16 06:08:24 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/03/16 06:34:33 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
 
@@ -225,7 +225,7 @@ public class smbdes {
 
   static void lshift(byte[] d, int count, int n)
   {
-    byte out[64];
+    byte out[] = new byte[64];
     
     /* -- */
     
@@ -265,11 +265,11 @@ public class smbdes {
   {
     for (int i=0; i<n; i++)
       {
-	out[i] = in1[i] ^ in2[i];
+	out[i] = (byte) (in1[i] ^ in2[i]);
       }
   }
 
-  static void dohash(byte[] out, byte[] in, byte[] key, byte forw)
+  static void dohash(byte[] out, byte[] in, byte[] key, boolean forw)
   {
     int i, j, k;
     byte pk1[] = new byte[56];
@@ -316,11 +316,11 @@ public class smbdes {
     for (i=0; i<16; i++) 
       {
 	byte er[] = new byte[48];
-	char erk[] = new byte[48];
-	char b[][] = new byte[8][6];
-	char cb[] = new byte[32];
-	char pcb[] = new byte[32];
-	char r2[] = new byte[32];
+	byte erk[] = new byte[48];
+	byte b[][] = new byte[8][6];
+	byte cb[] = new byte[32];
+	byte pcb[] = new byte[32];
+	byte r2[] = new byte[32];
 
 	permute(er, r, perm4, 48);
 
@@ -344,7 +344,7 @@ public class smbdes {
 	  
 	    for (k=0; k<4; k++)
 	      {
-		b[j][k] = (sbox[j][m][n] & (1<<(3-k)))?1:0; 
+		b[j][k] = (byte) ((sbox[j][m][n] & (1<<(3-k))) != 0 ?1:0);
 	      }
 	  }
 
@@ -380,24 +380,24 @@ public class smbdes {
    * <p>This function reads from str and writes into key</p>
    */
   
-  static void str_to_key(byte[] str, byte[] key)
+  static void str_to_key(byte[] str, int str_offset, byte[] key)
   {
     int i;
     
     /* -- */
     
-    key[0] = str[0]>>>1;
-    key[1] = ((str[0]&0x01)<<6) | (str[1]>>>2);
-    key[2] = ((str[1]&0x03)<<5) | (str[2]>>>3);
-    key[3] = ((str[2]&0x07)<<4) | (str[3]>>>4);
-    key[4] = ((str[3]&0x0F)<<3) | (str[4]>>>5);
-    key[5] = ((str[4]&0x1F)<<2) | (str[5]>>>6);
-    key[6] = ((str[5]&0x3F)<<1) | (str[6]>>>7);
-    key[7] = str[6]&0x7F;
+    key[0] = (byte) (str[str_offset]>>>1);
+    key[1] = (byte) (((str[str_offset]&0x01)<<6) | (str[str_offset+1]>>>2));
+    key[2] = (byte) (((str[str_offset+1]&0x03)<<5) | (str[str_offset+2]>>>3));
+    key[3] = (byte) (((str[str_offset+2]&0x07)<<4) | (str[str_offset+3]>>>4));
+    key[4] = (byte) (((str[str_offset+3]&0x0F)<<3) | (str[str_offset+4]>>>5));
+    key[5] = (byte) (((str[str_offset+4]&0x1F)<<2) | (str[str_offset+5]>>>6));
+    key[6] = (byte) (((str[str_offset+5]&0x3F)<<1) | (str[str_offset+6]>>>7));
+    key[7] = (byte) (str[str_offset+6]&0x7F);
     
     for (i=0; i<8; i++)
       {
-	key[i] = (key[i]<<1);
+	key[i] = (byte) (key[i]<<1);
       }
   }
 
@@ -414,10 +414,10 @@ public class smbdes {
    * from the secret that we are using to hash the appropriate
    * known pattern.
    */
-  
+
   static void smbhash(byte[] out, byte[] in, byte[] key)
   {
-    smbhash(out,in,key, true);
+    smbhash(out, 0, in, 0, key, 0, true);
   }
 
   /**
@@ -439,6 +439,47 @@ public class smbdes {
 
   static void smbhash(byte[] out, byte[] in, byte[] key, boolean forw)
   {
+    smbhash(out, 0, in, 0, key, 0, forw);
+  }
+
+  /**
+   * <p>This method actually performs the SMB hash algorithm.</p>
+   *
+   * @param out An 8 element byte array to hold the results of the
+   * hash function
+   *
+   * @param in An 8 element byte array to hold the known pattern
+   * that we are hashing
+   *
+   * @param key An 8 element byte array that holds information
+   * from the secret that we are using to hash the appropriate
+   * known pattern.
+   */
+  
+  static void smbhash(byte[] out, int out_offset, byte[] in, int in_offset, byte[] key, int key_offset)
+  {
+    smbhash(out, out_offset, in, in_offset, key, key_offset, true);
+  }
+
+  /**
+   * <p>This method actually performs the SMB hash algorithm.</p>
+   *
+   * @param out An 8 element byte array to hold the results of the
+   * hash function
+   *
+   * @param in An 8 element byte array to hold the known pattern
+   * that we are hashing
+   *
+   * @param key An 8 element byte array that holds information
+   * from the secret that we are using to hash the appropriate
+   * known pattern.
+   *
+   * @param forw If true, we do a forward XOR operation.  If false,
+   * we reverse it.
+   */
+
+  static void smbhash(byte[] out, int out_offset, byte[] in, int in_offset, byte[] key, int key_offset, boolean forw)
+  {
     int i;
     byte outb[] = new byte[64];
     byte inb[] = new byte[64];
@@ -447,12 +488,12 @@ public class smbdes {
     
     /* -- */
     
-    str_to_key(key, key2);
+    str_to_key(key, key_offset, key2);
     
     for (i=0; i<64; i++) 
       {
-	inb[i] = (in[i/8] & (1<<(7-(i%8)))) != 0 ? 1 : 0;
-	keyb[i] = (key2[i/8] & (1<<(7-(i%8)))) != 0 ? 1 : 0;
+	inb[i] = (byte) ((in[in_offset + i/8] & (1<<(7-(i%8)))) != 0 ? 1 : 0);
+	keyb[i] = (byte) ((key2[i/8] & (1<<(7-(i%8)))) != 0 ? 1 : 0);
 	outb[i] = 0;
       }
     
@@ -460,14 +501,14 @@ public class smbdes {
     
     for (i=0; i<8; i++) 
       {
-	out[i] = 0;
+	out[out_offset + i] = 0;
       }
     
     for (i=0; i<64; i++)
       {
 	if (outb[i] != 0)
 	  {
-	    out[i/8] |= (1<<(7-(i%8)));
+	    out[out_offset + i/8] |= (1<<(7-(i%8)));
 	  }
       }
   }
@@ -479,26 +520,26 @@ public class smbdes {
     /* -- */
     
     smbhash(p16, sp8, p14);
-    smbhash(p16+8, sp8, p14+7);
+    smbhash(p16, 8, sp8, 0, p14, 7);
   }
   
   static void E_P24(byte[] p21, byte[] c8, byte[] p24)
   {
     smbhash(p24, c8, p21);
-    smbhash(p24+8, c8, p21+7);
-    smbhash(p24+16, c8, p21+14);
+    smbhash(p24, 8, c8, 0, p21, 7);
+    smbhash(p24, 16, c8, 0, p21, 14);
   }
   
   static void D_P16(byte[] p14, byte[] in, byte[] out)
   {
     smbhash(out, in, p14, false);
-    smbhash(out+8, in+8, p14+7, false);
+    smbhash(out, 8, in, 8, p14, 7, false);
   }
 
   static void E_old_pw_hash( byte[] p14, byte[] in, byte[] out)
   {
     smbhash(out, in, p14);
-    smbhash(out+8, in+8, p14+7);
+    smbhash(out, 8, in, 8, p14, 7);
   }
 
   public static void cred_hash1(byte[] out,byte[] in,byte[] key)
@@ -508,7 +549,7 @@ public class smbdes {
     /* -- */
     
     smbhash(buf, in, key);
-    smbhash(out, buf, key+9);
+    smbhash(out, 0, buf, 0, key, 9);
   }
 
   public static void cred_hash2(byte[] out,byte[] in,byte[] key)
@@ -531,7 +572,7 @@ public class smbdes {
     
     smbhash(out, in, key, forw);
     key2[0] = key[7];
-    smbhash(out + 8, in + 8, key2, forw);
+    smbhash(out, 8, in, 8, key2, 0, forw);
   }
   
   /**
@@ -583,7 +624,7 @@ public class smbdes {
 	s_box[index_j] = tc;
       
 	t = bytes2u(s_box[index_i]) + bytes2u(s_box[index_j]);
-	data[ind] = data[ind] ^ s_box[t];
+	data[ind] = (byte) (data[ind] ^ s_box[t]);
       }
   }
 }
