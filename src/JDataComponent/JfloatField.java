@@ -4,15 +4,16 @@
    
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/10/29 16:11:13 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/01/08 03:21:54 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney, John Knutson
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -58,10 +59,10 @@ import java.lang.Double;
 -----------------------------------------------------------------------------*/
 
 /**
- * This class defines an entry field that is capable of handling
- * integers.  The maximum and minimum bounds for the range of 
- * integers that can be entered into this JfloatField can also
- * be preset.
+ * This class defines a GUI field component that is capable of
+ * handling Java doubles.  The maximum and minimum bounds for the
+ * range of doubles that can be entered into this JfloatField can also
+ * be preset.  
  */
 
 public class JfloatField extends JentryField {
