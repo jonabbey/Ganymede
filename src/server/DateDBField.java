@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -227,8 +227,6 @@ public class DateDBField extends DBField implements date_field {
 
   public synchronized String getValueString()
   {
-    Calendar cal = GregorianCalendar.getInstance();
-
     /* -- */
 
     if (!verifyReadPermission())
@@ -243,8 +241,7 @@ public class DateDBField extends DBField implements date_field {
 	    return "null";
 	  }
 
-	cal.setTime(this.value());
-	return cal.toString();
+	return this.value.toString();
       }
 
     String result = "";
@@ -257,9 +254,7 @@ public class DateDBField extends DBField implements date_field {
 	    result = result + ", ";
 	  }
 
-	cal.setTime(this.value(i));
-
-	result = result + cal.toString();
+	result = result + this.value(i).toString();
       }
 
     return result;
