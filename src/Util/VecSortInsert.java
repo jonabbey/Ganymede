@@ -7,8 +7,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/01 04:46:22 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2002/03/08 06:01:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,11 +64,11 @@ import java.util.*;
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>
  *
- * @version $Revision: 1.5 $ $Date: 2000/03/01 04:46:22 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2002/03/08 06:01:19 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class VecSortInsert {
+public class VecSortInsert implements Compare {
 
   Compare comparator;
   static final boolean debug = false;
@@ -211,9 +211,29 @@ public class VecSortInsert {
     System.out.println();
   }
 
+  /**
+   * <p>Constructor.  By not specifying a comparator, an ordinary
+   * string comparison will be performed on elements inserted.</p>
+   */
+
+  public VecSortInsert()
+  {
+    this.comparator = this;
+  }
+
+  /**
+   * <p>Constructor.  If comparator is null, an ordinary string
+   * comparison will be performed on elements inserted.</p>
+   */
+
   public VecSortInsert(Compare comparator)
   {
     this.comparator = comparator;
+
+    if (this.comparator == null)
+      {
+	this.comparator = this;
+      }
   }
 
   /**
@@ -305,5 +325,15 @@ public class VecSortInsert {
 
 	//	printTest(objects.size(), low, mid, high);
       }
+  }
+
+  /**
+   * <p>Default comparator, does a string comparison on the
+   * toString() output of the objects for ordering.</p>
+   */
+
+  public int compare(Object a, Object b)
+  {
+    return a.toString().compareTo(b.toString());
   }
 }
