@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,7 @@ import arlut.csd.JDialog.*;
 
 public class ReturnVal implements java.io.Serializable {
 
-  private boolean success = false;	// default value, as booleans don't have an undefined val
+  boolean success;	// default value, as booleans don't have an undefined val
   private StringBuffer rescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
