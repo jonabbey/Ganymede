@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -166,7 +166,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public String getName()
+  public final String getName()
   {
     return definition.getName();
   }
@@ -178,7 +178,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public short getID()
+  public final short getID()
   {
     return definition.getID();
   }
@@ -189,7 +189,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * 
    */
 
-  public DBObject getOwner()
+  public final DBObject getOwner()
   {
     return owner;
   }
@@ -202,7 +202,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public String getComment()
+  public final String getComment()
   {
     return definition.getComment();
   }
@@ -215,7 +215,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public String getTypeDesc()
+  public final String getTypeDesc()
   {
     return definition.getTypeDesc();
   }
@@ -229,7 +229,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public short getType()
+  public final short getType()
   {
     return definition.getType();
   }
@@ -242,7 +242,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public short getDisplayOrder()
+  public final short getDisplayOrder()
   {
     return definition.getDisplayOrder();
   }
@@ -278,7 +278,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public boolean isDefined()
+  public final boolean isDefined()
   {
     return defined;
   }
@@ -291,7 +291,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public boolean isVector()
+  public final boolean isVector()
   {
     return definition.isArray();
   }
@@ -307,7 +307,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public boolean isEditable()
+  public final boolean isEditable()
   {
     DBEditObject eObj;
 
@@ -345,7 +345,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public boolean isBuiltIn()
+  public final boolean isBuiltIn()
   {
     return definition.isBuiltIn();
   }
@@ -358,7 +358,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * @see arlut.csd.ganymede.db_field
    */
 
-  public boolean isVisible()
+  public final boolean isVisible()
   {
     return definition.base.objectHook.canSeeField(null, this);
   }
@@ -369,7 +369,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public boolean isEditInPlace()
+  public final boolean isEditInPlace()
   {
     return definition.isEditInPlace();
   }
@@ -380,7 +380,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public int getObjTypeID()
+  public final int getObjTypeID()
   {
     return definition.base().getTypeID();
   }
@@ -392,7 +392,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public DBNameSpace getNameSpace()
+  public final DBNameSpace getNameSpace()
   {
     return definition.getNameSpace();
   }
@@ -403,7 +403,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public DBObjectBaseField getFieldDef()
+  public final DBObjectBaseField getFieldDef()
   {
     return definition;
   }
