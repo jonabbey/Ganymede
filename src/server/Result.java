@@ -9,8 +9,8 @@
    
    Created: 21 October 1996 
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:05:53 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/06/15 02:48:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -60,8 +60,11 @@ import java.rmi.RemoteException;
 ------------------------------------------------------------------------------*/
 
 /**
- * The result class is used to return labeled invid's for
- * database queries.
+ * <P>The Result class is effectively a serializable, labeled
+ * {@link arlut.csd.ganymede.Invid Invid} that can be passed from the server
+ * to the client.  The client uses Results to load labeled items into the
+ * client tree, or to provide a list of labeled object handles in Invid
+ * chooser fields.</P>
  */
 
 public class Result implements java.io.Serializable {

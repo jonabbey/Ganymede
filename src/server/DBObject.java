@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/05/26 23:17:24 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/06/15 02:48:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.71 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.72 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -555,16 +555,20 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <P>Returns the primary label of this object.. calls
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * on the {@link arlut.csd.ganymede.DBEditObject DBEditObject} serving
+   * as the {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook} for
+   * this object's {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * to get the label for this object.</P>
    *
-   * Returns the primary label of this object.. 
-   * calls DBEditObject.getLabelHook() to get the
-   * label for this object.
-   *
-   * This base implementation just gives a generic
-   * label for the object.
+   * <P>If the objectHook customization object doesn't define a getLabelHook()
+   * method, this base implementation will return a string based on the
+   * designated label field for this object, or a generic
+   * label constructed based on the object type and invid if no label
+   * field is designated.</P>
    *
    * @see arlut.csd.ganymede.db_object
-   *
    */
 
   public String getLabel()

@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/04/20 18:21:49 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/06/15 02:48:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,7 +56,6 @@ import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   DBBaseCategory
@@ -64,10 +63,16 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>A DBBaseCategory is a 'red folder node' in the server's category and object
+ * hierarchy.  The purpose of DBBaseCategory is to be able to group object
+ * types with related purpose into a common folder for display on the client.</P>
  *
- * This class represents an objectbase folder in the server's
- * category hierarchy.
- *
+ * <P>The {@link arlut.csd.ganymede.DBStore DBStore} contains a tree of 
+ * {@link arlut.csd.ganymede.CategoryNode CategoryNode}s, each of which is either
+ * a {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} or a DBBaseCategory.  The
+ * {@link arlut.csd.ganymede.Category Category} RMI interface is used by the
+ * server and the schema editor to perform browsing and manipulating the server's
+ * category tree.</P>
  */
 
 public class DBBaseCategory extends UnicastRemoteObject implements Category, CategoryNode {

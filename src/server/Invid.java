@@ -11,8 +11,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:05:47 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/06/15 02:48:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,22 +62,20 @@ import java.io.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * An Invid is an immutable object id (an INVariant ID) in the
+ * <P>An Invid is an immutable object id (an INVariant ID) in the
  * Ganymede system.  All objects created in the database have a unique
  * and permanent Invid that identify the object's type and identity.  Because
  * of these properties, the Invid can be used as a persistent object pointer
- * type.<br><br>
+ * type.</P>
  *
- * Invid's are used extensively in the server to track pointer
+ * <P>Invid's are used extensively in the server to track pointer
  * relationships between objects.  Invid's are also used by the client to identify
  * objects to be viewed, edited, deleted, etc.  Basically whenever any code
  * in Ganymede deals with a reference to an object, it is done through the use
- * of Invid's.
+ * of Invid's.</P>
  *
  * @see arlut.csd.ganymede.InvidDBField
  * @see arlut.csd.ganymede.Session
- *  
  */
 
 public final class Invid implements java.io.Serializable {
@@ -110,13 +108,10 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   *
-   * This is the string constructor.. string should be
+   * <P>This is the string constructor.. string should be
    * a pair of colon separated numbers, in the form
-   *
    * 5:134 where the first number is the short type
-   * and the second is the int object number
-   *
+   * and the second is the int object number.</P>
    */
 
   public Invid(String string)

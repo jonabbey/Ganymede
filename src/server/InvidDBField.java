@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 1999/05/26 23:17:29 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 1999/06/15 02:48:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,24 +62,30 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>InvidDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of {@link arlut.csd.ganymede.Invid Invid}
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
  *
- * This class implements one of the most fundamental pieces of logic in the
+ * <P>The Ganymede client talks to InvidDBFields through the
+ * {@link arlut.csd.ganymede.invid_field invid_field} RMI interface.</P> 
+ *
+ * <P>This class implements one of the most fundamental pieces of logic in the
  * Ganymede server, the object pointer/object binding logic.  Whenever the
  * client calls setValue(), setElement(), addElement(), or deleteElement()
  * on an InvidDBField, the object being pointed to by the Invid being set
  * or cleared will be checked out for editing and the corresponding back
- * pointer will be set or cleared as appropriate.<br><br>
+ * pointer will be set or cleared as appropriate.</P>
  *
- * In other words, the InvidDBField logic guarantees that all objects
+ * <P>In other words, the InvidDBField logic guarantees that all objects
  * references in the server are symmetric.  If one object points to
  * another via an InvidDBField, the target of that pointer will point
  * back, either through a field explicitly specified in the schema, or
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
- * defined in every object in the database.
+ * defined in every object in the database.</P>
  *
- * @version $Revision: 1.105 $ %D%
+ * @version $Revision: 1.106 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *
  */
 
 public final class InvidDBField extends DBField implements invid_field {
@@ -103,10 +109,9 @@ public final class InvidDBField extends DBField implements invid_field {
   // ---
 
   /**
-   *
-   * Receive constructor.  Used to create a InvidDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a InvidDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -120,15 +125,15 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   InvidDBField(DBObject owner, DBObjectBaseField definition)
@@ -422,19 +427,21 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
+   * <P>This method returns a text encoded value for this InvidDBField
+   * without checking permissions.</P>
    *
-   * This method returns a text encoded value for this InvidDBField
-   * without checking permissions.<br><br>
+   * <P>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the 
+   * {@link arlut.csd.ganymede.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm()} 
+   * method.</P>
    *
-   * This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the getLabel()
-   * logic for DBObject, which is invoked from GanymedeSession.getPerm().<br><br>
-   *
-   * If this method checked permissions and the getPerm() method
+   * <P>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
    * object.getLabel(), as it does at present, the server could get
-   * into an infinite loop.
-   *
+   * into an infinite loop.</P>
    */
 
   public synchronized String getValueString()
@@ -528,16 +535,15 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
-   * This method returns the label of an object referenced by an
+   * <P>This method returns the label of an object referenced by an
    * invid held in this field.  If the object label returned is currently
    * null, we'll check to see if the remote object is currently being
    * edited by this session.  If it is, we'll try to get the label from
    * the state of that object as it existed at the start of the
    * current transaction.  This is to allow us to do proper logging
    * of the values deleted from this field in the case of the string
-   * generated by DBEditObject.diff() during transaction logging.
-   *
+   * generated by {@link arlut.csd.ganymede.DBEditObject#diff() DBEditObject.diff()}
+   * during transaction logging.</P>
    */
 
   private String getRemoteLabel(GanymedeSession gsession, Invid invid)
@@ -573,14 +579,13 @@ public final class InvidDBField extends DBField implements invid_field {
       }
   }
 
-  /**
-   *
-   * OK, this is a bit vague.. getEncodingString() is used by the new
-   * dump system to allow all fields to be properly sorted in the table..
-   * a real reversible encoding of an invid field would *not* be the
-   * getValueString() results, but getValueString() is what we want in
-   * the dump result table, so we'll do that here for now.
-   *
+  /** 
+   * <P>OK, this is a bit vague.. getEncodingString() is used by the
+   * new dump system to allow all fields to be properly sorted in the
+   * client's query result table.. a real reversible encoding of an
+   * invid field would *not* be the getValueString() results, but
+   * getValueString() is what we want in the dump result table, so
+   * we'll do that here for now.</P> 
    */
 
   public String getEncodingString()
@@ -589,15 +594,13 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public synchronized String getDiffString(DBField orig)

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/04/01 22:17:50 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/06/15 02:48:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,8 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>GanymedeAdmin is the server-side implementation of the adminSession
+ * <p>GanymedeAdmin is the server-side implementation of the
+ * {@link arlut.csd.ganymede.adminSession adminSession}
  * interface;  GanymedeAdmin provides the means by which privileged users
  * can carry out privileged operations on the Ganymede server, including
  * status monitoring and administrative activities.</p>
@@ -76,7 +77,7 @@ import java.rmi.server.UnicastRemoteObject;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.29 $ %D%
+ * @version $Revision: 1.30 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -515,9 +516,10 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
-   * Disconnect the remote admin console associated with this object
-   *
+   * <P>This method lets the admin console explicitly request
+   * a refresh.  Upon being called, the server will call several
+   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
+   * interface to pass current status information to the console.</P>
    */
 
   public synchronized void refreshMe() throws RemoteException
@@ -595,9 +597,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   * Get information about a particular user that 
+   * <P>Get information about a particular user that 
    * is logged in.  We will eventually want to return
-   * a data_object, probably.
+   * a db_object, probably.</P>
+   *
+   * <P>Currently a no-op.</P>
    */
 
   public synchronized String getInfo(String user)
@@ -697,9 +701,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
-   * dump the current state of the db to disk
-   *
+   * <P>dump the current state of the db to disk</P>
    */
 
   public boolean dumpDB()
@@ -726,11 +728,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     return true;
   }
 
-
   /**
-   *
-   * dump the current db schema to disk
-   *
+   * <P>dump the current db schema to disk</P>
    */
 
   public boolean dumpSchema()
@@ -758,12 +757,19 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   }
 
   /**
-   *
-   * This method causes the server to reload any registered
+   * <P>This method causes the server to reload any registered
    * custom classes, and can be run after a schema edit
    * to cause the new classes to take over management of
-   * their respective object types.
+   * their respective object types.</P>
    *
+   * <P>It's not clear how well this actually works.. I think
+   * that custom classes that have already been loaded will
+   * not be reloaded by the class loader, and classes that
+   * have not been loaded previously will need to already
+   * be present in the jar file that the server is running out
+   * of, so this method is probably not useful in practice.</P>
+   *
+   * <P>Better to shutdown and restart the server.</P>
    */
 
   public synchronized boolean reloadCustomClasses()
@@ -948,7 +954,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	    while (enum.hasMoreElements())
 	      {
 		base = (DBObjectBase) enum.nextElement();
-		if (base.currentLock != null)
+
+		if (base.isLocked())
 		  {
 		    Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
 		    Ganymede.db.schemaEditInProgress = false;

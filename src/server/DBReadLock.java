@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/01/26 05:10:50 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/06/15 02:48:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,16 +59,31 @@ import java.util.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>DBReadLock is a class used in the Ganymede server to represent a read lock on
+ * one or more {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects.  A
+ * DBReadLock is used in the
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} class to guarantee
+ * that all query operations go from start to finish without any changes being made
+ * along the way.</P>
+ *
+ * <P>While a DBReadLock is established on a DBObjectBase, no changes may be made
+ * to that base.  The {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}'s
+ * {@link arlut.csd.ganymede.DBWriteLock#establish(java.lang.Object) establish()}
+ * method will suspend until all read locks on a base are cleared.  As soon as
+ * a thread attempts to establish a DBWriteLock on a base, no more DBReadLocks
+ * will be established on that base until the DBWriteLock is cleared, but any
+ * DBReadLocks already established will persist until released, whereupon the
+ * DBWriteLock will establish.</P>
+ *
+ * <P>See {@link arlut.csd.ganymede.DBLock DBLock},
+ * {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}, and
+ * {@link arlut.csd.ganymede.DBDumpLock DBDumpLock} for details.</P>
+ */
+
 public class DBReadLock extends DBLock {
 
   static final boolean debug = false;
-
-  // --
-
-  private Object key;
-  private DBStore lockManager;
-  private Vector baseSet;
-  private boolean locked = false, abort = false, inEstablish = false;
 
   /* -- */
 
@@ -118,12 +133,10 @@ public class DBReadLock extends DBLock {
   }
 
   /**
-   *
-   * Establish a read lock on bases specified in this DBReadLock's
+   * <P>Establish a read lock on bases specified in this DBReadLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.
-   *
+   * proceed with reads on the specified baseset.</P>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -250,6 +263,9 @@ public class DBReadLock extends DBLock {
 	    for (int i = 0; okay && (i < baseSet.size()); i++)
 	      {
 		base = (DBObjectBase) baseSet.elementAt(i);
+		
+		// check for writers.  we don't care about dumpers, since
+		// we can read without problems while a dump lock is held
 		    
 		if (!base.isWriterEmpty())
 		  {
@@ -283,7 +299,7 @@ public class DBReadLock extends DBLock {
 		 
 		try
 		  {
-		    lockManager.wait(500); // an InterruptedException here gets propagated up
+		    lockManager.wait(2500); // an InterruptedException here gets propagated up
 
 		    if (debug)
 		      {
@@ -323,19 +339,18 @@ public class DBReadLock extends DBLock {
 
 	if (debug)
 	  {
-	    // Ganymede.debug("DBReadLock (" + key + "):  read lock established");
-
 	    System.err.println("DBReadLock (" + key + "):  read lock established");
 	  }
+
       }	// synchronized (lockManager)
   }
 
   /**
+   * <P>Relinquish the lock on bases held by this lock object.</P>
    *
-   * Relinquish the lock on bases held by this lock object.
-   *
-   * Should be called by DBSession.releaseLock()
-   *
+   * <P>Should be called by {@link arlut.csd.ganymede.DBSession DBSession}'s
+   * {@link arlut.csd.ganymede.DBSession#releaseLock(arlut.csd.ganymede.DBLock) releaseLock()}
+   * method.</P>
    */
 
   public void release()
@@ -364,7 +379,7 @@ public class DBReadLock extends DBLock {
 
 	    try
 	      {
-		lockManager.wait(500);
+		lockManager.wait(2500);
 	      } 
 	    catch (InterruptedException ex)
 	      {
@@ -408,17 +423,16 @@ public class DBReadLock extends DBLock {
   }
 
   /**
-   *
-   * Withdraw this lock.  This method can be called by a thread to
+   * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
-   * access to the appropriate set of DBObjectBase objects.  If
+   * access to the appropriate set of
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.
+   * establish(), establish() will throw an InterruptedException.</P>
    *
-   * Once abort() is processed, this lock may never be established.
-   * Any subsequent calls to estabish() will always throw
-   * InterruptedException.
-   *
+   * <P>Once abort() is processed, this lock may never be established.
+   * Any subsequent calls to establish() will always throw
+   * InterruptedException.</P>
    */
 
   public void abort()
@@ -430,59 +444,4 @@ public class DBReadLock extends DBLock {
 	release();
       }
   }
-
-  /**
-   *
-   * Returns true if the lock has been established and not
-   * yet aborted / released.
-   *
-   */
-
-  boolean isLocked()
-  {
-    return locked;
-  }
-
-  /**
-   *
-   * Returns true if <base> is locked by this lock.
-   *
-   */
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-    return false;
-  }
-
-  /**
-   *
-   * Returns the key that this lock is established with,
-   * or null if the lock has not been established.
-   *
-   */
-
-  Object getKey()
-  {
-    if (locked)
-      {
-	return key;
-      }
-    else
-      {
-	return null;
-      }
-  }
-
 }

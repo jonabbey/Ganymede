@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/01/22 18:05:50 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/06/15 02:48:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,18 @@ import java.io.*;
                                                                        PermEntry
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Serializable permissions entry object, used to store and transmit permissions
+ * for a specific {@link arlut.csd.ganymede.DBObjectBase
+ * DBObjectBase} and {@link arlut.csd.ganymede.DBObjectBaseField
+ * DBObjectBaseField}.</P>
+ *
+ * <P>Used in conjunction with
+ * {@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}
+ * and {@link arlut.csd.ganymede.PermMatrix PermMatrix} to handle Permissions
+ * in a Role object in the Ganymede server.</P>
+ */
 
 public class PermEntry implements java.io.Serializable {
 

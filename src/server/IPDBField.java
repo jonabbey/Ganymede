@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/03/30 20:14:20 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/06/15 02:48:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,14 +62,21 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>IPDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of IPv4/IPv6 address
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
  *
- * This class holds IPv4/IPv6 address data for Ganymede.<br><br>
+ * <P>The Ganymede client talks to IPDBFields through the
+ * {@link arlut.csd.ganymede.ip_field ip_field} RMI interface.</P> 
  *
- * Note that wherever Ganymede manipulates IP addresses, it does so in terms
- * of unsigned bytes.  Since Java does not provide an unsigned byte type, Ganymede
- * uses the s2u() and u2s() static methods defined in this class to convert from
- * the signed Java byte to the Ganymede 0-255 IP octet range.
- *
+ * <P>Note that wherever Ganymede manipulates IP addresses, it does so
+ * in terms of unsigned byte arrays.  Since Java does not provide an
+ * unsigned byte type, Ganymede uses the {@link
+ * arlut.csd.ganymede.IPDBField#s2u(byte) s2u()} and {@link
+ * arlut.csd.ganymede.IPDBField#u2s(int) u2s()} static methods defined
+ * in this class to convert from the signed Java byte to the Ganymede
+ * 0-255 IP octet range.</P>
  */
 
 public class IPDBField extends DBField implements ip_field {
@@ -81,10 +88,9 @@ public class IPDBField extends DBField implements ip_field {
   // --
 
   /**
-   *
-   * Receive constructor.  Used to create a BooleanDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a IPDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   IPDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -96,15 +102,15 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   IPDBField(DBObject owner, DBObjectBaseField definition)
@@ -352,13 +358,17 @@ public class IPDBField extends DBField implements ip_field {
   // ****
 
   /**
+   * <P>Sets the value of this field, if a scalar.</P>
    *
-   * Sets the value of this field, if a scalar.
-   *
-   * The ReturnVal object returned encodes
+   * <P>The {@link arlut.csd.ganymede.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</P>
    *
+   * <P>Note that IPDBField needs its own setValue() method
+   * (rather than using {@link arlut.csd.ganymede.DBField#setValue(java.lang.Object, boolean)
+   * DBField.setValue()}
+   * because it needs to be able to accept either a Byte[] array or
+   * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
   public ReturnVal setValue(Object value, boolean local)
@@ -518,14 +528,19 @@ public class IPDBField extends DBField implements ip_field {
       }
   }
 
+
   /**
+   * <P>Sets the value of this field, if a vector.</P>
    *
-   * Sets the value of an element of this field, if a vector.
-   *
-   * The ReturnVal object returned encodes
+   * <P>The {@link arlut.csd.ganymede.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</P>
    *
+   * <P>Note that IPDBField needs its own setElement() method
+   * (rather than using {@link arlut.csd.ganymede.DBField#setElement(int, java.lang.Object, boolean)
+   * DBField.setElement()}
+   * because it needs to be able to accept either a Byte[] array or
+   * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
   
   public ReturnVal setElement(int index, Object value, boolean local)
@@ -668,13 +683,17 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
+   * <P>Adds an element to the end of this field, if a vector.</P>
    *
-   * Adds an element to the end of this field, if a vector.
-   *
-   * The ReturnVal object returned encodes
+   * <P>The {@link arlut.csd.ganymede.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</P>
    *
+   * <P>Note that IPDBField needs its own addElement() method
+   * (rather than using {@link arlut.csd.ganymede.DBField#addElement(java.lang.Object, boolean)
+   * DBField.addElement()}
+   * because it needs to be able to accept either a Byte[] array or
+   * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
   public ReturnVal addElement(Object value, boolean local)
@@ -889,15 +908,13 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public synchronized String getDiffString(DBField orig)

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 1999/05/26 23:46:40 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 1999/06/15 02:48:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.JDialog.*;
  * while DBSession is accessed only by (presumably trusted)
  * server-side code.</p>
  *
- * @version $Revision: 1.66 $ %D%
+ * @version $Revision: 1.67 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -91,12 +91,51 @@ final public class DBSession {
     debug = val;
   }
 
+  /**
+   * <P>User-level session reference.  As mentioned above, 
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} has the
+   * user-level permissions handling, while DBSession has the database
+   * handling.</P>
+   */
+
   GanymedeSession GSession;
+
+  /**
+   * <P>Root object of the Ganymede database system.</P>
+   */
+
   DBStore store;
+
+  /**
+   * <P>Vector of {@link arlut.csd.ganymede.DBLock DBLock} objects held
+   * by this session.  This needs to be a Vector because a DBSession
+   * can legitimately hold multiple {@link arlut.csd.ganymede.DBReadLock DBReadLock}
+   * objects at a time.  Only one writer lock is allowed at a time, however,
+   * to avoid deadlock.</P>
+   *
+   * <P>The {@link arlut.csd.ganymede.DBStore#lockHash DBStore.lockHash} hashtable
+   * is used, in conjunction with the 
+   * {@link arlut.csd.ganymede.DBLock#establish(java.lang.Object) establish()}
+   * methods in the DBReadLock, {@link arlut.csd.ganymede.DBWriteLock DBWriteLock},
+   * and {@link arlut.csd.ganymede.DBDumpLock DBDumpLock} classes.</P>
+   */
 
   Vector lockVect = new Vector();
 
+  /**
+   * <P>Transaction handle for this session.</P>
+   */
+
   DBEditSet editSet;
+
+  /** 
+   * <P>Deprecated error reporting string.. like errno in the C
+   * standard library, this sort of interface isn't thread-friendly,
+   * so we've largely moved away from using this String to the
+   * per-method {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * result object.</P>
+   */
+
   String lastError;
   String id = null;
   Object key;
@@ -131,10 +170,8 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Close out this DBSession, aborting any open transaction, and releasing
-   * held read locks.
-   *
+   * <P>Close out this DBSession, aborting any open transaction, and releasing
+   * any held read/write/dump locks.</P>
    */
 
   public synchronized void logout()
@@ -150,10 +187,9 @@ final public class DBSession {
   }
 
   /**
-   *
-   * This method is provided so that custom DBEditObject subclasses
-   * can get access to methods on our DBStore.
-   *
+   * <P>This method is provided so that custom
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclasses
+   * can get access to methods on our DBStore.</P>
    */
 
   public DBStore getStore()
@@ -163,29 +199,30 @@ final public class DBSession {
 
 
   /**
-   * Create a new object in the database.<br><br>
+   * <P>Create a new object in the database.</P>
    *
-   * This method creates a slot in the object base of the
+   * <P>This method creates a slot in the object base of the
    * proper object type.  The created object is associated
    * with the current transaction.  When the transaction 
    * is committed, the created object will inserted into
    * the database, and will become visible to other
-   * sessions.<br><br>
+   * sessions.</P>
    *
-   * The created object will be given an object id.
-   * The DBEditObject can be queried to determine its
-   * invid.
+   * <P>The created object will be given an object id.
+   * The {@link arlut.csd.ganymede.DBEditObject DBEditObject} can 
+   * be queried to determine its invid.</P>
    *
-   * This method will return null if the object could
-   * not be constructed and initialized for some reason.
+   * <P>This method will return null if the object could
+   * not be constructed and initialized for some reason.</P>
    *
    * @param object_type Type of the object to be created
    * @param chosenSlot Invid to create the new object with.
    * normally only used in internal Ganymede code in conjunction with
    * the addition of new kinds of built-in objects during development
+   * @param owners Vector of invids for owner group objects to make initial
+   * owners for the newly created object
    *
    * @see arlut.csd.ganymede.DBStore
-   *
    */
 
   public synchronized DBEditObject createDBObject(short object_type, Invid chosenSlot, Vector owners)
@@ -345,26 +382,25 @@ final public class DBSession {
   }
 
   /**
-   * Create a new object in the database.<br><br>
+   * <P>Create a new object in the database.</P>
    *
-   * This method creates a slot in the object base of the
+   * <P>This method creates a slot in the object base of the
    * proper object type.  The created object is associated
    * with the current transaction.  When the transaction 
    * is committed, the created object will inserted into
    * the database, and will become visible to other
-   * sessions.<br><br>
+   * sessions.</P>
    *
-   * The created object will be given an object id.
-   * The DBEditObject can be queried to determine its
-   * invid.
+   * <P>The created object will be given an object id.
+   * The {@link arlut.csd.ganymede.DBEditObject DBEditObject}
+   * can be queried to determine its invid.</P>
    *
-   * This method will return null if the object could
-   * not be constructed and initialized for some reason.
+   * <P>This method will return null if the object could
+   * not be constructed and initialized for some reason.</P>
    *
    * @param object_type Type of the object to be created
    *
    * @see arlut.csd.ganymede.DBStore
-   *
    */
 
   public DBEditObject createDBObject(short object_type, Vector owners)
@@ -373,15 +409,14 @@ final public class DBSession {
   }
 
   /**
+   * <P>Pull an object out of the database for editing.</P>
    *
-   * Pull an object out of the database for editing.<br><br>
-   *
-   * This method is used to check an object out of the database for editing.
+   * <P>This method is used to check an object out of the database for editing.
    * Only one session can have a particular object checked out for editing at
-   * a time.<br><br>
+   * a time.</P>
    *
-   * The session has to have a transaction opened before it can pull
-   * an object out for editing.
+   * <P>The session has to have a transaction opened before it can pull
+   * an object out for editing.</P>
    *
    * @param invid The invariant id of the object to be modified.
    *
@@ -394,27 +429,24 @@ final public class DBSession {
   }
 
   /**
+   * <P>Pull an object out of the database for editing.</P>
    *
-   * Pull an object out of the database for editing.<br><br>
-   *
-   * This method is used to check an object out of the database for editing.
+   * <P>This method is used to check an object out of the database for editing.
    * Only one session can have a particular object checked out for editing at
-   * a time.<br><br>
+   * a time.</P>
    *
-   * The session has to have a transaction opened before it can pull a
-   * new object out for editing.  If the object specified by <baseID,
-   * objectID> is part of the current transaction, the transactional
+   * <P>The session has to have a transaction opened before it can pull a
+   * new object out for editing.  If the object specified by &lt;baseID,
+   * objectID&gt; is part of the current transaction, the transactional
    * copy will be returned, and no readLock is strictly necessary in
-   * that case.
+   * that case.</P>
    *
-   * @param baseID The short id number of the DBObjectBase containing the object to
-   *               be edited.
+   * @param baseID The short id number of the
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} containing the object to
+   * be edited.
    *
    * @param objectID The int id number of the object to be edited within the specified
    *                 object base.
-   *
-   * @see arlut.csd.ganymede.DBObjectBase
-   * 
    */
 
   public synchronized DBEditObject editDBObject(short baseID, int objectID)
@@ -458,25 +490,23 @@ final public class DBSession {
   }
 
   /**
+   * <P>Get a reference to a read-only copy of an object in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Get a reference to a read-only copy of an object in the DBStore.<br><br>
-   *
-   * If this session has a transaction currently open, this method will return
+   * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
-   * transaction.
+   * transaction.</P>
    *
-   * Note that unless the object has been checked out by the current session,
+   * <P>Note that unless the object has been checked out by the current session,
    * this method will return access to the object as it is stored directly
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use GanymedeSession.view_db_object to
-   * get the object.
+   * object's fields be protected, use {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid) 
+   * view_db_object()} method to get the object.</P>
    *
    * @param invid The invariant id of the object to be viewed.
-   *
-   * @see arlut.csd.ganymede.DBObjectBase
-   *
    */
 
   public DBObject viewDBObject(Invid invid)
@@ -485,30 +515,27 @@ final public class DBSession {
   }
 
   /**
+   * <P>Get a reference to a read-only copy of an object in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Get a reference to a read-only copy of an object in the DBStore.<br><br>
-   *
-   * If this session has a transaction currently open, this method will return
+   * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
-   * transaction.
+   * transaction.</P>
    *
-   * Note that unless the object has been checked out by the current session,
+   * <P>Note that unless the object has been checked out by the current session,
    * this method will return access to the object as it is stored directly
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use GanymedeSession.view_db_object to
-   * get the object.
+   * object's fields be protected, use {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid) 
+   * view_db_object()} method to get the object.</P>
    *
    * @param baseID The short id number of the DBObjectBase containing the object to
    *               be viewed.
    *
    * @param objectID The int id number of the object to be viewed within the specified
    *                 object base.
-   *
-   *
-   * @see arlut.csd.ganymede.DBObjectBase
-   *
    */
 
   public DBObject viewDBObject(short baseID, int objectID)
@@ -556,17 +583,15 @@ final public class DBSession {
   }
 
   /**
+   * <P>Remove an object from the database</P>
    *
-   * Remove an object from the database<br><br>
-   *
-   * This method method can only be called in the context of an open
+   * <P>This method method can only be called in the context of an open
    * transaction.  This method will mark an object for deletion.  When
    * the transaction is committed, the object is removed from the
    * database.  If the transaction is aborted, the object remains in
-   * the database unchanged.
+   * the database unchanged.</P>
    *
    * @param invid Invid of the object to be deleted
-   * 
    */
 
   public ReturnVal deleteDBObject(Invid invid)
@@ -575,20 +600,19 @@ final public class DBSession {
   }
 
   /**
+   * <P>Remove an object from the database</P>
    *
-   * Remove an object from the database<br><br>
-   *
-   * This method method can only be called in the context of an open
-   * transaction.  This method will check an object out of the DBStore
+   * <P>This method method can only be called in the context of an open
+   * transaction.  This method will check an object out of the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}
    * and add it to the editset's deletion list.  When the transaction
    * is committed, the object has its remove() method called to do
    * cleanup, and the editSet nulls the object's slot in the DBStore.
    * If the transaction is aborted, the object remains in the database
-   * unchanged.
+   * unchanged.</P>
    *
    * @param baseID id of the object base containing the object to be deleted
    * @param objectID id of the object to be deleted
-   *  
    */
 
   public ReturnVal deleteDBObject(short baseID, int objectID)
@@ -625,20 +649,23 @@ final public class DBSession {
   }
 
   /**
+   * <P>Remove an object from the database</P>
    *
-   * Remove an object from the database<br><br>
-   *
-   * This method method can only be called in the context of an open
+   * <P>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the
-   * only way to obtain a DBEditObject), no other locking is
-   * required. This method will take an object out of the DBStore, do
+   * only way to obtain a {@link arlut.csd.ganymede.DBEditObject DBEditObject}),
+   * no other locking is
+   * required. This method will take an object out of the
+   * {@link arlut.csd.ganymede.DBStore DBStore}, do
    * whatever immediate removal logic is required, and mark it as
    * deleted in the transaction.  When the transaction is committed,
-   * the object will be expunged from the database.
+   * the object will be expunged from the database.</P>
    *
-   * Note that this method does not check to see whether permission
+   * <P>Note that this method does not check to see whether permission
    * has been obtained to delete the object.. that's done in
-   * GanymedeSession.delete_db_object().
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#remove_db_object(arlut.csd.ganymede.Invid) remove_db_object()}
+   * method.</P>
    *
    * @param eObj An object checked out in the current transaction to be deleted
    *   
@@ -717,8 +744,10 @@ final public class DBSession {
    *
    * <p>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the only
-   * way to obtain a DBEditObject), no other locking is required. This method
-   * will take an object out of the DBStore and proceed to do whatever is
+   * way to obtain a {@link arlut.csd.ganymede.DBEditObject DBEditObject}),
+   * no other locking is required. This method
+   * will take an object out of the {@link arlut.csd.ganymede.DBStore DBStore}
+   * and proceed to do whatever is
    * necessary to cause that object to be 'inactivated'.</p>
    *
    * <p>Note that this method does not check to see whether permission
@@ -933,7 +962,8 @@ final public class DBSession {
   }
 
   /**
-   * <p>Establishes a read lock for the DBObjectBase's in bases.</p>
+   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}s
+   * in bases.</p>
    *
    * <p>The thread calling this method will block until the read lock 
    * can be established.  If any of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
@@ -963,18 +993,18 @@ final public class DBSession {
   }
 
   /**
+   * <P>openReadLock establishes a read lock for the entire
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * openReadLock establishes a read lock for the entire DBStore.<br><br>
-   *
-   * The thread calling this method will block until the read lock 
+   * <P>The thread calling this method will block until the read lock 
    * can be established.  If transactions on the database are
    * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.<br><br>
+   * until all such transactions are committed.</P>
    *
-   * All viewDBObject calls done within the context of an open read lock
+   * <P>All viewDBObject calls done within the context of an open read lock
    * will be transaction consistent.  Other sessions may pull objects out for
    * editing during the course of the session's read lock, but no visible changes
-   * will be made to those ObjectBases until the read lock is released.
+   * will be made to those ObjectBases until the read lock is released.</P>
    */
 
   public synchronized DBReadLock openReadLock() throws InterruptedException
@@ -992,10 +1022,8 @@ final public class DBSession {
   }
 
   /**
-   *
-   * This method establishes a dump lock on all object bases in this Ganymede
-   * server.
-   *
+   * <P>This method establishes a dump lock on all object bases in this Ganymede
+   * server.</P>
    */
 
   public synchronized DBDumpLock openDumpLock() throws InterruptedException
@@ -1013,11 +1041,9 @@ final public class DBSession {
   }
 
   /**
+   * <P>releaseLock releases a particular lock held by this session.</P>
    *
-   * releaseLock releases a particular lock held by this session.<br><br>
-   *
-   * This method must be synchronized.
-   *
+   * <P>This method must be synchronized.</P>
    */
 
   public synchronized void releaseLock(DBLock lock)
@@ -1028,14 +1054,12 @@ final public class DBSession {
   }
 
   /**
+   * <P>releaseAllLocks() releases all locks held by this
+   * session.</P>
    *
-   * releaseAllLocks() releases all locks held by this
-   * session.<br><br>
-   *
-   * This method is *not* synchronized.  This method must
+   * <P>This method is *not* synchronized.  This method must
    * only be called by code synchronized on this DBSession
-   * instance.
-   *
+   * instance.</P>
    */
 
   public void releaseAllLocks()
@@ -1057,18 +1081,18 @@ final public class DBSession {
   }
 
   /**
-   * openTransaction establishes a transaction context for this session.
-   * When this method returns, the session can call editDBObject and 
-   * createDBObject to obtain DBEditObjects.  Methods can then be called
+   * <P>openTransaction establishes a transaction context for this session.
+   * When this method returns, the session can call editDBObject() and 
+   * createDBObject() to obtain {@link arlut.csd.ganymede.DBEditObject DBEditObject}s.
+   * Methods can then be called
    * on the DBEditObjects to make changes to the database.  These changes
-   * are actually performed when and if commitTransaction is called.
+   * are actually performed when and if commitTransaction() is called.</P>
    *
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
    * transaction.
    *
    * @see arlut.csd.ganymede.DBEditObject
-   *
    */ 
 
   public synchronized void openTransaction(String describe)
@@ -1082,25 +1106,23 @@ final public class DBSession {
   }
 
   /**
-   * commitTransaction causes any changes made during the context of
+   * <P>commitTransaction causes any changes made during the context of
    * a current transaction to be performed.  Appropriate portions of the
    * database are locked, changes are made to the in-memory image of
    * the database, and a description of the changes is placed in the
-   * DBStore journal file.  Event logging / mail notification may
-   * take place.<br><br>
+   * {@link arlut.csd.ganymede.DBStore DBStore} journal file.  Event
+   * logging / mail notification may take place.</P>
    *
-   * The session must not hold any locks when commitTransaction is
+   * <P>The session must not hold any locks when commitTransaction is
    * called.  The symmetrical invid references between related objects
    * and the atomic namespace management code should guarantee that no
    * incompatible change is made with respect to any checked out objects
-   * while the Bases are unlocked.
-   *
+   * while the Bases are unlocked.</P>
    *
    * @return null if the transaction was committed successfully,
    *         a non-null ReturnVal if there was a commit failure.
    *
    * @see arlut.csd.ganymede.DBEditObject
-   *
    */
 
   public synchronized ReturnVal commitTransaction()
@@ -1174,16 +1196,17 @@ final public class DBSession {
   }
 
   /**
-   * abortTransaction causes all DBEditObjects that were pulled during
+   * <P>abortTransaction causes all {@link arlut.csd.ganymede.DBEditObject DBEditObject}s
+   * that were pulled during
    * the course of the session's transaction to be released without affecting
-   * the state of the database.  Any changes made to DBObjects pulled for editing
+   * the state of the database.  Any changes made to
+   * {@link arlut.csd.ganymede.DBObject DBObject}s pulled for editing
    * by this session during this transaction are abandoned.  Any objects created
    * or destroyed by this session during this transaction are abandoned / unaffected
-   * by the actions during the transaction.<br><br>
+   * by the actions during the transaction.</P>
    *
-   * Calling abortTransaction has no affect on any locks held by this session, but
-   * generally no locks should be held here.
-   *
+   * <P>Calling abortTransaction() has no affect on any locks held by this session, but
+   * generally no locks should be held here.</P>
    *
    * @return null if the transaction was committed successfully,
    *         a non-null ReturnVal if there was a commit failure.
@@ -1254,12 +1277,12 @@ final public class DBSession {
   }
 
   /**
+   * <P>internal method for setting error messages resulting from session activities.</P>
    *
-   * internal method for setting error messages resulting from session activities.
+   * <P>this method may eventually be hooked up to a more general logging
+   * mechanism.</P>
    *
-   * this method may eventually be hooked up to a more general logging
-   * mechanism.
-   *
+   * @deprecated This method is obsoleted by the use of ReturnVal
    */
 
   public void setLastError(String error)
@@ -1278,11 +1301,9 @@ final public class DBSession {
   }
 
   /**
-   *
-   * This method is responsible for providing an identifier string
+   * <P>This method is responsible for providing an identifier string
    * for the user who this session belongs to, and is used for
-   * logging and what-not.
-   *
+   * logging and what-not.</P>
    */
 
   public String getID()
@@ -1315,10 +1336,8 @@ final public class DBSession {
   }
 
   /**
-   *
-   * This method returns a handle to the Ganymede Session
-   * that owns this DBSession.
-   *
+   * <P>This method returns a handle to the Ganymede Session
+   * that owns this DBSession.</P>
    */
 
   public GanymedeSession getGSession()
@@ -1327,10 +1346,8 @@ final public class DBSession {
   }
 
   /**
-   *
-   * This method returns a handle to the objectHook for
-   * a particular Invid.
-   *
+   * <P>This method returns a handle to the objectHook for
+   * a particular Invid.</P>
    */
 
   public DBEditObject getObjectHook(Invid invid)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 1999/06/09 03:33:36 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 1999/06/15 02:48:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,8 @@ import arlut.csd.Util.*;
 
 /**
  * <p>The data dictionary and object store for a particular kind of
- * object in the {@link arlut.csd.ganymede.DBStore DBStore}.</p>
+ * object in the {@link arlut.csd.ganymede.DBStore DBStore} on the
+ * Ganymede server.</p>
  *
  * <p>Each DBObjectBase object includes a set of
  * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} objects, which
@@ -81,7 +82,11 @@ import arlut.csd.Util.*;
  * given object type, the DBObjectBase class may also contain a string classname
  * for a Java class to be dynamically loaded to manage the server's interactions
  * with objects of this type.  Such a class name must refer to a subclass of the
- * {@link arlut.csd.ganymede.DBEditObject DBEditObject} class.</p>
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} class.  If such a custom
+ * class is defined for this object type, DBObjectBase will contain an
+ * {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook} DBEditObject
+ * instance whose methods will be consulted to customize a lot of the server's
+ * functioning.</p>
  *
  * <p>DBObjectBase also keeps track of {@link arlut.csd.ganymede.DBReadLock DBReadLocks},
  * {@link arlut.csd.ganymede.DBWriteLock DBWriteLocks}, and 
@@ -108,12 +113,36 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   DBStore store;
 
-  // schema info from the DBStore file
+  /**
+   * <P>Name of this object type</P>
+   */
 
   String object_name;
-  String classname;
-  Class classdef;
+
+  /**
+   * <P>short type id code for this object type.  This number is
+   * used as the {@link arlut.csd.ganymede.Invid#type type} code
+   * in {@link arlut.csd.ganymede.Invid Invid}s pointing to objects
+   * of this type.</P>
+   */
+
   short type_code;
+
+  /**
+   * <P>Fully qualified package and class name for a custom 
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclass
+   * to be dynamically loaded to manage operations on this DBObjectBase.</P>
+   */
+
+  String classname;
+
+  /**
+   * <P>Class definition for a
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclass
+   * dynamically loaded to manage operations on this DBObjectBase.</P>
+   */
+
+  Class classdef;
 
   /**
    * which field represents our label?
@@ -125,7 +154,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * what type of object is this?
    */
 
-  Category category;	
+  Category category;
+
+  /**
+   * <P>What order will this object type appear in the client's
+   * object tree?  This ordering number applies within the
+   * {@link arlut.csd.ganymede.Category Category} containing
+   * this DBObjectBase.</P>
+   */
+
   int displayOrder = 0;
 
   private boolean embedded;
@@ -169,24 +206,115 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean reallyLoading;
 
-  // used by the DBLock Classes to synchronize client access
+  /**
+   * <P>If this DBObjectBase is locked with an exclusive lock
+   * (either a {@link arlut.csd.ganymede.DBWriteLock DBWriteLock} or
+   * a {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}), this field
+   * will point to it.</P>
+   *
+   * <P>This field is not currently used for anything in particular
+   * in the lock logic, it is here strictly for informational/debugging
+   * purposes.</P>
+   */
 
   DBLock currentLock;
-  private Vector writerList, readerList, dumperList;
+
+  /**
+   * <P>"Queue" of {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s pending
+   * on this DBObjectBase.  DBWriteLocks will add themselves to the writerList
+   * upon entering establish().  If writerList is not empty, no new
+   * {@link arlut.csd.ganymede.DBReadLock DBReadLock}s will be allowed to
+   * add themselves to the
+   * {@link arlut.csd.ganymede.DBObjectBase#readerList readerList} in this
+   * DBObjectBase.</P>
+   *
+   * <P>Note that there is no guarantee that DBWriteLocks will be granted
+   * access to any given DBObjectBase in the order that their threads
+   * entered the establish() method, as different DBWriteLocks may be
+   * attempting to establish() on differing sets of DBObjectBases.  There
+   * is not in fact any attempt in the DBWriteLock establish() method to
+   * ensure that writers are given the lock on a DBObjectBase in their
+   * writerList ordering.  The establish() methods may establish() any
+   * writer in any order, depending on the server's threading behavior.</P>
+   */
+
+  private Vector writerList;
+
+  /**
+   * <P>Collection of {@link arlut.csd.ganymede.DBReadLock DBReadLock}s
+   * that are locked on this DBObjectBase.</P>
+   */
+
+  private Vector readerList;
+
+  /**
+   * <P>"Queue" of {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}s pending
+   * on this DBObjectBase.  DBDumpLocks will add themselves to the dumperList
+   * upon entering establish().  If dumperList is not empty, no new
+   * {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s will be allowed to
+   * add themselves to the
+   * {@link arlut.csd.ganymede.DBObjectBase#writerList writerList} in this
+   * DBObjectBase.</P>
+   *
+   * <P>Note that there is no guarantee that DBDumpLocks will be granted
+   * access to any given DBObjectBase in the order that their threads
+   * entered the establish() method, as different DBDumpLocks may be
+   * attempting to establish() on differing sets of DBObjectBases.  There
+   * is not in fact any attempt in the DBDumpLock establish() method to
+   * ensure that writers are given the lock on a DBObjectBase in their
+   * dumperList ordering.  The establish() methods may establish() any
+   * dumper in any order, depending on the server's threading behavior.</P>
+   */
+
+  private Vector dumperList;
+
+  /**
+   * <P>Boolean flag monitoring whether or not this DBObjectBase is
+   * currently locked for writing.</P>
+   */
+
   boolean writeInProgress;
+
+  /**
+   * <P>Boolean flag monitoring whether or not this DBObjectBase is
+   * currently locked for dumping.</P>
+   */
+
   boolean dumpInProgress;
 
-  // Used to keep track of schema editing
+  /**
+   * Used to keep track of schema editing
+   */
 
   DBSchemaEdit editor;
-  DBObjectBase original;	
+
+  /**
+   * Used to keep track of schema editing
+   */
+
+  DBObjectBase original;
+
+  /**
+   * Used to keep track of schema editing
+   */
+
   boolean save;
+
+  /**
+   * Used to keep track of schema editing
+   */
+
   boolean changed;
 
   // Customization Management Object
 
   /**
-   * a hook to allow pseudostatic method calls on a DBEditObject management subclass
+   * <P>Each DBObjectBase can have an instantiation of a custom DBEditObject subclass
+   * to respond to a number of 'pseudostatic' method calls which customize
+   * the Ganymede server's behavior when dealing with objects of this DBObjectBase's
+   * type.</P>
+   *
+   * <P>If this DBObjectBase
    */
 
   DBEditObject objectHook;	
@@ -2166,23 +2294,49 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
   }
 
-  // 
-  // This method is used to allow objects in this base to notify us when
-  // their state changes.
+  /**
+   * <P>This method is used to allow objects in this base to notify us when
+   * their state changes.  It is called from the
+   * {@link arlut.csd.ganymede.DBEditSet DBEditSet} commit() method.</P>
+   *
+   * <P>We use this method to be able to determine the last time anything in
+   * this DBObjectBase changed when making decisions as to what needs to
+   * be done in BuilderTasks.</P>
+   */
 
   void updateTimeStamp()
   {
     lastChange.setTime(System.currentTimeMillis());
   }
 
+  /**
+   * <P>Returns a Date object containing the time that any changes were
+   * committed to this DBObjectBase.</P> 
+   */
+
   public Date getTimeStamp()
   {
     return lastChange;
   }
 
+  //
   // the following methods are used to manage locks on this base
   // All methods that modify writerList, readerList, or dumperList
   // must be synchronized on store.
+  //
+
+  /**
+   * <P>Returns true if this DBObjectBase is currently locked for reading,
+   * writing, or dumping.</P>
+   */
+
+  boolean isLocked()
+  {
+    synchronized (store)
+      {
+	return (!isReaderEmpty() || writeInProgress || dumpInProgress);
+      }
+  }
 
   /**
    * <p>Add a DBWriteLock to this base's writer queue.</p>
@@ -2205,6 +2359,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   boolean removeWriter(DBWriteLock writer)
   {
     boolean result;
+
     synchronized (store)
       {
 	result = writerList.removeElement(writer);
@@ -2231,7 +2386,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     return writerList.size();
   }
-
 
   /**
    * <p>Add a DBReadLock to this base's reader list.</p>

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/03/17 05:32:48 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/06/15 02:48:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,26 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>DateDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of Date
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to DateDBFields through the
+ * {@link arlut.csd.ganymede.date_field date_field} RMI interface.</P> 
+ *
+ * <P>Ganymede uses the standard Java Date class, which can encode dates
+ * from roughly 300 million years B.C. to 300 million years A.D., with
+ * millisecond resolution.  No Y2k problems here. ;-)</P>
+ */
+
 public class DateDBField extends DBField implements date_field {
 
   /**
-   *
-   * Receive constructor.  Used to create a BooleanDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a DateDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -77,15 +90,15 @@ public class DateDBField extends DBField implements date_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   DateDBField(DBObject owner, DBObjectBaseField definition)
@@ -209,16 +222,15 @@ public class DateDBField extends DBField implements date_field {
     return Long.toString(((Date) this.value).getTime());
   }
 
+
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public String getDiffString(DBField orig)
@@ -258,16 +270,15 @@ public class DateDBField extends DBField implements date_field {
   // ****
 
   /**
+   * <P>Returns true if this date field has a minimum and/or maximum date
+   * set.</P>
    *
-   * Returns true if this date field has a minimum and/or maximum date
-   * set.
-   *
-   * We are currently assuming that time limited fields will need to
-   * have their limits dynamically calculated, so such fields will
-   * need to override this method to provide limit information.
+   * <P>We depend on our owner's 
+   * {@link arlut.csd.ganymede.DBEditObject#isDateLimited(arlut.csd.ganymede.DBField) isDateLimited()}
+   * method to tell us whether this Date field should be limited or not
+   * in this editing context.</P>
    *
    * @see arlut.csd.ganymede.date_field
-   *
    */
 
   public boolean limited()
@@ -287,15 +298,13 @@ public class DateDBField extends DBField implements date_field {
   }
 
   /**
+   * <P>Returns the earliest date acceptable for this field</P>
    *
-   * Returns the earliest date acceptable for this field
-   *
-   * We are currently assuming that time limited fields will need to
-   * have their limits dynamically calculated, so such fields will
-   * need to override this method to provide limit information.
+   * <P>We depend on our owner's 
+   * {@link arlut.csd.ganymede.DBEditObject#minDate(arlut.csd.ganymede.DBField) minDate()}
+   * method to tell us what the earliest acceptable Date for this field is.</P>
    *
    * @see arlut.csd.ganymede.date_field
-   *
    */
 
   public Date minDate()
@@ -315,15 +324,13 @@ public class DateDBField extends DBField implements date_field {
   }
 
   /**
+   * <P>Returns the latest date acceptable for this field</P>
    *
-   * Returns the latest date acceptable for this field
-   *
-   * We are currently assuming that time limited fields will need to
-   * have their limits dynamically calculated, so such fields will
-   * need to override this method to provide limit information.
+   * <P>We depend on our owner's 
+   * {@link arlut.csd.ganymede.DBEditObject#maxDate(arlut.csd.ganymede.DBField) maxDate()}
+   * method to tell us what the earliest acceptable Date for this field is.</P>
    *
    * @see arlut.csd.ganymede.date_field
-   *
    */
 
   public Date maxDate()

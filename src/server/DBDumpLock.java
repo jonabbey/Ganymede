@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:05:30 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/06/15 02:48:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,28 +59,21 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * DBDumpLock is an object used to lock the DBStore for the purpose of
+ * <P>DBDumpLock is a {@link arlut.csd.ganymede.DBLock DBLock} object used to lock the
+ * {@link arlut.csd.ganymede.DBStore DBStore} for the purpose of
  * dumping the database.  A DBDumpLock establish request has lower
- * priority than DBWriteLock requests, but once a DBDumpLock establish
+ * priority than {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}
+ * requests, but once a DBDumpLock establish
  * request is submitted, no new DBWriteLock can be established until
- * the dumping thread has completed the dump and released the lock.
+ * the dumping thread has completed the dump and released the lock.</P>
  *
- * DBReadLock's can be established while a DBDumpLock is active.
- *
+ * <P>{@link arlut.csd.ganymede.DBReadLock DBReadLock}'s can be established
+ * while a DBDumpLock is active.</P>
  */
 
 class DBDumpLock extends DBLock {
 
   static final boolean debug = false;
-
-  private Object key;
-  private DBStore lockManager;
-  private Vector baseSet;
-  private boolean 
-    locked = false,
-    abort = false, 
-    inEstablish = false;
 
   /* -- */
 
@@ -132,12 +125,10 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   *
-   * Establish a dump lock on bases specified in this DBDumpLock's
+   * <P>Establish a dump lock on bases specified in this DBDumpLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.
-   *
+   * proceed with reads on the specified baseset.</P>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -303,17 +294,16 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   *
-   * Withdraw this lock.  This method can be called by a thread to
+   * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
-   * access to the appropriate set of DBObjectBase objects.  If
+   * access to the appropriate set of
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.
+   * establish(), establish() will throw an InterruptedException.</P>
    *
-   * Once abort() is processed, this lock may never be established.
+   * <P>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to estabish() will always throw
-   * InterruptedException.
-   *
+   * InterruptedException.</P>
    */
 
   public void abort()
@@ -325,59 +315,4 @@ class DBDumpLock extends DBLock {
 	release();
       }
   }
-
-  /**
-   *
-   * Returns true if the lock has been established and not
-   * yet aborted / released.
-   *
-   */
-
-  boolean isLocked()
-  {
-    return locked;
-  }
-
-  /**
-   *
-   * Returns true if <base> is locked by this lock.
-   *
-   */
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-    return false;
-  }
-
-  /**
-   *
-   * Returns the key that this lock is established with,
-   * or null if the lock has not been established.
-   *
-   */
-
-  Object getKey()
-  {
-    if (locked)
-      {
-	return key;
-      }
-    else
-      {
-	return null;
-      }
-  }
-
 }

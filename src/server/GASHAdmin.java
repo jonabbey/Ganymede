@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/06/09 03:33:38 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/06/15 02:48:23 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -75,11 +75,12 @@ import arlut.csd.Util.*;
                                                                            class
                                                                           iAdmin
 
-iAdmin does all the heavy lifting to connect the server with the client, and
-provides callbacks that the server can use to notify the client when something
-happens.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>RMI communications class for the admin console.  Handles login and 
+ * update duties for {@link arlut.csd.ganymede.GASHAdmin GASHAdmin}.</P>
+ */
 
 class iAdmin extends UnicastRemoteObject implements Admin {
 

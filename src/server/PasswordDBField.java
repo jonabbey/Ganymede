@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/05/26 23:17:30 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/06/15 02:48:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,7 +63,13 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Ganymede database field used to store and manipulate password information.</p>
+ * <P>PasswordDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of password
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to PasswordDBFields through the
+ * {@link arlut.csd.ganymede.pass_field pass_field} RMI interface.</P> 
  *
  * <p>This class differs a bit from most subclasses of {@link
  * arlut.csd.ganymede.DBField DBField} in that the normal setValue()/getValue()
@@ -73,18 +79,25 @@ import arlut.csd.JDialog.*;
  * <p>Crypted passwords are stored in the UNIX crypt() format.  See the
  * {@link jcrypt jcrypt} class for details on the crypt hashing.</p>
  *
- * <p>There are no methods provided to allow remote access to password information..
- * server-side code must locally access the getUNIXCryptText() and getPlainText()
- * methods to get access to the password information.  Generally, even in that
- * case, only crypted password information will be available.  If this password
- * field was configured to store encrypted passwords by way of its
- * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}, this password
- * field will never emit() the plaintext to disk.  Instead, the crypt()'ed
- * password information will be retained for user authentication.  The plaintext of
- * the password <b>may</b> be retained in memory for the purpose of replicating to
- * systems that do not use the UNIX crypt() format for password hashing, but only
- * on a temporary basis, for those passwords whose plaintext was provided to the
- * server during its operation.</p>
+ * <p>There are no methods provided to allow remote access to password
+ * information..  server-side code must locally access the {@link
+ * arlut.csd.ganymede.PasswordDBField#getUNIXCryptText()
+ * getUNIXCryptText()} and {@link
+ * arlut.csd.ganymede.PasswordDBField#getPlainText() getPlainText()}
+ * methods to get access to the password information.  Generally, even
+ * in that case, only crypted password information will be available.
+ * If this password field was configured to store encrypted passwords
+ * by way of its {@link arlut.csd.ganymede.DBObjectBaseField
+ * DBObjectBaseField}, this password field will never emit() the
+ * plaintext to disk.  Instead, the crypt()'ed password information
+ * will be retained for user authentication.  The plaintext of the
+ * password <b>may</b> be retained in memory for the purpose of
+ * replicating to systems that do not use the UNIX crypt() format for
+ * password hashing, but only on a temporary basis, for those
+ * passwords whose plaintext was provided to the server during its
+ * operation.  Basically, it's for custom builder tasks that
+ * need to be able to provide the plaintext of a stored password
+ * for replication to a system with an incompatible hash format.</P>
  *
  * @see arlut.csd.ganymede.BaseField#setCrypted(boolean)
  * @see arlut.csd.ganymede.BaseField#setPlainText(boolean)

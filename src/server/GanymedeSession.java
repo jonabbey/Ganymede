@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 1999/05/26 23:17:28 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 1999/06/15 02:48:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.134 $ %D%
+ * @version $Revision: 1.135 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2590,7 +2590,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    // object types.. make sure we've got an instance
 		    // of the right kind of field
 
-		    if (resultfield.definition != fieldDef)
+		    if (resultfield.getFieldDef() != fieldDef)
 		      {
 			return intersectQueries(query, result, null);
 		      }
@@ -2697,14 +2697,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // check to make sure that the lock we were passed in has everything
 	    // locked that we'll need to examine.
 
-	    for (int i = 0; i < baseLock.size(); i++)
+	    if (!extantLock.isLocked(baseLock))	// *sync* DBStore
 	      {
-		if (!extantLock.isLocked((DBObjectBase) baseLock.elementAt(i)))
-		  {
-		    throw new IllegalArgumentException("error, didn't have base " + 
-						       baseLock.elementAt(i) +
-						       " locked with extantLock");
-		  }
+		throw new IllegalArgumentException("error, didn't have all bases needed for query " + 
+						   " locked with extantLock");
 	      }
 
 	    rLock = extantLock;
@@ -2733,7 +2729,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// called.. this shouldn't really ever happen here due to
 	// synchronization on GanymedeSession, but if somehow it does
 	// happen, we want to go ahead and break out of our query.  We
-	// could well have our logged_in flag cleared during execution
+	// could well have our lock revoked during execution
 	// of a query, so we'll check that as well.
 
 	enum = base.objectTable.elements();
@@ -2762,6 +2758,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		addResultRow(obj, query, result, internal, perspectiveObject);
 	      }
+	  }
+
+	if (!logged_in)
+	  {
+	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
+				       "GanymedeSession logged out during processing"); 
+	  }
+
+	if (!session.isLocked(rLock))
+	  {
+	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
+				       "Read lock released during processing"); 
 	  }
 
 	if (debug)
@@ -3990,15 +3998,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method takes the administrator's current
+   * <P>This method takes the administrator's current
    * persona, considers the owner groups the administrator
    * is a member of, checks to see if the object is owned
    * by that group, and determines the appropriate permission
-   * bits for the object.  getPerm() will or any proprietary
+   * bits for the object.  getPerm() will OR any proprietary
    * ownership bits with the default permissions to give
-   * an appopriate result.
-   *
+   * an appopriate result.</P>
    */
 
   public final PermEntry getPerm(DBObject object)

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 1999/04/01 22:17:47 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 1999/06/15 02:48:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,41 +62,145 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>This abstract base class encapsulates the basic logic for fields in the
+ * Ganymede {@link arlut.csd.ganymede.DBStore DBStore},
+ * including permissions and unique value handling.</P>
  *
- * This abstract base class encapsulates the basic logic for fields in the
- * Ganymede data store, including permissions and unique value handling.<br><br>
+ * <P>DBFields are the actual carriers of field value in the Ganymede server.  Each
+ * {@link arlut.csd.ganymede.DBObject DBObject} holds a set of DBFields in
+ * a {@link arlut.csd.ganymede.DBFieldTable DBFieldTable}.  Each DBField is
+ * associated with a {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+ * field definition (see {@link arlut.csd.ganymede.DBField#getFieldDef() getFieldDef()})
+ * which defines the type of the field as well as various generic and type-specific
+ * attributes for the field.  The DBObjectBaseField information is created and
+ * edited with the Ganymede schema editor.</P>
  *
- * An important note about synchronization: it is possible to encounter a
+ * <P>DBField is an abstract class.  There is a different subclass of DBField
+ * for each kind of data that can be held in the Ganymede server, as follows:</P>
+ *
+ * <UL>
+ * <LI>{@link arlut.csd.ganymede.StringDBField StringDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.BooleanDBField BooleanDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.NumericDBField NumericDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.DateDBField DateDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.InvidDBField InvidDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.IPDBField IPDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.PasswordDBField PasswordDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}</LI>
+ * </UL>
+ *
+ * <P>Each DBField subclass is responsible for writing itself to disk
+ * on command with the {@link
+ * arlut.csd.ganymede.DBField#emit(java.io.DataOutput) emit()} method,
+ * and reading its state in with the {@link
+ * arlut.csd.ganymede.DBField#receive(java.io.DataInput) receive()}
+ * method.  Each DBField subclass may also have extensive special
+ * logic to handle special operations on fields of the appropriate
+ * type.  For instance, the InvidDBField class has lots and lots of
+ * logic for handling the bi-directional object linking that the
+ * server depends on for its object handling.  Mostly the DBField
+ * subclasses provide customization that modifies how things like
+ * {@link arlut.csd.ganymede.DBField#setValue(java.lang.Object)
+ * setValue()} and {@link arlut.csd.ganymede.DBField#getValue()
+ * getValue()} work, but PasswordDBField and PermissionMatrixDBField
+ * don't fit with the standard generic value-container model, and
+ * contain their own methods for manipulating and accessing data held
+ * in the Ganymede database. Most DBField subclasses only allow a
+ * single value to be held, but StringDBField, InvidDBField, and
+ * IPDBField support vectors of values.</P>
+ *
+ * <P>The Ganymede client can directly access fields in RMI-published objects
+ * using the {@link arlut.csd.ganymede.db_field db_field} RMI interface.  Each
+ * concrete subclass of DBField has its own special RMI interface which provides
+ * special methods for the client.  Adding a new data type to the Ganymede server
+ * will involve creating a new DBField subclass, as well as a new RMI interface
+ * for any special field methods.  All client code would also need to be modified
+ * to be aware of the new field type.  DBObjectBaseField and DBObject would also
+ * need to be modified to be aware of the new field type for schema editing and
+ * object loading.  The schema editor would have to be modified as well.</P>
+ *
+ * <P>But you can do it if you absolutely have to.  Just be careful and take a good
+ * look around at the code.</P>
+ *
+ * <P>Note that while DBField was designed to be subclassed, it should only be
+ * necessary for adding a new data type to the server.  All other likely 
+ * customizations you'd want to do are handled by
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} customization methods.  Most
+ * DBField methods at some point call methods on the DBObject/DBEditObject
+ * that contains it.  All methods that cause changes to fields call out to
+ * finalizeXXX() and/or wizardHook() methods in DBEditObject.  Consult the
+ * DBEditObject customization guide for details on the field/object interactions.</P>
+ *
+ * <P>An important note about synchronization: it is possible to encounter a
  * condition called a <b>nested monitor deadlock</b>, where a synchronized
  * method on a field can block trying to enter a synchronized method on
- * a DBSession, GanymedeSession, or DBEditObject object that is itself blocked
- * on another thread trying to call a synchronized method on the same field.<br><br>
+ * a {@link arlut.csd.ganymede.DBSession DBSession}, 
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}, or 
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} object that is itself blocked
+ * on another thread trying to call a synchronized method on the same field.</P>
  *
- * To avoid this condition, no field methods that call synchronized methods on
- * other objects should themselves be synchronized in any fashion.
- *
+ * <P>To avoid this condition, no field methods that call synchronized methods on
+ * other objects should themselves be synchronized in any fashion.</P> 
  */
 
 public abstract class DBField implements Remote, db_field, Cloneable {
 
-  Object 
-    value,			// the object's current value, for scalars
-    newValue = null;		// the object's new value, for use by custom verification classes
+  /**
+   * the object's current value, for scalars
+   */
+
+  Object value = null;
+  
+  /**
+   * the object's new value, for use by custom verification classes
+   */
+
+  Object newValue = null;
+
+  /**
+   * the object's current value, for vectors
+   */
 
   Vector values;
-  DBObject owner;
-  DBObjectBaseField definition;
 
-  DBField next = null;		// required for use with DBFieldTable
+  /**
+   * The object this field is contained within
+   */
+
+  DBObject owner;
+
+  /**
+   * <P>Link to the field definition for this field</P>
+   *
+   * <P>For a very minor memory optimization, we could ditch
+   * this field and have the {@link arlut.csd.ganymede.DBField#getFieldDef() getFieldDef()}
+   * method do a dynamic look-up based on {@link arlut.csd.ganymede.DBField#owner owner}
+   * and {@link arlut.csd.ganymede.DBField#fieldID fieldID}, maybe.</P>
+   */
+
+  DBObjectBaseField definition;
+  
+  /**
+   * required for use with {@link arlut.csd.ganymede.DBFieldTable DBFieldTable}.
+   */
+
+  DBField next = null;
+
+  /**
+   * <P>Field number for this field in the containing {@link arlut.csd.ganymede.DBObject DBObject}.</P>
+   */
+
   short fieldID = -1;
 
   /**
+   * <P>Permissions record for this field in the current
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} context,
+   * used when an object has been checked out for viewing or editing
+   * by GanymedeSession to avoid redundant synchronized calls on GanymedeSession,
+   * both for dead lock prevention and for speed-ups.</P>
    *
-   * This permissions record is used when an object has been checked
-   * out to avoid redundant synchronized calls on the owning
-   * GanymedeSession context, both for dead lock prevention and for
-   * speed-ups.
-   * 
+   * <P>Doing a permissions look-up in GanymedeSession is a relatively expensive
+   * operation, after all.</P>
    */
 
   PermEntry
@@ -174,21 +278,43 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
     else
       {
-	return definition.getMaxArraySize();
+	return getFieldDef().getMaxArraySize();
       }     
   }      
 
+  /**
+   * <P>This method is responsible for writing out the contents of
+   * this field to an binary output stream.  It is used in writing
+   * fields to the ganymede.db file and to the journal file.</P>
+   *
+   * <P>This method only writes out the value contents of this field.
+   * The {@link arlut.csd.ganymede.DBObject DBObject}
+   * {@link arlut.csd.ganymede.DBObject#emit(java.io.DataOutput) emit()}
+   * method is responsible for writing out the field identifier information
+   * ahead of the field's contents.</P>
+   */
+
   abstract void emit(DataOutput out) throws IOException;
+
+  /**
+   * <P>This method is responsible for reading in the contents of
+   * this field from an binary input stream.  It is used in reading
+   * fields from the ganymede.db file and from the journal file.</P>
+   *
+   * <P>The code that calls receive() on this field is responsible for
+   * having read enough of the binary input stream's context to
+   * place the read cursor at the point in the file immediately after
+   * the field's id and type information has been read.</P>
+   */
+
   abstract void receive(DataInput in) throws IOException;
 
   /**
+   * <P>Returns true if obj is a field with the same value(s) as
+   * this one.</P>
    *
-   * Returns true if obj is a field with the same value(s) as
-   * this one.<br><br>
-   *
-   * This method is ok to be synchronized because it does not
-   * call synchronized methods on any other object.
-   *
+   * <P>This method is ok to be synchronized because it does not
+   * call synchronized methods on any other object.</P>
    */
 
   public synchronized boolean equals(Object obj)
@@ -239,7 +365,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final FieldTemplate getFieldTemplate()
   {
-    return definition.template;
+    return getFieldDef().template;
   }
 
   /**
@@ -263,7 +389,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final String getName()
   {
-    return definition.getName();
+    return getFieldDef().getName();
   }
 
   /**
@@ -277,7 +403,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   {
     if (fieldID == -1)
       {
-	fieldID = definition.getID();
+	fieldID = getFieldDef().getID();
       }
 
     return fieldID;
@@ -304,7 +430,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final String getComment()
   {
-    return definition.getComment();
+    return getFieldDef().getComment();
   }
 
   /**
@@ -317,7 +443,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final String getTypeDesc()
   {
-    return definition.getTypeDesc();
+    return getFieldDef().getTypeDesc();
   }
 
   /**
@@ -331,7 +457,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final short getType()
   {
-    return definition.getType();
+    return getFieldDef().getType();
   }
 
   /**
@@ -344,7 +470,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final short getDisplayOrder()
   {
-    return definition.getDisplayOrder();
+    return getFieldDef().getDisplayOrder();
   }
 
   /**
@@ -358,27 +484,23 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   abstract public String getValueString();
 
   /**
-   *
-   * Returns a String representing a reversible encoding of the
+   * <P>Returns a String representing a reversible encoding of the
    * value of this field.  Each field type will have its own encoding,
-   * suitable for embedding in a DumpResult.
+   * suitable for embedding in a {@link arlut.csd.ganymede.DumpResult DumpResult}.</P>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   abstract public String getEncodingString();
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.<br><br>
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   abstract public String getDiffString(DBField orig);
@@ -419,13 +541,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of DBField will
-   * implement this in different ways.  Any namespace values claimed
+   * <P>This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of DBField may
+   * implement this in different ways, if simply setting the field's
+   * value member to null is not appropriate.  Any namespace values claimed
    * by the field will be released, and when the transaction is
-   * committed, this field will be released.
-   * 
+   * committed, this field will be released.</P>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -482,16 +603,16 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final boolean isVector()
   {
-    return definition.isArray();
+    return getFieldDef().isArray();
   }
 
   /**
+   * <P>Returns true if this field is editable, false
+   * otherwise.</P>
    *
-   * Returns true if this field is editable, false
-   * otherwise.<br><br>
-   *
-   * Note that DBField are only editable if they are
-   * contained in a subclass of DBEditObject.
+   * <P>Note that DBField are only editable if they are
+   * contained in a subclass of
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject}.</P>
    *
    * @see arlut.csd.ganymede.db_field
    */
@@ -502,16 +623,16 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Returns true if this field is editable, false
+   * otherwise.</P>
    *
-   * Returns true if this field is editable, false
-   * otherwise.<br><br>
+   * <P>Note that DBField are only editable if they are
+   * contained in a subclass of
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject}.</P>
    *
-   * Note that DBField are only editable if they are
-   * contained in a subclass of DBEditObject.<br><br>
+   * <P>Server-side method only</P>
    *
-   * Server-side method only<br><br>
-   *
-   * *Deadlock Hazard.*
+   * <P><B>*Deadlock Hazard.*</B></P>
    *
    * @param local If true, skip permissions checking
    *   
@@ -556,7 +677,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final boolean isBuiltIn()
   {
-    return definition.isBuiltIn();
+    return getFieldDef().isBuiltIn();
   }
 
   /**
@@ -570,7 +691,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   public final boolean isVisible()
   {
     return verifyReadPermission() && 
-      definition.base.objectHook.canSeeField(null, this);
+      getFieldDef().base.objectHook.canSeeField(null, this);
   }
 
   /**
@@ -581,7 +702,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final boolean isEditInPlace()
   {
-    return definition.isEditInPlace();
+    return getFieldDef().isEditInPlace();
   }
 
   /**
@@ -592,7 +713,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final int getObjTypeID()
   {
-    return definition.base().getTypeID();
+    return getFieldDef().base().getTypeID();
   }
 
   /**
@@ -604,7 +725,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final DBNameSpace getNameSpace()
   {
-    return definition.getNameSpace();
+    return getFieldDef().getNameSpace();
   }
 
   /**
@@ -651,23 +772,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * This method is used to allow server-side custom code to get access to
+   * <P>This method is used to allow server-side custom code to get access to
    * a proposed new value before it is finalized, used when making a change
    * to this field causes other fields to be changed which need to insure
-   * that this field has an appropriate value first.<br><br>
+   * that this field has an appropriate value first.</P>
    *
-   * This method is not intended to be accessible to the client.<br><br>
+   * <P><B>This method is not intended to be accessible to the client.</B></P>
    *
-   * This method does not support virtualized fields.<br><br>
+   * <P>This method does not support virtualized fields.</P>
    *
-   * This method will only have a useful value during the
+   * <P>This method will only have a useful value during the
    * course of the containing objects' finalizeSetValue() call.  It
    * is intended that this field will set the new value in setValue(),
-   * call owner.finalizeSetValue(), then clear the newValue.<br><br>
+   * call owner.finalizeSetValue(), then clear the newValue.</P>
    *
-   * What, this code a hack?
-   *
+   * <P>What, this code a hack?</P>
    */
 
   public Object getNewValue()
@@ -682,22 +801,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * This method is used to allow server-side custom code to get access to
+   * <P>This method is used to allow server-side custom code to get access to
    * a proposed new value before it is finalized, used when making a change
    * to this field causes other fields to be changed which need to insure
-   * that this field has an appropriate value first.<br><br>
+   * that this field has an appropriate value first.</P>
    *
-   * This method is not intended to be accessible to the client.<br><br>
+   * <P><B>This method is not intended to be accessible to the client.</B></P>
    *
-   * This method does not support virtualized fields.<br><br>
+   * <P>This method does not support virtualized fields.</P>
    *
-   * This method will only have a useful value during the
+   * <P>This method will only have a useful value during the
    * course of the containing objects' finalizeSetValue() call.  It
    * is intended that this field will set the new value in setValue(),
-   * call owner.finalizeSetValue(), then clear the newValue.<br><br>
+   * call owner.finalizeSetValue(), then clear the newValue.</P>
    *
-   * What, this code a hack?
-   *
+   * <P>What, this code a hack?</P>
    */
 
   public Object getOldValue()
@@ -742,21 +860,19 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Sets the value of this field, if a scalar.</P>
    *
-   * Sets the value of this field, if a scalar.<br><br>
-   *
-   * The ReturnVal object returned encodes
+   * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.<br><br>
+   * pass back a dialog.</P>
    *
-   * This method is intended to be called by code that needs to go
+   * <P>This method is intended to be called by code that needs to go
    * through the permission checking regime, and that needs to have
    * rescan information passed back.  This includes most wizard
-   * setValue calls.
+   * setValue calls.</P>
    *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
-   * 
    */
 
   public final ReturnVal setValue(Object value)
@@ -773,16 +889,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Sets the value of this field, if a scalar.</P>
    *
-   * Sets the value of this field, if a scalar.<br><br>
+   * <P><B>This method is server-side only, and bypasses
+   * permissions checking.</B></P>
    *
-   * This method is server-side only, and bypasses
-   * permissions checking.<br><br>
-   *
-   * The ReturnVal object returned encodes
+   * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * pass back a dialog.</P>
    */
 
   public final ReturnVal setValueLocal(Object value)
@@ -791,20 +905,18 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Sets the value of this field, if a scalar.</P>
    *
-   * Sets the value of this field, if a scalar.<br><br>
+   * <P><B>This method is server-side only.</B></P>
    *
-   * This method is server-side only.<br><br>
+   * <P>The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.</P>
    *
-   * The ReturnVal object returned encodes success or failure, and may
-   * optionally pass back a dialog.<br><br>
-   *
-   * This method will be overridden by DBField subclasses with special
-   * needs.
+   * <P>This method will be overridden by DBField subclasses with special
+   * needs.</P>
    *
    * @param value Value to set this field to
    * @param local If true, permissions checking will be skipped
-   * 
    */
 
   public synchronized ReturnVal setValue(Object value, boolean local)
@@ -1199,15 +1311,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Adds an element to the end of this field, if a vector.</P>
    *
-   * Adds an element to the end of this field, if a vector.<br><br>
+   * <P>Server-side method only</P>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
+   * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * pass back a dialog.</P>
    */
 
   public final ReturnVal addElementLocal(Object value)
@@ -1216,15 +1326,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>Adds an element to the end of this field, if a vector.</P>
    *
-   * Adds an element to the end of this field, if a vector.<br><br>
+   * <P>Server-side method only</P>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
+   * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * pass back a dialog.</P>
    */
 
   public synchronized ReturnVal addElement(Object value, boolean local)
@@ -1714,7 +1822,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     /* -- */
 
-    namespace = definition.getNameSpace();
+    namespace = getFieldDef().getNameSpace();
     editset = owner.editset;
 
     if (namespace == null)
@@ -1770,7 +1878,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     /* -- */
 
-    namespace = definition.getNameSpace();
+    namespace = getFieldDef().getNameSpace();
     editset = owner.editset;
 
     if (namespace == null)
@@ -1803,7 +1911,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     /* -- */
 
-    namespace = definition.getNameSpace();
+    namespace = getFieldDef().getNameSpace();
     editset = owner.editset;
 
     if (!isVector())
@@ -1853,7 +1961,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     /* -- */
 
-    namespace = definition.getNameSpace();
+    namespace = getFieldDef().getNameSpace();
     editset = owner.editset;
 
     if (namespace == null)
@@ -2013,12 +2121,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * This method is a deadlock hazard, due to its
-   * calling synchronized methods on GanymedeSession,
+   * <P>This method is a deadlock hazard, due to its
+   * calling synchronized methods on 
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession},
    * but since it caches permissions, the window
-   * of vulnerability is significantly reduced.
-   *
+   * of vulnerability is significantly reduced.</P>
    */
 
   synchronized private void updatePermCache()
@@ -2057,23 +2164,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /** 
+   * <P>Returns a Vector of the values of the elements in this field, if
+   * a vector.</P>
    *
-   * Returns a Vector of the values of the elements in this field, if
-   * a vector.<br><br>
+   * <P>This is intended to be used within the Ganymede server, it
+   * bypasses the permissions checking that getValues() does.</P>
    *
-   * This is intended to be used within the Ganymede server, it
-   * bypasses the permissions checking that getValues() does.<br><br>
-   *
-   * The server code <b>*must not*</b> make any modifications to the
+   * <P>The server code <b>*must not*</b> make any modifications to the
    * returned vector as doing such may violate the namespace maintenance
    * logic.  Always, <b>always</b>, use the addElement(), deleteElement(),
-   * setElement() methods in this class.<br><br>
+   * setElement() methods in this class.</P>
    *
-   * Remember, this method gives you <b>*direct access</b> to the vector
+   * <P>Remember, this method gives you <b>*direct access</b> to the vector
    * from this field.  Always always clone the Vector returned if you
    * find you need to modify the results you get back.  I'm trusting you
-   * here.  Pay attention.
-   *
+   * here.  Pay attention.</P>
    */
 
   public Vector getValuesLocal()
@@ -2088,12 +2193,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /** 
+   * <P>Returns an Object carrying the value held in this field.</P>
    *
-   * Returns an Object carrying the value held in this field.<br><br>
-   *
-   * This is intended to be used within the Ganymede server, it bypasses
-   * the permissions checking that getValues() does.
-   *
+   * <P>This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.</P>
    */
 
   public Object getValueLocal()
@@ -2118,15 +2221,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   // ***
 
   /**
+   * <P>This method is used to basically dump state out of this field
+   * so that the {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.DBEditSet#checkpoint(java.lang.String) checkpoint()}
+   * code can restore it later if need be.</P>
    *
-   * This method is used to basically dump state out of this field
-   * so that the DBEditSet checkpoint() code can restore it later
-   * if need be.<br><br>
-   *
-   * This method is not synchronized because all operations performed
+   * <P>This method is not synchronized because all operations performed
    * by this method are either synchronized at a lower level or are
-   * atomic.
-   *
+   * atomic.</P>
    */
 
   public Object checkpoint()
@@ -2142,13 +2244,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <P>This method is used to basically force state into this field.</P>
    *
-   * This method is used to basically force state into this field.<br><br>
-   *
-   * It is used to place a value or set of values that were known to
+   * <P>It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
-   * without creating or changing this DBField's object identity.
-   *
+   * without creating or changing this DBField's object identity.</P>
    */
 
   public synchronized void rollback(Object oldval)
@@ -2186,30 +2286,30 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * This method takes the result of an operation on this field
-   * and wraps it with an instruction to the client to rescan
+   * <P>This method takes the result of an operation on this field
+   * and wraps it with a {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * that encodes an instruction to the client to rescan
    * this field.  This isn't normally necessary for most client
    * operations, but it is necessary for the case in which wizards
    * call DBField.setValue() on behalf of the client, because in those
    * cases, the client otherwise won't know that the wizard modified
-   * the field.<br><br>
+   * the field.</P>
    *
-   * This makes for a significant bit of overhead on client calls
+   * <P>This makes for a significant bit of overhead on client calls
    * to the field modifier methods, but this is avoided if code 
    * on the server uses setValueLocal(), setElementLocal(), addElementLocal(),
-   * or deleteElementLocal() to make changes to a field.<br><br>
+   * or deleteElementLocal() to make changes to a field.</P>
    *
-   * If you are ever in a situation where you want to use the local
+   * <P>If you are ever in a situation where you want to use the local
    * variants of the modifier methods (to avoid permissions checking
    * overhead), but you <b>do</b> want to have the field's rescan
-   * information returned, you can do something like:<br>
+   * information returned, you can do something like:</P>
+   *
    * <pre>
    *
    * return field.rescanThisField(field.setValueLocal(null));
    *
    * </pre> 
-   *
    */
 
   public final ReturnVal rescanThisField(ReturnVal original)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/03/17 05:32:46 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/06/15 02:48:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,22 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>BooleanDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of boolean
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to BooleanDBFields through the
+ * {@link arlut.csd.ganymede.boolean_field boolean_field} RMI interface.</P> 
+ */
+
 public class BooleanDBField extends DBField implements boolean_field {
 
   /**
-   *
-   * Receive constructor.  Used to create a BooleanDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a BooleanDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   BooleanDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -78,15 +87,15 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   BooleanDBField(DBObject owner, DBObjectBaseField definition)
@@ -169,13 +178,13 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   *
-   * This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of DBField will
-   * implement this in different ways.  Any namespace values claimed
+   * <P>This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of
+   * {@link arlut.csd.ganymede.DBField DBField} may
+   * implement this in different ways, if simply setting the field's
+   * value member to null is not appropriate.  Any namespace values claimed
    * by the field will be released, and when the transaction is
-   * committed, this field will be released.
-   * 
+   * committed, this field will be released.</P>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -212,6 +221,24 @@ public class BooleanDBField extends DBField implements boolean_field {
     throw new IllegalArgumentException("vector accessor called on scalar");
   }
 
+  /**
+   * <P>This method returns a text encoded value for this BooleanDBField
+   * without checking permissions.</P>
+   *
+   * <P>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the 
+   * {@link arlut.csd.ganymede.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm()} 
+   * method.</P>
+   *
+   * <P>If this method checked permissions and the getPerm() method
+   * failed for some reason and tried to report the failure using
+   * object.getLabel(), as it does at present, the server could get
+   * into an infinite loop.</P>
+   */
+
   public synchronized String getValueString()
   {
     if (!verifyReadPermission())
@@ -240,15 +267,13 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public String getDiffString(DBField orig)

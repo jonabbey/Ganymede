@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/06/09 04:03:56 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/06/15 02:48:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,83 +59,209 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBLocks arbitrate access to a {@link arlut.csd.ganymede.DBStore DBStore}
- * object.  Threads wishing to read from,
- * dump, or update the DBStore must be in possession of an established DBLock.
- * The general scheme is that any number of readers and/or dumpers can read
- * from the database simultaneously.  If a number of readers are processing when
- * a thread attempts to establish a write lock, those readers are allowed to
- * complete their reading, but no new read lock may be established until the
- * writer has a chance to get in and make its update.</p>
+ * <p>DBLocks arbitrate access to {@link
+ * arlut.csd.ganymede.DBObjectBase DBObjectBase} objects in the
+ * Ganymede server's {@link arlut.csd.ganymede.DBStore DBStore}.
+ * Threads wishing to read from, dump, or update object bases in the
+ * DBStore must be in possession of an established DBLock.  The
+ * general scheme is that any number of readers and/or dumpers can
+ * read from an object base simultaneously.  If a number of readers are
+ * processing when a thread attempts to establish a write lock, those
+ * readers are allowed to complete their reading, but no new read lock
+ * may be established until the writer has a chance to get in and make
+ * its update.</p>
  * 
- * <p>If there are a number of writer locks queued up for update access to the
- * DBStore when a thread attempts to establish a dump lock, those writers are
- * allowed to complete their updates, but no new writer is queued until the
- * dump thread finishes dumping the database.</p>
+ * <p>If there are a number of writer locks queued up for update
+ * access to a DBObjectBase in the DBStore when a thread attempts to
+ * establish a dump lock, those writers are allowed to complete their
+ * updates, but no new writer is queued until the dump thread finishes
+ * dumping the locked bases.</p>
+ *
+ * <P>All of this priority logic is implemented in the establish()
+ * methods of the concrete DBLock subclasses.</P>
+ *
+ * <P>As mentioned above, all DBLock's are issued in the context of
+ * one or more {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+ * objects.  The DBObjectBases are actually the things being locked.
+ * To maintain multi-threaded safety of the lock system across
+ * multiple DBObjectBases, the DBLock {@link
+ * arlut.csd.ganymede.DBLock#establish(java.lang.Object) establish()}
+ * and {@link arlut.csd.ganymede.DBLock#release() release()} methods
+ * (as implemented in {@link arlut.csd.ganymede.DBReadLock
+ * DBReadLock}, {@link arlut.csd.ganymede.DBReadLock DBWriteLock}, and
+ * {@link arlut.csd.ganymede.DBReadLock DBDumpLock}) are all
+ * synchronized on the Ganymede's DBStore object.  This
+ * synchronization is critical for the proper functioning of the
+ * DBLock system.</P>
  * 
  * <p>There is currently no support for handling timeouts, and locks can persist
  * indefinitely.  However, the {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
  * class will detect a client that has died, and will properly clean up any
- * locks held by the user.</p>
+ * locks held by the user.</p> 
  */
 
 public abstract class DBLock {
 
-  // type parent
+  /**
+   * <P>All DBLock's have an identifier key, which is used to
+   * identify the lock in the {@link arlut.csd.ganymede.DBStore DBStore}'s
+   * {@link arlut.csd.ganymede.DBStore#lockHash DBStore.lockHash}.  The
+   * establish() methods in the DBLock subclasses consult the DBStore.lockHash
+   * to make sure that no DBSession ever possesses more than one write lock,
+   * to prevent deadlocks from occuring in the server.</P>
+   */
 
+  Object key;
 
   /**
+   * <P>All DBLock's establish() and release() methods synchronize their
+   * critical sections on the Ganymede server's DBStore object to guarantee
+   * that all lock negotiations are thread-safe.  We have a reference to the
+   * DBStore here so that we can change the synchronization monitor to something
+   * other than DBStore if we need to.
+   */
+
+  DBStore lockManager;
+
+  /**
+   * <P>In order to prevent deadlocks, each individual lock must be established on
+   * all applicable {@link arlut.csd.ganymede.DBObjectBase DBObjectBases} at the
+   * time the lock is initially established.  baseSet is the Vector of DBObjectBases
+   * that this DBLock is/will be locked on.</P>
+   */
+
+  Vector baseSet;
+
+  /**
+   * <P>Will be true if a DBLock is successfully locked.</P>
    *
+   * <P>Should not be directly consulted outside of the DBLock class hierarchy.</P>
+   */
+
+  boolean locked = false;
+
+  /**
+   * <P>Will be true if a DBLock has had its abort() method called.  Once
+   * aborted, a lock may never be re-established;  the locking code must
+   * create a new lock.</P>
+   */
+
+  boolean abort = false;
+
+  /**
+   * <P>Will be true while a DBLock is in the process of being established.</P>
+   */
+  
+  boolean inEstablish = false;
+
+  /* -- */
+
+  /**
    * Returns true if the lock has been established and not
    * yet aborted / released.
-   *
-   *
    */
 
-  abstract boolean isLocked();
+  boolean isLocked()
+  {
+    return locked;
+  }
 
   /**
-   *
-   * Returns true if the lock has the given base
+   * Returns true if the lock has the given
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * locked.
-   *
    */
 
-  abstract boolean isLocked(DBObjectBase base);
+  boolean isLocked(DBObjectBase base)
+  {
+    if (!locked)
+      {
+	return false;
+      }
+
+    synchronized (lockManager)
+      {
+	for (int i=0; i < baseSet.size(); i++)
+	  {
+	    if (baseSet.elementAt(i) == base)
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
 
   /**
+   * Returns true if the lock has all of the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * objects in the provided Vector locked.
+   */
+
+  boolean isLocked(Vector bases)
+  {
+    synchronized (lockManager)
+      {
+	return arlut.csd.Util.VectorUtils.difference(bases, baseSet).size() == 0;
+      }
+  }
+
+  /**
+   * <P>This method waits until the lock can be established.  The
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBases} locked
+   * are specified in the constructor of the implementation subclass
+   * ({@link arlut.csd.ganymede.DBReadLock DBReadLock},
+   * {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}, or
+   * {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}).</P>
    *
-   * This method waits until the lock can be established.
-   * 
+   * <P>A thread that calls establish() will be suspended (waiting
+   * on the server's {@link arlut.csd.ganymede.DBStore DBStore} until 
+   * all DBObjectBases listed in the DBLock's constructor are available
+   * to be locked.  At that point, the thread blocking on establish()
+   * will wake up possessing a lock on the requested DBObjectBases.</P>
+   *
+   * <P>It is possible for the establish() to fail completely.. the
+   * admin console may reject a client whose thread is blocking on
+   * establish(), for instance, or the server may be shut down.  In
+   * those cases, another thread may call the DBLock's
+   * {@link arlut.csd.ganymede.DBLock#abort() abort()} method, in
+   * which case
+   * establish() will throw an InterruptedException, and the lock will
+   * not be established.</P>
    */
 
   abstract void establish(Object key) throws InterruptedException;
 
   /**
-   *
    * Unlock the bases held by this lock.
-   *
    */ 
 
   abstract void release();
 
   /**
-   *
    * Abort this lock;  if any thread is waiting in establish() on this
    * lock when abort() is called, that thread's call to establish() will
    * fail with an InterruptedException.
-   *
    */
 
   abstract void abort();
 
   /**
-   *
    * Returns the key that this lock is established with,
    * or null if the lock has not been established.
-   *
    */
 
-  abstract Object getKey();
+  Object getKey()
+  {
+    if (locked)
+      {
+	return key;
+      }
+    else
+      {
+	return null;
+      }
+  }
 
 }

@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/03/23 06:22:13 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/06/15 02:48:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,19 +58,22 @@ import gnu.regexp.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is the query processing engine for the Ganymede database.  Static
+ * <P>This class is the query processing engine for the Ganymede database.  Static
  * methods in this class are used to test a query tree against an individual object
- * in the database.<br><br>
+ * in the database.</P>
  *
- * The GanymedeSession.queryDispatch() method contains most of the query engine's
+ * <P>The {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+ * {@link arlut.csd.ganymede.GanymedeSession#queryDispatch(arlut.csd.ganymede.Query,
+ * boolean, boolean, arlut.csd.ganymede.DBLock, arlut.csd.ganymede.DBEditObject)
+ * queryDispatch()}
+ * method contains most of the query engine's
  * logic (including namespace-indexed query optimization).  This class is just
- * responsible for applying a recursive QueryNode tree to a particular object.
+ * responsible for applying a recursive QueryNode tree to a particular object.</P>
  *
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.21 $ $Date: 1999/03/23 06:22:13 $ $Name:  $
+ * @version $Revision: 1.22 $ $Date: 1999/06/15 02:48:20 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -883,17 +886,15 @@ public class DBQueryHandler {
   }
 
   /**
-   *
-   * This helper method extracts the leading octets from the supplied
+   * <P>This helper method extracts the leading octets from the supplied
    * IP address that are not all zeros.  I.e., for the address
    * 129.0.116.0, ipAddrNoPad() would return 129.0.116, where
    * for the address 129.116.0.0, ipAddrNoPad() would return
-   * 129.116.<br><br>
+   * 129.116.</P>
    *
-   * Note that, like all Ganymede code dealing with IP addresses,
+   * <P>Note that, like all Ganymede code dealing with IP addresses,
    * Ganymede is using the u2s() and s2u() methods here to handle
-   * encoded unsigned values in the Java signed byte/Byte type/object.
-   *
+   * encoded unsigned values in the Java signed byte/Byte type/object.</P>
    */
 
   private static Byte[] ipAddrNoPad(Byte[] ipaddr)
@@ -914,10 +915,8 @@ public class DBQueryHandler {
   }
 
   /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
+   * <P>This method maps an int value between 0 and 255 inclusive
+   * to a legal signed byte value.</P>
    */
 
   private final static byte u2s(int x)
@@ -931,10 +930,8 @@ public class DBQueryHandler {
   }
 
   /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
+   * <P>This method maps a u2s-encoded signed byte value to an
+   * int value between 0 and 255 inclusive.</P>
    */
 
   private final static short s2u(byte b)

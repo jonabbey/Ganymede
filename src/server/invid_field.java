@@ -6,8 +6,8 @@
 
    Created: 14 November 1996
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:05:58 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/06/15 02:48:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,7 +50,19 @@ package arlut.csd.ganymede;
 import java.util.*;
 import java.rmi.RemoteException;
 
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                     invid_field
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Client-side remote interface for the
+ * server-side {@link arlut.csd.ganymede.InvidDBField InvidDBField} class.
+ */
+
 public interface invid_field extends db_field {
+
   boolean limited() throws RemoteException;
   int getAllowedTarget() throws RemoteException;
 

@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/05/26 18:28:12 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/06/15 02:48:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,51 +53,125 @@ package arlut.csd.ganymede;
 import java.rmi.*;
 import java.util.Date;
 
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                    adminSession
+
+------------------------------------------------------------------------------*/
+
 /**
- * <p>GanymedeAdmin is the server-side implementation of the adminSession
- * interface;  GanymedeAdmin provides the means by which privileged users
- * can carry out privileged operations on the Ganymede server, including
- * status monitoring and administrative activities.</p>
+ * <p>adminSession is an RMI interface to the Ganymede server's
+ * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} class.  adminSession
+ * is the remote interface used by the admin console to send system commands
+ * to the Ganymede server.</P>
  *
- * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
- * GanymedeAdmin implements {@link arlut.csd.ganymede.adminSession adminSession},
- * providing a hook for the admin console to talk to.  On the other,
- * GanymedeAdmin contains a lot of static fields and methods which the
- * server code uses to communicate information to any admin consoles
- * that are attached to the server at any given time.</p>
- *
- * @version $Revision: 1.11 $ %D%
+ * @version $Revision: 1.12 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public interface adminSession extends Remote {
 
-  // Client/server interface operations
+  /**
+   *
+   * Disconnect the remote admin console associated with this object
+   *
+   */
 
   void        logout() throws RemoteException;
 
   /**
-   *
-   * This method lets the admin console explicitly request
-   * a refresh.
-   *
+   * <P>This method lets the admin console explicitly request
+   * a refresh.  Upon being called, the server will call several
+   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
+   * interface to pass current status information to the console.</P>
    */
 
   void        refreshMe() throws RemoteException;
+
+  /**
+   * Kick a user off of the Ganymede server on behalf of this admin console
+   */
+
   boolean     kill(String user) throws RemoteException;
+
+  /**
+   * Kick all users off of the Ganymede server on behalf of this admin console
+   */
+
   boolean     killAll() throws RemoteException;
+
+  /**
+   * <P>Get information about a particular user that 
+   * is logged in.  We will eventually want to return
+   * a db_object, probably.</P>
+   *
+   * <P>Currently a no-op.</P>
+   */
+
   String      getInfo(String user) throws RemoteException;
+
+  /**
+   * <p>shutdown the server cleanly, on behalf of this admin console.</p>
+   */
+
   boolean     shutdown() throws RemoteException;
+
+  /**
+   * <P>dump the current state of the db to disk</P>
+   */
+
   boolean     dumpDB() throws RemoteException;
+
+  /**
+   * <P>dump the current db schema to disk</P>
+   */
+
   boolean     dumpSchema() throws RemoteException;
+
+  /**
+   * <P>This method causes the server to reload any registered
+   * custom classes, and can be run after a schema edit
+   * to cause the new classes to take over management of
+   * their respective object types.</P>
+   *
+   * <P>It's not clear how well this actually works.. I think
+   * that custom classes that have already been loaded will
+   * not be reloaded by the class loader, and classes that
+   * have not been loaded previously will need to already
+   * be present in the jar file that the server is running out
+   * of, so this method is probably not useful in practice.</P>
+   *
+   * <P>Better to shutdown and restart the server.</P>
+   */
+
   boolean     reloadCustomClasses() throws RemoteException;
+
+  /**
+   *
+   * run a long-running verification suite on the invid links
+   *
+   */
+
   void        runInvidTest() throws RemoteException;
+
+  /**
+   *
+   * run a long-running verification suite on the invid links
+   *
+   */
+
   void        runInvidSweep() throws RemoteException;
 
   boolean     runTaskNow(String name) throws RemoteException;
   boolean     stopTask(String name) throws RemoteException;
   boolean     disableTask(String name) throws RemoteException;
   boolean     enableTask(String name) throws RemoteException;
+
+  /**
+   *
+   * lock the server and edit the schema
+   *
+   */
 
   SchemaEdit  editSchema() throws RemoteException;
 }

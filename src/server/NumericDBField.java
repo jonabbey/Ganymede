@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/03/17 05:32:49 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/06/15 02:48:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,22 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>NumericDBField is a subclass of {@link arlut.csd.ganymede.DBField DBField}
+ * for the storage and handling of numeric
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to NumericDBFields through the
+ * {@link arlut.csd.ganymede.num_field num_field} RMI interface.</P> 
+ */
+
 public class NumericDBField extends DBField implements num_field {
 
   /**
-   *
-   * Receive constructor.  Used to create a NumericDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a NumericDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -77,15 +86,15 @@ public class NumericDBField extends DBField implements num_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   NumericDBField(DBObject owner, DBObjectBaseField definition)
@@ -200,16 +209,15 @@ public class NumericDBField extends DBField implements num_field {
     return getValueString();
   }
   
+
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public String getDiffString(DBField orig)

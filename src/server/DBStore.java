@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 1999/04/20 18:21:52 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 1999/06/15 02:48:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,14 +63,24 @@ import arlut.csd.Util.zipIt;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBStore is the main data store class.  Any code that intends to make use
- * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.
- * DBStore is responsible for actually handling the Ganymede database, and manages
+ * <p>DBStore is the main Ganymede database class. DBStore is responsible for
+ * actually handling the Ganymede database, and manages
  * database loads and dumps, locking (in conjunction with 
- * {@link arlut.csd.ganymede.DBSession DBSession}), 
+ * {@link arlut.csd.ganymede.DBSession DBSession} and
+ * {@link arlut.csd.ganymede.DBLock DBLock}), 
  * the {@link arlut.csd.ganymede.DBJournal journal}, and schema dumping.</p>
  *
- * <p>The DBStore class holds all {@link arlut.csd.ganymede.DBObject DBObject}'s
+ * <P>The DBStore class holds the server's namespace and schema
+ * dictionaries, in the form of a collection of
+ * {@link arlut.csd.ganymede.DBNameSpace DBNameSpace} and {@link
+ * arlut.csd.ganymede.DBObjectBase DBObjectBase} objects.  Each
+ * DBObjectBase contains schema information for an object type,
+ * including field definitions for all fields that may be stored in
+ * objects of that type.</P>
+ *
+ * <p>In addition to holding schema information, each DBObjectBase contains
+ * an {@link arlut.csd.ganymede.Invid Invid}-keyed hash of
+ * {@link arlut.csd.ganymede.DBObject DBObject}'s of that type
  * in memory after the database loading is complete at start-up.  Changes made
  * to the DBStore are done in transactional contexts using DBSession, which is
  * responsible for initiating journal changes when individual transactions are
@@ -83,18 +93,29 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} interface initiates a
  * server shutdown.</p>
  *
- * <p>A program could in theory have any number of DBStore objects active, but
- * there is probably no good reason for doing so since a single DBStore can
- * store and cross reference up to 32k different kinds of objects.</p>
+ * <p>DBStore was originally written with the intent of being able to serve as
+ * a stand-alone in-process transactional object storage system, but in practice, DBStore
+ * is now thoroughly integrated with the rest of the Ganymede server, and particularly
+ * with {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}.  Various
+ * component classes ({@link arlut.csd.ganymede.DBSession DBSession},
+ * {@link arlut.csd.ganymede.DBObject DBObject}, and
+ * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
+ * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * <p>IMPORTANT NOTE: All synchronized methods in this class must do a 
- * this.notifyAll() on exiting a synchronized block because the DBLock classes 
- * use DBStore as their synchronization object.  If any do not, then the server
- * can deadlock.</p>
+ * <P>In addition to handling loads, dumps, and schema initialization
+ * for cold server start-ups, DBStore also acts as a synchronization
+ * monitor object for all {@link arlut.csd.ganymede.DBLock DBLock}
+ * activity.  Because of this, it is critical that all synchronized
+ * methods in this class do a this.notifyAll() on exiting a
+ * synchronized block because the {@link arlut.csd.ganymede.DBLock
+ * DBLock} classes wait on DBStore as their synchronization monitor.
+ * Generally, whenever the DBLock classes wait on DBStore, they do so
+ * in a loop with a timeout specified on the wait() to avoid accidental
+ * thread-lock, but it is still important to do a notifyAll() to avoid
+ * unnecessary delays.</P>
  *
- * @version $Revision: 1.80 $ %D%
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- */
+ * @version $Revision: 1.81 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class DBStore {
 
@@ -137,8 +158,17 @@ public class DBStore {
 	
   Hashtable objectBases;
 
-  /**
-   * identifier keys for current locks
+  /** 
+   * <P>Identifier keys for current {@link arlut.csd.ganymede.DBLock
+   * DBLocks}.</P>
+   *
+   * <P>This hash is used by the establish() method in various DBLock
+   * subclasses to guarantee that only one lock will established by
+   * a client at a time, to prevent any possibility of DBLock deadlock.</P>
+   *
+   * <P>The values in this hash may either be scalar DBLock objects, or
+   * in the case of readers (where it is permissible for a single client
+   * to have several distinct reader locks), a Vector of DBLocks.</P>
    */
 
   Hashtable lockHash;

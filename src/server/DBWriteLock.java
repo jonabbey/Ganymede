@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:05:39 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/06/15 02:48:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,36 +59,31 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * <p>A DBWriteLock is established on one or more DBObjectBases to prevent any
- * other threads from reading or writing to the database.  When a DBWriteLock
+ * <p>A DBWriteLock is a {@link arlut.csd.ganymede.DBLock DBLock} subclass
+ * used to lock one or more
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBases} for the purposes
+ * of committing changes into those bases, preventing any
+ * other threads from reading or writing to the database while the update
+ * is being performed.  When a DBWriteLock
  * is established on a DBObjectBase, the establishing thread suspends until
  * all readers currently working in the specified DBObjectBases complete.  The
  * write lock is then established, and the thread possessing the DBWriteLock
- * is free to replace objects in the DBStore with modified copies.</p>
+ * is free to replace objects in the {@link arlut.csd.ganymede.DBStore DBStore}
+ * with modified copies.</p>
  *
- * <p>DBWriteLocks are typically created and managed by the code in the editSet
+ * <p>DBWriteLocks are typically created and managed by the code in the 
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet}
  * class.  It is very important that any thread that obtains a DBWriteLock be
  * scrupulous about releasing the lock in a timely fashion once the
  * appropriate changes are made in the database. </p>
  *
  * @see arlut.csd.ganymede.DBEditSet
  * @see arlut.csd.ganymede.DBObjectBase
- *
  */
 
 public class DBWriteLock extends DBLock {
 
   static final boolean debug = false;
-
-  private Object key;
-  private DBStore lockManager;
-  private Vector baseSet;
-  private boolean 
-    locked = false,
-    abort = false;
-
-  boolean inEstablish = false;
 
   /* -- */
 
@@ -138,12 +133,10 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   *
-   * Establish a dump lock on bases specified in this DBDumpLock's
+   * <P>Establish a dump lock on bases specified in this DBWriteLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.
-   *
+   * proceed with reads on the specified baseset.</P>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -232,6 +225,7 @@ public class DBWriteLock extends DBLock {
 			    System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + 
 					       base.getDumperSize());
 			  }
+
 			okay = false;
 		      }
 		  }
@@ -241,7 +235,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait(500);
+		    lockManager.wait(2500);
 		  }
 		catch (InterruptedException ex)
 		  {
@@ -304,6 +298,7 @@ public class DBWriteLock extends DBLock {
 	    for (int i = 0; okay && (i < baseSet.size()); i++)
 	      {
 		base = (DBObjectBase) baseSet.elementAt(i);
+
 		if (base.writeInProgress || !base.isReaderEmpty())
 		  {
 		    if (debug)
@@ -346,7 +341,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait(500);
+		    lockManager.wait(2500);
 		  }
 		catch (InterruptedException ex)
 		  {
@@ -396,7 +391,7 @@ public class DBWriteLock extends DBLock {
 	  {
 	    try
 	      {
-		lockManager.wait(500);
+		lockManager.wait(2500);
 	      } 
 	    catch (InterruptedException ex)
 	      {
@@ -428,17 +423,16 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   *
-   * Withdraw this lock.  This method can be called by a thread to
+   * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
-   * access to the appropriate set of DBObjectBase objects.  If
+   * access to the appropriate set of
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.
+   * establish(), establish() will throw an InterruptedException.</P>
    *
-   * Once abort() is processed, this lock may never be established.
+   * <P>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to estabish() will always throw
-   * InterruptedException.
-   *
+   * InterruptedException.</P>
    */
   
   public void abort()
@@ -450,60 +444,4 @@ public class DBWriteLock extends DBLock {
 	release();
       }
   }
-
-  /**
-   *
-   * Returns true if the lock has been established and not
-   * yet aborted / released.
-   *
-   */
-
-  boolean isLocked()
-  {
-    return locked;
-  }
-
-  /**
-   *
-   * Returns true if <base> is locked by this lock.
-   *
-   */
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-
-    return false;
-  }
-
-  /**
-   *
-   * Returns the key that this lock is established with,
-   * or null if the lock has not been established.
-   *
-   */
-
-  Object getKey()
-  {
-    if (locked)
-      {
-	return key;
-      }
-    else
-      {
-	return null;
-      }
-  }
-  
 }

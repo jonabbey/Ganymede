@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/03/17 05:32:50 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/06/15 02:48:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,6 +61,33 @@ import arlut.csd.JDialog.*;
 
 ------------------------------------------------------------------------------*/
 
+/** 
+ * <P>PermissionMatrixDBField is a subclass of {@link
+ * arlut.csd.ganymede.DBField DBField} for the storage and handling of
+ * permission matrix fields (used only in the Role objects) in the
+ * {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to PermissionMatrixDBFields through the
+ * {@link arlut.csd.ganymede.perm_field perm_field} RMI interface.</P> 
+ *
+ * <P>This class differs a bit from most subclasses of {@link
+ * arlut.csd.ganymede.DBField DBField} in that the normal setValue()/getValue()
+ * methods are non-functional.  Instead, there are special methods used to set or
+ * access permission information from the specially coded Hashtable held by
+ * a PermissionMatrixDBField.  This Hashtable maps strings encoded by the
+ * {@link arlut.csd.ganymede.PermissionMatrixDBField#matrixEntry(short, java.lang.String)
+ * matrixEntry()} methods to {@link arlut.csd.ganymede.PermEntry PermEntry}
+ * objects, which hold create, edit, view, and delete bits.</P>
+ *
+ * <P>PermissionMatrixDBField's methods encode part of the server's permissions
+ * logic, including the restrictions on what bits can be set in a Role's
+ * permission matrix based on the rights granted in the client's
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}.  We determine
+ * what GanymedeSession we are operating in for that case 
+ * by asking our {@link arlut.csd.ganymede.DBEditObject DBEditObject} owner.</P>
+ */
+
 public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static final boolean debug = false;
@@ -84,13 +111,13 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of DBField will
-   * implement this in different ways.  Any namespace values claimed
+   * <P>This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of
+   * {@link arlut.csd.ganymede.DBField DBField} may
+   * implement this in different ways, if simply setting the field's
+   * value member to null is not appropriate.  Any namespace values claimed
    * by the field will be released, and when the transaction is
-   * committed, this field will be released.
-   * 
+   * committed, this field will be released.</P>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -107,11 +134,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This utility method extracts the DBObjectBase name from a coded
-   * permission entry held in a PermMatrix/PermissionMatrixDBField
-   * Matrix.
-   * 
+   * <P>This utility method extracts the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} name from a coded
+   * permission entry held in a
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix}/PermissionMatrixDBField
+   * Matrix.</P>
    */
 
   public static String decodeBaseName(String entry)
@@ -155,11 +182,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This method extracts the DBObjectBaseField name from a coded
-   * permission entry held in a PermMatrix/PermissionMatrixDBField
-   * Matrix.
-   * 
+   * <P>This utility method extracts the 
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} name from a coded
+   * permission entry held in a
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix}/PermissionMatrixDBField
+   * Matrix.</P>
    */
 
   public static String decodeFieldName(String entry)
@@ -239,11 +266,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This method returns true if the given PermMatrix /
+   * <P>This method returns true if the given
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix}/
    * PermissionMatrixDBField key refers to a currently valid 
-   * DBObjectBase/DBObjectBaseField in the loaded schema.
-   *
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}/
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * in the loaded schema.</P>
    */
 
   public static boolean isValidCode(String entry)
@@ -386,10 +414,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /* -- */
 
   /**
-   *
-   * Receive constructor.  Used to create a PermissionMatrixDBField
-   * from a DBStore/DBJournal DataInput stream.
-   * 
+   * <P>Receive constructor.  Used to create a PermissionMatrixDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   PermissionMatrixDBField(DBObject owner, 
@@ -405,15 +432,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.<br><br>
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition)
@@ -749,18 +776,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * Return a serializable, read-only copy of the maximum permissions
+   * <P>Return a serializable, read-only copy of the maximum permissions
    * that can be set for this field's permission matrix.  This matrix
    * is drawn from the union of delegatable roles that the client's
-   * adminPersona is a member of.<br><br>
+   * adminPersona is a member of.</P>
    * 
-   * This method will return null if this perm_field is not associated
+   * <P>This method will return null if this perm_field is not associated
    * with an object that is being edited, or if the client is logged
-   * into the server as supergash.
+   * into the server as supergash.</P>
    * 
    * @see arlut.csd.ganymede.perm_field
-   *
    */
 
   public PermMatrix getTemplateMatrix()
@@ -789,8 +814,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * Returns a PermEntry object representing this PermMatrix's 
+   * Returns a PermEntry object representing this 
+   * {@link arlut.csd.ganymede.PermMatrix PermMatrix}'s 
    * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;
    *
    * @see arlut.csd.ganymede.perm_field
@@ -814,7 +839,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;baseID&gt;
    *
@@ -828,7 +852,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;field&gt; in base &lt;base&gt;
    *
@@ -861,7 +884,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;base&gt;
    *
@@ -882,13 +904,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>Sets the permission entry for base &lt;base&gt;,
+   * field &lt;field&gt; to PermEntry &lt;entry&gt;</P>
    *
-   * Sets the permission entry for this matrix for base &lt;base&gt;,
-   * field &lt;field&gt; to PermEntry &lt;entry&gt;<br><br>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry
@@ -908,13 +928,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>Sets the permission entry for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to PermEntry &lt;entry&gt;.</P>
    *
-   * Sets the permission entry for this matrix for base &lt;baseID&gt;,
-   * field &lt;fieldID&gt; to PermEntry &lt;entry&gt;.<br><br>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry 
@@ -958,13 +976,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>Sets the permission entry for base &lt;baseID&gt;
+   * to PermEntry &lt;entry&gt;.</P>
    *
-   * Sets the permission entry for this matrix for base &lt;baseID&gt;
-   * to PermEntry &lt;entry&gt;.<br><br>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
@@ -984,13 +1000,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>Sets the permission entry for this matrix for base &lt;baseID&gt;
+   * to PermEntry &lt;entry&gt;</P>
    *
-   * Sets the permission entry for this matrix for base &lt;baseID&gt;
-   * to PermEntry &lt;entry&gt;<br><br>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry
@@ -1030,19 +1044,19 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   * Sets the default permission entry to apply to fields under base
+   * <P>Sets the default permission entry to apply to fields under base
    * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
    * permission is set for a base, all new fields created under that
    * base will take the default permissions entry.  If the schema editor
    * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.<br><br>
+   * no-permissions), that will override the default.</P>
    *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.<br><br>
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
-   * This operation may only be performed by a GanymedeSession 
-   * with supergash-level privileges, for security's sake.
+   * <P>This operation may only be performed by a
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * with supergash-level privileges, for security's sake.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry 
@@ -1061,19 +1075,19 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   * Sets the default permission entry to apply to fields under base
+   * <P>Sets the default permission entry to apply to fields under base
    * &lt;baseID&gt; to PermEntry &lt;entry&gt;  Once the default fields
    * permission is set for a base, all new fields created under that
    * base will take the default permissions entry.  If the schema editor
    * is used to explicitly set the permissions for a field (even to 
-   * no-permissions), that will override the default.<br><br>
+   * no-permissions), that will override the default.</P>
    *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.<br><br>
+   * <P>This operation will fail if this
+   * PermissionMatrixDBField is not editable.</P>
    *
-   * This operation may only be performed by a GanymedeSession 
-   * with supergash-level privileges, for security's sake.
+   * <P>This operation may only be performed by a 
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * with supergash-level privileges, for security's sake.</P>
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry 
@@ -1114,11 +1128,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This internal method is used to cull out any entries in this
+   * <P>This internal method is used to cull out any entries in this
    * permissions field that are non-operative, either by referring to
-   * an object/field type that does not exist, or by being redundant.
-   *  
+   * an object/field type that does not exist, or by being redundant.</P>
    */
 
   private void clean()
@@ -1297,15 +1309,37 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
   }
 
+  /**
+   * <P>Private method to generate a key for use in
+   * our internal Hashtable, used to encode the default
+   * permission for a given {@link arlut.csd.ganymede.DBObjectBase
+   * DBObjectBase}.</P>
+   */
+
   private String matrixEntry(short baseID, String text)
   {
     return (baseID + ":" + text);
   }
 
+  /**
+   * <P>Private method to generate a key for use in
+   * our internal Hashtable, used to encode the 
+   * permission for a given {@link arlut.csd.ganymede.DBObjectBase
+   * DBObjectBase} and {@link arlut.csd.ganymede.DBObjectBaseField
+   * DBObjectBaseField}.</P>
+   */
+
   private String matrixEntry(short baseID, short fieldID)
   {
     return (baseID + ":" + fieldID);
   }
+
+  /**
+   * <P>Private method to generate a key for use in
+   * our internal Hashtable, used to encode the
+   * permission for a given {@link arlut.csd.ganymede.DBObjectBase
+   * DBObjectBase}.</P>
+   */
   
   private String matrixEntry(short baseID)
   {
@@ -1313,11 +1347,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   *
-   * This method is used to basically dump state out of this field
-   * so that the DBEditSet checkpoint() code can restore it later
-   * if need be.
-   *
+   * <P>This method is used to basically dump state out of this field
+   * so that the {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.DBEditSet#checkpoint(java.lang.String) checkpoint()}
+   * code can restore it later
+   * if need be.</P>
    */
 
   public synchronized Object checkpoint()
@@ -1333,13 +1367,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>This method is used to basically force state into this field.</P>
    *
-   * This method is used to basically force state into this field.<br><br>
-   *
-   * It is used to place a value or set of values that were known to
+   * <P>It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
-   * without creating or changing this DBField's object identity.
-   *
+   * without creating or changing this DBField's object identity.</P>
    */
 
   public synchronized void rollback(Object oldval)
@@ -1368,13 +1400,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <P>This method is used to check that the given operation can be set by the
+   * current administrator.</P>
    *
-   * This method is used to check that the given operation can be set by the
-   * current administrator.<br><br>
-   *
-   * If fieldID &lt; 0, entry will be checked against the administrator's
-   * applicable base permissions.
-   *
+   * <P>If fieldID &lt; 0, entry will be checked against the administrator's
+   * applicable base permissions.</P>
    */
 
   public boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
@@ -1451,6 +1481,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                                                                PermMatrixCkPoint
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Helper class used to handle checkpointing of a 
+ * {@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}'s
+ * state.
+ *
+ * <P>See {@link arlut.csd.ganymede.PermissionMatrixDBField#checkpoint() 
+ * PermissionMatrixDBField.checkpoint()} for more detail.</P>
+ */
 
 class PermMatrixCkPoint {
 

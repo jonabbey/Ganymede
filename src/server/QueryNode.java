@@ -11,8 +11,8 @@
    
    Created: 21 October 1996
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:05:52 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/06/15 02:48:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -60,6 +60,13 @@ import arlut.csd.ganymede.*;
                                                                        QueryNode
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>A QueryNode is a node in a serialized {@link arlut.csd.ganymede.Query Query}
+ * tree.  The QueryNodes form a tree of boolean operators and comparison nodes
+ * that are submitted to the server by the client, and which are interpreted
+ * by the {@link arlut.csd.ganymede.DBQueryHandler DBQueryHandler}.</P>
+ */
 
 public abstract class QueryNode implements java.io.Serializable {
   static final long serialVersionUID = -4396943100372813308L;

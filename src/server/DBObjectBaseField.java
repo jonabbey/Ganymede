@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/06/09 03:33:37 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/06/15 02:48:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,10 +61,27 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>An entry in the 
- * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} field dictionary.  This class defines the
- * type of an object field, along with constraints and any namespace information
- * pertaining to the field.</p>
+ * <p>An entry in the Ganymede server's {@link arlut.csd.ganymede.DBStore DBStore}
+ * schema dictionary.  DBStore contains a collection of 
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects, which define
+ * the schema information for a particular type of object held in the Ganymede
+ * database.  A DBObjectBaseField is contained within a DBObjectBase, and defines
+ * the name, id, type, and constraints of a particular field that can be held
+ * in {@link arlut.csd.ganymede.DBObject DBObjects} of that type, including
+ * a controlling {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}, if
+ * appropriate.</P>
+ *
+ * <P>Each {@link arlut.csd.ganymede.DBField DBField} held in the server's
+ * database holds a reference to a DBObjectBaseField, and the DBField's methods
+ * will consult the DBObjectBaseField during run-time to make decisions based
+ * on specified constraints defined in the DBObjectBaseField.</P>
+ *
+ * <P>The Ganymede schema editor uses the {@link arlut.csd.ganymede.BaseField BaseField}
+ * remote interface to make changes to a DBObjectBaseField's constraint information
+ * during schema editing. The Ganymede client may also use the BaseField interface
+ * to learn about the field's type information, but it may also download a
+ * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} that carries a
+ * DBObjectBaseField's type information in an efficiently retrieved summary.</P>
  */
 
 public final class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {

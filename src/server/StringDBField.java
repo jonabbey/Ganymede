@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/03/17 05:32:50 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/06/15 02:48:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,21 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>StringDBField is a subclass of DBField for the storage and handling of string
+ * fields in the {@link arlut.csd.ganymede.DBStore DBStore} on the Ganymede
+ * server.</P>
+ *
+ * <P>The Ganymede client talks to StringDBFields through the
+ * {@link arlut.csd.ganymede.string_field string_field} RMI interface.</P> 
+ */
+
 public class StringDBField extends DBField implements string_field {
 
   /**
-   *
-   * Receive constructor.  Used to create a StringDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <P>Receive constructor.  Used to create a StringDBField from a
+   * {@link arlut.csd.ganymede.DBStore DBStore}/{@link arlut.csd.ganymede.DBJournal DBJournal}
+   * DataInput stream.</P>
    */
 
   StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -77,15 +85,15 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
+   * <P>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <P>Used to provide the client a template for 'creating' this
+   * field if so desired.</P>
    */
 
   StringDBField(DBObject owner, DBObjectBaseField definition)
@@ -270,21 +278,22 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
+   * <P>This method returns a text encoded value for this StringDBField
+   * without checking permissions.</P>
    *
-   * This method returns a text encoded value for this StringDBField
-   * without checking permissions.<br><br>
+   * <P>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the 
+   * {@link arlut.csd.ganymede.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm()} 
+   * method.</P>
    *
-   * This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the getLabel()
-   * logic for DBObject, which is invoked from GanymedeSession.getPerm().<br><br>
-   *
-   * If this method checked permissions and the getPerm() method
+   * <P>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
    * object.getLabel(), as it does at present, the server could get
-   * into an infinite loop.
-   * 
+   * into an infinite loop.</P>
    */
-
 
   public synchronized String getValueString()
   {
@@ -343,11 +352,9 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * For strings, we don't care about having a reversible encoding,
+   * <P>For strings, we don't care about having a reversible encoding,
    * because we can sort and select normally based on the getValueString()
-   * result.
-   *
+   * result.</P>
    */
 
   public String getEncodingString()
@@ -356,15 +363,13 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <P>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</P>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <P>If there is no change in the field, null will be returned.</P>
    */
 
   public synchronized String getDiffString(DBField orig)
@@ -512,12 +517,10 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Returns true if this field has a value associated
-   * with it, or false if it is an unfilled 'placeholder'.
+   * <P>Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.</P>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public synchronized boolean isDefined()
@@ -654,14 +657,13 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Returns a list of recommended and/or mandatory choices 
+   * <P>Returns a list of recommended and/or mandatory choices 
    * for this field.  This list is dynamically generated by
-   * subclasses of DBEditObject; this method should not need
-   * to be overridden.
+   * subclasses of {@link arlut.csd.ganymede.DBEditObject DBEditObject};
+   * this method should not need
+   * to be overridden.</P>
    *
    * @see arlut.csd.ganymede.string_field
-   *
    */
 
   public QueryResult choices()
@@ -675,15 +677,13 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <P>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.</P>
    *
-   * If there is no caching key, this method will return null.
-   *
+   * <P>If there is no caching key, this method will return null.</P>
    */
 
   public Object choicesKey()
@@ -699,14 +699,12 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Returns a string containing the list of acceptable characters.
+   * <P>Returns a string containing the list of acceptable characters.
    * If the string is null, it should be interpreted as meaning all
    * characters not listed in disallowedChars() are allowable by
-   * default.
+   * default.</P>
    *
    * @see arlut.csd.ganymede.string_field
-   * 
    */
 
   public String allowedChars()
@@ -715,14 +713,12 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Returns a string containing the list of forbidden
+   * <P>Returns a string containing the list of forbidden
    * characters for this field.  If the string is null,
    * it should be interpreted as meaning that no characters
-   * are specifically disallowed.
+   * are specifically disallowed.</P>
    *
    * @see arlut.csd.ganymede.string_field
-   *
    */
 
   public String disallowedChars()
@@ -731,12 +727,10 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
-   * Convenience method to identify if a particular
-   * character is acceptable in this field.
+   * <P>Convenience method to identify if a particular
+   * character is acceptable in this field.</P>
    *
    * @see arlut.csd.ganymede.string_field
-   *
    */
 
   public boolean allowed(char c)

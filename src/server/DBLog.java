@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/04/16 22:52:44 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/06/15 02:48:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,8 @@ import arlut.csd.Util.*;
  *
  * <p>Most of the methods in this class must be synchronized, both to keep the
  * logfile itself orderly, and to allow the various log-processing methods
- * in DBLogEvent to re-use the 'multibuffer' StringBuffer.</p>
+ * in {@link arlut.csd.ganymede.DBLogEvent DBLogEvent} to re-use the
+ * 'multibuffer' StringBuffer.</p>
  */
 
 public class DBLog {
@@ -230,20 +231,19 @@ public class DBLog {
   }
 
   /**
-   * This method is used to handle an email notification event, where
+   * <P>This method is used to handle an email notification event, where
    * the mail title should reflect detailed information about the
-   * event, and extra descriptive information is to be sent out.
+   * event, and extra descriptive information is to be sent out.</P>
    *
-   * mailNotify() will send the message to the owners of any objects
-   * referenced by event if mailToOwners is true.
+   * <P>mailNotify() will send the message to the owners of any objects
+   * referenced by event if mailToOwners is true.</P>
    *
-   * description and/or title may be null, in which case the proper
-   * strings will be extracted from the event's database record
+   * <P>description and/or title may be null, in which case the proper
+   * strings will be extracted from the event's database record</P>
    *
    * @param event A single event to be logged, with its own timestamp.
    * @param mailToOwners If true, this event's mail will go to the owners
    * of any objects referenced by event.
-   *  
    */
 
   public synchronized void mailNotify(String title, String description,
@@ -347,13 +347,11 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method is used to log an event such as server shutdown/restart,
+   * <P>This method is used to log an event such as server shutdown/restart,
    * user log-in, persona change, etc.  Basically any thing not associated
-   * with a transaction.
+   * with a transaction.</P>
    *
    * @param event A single event to be logged, with its own timestamp.
-   *
    */
 
   public synchronized void logSystemEvent(DBLogEvent event)
@@ -451,11 +449,9 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method is used to log all events associated with a transaction.
+   * <P>This method is used to log all events associated with a transaction.</P>
    *
    * @param logEvents a Vector of DBLogEvent objects.
-   *
    */
 
   public synchronized void logTransaction(Vector logEvents, String adminName, 
@@ -639,9 +635,8 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method is used to scan the log file for log events that match
-   * invid and that have occurred since sinceTime.
+   * <P>This method is used to scan the log file for log events that match
+   * invid and that have occurred since sinceTime.</P>
    *
    * @param invid If not null, retrieveHistory() will only return events involving
    * this object invid.
@@ -654,7 +649,6 @@ public class DBLog {
    * performed on behalf of the administrator with invid &lt;invid&gt;.
    *
    * @return A human-readable multiline string containing a list of history events
-   *
    */
 
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin)
@@ -820,12 +814,10 @@ public class DBLog {
   // -----
 
   /**
-   *
-   * This mail sends out the 'auxiliary' type specific log information
+   * <P>This mail sends out the 'auxiliary' type specific log information
    * to designated users, using the object event objects in the Ganymede
    * database.  This mail is sent for a distinct eventcode/object type pair,
-   * outside of the context of a transaction.
-   *
+   * outside of the context of a transaction.</P>
    */
 
   private void sendObjectMail(DBLogEvent event, String transdescrip)
@@ -923,10 +915,8 @@ public class DBLog {
   }
 
   /**
-   *
-   * Private helper method to (re)initialize our local hash of system
-   * event codes.
-   * 
+   * <P>Private helper method to (re)initialize our local hash of system
+   * event codes.</P>
    */
 
   private void updateSysEventCodeHash()
@@ -1004,10 +994,8 @@ public class DBLog {
   }
 
   /**
-   *
-   * Private helper method to (re)initialize our local hash of object
-   * event codes.
-   * 
+   * <P>Private helper method to (re)initialize our local hash of object
+   * event codes.</P>
    */
 
   private void updateObjEventCodeHash()
@@ -1089,16 +1077,14 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method generates a list of additional email addresses that
+   * <P>This method generates a list of additional email addresses that
    * notification for this event should be sent to, based on the
    * event's type and the ownership of objects referenced by this
-   * event.<br><br>
+   * event.</P>
    *
-   * Note that the email addresses added to this event's mail list
+   * <P>Note that the email addresses added to this event's mail list
    * will be in addition to any that were previously specified by the
-   * code that originally generated the log event.
-   *    
+   * code that originally generated the log event.</P>
    */
 
   private void calculateMailTargets(DBLogEvent event)
@@ -1143,12 +1129,11 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method takes a vector of Invid's representing objects touched
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
+   * representing objects touched
    * during a transaction, and returns a Vector of email addresses that
    * should be notified of operations affecting the objects in the
-   * &lt;objects&gt; list.
-   *
+   * &lt;objects&gt; list.</P>
    */
 
   private Vector calculateOwnerAddresses(Vector objects)
@@ -1281,11 +1266,10 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method takes an Invid for an Owner Group DBObject
+   * This method takes an {@link arlut.csd.ganymede.Invid Invid} for
+   * an Owner Group {@link arlut.csd.ganymede.DBObject DBObject}
    * and returns a Vector of Strings containing the list
    * of email addresses for that owner group.
-   *
    */
 
   private Vector getOwnerGroupAddresses(Invid ownerInvid)
@@ -1381,12 +1365,10 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method takes an Invid pointing to an Admin persona
+   * <P>This method takes an Invid pointing to an Admin persona
    * record, and returns a string that can be used to send
    * email to that person.  This method will return null
-   * if no address could be determined for this administrator.
-   *
+   * if no address could be determined for this administrator.</P>
    */
 
   private String convertAdminInvidToString(Invid adminInvid)
@@ -1431,17 +1413,16 @@ public class DBLog {
   }
 
   /**
-   *
-   * This method takes a DBLogEvent object, scans it to determine
+   * <P>This method takes a DBLogEvent object, scans it to determine
    * what mailing lists should be notified of the event in the
    * context of a transaction, and adds a description of the
-   * passed in event to each MailOut object held in map.
+   * passed in event to each {@link arlut.csd.ganymede.MailOut MailOut}
+   * object held in map.</P>
    *
-   * That is, the map passed in maps each discrete recipient
+   * <P>That is, the map passed in maps each discrete recipient
    * list to a running MailOut object which has the complete
    * text that will be mailed to that recipient when the
-   * transaction's records are mailed out.
-   *
+   * transaction's records are mailed out.</P>
    */
 
   private void appendMailOut(DBLogEvent event, Hashtable map)
@@ -1525,10 +1506,8 @@ public class DBLog {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is used to store system event information derived from
- * the Ganymede database.
- * 
+ * <P>This class is used to store system event information derived from
+ * the Ganymede database.</P>
  */
 
 class systemEventType {
@@ -1580,11 +1559,9 @@ class systemEventType {
   }
 
   /**
-   *
-   * This method takes an event definition object and extracts
+   * <P>This method takes an event definition object and extracts
    * a list of email addresses to which mail will be sent when
-   * an event of this type is logged.
-   *
+   * an event of this type is logged.</P>
    */
 
   private String getAddresses(DBObject obj)
@@ -1641,10 +1618,8 @@ class systemEventType {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is used to store object event information derived from
- * the Ganymede database.
- * 
+ * <P>This class is used to store object event information derived from
+ * the Ganymede database.</P>
  */
 
 class objectEventType {
@@ -1711,11 +1686,9 @@ class objectEventType {
   }
 
   /**
-   *
-   * This method takes an event definition object and extracts
+   * <P>This method takes an event definition object and extracts
    * a list of email addresses to which mail will be sent when
-   * an event of this type is logged.
-   *
+   * an event of this type is logged.</P>
    */
 
   private String getAddresses(DBObject obj)
@@ -1772,10 +1745,8 @@ class objectEventType {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is used to store event information derived from the Ganymede
- * database.
- *
+ * <P>This class is used to store event information derived from the Ganymede
+ * database.</P>
  */
 
 class MailOut {
