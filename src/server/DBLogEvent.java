@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,12 +29,13 @@ import arlut.csd.Util.*;
  *
  * This class defines the data to be recorded in a log/mail record.
  *
- *
  */
 
 public class DBLogEvent {
 
   static final boolean debug = false;
+
+  // ---
 
   String eventClassToken;
   String description;
@@ -50,6 +51,18 @@ public class DBLogEvent {
   Date time = null;		// used for DBLog.retrieveHistory()
 
   boolean augmented = false;
+
+  /**
+   *
+   * We use this buffer everywhere in this class to avoid creating
+   * StringBuffers as much as we can.  Note that everything in this
+   * class that uses the multibuffer must be sure not to call other
+   * methods that themselves use the multibuffer in a way that would
+   * conflict.  We're buying efficiency with some fragility here.
+   *
+   */
+
+  StringBuffer multibuffer;
 
   /* -- */
 
@@ -70,29 +83,64 @@ public class DBLogEvent {
 		    Invid admin, String adminName,
 		    Vector objects, Vector notifyList)
   {
+    this(eventClassToken, description, admin, adminName, objects, notifyList, null);
+  }
+
+  /**
+   *
+   * @param eventClassToken a short string specifying a DBObject
+   * record describing the general category for the event
+   * @param description Descriptive text to be entered in the record of the event
+   * @param admin Invid pointing to the adminPersona that fired the event, if any
+   * @param adminName String containing the name of the adminPersona that fired the event, if any
+   * @param objects A vector of invids of objects involved in this event.
+   * @param notifyList A vector of Strings listing email addresses to send notification
+   * of this event to.
+   * @param multibuffer A StringBuffer that this event can use to avoid an extra object create.
+   * If you provide a StringBuffer here, be aware that this object may use it both when this
+   * object is being constructed, and by the writeEvent() method.  The code that uses this
+   * DBLogEvent may do whatever it likes with the buffer between method calls to this DBLogEvent,
+   * but any method called on this object might clobber the buffer.
+   * 
+   * 
+   */
+
+  public DBLogEvent(String eventClassToken, String description,
+		    Invid admin, String adminName,
+		    Vector objects, Vector notifyList,
+		    StringBuffer multibuffer)
+  {
     this.eventClassToken = eventClassToken;
     this.description = description;
     this.admin = admin;
     this.adminName = adminName;
     this.objects = objects;
+    this.multibuffer = multibuffer;
+
+    if (this.multibuffer == null)
+      {
+	this.multibuffer = new StringBuffer();
+      }
+    else
+      {
+	this.multibuffer.setLength(0);
+      }
 
     this.notifyVect = notifyList;
 
     if (notifyList != null)
       {
-	StringBuffer list = new StringBuffer();
-
 	for (int i = 0; i < notifyList.size(); i++)
 	  {
 	    if (i > 0)
 	      {
-		list.append(", ");
+		multibuffer.append(", ");
 	      }
 	    
-	    list.append((String) notifyList.elementAt(i));
+	    multibuffer.append((String) notifyList.elementAt(i));
 	  }
 
-	this.notifyList = list.toString();
+	this.notifyList = multibuffer.toString();
       }
     else
       {
@@ -100,8 +148,27 @@ public class DBLogEvent {
 	notifyVect = null;
       }
   }
+
+  /**
+   *
+   * Constructor to construct a DBLogEvent from a log file line.
+   *
+   */
   
   public DBLogEvent(String line) throws IOException
+  {
+    this(line, null);
+  }
+
+  /**
+   *
+   * Constructor to construct a DBLogEvent from a log file line.
+   *
+   * @param multibuffer A StringBuffer that this event can use to avoid an extra object create
+   *
+   */
+
+  public DBLogEvent(String line, StringBuffer multibuffer) throws IOException
   {
     int i, j;
     String dateString;
@@ -114,6 +181,17 @@ public class DBLogEvent {
     if (line == null || (line.trim().equals("")))
       {
 	throw new IOException("empty log line");
+      }
+
+    this.multibuffer = multibuffer;
+
+    if (this.multibuffer == null)
+      {
+	this.multibuffer = new StringBuffer();
+      }
+    else
+      {
+	this.multibuffer.setLength(0);
       }
 
     //    System.out.println("Trying to create DBLogEvent: " + line);
@@ -179,26 +257,30 @@ public class DBLogEvent {
 
     if (notifyVect != null)
       {
-	StringBuffer list = new StringBuffer();
+	multibuffer.setLength(0);
 
 	for (int k = 0; k < notifyVect.size(); k++)
 	  {
 	    if (i > 0)
 	      {
-		list.append(", ");
+		multibuffer.append(", ");
 	      }
 	    
-	    list.append((String) notifyVect.elementAt(k));
+	    multibuffer.append((String) notifyVect.elementAt(k));
 	  }
 
-	this.notifyList = list.toString();
+	this.notifyList = multibuffer.toString();
       }
 
     augmented = true;
   }
 
-  // find the index of the next field separator, taking into account
-  // escaped chars
+  /**
+   *
+   * find the index of the next field separator, taking into account
+   * escaped chars
+   *
+   */
 
   private int scanSep(char[] line, int startIndex)
   {
@@ -217,15 +299,20 @@ public class DBLogEvent {
     return i;
   }
 
-  // scan the string for this field, decoding backslash escapes in the
-  // process
+  /**
+   *
+   * scan the string for this field, decoding backslash escapes in the
+   * process 
+   *
+   */
 
   private String readNextField(char[] line, int startIndex)
   {
-    StringBuffer buffer = new StringBuffer();
     boolean doit = true;
 
     /* -- */
+
+    multibuffer.setLength(0);
 
     for (int i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -237,27 +324,34 @@ public class DBLogEvent {
 
 	    if (line[i] == 'n')
 	      {
-		buffer.append('\n');
+		multibuffer.append('\n');
 		doit = false;
 	      }
 	  }
 
 	if (doit)
 	  {
-	    buffer.append(line[i]);
+	    multibuffer.append(line[i]);
 	  }
       }
 
-    return buffer.toString();
+    return multibuffer.toString();
   }
+
+  /**
+   *
+   * This method reads a vector of invid's from a log file line
+   *
+   */
 
   private Vector readObjectVect(char[] line, int startIndex)
   {
     Vector result = new Vector();
-    StringBuffer buffer = new StringBuffer();
     int i;
 
     /* -- */
+
+    multibuffer.setLength(0);
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -268,15 +362,15 @@ public class DBLogEvent {
 
 	if (line[i] == ',')
 	  {
-	    if (buffer.length() != 0)
+	    if (multibuffer.length() != 0)
 	      {
-		result.addElement(new Invid(buffer.toString()));
-		buffer.setLength(0); // clear for next
+		result.addElement(new Invid(multibuffer.toString()));
+		multibuffer.setLength(0); // clear for next
 	      }
 	  }
 	else
 	  {
-	    buffer.append(line[i]);
+	    multibuffer.append(line[i]);
 	  }
       }
 
@@ -284,9 +378,9 @@ public class DBLogEvent {
       {
 	if (line[i] == '|')
 	  {
-	    if (buffer.length() != 0)
+	    if (multibuffer.length() != 0)
 	      {
-		result.addElement(new Invid(buffer.toString()));
+		result.addElement(new Invid(multibuffer.toString()));
 	      }
 	  }
       }
@@ -298,13 +392,20 @@ public class DBLogEvent {
     return result;
   }
 
+  /**
+   *
+   * This method reads a vector of email addresses from a log file line
+   *
+   */
+
   private Vector readNotifyVect(char[] line, int startIndex)
   {
     Vector result = new Vector();
-    StringBuffer buffer = new StringBuffer();
     int i;
 
     /* -- */
+
+    multibuffer.setLength(0);
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -315,15 +416,15 @@ public class DBLogEvent {
 
 	if (line[i] == ',' || line[i] == '|')
 	  {
-	    if (buffer.length() != 0)
+	    if (multibuffer.length() != 0)
 	      {
-		result.addElement(buffer.toString().trim());
-		buffer.setLength(0); // clear for next
+		result.addElement(multibuffer.toString().trim());
+		multibuffer.setLength(0); // clear for next
 	      }
 	  }
 	else
 	  {
-	    buffer.append(line[i]);
+	    multibuffer.append(line[i]);
 	  }
       }
 
@@ -535,59 +636,80 @@ public class DBLogEvent {
 
     if (notifyVect != null)
       {
-	StringBuffer list = new StringBuffer();
+	multibuffer.setLength(0);
 
 	for (int i = 0; i < notifyVect.size(); i++)
 	  {
 	    if (i > 0)
 	      {
-		list.append(", ");
+		multibuffer.append(", ");
 	      }
 	    
-	    list.append((String) notifyVect.elementAt(i));
+	    multibuffer.append((String) notifyVect.elementAt(i));
 	  }
 
-	this.notifyList = list.toString();
+	this.notifyList = multibuffer.toString();
       }
 
     augmented = true;
   }
 
+  /**
+   *
+   * Write a field separator to the log file
+   *
+   */
 
   private final void writeSep(PrintWriter logWriter)
   {
     logWriter.print('|');
   }
 
+  /**
+   *
+   * Write a field to the log file, escaping it for safety
+   *
+   */
+
   private final void writeStr(PrintWriter logWriter, String in)
   {
     logWriter.print(escapeStr(in));
   }
 
+  /**
+   *
+   * This method makes the provided String safe for inclusion
+   * in the log file.
+   *
+   */
+
   private final String escapeStr(String in)
   {
     char[] ary = in.toCharArray();
-    StringBuffer result = new StringBuffer();
 
     /* -- */
+
+    multibuffer.setLength(0);
+
+    // do it
 
     for (int i = 0; i < ary.length; i++)
       {
 	if (ary[i] == '\n')
 	  {
-	    result.append("\\n");
+	    multibuffer.append("\\n");
 	  }
 	else if (ary[i] == '|')
 	  {
-	    result.append("\\|");
+	    multibuffer.append("\\|");
 	  }
 	else
 	  {
-	    result.append(ary[i]);
+	    multibuffer.append(ary[i]);
 	  }
       }
 
-    return result.toString();
+    return multibuffer.toString();
   }
 
   /**
