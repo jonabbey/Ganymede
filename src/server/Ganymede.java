@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -609,7 +609,7 @@ public class Ganymede {
 
   public static boolean loadProperties(String filename)
   {
-    Properties props = new Properties();
+    Properties props = new Properties(System.getProperties());
     boolean success = true;
 
     /* -- */
@@ -623,20 +623,25 @@ public class Ganymede {
 	return false;
       }
 
-    dbFilename = props.getProperty("ganymede.database");
-    journalProperty = props.getProperty("ganymede.journal");
-    logProperty = props.getProperty("ganymede.log");
-    schemaProperty = props.getProperty("ganymede.schemadump");
-    htmlProperty = props.getProperty("ganymede.htmldump");
-    serverHostProperty = props.getProperty("ganymede.serverhost");
-    rootname = props.getProperty("ganymede.rootname");
-    defaultrootpassProperty = props.getProperty("ganymede.defaultrootpass");
-    mailHostProperty = props.getProperty("ganymede.mailhost");
-    signatureFileProperty = props.getProperty("ganymede.signaturefile");
-    returnaddrProperty = props.getProperty("ganymede.returnaddr");
-    helpbaseProperty = props.getProperty("ganymede.helpbase");
-    monitornameProperty = props.getProperty("ganymede.monitorname");
-    defaultmonitorpassProperty = props.getProperty("ganymede.defaultmonitorpass");
+    // make the combined properties file accessible throughout our server
+    // code.
+
+    System.setProperties(props);
+
+    dbFilename = System.getProperty("ganymede.database");
+    journalProperty = System.getProperty("ganymede.journal");
+    logProperty = System.getProperty("ganymede.log");
+    schemaProperty = System.getProperty("ganymede.schemadump");
+    htmlProperty = System.getProperty("ganymede.htmldump");
+    serverHostProperty = System.getProperty("ganymede.serverhost");
+    rootname = System.getProperty("ganymede.rootname");
+    defaultrootpassProperty = System.getProperty("ganymede.defaultrootpass");
+    mailHostProperty = System.getProperty("ganymede.mailhost");
+    signatureFileProperty = System.getProperty("ganymede.signaturefile");
+    returnaddrProperty = System.getProperty("ganymede.returnaddr");
+    helpbaseProperty = System.getProperty("ganymede.helpbase");
+    monitornameProperty = System.getProperty("ganymede.monitorname");
+    defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
 
     if (dbFilename == null)
       {
