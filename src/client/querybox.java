@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -97,8 +97,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   JCheckBox allBox = new JCheckBox("Return all objects of this type");
   JComboBox baseChoice = new JComboBox();
 
-
   // This is so we can hind the middle panel when the show all button is clicked
+
   CardLayout 
     card_layout;
 
@@ -108,7 +108,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     fields;			// FieldTemplates for the selectedBase
 
   BaseDump selectedBase;
+
   String baseName;
+
   boolean 
     editOnly = false,
     showAllItems = false;
@@ -172,7 +174,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // - Define the main window
     
     contentPane.setLayout(new BorderLayout());
-    //    contentPane.setBackground(Color.white);
     
     OkButton.addActionListener(this);
     CancelButton.addActionListener(this);
@@ -187,7 +188,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     allBox.addItemListener(this);
 
     query_panel.setLayout(new BorderLayout());
-    //    query_panel.setBackground(Color.lightGray); 
     contentPane.add("Center", query_panel); 
 
     // - Define the inner window with the query choice buttons
@@ -249,7 +249,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	mapBaseNamesToTemplates(selectedBase.getTypeID());
       }
       
-    //    baseChoice.setBackground(Color.white);
     baseChoice.addItemListener(this);
 
     bp_gbc.anchor = bp_gbc.WEST;
@@ -269,10 +268,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     base_panel.add(editBox);
 
     inner_choice.setLayout(gbl);
-    //    inner_choice.setBackground(Color.white);
     
     outer_choice.setLayout(new FlowLayout());
-    //    outer_choice.setBackground(Color.white);
     outer_choice.add(inner_choice);
 
     choice_pane.setViewportView(outer_choice);
@@ -291,7 +288,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     titledPanel.setLayout(new BorderLayout());
     titledPanel.add("Center", card_panel);
     titledPanel.add("North", base_panel);
-
 
     query_panel.add("Center", titledPanel);
 
@@ -1395,7 +1391,17 @@ class QueryRow implements ItemListener {
       {
 	short targetBase = field.getTargetBase();
 
-	if (targetBase < 0)
+	// right now we have this commented out because we don't want
+	// to always force the JInvidChooser.. it will often take
+	// longer to use the chooser to select a user name (for
+	// instance), not to mention the query time to get the list
+	// from the server. thankfully, the server can use either a
+	// label string or an invid for invid fields
+
+	// in the long run, i'm not sure what to do here.. use the
+	// chooser sometimes, but not others based on some criteria?
+
+	if (true /* (targetBase < 0) */)
 	  {
 	    if (!(operand instanceof JstringField))
 	      {
@@ -1575,7 +1581,8 @@ class QueryRow implements ItemListener {
       {
 	if (operator.equals("Contain"))
 	  {
-	    opValue = QueryDataNode.CONTAINS;
+	    opValue = QueryDataNode.EQUALS;
+	    arrayOp = QueryDataNode.CONTAINS;
 	  } 
 	else if (operator.equals("Length =="))
 	  {
