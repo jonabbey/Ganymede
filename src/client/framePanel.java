@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2001/05/23 03:55:00 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2001/07/27 01:44:21 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.66 $ $Date: 2001/05/23 03:55:00 $ $Name:  $
+ * @version $Revision: 1.67 $ $Date: 2001/07/27 01:44:21 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1050,7 +1050,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	owner.getVerticalScrollBar().setUnitIncrement(15);
 
 	invid_field invf = (invid_field) getObject().getField(SchemaConstants.OwnerListField);
-	owner.setViewportView(new ownerPanel(invf, editable, this));
+	owner.setViewportView(new ownerPanel(invf, editable && invf.isEditable(), this));
       }
     catch (RemoteException rx)
       {
