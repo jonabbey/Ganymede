@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1829,7 +1829,7 @@ public class directLoader {
 	
 	System.out.print("Creating net: " + name);
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 267);	// base 267 is for system types
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 267);	// base 267 is for networks
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
