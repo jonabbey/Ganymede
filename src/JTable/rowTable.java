@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.25 $ %D%
+  Version: $Revision: 1.26 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.25 $ %D% 
+ * @version $Revision: 1.26 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -69,6 +69,8 @@ public class rowTable extends baseTable implements ActionListener {
   JMenuItem OptimizeMI;
 
   boolean sortForward = true;
+
+  Object rowSelectedKey;
 
   /* -- */
 
@@ -255,58 +257,86 @@ public class rowTable extends baseTable implements ActionListener {
 
     /* -- */
 
+    // find the key for the selected row
+
+    if (debug)
+      {
+	System.err.println("rowTable.clickInCell(" + x + "," + y + "): seeking key");
+      }
+
     for (int i = 0; i < crossref.size(); i++)
       {
 	if (((rowHandle) crossref.elementAt(i)).rownum == y)
 	  {
 	    element = (rowHandle) crossref.elementAt(i);
+	    break;
 	  }
       }
 
-    if (!testRowSelected(y))
+    if (debug)
       {
-	// unselect the currently selected row, if any.  Note that we
-	// are currently only supporting single row selection.
-
-	for (int i = 0; i < rows.size(); i++)
+	if (element == null)
 	  {
-	    if (testRowSelected(i))
-	      {
-		unSelectRow(i);
-		if (callback != null)
-		  {
-		    // if we get a nullpointer exception on
-		    // element here, it means that the tableCanvas
-		    // code didn't properly check to make sure that
-		    // the location clicked on corresponded to
-		    // a proper row
-		    callback.rowUnSelected(((rowHandle)crossref.elementAt(i)).key, true);
-		  }
-	      }
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): key not found");
+	  }
+	else
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): found key " + element.key);
+	  }
+      }
+
+    if (!element.key.equals(rowSelectedKey))
+      {
+	if (debug)
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. unselecting");
 	  }
 
-	selectRow(y);
+	unSelectRow();
+
+	if (debug)
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. selecting");
+	  }
+
+	selectRow(element.key, false);
+
+	if (debug)
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. refreshing");
+	  }
+
 	refreshTable();
 
-	if (callback != null)
+	if (debug)
 	  {
-	    callback.rowSelected(element.key);
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
 	  }
       }
     else
       {
 	// go ahead and deselect the current row
 	
-	unSelectRow(y);
+	if (debug)
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
+	  }
+
+	unSelectRow();
+
+	if (debug)
+	  {
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
+	  }
+
 	refreshTable();
 
-	if (callback != null)
+	if (debug)
 	  {
-	    callback.rowUnSelected(element.key, false);
+	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
 	  }
       }
   }
-
 
   /**
    * Hook for subclasses to implement selection logic
@@ -326,10 +356,11 @@ public class rowTable extends baseTable implements ActionListener {
 	if (((rowHandle) crossref.elementAt(i)).rownum == y)
 	  {
 	    element = (rowHandle) crossref.elementAt(i);
+	    break;
 	  }
       }
 
-    if (testRowSelected(y))
+    if (element.key.equals(rowSelectedKey))
       {
 	callback.rowDoubleSelected(element.key);
       }
@@ -337,6 +368,7 @@ public class rowTable extends baseTable implements ActionListener {
       {
 	// the first click of our double click deselected
 	// the row, go ahead and reselect it
+
 	clickInCell(x,y);
       }
   }
@@ -352,6 +384,7 @@ public class rowTable extends baseTable implements ActionListener {
 	if (testRowSelected(i))
 	  {
 	    unSelectRow(i);
+
 	    if (callback != null)
 	      {
 		// if we get a nullpointer exception on
@@ -364,25 +397,14 @@ public class rowTable extends baseTable implements ActionListener {
 	  }
       }
 
+    rowSelectedKey = null;
+
     refreshTable();
   }
 
   public Object getSelectedRow()
   {
-    if (selectedRow == -1)
-      {
-	return null;
-      }
-
-    for (int i = 0; i < crossref.size(); i++)
-      {
-	if (((rowHandle) crossref.elementAt(i)).rownum == selectedRow)
-	  {
-	    return ((rowHandle) crossref.elementAt(i)).key;
-	  }
-      }
-
-    return null;
+    return rowSelectedKey;
   }
 
   /**
@@ -394,7 +416,7 @@ public class rowTable extends baseTable implements ActionListener {
    *
    */
 
-  public synchronized void selectRow(Object key)
+  public synchronized void selectRow(Object key, boolean refreshTable)
   {
     Object rowKey;
 
@@ -403,35 +425,26 @@ public class rowTable extends baseTable implements ActionListener {
     // unselect the currently selected row, if any.  Note that we
     // are currently only supporting single row selection.
 
-    for (int i = 0; i < rows.size(); i++)
+    unSelectRow();
+
+    if (key != null)
       {
-	rowKey = ((rowHandle) crossref.elementAt(i)).key;
+	rowHandle row = (rowHandle) index.get(key);
 
-	if (rowKey.equals(key))
+	if (row == null)
 	  {
-	    selectRow(i);
+	    return;
 	  }
-	else
-	  {
-	    if (testRowSelected(i))
-	      {
-		unSelectRow(i);
 
-		if (callback != null)
-		  {
-		    // if we get a nullpointer exception on
-		    // element here, it means that the tableCanvas
-		    // code didn't properly check to make sure that
-		    // the location clicked on corresponded to
-		    // a proper row
+	selectRow(row.rownum);
 
-		    callback.rowUnSelected(rowKey, true);
-		  }
-	      }
-	  }
+	rowSelectedKey = key;
       }
 
-    refreshTable();
+    if (refreshTable)
+      {
+	refreshTable();
+      }
 
     if (callback != null)
       {
@@ -440,14 +453,46 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
-   * Erases all the cells in the table and removes any per-cell
-   * attribute sets.  
+   *
+   * This method unselects the currently selected row.
+   *
    */
+
+  public synchronized void unSelectRow()
+  {
+    if (rowSelectedKey != null)
+      {
+	rowHandle row = (rowHandle) index.get(rowSelectedKey);
+
+	if (row == null)
+	  {
+	    return;
+	  }
+
+	unSelectRow(row.rownum);
+
+	if (callback != null)
+	  {
+	    callback.rowSelected(rowSelectedKey);
+	  }
+
+	rowSelectedKey = null;
+      }
+  }
+
+  /**
+   *
+   * Erases all the cells in the table and removes any per-cell
+   * attribute sets.
+   *
+   */
+
   public void clearCells()
   {
     index = new Hashtable();
     crossref = new Vector();
     super.clearCells();
+    rowSelectedKey = null;
   }
 
 
@@ -456,6 +501,7 @@ public class rowTable extends baseTable implements ActionListener {
    *
    * @param key A hashtable key to be used to refer to this row in the future
    */
+
   public void newRow(Object key)
   {
     rowHandle element;
@@ -470,11 +516,10 @@ public class rowTable extends baseTable implements ActionListener {
     element = new rowHandle(this, key);
 
     index.put(key, element);
-    reShape();
   }
 
   /**
-   * Deletes a row
+   * Deletes a row.
    *
    * @param key A hashtable key for the row to delete
    * @param repaint true if the table should be redrawn after the row is deleted
@@ -490,6 +535,11 @@ public class rowTable extends baseTable implements ActionListener {
       {
 	// no such row exists.. what to do?
 	return;
+      }
+
+    if (key.equals(rowSelectedKey))
+      {
+	unSelectRow();
       }
 
     element = (rowHandle) index.get(key);
@@ -749,6 +799,7 @@ public class rowTable extends baseTable implements ActionListener {
 	if (((rowHandle) crossref.elementAt(i)).rownum == menuRow)
 	  {
 	    element = (rowHandle) crossref.elementAt(i);
+	    break;
 	  }
       }
     
