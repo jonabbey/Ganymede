@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/09/12 05:08:23 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/11/07 09:20:53 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2000/09/12 05:08:23 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2000/11/07 09:20:53 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -702,11 +702,23 @@ public class xmlfield implements FieldType {
 	  }
       }
 
-    if (result2 != null && result1 != null && !result1.equals(result2))
+    if (result2 != null && result1 != null)
       {
-	owner.xSession.err.println("\nWarning, date element " + item + " is not internally consistent.");
-	owner.xSession.err.println("Ignoring date string \"" + formattedDate + "\".");
-	owner.xSession.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
+	// test to see if the two time stamps are within a second or
+	// so of each other.. the Ganymede client doesn't always
+	// round times to the nearest second when setting times
+	// in date fields, but the time string in 'val', if present,
+	// will only have second resolution
+
+	long timediff = result2.getTime() - result1.getTime();
+
+	if (timediff < -1000 || timediff > 1000)
+	  {
+	    owner.xSession.err.println("\nWarning, date element " + item + " is not internally consistent.");
+	    owner.xSession.err.println("Ignoring date string \"" + formattedDate + "\", which was parsed as ");
+	    owner.xSession.err.println(formatters[0].format(result1));
+	    owner.xSession.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
+	  }
 
 	return result2;
       }
@@ -1595,7 +1607,7 @@ class xInvid {
       }
     else if (num != -1)
       {
-	return new Invid(typeId, num);
+	return getXSession().getInvid(typeId, new Integer(num));
       }
     else
       {

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/11/04 04:22:28 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/11/07 09:20:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -320,8 +320,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     session.setXSession(this);
 
-    initializeLookups();
-
     try
       {
 	// We create a PipedOutputStream that we will write data from
@@ -465,6 +463,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     objectTypes.clear();
     objectTypes = null;
+
+    objectTypeIDs.clear();
+    objectTypeIDs = null;
 
     objectStore.clear();
     objectStore = null;
@@ -1606,6 +1607,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println("processData");
       }
 
+    initializeLookups();
+
     try
       {
 	item = getNextItem();
@@ -1804,6 +1807,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (objectHash == null)
       {
+	// we do this mainly so we can fall through to our if (element
+	// == null) logic below.
+
 	objectHash = new Hashtable();
 	objectStore.put(typeKey, objectHash);
       }
@@ -2148,11 +2154,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error registering fields for " + newObject + ", reason: " + msg);
+		err.println("[1] Error registering fields for " + newObject + ", reason: " + msg);
 	      }
 	    else
 	      {
-		err.println("Error registering fields for " + newObject + ", no reason given.");
+		err.println("[1] Error registering fields for " + newObject + ", no reason given.");
 	      }
 
 	    success = false;
@@ -2180,11 +2186,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error registering fields for " + newObject + ", reason: " + msg);
+		err.println("[2] Error registering fields for " + newObject + ", reason: " + msg);
 	      }
 	    else
 	      {
-		err.println("Error registering fields for " + newObject + ", no reason given.");
+		err.println("[2] Error registering fields for " + newObject + ", no reason given.");
 	      }
 
 	    success = false;
@@ -2227,11 +2233,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error registering fields for " + object + ", reason: " + msg);
+		err.println("[3] Error registering fields for " + object + ", reason: " + msg);
 	      }
 	    else
 	      {
-		err.println("Error registering fields for " + object + ", no reason given.");
+		err.println("[3] Error registering fields for " + object + ", no reason given.");
 	      }
 
 	    success = false;
@@ -2251,11 +2257,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (msg != null)
 	      {
-		err.println("Error registering fields for " + object + ", reason: " + msg);
+		err.println("[4] Error registering fields for " + object + ", reason: " + msg);
 	      }
 	    else
 	      {
-		err.println("Error registering fields for " + object + ", no reason given.");
+		err.println("[4] Error registering fields for " + object + ", no reason given.");
 	      }
 
 	    success = false;

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2000/11/01 00:57:48 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2000/11/07 09:20:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1703,7 +1703,8 @@ public abstract class DBField implements Remote, db_field {
       {
 	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
 					  "Field " + getName() + 
-					  " can't take " + submittedValues.size() + " new values");
+					  " can't take " + submittedValues.size() + " new values..\n" +
+					  "size():" + size() + ", getMaxArraySize():" + getMaxArraySize());
       }
 
     // check to see if all of the submitted values are acceptable in

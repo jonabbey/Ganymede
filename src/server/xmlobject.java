@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/10/10 04:59:45 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/11/07 09:20:54 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -71,7 +71,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2000/10/10 04:59:45 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2000/11/07 09:20:54 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -466,6 +466,10 @@ public class xmlobject {
   {
     if (invid == null && !knownNonExistent)
       {
+	// if we were given a number, assume they really do
+	// mean for us to edit a pre-existing object with
+	// that number, and don't argue
+
 	if (num != -1)
 	  {
 	    invid = new Invid(type.shortValue(), num);

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2000/11/02 02:41:18 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2000/11/07 09:20:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.104 $ $Date: 2000/11/02 02:41:18 $
+ * @version $Revision: 1.105 $ $Date: 2000/11/07 09:20:48 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -993,8 +993,11 @@ public class DBObject implements db_object, FieldType, Remote {
       {
 	xmlOut.attribute("id", getLabel());
       }
+    else
+      {
+	xmlOut.attribute("id", getTypeName() + "[" + getID() + "]");
+      }
 
-    xmlOut.attribute("num", java.lang.Integer.toString(getID()));
     xmlOut.indentOut();
 
     // by using getFieldVector(), we get the fields in display
@@ -1002,22 +1005,52 @@ public class DBObject implements db_object, FieldType, Remote {
 
     Vector fieldVec = getFieldVector(false);
 
-    for (int i = 0; i < fieldVec.size(); i++)
+    if (getTypeID() == SchemaConstants.OwnerBase)
       {
-	DBField field = (DBField) fieldVec.elementAt(i);
-
-	if (!xmlOut.doDumpHistoryInfo() &&
-	    field.getID() == SchemaConstants.CreationDateField ||
-	    field.getID() == SchemaConstants.CreatorField ||
-	    field.getID() == SchemaConstants.ModificationDateField ||
-	    field.getID() == SchemaConstants.ModifierField)
+	for (int i = 0; i < fieldVec.size(); i++)
 	  {
-	    // skip these
-
-	    continue;
+	    DBField field = (DBField) fieldVec.elementAt(i);
+	    
+	    if (!xmlOut.doDumpHistoryInfo() &&
+		field.getID() == SchemaConstants.CreationDateField ||
+		field.getID() == SchemaConstants.CreatorField ||
+		field.getID() == SchemaConstants.ModificationDateField ||
+		field.getID() == SchemaConstants.ModifierField)
+	      {
+		// skip these
+		
+		continue;
+	      }
+	    
+	    if (field.getID() == SchemaConstants.OwnerObjectsOwned)
+	      {
+		// also this
+		
+		continue;
+	      }
+	    
+	    field.emitXML(xmlOut);
 	  }
+      }
+    else
+      {
+	for (int i = 0; i < fieldVec.size(); i++)
+	  {
+	    DBField field = (DBField) fieldVec.elementAt(i);
+	    
+	    if (!xmlOut.doDumpHistoryInfo() &&
+		field.getID() == SchemaConstants.CreationDateField ||
+		field.getID() == SchemaConstants.CreatorField ||
+		field.getID() == SchemaConstants.ModificationDateField ||
+		field.getID() == SchemaConstants.ModifierField)
+	      {
+		// skip these
+		
+		continue;
+	      }
 
-	field.emitXML(xmlOut);
+	    field.emitXML(xmlOut);
+	  }
       }
 
     xmlOut.indentIn();
