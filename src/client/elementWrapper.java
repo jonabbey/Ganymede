@@ -39,9 +39,10 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     remove;
 
   vectorPanel
-    parent;
+    vp;
 
   boolean 
+    editable,
     expanded = false,
     loaded = false;
 
@@ -50,7 +51,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   // class methods
 
-  public elementWrapper(String titleText, Component comp, vectorPanel parent)
+  public elementWrapper(String titleText, Component comp, vectorPanel parent, boolean editable)
   {
     if (debug)
       {
@@ -63,10 +64,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       }
 
     this.titleText = titleText;
-    this.parent = parent;
+    this.vp = parent;
+    this.editable = editable;
     
     setLayout(new BorderLayout());
-    setBorder(parent.parent.eWrapperBorder);
+    setBorder(vp.wp.eWrapperBorder);
       
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);
@@ -74,13 +76,16 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     buttonPanel.setForeground(ClientColor.vectorFore);
 
     buttonPanel.setLayout(new BorderLayout());
-      
-    remove = new JButton(parent.parent.removeImageIcon);
-    remove.setBorderPainted(false);
-    remove.setFocusPainted(false);
-    remove.setMargin(new Insets(0,0,0,0));
-    remove.setToolTipText("Delete this element");
-    remove.addActionListener(this);
+
+    if (editable)
+      {
+	remove = new JButton(vp.wp.removeImageIcon);
+	remove.setBorderPainted(false);
+	remove.setFocusPainted(false);
+	remove.setMargin(new Insets(0,0,0,0));
+	remove.setToolTipText("Delete this element");
+	remove.addActionListener(this);
+      }
 
     if (comp instanceof containerPanel)
       {
@@ -95,7 +100,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	System.out.println("Adding mouse listener.");
 	title.addMouseListener(this);
 
-	expand = new JButton(parent.parent.closeIcon);
+	expand = new JButton(vp.wp.closeIcon);
 	expand.setToolTipText("Expand this element");
 	expand.setBorderPainted(false);
 	expand.setFocusPainted(false);
@@ -103,7 +108,10 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	
 	buttonPanel.add("West", expand);
 	buttonPanel.add("Center", title);
-	buttonPanel.add("East",remove);
+	if (editable)
+	  {
+	    buttonPanel.add("East",remove);
+	  }
       }
     else
       {
@@ -112,12 +120,15 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    buttonPanel.add("West", new JLabel(titleText));
 	  }
 	buttonPanel.add("Center", comp);
-	buttonPanel.add("East", remove);
+	if (editable)
+	  {
+	    buttonPanel.add("East", remove);
+	  }
       }
 
 
     my_component = comp;
-    //my_component.setBackground(parent.container.frame.getVectorBG());
+
       
     //add("Center",my_component);
     add("North",buttonPanel);
@@ -131,10 +142,15 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   
   public void expand()
   {
+    System.out.println("expand().");
     if (expanded)
       {
-	remove(my_component);
-	expand.setIcon(parent.parent.closeIcon);
+	System.out.println("remove");
+	//remove(my_component);
+	my_component.setVisible(false);
+	System.out.println("setIcon");
+	expand.setIcon(vp.wp.closeIcon);
+	System.out.println("setToolTipText");
 	expand.setToolTipText("Collapse this element");
 	expanded = false;
       }
@@ -142,24 +158,44 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	if (! loaded)
 	  {
-	    parent.parent.getgclient().setStatus("Loading container panel, you are just gonna have to wait.");
+	    setStatus("Loading container panel, you are just gonna have to wait.");
 	    ((containerPanel)my_component).load();
+	    add("Center", my_component);
 	    loaded = true;
 	  }
+	else
+	  {
+	    my_component.setVisible(true);
+	  }
 
-	add("Center", my_component);
-	expand.setIcon(parent.parent.openIcon);
+	expand.setIcon(vp.wp.openIcon);
 	expand.setToolTipText("Expand this element");
 	expanded = true;
       }
 
-    parent.parent.getgclient().setStatus("Invalidating everything.");
-    //invalidate();
-    invalidateRight();
-    parent.parent.getgclient().setStatus("Ok, there you go.");
-    
+    System.out.println("Done with expand().");
   }
 
+  /*
+  public void validate()
+  {
+    System.out.println("--Validate: element Wrapper: " + this);
+    super.validate();
+  }
+
+  public void invalidate()
+  {
+    System.out.println("--inValidate: elementWrapper: " + this);
+    super.invalidate();
+  }
+
+  public void doLayout()
+  {
+    System.out.println("//doLayout in elementW: " + this);
+    super.doLayout();
+    System.out.println("\\doLayout over in ew");
+  }
+  */
 
   /**
    *
@@ -179,9 +215,10 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     while ((c!= null) && !(c instanceof JViewport))
       {
+	System.out.println("doLayout on: " + c);
 	c.doLayout();
 	c = c.getParent();
-	//System.out.println("Next c = " + c);
+
       }
   }
 
@@ -194,7 +231,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     if (evt.getSource() == remove) 
       {
 	JValueObject v = new JValueObject(getComponent(),"remove");
-	parent.setValuePerformed(v);
+	vp.setValuePerformed(v);
       }
     else if (evt.getSource() == expand)
       {
@@ -219,6 +256,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   public void mouseExited(MouseEvent e) {}
   public void mousePressed(MouseEvent e) {}
   public void mouseReleased(MouseEvent e) {}
+
+  public final void setStatus(String status)
+  {
+    vp.wp.getgclient().setStatus(status);
+  }
 
 }
 
