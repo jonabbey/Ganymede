@@ -9,8 +9,8 @@
 
    Created: 6 May 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/05/07 05:19:39 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/05/26 18:27:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,9 +67,12 @@ import arlut.csd.Util.ParseArgs;
 ------------------------------------------------------------------------------*/
 
 /**
- * Command line application to update user account password, shell, and/or
+ * <p>Command line application to update user account password, shell, and/or
  * gecos information based on interaction with the rpc.yppasswdd daemon
- * from the Linux NIS kit.
+ * from the Linux NIS kit, versions 1.3.6.92 and above, using the -x option.</p>
+ *
+ * <p>This client uses the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
+ * client stub for communications with the server.</p>
  */
 
 public class rpcpass implements ClientListener {

@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 1999/04/14 19:04:38 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 1999/05/26 18:27:37 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.104 $ $Date: 1999/04/14 19:04:38 $ $Name:  $
+ * @version $Revision: 1.105 $ $Date: 1999/05/26 18:27:37 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -298,7 +298,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    * <p>The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
-   * infromation on the fields for this object are loaded from
+   * information on the fields for this object are loaded from
    * the server.  progressBar should be null if this containerPanel
    * is not serving as the main panel for a framePanel.</p>
    *
@@ -328,7 +328,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    * <p>The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
-   * infromation on the fields for this object are loaded from
+   * information on the fields for this object are loaded from
    * the server.</p>
    *
    * @param object   The object to be displayed
@@ -358,7 +358,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    * <p>The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
-   * infromation on the fields for this object are loaded from
+   * information on the fields for this object are loaded from
    * the server.  progressBar should be null if this containerPanel
    * is not serving as the main panel for a framePanel.</p>
    *
