@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2001/01/13 07:41:50 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2001/02/08 08:12:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.114 $ $Date: 2001/01/13 07:41:50 $
+ * @version $Revision: 1.115 $ $Date: 2001/02/08 08:12:21 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1511,6 +1511,8 @@ public class DBObject implements db_object, FieldType, Remote {
   /**
    * <p>This method finds the index for the given field id in this object's
    * fieldAry and permCacheAry tables.</p>
+   *
+   * @return -1 if we couldn't find a field with the given id
    */
 
   public final short findField(short id)

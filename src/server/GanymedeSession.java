@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.223 $
-   Last Mod Date: $Date: 2001/01/27 02:27:04 $
+   Version: $Revision: 1.224 $
+   Last Mod Date: $Date: 2001/02/08 08:12:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.223 $ $Date: 2001/01/27 02:27:04 $
+ * @version $Revision: 1.224 $ $Date: 2001/02/08 08:12:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1002,36 +1002,100 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	// Construct a vector of invid's to place in the log entry we
-	// are about to create.  This lets us search the log easily.
+	// we assume that once we have communicated with the client,
+	// we won't have to worry about the rest of this taking a
+	// particularly long time, so we'll go ahead and sync up to
+	// handle the logout.  if all of this takes too long, the
+	// join() below will expire and the spawning thread will
+	// also attempt to sync on forceLock and kick off the user,
+	// but we're not going to do anything which should take
+	// very long in this sync block.  certainly nothing which
+	// should involve communications with the client or admin
+	// consoles
 
-	Vector objects = new Vector();
+	synchronized (forceLock)
+	  {
+	    if (logged_in)
+	      {
+		// Construct a vector of invid's to place in the log entry we
+		// are about to create.  This lets us search the log easily.
+
+		Vector objects = new Vector();
 	    
-	if (userInvid != null)
-	  {
-	    objects.addElement(userInvid);
-	  }
+		if (userInvid != null)
+		  {
+		    objects.addElement(userInvid);
+		  }
 	    
-	if (personaInvid != null)
-	  {
-	    objects.addElement(personaInvid);
+		if (personaInvid != null)
+		  {
+		    objects.addElement(personaInvid);
+		  }
+
+		if (Ganymede.log != null)
+		  {
+		    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+							       "Abnormal termination for username: " + username + "\n" +
+							       myReason,
+							       userInvid,
+							       username,
+							       objects,
+							       null));
+		  }
+
+		me.logout(true);		// keep logout from logging a normal logout
+	      }
 	  }
-	
-	if (Ganymede.log != null)
-	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						       "Abnormal termination for username: " + username + "\n" +
-						       myReason,
-						       userInvid,
-						       username,
-						       objects,
-						       null));
-	  }
-	
-	me.logout(true);		// keep logout from logging a normal logout
       }}, "Client Disconnector Thread");
 
     forceThread.start();
+
+    // if we get stuck talking to the client, go ahead and clean things
+    // up on the server side
+
+    try
+      {
+	forceThread.join(15000); // wait up to 15 seconds
+      }
+    catch (InterruptedException ex)
+      {
+      }
+
+    // okay, we have timed out on talking to the client.. if our
+    // communications thread has not successfully kicked the sent the
+    // client a disconnect message and logged the client out from the
+    // server, handle the server-side logout ourselves.
+
+    synchronized (forceLock)
+      {
+	if (logged_in)
+	  {
+	    Vector objects = new Vector();
+	    
+	    if (userInvid != null)
+	      {
+		objects.addElement(userInvid);
+	      }
+	    
+	    if (personaInvid != null)
+	      {
+		objects.addElement(personaInvid);
+	      }
+
+	    if (Ganymede.log != null)
+	      {
+		Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+							   "Abnormal forced termination for username: " + username + "\n" +
+							   myReason,
+							   userInvid,
+							   username,
+							   objects,
+							   null));
+	      }
+	    
+	    me.logout(true);
+	  }
+      }
   }
 
   /**
