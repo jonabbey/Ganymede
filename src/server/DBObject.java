@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,67 +113,6 @@ public class DBObject {
 	key = (short) ((Integer) enum.nextElement()).intValue();
 	out.writeShort((short) key);
 	((DBField) fields.get(new Integer(key))).emit(out);
-      }
-  }
-
-  /**
-   *
-   * The emitJournalEntry() method is used to write out a differential
-   * DBStore entry, to be written to the DBStore Journal.  A Journal
-   * entry only contains the fields that changed in the transaction.
-   *
-   */
-
-  void emitJournalEntry(DataOutput out) throws IOException
-  {
-    Enumeration enum, enum2;
-    Object key;
-    DBField shadowField, origField;
-    short fieldcount = 0;
-    Vector fieldVect = null;
-
-    /* -- */
-
-    if (shadowObject == null)
-      {
-	return; // this object is not edited
-      }
-
-    fieldVect = new Vector();
-    
-    enum = shadowObject.fields.keys();
-
-    while (enum.hasMoreElements())
-      {
-	key = enum.nextElement();
-
-	if (!fields.contains(key))
-	  {
-	    fieldVect.addElement(shadowObject.fields.get(key));
-	  }
-	else
-	  {
-	    origField = (DBField) fields.get(key);
-	    shadowField = (DBField) shadowObject.fields.get(key);
-
-	    if (!origField.equals(shadowField))
-	      {
-		fieldVect.addElement(shadowField);
-	      }
-	  }
-      }
-
-    // write out the field count
-
-    out.writeShort((short)fieldVect.size());
-
-    // and the fields that are new or have changed
-
-    enum = fieldVect.elements();
-
-    while (enum.hasMoreElements())
-      {
-	((DBField) enum.nextElement()).emit(out);
       }
   }
 
