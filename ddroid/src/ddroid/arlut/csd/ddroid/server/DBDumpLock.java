@@ -186,7 +186,7 @@ class DBDumpLock extends DBLock {
 		    // locked and any of his buddies on the write wait
 		    // list to finish up
 
-		    if (!base.isWriterEmpty() || base.writeInProgress)
+		    if (!base.isWriterEmpty() || base.isWriteInProgress())
 		      {
 			okay = false;
 		      }

@@ -4769,7 +4769,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 						   vObj.getLabel()));
 	  }
 
-	ReturnVal retVal = objBase.objectHook.canRemove(session, vObj);
+	ReturnVal retVal = objBase.getObjectHook().canRemove(session, vObj);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -4781,7 +4781,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // if an object type can be inactivated, then it *must* be
 	    // inactivated, unless the user is supergash
 
-	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
+	    if (!isSuperGash() && objBase.getObjectHook().canBeInactivated())
 	      {
 		return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 						  ts.l("remove_db_object.must_inactivate",

@@ -783,7 +783,7 @@ public abstract class DBField implements Remote, db_field {
   public final boolean isVisible()
   {
     return verifyReadPermission() && 
-      getFieldDef().base.objectHook.canSeeField(null, this);
+      getFieldDef().base.getObjectHook().canSeeField(null, this);
   }
 
   /**
@@ -893,9 +893,9 @@ public abstract class DBField implements Remote, db_field {
     // if this field is virtualized, let our customizer provide the
     // value
 
-    if (owner.objectBase.objectHook.virtualizeField(getID()))
+    if (owner.objectBase.getObjectHook().virtualizeField(getID()))
       {
-	return owner.objectBase.objectHook.getVirtualValue(this);
+	return owner.objectBase.getObjectHook().getVirtualValue(this);
       }
 
     return value;
@@ -924,9 +924,9 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
       }
 
-    if (virtualize && owner.objectBase.objectHook.virtualizeField(getID()))
+    if (virtualize && owner.objectBase.getObjectHook().virtualizeField(getID()))
       {
-	return owner.objectBase.objectHook.getVirtualValue(this);
+	return owner.objectBase.getObjectHook().getVirtualValue(this);
       }
 
     return value;

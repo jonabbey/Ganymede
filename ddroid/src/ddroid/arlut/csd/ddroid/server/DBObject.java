@@ -710,7 +710,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     if (objectBase.getObjectHook().useLabelHook())
       {
-	result = objectBase.objectHook.getLabelHook(this);
+	result = objectBase.getObjectHook().getLabelHook(this);
       }
 
     if (result == null)
@@ -1202,7 +1202,7 @@ public class DBObject implements db_object, FieldType, Remote {
     // the proper check-out constructor for the DBEditObject
     // subtype.
 
-    if (objectBase.classdef != null)
+    if (objectBase.getClassDef() != null)
       {
 	Constructor c;
 	Class classArray[];
@@ -1222,7 +1222,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	try
 	  {
-	    c = objectBase.classdef.getDeclaredConstructor(classArray);
+	    c = objectBase.getClassDef().getDeclaredConstructor(classArray);
 	    shadowObject = (DBEditObject) c.newInstance(parameterArray);
 	  }
 	catch (NoSuchMethodException ex)

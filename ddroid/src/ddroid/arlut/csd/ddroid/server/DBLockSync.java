@@ -72,6 +72,13 @@ import java.rmi.*;
  * <P>This class acts as a general synchronization object for
  * interlock coordination.  All global data required for coordinating
  * lock activity is stored here.</P>
+ *
+ * <p>Note that much code in the various {@link arlut.csd.ddroid.server.DBLock}
+ * subclasses, and in the rest of the Ganymede server, establishes external
+ * synchronization on the DBLockSync object referenced in
+ * {@link arlut.csd.ddroid.server.DBStore#lockSync DBStore.lockSync}, so certain
+ * methods in this class which do not appear synchronized may in fact be
+ * dependent on external synchronization.</p>
  */
 
 public class DBLockSync {

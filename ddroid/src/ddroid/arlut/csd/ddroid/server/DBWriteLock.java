@@ -330,7 +330,7 @@ public class DBWriteLock extends DBLock {
 						   ": DBWriteLock.establish(): " +
 						   "waiting for dumpers to release.");
 			      }
-			    else if (base.writeInProgress)
+			    else if (base.isWriteInProgress())
 			      {
 				System.err.println(this.key +
 						   ": DBWriteLock.establish(): " + 
@@ -362,8 +362,8 @@ public class DBWriteLock extends DBLock {
 		    for (int i = 0; i < baseSet.size(); i++)
 		      {
 			base = (DBObjectBase) baseSet.elementAt(i);
-			base.writeInProgress = true;
-			base.currentLock = this;
+			base.setWriteInProgress(true);
+			base.setCurrentLock(this);
 		      }
 		
 		    done = true;
@@ -460,8 +460,8 @@ public class DBWriteLock extends DBLock {
 	for (int i = 0; i < baseSet.size(); i++)
 	  {
 	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.writeInProgress = false;
-	    base.currentLock = null;
+	    base.setWriteInProgress(false);
+	    base.setCurrentLock(null);
 	  }
 	
 	locked = false;
