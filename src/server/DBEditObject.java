@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.151 $
-   Last Mod Date: $Date: 2001/06/05 07:57:35 $
+   Version: $Revision: 1.152 $
+   Last Mod Date: $Date: 2001/06/05 08:07:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.151 $ $Date: 2001/06/05 07:57:35 $ $Name:  $
+ * @version $Revision: 1.152 $ $Date: 2001/06/05 08:07:41 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3127,6 +3127,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>This method returns true if this object has already gone
    * through phase 1 of the commit process, which requires
    * the DBEditObject not to accept further changes.</p>
+   *
+   * <p>{@link arlut.csd.ganymede.DBField DBField}'s
+   * {@link arlut.csd.ganymede.DBField#isEditable(boolean) isEditable()}
+   * method consults this method to determine whether to allow
+   * editing of fields.  While a DBEditObject is in the committing
+   * process, no changes to fields will be allowed.</p>
    */
 
   public final boolean isCommitting()
