@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,13 +20,13 @@ import java.util.*;
 import java.text.*;
 
 import com.sun.java.swing.*;
-import tablelayout.*;
-import arlut.csd.ganymede.*;
+import com.sun.java.swing.border.*;
 
+import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JCalendar.*;
 
-public class datePanel extends JBufferedPane implements ActionListener, JsetValueCallback {
+public class datePanel extends JPanel implements ActionListener, JsetValueCallback {
 
   boolean 
     editable;
@@ -37,12 +37,9 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
   date_field
     field;
 
-  JBufferedPane
+  JPanel
     top_pane,
     bottom_pane;
-
-  JBorderedPane
-    top_border;
 
   JpanelCalendar
     cal;
@@ -73,23 +70,16 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
     this.label = label;
     this.parent = parent;
     
-    setBuffered(false);
+    setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
-    setInsets(new Insets(5,5,5,5));
-
-    top_pane = new JBufferedPane(false);
+    top_pane = new JPanel(false);
     top_pane.setLayout(new BorderLayout());
     top_pane.setMaximumSize(top_pane.getPreferredSize());
-    bottom_pane = new JBufferedPane(false);
+    bottom_pane = new JPanel(false);
     bottom_pane.setLayout(new BoxLayout(bottom_pane, BoxLayout.Y_AXIS));
 
-    top_border = new JBorderedPane();
-    top_border.setLayout(new BorderLayout());
-    top_border.setBorder(BorderFactory.createTitledBorder(top_pane, label + " Date"));
-    top_border.add("Center", top_pane);
-
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    add(top_border);
+    add(top_pane);
     add(bottom_pane);
     add(Box.createVerticalGlue());
 
@@ -117,7 +107,7 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
     try
       {
 	topLabel = new JLabel();
-	topLabel.setInsets(new Insets(5,1,5,1));
+	topLabel.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
 
 	if ((field != null) && (field.getValue() != null))
 	  {
@@ -132,11 +122,7 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
 	  }
 	
 	cal = new JpanelCalendar(my_Calendar, this, false, true);
-	JBorderedPane cal_border = new JBorderedPane();
-	cal_border.setBorder(BorderFactory.createGroovedBorder());
-	cal_border.setLayout(new BorderLayout());
-	cal_border.add("Center", cal);
-	bottom_pane.add(cal_border);
+	bottom_pane.add(cal);
 	bottom_pane.add(Box.createGlue());
 
 	top_pane.add("Center", topLabel);
