@@ -6,7 +6,7 @@
    BSD 4.4 group file
    
    Created: 29 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,8 @@ import java.util.*;
 
 public class Group {
 
+  static final boolean debug = true;
+
   public static void initTokenizer(StreamTokenizer tokens)
   {
     tokens.resetSyntax();
@@ -42,6 +44,10 @@ public class Group {
   int gid;
   Vector users;
 
+  boolean valid;
+
+  StreamTokenizer tokens;
+
   // instance constructor
 
   public Group()
@@ -49,18 +55,27 @@ public class Group {
     users = new Vector();
   }
 
+  /**
+   *
+   * Returns true if we're at EOF.
+   *
+   */
+
   public boolean loadLine(StreamTokenizer tokens) throws IOException, EOFException
   {
     int token;
 
     /* -- */
 
+    this.tokens = tokens;
+
     // read groupname
 
     tokens.nextToken();
 
-    if (tokens.ttype == StreamTokenizer.TT_EOF)
+    if (atEOF())
       {
+	valid = false;
 	return true;
       }
     else
@@ -70,16 +85,39 @@ public class Group {
 
     name = getNextBit(tokens);
 
-    //    System.out.println("name = '" + name + "'");
+    if (debug)
+      {
+	System.out.println("name = '" + name + "'");
+      }
 
     password = getNextBit(tokens); 
 
-    // System.out.println("password = '" + password + "'");
+    if (debug)
+      {
+	System.out.println("password = '" + password + "'");
+      }
 
     String gidString = getNextBit(tokens);
-    gid = new Integer(gidString).intValue();
 
-    // System.out.println("gid = '" + gid + "'");
+    if (gidString != null && !gidString.equals(""))
+      {
+	gid = new Integer(gidString).intValue();
+      }
+    else
+      {
+	System.err.println("Error, group " + name + " has no gid.. skipping line.");
+
+	skipToEndLine();
+	valid = false;
+	return atEOF();
+      }
+
+    if (debug)
+      {
+	System.out.println("gid = '" + gid + "'");
+      }
+
+    // skip :
 
     token = tokens.nextToken();
 
@@ -92,6 +130,8 @@ public class Group {
 	System.err.println("Parse error after gid");
       }
 
+    // read the user list
+
     while (tokens.ttype != ':' && (tokens.ttype != StreamTokenizer.TT_EOL) &&
 	    (tokens.ttype != StreamTokenizer.TT_EOF))
       {
@@ -101,7 +141,11 @@ public class Group {
 	  }
 	else
 	  {
-	    //	    System.out.print(" " + tokens.sval);
+	    if (debug)
+	      {
+	        System.out.print(" " + tokens.sval);
+	      }
+
 	    users.addElement(tokens.sval);
 	  }
 
@@ -113,32 +157,23 @@ public class Group {
 	  }
       }
 
-    if (tokens.ttype == StreamTokenizer.TT_EOL || tokens.ttype == StreamTokenizer.TT_EOF)
-      {
-	contract = "";
-	description = "";
-	
-	return (tokens.ttype == StreamTokenizer.TT_EOF);
-      }
+    skipToEndLine();
+    valid = true;
 
-    // get to the end of line
-
-    // System.err.println("HEY! Token = " + token + ", ttype = " + tokens.ttype);
-
-    while ((tokens.ttype != StreamTokenizer.TT_EOL) && (tokens.ttype != StreamTokenizer.TT_EOF))
-      {
-	// System.err.print(".");
-	token = tokens.nextToken();
-      }
-
-    return (tokens.ttype == StreamTokenizer.TT_EOF);
+    return atEOF();
   }
+
+  /**
+   *
+   * Debug routine.
+   *
+   */
 
   public void display()
   {
     System.out.println("Group: " + name + ", pass: " + password + ", gid: " + gid);
 
-    System.out.print("\tUsers: ");
+    System.out.print("Users: ");
 
     for (int i = 0; i < users.size(); i++)
       {
@@ -149,27 +184,100 @@ public class Group {
 
 	System.out.print((String)users.elementAt(i));
       }
-
-    System.out.println("\tContract: " + contract + ", Descrip: " + description);
   }
+
+  /**
+   *
+   * Returns true if we're at EOL
+   *
+   */
+
+  private boolean atEOL()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOL;
+  }
+
+  /**
+   *
+   * Returns true if we're at EOF
+   *
+   */
+
+  private boolean atEOF()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOF
+;
+  }
+
+  /**
+   *
+   * This method runs tokens to the end of the line.
+   *
+   */
+
+  private void skipToEndLine() throws IOException
+  {
+    while (!atEOL() && !atEOF())
+      {
+	tokens.nextToken();
+      }
+  }
+
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   */
   
   private String getNextBit(StreamTokenizer tokens) throws IOException
+  {
+    return getNextBit(tokens, true);
+  }
+
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   * @param skipleading if true, getNextBit will chew through leading
+   * commas and colons until it gets to either a normal string or
+   * eol/eof.
+   *
+   */
+
+  private String getNextBit(StreamTokenizer tokens, boolean skipleading) throws IOException
   {
     int token;
     String result;
 
     token = tokens.nextToken();
 
-    if ((tokens.ttype == StreamTokenizer.TT_EOF) ||
-	(tokens.ttype == StreamTokenizer.TT_EOL))
+    if (atEOF() || atEOL())
       {
 	return "";
       }
 
-    while (tokens.ttype == ':' || tokens.ttype == ',')
+    // eat any leading :'s or ,'s
+
+    if (!skipleading)
       {
-	//	System.err.println("*");
-	token = tokens.nextToken();
+	// skip only the single leading token
+
+	if (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    token = tokens.nextToken();
+	  }
+      }
+    else
+      {
+	// skip any leading colons and commas
+
+	while (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    //	System.err.println("*");
+	    token = tokens.nextToken();
+	  }
       }
 
     if (tokens.ttype == StreamTokenizer.TT_WORD)

@@ -6,7 +6,7 @@
    BSD master.passwd file
    
    Created: 22 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,20 +54,32 @@ public class User {
   int lastchange;
   int expire;
 
+  boolean valid;
+  StreamTokenizer tokens;
+
   // instance constructor
 
   public User()
   {
   }
 
+  /**
+   *
+   * Returns true if we're at EOF.
+   *
+   */
+
   public boolean loadLine(StreamTokenizer tokens) throws IOException, EOFException
   {
+    this.tokens = tokens;
+
     // read username
 
     tokens.nextToken();
 
-    if (tokens.ttype == StreamTokenizer.TT_EOF)
+    if (atEOF())
       {
+	valid = false;
 	return true;
       }
     else
@@ -90,7 +102,19 @@ public class User {
       }
 
     String uidString = getNextBit(tokens);
-    uid = new Integer(uidString).intValue();
+
+    if (uidString != null && !uidString.equals(""))
+      {
+	uid = new Integer(uidString).intValue();
+      }
+    else
+      {
+	System.err.println("Error, user " + name + " has no uid.. skipping line.");
+
+	skipToEndLine();
+	valid = false;
+	return atEOF();
+      }
 
     if (debug)
       {
@@ -98,7 +122,19 @@ public class User {
       }
 
     String gidString = getNextBit(tokens);
-    gid = new Integer(gidString).intValue();
+
+    if (gidString != null && !gidString.equals(""))
+      {
+	gid = new Integer(gidString).intValue();
+      }
+    else
+      {
+	System.err.println("Error, group " + name + " has no gid.. skipping line.");
+
+	skipToEndLine();
+	valid = false;
+	return atEOF();
+      }
 
     if (debug)
       {
@@ -135,25 +171,34 @@ public class User {
 	System.out.println("fullname = '" + fullname + "'");
       }
 
-    room = getNextBit(tokens, false);
-
-    if (debug)
+    if (checkNextToken(tokens) == ',')
       {
-	System.out.println("room = '" + room + "'");
+	room = getNextBit(tokens, false);
+	
+	if (debug)
+	  {
+	    System.out.println("room = '" + room + "'");
+	  }
       }
 
-    officePhone = getNextBit(tokens, false);
-
-    if (debug)
+    if (checkNextToken(tokens) == ',')
       {
-	System.out.println("officePhone = '" + officePhone + "'");
+	officePhone = getNextBit(tokens, false);
+	
+	if (debug)
+	  {
+	    System.out.println("officePhone = '" + officePhone + "'");
+	  }
       }
-    
-    homePhone = getNextBit(tokens, false);
 
-    if (debug)
+    if (checkNextToken(tokens) == ',')
       {
-	System.out.println("homePhone = '" + homePhone + "'");
+	homePhone = getNextBit(tokens, false);
+	
+	if (debug)
+	  {
+	    System.out.println("homePhone = '" + homePhone + "'");
+	  }
       }
 
     directory = getNextBit(tokens);
@@ -170,27 +215,61 @@ public class User {
 	System.out.println("shell = '" + shell + "'");
       }
 
-    // get to the end of line
+    skipToEndLine();
+    valid = true;
 
-    // System.err.println("HEY! Token = " + token + ", ttype = " + tokens.ttype);
-
-    while ((tokens.ttype != StreamTokenizer.TT_EOL) && (tokens.ttype != StreamTokenizer.TT_EOF))
-      {
-	// System.err.print(".");
-	token = tokens.nextToken();
-      }
-
-    return (tokens.ttype == StreamTokenizer.TT_EOF);
+    return atEOF();
   }
+
+  /**
+   *
+   * Debug routine.
+   *
+   */
 
   public void display()
   {
     System.out.println("User: " + name + ", pass: " + password + ", uid: " + uid + ", gid: " + gid);
-    System.out.println("\tfullname: " + fullname + ", room: " + room + ", division: " + division +
+    System.out.println("\tfullname: " + fullname + ", room: " + room + 
 		       ", officePhone: " + officePhone + ", homePhone: " + homePhone);
     System.out.println("Directory: " + directory + ", shell: " + shell);
   }
 
+  /**
+   *
+   * Returns true if we're at EOL
+   *
+   */
+
+  private boolean atEOL()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOL;
+  }
+
+  /**
+   *
+   * Returns true if we're at EOF
+   *
+   */
+
+  private boolean atEOF()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOF;
+  }
+
+  /**
+   *
+   * This method runs tokens to the end of the line.
+   *
+   */
+
+  private void skipToEndLine() throws IOException
+  {
+    while (!atEOL() && !atEOF())
+      {
+	tokens.nextToken();
+      }
+  }
   
   /**
    *
@@ -221,6 +300,11 @@ public class User {
     String result;
 
     token = tokens.nextToken();
+
+    if (atEOF() || atEOL())
+      {
+	return "";
+      }
 
     // eat any leading :'s or ,'s
 
@@ -273,7 +357,7 @@ public class User {
     return null;
   }
 
-  private int checkNextToken(StreamTokenizer tokens)
+  private int checkNextToken(StreamTokenizer tokens) throws IOException
   {
     tokens.nextToken();
     int result = tokens.ttype;
