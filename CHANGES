@@ -89,6 +89,11 @@ characters.
 This is not a reasonable or tenable situation, so the passive
 plaintext password capture logic has been disabled.
 
+5. [SERVER] Better error message on link permission failure
+
+The Ganymede server will now explicitly report a permissions problem
+when an attempt is made to link to an uneditable object.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
