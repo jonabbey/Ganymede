@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/04/23 05:06:57 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/05/07 06:18:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1711,7 +1711,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 					   workphone + "," + homephone);
 
 	    sambaFile.println(username + ":" + uid.intValue() + ":" + 
-			      hash1 + ":" + hash2 +
+			      hash1 + ":" + hash2 + ":" +
 			      composite + ":" + homedir + ":" + shell);
 	  }
       }
