@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2000/06/30 04:35:22 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2000/08/18 05:13:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -518,7 +518,6 @@ public class Ganymede {
 	
 	//	db.importXML(dbFilename + ".xml", false);
       }
-
 
     // set up the log
 

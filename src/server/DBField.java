@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2000/08/09 02:22:15 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2000/08/18 05:13:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.lang.reflect.*;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.VectorUtils;
@@ -155,6 +156,18 @@ import arlut.csd.Util.*;
 public abstract class DBField implements Remote, db_field {
 
   /**
+   *  Dynamically loaded RMI proxy class definition for this class.
+   */
+
+  static Class proxyClass = null;
+
+  /**
+   *  Dynamically loaded constructor for instances of the RMI proxy
+   */
+
+  static java.lang.reflect.Constructor proxyConstructor = null;
+
+  /**
    * the object's current value.  May be a Vector for vector fields, in
    * which case getVectVal() may be used to perform the cast.
    */
@@ -199,6 +212,104 @@ public abstract class DBField implements Remote, db_field {
     permCache = null;
   }
 
+  /**
+   * <p>This method creates an RMI proxy object that channels db_field
+   * calls to a GanymedeSession object over RMI rather than over a
+   * direct RMI field reference.  This is valuable because it can
+   * dramatically decrease the number of references that have to be
+   * managed through distributed garbage collection, increasing the
+   * scalability of the server at the cost of a constant time increase
+   * in initial communications for downloading the proxy.</p>
+   */
+
+  public db_field getProxy()
+  {
+    Object proxy = null;
+
+    /* -- */
+
+    synchronized (getClass())
+      {
+	if (proxyClass == null)
+	  {
+	    // load
+
+	    try
+	      {
+		proxyClass = Class.forName("arlut.csd.ganymede.db_fieldRemote");
+	      }
+	    catch (ClassNotFoundException ex)
+	      {
+		System.err.println("DBField.getProxy(): couldn't find arlut.csd.ganymede.db_fieldRemote");
+		ex.printStackTrace();
+
+		return null;
+	      }
+	  }
+
+	if (proxyConstructor != null)
+	  {
+	    Class constructParams[] = new Class[3];
+
+	    try
+	      {
+		constructParams[0] = Class.forName("arlut.csd.ganymede.Invid");
+		constructParams[1] = short.class;
+		constructParams[2] = Class.forName("arlut.csd.ganymede.Session");
+	      }
+	    catch (ClassNotFoundException ex)
+	      {
+		System.err.println("DBField.getProxy(): couldn't find proxy constructor: " + ex.getMessage());
+		ex.printStackTrace();
+
+		return null;
+	      }
+	    
+	    try
+	      {
+		proxyConstructor = proxyClass.getConstructor(constructParams);
+	      }
+	    catch (NoSuchMethodException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	    catch (SecurityException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	  }
+
+	Object params[] = new Object[2];
+
+	params[0] = getOwner().getInvid();
+	params[1] = new Short(getID());
+	params[2] = getOwner().getGSession();
+	
+	try
+	  {
+	    proxy = proxyConstructor.newInstance(params);
+	  }
+	catch (InstantiationException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+	catch (InvocationTargetException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+	
+	return (db_field) proxy;
+      }
+  }
+ 
   /**
    * <p>This method is designed to handle casting this field's value into
    * a vector as needed.  We don't bother to check whether value is a Vector
