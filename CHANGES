@@ -123,7 +123,7 @@ Admins other than supergash and monitor will need to log into the
 server via the admin console using their full persona name.. i.e.,
 'broccol:GASH Admin'.
 
-9. [DOCUMENTATION] Revised, improved the install guide
+9. [DOCUMENTATION] Revised, improved the install guide, added FAQ
 
 Significantly revised and enhanced the install guide, corrected some
 mistakes, included information on the use of installWeb.
@@ -131,6 +131,9 @@ mistakes, included information on the use of installWeb.
 The text INSTALL file is now a lynx-generated version of the HTML
 file.. it was too much work and too error-prone trying to maintain
 both independently.
+
+Added a text FAQ file.  Will convert this into a nice web version at
+some point.
 
 -------------------- Changes from 0.99.2 to 0.99.3 -------------------
 

@@ -167,7 +167,19 @@ inherited from GASH, we're developing an XML-based DNS system that
 will allow us to do both bulk and incremental DNS updates and, if we
 play our cards right, even flexible BIND file importing.  It's coming.
 
-8) Where's the documentation?
+8) What's this rpcpass thing in the client bin directory?
+
+   It's a proxy utility to allow integrating the NIS rpc.yppasswd
+daemon with Ganymede, so users can change their Ganymede (Samba, NT,
+whatever else you're supporting with Ganymede) password through the
+UNIX NIS passwd command.  This works with version 1.3.6.92 or
+later of the Linux NISkit's rpc.yppasswdd daemon using the --x
+or --execute option.
+
+   See the rpcpass entry in doc/glossary.html file for details,
+and the entry for 0.99.1 in the CHANGES file.
+
+9) Where's the documentation?
 
    What documentation do you want?  I know more and better docs are
 needed, but feedback is pretty scarce.  Are the current docs adequate
@@ -181,7 +193,7 @@ on Ganymede.  It provides a very good conceptual and technical
 overview.  It's not so good as an operational manual, but we're
 struggling to get more operational documentation written.
 
-9) How can I help?
+10) How can I help?
 
    Send in bug reports and success reports, to
 jonabbey@arlut.utexas.edu or, preferably, ganymede@arlut.utexas.edu to
@@ -191,7 +203,7 @@ something to say about it as well.
 
    For the feedback is the life.
 
-10) Where's the Ganymede web site?
+11) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
