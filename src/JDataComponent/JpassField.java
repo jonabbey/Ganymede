@@ -37,8 +37,6 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
   protected JsetValueCallback my_parent = null;
 
-  protected JcomponentAttr valueAttr = null;
-
   Frame
     frame;
 
@@ -76,7 +74,6 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 		    boolean is_editable)
   {
     this(frame, showChangeFields, columns, maxstrlen,
-	 new JcomponentAttr(null, new Font("SansSerif", Font.PLAIN, 12), Color.black, Color.white), 
 	 is_editable,
 	 null,
 	 null);
@@ -97,13 +94,11 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 		    boolean showChangeFields, 
 		    int columns, 
 		    int maxstrlen, 
-		    JcomponentAttr valueAttr,
 		    boolean is_editable,
 		    String allowed, 
 		    String disallowed) 
   {
     this.frame = frame;
-    this.valueAttr = valueAttr;
     this.showChangeFields = showChangeFields;
 
     if (showChangeFields)
@@ -350,15 +345,6 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
   }
 
   /**
-   *  returns a JcomponentAttr object for the JpassField
-   */
-
-  public JcomponentAttr getValueAttr()
-  {
-    return this.valueAttr;
-  }
-  
-  /**
    *  sets the parent of this component for callback purposes
    *
    */
@@ -375,155 +361,4 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
     allowCallback = true;
   }
   
-  /**
-   * sets the background color for the JpassField
-   * and forces a repaint
-   *
-   * @param color the color which will be used
-   */
-
-  public void setBackground(Color color)
-  {
-    setValueBackColor(color,true);
-  }
-
-  
-  /**
-   * sets the background color for the JpassField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueBackColor(Color color,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setBackground(color);
-    
-    setValueAttr(valueAttr,repaint);
-  }
-  
-  
-  /**
-   * sets the attributes for the JpassField
-   *
-   * @param attrib the attributes which will be used
-   * @param repaint true if the label component needs to be repainted
-   */
-
-  public void setValueAttr(JcomponentAttr attributes,boolean repaint)
-  {
-    this.valueAttr = attributes;
-
-    if (showChangeFields)
-      {
-	field1.setFont(attributes.font);
-	field1.setForeground(attributes.fg);
-	field1.setBackground(attributes.bg);
-    
-	field2.setFont(attributes.font);
-	field2.setForeground(attributes.fg);
-	field2.setBackground(attributes.bg);
-
-	if (repaint)
-	  {
-	    field1.repaint();
-	    field2.repaint();
-	  }
-      }
-    else
-      {
-	changePass.setFont(attributes.font);
-	changePass.setForeground(attributes.fg);
-	changePass.setBackground(attributes.bg);
-
-	if (repaint)
-	  {
-	    changePass.repaint();
-	  }
-      }
-  }
-
-  /**
-   *  sets the font for the JpassField and
-   *  forces a repaint
-   *
-   * @param f the font which will be used
-   */
-
-  public void setFont(Font f)
-  {
-    setValueFont(f,true);
-  }
-  
-  /**
-   *  sets the font for the JpassField
-   *
-   * @param f the font which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueFont(Font f,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setFont(f);
-
-    setValueAttr(valueAttr,repaint);
-  }
-
-  /**
-   * sets the foreground color for the JpassField
-   * and forces a repaint.
-   *
-   * @param color the color which will be used
-   */
-
-  public void setForeground(Color color)
-  {
-    setValueForeColor(color,true);    
-  }
-
-  /**
-   * sets the foreground color for the JpassField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueForeColor(Color color,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setForeground(color);
-
-    setValueAttr(valueAttr,repaint);
-  } 
-
-//   /**
-//    *  processes any focus events generated in this component
-//    *
-//    * @param e the FocusEvent that needs to be processed
-//    */
-
-//   public void processFocusEvent(FocusEvent e)
-//   {
-//     super.processFocusEvent(e);
-//   }
 }
-
-
-
-
-
-
