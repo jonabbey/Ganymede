@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.3 $
-# $Date: 1999/01/15 23:25:26 $
+# $Revision: 1.4 $
+# $Date: 1999/01/15 23:55:44 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -88,7 +88,7 @@ $mydir = &resolve(cwd(), dirname($PROGRAM_NAME));
 
 &get_vars("$mydir/$config_file");
 
-print "Hey, $compname is rebuilding in $mydir!\n";
+print "Rebuilding $compname\n";
 
 $ENV{'CLASSPATH'}="$classdir:".$ENV{"CLASSPATH"};
 
