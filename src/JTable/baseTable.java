@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.13 $ %D%
+  Version: $Revision: 1.14 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.13 $ %D%
+ * @version $Revision: 1.14 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -113,9 +113,11 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     hVertFill = false;		// if horizLines && hVertFill, draw horiz lines to bottom
 				// of component, otherwise don't draw horiz lines below
 				// last non-empty row
-  int[]
+
+  Vector
     colPos;			// x position of vertical lines.. colPos[0] is 0,
-				// colPos[cols.length] is x pos of right most edge
+				// colPos[cols.size()] is x pos of right most edge
+
   tableAttr
     headerAttrib,
     tableAttrib;
@@ -129,7 +131,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   Vector 
     rows;			// vector of tableRows, which actually hold the table content
 
-  tableCol[]
+  Vector
     cols;			// header information, column attributes
 
   PopupMenu 
@@ -244,14 +246,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	System.err.println("** calculating columns");
       }
 
-    cols = new tableCol[colWidths.length];
-    colPos = new int[colWidths.length+1];
+    cols = new Vector(colWidths.length);
+    colPos = new Vector(colWidths.length+1);
     origTotalWidth = 0;
 
     for (int i = 0; i < colWidths.length; i++)
       {
-	cols[i] = new tableCol(this, headers[i], colWidths[i],
-				colAttribs != null?colAttribs[i]:null);
+	cols.addElement(new tableCol(this, headers[i], colWidths[i],
+				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
       }
 
@@ -372,18 +374,18 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
     if (row == null)
       {
-	row = new tableRow(cols.length);
+	row = new tableRow(cols.size());
 	rows.setElementAt(row, y);
       }
 
     // this often will
     
-    if (row.cells[x] == null)
+    if (row.elementAt(x) == null)
       {
-	row.cells[x] = new tableCell();
+	row.setElementAt(new tableCell(), x);
       }
 
-    return row.cells[x];
+    return row.elementAt(x);
   }
 
   /**
@@ -586,7 +588,12 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void setColAttr(int x, tableAttr attr, boolean repaint)
   {
-    cols[x].attr = attr;
+    tableCol element;
+
+    /* -- */
+
+    element = (tableCol) cols.elementAt(x);
+    element.attr = attr;
 
     calcFonts();
 
@@ -610,12 +617,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void setColFont(int x, Font font, boolean repaint)
   {
-    if (cols[x].attr == null)
+    tableCol element = (tableCol) cols.elementAt(x);
+
+    if (element.attr == null)
       {
-	cols[x].attr = new tableAttr(this);
+	element.attr = new tableAttr(this);
       }
 
-    cols[x].attr.setFont(font);
+    element.attr.setFont(font);
 
     calcFonts();
 
@@ -639,9 +648,11 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void setColJust(int x, int just, boolean repaint)
   {
-    if (cols[x].attr == null)
+    tableCol element = (tableCol) cols.elementAt(x);
+
+    if (element.attr == null)
       {
-	cols[x].attr = new tableAttr(this);
+	element.attr = new tableAttr(this);
       }
     
     if (just < tableAttr.JUST_LEFT || just > tableAttr.JUST_INHERIT)
@@ -649,7 +660,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	throw new IllegalArgumentException();
       }
 
-    cols[x].attr.align = just;
+    element.attr.align = just;
 
     if (repaint)
       {
@@ -671,12 +682,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void setColColor(int x, Color color, boolean repaint)
   {
-    if (cols[x].attr == null)
+    tableCol element = (tableCol) cols.elementAt(x);
+
+    if (element.attr == null)
       {
-	cols[x].attr = new tableAttr(this);
+	element.attr = new tableAttr(this);
       }
 
-    cols[x].attr.fg = color;
+    element.attr.fg = color;
 
     if (repaint)
       {
@@ -698,12 +711,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void setColBackColor(int x, Color color, boolean repaint)
   {
-    if (cols[x].attr == null)
+    tableCol element = (tableCol) cols.elementAt(x);
+
+    if (element.attr == null)
       {
-	cols[x].attr = new tableAttr(this);
+	element.attr = new tableAttr(this);
       }
 
-    cols[x].attr.bg = color;
+    element.attr.bg = color;
 
     if (repaint)
       {
@@ -967,7 +982,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void selectRow(int y)
   {
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	selectCell(i, y);
       }
@@ -980,7 +995,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final void unSelectRow(int y)
   {
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	unSelectCell(i, y);
       }
@@ -1018,7 +1033,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public void unSelectAll()
   {
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	unSelectCol(i);
       }
@@ -1055,7 +1070,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public final boolean testRowSelected(int y)
   {
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	if (!getCell(i,y).selected)
 	  {
@@ -1120,7 +1135,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
   public void addRow(boolean repaint)
   {
-    rows.addElement(new tableRow(cols.length));
+    rows.addElement(new tableRow(cols.size()));
     if (repaint)
       {
 	reShape();
@@ -1172,7 +1187,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
     /* -- */
 
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	for (int j = 0; j < rows.size(); j++)
 	  {
@@ -1208,14 +1223,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   {
     clearCells();
 
-    cols = new tableCol[colWidths.length];
-    colPos = new int[colWidths.length+1];
+    cols = new Vector(colWidths.length); 
+    colPos = new Vector(colWidths.length + 1);
     origTotalWidth = 0;
 
     for (int i = 0; i < colWidths.length; i++)
       {
-	cols[i] = new tableCol(this, headers[i], colWidths[i],
-				colAttribs != null?colAttribs[i]:null);
+	cols.addElement(new tableCol(this, headers[i], colWidths[i],
+				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
       }
 
@@ -1337,9 +1352,9 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     
     hSize = vLineThickness;
 
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
-	hSize += cols[i].origWidth + vLineThickness;
+	hSize += ((tableCol) cols.elementAt(i)).origWidth + vLineThickness;
       }
 
     // calculate how tall or table is, not counting any scroll bars.
@@ -1495,7 +1510,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	hbar.setValues(hbar.getValue(),
 		       canvas.getBounds().width,
 		       0,
-		       origTotalWidth  + (cols.length + 1) * vLineThickness);
+		       origTotalWidth  + (cols.size() + 1) * vLineThickness);
 
 	hbar.setBlockIncrement(canvas.getBounds().width / 2);    
       }
@@ -1517,6 +1532,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   {
     int 
       pos;
+
+    tableCol element;
 
     /* -- */
 
@@ -1545,22 +1562,28 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	
 	pos = 0;
 
-	for (int i = 0; i < cols.length; i++)
+	for (int i = 0; i < cols.size(); i++)
 	  {
-	    cols[i].width = (int) cols[i].origWidth;
-	    colPos[i] = pos;
-	    pos += cols[i].width + vLineThickness;
+	    element = (tableCol) cols.elementAt(i);
+	    element.width = (int) element.origWidth;
+
+	    colPos.setElementAt(new Integer(pos), i);
+	    pos += element.width + vLineThickness;
 	  }
 
 	// set the last pole directly to avoid scaling artifacts
 
-	colPos[cols.length] = origTotalWidth + (cols.length + 1) * vLineThickness;
+	colPos.setElementAt(new Integer(origTotalWidth + (cols.size() + 1) * vLineThickness),
+			    cols.size());
 
 	// and set the last column's width directly to avoid the same
 
-	if (cols.length > 0)
+	if (cols.size() > 0)
 	  {
-	    cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length-1];
+	    element = (tableCol) cols.elementAt(cols.size() - 1);
+	    
+	    element.width = ((Integer)colPos.elementAt(cols.size())).intValue() -
+	      ((Integer)colPos.elementAt(cols.size()-1)).intValue();
 	  }
       }
     else
@@ -1588,7 +1611,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	    
 	    make scalefact an object global float? */
 	
-	scalefact = (canvas.getBounds().width - (cols.length + 1) * vLineThickness) / 
+	scalefact = (canvas.getBounds().width - (cols.size() + 1) * vLineThickness) / 
 	  (float) origTotalWidth;
 
 	if (debug)
@@ -1600,22 +1623,26 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
 	pos = 0;
 
-	for (int i = 0; i < cols.length; i++)
+	for (int i = 0; i < cols.size(); i++)
 	  {
-	    colPos[i] = pos;
-	    cols[i].width = (int) (cols[i].origWidth * scalefact);
-	    pos += cols[i].width + vLineThickness;
+	    element = (tableCol) cols.elementAt(i);
+	    
+	    colPos.setElementAt(new Integer(pos), i);
+	    element.width = (int) (element.origWidth * scalefact);
+	    pos += element.width + vLineThickness;
 	  }
 
 	// we know where the last colPos should be if we are not doing
 	// a scrollbar.  set it directly to avoid integer/float
 	// precision problems.
 
-	colPos[cols.length] = canvas.getBounds().width - 1;
+	colPos.setElementAt(new Integer(canvas.getBounds().width - 1), cols.size());
 
-	if (cols.length > 0)
+	if (cols.size() > 0)
 	  {
-	    cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length - 1] - vLineThickness;
+	    element = (tableCol) cols.elementAt(cols.size()-1);
+	    element.width = ((Integer)colPos.elementAt(cols.size())).intValue() -
+	      ((Integer)colPos.elementAt(cols.size()-1)).intValue() - vLineThickness;
 	  }
       }
 
@@ -1633,6 +1660,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   void calcFonts()
   {
     tableCell cell;
+    tableCol element = null;
 
     int 
       old_rheight = row_height,
@@ -1650,14 +1678,16 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     row_height = 0;
     row_baseline = 0;
 
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	try
 	  {
-	    if (cols[i].attr.height > row_height)
+	    element = (tableCol) cols.elementAt(i);
+
+	    if (element.attr.height > row_height)
 	      {
-		row_height = cols[i].attr.height;
-		row_baseline = cols[i].attr.baseline;
+		row_height = element.attr.height;
+		row_baseline = element.attr.baseline;
 	      }
 	  }
 	catch (RuntimeException ex)
@@ -1666,7 +1696,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	  }
       }
 
-    for (int i = 0; i < cols.length; i++)
+    for (int i = 0; i < cols.size(); i++)
       {
 	for (int j = 0; j < rows.size(); j++)
 	  {
@@ -1884,7 +1914,16 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	  }
 
 	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
-	backing = createImage(getBounds().width, getBounds().height);
+
+	int width = getBounds().width;
+	int height = getBounds().height;
+
+	if (debug)
+	  {
+	    System.err.println("Trying to create image of size " + width + " x " + height);
+	  }
+
+	backing = createImage(width, height);
 	bg = backing.getGraphics();
       }
     else if ((backing_rect.width != getBounds().width) ||
@@ -1919,11 +1958,6 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	System.err.println("\tFilling Rect");
       }
 
-    // isn't this extraneous?
-
-    //    bg.setColor(Color.lightGray);
-    //    bg.fillRect(0, 0, backing_rect.width, backing_rect.height);
-
     /* Calculate horizontal offset, rendering parameters */
 
     if (rt.hbar_visible)
@@ -1936,17 +1970,17 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	    System.err.println("maximum = " + rt.hbar.getMaximum());
 	    System.err.println("calculated right edge = " + (h_offset + getBounds().width));
 	    System.err.println("canvas width = " + getBounds().width);
-	    System.err.println("position of right pole = " + rt.colPos[rt.cols.length]);
+	    System.err.println("position of right pole = " + rt.colPos.elementAt(rt.cols.size()));
 	  }
 
 	/* calculate first col visible */
 
 	first_col = 0;	
-	xpos =  rt.vLineThickness + rt.cols[first_col].width;
+	xpos =  rt.vLineThickness + ((tableCol) rt.cols.elementAt(first_col)).width;
 
 	while (xpos < h_offset)
 	  {
-	    xpos += rt.vLineThickness + rt.cols[++first_col].width;
+	    xpos += rt.vLineThickness + ((tableCol) rt.cols.elementAt(++first_col)).width;
 	  }
 
 	/* calculate last col visible */
@@ -1954,16 +1988,16 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	last_col = first_col;
 	leftedge = getBounds().width + h_offset;
 	
-	while ((xpos < leftedge) && (last_col < rt.cols.length - 1))
+	while ((xpos < leftedge) && (last_col < rt.cols.size() - 1))
 	  {
-	    xpos += rt.vLineThickness + rt.cols[++last_col].width;
+	    xpos += rt.vLineThickness + ((tableCol) rt.cols.elementAt(++last_col)).width;
 	  }
       }
     else
       {
 	h_offset = 0;
 	first_col = 0;
-	last_col = rt.cols.length -1;
+	last_col = rt.cols.size() -1;
       }
 
     /* Calculate vertical offset, rendering parameters */
@@ -2041,11 +2075,15 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 
     for (int j = first_col; j <= last_col; j++)
       {
+	tableCol element = (tableCol) rt.cols.elementAt(j);
+
+	/* -- */
+
 	/* prep our cellImage for doing clipping */
 
 	if ((cellImage == null) || (g == null))
 	  {
-	    cellRect = new Rectangle(0, 0, rt.cols[j].width, rt.row_height);
+	    cellRect = new Rectangle(0, 0, ((tableCol)rt.cols.elementAt(j)).width, rt.row_height);
 	    cellImage = createImage(cellRect.width, cellRect.height);
 	    g = cellImage.getGraphics();
 	  }
@@ -2056,10 +2094,10 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	       create a new image and Graphics object for rendering
 	       this column */
 
-	    if ((cellRect != null) && (cellRect.width != rt.cols[j].width))
+	    if ((cellRect != null) && (cellRect.width != element.width))
 	      {
 		cellImage.flush();
-		cellRect = new Rectangle(0, 0, rt.cols[j].width, rt.row_height);
+		cellRect = new Rectangle(0, 0, element.width, rt.row_height);
 		cellImage = createImage(cellRect.width, cellRect.height);
 		g = cellImage.getGraphics();
 	      }
@@ -2103,17 +2141,17 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 			g.setColor(cell.attr.bg);
 		      }
 		  }
-		else if ((rt.cols[j].attr != null) &&
-			 (rt.cols[j].attr.bg != null) &&
-			 (rt.cols[j].attr.fg != null))
+		else if ((element.attr != null) &&
+			 (element.attr.bg != null) &&
+			 (element.attr.fg != null))
 		  {
 		    if (cell.selected)
 		      {
-			g.setColor(rt.cols[j].attr.fg);
+			g.setColor(element.attr.fg);
 		      }
 		    else
 		      {
-			g.setColor(rt.cols[j].attr.bg);
+			g.setColor(element.attr.bg);
 		      }
 		  }
 		else
@@ -2130,11 +2168,11 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	      }
 	    else
 	      {
-		if ((rt.cols[j].attr != null) &&
-		    (rt.cols[j].attr.bg != null) &&
-		    (rt.cols[j].attr.fg != null))
+		if ((element.attr != null) &&
+		    (element.attr.bg != null) &&
+		    (element.attr.fg != null))
 		  {
-		    g.setColor(rt.cols[j].attr.bg);
+		    g.setColor(element.attr.bg);
 		  }
 		else
 		  {
@@ -2157,11 +2195,11 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 			g.setFont(cell.attr.font);
 			strwidth = cell.attr.fontMetric.stringWidth(cell.text);
 		      }
-		    else if ((rt.cols[j].attr != null) &&
-			     (rt.cols[j].attr.font != null))
+		    else if ((element.attr != null) &&
+			     (element.attr.font != null))
 		      {
-			g.setFont(rt.cols[j].attr.font);
-			strwidth = rt.cols[j].attr.fontMetric.stringWidth(cell.text);
+			g.setFont(element.attr.font);
+			strwidth = element.attr.fontMetric.stringWidth(cell.text);
 		      }
 		    else
 		      {
@@ -2182,17 +2220,17 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 			    g.setColor(cell.attr.fg);
 			  }
 		      }
-		    else if ((rt.cols[j].attr != null) &&
-			     (rt.cols[j].attr.fg != null) &&
-			     (rt.cols[j].attr.bg != null))
+		    else if ((element.attr != null) &&
+			     (element.attr.fg != null) &&
+			     (element.attr.bg != null))
 		      {
 			if (cell.selected)
 			  {
-			    g.setColor(rt.cols[j].attr.bg);
+			    g.setColor(element.attr.bg);
 			  }
 			else
 			  {
-			    g.setColor(rt.cols[j].attr.fg);
+			    g.setColor(element.attr.fg);
 			  }
 		      }
 		    else
@@ -2213,10 +2251,10 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 		      {
 			just = cell.attr.align;
 		      }
-		    else if ((rt.cols[j].attr != null) &&
-			     (rt.cols[j].attr.align != tableAttr.JUST_INHERIT))
+		    else if ((element.attr != null) &&
+			     (element.attr.align != tableAttr.JUST_INHERIT))
 		      {
-			just = rt.cols[j].attr.align;
+			just = element.attr.align;
 		      }
 		    else
 		      {
@@ -2245,7 +2283,8 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	    // okay, we're done drawing into our cell.  Now we need to
 	    // blit the cell into the main backing image.
 
-	    bg.drawImage(cellImage, rt.colPos[j] - h_offset + rt.vLineThickness, 
+	    bg.drawImage(cellImage, ((Integer) rt.colPos.elementAt(j)).intValue() -
+			 h_offset + rt.vLineThickness, 
 			 rt.headerAttrib.height + (2 * rt.hHeadLineThickness) + 
 			 ((rt.row_height + rt.hRowLineThickness) * i) - v_offset, 
 			 this);
@@ -2263,10 +2302,14 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 
     for (int j = first_col; j <= last_col; j++)
       {
+	tableCol element = (tableCol) rt.cols.elementAt(j);
+
+	/* -- */
+
 	if (cellImage == null)
 	  {
-	    cellRect = new Rectangle(0, 0, rt.cols[j].width, rt.headerAttrib.height);
-	    cellImage = createImage(rt.cols[j].width, rt.headerAttrib.height);
+	    cellRect = new Rectangle(0, 0, element.width, rt.headerAttrib.height);
+	    cellImage = createImage(element.width, rt.headerAttrib.height);
 	    g = cellImage.getGraphics();
 	  }
 	else
@@ -2276,16 +2319,16 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	    // create a new image and Graphics object for rendering
 	    // this column
 
-	    if (cellRect.width != rt.cols[j].width)
+	    if (cellRect.width != element.width)
 	      {
 		cellImage.flush();
-		cellRect = new Rectangle(0, 0, rt.cols[j].width, rt.headerAttrib.height);
-		cellImage = createImage(rt.cols[j].width, rt.headerAttrib.height);
+		cellRect = new Rectangle(0, 0, element.width, rt.headerAttrib.height);
+		cellImage = createImage(element.width, rt.headerAttrib.height);
 		g = cellImage.getGraphics();
 	      }
 	  }
 
-	cellText = rt.cols[j].header;
+	cellText = element.header;
 
 	g.setFont(rt.headerAttrib.font);
 	g.setColor(rt.headerAttrib.bg);
@@ -2303,7 +2346,8 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	// blit the cell into the main backing image.
 	
 	bg.drawImage(cellImage,
-		     rt.colPos[j] + rt.vLineThickness - h_offset,
+		     ((Integer) rt.colPos.elementAt(j)).intValue() +
+		     rt.vLineThickness - h_offset,
 		     rt.hHeadLineThickness, this);
       }
 
@@ -2383,7 +2427,7 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
       {
 	for (int j = first_col; j <= last_col + 1; j++)
 	  {
-	    xpos = rt.colPos[j] - h_offset;
+	    xpos = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset;
 	    
 	    bg.setColor(rt.vHeadLineColor);
 	    bg.drawLine(xpos, 0, xpos, rt.headerAttrib.height + 2 * rt.hHeadLineThickness - 1);
@@ -2462,12 +2506,14 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
       {
 	// mouse down near column line?
 
-	for (col = 1; col < rt.cols.length; col++)
+	for (col = 1; col < rt.cols.size(); col++)
 	  {
+	    int colLoc = ((Integer) rt.colPos.elementAt(col)).intValue();
+
 	    // nice wide grab range
 	
-	    if ((vx > rt.colPos[col] - colgrab) &&
-		(vx < rt.colPos[col] + colgrab))
+	    if ((vx > colLoc - colgrab) &&
+		(vx < colLoc + colgrab))
 	      {
 		if (debug)
 		  {
@@ -2479,8 +2525,8 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 
 		colDrag = col;
 	      }
-	    else if ((vx >= (rt.colPos[col] + colgrab)) &&
-		     (vx <= (rt.colPos[col+1] - colgrab)))
+	    else if ((vx >= (colLoc + colgrab)) &&
+		     (vx <= (((Integer) rt.colPos.elementAt(col+1)).intValue() - colgrab)))
 	      {
 		clickCol = col;
 	      }
@@ -2492,12 +2538,11 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 
 	if (clickCol == -1)
 	  {
-	    if ((vx >= rt.colPos[0]) &&
-		(vx <= (rt.colPos[1] - colgrab)))
+	    if ((vx >= ((Integer) rt.colPos.elementAt(0)).intValue()) &&
+		(vx <= (((Integer) rt.colPos.elementAt(1)).intValue() - colgrab)))
 	      {
 		clickCol = 0;
 	      }
-	
 	  }
       }
 
@@ -2582,21 +2627,24 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	    System.err.println("placing column " + colDrag);
 	    
 	    System.err.println("x = " + x);
-	    System.err.println("colPos["+(colDrag-1)+"] = " + rt.colPos[colDrag-1]);
-	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos[colDrag]);
+	    System.err.println("colPos["+(colDrag-1)+"] = " + rt.colPos.elementAt(colDrag-1));
+	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos.elementAt(colDrag));
 	  }
 
 	// if we have gone past the edge of our valid column adjust region,
 	// restrict it to a valid range
 
-	if (x <= rt.colPos[colDrag-1] + mincolwidth)
+	int prior = ((Integer) rt.colPos.elementAt(colDrag-1)).intValue();
+	int next = ((Integer) rt.colPos.elementAt(colDrag+1)).intValue();
+
+	if (x <= prior + mincolwidth)
 	  {
-	    x = rt.colPos[colDrag-1] + mincolwidth + 1;
+	    x = prior + mincolwidth + 1;
 	  }
 
-	if (x >= rt.colPos[colDrag+1] - mincolwidth)
+	if (x >= next - mincolwidth)
 	  {
-	    x = rt.colPos[colDrag+1] - mincolwidth - 1;
+	    x = next - mincolwidth - 1;
 	  }
 
 	if (debug)
@@ -2604,50 +2652,62 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	    System.err.println("Adjusting column " + colDrag);
 	  }
 
-	rt.colPos[colDrag] = x;
+	rt.colPos.setElementAt(new Integer(x), colDrag);
 
 	if (rt.hbar_visible)
 	  {
 	    // we are not scaled
 
+	    tableCol priorCol, thisCol, nextCol;
+
+	    priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
+	    thisCol = (tableCol) rt.cols.elementAt(colDrag);
+	    nextCol = (tableCol) rt.cols.elementAt(colDrag+1);
+
 	    if (debug)
 	      {
 		System.err.println("Adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
-				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				   rt.cols[colDrag].origWidth);
+				   priorCol.origWidth + ", cols["+colDrag+"].origWidth = " +
+				   thisCol.origWidth);
 	      }
 
-	    rt.cols[colDrag - 1].origWidth = x - rt.colPos[colDrag - 1] - rt.vLineThickness;
-	    rt.cols[colDrag].origWidth = rt.colPos[colDrag + 1] - x - rt.vLineThickness;
+	    priorCol.origWidth = x - prior - rt.vLineThickness;
+	    thisCol.origWidth = next - x - rt.vLineThickness;
 
 	    if (debug)
 	      {
 		System.err.println("Adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
-				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				   rt.cols[colDrag].origWidth);
+				   priorCol.origWidth + ", cols["+colDrag+"].origWidth = " +
+				   thisCol.origWidth);
 	      }
 	  }
 	else
 	  {
 	    // we are probably scaled
 
+	    tableCol priorCol, thisCol, nextCol;
+
+	    priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
+	    thisCol = (tableCol) rt.cols.elementAt(colDrag);
+	    nextCol = (tableCol) rt.cols.elementAt(colDrag+1);
+
 	    if (debug)
 	      {
 		System.err.println("Scaling and adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
-				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				   rt.cols[colDrag].origWidth);
+				   priorCol.origWidth + ", cols["+colDrag+"].origWidth = " +
+				   thisCol.origWidth);
 		System.err.println("scalefact = " + rt.scalefact);
 	      }
 
-	    x1 = rt.cols[colDrag-1].origWidth;
-	    rt.cols[colDrag-1].origWidth = ((x - rt.colPos[colDrag - 1] - rt.vLineThickness) / rt.scalefact);
-	    rt.cols[colDrag].origWidth += x1 - rt.cols[colDrag - 1].origWidth;
+	    x1 = priorCol.origWidth;
+	    priorCol.origWidth = ((x - prior - rt.vLineThickness) / rt.scalefact);
+	    thisCol.origWidth += x1 - priorCol.origWidth;
 
 	    if (debug)
 	      {
 		System.err.println("Scaling and adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
-				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				   rt.cols[colDrag].origWidth);		
+				   priorCol.origWidth + ", cols["+colDrag+"].origWidth = " +
+				   thisCol.origWidth);		
 	      }
 	  }
 	rt.calcCols();	// update colPos[] based on origColWidths[]
@@ -2723,11 +2783,11 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 
     clickCol = -1;
 
-    for (int i = 0; i < rt.cols.length; i++)
+    for (int i = 0; i < rt.cols.size(); i++)
       {
 	// nice wide grab range
-	if ((vx >= (rt.colPos[i])) &&
-	    (vx <= (rt.colPos[i+1])))
+	if ((vx >= (((Integer) rt.colPos.elementAt(i)).intValue())) &&
+	    (vx <= (((Integer) rt.colPos.elementAt(i+1)).intValue())))
 	  {
 	    clickCol = i;
 	  }
@@ -2770,7 +2830,7 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
       }
 
-    cell = ((tableRow) rt.rows.elementAt(clickRow)).cells[clickCol];
+    cell = ((tableRow) rt.rows.elementAt(clickRow)).elementAt(clickCol);
 
     if (cell.menu != null)
       {
@@ -2782,7 +2842,7 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	return;
       }
 
-    col = rt.cols[clickCol];
+    col = (tableCol) rt.cols.elementAt(clickCol);
 
     if (col.menu != null)
       {
@@ -2838,11 +2898,15 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
 	  {
 	    System.err.println("colDragging column " + colDrag);
 	    System.err.println("x = " + x);
-	    System.err.println("colPos["+(colDrag-1)+"] = " + rt.colPos[colDrag-1]);
-	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos[colDrag]);
+	    System.err.println("colPos["+(colDrag-1)+"] = " + 
+			       ((Integer) rt.colPos.elementAt(colDrag-1)).intValue());
+
+	    System.err.println("colPos["+(colDrag)+"] = " + 
+			       ((Integer) rt.colPos.elementAt(colDrag)).intValue());
 	  }
 
-	if ((x > (rt.colPos[colDrag-1] + mincolwidth + 1)) && (x < rt.colPos[colDrag+1] - mincolwidth - 1))
+	if ((x > (((Integer)rt.colPos.elementAt(colDrag-1)).intValue() + mincolwidth + 1)) && 
+	    (x < ((Integer)rt.colPos.elementAt(colDrag+1)).intValue() - mincolwidth - 1))
 	  {
 	    bg.setXORMode(Color.red); // needs to be settable
 
@@ -2873,13 +2937,13 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
   {
     if (rt.rows.size() < 5)
       {
-	return new Dimension(rt.origTotalWidth + (rt.cols.length + 1) * rt.vLineThickness,
+	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
 			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
 			     5 * (rt.row_height + rt.hRowLineThickness));
       }
     else
       {
-	return new Dimension(rt.origTotalWidth + (rt.cols.length + 1) * rt.vLineThickness,
+	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
 			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
 			     rt.rows.size() * (rt.row_height + rt.hRowLineThickness));
       }
@@ -2961,16 +3025,31 @@ class tableCell {
 
 class tableRow {
 
-  tableCell[] cells;
+  Vector cells = new Vector();
+
+  /* -- */
 
   tableRow(tableCell[] cells)
   {
-    this.cells = cells;
+    for (int i = 0; i < cells.length; i++)
+      {
+	this.cells.addElement(cells[i]);
+      }
   }
 
   tableRow(int size)
   {
-    this.cells = new tableCell[size];
+    this.cells = new Vector(size);
+  }
+
+  tableCell elementAt(int index)
+  {
+    return (tableCell) cells.elementAt(index);
+  }
+
+  void setElementAt(tableCell cell, int index)
+  {
+    cells.setElementAt(cell, index);
   }
 }
 
