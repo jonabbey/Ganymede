@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.139 $
-   Last Mod Date: $Date: 1999/03/17 00:22:15 $
+   Version: $Revision: 1.140 $
+   Last Mod Date: $Date: 1999/03/19 05:11:45 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -243,6 +243,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   Image
     errorImage = null,
+    questionImage = null,
     search,
     queryIcon,
     pencil,
@@ -1183,6 +1184,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     
     return errorImage;
+  }
+
+  /**
+   * Returns the question Image.
+   */
+
+  public final Image getQuestionImage()
+  {
+    if (questionImage == null)
+      {
+	questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
+      }
+    
+    return questionImage;
   }
 
   /**

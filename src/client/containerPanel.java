@@ -5,9 +5,9 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-   Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 1999/03/12 20:47:16 $
+    Release: $Name:  $
+    Version: $Revision: 1.92 $
+    Last Mod Date: $Date: 1999/03/19 05:11:44 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -2324,7 +2324,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						   editable && fieldInfo.isEditable(),
 						   false,  // canChoose
 						   false,  // mustChoose
-						   230);// This is double wide because there is no available list
+						   0);
 
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
@@ -2342,7 +2342,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						   editable && fieldInfo.isEditable(),
 						   true,   // canChoose
 						   false,  // mustChoose
-						   ((editable && fieldInfo.isEditable()) && (available != null)) ? 115 : 230);
+						   0);
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2359,7 +2359,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					       editable && fieldInfo.isEditable(),
 					       false,   // canChoose
 					       false,  // mustChoose
-					       230); // no availble list, so it is wider
+					       0); // no availble list, so it is wider
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
@@ -2546,8 +2546,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, 
 					   editable && fieldInfo.isEditable(), 
 					   true, true, 
-					   ((choiceHandles != null) && 
-					    (editable && fieldInfo.isEditable())) ? 115 : 230,
+					   0,
 					   "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)

@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/03/10 23:04:11 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/03/19 05:11:46 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -142,7 +142,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public windowPanel(gclient gc, JMenu windowMenu)
   {
     this.gc = gc;
+
+    // are we running the client in debug mode?
+
     debug = gc.debug;
+
     this.windowMenu = windowMenu;
 
     // toggleToolBarMI was added to windowMenu in client
@@ -238,6 +242,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     this.addWindow(object, editable, objectType, false);
   }
+
+  /**
+   *
+   * Create a new editable or view-only window in this windowPanel.
+   *
+   * @param object an individual object from the server to show
+   * in this window
+   * @param editable if true, the object will be presented as editable
+   * @param objectType Used for the title of the new window
+   * @param isNewlyCreated if true, this window will be a 'create object' window.
+   *
+   */
 
   public void addWindow(db_object object, boolean editable, String objectType, boolean isNewlyCreated)
   {
@@ -674,8 +690,14 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    
 	    if (w.isEditable())
 	      {
+		if (debug)
+		  {
+		    System.err.println("closing editables.. " + w.getTitle());
+		  }
+
 		try
 		  {
+		    w.closingApproved = true;
 		    w.setClosed(true);
 		  }
 		catch (java.beans.PropertyVetoException ex)
@@ -711,8 +733,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    w.setClosable(true);
 	  }
 	
+	if (debug)
+	  {
+	    System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
+	  }
+
 	try
 	  {
+	    if (w instanceof framePanel)
+	      {
+		((framePanel) w).closingApproved = true;
+	      }
+
 	    w.setClosed(true);
 	  }
 	catch (java.beans.PropertyVetoException ex)
@@ -749,6 +781,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    if (w.isClosable())
 	      {
+		if (debug)
+		  {
+		    System.err.println("windowPanel.java closing " + title);
+		  }
+
+		if (w instanceof framePanel)
+		  {
+		    ((framePanel) w).closingApproved = true;
+		  }
+
 		try 
 		  {
 		    w.setClosed(true);

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 1999/02/16 23:05:46 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 1999/03/19 05:11:45 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -53,7 +53,7 @@ import java.io.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
-import java.beans.PropertyVetoException;
+import java.beans.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -72,15 +72,36 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * A framePanel is the interal window holding an object.  This class manages the
- * tabbed pane, and the creation of each of the panels in the window.
+ * Each object window in the client is an instance of a framePanel.  A framePanel
+ * is a JInternalFrame which contains a tabbed pane which incorporates a
+ * Ganymede database object panel, owner panel, history panel, and other panels
+ * as appropriate for specific object types.
  */
 
-public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener, InternalFrameListener {
-  
-  // This will be loaded from gclient anyway.
+public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener, VetoableChangeListener, InternalFrameListener {
+
+  /**  
+   * This will be loaded from gclient anyway.
+   */
 
   boolean debug = true;
+
+  /**
+   * used with vetoableChange() to work around Swing 1.1 bug preventing
+   * setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from doing anything
+   * useful.
+   */
+
+  boolean closingApproved = false;
+
+  /**
+   * helpfully, the vetoableChange() method will be called twice from
+   * one close window attempt on the part of the user.  I am so happy
+   * about this.  Really.  I hope to god this gets fixed in Swing 1.1.1,
+   * but then of course this 'vetoCount' code will be broken.  Grrrr.
+   */
+
+  private int vetoCount = 0;
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -99,9 +120,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     objects_owned_index = -1,
     personae_index = -1;
 
-  // We'll show a progressBar while the general panel is loading.  The
-  // progressBar is contained in the progressPanel, which will be
-  // removed when the general panel is finished loading.
+  /**
+   * We'll show a progressBar while the general panel is loading.  The
+   * progressBar is contained in the progressPanel, which will be
+   * removed when the general panel is finished loading.
+   */
   
   JProgressBar
     progressBar;
@@ -115,14 +138,47 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   // Each of these panes is one of the tabs in the tabbedPane.  Some
   // objects don't use every scrollpane.
 
-  JScrollPane 
-    general,     // Holds a containerPanel in the ViewportView
-    expiration_date,       // Holds a datePanel
-    removal_date, 
-    owner,       // Holds an ownerPanel
-    notes,       // holds a notePanel
-    admin_history, // holds an adminHistoryPanel (only for adminPersonae)
-    objects_owned;  // Holds an ownershipPanel
+  /**
+   * Holds a containerPanel in the ViewportView
+   */
+
+  JScrollPane general;
+
+  /**
+   * Holds a datePanel
+   */
+
+  JScrollPane expiration_date;
+
+  /**
+   * Holds a datePanel
+   */
+
+  JScrollPane removal_date;
+
+  /**
+   * Holds an ownerPanel
+   */
+
+  JScrollPane owner;
+
+  /**
+   * holds a notePanel
+   */
+
+  JScrollPane notes;
+
+  /**
+   * holds an adminHistoryPanel (only for adminPersonae)
+   */
+
+  JScrollPane admin_history;
+
+  /**
+   * Holds an ownershipPanel (ownly for owner groups)
+   */
+ 
+  JScrollPane objects_owned;
 
   datePanel
     exp_date_panel,
@@ -179,9 +235,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   notesPanel
     my_notesPanel = null;
 
-  // Invid of the object edited.  DO NOT access invid directly; use
-  // getObjectInvid().  invid will be null until the first time
-  // getObjectInvid() is called.
+  /**
+   * Invid of the object edited.  DO NOT access invid directly; use
+   * getObjectInvid().  invid will be null until the first time
+   * getObjectInvid() is called.
+   */
 
   private Invid
     invid = null;
@@ -190,6 +248,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   /* -- */
 
+  /**
+   * @param object RMI reference to a server-side database object
+   * @param editable If true, the database object is being edited by this window
+   * @param winP The JDesktopPane container for this window
+   * @param title Title for this window
+   * @param isCreating if true, this window is for a newly created object, and will
+   * be treated specially when closing this window.
+   */
 
   public framePanel(db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
   {
@@ -198,6 +264,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     this.editable = editable;
     this.gc = winP.gc;
     this.isCreating = isCreating;
+
+    // are we running the client in debug mode?
     
     debug = wp.gc.debug;
     
@@ -208,16 +276,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     setMaximizable(true);
     setResizable(true);
 
-    if (!isCreating)
-      {
-	setClosable(true);
-      }
+    setClosable(true);
 
     setIconifiable(true);
     setTitle(title);
 
+    // we want to be able to take control of closing ourselves.
+
+    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+    // gah!  we need to work around a bug in JDK 1.2/Swing 1.1.1.. bug parade #4176136
+
+    this.addVetoableChangeListener(this);
     this.addInternalFrameListener(this);
-    
+
     //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
     
     progressPanel = new JPanel();
@@ -483,9 +555,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    */
 
   public notesPanel getNotesPanel()
-    {
-      return my_notesPanel;
-    }
+  {
+    return my_notesPanel;
+  }
 
   /**
    * Refresh the tab that is showing.
@@ -1298,6 +1370,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	try
 	  {
+	    if (debug)
+	      {
+		System.err.println("Processing close action command");
+	      }
+
 	    setClosed(true);
 	  }
 	catch (PropertyVetoException ex)
@@ -1330,10 +1407,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	
 	if (success)
 	  {
+	    if (debug)
+	      {
+		System.err.println("removing window after inactivation");
+	      }
+
 	    try
 	      {
 		setClosed(true);
-		
 	      }
 	    catch (PropertyVetoException ex)
 	      {
@@ -1344,7 +1425,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  {
 	    showErrorMessage("Could not inactivate object.");
 	  }
-
       }
     else if (e.getActionCommand().equals("Set Expiration Date"))
       {
@@ -1496,21 +1576,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void internalFrameClosed(InternalFrameEvent event)
   {
+    System.err.println("frame closed");
+
     for (int i = 0; i < containerPanels.size(); i++)
       {
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
-
+	
 	cp.unregister();
       }
-
+    
     if (history_panel != null)
       {
 	history_panel.unregister();
       }
+
+    this.dispose();
   }
 
   public void internalFrameClosing(InternalFrameEvent event)
   {
+    if (!closingApproved)
+      {
+	return;
+      }
+
+    System.err.println("Ok, closing the created window");
   }
 
   public void internalFrameDeactivated(InternalFrameEvent event)
@@ -1527,5 +1617,65 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void internalFrameOpened(InternalFrameEvent event)
   {
+  }
+
+  /**
+   * gah!  we need to work around a bug in JDK 1.2/Swing 1.1.1.. bug parade #4176136
+   */
+
+  public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException
+  {
+    if (pce.getPropertyName().equals(IS_CLOSED_PROPERTY))
+      {
+	vetoCount++;
+
+	if (!closingApproved && ((vetoCount % 2) == 1))
+	  {
+	    StringDialog okToKill;
+
+	    if (isCreating)
+	      {
+		okToKill = new StringDialog(gclient.client, 
+					    "Ok to discard object?",
+					    "If you close this newly created window before committing this " +
+					    "transaction, this newly created object will be forgotten and " +
+					    "abandoned on commit.",
+					    "Discard It",
+					    "Cancel",
+					    gclient.client.getQuestionImage());
+	      }
+	    else
+	      {
+		okToKill = new StringDialog(gclient.client, 
+					    "Ok to hide this window?",
+					    "Closing this window will not undo changes made to it, nor will it make " +
+					    "this object available to other Ganymede users to edit. If you want to " +
+					    "undo changes to this object, you will have to either manually undo them " +
+					    "or cancel the transaction.\n\n" +
+					    "If this window is closed, you will be able to re-open it from the tree " +
+					    "later if needed.",
+					    "Hide it",
+					    "Cancel",
+					    gclient.client.getQuestionImage());
+	      }
+
+	    Hashtable result = okToKill.DialogShow();
+	    
+	    if (result == null)
+	      {
+		throw new PropertyVetoException("Cancelled", null);
+	      }
+
+	    // ah, we get to close.. delete us first.. this will cause the
+	    // server to drop this object on commit.
+
+	    if (isCreating)
+	      {
+		gclient.client.deleteObject(getObjectInvid());
+	      }
+	  }
+
+	closingApproved = true;
+      }
   }
 }
