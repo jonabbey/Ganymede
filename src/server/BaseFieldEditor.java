@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/08/05 22:08:44 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/09/22 22:27:54 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -108,8 +108,9 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     classS,			// all
     trueLabelS,			// boolean
     falseLabelS,		// boolean
-    OKCharS,			// string
-    BadCharS;			// string
+    OKCharS,			// string, password
+    BadCharS,			// string, password
+    regexpS;			// string
 
   JnumberField
     idN,			// all
@@ -173,32 +174,34 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     editPanel = new JPanel();
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setLayout(gbl);
+
+    int rowcount = 0;
     
     idN = new JnumberField(20,  false, false, 0, 0);
     idN.setCallback(this);
-    addRow(editPanel, idN, "Field ID:", 0);
+    addRow(editPanel, idN, "Field ID:", rowcount++);
     
     nameS = new JstringField(20, 100,  true, false, null, null);
     nameS.setCallback(this);
-    addRow(editPanel, nameS, "Field Name:", 1);
+    addRow(editPanel, nameS, "Field Name:", rowcount++);
 
     classS = new JstringField(20, 100,  true, false, null, null);
     classS.setCallback(this);
-    addRow(editPanel, classS, "Class name:", 2);
+    addRow(editPanel, classS, "Class name:", rowcount++);
 
     commentT = new JTextArea(4, 20);
     JScrollPane commentScroll = new JScrollPane(commentT);
     //commentT.addTextListener(this);
-    addRow(editPanel, commentScroll, "Comment:", 3);
+    addRow(editPanel, commentScroll, "Comment:", rowcount++);
     
     // This one is different:
     vectorCF = new JcheckboxField(null, false, true);
     vectorCF.setCallback(this);
-    addRow(editPanel, vectorCF, "Vector:", 4);
+    addRow(editPanel, vectorCF, "Vector:", rowcount++);
 
     maxArrayN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxArrayN.setCallback(this);
-    addRow(editPanel, maxArrayN, "Max Array Size:", 5);
+    addRow(editPanel, maxArrayN, "Max Array Size:", rowcount++);
 
     typeC = new JComboBox();
     typeC.addItem("Boolean");
@@ -214,64 +217,68 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     //choose the one that is the default
     changeTypeChoice("Boolean");
 
-    addRow(editPanel, typeC, "Field Type:", 6);
+    addRow(editPanel, typeC, "Field Type:", rowcount++);
 
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "UNIX/MD5 Crypted:" , 7);
+    addRow(editPanel, cryptedCF, "UNIX/MD5 Crypted:" , rowcount++);
 
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
-    addRow(editPanel, plainTextCF, "Store PlainText:" , 8);
+    addRow(editPanel, plainTextCF, "Store PlainText:" , rowcount++);
 
     multiLineCF = new JcheckboxField(null, false, true);
     multiLineCF.setCallback(this);
-    addRow(editPanel, multiLineCF, "MultiLine Field:" , 9);
+    addRow(editPanel, multiLineCF, "MultiLine Field:" , rowcount++);
 
     minLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
-    addRow(editPanel, minLengthN, "Minimum String Size:", 10);
+    addRow(editPanel, minLengthN, "Minimum String Size:", rowcount++);
     
     maxLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
-    addRow(editPanel, maxLengthN, "Maximum String Size:", 11);
+    addRow(editPanel, maxLengthN, "Maximum String Size:", rowcount++);
+
+    regexpS = new JstringField(20, 100, true, false, null, null);
+    regexpS.setCallback(this);
+    addRow(editPanel, regexpS, "Regular Expression:", rowcount++);
    
     OKCharS = new JstringField(20, 100,  true, false, null, null);
     OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, "Allowed Chars:", 12);
+    addRow(editPanel, OKCharS, "Allowed Chars:", rowcount++);
 
     BadCharS = new JstringField(20, 100,  true, false, null, null);
     BadCharS.setCallback(this);
-    addRow(editPanel, BadCharS, "Disallowed Chars:", 13);
+    addRow(editPanel, BadCharS, "Disallowed Chars:", rowcount++);
 
     namespaceC = new JComboBox();
     namespaceC.addItemListener(this);
 
-    addRow(editPanel, namespaceC, "Namespace:", 14);
+    addRow(editPanel, namespaceC, "Namespace:", rowcount++);
     
     labeledCF = new JcheckboxField(null, false, true);
     labeledCF.setCallback(this);
-    addRow(editPanel, labeledCF, "Labeled:", 15);
+    addRow(editPanel, labeledCF, "Labeled:", rowcount++);
 
     trueLabelS = new JstringField(20, 100,  true, false, null, null);
     trueLabelS.setCallback(this);
-    addRow(editPanel, trueLabelS, "True Label:", 16);
+    addRow(editPanel, trueLabelS, "True Label:", rowcount++);
 
     falseLabelS = new JstringField(20, 100,  true, false, null, null);
     falseLabelS.setCallback(this);
-    addRow(editPanel, falseLabelS, "False Label:", 17);
+    addRow(editPanel, falseLabelS, "False Label:", rowcount++);
 
     editInPlaceCF = new JcheckboxField(null, false, true);
     editInPlaceCF.setCallback(this);
-    addRow(editPanel, editInPlaceCF, "Edit In Place:", 18);
+    addRow(editPanel, editInPlaceCF, "Edit In Place:", rowcount++);
 
     targetC = new JComboBox();
     targetC.addItemListener(this);
-    addRow(editPanel, targetC, "Target Object:", 19);
+    addRow(editPanel, targetC, "Target Object:", rowcount++);
 
     fieldC = new JComboBox();
     fieldC.addItemListener(this);
-    addRow(editPanel, fieldC, "Target Field:", 20);
+    addRow(editPanel, fieldC, "Target Field:", rowcount++);
 
     booleanShowing = true;
     numericShowing = false;
@@ -293,6 +300,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     trueLabelS.setText("");
     falseLabelS.setText("");
+    regexpS.setText("");
     OKCharS.setText("");
     BadCharS.setText("");
 
@@ -390,6 +398,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       }
 
     setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
+    setRowVisible(regexpS, stringShowing);
     setRowVisible(OKCharS, stringShowing || passwordShowing);
     setRowVisible(BadCharS, stringShowing || passwordShowing);
     setRowVisible(minLengthN, stringShowing || passwordShowing);
@@ -857,6 +866,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    multiLineCF.setSelected(fieldDef.isMultiLine(), false);
 	    minLengthN.setValue(fieldDef.getMinLength());
 	    maxLengthN.setValue(fieldDef.getMaxLength());
+	    regexpS.setText(fieldDef.getRegexpPat());
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
@@ -1203,6 +1213,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	classS.setEditable(isEditable);
 	trueLabelS.setEditable(isEditable);
 	falseLabelS.setEditable(isEditable);
+	regexpS.setEditable(isEditable);
 	OKCharS.setEditable(isEditable);
 	BadCharS.setEditable(isEditable);
 	idN.setEditable(isEditable);
@@ -1342,6 +1353,21 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    fieldDef.setArray(vectorCF.isSelected());
 	    checkVisibility();
+	  }
+	else if (comp == regexpS)
+	  {
+	    if (debug)
+	      {
+		System.out.println("regexpS");
+	      }
+
+	    // setting a regexp can fail if it can't be properly
+	    // parsed
+
+	    if (!fieldDef.setRegexpPat((String) v.getValue()))
+	      {
+		regexpS.setText("");
+	      }
 	  }
 	else if (comp == OKCharS)
 	  {

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/08/05 22:08:44 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/09/22 22:27:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,6 +53,7 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
+import gnu.regexp.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -207,6 +208,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   DBNameSpace namespace = null;
   boolean multiLine = false;
 
+  /**
+   * Regular Expression string for input-filtering
+   * in {@link arlut.csd.ganymede.StringDBField}s.
+   */
+
+  String regexpPat = null;	// introduced in ganymede.db version 1.14
+
+  /**
+   * Compiled regular expression for input-filtering
+   * in {@link arlut.csd.ganymede.StringDBField}s.
+   */
+
+  gnu.regexp.RE regexp = null;
+
   // invid attributes
 
   boolean editInPlace = false;
@@ -330,6 +345,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     badChars = original.badChars;
     namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
     multiLine = original.multiLine;
+    regexpPat = original.regexpPat;
+    regexp = original.regexp;
 
     editInPlace = original.editInPlace;
     allowedTarget = original.allowedTarget;
@@ -363,17 +380,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     out.writeBoolean(editable);
     out.writeBoolean(removable);
 
-    if ((base.store.major_version >= 1) && (base.store.minor_version >= 6))
+    if ((base.store.major_version >= 1) || (base.store.minor_version >= 6))
       {
 	out.writeBoolean(visibility); // added at file version 1.6
       }
 
-    if ((base.store.major_version >= 1) && (base.store.minor_version >= 7))
+    if ((base.store.major_version >= 1) || (base.store.minor_version >= 7))
       {
 	out.writeBoolean(builtIn); // added at file version 1.7
       }
 
-    if ((base.store.major_version >= 1) && (base.store.minor_version >= 1))
+    if ((base.store.major_version >= 1) || (base.store.minor_version >= 1))
       {
 	out.writeShort(field_order); // added at file version 1.1
       }
@@ -425,10 +442,16 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    out.writeUTF("");
 	  }
 
-	if ((base.store.major_version >= 1) && (base.store.minor_version >= 9))
+	if ((base.store.major_version >= 1) || (base.store.minor_version >= 9))
 	  {
 	    out.writeBoolean(multiLine); // added at file version 1.9
 	  }
+
+	if ((base.store.major_version >= 1) || (base.store.minor_version >= 14))
+	  {
+	    out.writeUTF(regexpPat); // added at file version 1.14
+	  }
+
       }
     else if (isNumeric())
       {
@@ -608,6 +631,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	else
 	  {
 	    multiLine = false;
+	  }
+
+	// at file version 1.14, we introduced regexps for string fields
+	
+	if ((base.store.file_major > 1) || (base.store.file_minor >= 14))
+	  {
+	    setRegexpPat(in.readUTF());
+	  }
+	else
+	  {
+	    setRegexpPat(null);
 	  }
       }
     else if (isNumeric())
@@ -1561,6 +1595,70 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     multiLine = b;
+  }
+
+  /**
+   * <p>Returns the regexp pattern string constraining this string
+   * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public String getRegexpPat()
+  {
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    return regexpPat;
+  }
+
+  /**
+   * <p>Sets the regexp pattern string constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized boolean setRegexpPat(String s)
+  {
+    if (editor == null && !loading)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    if (s == null || s.equals(""))
+      {
+	regexpPat = null;
+	regexp = null;
+
+	return true;
+      }
+    else
+      {
+	try
+	  {
+	    regexp = new gnu.regexp.RE(s);
+	  }
+	catch (gnu.regexp.REException ex)
+	  {
+	    return false;	// bad regexp syntax?
+	  }
+
+	regexpPat = s;
+	return true;
+      }
   }
 
   /** 

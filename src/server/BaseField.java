@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/06/09 03:33:35 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/09/22 22:27:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -473,6 +473,25 @@ public interface BaseField extends Remote {
    */
 
   public void setMultiLine(boolean b) throws RemoteException;
+
+  /**
+   * <p>Returns the regexp pattern string constraining this string
+   * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
+  public String getRegexpPat() throws RemoteException;
+
+  /**
+   * <p>Sets the regexp pattern string constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
+  public boolean setRegexpPat(String s) throws RemoteException;
 
   // these two apply to strings, numbers, and IP addresses
 

@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/07/27 00:27:17 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/09/22 22:27:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1356,7 +1356,7 @@ public class DBLog {
 	  {
 	    if (debug)
 	      {
-		System.err.println("calculateOwnerAddresses(): Looking up perms for Embeded invid " + 
+		System.err.println("calculateOwnerAddresses(): Looking up owner for Embeded invid " + 
 				   invid.toString());
 	      }
 

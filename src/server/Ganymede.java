@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 1999/08/27 17:25:20 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 1999/09/22 22:27:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -550,7 +550,15 @@ public class Ganymede {
       {
 	debug("Binding GanymedeServer in RMI Registry");
 
-	Naming.rebind("rmi://localhost:" + registryPortProperty + "/ganymede.server", server);
+	// we use rebind so that we can bind successfully if the rmi
+	// registry is still running from a previous Ganymede server
+	// session.
+
+	// we assume the rmi registry is running on localhost.
+
+	Naming.rebind("rmi://" + 
+		      java.net.InetAddress.getLocalHost().getHostName() + ":" + 
+		      registryPortProperty + "/ganymede.server", server);
       }
     catch (Exception ex)
       {

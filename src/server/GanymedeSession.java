@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.147 $
-   Last Mod Date: $Date: 1999/08/14 00:49:06 $
+   Version: $Revision: 1.148 $
+   Last Mod Date: $Date: 1999/09/22 22:27:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.147 $ %D%
+ * @version $Revision: 1.148 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4069,6 +4069,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     while (localObj != null && localObj.isEmbedded())
       {
 	inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+
+	// if we need to find the top-level containing object for an
+	// embedded object that has been or is in the process of being
+	// deleted, we'll need to consult the original version of the
+	// object to find its containing parent.
+
+	if (inf == null)
+	  {
+	    if (localObj instanceof DBEditObject)
+	      {
+		DBEditObject localEditObj = (DBEditObject) localObj;
+
+		if (localEditObj.getStatus() == ObjectStatus.DELETING)
+		  {
+		    localObj = localEditObj.getOriginal();
+		  }
+
+		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+	      }
+	  }
 
 	if (inf == null)
 	  {

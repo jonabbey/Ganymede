@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/06/24 00:56:27 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/09/22 22:27:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+import gnu.regexp.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -806,7 +807,23 @@ public class StringDBField extends DBField implements string_field {
 					  " which has a minimum length of " + 
 					  minSize());
       }
-    
+
+    if (definition.regexp != null)
+      {
+	gnu.regexp.REMatch match = definition.regexp.getMatch(s);
+
+	if (match == null)
+	  {
+	    return Ganymede.createErrorDialog("String Field Error",
+					      "String value " + s +
+					      "does not conform to the regular expression pattern established " +
+					      "for this string field.\n\n" +
+					      "This string field only accepts strings matching the " +
+					      "following regular expression:\n\n" +
+					      definition.getRegexpPat());
+	  }
+      }
+
     if (allowedChars() != null && !allowedChars().equals(""))
       {
 	String okChars = allowedChars();

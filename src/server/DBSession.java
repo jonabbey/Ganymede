@@ -1,4 +1,4 @@
- /*
+/*
 
    DBSession.java
 
@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 1999/08/18 23:49:40 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 1999/09/22 22:27:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.74 $ %D%
+ * @version $Revision: 1.75 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
