@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ import gjt.Box;
 
 *******************************************************************/
 
-public class JdateField extends JPanel implements JsetValueCallback,ActionListener {
+public class JdateField extends JBufferedPane implements JsetValueCallback,ActionListener {
 
   private boolean
     allowCallback = false,
@@ -162,12 +162,12 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     add(_date,"Center");
 
-    JPanel buttonPanel = new JPanel();
+    JBufferedPane buttonPanel = new JBufferedPane();
     buttonPanel.setLayout(new BorderLayout());
 
     Image img = PackageResources.getImageResource(this, "i043.gif", getClass());
 
-    _calendarButton = new JButton(new ImageGlyph(img));
+    _calendarButton = new JButton(new ImageIcon(img));
     _calendarButton.addActionListener(this);
 
     buttonPanel.add(_calendarButton,"West");

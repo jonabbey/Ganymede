@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.2 $ %D%
+ Version: $Revision: 1.3 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,15 +20,15 @@ import java.util.Vector;
 
 public class JstringListBox extends JListBox implements ListCellRenderer, ListSelectionListener{ 
 
-  static boolean debug = true;
+  static final boolean debug = true;
 
   // -- 
 
   int 
     numberOfStrings = 0;
 
-  JListDataModel 
-    model = new JListDataModel();
+  DefaultListModel 
+    model = new DefaultListModel();
 
   JLabel 
     label = new JLabel();
@@ -64,31 +64,39 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
   public JstringListBox(Vector items)
   {
     this();
-  
-    for (int i=0 ; i<items.size() ; i++)
-      {
-	if (items.elementAt(i) instanceof String)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringListBox: adding string " + (String) items.elementAt(i));
-	      }
 
-	    addString((String)items.elementAt(i));
+    if ((items != null) && (items.size() > 0))
+      {	
+	if (items.elementAt(0) instanceof String)
+	  {
+	    for (int i=0 ; i<items.size() ; i++)
+	      {
+		
+		if (debug)
+		  {
+		    System.err.println("JstringListBox: adding string " + (String) items.elementAt(i));
+		  }
+		
+		addString((String)items.elementAt(i));
+	      }
 	  }
-	else if (items.elementAt(i) instanceof listHandle)
+	else if (items.elementAt(0) instanceof listHandle)
 	  {
-	    if (debug)
+	    for (int i=0 ; i<items.size() ; i++)
 	      {
-		System.err.println("JstringListBox: adding listhandle " + ((listHandle) items.elementAt(i)).getLabel());
+		if (debug)
+		  {
+		    System.err.println("JstringListBox: adding listhandle " + ((listHandle) items.elementAt(i)).getLabel());
+		  }
+		
+		addHandle((listHandle)items.elementAt(i));
 	      }
-
-	    addHandle((listHandle)items.elementAt(i));
 	  }
 	else
 	  {
 	    System.out.println("Unsupported item type");
 	  }
+      
       }
   }
 
@@ -108,14 +116,14 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     allowCallback = true;
   }
 
-  public void addString(String item)
+  public void addString(String label)
   {
-    addString(item, false);
+    addString(label, false);
   }
 
-  public void addString(String item, boolean redraw)
+  public void addString(String label, boolean redraw)
   {
-    model.addElement(new listHandle(item));
+    model.addElement(new listHandle(label));
     if (redraw)
       {
 	invalidate();
@@ -173,7 +181,7 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     return model.getSize();
   }
 
-  public boolean contains(String string)
+  public boolean containsString(String string)
   {
     for (int i = 0; i < model.getSize(); i++)
       {
@@ -207,8 +215,20 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     return (listHandle)model.elementAt(getSelectedIndex());
   }
 
+  // These two set up how the label is drawn.
+
   public void configureListCellRenderer(Object value, int index)
   {
+    if (label == null)
+      {
+	System.out.println("label is null!");
+	return;
+      }
+    if ((listHandle)model.elementAt(index) == null)
+      {
+	System.out.println("element at " + index + " is null");
+	return;
+      }
     label.setText(((listHandle)model.elementAt(index)).getLabel());
   }
 
