@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2000/11/24 04:43:41 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/03/30 22:05:38 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.51 $ %D%
+ * @version $Revision: 1.52 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -89,12 +89,6 @@ import java.util.*;
 public interface Session extends Remote {
 
   // Client/server interface operations
-
-  /**
-   * @deprecated
-   */
-
-  String      getLastError() throws RemoteException;
 
   /**
    *

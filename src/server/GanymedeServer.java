@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2001/02/13 06:36:25 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2001/03/30 22:05:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -599,9 +600,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    
 	    if (session.logged_in)
 	      {
-		// note that we really should do something a bit more sophisticated
-		// than using toString on connecttime.
-		
 		entries.addElement(session.getAdminEntry());
 	      }
 	  }

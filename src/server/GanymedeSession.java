@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.233 $
-   Last Mod Date: $Date: 2001/02/16 05:25:28 $
+   Version: $Revision: 1.234 $
+   Last Mod Date: $Date: 2001/03/30 22:05:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.233 $ $Date: 2001/02/16 05:25:28 $
+ * @version $Revision: 1.234 $ $Date: 2001/03/30 22:05:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -276,16 +276,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   String clienthost;
-
-  /**
-   *
-   * We used to depend primarily on setLastError()/getLastError() to
-   * provide diagnostics, but we've moved more to using ReturnVal result
-   * objects to provide diagnostic dialog results.
-   *
-   */
-
-  String lastError;
 
   /**
    * <P>The current status message for this client.  The 
@@ -865,20 +855,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /** 
-   * <P>This method is used to flag an error condition that the
-   * client can then call getLastError() to look up.  This system
-   * functions similarly to the errno system in C, and has similar
-   * problems in a multi-thread environment.  Most Ganymede code now
-   * uses {@link arlut.csd.ganymede.ReturnVal ReturnVal} objects to
-   * pass back error information in response to a client
-   * operation.</P>
+   * <p>This method used to be used to flag an error condition that the
+   * client could then call getLastError() to look up.  It has
+   * been deprecated from that usage, and now simply logs the error.</p>
    */
 
-  void setLastError(String status)
+  void setLastError(String error)
   {
-    lastError = status;
-    userInfo = null;		// clear admin console info cache
-    Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + lastError + ")");
+    Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + error + ")");
   }
 
   /**
@@ -1106,37 +1090,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   //
   //************************************************************
 
-  /** 
-   * <p>getLastError() returns text explaining the last error condition.</p>
-   *
-   * <p>This method is now all-but-deprecated, as most code in the Ganymede
-   * server now uses ReturnVal objects to return error information.</p>
-   *
-   * @see arlut.csd.ganymede.GanymedeSession.setLastError()
-   * @see arlut.csd.ganymede.Session 
-   * @deprecated
-   */
-  
-  public String getLastError()
-  {
-    String result = null;
-
-    /* -- */
-
-    if (lastError != null)
-      {
-	result = lastError;
-	lastError = null;
-      }
-    else if (session != null)
-      {
-	result = session.lastError;
-	session.lastError = null;
-      }
-
-    return result;
-  }
-
   /**
    * <p>Log out this session.  After this method is called, no other
    * methods may be called on this session object.</p>
@@ -1288,7 +1241,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // skip username.. we'll do it below
 	    // skip userInvid.. we'll do it below
 	    clienthost = null;
-	    lastError = null;
 	    status = null;
 	    lastEvent = null;
 	    session = null;
@@ -2116,7 +2068,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized Vector getFieldTemplateVector(short baseId)
+  public Vector getFieldTemplateVector(short baseId)
   {
     checklogin();
 
@@ -2998,9 +2950,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    * <p>This method is the primary Query engine for the Ganymede
    * databases.  It is used by dump(), query(), and internalQuery().</p>
-   *
-   * <p>This method is partially synchronized to prevent deadlock problems when
-   * extantLock is null.</p>
    *
    * @param query The query to be handled
    * @param internal If true, the query filter setting will not be honored
@@ -5825,7 +5774,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * called in this GanymedeSession.
    */
 
-  synchronized void updatePerms(boolean forceUpdate)
+  public synchronized void updatePerms(boolean forceUpdate)
   { 
     PermissionMatrixDBField permField;
 
@@ -6189,7 +6138,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
-  public synchronized boolean isWizardActive()
+  public boolean isWizardActive()
   {
     return (wizard != null) && (wizard.isActive());
   }
@@ -6201,7 +6150,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
-  public synchronized boolean isWizardActive(GanymediatorWizard wizard)
+  public boolean isWizardActive(GanymediatorWizard wizard)
   {
     return (this.wizard == wizard) && (this.wizard.isActive());
   }
@@ -6213,7 +6162,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
-  public synchronized GanymediatorWizard getWizard()
+  public GanymediatorWizard getWizard()
   {
     return wizard;
   }
@@ -6227,7 +6176,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
-  public synchronized boolean registerWizard(GanymediatorWizard wizard)
+  public boolean registerWizard(GanymediatorWizard wizard)
   {
     if (wizard != null && wizard.isActive())
       {
@@ -6250,7 +6199,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
-  public synchronized void unregisterWizard(GanymediatorWizard wizard)
+  public void unregisterWizard(GanymediatorWizard wizard)
   {
     if (this.wizard == wizard)
       {
