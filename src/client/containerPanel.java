@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.23 $ %D%
+    Version: $Revision: 1.24 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -175,15 +175,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		short type = object.getTypeID();
 		
 		// Skip some fields.  custom panels hold the built ins, and a few others.
+
 		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
 		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
 		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
-			
-		    
 		  {
 		    if (debug)
 		      {
-			System.out.println("Skipping a built in field: " + fields[i].getName());
+			System.out.println("Skipping a special field: " + fields[i].getName());
 		      }
 		  }
 		else
@@ -1408,27 +1407,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (editable && field.isEditable())
       {
-	// really probably ought to do a combo box here.. we shouldn't
-	// ever have an invid field without a list of choices provided
-	// us by the server
-	
-
-	JComboBox combo = new JComboBox();
-	
 	Vector choices = field.choices().getListHandles();
         Invid currentChoice = (Invid) field.getValue();
 	listHandle currentListHandle = null;
-	
+	listHandle noneHandle = new listHandle("<none>", null);
 	boolean found = false;
+	JComboBox combo = new JComboBox();
+	
+	/* -- */
+
+	combo.addItem(noneHandle);
 	
 	for (int j = 0; j < choices.size(); j++)
 	  {
-	    listHandle thisChoice = (listHandle)choices.elementAt(j);
+	    listHandle thisChoice = (listHandle) choices.elementAt(j);
 	    combo.addItem(thisChoice);
 	    
 	    if (!found && (currentChoice != null))
 	      {
-		if (((Invid)thisChoice.getObject()).equals(currentChoice))
+		if (thisChoice.getObject().equals(currentChoice))
 		  {
 		    if (debug)
 		      {
@@ -1447,10 +1444,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
 	// if the current value wasn't in the choice, add it in now
 	
-	if (!found && (currentChoice != null))
+	if (!found)
 	  {
-	    currentListHandle = new listHandle(parent.getSession().viewObjectLabel(currentChoice), currentChoice);
-	    combo.addItem(currentListHandle);
+	    if (currentChoice != null)
+	      {
+		currentListHandle = new listHandle(parent.getSession().viewObjectLabel(currentChoice), currentChoice);
+		combo.addItem(currentListHandle);
+	      }
 	  }
 	
 	combo.setMaximumRowCount(12);
@@ -1464,11 +1464,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("setting current choice: " + currentChoice);
 	      }
-	    combo.setSelectedItem(currentChoice);
+	    combo.setSelectedItem(currentListHandle);
 	  }
 	else
 	  {
-	    System.out.println("currentChoice is null");
+	    if (debug)
+	      {
+		System.out.println("currentChoice is null");
+	      }
+	    combo.setSelectedItem(noneHandle);
 	  }	  
 
 	combo.addItemListener(this); // register callback
@@ -1487,7 +1491,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    throw new RuntimeException("Could not check visibility");
 	  }
-	
       }
     else
       {
