@@ -247,7 +247,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal login(String username, String password) throws RemoteException
   {
-    return processLogin(username, password, Ganymede.remotelyAccessible, true);
+    return processLogin(username, password, true, true);
   }
 
   /** 

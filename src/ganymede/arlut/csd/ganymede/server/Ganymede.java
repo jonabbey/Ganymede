@@ -185,15 +185,6 @@ public class Ganymede {
   public static String debugFilename = null;
 
   /**
-   * <p>If true, {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * will export any objects being viewed, edited, or created before
-   * returning it to the client.  This will be false during direct
-   * loading, which should double load speed.</p>
-   */
-
-  public static boolean remotelyAccessible = true;
-
-  /**
    * <p>This object is responsible for handling all of the RMI
    * exportation of objects in the server.  According to how it is
    * initialized, objects may or may not be exported over SSL, and may
