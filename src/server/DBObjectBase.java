@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,6 +88,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   {
     super();			// initialize UnicastRemoteObject
 
+    DBObjectBaseField bf;
+
+    /* -- */
+
     writerList = new Vector();
     readerList = new Vector();
     dumperList = new Vector();
@@ -105,6 +109,22 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     original = null;
     save = true;		// by default, we'll want to keep this
     changed = false;
+
+    /* Set up our 0 field, the owner list. */
+
+    bf = new DBObjectBaseField(this);
+
+    bf.field_name = "Owner list";
+    bf.field_code = 0;
+    bf.field_type = FieldType.INVID;
+    bf.field_order = 0;
+    bf.allowedTarget = 0;
+    bf.targetField = 8;
+    bf.editable = false;
+    bf.removable = false;
+    bf.array = true;
+
+    fieldHash.put(new Short((short)0), bf);
   }
 
   /**
@@ -339,11 +359,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * We don't allow removal of Base 0 because it is the Ganymede
    * administrator Base, a privileged Base in the Ganymede system.
    *
+   * Likewise, Base 1 is 'User', also a privileged base.
+   *
    */
 
   public boolean isRemovable()
   {
-    return (getTypeID() > 0);
+    return (getTypeID() > 1);
   }
 
   /**
