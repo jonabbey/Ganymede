@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -284,10 +284,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
   void checkVisibility()
   {
     System.out.println(" Checking visibility");
-    if (passwordShowing || booleanShowing)
+    if (passwordShowing || booleanShowing || numericShowing || dateShowing)
       {
 	setRowVisible(vectorCF, false);
-	setRowVisible(maxArrayN, vectorCF.getState());
+	setRowVisible(maxArrayN, false);
       }
     else
       {
