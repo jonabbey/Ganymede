@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/06/14 04:51:19 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/06/15 05:20:44 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.15 $ $Date: 2000/06/14 04:51:19 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2000/06/15 05:20:44 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -230,6 +230,8 @@ public class xmlclient implements ClientListener {
 
   private ClientBase my_client;
 
+  java.io.BufferedReader in;
+
   // ---
 
   /**
@@ -248,9 +250,10 @@ public class xmlclient implements ClientListener {
   {
     boolean ok = true;
     File xmlFile = null;
-    java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     /* -- */
+
+    in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     // find the properties command line argument
 
@@ -268,35 +271,7 @@ public class xmlclient implements ClientListener {
       }
 
     username = ParseArgs.getArg("username", argv);
-
-    if (username == null)
-      {
-	// we would prompt for the username here, but java gives us no
-	// portable way to turn character echo on and off.. the script
-	// that runs us has character echo off so that we can prompt
-	// for the user's password, but since it is off, we can't
-	// really prompt for a missing user name here.
-
-	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name");
- 	System.err.println("Usage: xmlclient username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
-	System.exit(1);
-      }
-
     password = ParseArgs.getArg("password", argv);
-
-    if (password == null)
-      {
-	try
-	  {
-	    System.out.print("Password:");
-	    password = in.readLine();
-	    System.out.println();
-	  }
-	catch (java.io.IOException ex)
-	  {
-	    throw new RuntimeException("Exception getting input: " + ex.getMessage());
-	  }
-      }
     
     String bufferString = ParseArgs.getArg("bufsize", argv);
 
@@ -325,7 +300,7 @@ public class xmlclient implements ClientListener {
 
     if (!ok)
       {
- 	System.err.println("Usage: xmlclient username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+ 	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
   }
@@ -391,6 +366,11 @@ public class xmlclient implements ClientListener {
 
 	if (nextElement.matches("ganydata"))
 	  {
+	    if (nextElement.getAttrStr("persona") != null)
+	      {
+		username = nextElement.getAttrStr("persona");
+	      }
+
 	    if (!processData())
 	      {
 		// don't both processing rest of XML
@@ -584,13 +564,11 @@ public class xmlclient implements ClientListener {
 	System.err.println("processData");
       }
 
-    System.err.println("Connecting to server");
-
     connectAsClient();
 
     try
       {
-	System.err.println("Reading object data");
+	System.out.println("Reading object data");
 
 	item = getNextItem();
 
@@ -613,7 +591,7 @@ public class xmlclient implements ClientListener {
 		    return false;
 		  }
 
-		System.err.print(".");
+		System.out.print(".");
 
 		//	    System.err.println(item);
 
@@ -664,11 +642,9 @@ public class xmlclient implements ClientListener {
 	    item = getNextItem();
 	  }
 
-	System.err.print("\n\n");
+	System.out.print("\n");
 
 	committedTransaction = transmitData();
-
-	System.err.println("/processData");
 
 	return committedTransaction;
       }
@@ -676,7 +652,7 @@ public class xmlclient implements ClientListener {
       {
 	if (!committedTransaction)
 	  {
-	    System.err.println("Aborted transaction, logging out.");
+	    System.out.println("Aborted transaction, logging out.");
 	  }
 
 	try
@@ -701,6 +677,34 @@ public class xmlclient implements ClientListener {
     // server, so we need to always do System.exit() to shut down the
     // VM, from this point forward
 
+    if (username == null)
+      {
+	// we would prompt for the username here, but java gives us no
+	// portable way to turn character echo on and off.. the script
+	// that runs us has character echo off so that we can prompt
+	// for the user's password, but since it is off, we can't
+	// really prompt for a missing user name here.
+
+	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name in <ganydata> element, or on");
+	System.err.println("command line.");
+ 	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	System.exit(1);
+      }
+
+    if (password == null)
+      {
+	try
+	  {
+	    System.out.print("Password for \"" + username + "\":");
+	    password = in.readLine();
+	    System.out.println();
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    throw new RuntimeException("Exception getting input: " + ex.getMessage());
+	  }
+      }
+
     try
       {
 	my_client = new ClientBase(server_url, this);
@@ -716,7 +720,7 @@ public class xmlclient implements ClientListener {
 	System.exit(1);
       }
 
-    System.err.println("Logging into server");
+    System.out.println("Logging into server");
 
     try
       {
@@ -1046,7 +1050,7 @@ public class xmlclient implements ClientListener {
 
     try
       {
-	System.err.println("Opening transaction");
+	System.out.println("Opening transaction");
 
 	attempt = session.openTransaction("xmlclient client (" + username + ")");
 	    
@@ -1074,7 +1078,7 @@ public class xmlclient implements ClientListener {
 	return false;
       }
 
-    System.err.println("Creating objects");
+    System.out.println("Creating objects");
 
     for (int i = 0; success && i < createdObjects.size(); i++)
       {
@@ -1087,7 +1091,7 @@ public class xmlclient implements ClientListener {
 
 	if (!newObject.forceCreate && newObject.getInvid() != null)
 	  {
-	    System.err.println("Editing " + newObject);
+	    System.out.println("Editing " + newObject);
 
 	    attempt = newObject.editOnServer(session);
 
@@ -1110,7 +1114,7 @@ public class xmlclient implements ClientListener {
 	  }
 	else
 	  {
-	    System.err.println("Creating " + newObject);
+	    System.out.println("Creating " + newObject);
 
 	    attempt = newObject.createOnServer(session);
 
@@ -1166,7 +1170,7 @@ public class xmlclient implements ClientListener {
       {
 	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
 
-	System.err.println("Resolving invids for " + newObject);
+	System.out.println("Resolving pointers for " + newObject);
 	
 	attempt = newObject.registerFields(1); // just invids
 
@@ -1194,7 +1198,7 @@ public class xmlclient implements ClientListener {
       {
 	xmlobject object = (xmlobject) editedObjects.elementAt(i);
 
-	System.err.println("Editing " + object);
+	System.out.println("Editing " + object);
 
 	attempt = object.editOnServer(session);
 
@@ -1265,7 +1269,7 @@ public class xmlclient implements ClientListener {
       {
 	xmlobject object = (xmlobject) inactivatedObjects.elementAt(i);
 
-	System.err.println("Inactivating " + object);
+	System.out.println("Inactivating " + object);
 	    
 	Invid target = object.getInvid();
 
@@ -1311,7 +1315,7 @@ public class xmlclient implements ClientListener {
       {
 	xmlobject object = (xmlobject) deletedObjects.elementAt(i);
 
-	System.err.println("Deleting " + object);
+	System.out.println("Deleting " + object);
 	    
 	Invid target = object.getInvid();
 
@@ -1357,7 +1361,7 @@ public class xmlclient implements ClientListener {
       {
 	if (success)
 	  {	
-	    System.err.println("Committing transaction");
+	    System.out.println("Committing transaction");
 
 	    attempt = session.commitTransaction(true);
 
@@ -1376,6 +1380,9 @@ public class xmlclient implements ClientListener {
 
 		success = false;
 	      }
+
+	    System.out.println("Transaction successfully committed.");
+	    System.out.println("Done.");
 	  }
 	else
 	  {
