@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.25 $ %D%
+ * @version $Revision: 1.26 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -273,15 +273,54 @@ public interface Session extends Remote {
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients, or to subsequent queries and view_db_object() calls by
-   * this client.
+   * clients.<br><br>
    *
    * If the transaction cannot be committed for some reason,
-   * commitTransaction() will instead abort the transaction.  In any
-   * case, calling commitTransaction() will close the transaction.
+   * commitTransaction() will abort the transaction if abortOnFail is
+   * true.  In any case, commitTransaction() will return a ReturnVal
+   * indicating whether or not the transaction could be committed, and
+   * whether or not the transaction remains open for further attempts
+   * at commit.  If ReturnVal.doNormalProcessing is set to true, the
+   * transaction remains open and it is up to the client to decide
+   * whether to abort the transaction by calling abortTransaction(),
+   * or to attempt to fix the reported problem and try another call
+   * to commitTransaction().
    *
-   * @return null if the transaction was committed successfully,
-   *         a non-null ReturnVal if there was a commit failure.
+   * @param abortOnFail If true, the transaction will be aborted if it
+   * could not be committed successfully.
+   *
+   * @return a ReturnVal object if the transaction could not be committed,
+   *         or null if there were no problems.  If the transaction was
+   *         forcibly terminated due to a major error, the 
+   *         doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
+   *
+   */
+
+  ReturnVal  commitTransaction(boolean abortOnFail) throws RemoteException;
+
+  /**
+   *
+   * This method causes all changes made by the client to be 'locked in'
+   * to the database.  When commitTransaction() is called, the changes
+   * made by the client during this transaction is logged to a journal
+   * file on the server, and the changes will become visible to other
+   * clients.<br><br>
+   *
+   * Committransaction() will return a ReturnVal indicating whether or
+   * not the transaction could be committed, and whether or not the
+   * transaction remains open for further attempts at commit.  If
+   * ReturnVal.doNormalProcessing is set to true, the transaction
+   * remains open and it is up to the client to decide whether to
+   * abort the transaction by calling abortTransaction(), or to
+   * attempt to fix the reported problem and try another call to
+   * commitTransaction().
+   *
+   * @return a ReturnVal object if the transaction could not be committed,
+   *         or null if there were no problems.  If the transaction was
+   *         forcibly terminated due to a major error, the 
+   *         doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
    * 
    */
 
