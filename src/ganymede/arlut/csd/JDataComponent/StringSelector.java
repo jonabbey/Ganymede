@@ -618,7 +618,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	System.out.println("What's this supposed to be? " + item);
 	return;
       }
 
@@ -965,7 +964,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
-    
+
+    // Java 5.0 seems to need these, for some reason
+
+    in.repaint();
+    out.repaint();
+
     updateTitles();
     invalidate();
     parent.validate();
@@ -1064,6 +1068,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
+
+    // Java 5.0 seems to need these, for some reason
+
+    in.repaint();
+    out.repaint();
 
     updateTitles();
     invalidate();

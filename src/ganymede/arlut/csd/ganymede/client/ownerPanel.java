@@ -69,7 +69,7 @@ import arlut.csd.JDialog.*;
  * @author Mike Mulvaney
  */
 
-public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
+public class ownerPanel extends JPanel implements JsetValueCallback {
 
   boolean debug = false;
 
@@ -147,19 +147,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     add("Center", holdOnPanel);
     invalidate();
     fp.validate();
-
-    // spin off a thread to load the panel.
-    
-    Thread thread = new Thread(this);
-    thread.start();
-  }
-
-  public void run()
-  {
-    if (debug)
-      {
-	System.out.println("Starting new thread");
-      }
 
     if (field == null)
       {

@@ -5818,7 +5818,7 @@ class PersonaListener implements ActionListener {
 		
 	    gc.ownerGroups = null;
 	    gc.clearCaches();
-	    gc.loader.clear();  // This reloads the hashes
+	    gc.loader.clear();  // This reloads the hashes on a new background thread
 	    gc.cancelTransaction();
 	    gc.buildTree();
 	    gc.currentPersonaString = newPersona;
