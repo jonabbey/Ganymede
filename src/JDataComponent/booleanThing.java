@@ -33,4 +33,9 @@ public class booleanThing {
       Boolean answer = new Boolean(Default);
       return answer;
     }
+
+  public boolean getValue()
+    {
+      return Default;
+    }
 }

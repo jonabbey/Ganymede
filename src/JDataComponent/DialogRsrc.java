@@ -16,6 +16,31 @@ import com.sun.java.swing.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * This class is used to create a customized StringDialog.  
+ *
+ * <p>Use the various addXXX methods on this class to insert
+ * the desired type of inputs, and then pass it to a StringDialog
+ * constructor.  The order in which the addXXX methods are called
+ * determines the layout order in the StringDialog.</p>
+ *
+ * Example:
+ *
+ * <code><blockquote><pre>
+ * DialogRsrc r = new DialogRsrc(frame, "Simple dialog", "Give us some information:");
+ * r.addString("Name:");
+ * r.addBoolean("Married:");
+ * 
+ * StringDialog d = new StringDialog(r);
+ * Hashtable result = d.DialogShow();
+ * if (result == null) {
+ *     // cancel was clicked...
+ * } else {
+ *     //process hashtable...
+ * }
+ * </pre></blockquote></code>
+ *  @see StringDialog
+ */
 public class DialogRsrc {
 
   static Hashtable imageCache = new Hashtable();
@@ -131,6 +156,19 @@ public class DialogRsrc {
     objects = new Vector();
   }
 
+    /**
+   *
+   * Adds a labeled text field
+   *
+   * @param label String to use as the label
+   * @param value Initial value of text field
+   */
+
+  public void addString(String label, String value)
+  {
+    objects.addElement(new stringThing(label, value));
+  }
+
   /**
    *
    * Adds a labeled text field
@@ -138,10 +176,11 @@ public class DialogRsrc {
    * @param string String to use as the label
    */
 
-  public void addString(String string)
+  public void addString(String label)
   {
-    objects.addElement(new stringThing(string));
+    addString(label, null);
   }
+
 
   /**
    * 
@@ -150,9 +189,36 @@ public class DialogRsrc {
    * @param string String to use as the label
    */
   
-  public void addBoolean(String string)
+  public void addBoolean(String label)
   {
-    objects.addElement(new booleanThing(string));
+    addBoolean(label, false);
+  }
+
+  /**
+   * 
+   * Adds a labeled check box field
+   *
+   * @param string String to use as the label
+   * @param value Initial value of field
+   */
+  
+  public void addBoolean(String label, boolean value)
+  {
+    objects.addElement(new booleanThing(label, value));
+  }
+
+  /**
+   *
+   * Adds a choice field to the dialog
+   *
+   * @param label String to use as the label
+   * @param choices Vector of Strings to add to the choice 
+   * @param selectedItem Initially selected item
+   */
+  
+  public void addChoice(String label, Vector choices, Object selectedItem)
+  {
+    objects.addElement(new choiceThing(label, choices, selectedItem));
   }
 
   /**
@@ -165,7 +231,7 @@ public class DialogRsrc {
   
   public void addChoice(String label, Vector choices)
   {
-    objects.addElement(new choiceThing(label, choices));
+    addChoice(label, choices, null);
   }
 
   /**
@@ -175,8 +241,8 @@ public class DialogRsrc {
    */
   public void addSeparator()
   {
-    System.out.println("NOT Adding separator.. not using gjt");
-    //    objects.addElement(new Separator());
+    System.out.println("Adding Jseparator");
+    objects.addElement(new JSeparator());
   }
 
   /**
@@ -187,8 +253,20 @@ public class DialogRsrc {
    */
   public void addPassword(String label)
   {
+    addPassword(label, false);
+  }
+
+  /**
+   *
+   * Adds a text-hidden password string field to the dialog
+   *
+   * @param label String to use as label
+   * @param isNew If true, password will have two fields for verification
+   */
+  public void addPassword(String label, boolean isNew)
+  {
     System.out.println("Adding password field");
-    objects.addElement(new passwordThing(label));
+    objects.addElement(new passwordThing(label, isNew));
   }
 
   public Vector getObjects()

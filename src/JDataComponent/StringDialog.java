@@ -24,6 +24,17 @@ import com.sun.java.swing.border.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * This class represents a customizable dialog.  
+ *
+ * <p>For simple dialogs, use the included
+ * constructors.  For more complicated dialogs, including check boxes, choice lists, and text
+ * fields, use a DialogRsrc. </p>
+ *
+ * <p>The ShowDialog method shows the current dialog, and returns a Hashtable of results.</p>
+ *
+ * @see DialogRsrc
+ */
 public class StringDialog extends JDialog implements ActionListener, JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
@@ -40,13 +51,15 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   JLabel
     imageCanvas;
 
+  JComponent
+    firstComp;   //This is the first component in the dialog.  It will request the focus.
+
   JButton 
     OKButton,
     CancelButton;
 
   JPanel 
     panel,
-    textPanel,
     mainPanel,
     dataPanel,
     buttonPanel;
@@ -136,25 +149,23 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     mainPanel.setLayout(new BorderLayout());
 
     dataPanel = new JPanel(new BorderLayout());
+    dataPanel.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
     mainPanel.add("Center", dataPanel);
 
     // Set up the text box at the top
 
     JLabel titleLabel = new JLabel(Resource.title, SwingConstants.CENTER);
-    titleLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    EmptyBorder eb5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5);
+    titleLabel.setBorder(eb5);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
     titleLabel.setOpaque(true);
     JPanel tPanel = new JPanel();
     tPanel.add(titleLabel);
     mainPanel.add("North", tPanel);
 
-    //textPanel = new JPanel();
-    //textPanel.setLayout(new BorderLayout());
-
     textLabel = new JMultiLineLabel(Resource.getText());
     //textLabel = new JLabel(Resource.getText());
-    textLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    //textPanel.add("Center", textLabel);
+    textLabel.setBorder(eb5);
     dataPanel.add("North", textLabel);
 
     image = Resource.getImage();
@@ -174,6 +185,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	buttonPanel.add(CancelButton);
       }
     JPanel southPanel = new JPanel(new BorderLayout());
+    southPanel.setBorder(BorderFactory.createEmptyBorder(5,3,0,3));
     southPanel.add("Center", buttonPanel);
     southPanel.add("North", new arlut.csd.JDataComponent.JSeparator());
 
@@ -228,6 +240,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	      {
 		Object element = objects.elementAt(i);
 
+		if (debug)
+		  {
+		    System.out.println("number: " + numberOfObjects + " current: " + i);
+		  }
+
 		if (element instanceof stringThing)
 		  {
 		    if (debug)
@@ -237,8 +254,21 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    
 		    stringThing st = (stringThing)element;
 		    JstringField sf = new JstringField();
+		    sf.setText(st.getValue());
 		    sf.setEditable(true);
 		    sf.setCallback(this); 
+
+		    if (i == (numberOfObjects - 1)) // This is the last object
+		      {
+			sf.addActionListener(new ActionListener() {
+			  public void actionPerformed(ActionEvent e)
+			    {
+			      OKButton.doClick();
+			    }
+			});
+
+		      }
+
 		    addRow(panel, sf, st.getLabel(), i);
 		    
 		    componentHash.put(sf, st.getLabel());
@@ -253,14 +283,42 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		      }
 
 		    passwordThing pt = (passwordThing)element;
-		    JpasswordField sf = new JpasswordField();
+		    if (pt.isNew())
+		      {
+			JpassField sf = new JpassField(null, true, 10,100,true);
+			
+			sf.setCallback(this); 
+			addRow(panel, sf, pt.getLabel(), i);
+			
+			componentHash.put(sf, pt.getLabel());
+		      }
+		    else
+		      {
+			JpasswordField sf = new JpasswordField();
+			sf.setCallback(this); 
+			sf.setEditable(true);
+			if (i == (numberOfObjects - 1)) // This is the last object
+			  {
+			    if (debug)
+			      {
+				System.out.println("Adding action listener.");
+			      }
+			    sf.addActionListener(new ActionListener() {
+			      public void actionPerformed(ActionEvent e)
+				{
+				  OKButton.doClick();
+				}
+			    });
+			    
+			  }
+			
+			addRow(panel, sf, pt.getLabel(), i);
+			
+			componentHash.put(sf, pt.getLabel());
+		      }
 
-		    sf.setEditable(true);
-		    sf.setCallback(this); 
-		    addRow(panel, sf, pt.getLabel(), i);
-
-		    componentHash.put(sf, pt.getLabel());
 		    valueHash.put(pt.getLabel(), "");
+		    
 		  }
 		else if (element instanceof booleanThing)
 		  {
@@ -272,12 +330,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    booleanThing bt = (booleanThing)element;
 		    JcheckboxField cb = new JcheckboxField();
 		    cb.setCallback(this);
-		    cb.setSelected(bt.getDefault().booleanValue());
+		    cb.setSelected(bt.getValue());
 		    addRow(panel, cb, bt.getLabel(), i);
 		      
 		    componentHash.put(cb, bt.getLabel());
-		    valueHash.put(bt.getLabel(), bt.getDefault());
-		      
+		    valueHash.put(bt.getLabel(), new Boolean(bt.getValue()));
 		  }
 		else if (element instanceof choiceThing)
 		  {
@@ -315,6 +372,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 			    ch.addItem(str);
 			  }
 
+			if (ct.getSelectedItem() != null)
+			  {
+			    ch.setSelectedItem(ct.getSelectedItem());
+			  }
+
 			ch.addItemListener(this);
 			addRow(panel, ch, ct.getLabel(), i);
 
@@ -338,48 +400,89 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		System.err.println("Created components, registering callbacks.");
 	      }
 
-	    for (int i = 0; i < components.size() - 1; i++)
+	    for (int i = 0; i < components.size(); i++)
 	      {
 		JComponent c = (JComponent)components.elementAt(i);
+		if (debug)
+		  {
+		    System.out.println("Checking component: " + c);
+		  }
 
 		if (c instanceof JstringField)
 		  {
 		    JstringField sf = (JstringField) c;
-		    sf.addActionListener(
-					 new ActionListener()
-					 {
-					   public void actionPerformed(ActionEvent e) {
-					     JComponent thisComp = (JComponent)e.getSource();
-					     
-					     ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-					   }
-					 });
+		    if (i == components.size() -1) // last one!
+		      {
+			sf.addActionListener(
+					     new ActionListener()
+					     {
+					       public void actionPerformed(ActionEvent e) {
+						 OKButton.doClick();
+					       }
+					     });
+		      }
+		    else
+		      {
+			sf.addActionListener(
+					     new ActionListener()
+					     {
+					       public void actionPerformed(ActionEvent e) {
+						 JComponent thisComp = (JComponent)e.getSource();
+						 
+						 ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+					       }
+					     });
+		      }
+		    
+		    if (i == 0) // first object
+		      {
+			firstComp = sf;
+		      }
+		    
+		    
 		  }
 		else if (c instanceof JpasswordField)
 		  {
+		    if (debug)
+		      {
+			System.out.println("This is a JpasswordField, number " + i);
+		      }
+
 		    JpasswordField pf = (JpasswordField) c;
-		    pf.addActionListener(new ActionListener()
-					 {
-					   public void actionPerformed(ActionEvent e) {
-					     JComponent thisComp = (JComponent)e.getSource();
-					     
-					     ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-					   }
-					 });
+		    if (i == components.size() -1)
+		      {
+			pf.addActionListener(new ActionListener()
+					     {
+					       public void actionPerformed(ActionEvent e) {
+						 OKButton.doClick();
+					       }
+					     });
+		      }
+		    else
+		      {
+			pf.addActionListener(new ActionListener()
+					     {
+					       public void actionPerformed(ActionEvent e) {
+						 JComponent thisComp = (JComponent)e.getSource();
+						 
+						 ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+					       }
+					     });
+		      }
+		    if (i == 0) // first object
+		      {
+			firstComp = pf;
+		      }
+		  }
+		else if (c instanceof JComboBox)
+		  {
+		    if (i == 0)
+		      {
+			firstComp = c;
+		      }
 		  }
 	      }
 
-	    // last component
-	    /*
-	    JComponent last = (JComponent)components.elementAt(components.size() -1);
-	    last.addActionListener(new ActionListener()
-				   {
-				     public void actionPerformed(ActionEvent e) {
-				       OKButton.doClick();
-				     }
-				   });
-	    */
-	    
 	  }
 	else if (debug)
 	  {
@@ -417,20 +520,29 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   /**
    * Display the dialog box.
    *
-   * Use this instead of Dialog.show();
-   * @returns valueHash HashTable of labels to values
+   * Use this instead of Dialog.show().  If Hashtable returned is null,
+   * then the cancel button was clicked.  Otherwise, it will contain a 
+   * hash of labels(String) to results (Object).
+   *
+   * @return HashTable of labels to values
    */
 
   public Hashtable DialogShow()
   {
+    SwingUtilities.invokeLater(new Runnable() 
+			       {
+				 public void run()
+				   {
+				     firstComp.requestFocus();
+				   }
+			       });
+
     pack();
 
     repaint();
     //    show();
     setVisible(true);		// thread will halt here
       
-    this.dispose();
-    
     return valueHash;
   }
 
@@ -481,7 +593,15 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	String label = (String)componentHash.get(comp);
 	JstringField sf = (JstringField)comp;
-	valueHash.put(label, sf.getText());
+	if (sf.getText() == null)
+	  {
+	    valueHash.put(label, "");
+	  }
+	else
+	  {
+	    valueHash.put(label, sf.getText());
+	  }
+
 
 	if (debug)
 	  {
@@ -492,7 +612,15 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	String label = (String)componentHash.get(comp);
 	JpasswordField sf = (JpasswordField)comp;
-	valueHash.put(label, sf.getText());
+
+	if (sf.getText() == null)
+	  {
+	    valueHash.put(label, "");
+	  }
+	else
+	  {
+	    valueHash.put(label, sf.getText());
+	  }
 
 	if (debug)
 	  {
@@ -516,7 +644,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     return true;
   }
 
-  void addRow(JPanel parent, JComponent comp,  String label, int row)
+  private final void addRow(JPanel parent, JComponent comp,  String label, int row)
   {
     components.addElement(comp);
 
@@ -527,7 +655,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     parent.invalidate();
   }
 
-  void addSeparator(JPanel parent, Component comp, int row)
+  private final void addSeparator(JPanel parent, Component comp, int row)
   {
     parent.add("0 " + row + " 2 1 hH", comp);
   }
