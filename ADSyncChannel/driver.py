@@ -1,25 +1,32 @@
 from connection import ADFrontend
 from base64 import encodestring
-
-class MockObj: pass
+import sddl
 
 def go():
   ad = ADFrontend()
   ad.connect()
 
+  '''
   try:
     ad.delete_user("foobar")
   except:
     pass
   
-  obj = MockObj()
-  obj.sAMAccountName = "foobar"
-  
-  ad.add_user(obj)
-  ad.set_user_pw("foobar", "P@$$word")
-  ad.set_user_pw("foobar", "P@$$word2")
+  ad.add_user("foobar", {}, password="P@$$word", accountControlFlag=512)
+  '''
+  print "Dumping all security descriptors:"
+  print
 
-  print ad.get_user("foobar")
+  r = ad.search(attrlist=["nTSecurityDescriptor"])
+  for dn, attrdict in r:
+    if dn is None:
+      continue
+
+    print dn
+    secdescriptor = attrdict["nTSecurityDescriptor"][0]
+    sddl.SecurityDescriptor(secdescriptor).pprint()
+    print "----------------------------------------------------------"
+    print
 
 if __name__ == "__main__":
   go()
