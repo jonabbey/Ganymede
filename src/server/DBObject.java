@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.19 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.20 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -67,6 +67,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   /* - */
 
+  boolean customizer = false;
   DBObjectBase objectBase;
   int id;			// 32 bit id - the object's invariant id
   Hashtable fields;
@@ -78,6 +79,17 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 				// care of.
 
   /* -- */
+
+  /**
+   *
+   * No param constructor, here to allow DBEditObject to have
+   * a no-param constructor for a static method handle
+   *
+   */
+  public DBObject() throws RemoteException
+  {
+    customizer = true;
+  }
 
   /**
    *
@@ -238,7 +250,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public String getLabel()
   {
-    if (objectBase.classdef == null)
+    String result;
+
+    result = objectBase.objectHook.getLabelHook(this);
+
+    if (result == null)
       {
 	// no class for this object.. just go
 	// ahead and use the default label
@@ -272,39 +288,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       }
     else
       {
-	Method m;
-	String S;
-	Object objs[];
-	
-	objs = new Object[1];
-	objs[0] = this;
-
-	try
-	  {
-	    m = objectBase.classdef.getDeclaredMethod("getLabelHook", null);
-	    S = (String) m.invoke(null, objs);
-	    return S;
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (SecurityException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (InvocationTargetException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
+	return result;
       }
   }
 
