@@ -50,13 +50,13 @@ if ($query->param) {
 
     if ($new_pass eq $verify) {
       &make_xml;
-      $xml_output = `$xmlclient $filename >/dev/null 2>&1`;
+      $xml_output = `$xmlclient $filename`;
       $xml_status = $? >> 8;
       if (($xml_status == 0)) {
 	    $time = `/usr/bin/date`;
 	    &print_success;
         } else {
-	    &print_failure;
+	    &print_failure($xml_output);
         }
     } else {
 	&print_nomatch;
@@ -320,6 +320,8 @@ ENDSUCCESS
 ######################################################################
 
 sub print_failure {
+my ($failure) = @_;
+
     print <<ENDFAILURE;
  <HTML>
   <HEAD>
@@ -359,8 +361,11 @@ sub print_failure {
     <table border=0 width="60%">
 
 <tr> <td align="center"> <p>Ganymede was not able to accept your
-password change request.  Either your username or your current
-password were not valid.</p>
+password change request.  The following error message was reported:</p>
+
+<pre>
+$failure
+</pre>
 
 <p>If your current password was not entered properly, you will receive
 mail from Ganymede reporting a failure to login.  This is normal, and

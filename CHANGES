@@ -3,6 +3,52 @@ June 7, 2001
 CHANGES
 ---------------------------------------------
 
+-------------------- Changes from 1.02 to 1.03 -------------------
+
+RELEASE DATE: ??, 2001
+
+1. [SERVER] Fixed non-event related mail sending in DBLog
+
+The DBLog class had an error, effectively, that prevented 'mailout'
+class mail from being sent, although it was logged.
+
+Added a 'sendMail' method to DBLog to simplify the sending
+of mail by plug-in code and custom tasks.
+
+2. [SERVER] Fixed startup default permissions for non-supergash users
+
+Muller Miklos, mmuller@lbcons.net, reported a bug that caused Ganymede
+to not allow non-supergash users to login to a freshly initialized
+Ganymede server.  Editing the Default Role object's Default Access
+Bits field, works around the problem, but unless this is done, an
+exception will be thrown in GanymedeSession.resetDefaultPerms().
+
+I have corrected the GanymedeSession resaultDefaultPerms() method so
+that it will not freak out when it doesn't find any definition for the
+Default Access Bits field in the Default Role object.
+
+This bug was avoided by users who used the userKit's loader.pl script
+to initialize the Ganymede database.
+
+3. [SERVER] Fixed infinite loop bug in XML parser
+
+The XML parsing code had a bug that would leave it looping infinitely
+if the XML stream was closed before completion of parsing.
+
+-------------------- Changes from 1.01 to 1.02 -------------------
+
+RELEASE DATE: June 7, 2001
+
+1. [SERVER] Fixed an incompatibility with JDK 1.1 on the server
+
+The server code included a use of a generic 'add()' method
+on the java.util.Vector class that didn't get added until Java
+1.2.  Replaced it with addElement().
+
+I'm going to have to put up some sort of nightly build directory until
+I can get network CVS access going, putting out new releases like this
+is silly. ;-)
+
 -------------------- Changes from 1.0 to 1.01 -------------------
 
 RELEASE DATE: June 7, 2001
