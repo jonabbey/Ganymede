@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2002/08/07 18:39:21 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2002/08/21 05:29:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -695,10 +695,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    else
 	      {
 		// if all we wind up doing is schema editing, we'll
-		// want return a positive success.  in transmitData(),
-		// below, we set this.success back to false until we
-		// know that we have successfully committed all the
-		// data in the <ganydata> block.
+		// want return a positive success.  in
+		// integrateXMLTransaction(), below, we set
+		// this.success back to false until we know that we
+		// have successfully committed all the data in the
+		// <ganydata> block.
 
 		this.success = true; 
 	      }
@@ -1800,7 +1801,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	System.err.println("\n\n");
 
-	committedTransaction = transmitData();
+	committedTransaction = integrateXMLTransaction();
 
 	return committedTransaction;
       }
@@ -2179,7 +2180,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * had problems and was abandoned.
    */
 
-  private boolean transmitData()
+  private boolean integrateXMLTransaction()
   {
     boolean success = true;
     ReturnVal attempt;
@@ -2537,70 +2538,73 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    this.success = true;
 	  }
 
-	if (createCount.size() > 0)
+	if (success)
 	  {
-	    err.println("Objects created:");
-
-	    Enumeration enum = createCount.keys();
-
-	    while (enum.hasMoreElements())
+	    if (createCount.size() > 0)
 	      {
-		String key = (String) enum.nextElement();
-
-		err.println("\t" + key + ": " + createCount.get(key));
+		err.println("Objects created:");
+		
+		Enumeration enum = createCount.keys();
+		
+		while (enum.hasMoreElements())
+		  {
+		    String key = (String) enum.nextElement();
+		    
+		    err.println("\t" + key + ": " + createCount.get(key));
+		  }
 	      }
-	  }
-
-	if (editCount.size() > 0)
-	  {
-	    err.println("Objects edited:");
-
-	    Enumeration enum = editCount.keys();
-
-	    while (enum.hasMoreElements())
+	    
+	    if (editCount.size() > 0)
 	      {
-		String key = (String) enum.nextElement();
-
-		err.println("\t" + key + ": " + editCount.get(key));
+		err.println("Objects edited:");
+		
+		Enumeration enum = editCount.keys();
+		
+		while (enum.hasMoreElements())
+		  {
+		    String key = (String) enum.nextElement();
+		    
+		    err.println("\t" + key + ": " + editCount.get(key));
+		  }
 	      }
-	  }
-
-	if (deleteCount.size() > 0)
-	  {
-	    err.println("Objects deleted:");
-
-	    Enumeration enum = deleteCount.keys();
-
-	    while (enum.hasMoreElements())
+	    
+	    if (deleteCount.size() > 0)
 	      {
-		String key = (String) enum.nextElement();
-
-		err.println("\t" + key + ": " + deleteCount.get(key));
+		err.println("Objects deleted:");
+		
+		Enumeration enum = deleteCount.keys();
+		
+		while (enum.hasMoreElements())
+		  {
+		    String key = (String) enum.nextElement();
+		    
+		    err.println("\t" + key + ": " + deleteCount.get(key));
+		  }
 	      }
-	  }
-
-	if (inactivateCount.size() > 0)
-	  {
-	    err.println("Objects inactivated:");
-
-	    Enumeration enum = inactivateCount.keys();
-
-	    while (enum.hasMoreElements())
+	    
+	    if (inactivateCount.size() > 0)
 	      {
-		String key = (String) enum.nextElement();
-
-		err.println("\t" + key + ": " + inactivateCount.get(key));
+		err.println("Objects inactivated:");
+		
+		Enumeration enum = inactivateCount.keys();
+		
+		while (enum.hasMoreElements())
+		  {
+		    String key = (String) enum.nextElement();
+		    
+		    err.println("\t" + key + ": " + inactivateCount.get(key));
+		  }
 	      }
-	  }
+	    
+	    err.println("\nTransaction successfully committed.");
 
-	err.println("\nTransaction successfully committed.");
+	    return success;
+	  }
       }
-    else
-      {
-	err.println("Errors encountered, aborting transaction.");
-	
-	// the disconnect below will abort the transaction and log us out
-      }
+
+    // we should only get here if success == false
+
+    err.println("Errors encountered, aborting transaction.");
 
     return success;
   }
