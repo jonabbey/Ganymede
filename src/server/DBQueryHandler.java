@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package arlut.csd.ganymede;
 
 import java.util.*;
+import gnu.regexp.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -198,7 +199,59 @@ public class DBQueryHandler {
 	      {
 		if (n.arrayOp == n.NONE)
 		  {
-		    return compareStrings(n, (String) n.value, (String) value);
+		    if (n.comparator == QueryDataNode.MATCHES)
+		      {
+			if (n.regularExpression == null)
+			  {
+			    if (debug)
+			      {
+				System.err.println("DBQueryHandler: trying to build regexp: /" + n.value + "/");
+			      }
+
+			    try
+			      {
+				n.regularExpression = new gnu.regexp.RE(n.value);
+			      }
+			    catch (gnu.regexp.REException ex)
+			      {
+				System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
+
+				return false;
+			      }
+
+			    if (debug)
+			      {
+				System.err.println("DBQueryHandler: regexp built successfully: " + n.regularExpression);
+			      }
+			  }
+
+			gnu.regexp.RE regexp = (gnu.regexp.RE) n.regularExpression;
+			
+			if (debug)
+			  {
+			    System.err.println("DBQueryHandler: Trying to match regexp against " + value);
+			  }
+			
+			gnu.regexp.REMatch match = regexp.getMatch(value);
+
+			if (debug)
+			  {
+			    if (match == null)
+			      {
+				System.err.println("DBQueryHandler: Failed match regexp against " + value);
+			      }
+			    else
+			      {
+				System.err.println("DBQueryHandler: Found match regexp against " + value);
+			      }
+			  }
+
+			return (match != null);
+		      }
+		    else
+		      {
+			return compareStrings(n, (String) n.value, (String) value);
+		      }
 		  }
 		else
 		  {
@@ -288,7 +341,7 @@ public class DBQueryHandler {
 
 		if (debug)
 		  {
-		    System.err.println("Doing an string/invid compare");
+		    System.err.println("Doing a string/invid compare");
 		  }
 
 		if (n.arrayOp == n.NONE)
