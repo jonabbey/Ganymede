@@ -19,6 +19,8 @@ public class listHandle {
   Object
     object = null;
 
+  /* -- */
+
   public listHandle(String label)
   {
     this(label, null, false);
@@ -74,8 +76,10 @@ public class listHandle {
       {
 	return label;
       }
+
     return object;
   }
+
   public boolean isCustom()
   {
     return custom;
@@ -84,5 +88,25 @@ public class listHandle {
   public void setCustom(boolean isCustom)
   {
     this.custom = custom;
+  }
+
+  public boolean equals(Object val)
+  {
+    if (!(val instanceof listHandle))
+      {
+	return false;
+      }
+
+    listHandle handle = (listHandle) val;
+
+    if (object != null)
+      {
+	return object.equals(handle.object) &&
+	  label.equals(handle.label);
+      }
+    else
+      {
+	return label.equals(handle.label);
+      }
   }
 }
