@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.12 $
-# $Date: 2000/07/25 00:33:11 $
+# $Revision: 1.13 $
+# $Date: 2000/08/21 20:20:42 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -140,7 +140,7 @@ if (!-d $vars{"CLIENTINSTALL"}) {
 } else {
   print "Found the client install directory ok\n";
 
-  if (-f $vars{"CLIENTINSTALL"}/ganymede.properties) {
+  if (-f $vars{"CLIENTINSTALL"}."/ganymede.properties") {
     die "*Error, can't install client into ".$vars{"CLIENTINSTALL"}.".. server installed in this directory.";
   }
 }
@@ -154,10 +154,10 @@ $installdir = $vars{"CLIENTINSTALL"};
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/password", 0750); print ".";
 
-copy("jars/ganymede.jar", "$installdir/jars/ganymede.jar"); print ".";
-copy("jars/ganymedeAdmin.jar", "$installdir/jars/ganymedeAdmin.jar"); print ".";
-copy("jars/password.jar", "$installdir/jars/password.jar"); print ".";
-copydir("password", "$installdir/password"); print ".";
+copy("jars/ganymede.jar", $installdir."/jars/ganymede.jar"); print ".";
+copy("jars/ganymedeAdmin.jar", $installdir."/jars/ganymedeAdmin.jar"); print ".";
+copy("jars/password.jar", $installdir."/jars/password.jar"); print ".";
+copydir("password", $installdir."/password"); print ".";
 
 # Copy and process the properties file into place
 
@@ -165,7 +165,7 @@ copydir("password", "$installdir/password"); print ".";
 		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
 
 open INPUT, $template or die "Couldn't open client properties template!";
-open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";
+open OUTPUT, ">".$installdir."/client.properties" or die "Couldn't write client.properties";
 
 print "\nCustomizing client.properties\n";
 
@@ -189,11 +189,11 @@ close OUTPUT;
 print "\nCustomizing ganymede script\n";
   
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
+	       "PROPERTIES" => $installdir."/client.properties",
+	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:".$installdir."/jars/ganymede.jar");
   
 open INPUT, "scripts/ganymede.template" or die "Couldn't open ganymede template!";
-open OUTPUT, ">$installdir/bin/ganymede" or die "Couldn't write ganymede";
+open OUTPUT, ">".$installdir."/bin/ganymede" or die "Couldn't write ganymede";
   
 while (<INPUT>) {
     
