@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.19 $ %D%
+  Version: $Revision: 1.20 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,7 +56,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.19 $ %D%
+ * @version $Revision: 1.20 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -1470,6 +1470,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 class treeCanvas extends JComponent implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
+  static final boolean debug2 = false;
   static final Object SPACE = new Object();
   static final Object LINE = new Object();
 
@@ -2097,7 +2098,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	return;
       }
 
-    if (debug)
+    if (debug2)
       {
 	System.err.println("Clicked on node " + node.getText() + ", row " + row);
 
@@ -2137,7 +2138,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       }
     else
       {
-	if (debug)
+	if (debug2)
 	  {
 	    System.err.println("Click in row " + row);
 	  }
@@ -2228,7 +2229,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  {
 	    ctrl.dragNode = (treeNode) ctrl.rows.elementAt(row);
 
-	    if (debug)
+	    if (debug2)
 	      {
 		System.err.println("mousePressed(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
 	      }
@@ -2239,7 +2240,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  }
       }
 
-    if (debug)
+    if (debug2)
       {
 	System.err.println("Press in row " + row);
       }
@@ -2287,7 +2288,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     dontdrag = false;
     ctrl.dragNode = null;
 
-    if (debug)
+    if (debug2)
       {
 	System.err.println("Released in row " + row);
       }
@@ -2331,7 +2332,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     row = (e.getY() + v_offset) / ctrl.row_height;
 
-    if (debug)
+    if (debug2)
       {
 	System.err.println("Dragging over row " + row);
       }
@@ -2354,7 +2355,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	return;
       }
 
-    if (debug)
+    if (debug2)
       {
 	System.err.println("Dragging over Node: " + n.getText()); 
       }
@@ -2365,12 +2366,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (!spriteVisible && (ctrl.dragMode != treeControl.DRAG_NONE))
       {
-	if (ctrl.dCallback.startDrag(n))
+	if (ctrl.dCallback.startDrag(ctrl.dragNode))
 	  {
 	    spriteVisible = true;
-	    ctrl.dragNode = n;
 
-	    if (debug)
+	    if (debug2)
 	      {
 		System.err.println("mouseDragged(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
 	      }
@@ -2414,7 +2414,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	      {
 		if (ctrl.dCallback.iconDragOver(ctrl.dragNode, n))
 		  {
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned true");
 		      }
@@ -2428,7 +2428,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		  }
 		else
 		  {
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned false");
 		      }
@@ -2449,7 +2449,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	      {
 		if (dragSelected)
 		  {
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("** still dragging over selected node " + n.getText());
 		      }
@@ -2458,7 +2458,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		  }
 		else
 		  {
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("** still dragging over unselected node " + n.getText());
 		      }
@@ -2484,7 +2484,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	      {
 		aboveNode = n;
 
-		if (debug)
+		if (debug2)
 		  {
 		    System.err.println("aboveNode is " + aboveNode.getText());
 		  }
@@ -2493,7 +2493,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		  {
 		    belowNode = (treeNode) ctrl.rows.elementAt(aboveNode.row + 1);
 
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("belowNode is " + belowNode.getText());
 		      }
@@ -2507,7 +2507,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	      {
 		belowNode = n;
 
-		if (debug)
+		if (debug2)
 		  {
 		    System.err.println("belowNode is " + belowNode.getText());
 		  }
@@ -2516,7 +2516,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		  {
 		    aboveNode = (treeNode) ctrl.rows.elementAt(belowNode.row - 1);
 
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("aboveNode is " + aboveNode.getText());
 		      }
@@ -2554,7 +2554,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	    if (!dragSelected ||
 		((spriteLoc.y < hiBound) || (spriteLoc.y > loBound)))
 	      {
-		if (debug)
+		if (debug2)
 		  {
 		    if (dragSelected)
 		      {
@@ -2570,7 +2570,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
 		if (ctrl.dCallback.dragLineTween(ctrl.dragNode, aboveNode, belowNode))
 		  {
-		    if (debug)
+		    if (debug2)
 		      {
 			System.err.println("dragLineTween affirm");
 		      }
