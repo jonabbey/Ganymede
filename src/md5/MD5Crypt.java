@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/11/04 02:25:43 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/11/04 03:13:11 $
    Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -67,8 +67,8 @@ import MD5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.2 $</p>
- * <p>Last Mod Date: $Date: 1999/11/04 02:25:43 $</p>
+ * <p>Version: $Revision: 1.3 $</p>
+ * <p>Last Mod Date: $Date: 1999/11/04 03:13:11 $</p>
  * <p> Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
@@ -104,19 +104,24 @@ public final class MD5Crypt {
     System.exit(0);
   }
 
-  static final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  static private final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-  static final String to64(long v, int size)
+  static private final String to64(long v, int size)
   {
     StringBuffer result = new StringBuffer();
 
-    for (int i = 0; i < size; i++)
+    while (--size >= 0)
       {
 	result.append(itoa64.charAt((int) (v & 0x3f)));
-	v>>=6;
+	v >>>= 6;
       }
 
     return result.toString();
+  }
+
+  static private final int bytes2u(byte inp)
+  {
+    return (int) inp & 0xff;
   }
 
   /**
@@ -177,7 +182,6 @@ public final class MD5Crypt {
     /* Then just as many characters of the MD5(pw,salt,pw) */
 
     ctx1 = new MD5();
-
     ctx1.Update(password);
     ctx1.Update(salt);
     ctx1.Update(password);
@@ -190,7 +194,7 @@ public final class MD5Crypt {
 
     /* Then something really weird... */
 
-    for (int j = 0, i = password.length(); i != 0; i >>=1)
+    for (int j = 0, i = password.length(); i != 0; i >>>=1)
       {
 	if ((i & 1) != 0)
 	  {
@@ -255,22 +259,22 @@ public final class MD5Crypt {
     result.append(salt);
     result.append("$");
 
-    l = (finalState[0] << 16) | (finalState[6] << 8) | finalState[12];
+    l = (bytes2u(finalState[0]) << 16) | (bytes2u(finalState[6]) << 8) | bytes2u(finalState[12]);
     result.append(to64(l, 4));
 
-    l = (finalState[1] << 16) | (finalState[7] << 8) | finalState[13];
+    l = (bytes2u(finalState[1]) << 16) | (bytes2u(finalState[7]) << 8) | bytes2u(finalState[13]);
     result.append(to64(l, 4));
 
-    l = (finalState[2] << 16) | (finalState[8] << 8) | finalState[14];
+    l = (bytes2u(finalState[2]) << 16) | (bytes2u(finalState[8]) << 8) | bytes2u(finalState[14]);
     result.append(to64(l, 4));
 
-    l = (finalState[3] << 16) | (finalState[9] << 8) | finalState[15];
+    l = (bytes2u(finalState[3]) << 16) | (bytes2u(finalState[9]) << 8) | bytes2u(finalState[15]);
     result.append(to64(l, 4));
 
-    l = (finalState[4] << 16) | (finalState[10] << 8) | finalState[5];
+    l = (bytes2u(finalState[4]) << 16) | (bytes2u(finalState[10]) << 8) | bytes2u(finalState[5]);
     result.append(to64(l, 4));
 
-    l = finalState[11];
+    l = bytes2u(finalState[11]);
     result.append(to64(l, 2));
 
     return result.toString();
