@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,7 +56,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public systemCustom(DBObjectBase objectBase) throws RemoteException
+  public systemCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -67,7 +67,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public systemCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public systemCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -79,7 +79,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public systemCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public systemCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
 

@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
    *
    */
 
-  public mapCustom(DBObjectBase objectBase) throws RemoteException
+  public mapCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -43,7 +43,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
    *
    */
 
-  public mapCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public mapCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -55,7 +55,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
    *
    */
 
-  public mapCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public mapCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }
