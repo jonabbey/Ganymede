@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -359,6 +359,100 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   /**
    *
+   * This method provides the hook for doing a
+   * fast database dump to a string form.
+   *
+   * @see arlut.csd.ganymede.Query
+   * @see arlut.csd.ganymede.Result
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public synchronized StringBuffer dump(Query query)
+  {
+    StringBuffer buffer = new StringBuffer();
+    DBObjectBase base = null;
+    Vector baseLock = new Vector();
+    Enumeration enum;
+    Integer key;
+    DBObject obj;
+
+    /* -- */
+
+    if (query == null)
+      {
+	setLastError("null query");
+	return null;
+      }
+
+    // objectType will be -1 if the query is specifying the
+    // base with the base's name
+
+    if (query.objectType != -1)
+      {
+	base = Ganymede.db.getObjectBase(query.objectType);
+      }
+    else if (query.objectName != null)
+      {
+	base = Ganymede.db.getObjectBase(query.objectName);
+      }
+
+    if (base == null)
+      {
+	setLastError("No such base");
+	return null;
+      }
+
+    baseLock.addElement(base);
+
+    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+
+    try
+      {
+	session.openReadLock(baseLock);	// wait for it
+      }
+    catch (InterruptedException ex)
+      {
+	setLastError("lock interrupted");
+	return null;		// we're probably being booted off
+      }
+
+    Ganymede.debug("Query: " + username + " : got read lock");
+
+    buffer.append(base.dump());
+
+    enum = base.objectHash.keys();
+
+    // need to check in here to see if we've had the lock yanked
+
+    while (session.isLocked() && enum.hasMoreElements())
+      {
+	key = (Integer) enum.nextElement();
+	obj = (DBObject) base.objectHash.get(key);
+
+	if (DBQueryHandler.matches(query, obj))
+	  {
+	    //    Ganymede.debug("Dump Query: " + username + " : adding element " + obj.getLabel());
+	    buffer.append(obj.dump(session));
+	  }
+      }
+
+    if (!session.isLocked())
+      {
+	setLastError("lock interrupted");
+	return null;
+      }
+    
+    session.releaseReadLock();
+
+    Ganymede.debug("Query: " + username + " : released read lock");
+
+    return buffer;
+  }
+
+  /**
+   *
    * This method provides the hook for doing all
    * manner of object listing for the Ganymede
    * database.
@@ -369,11 +463,11 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized Vector query(Query query)
+  public synchronized StringBuffer query(Query query)
   {
+    StringBuffer result = new StringBuffer();
     DBObjectBase base = null;
     Vector baseLock = new Vector();
-    Vector result = new Vector();
     Enumeration enum;
     Integer key;
     DBObject obj;
@@ -431,8 +525,100 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
-	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
-	    result.addElement(new Result(obj));
+	    //	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
+	    result.append(obj.resultDump(session));
+	  }
+      }
+
+    if (!session.isLocked())
+      {
+	setLastError("lock interrupted");
+	return null;
+      }
+    
+    session.releaseReadLock();
+
+    Ganymede.debug("Query: " + username + " : released read lock");
+
+    return result;
+  }
+
+  /**
+   *
+   * This method provides the hook for doing all
+   * manner of object listing for the Ganymede
+   * database.
+   *
+   * @see arlut.csd.ganymede.Query
+   * @see arlut.csd.ganymede.Result
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized Vector internalQuery(Query query)
+  {
+    Vector result = new Vector();
+    DBObjectBase base = null;
+    Vector baseLock = new Vector();
+    Enumeration enum;
+    Integer key;
+    DBObject obj;
+
+    /* -- */
+
+    if (query == null)
+      {
+	setLastError("null query");
+	return null;
+      }
+
+    // objectType will be -1 if the query is specifying the
+    // base with the base's name
+
+    if (query.objectType != -1)
+      {
+	base = Ganymede.db.getObjectBase(query.objectType);
+      }
+    else if (query.objectName != null)
+      {
+	base = Ganymede.db.getObjectBase(query.objectName);
+      }
+
+    if (base == null)
+      {
+	setLastError("No such base");
+	return null;
+      }
+
+    baseLock.addElement(base);
+
+    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+
+    try
+      {
+	session.openReadLock(baseLock);	// wait for it
+      }
+    catch (InterruptedException ex)
+      {
+	setLastError("lock interrupted");
+	return null;		// we're probably being booted off
+      }
+
+    Ganymede.debug("Query: " + username + " : got read lock");
+
+    enum = base.objectHash.keys();
+
+    // need to check in here to see if we've had the lock yanked
+
+    while (session.isLocked() && enum.hasMoreElements())
+      {
+	key = (Integer) enum.nextElement();
+	obj = (DBObject) base.objectHash.get(key);
+
+	if (DBQueryHandler.matches(query, obj))
+	  {
+	    //	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
+	    result.addElement(new Result(obj.getInvid(), obj.getLabel()));
 	  }
       }
 
