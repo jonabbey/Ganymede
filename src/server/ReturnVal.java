@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/04/01 22:17:52 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/05/07 05:21:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,27 +63,26 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class provides a report on the status of the client's
+ * <p>This class provides a report on the status of the client's
  * requested operation.  It is intended to be returned by a call on
- * the server to make a change to the database.<br><br>
+ * the server to make a change to the database.</p>
  *
- * Included in this object is a general success code, a list of
+ * <p>Included in this object is a general success code, a list of
  * objects and fields that need to be rescanned, if applicable, a
  * dialog resource that can provide a description of a dialog box to
  * be presented to the user, and an optional callback that the client
- * can call with the results of the dialog box if necessary.<br><br>
+ * can call with the results of the dialog box if necessary.</p>
  *
- * Note that operations that succeed without needing any further information
- * or action on the part of the client will simply return null.<br><br>
+ * <p>Note that operations that succeed without needing any further information
+ * or action on the part of the client will simply return null.</p>
  *
- * If a non-null ReturnVal object is passed back, one of two things
+ * <p>If a non-null ReturnVal object is passed back, one of two things
  * may be true.  didSucceed() may return true, in which case the
  * operation was successful, but there may be an informational dialog
  * returned and/or a list of objects and fields that need to be
- * updated in response to the successful update.  <br><br>
+ * updated in response to the successful update.</p>
  *
- * Alternatively, didSucceed() may return false, in which case the
+ * <p>Alternatively, didSucceed() may return false, in which case the
  * operation either could not succeed or is incomplete.  In this case,
  * doRescan() will return false, and getDialog() should return a valid
  * JDialogBuff().  If the operation is simply incomplete pending more
@@ -92,7 +91,7 @@ import arlut.csd.JDialog.*;
  * results of that dialog should be passed to the callback.  The
  * callback will in return pass back another ReturnVal object.  The
  * server may walk the user through an iterative set of dialogs to
- * finally complete the desired operation.
+ * finally complete the desired operation.</p>
  *
  * @see arlut.csd.JDialog.JDialogBuff
  * @see arlut.csd.JDialog.DialogRsrc
@@ -117,65 +116,51 @@ public class ReturnVal implements java.io.Serializable {
   byte status;
 
   /**
-   *
-   * A Serializable Invid that can be returned in response to certain
-   * operations on the server.
-   *
+   * <p>A Serializable Invid that can be returned in response to certain
+   * operations on the server.</p>
    */
 
   Invid newObjectInvid = null;
 
   /**
-   *
-   * A Remote handle to a db_object on the server returned for use by
-   * the client.
-   * 
+   * <p>A Remote handle to a db_object on the server returned for use by
+   * the client.</p>
    */
 
   db_object remoteObjectRef = null;
 
   /**
-   *
-   * A Serializable StringBuffer representation of objects and fields
-   * that need to be rescanned.
-   * 
+   * <p>A Serializable StringBuffer representation of objects and fields
+   * that need to be rescanned.</p>
    */
 
   private StringBuffer rescanList;
 
   /**
-   *
-   * A Serializable Dialog Definition
-   *
+   * <p>A Serializable Dialog Definition</p>
    */
 
   private JDialogBuff dialog;
 
   /**
-   *
-   * A Remote handle to a Wizard object on the server
-   *
+   * <p>A Remote handle to a Wizard object on the server</p>
    */
 
   private Ganymediator callback;
 
   /**
-   *
-   * Maps Invid's to RescanBuf's.  Used on the client-side
-   * post-serialization.
-   * 
+   * <p>Maps Invid's to RescanBuf's.  Used on the client-side
+   * post-serialization.</p>
    */
 
   private transient Hashtable rescanHash = null;
 
   /**
-   *
-   * This boolean variable is used on the server side only,
+   * <p>This boolean variable is used on the server side only,
    * to determine whether the field code that invoked 
    * wizardHook on a DBEditObject subclass should continue
    * with its normal process or whether it should immediately
-   * return this ReturnVal to the (client-side) caller.
-   *
+   * return this ReturnVal to the (client-side) caller.</p>
    */
 
   public boolean doNormalProcessing;
@@ -185,11 +170,9 @@ public class ReturnVal implements java.io.Serializable {
   // client side access
 
   /**
-   *
-   * This method returns the general success code for the
+   * <p>This method returns the general success code for the
    * preceding operation.  If didSucceed() is true, doRescan()
-   * should be checked.
-   *
+   * should be checked.</p>
    */
 
   public boolean didSucceed()
@@ -198,9 +181,7 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * Certain operations may set status codes.
-   *
+   * <p>Certain operations may set status codes.</p>
    */
 
   public byte getObjectStatus()
@@ -209,15 +190,13 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method is used to get an Invid that the server
+   * <p>This method is used to get an Invid that the server
    * wants to return to the client.  Used particularly
    * for invid_field.createNewEmbedded().  Return null
-   * if no Invid was set.
+   * if no Invid was set.</p>
    *
    * @see arlut.csd.ganymede.invid_field
    * @see arlut.csd.ganymede.InvidDBField
-   *
    */
 
   public Invid getInvid()
@@ -226,10 +205,10 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method is used to get a remote db_object reference that the
+   * <p>This method is used to get a remote db_object reference that the
    * server wants to return to the client.  Used particularly for
    * Session.create_db_object() / Session.edit_db_object(), or null if
-   * no db_object was returned.
+   * no db_object was returned.</p>
    *
    * @see arlut.csd.ganymede.Session
    */
@@ -240,14 +219,12 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * If the operation was not successful, this method should
+   * <p>If the operation was not successful, this method should
    * return a dialog box describing the problem and, potentially,
-   * asking for more information to complete the operation.<br><br>
+   * asking for more information to complete the operation.</p>
    *
-   * This method be checked after all calls to the server that
-   * return non-null ReturnVal objects.
-   *
+   * <p>This method be checked after all calls to the server that
+   * return non-null ReturnVal objects.</p>
    */
 
   public JDialogBuff getDialog()
@@ -256,16 +233,14 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * If the server is asking for more interaction from the user
+   * <p>If the server is asking for more interaction from the user
    * to complete this operation, this method will return an RMI
    * handle to a callback on the server.  The client should
    * popup the dialog box specified by getDialog() and pass the
-   * results to the callback returned by this method.<br><br>
+   * results to the callback returned by this method.</p>
    *
-   * This method will return null if getDialog() returns
-   * null, and need not be checked in that case.
-   *
+   * <p>This method will return null if getDialog() returns
+   * null, and need not be checked in that case.</p>
    */
 
   public Ganymediator getCallback()
@@ -274,13 +249,11 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>This method returns true if this ReturnVal encodes rescan
+   * information for one or more fields in on or more objects.</p>
    *
-   * This method returns true if this ReturnVal encodes rescan
-   * information for one or more fields in on or more objects.<br><br>
-   *
-   * This method will never return true if didSucceed() returns
-   * false, and need not be checked in that case.
-   *
+   * <p>This method will never return true if didSucceed() returns
+   * false, and need not be checked in that case.</p>
    */
 
   public boolean doRescan()
@@ -289,10 +262,8 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns a Vector of Invid objects, corresponding to
-   * those objects which need to have some field rescan work done.
-   * 
+   * <p>This method returns a Vector of Invid objects, corresponding to
+   * those objects which need to have some field rescan work done.</p>
    */
 
   public Vector getRescanObjectsList()
@@ -320,11 +291,9 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if the server is requesting that all
+   * <p>This method returns true if the server is requesting that all
    * fields in the object referenced by the client's preceding call 
-   * to the server be reprocessed.
-   *
+   * to the server be reprocessed.</p>
    */
 
   public boolean rescanAll(Invid objID)
@@ -345,11 +314,9 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns a Vector of Short() objects if the server
+   * <p>This method returns a Vector of Short() objects if the server
    * provided an explicit list of fields that need to be reprocessed,
-   * or null if all or no fields need to be processed.
-   *
+   * or null if all or no fields need to be processed.</p>
    */
   
   public Vector getRescanList(Invid objID)
@@ -372,13 +339,11 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns an encoded string representing
+   * <p>This method returns an encoded string representing
    * the objects and fields to be rescanned by the
-   * client in response to this ReturnVal.<br><br>
+   * client in response to this ReturnVal.</p>
    *
-   * To be used for debugging.
-   *
+   * <p>To be used for debugging.</p>
    */
 
   public String dumpRescanInfo()
@@ -401,11 +366,9 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This private method converts the rescanList StringBuffer to
+   * <p>This private method converts the rescanList StringBuffer to
    * a Hashtable (rescanHash) that maps Invid's to either Vector of
-   * Short's or "all".
-   *
+   * Short's or "all".</p>
    */
 
   private void breakOutRescanList()
@@ -420,16 +383,15 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>This method takes a StringBuffer encoded as follows:</p>
    *
-   * This method takes a StringBuffer encoded as follows:
+   * <pre>263:170|all|271:131|31|57|286:41|all|310:4|134|13|92|</pre>
    *
-   * 263:170|all|271:131|31|57|286:41|all|310:4|134|13|92|
-   *
-   * and returns a Hashtable mapping Invid's to the rescan information
+   * <p>and returns a Hashtable mapping Invid's to the rescan information
    * for that Invid, where the rescan information will either be the
    * String "all", indicating that all fields need to be rescanned, or
    * a Vector of Short's specifying field id's to be rescanned for
-   * that object.
+   * that object.</p>
    *
    * @param buffer The StringBuffer to be decoded.
    * @param original The Hashtable to put the results into.. this method
@@ -537,15 +499,13 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>unionRescan merges field and object rescan requests from
+   * the supplied ReturnVal with and rescan requests we contain.</p>
    *
-   * unionRescan merges field and object rescan requests from
-   * the supplied ReturnVal with and rescan requests we contain.<br><br>
+   * <p>It is used to allow multiple sources in InvidDBField to contribute
+   * rescan requests.</p>
    *
-   * It is used to allow multiple sources in InvidDBField to contribute
-   * rescan requests.<br><br>
-   *
-   * This method returns this so you can do a cascading return.
-   *
+   * <p>This method returns this so you can do a cascading return.</p>
    */
 
   public synchronized ReturnVal unionRescan(ReturnVal retVal)
@@ -581,11 +541,11 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method takes a Hashtable mapping Invid's to Vectors
+   * <p>This method takes a Hashtable mapping Invid's to Vectors
    * of Short field identifiers or the String "all" and generates
-   * the StringBuffer to be serialized down to the client.
+   * the StringBuffer to be serialized down to the client.</p>
    *
+   * <p>For use on the server-side.</p>
    */
 
   private void encodeRescanList(Hashtable rescanTable)
@@ -641,10 +601,10 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>This method makes a note in this ReturnVal to have the
+   * client rescan all fields in object objID.</p>
    *
-   * This method makes a note in this ReturnVal to have the
-   * client rescan all fields in object objID.
-   *
+   * <p>For use on the server-side.</p>
    */
 
   public synchronized void setRescanAll(Invid objID)
@@ -664,10 +624,10 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>This method makes a note in this ReturnVal to have the
+   * client rescan field fieldID in object objID.</p>
    *
-   * This method makes a note in this ReturnVal to have the
-   * client rescan field fieldID in object objID.
-   *
+   * <p>For use on the server-side.</p>
    */
 
   public synchronized void addRescanField(Invid objID, short fieldID)
@@ -688,10 +648,24 @@ public class ReturnVal implements java.io.Serializable {
     rescanList.append("|");
   }
 
+  /** 
+   * <p>This method attaches a remote reference to a
+   * {@link arlut.csd.ganymede.Ganymediator} 
+   * wizard-handler to this ReturnVal for extraction by the client.</p>
+   *
+   * <p>For use on the server-side.</p> */
+
   public void setCallback(Ganymediator callback)
   {
     this.callback = callback;
   }
+
+  /**
+   * <p>This method attaches a dialog definition to this ReturnVal
+   * for extraction by the client.</p>
+   *
+   * <p>For use on the server-side.</p>
+   */
 
   public void setDialog(JDialogBuff dialog)
   {
@@ -699,12 +673,12 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method is used to set an Invid that the client
+   * <p>This method is used to set an Invid that the client
    * can retrieve from us in those cases where a method
    * on the server really does need to return an Invid
-   * _and_ a return val.
+   * _and_ a return val.</p>
    *
+   * <p>For use on the server-side.</p>
    */
 
   public void setInvid(Invid invid)
@@ -713,11 +687,11 @@ public class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method is used to set a db_object reference that the client
+   * <p>This method is used to set a db_object reference that the client
    * can retrieve from us in those cases where a method on the server
-   * really does need to return a db_object _and_ a return val.
-   * 
+   * really does need to return a db_object _and_ a return val.</p>
+   *
+   * <p>For use on the server-side.</p>
    */
 
   public void setObject(db_object object)

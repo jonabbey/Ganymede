@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/04/01 22:17:53 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/05/07 05:21:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,12 +52,17 @@ package arlut.csd.ganymede;
 import java.rmi.RemoteException;
 import java.util.*;
 
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                        db_field
+
+------------------------------------------------------------------------------*/
 /**
  * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.DBField DBField}, the
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
  *
- * @version $Revision: 1.17 $ $Date: 1999/04/01 22:17:53 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 1999/05/07 05:21:37 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 1999/04/01 22:17:52 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 1999/05/07 05:21:36 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,12 +63,12 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *   Client side interface definition for the Ganymede Session Object.  The
- *   Ganymede Session object holds the state for a Ganymede client's session
- *   with the Ganymede server.  The Ganymede session will also provide the
- *   primary interface for accessing ganymede db objects.
+ * <p>Client side interface definition for the Ganymede Session Object.  The
+ * Ganymede Session object holds the state for a Ganymede client's session
+ * with the Ganymede server.  The Ganymede session will also provide the
+ * primary interface for accessing ganymede db objects.</p>
  *
- * @version $Revision: 1.36 $ %D%
+ * @version $Revision: 1.37 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -94,39 +94,34 @@ public interface Session extends Remote {
   void        logout() throws RemoteException;
 
   /**
-   *
-   * This method is used to allow a client to request that wizards
+   * <p>This method is used to allow a client to request that wizards
    * not be provided in response to actions by the client.  This
    * is intended to allow non-interactive or non-gui clients to
    * do work without having to go through a wizard interaction
-   * sequence.<br><br>
+   * sequence.</p>
    *
-   * Wizards are enabled by default.
+   * <p>Wizards are enabled by default.</p>
    *
    * @param val If true, wizards will be enabled.
-   *
    */
 
   void        enableWizards(boolean val) throws RemoteException;
 
   /**
-   *
-   * This method is used to tell the client where to look to access
+   * <p>This method is used to tell the client where to look to access
    * the Ganymede help document tree.  The String returned is a URL
-   * for the root of the Ganymede help web.
-   * 
+   * for the root of the Ganymede help web.</p>
    */
 
   String      getHelpBase() throws RemoteException;
 
   /**
-   *
-   * This method is used to allow the client to retrieve messages like
+   * <p>This method is used to allow the client to retrieve messages like
    * the motd from the server.  The client can specify that it only
    * wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -141,13 +136,12 @@ public interface Session extends Remote {
   StringBuffer getMessage(String key, boolean onlyShowIfNew) throws RemoteException;
 
   /**
-   *
-   * This method is used to allow the client to retrieve messages like
+   * <p>This method is used to allow the client to retrieve messages like
    * the motd from the server.  The client can specify that it only
    * wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -162,69 +156,60 @@ public interface Session extends Remote {
   StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws RemoteException;
 
   /**
-   *
-   * This method returns the identification string that the server
-   * has assigned to the user.
-   * 
+   * <p>This method returns the identification string that the server
+   * has assigned to the user.</p>
    */
 
   String      getMyUserName() throws RemoteException;
 
   /**
-   *
-   * This method returns a list of personae names available
-   * to the user logged in.
-   *
+   * <p>This method returns a list of personae names available
+   * to the user logged in.</p>
    */
 
   Vector      getPersonae() throws RemoteException;
 
   /**
-   *
-   * This method may be used to select an admin persona.
-   *
+   * <p>This method is used to select an admin persona, changing the
+   * permissions that the user has and the objects that are
+   * accessible in the database.</p>
    */
 
   boolean     selectPersona(String persona, String password) throws RemoteException;
 
   /**
-   *
-   * This method returns a QueryResult of owner groups that the current
+   * <p>This method returns a QueryResult of owner groups that the current
    * persona has access to.  This list is the transitive closure of
    * the list of owner groups in the current persona.  That is, the
    * list includes all the owner groups in the current persona along
-   * with all of the owner groups those owner groups own, and so on.
-   *
+   * with all of the owner groups those owner groups own, and so on.</p>
    */
 
   QueryResult      getOwnerGroups() throws RemoteException;
 
   /**
-   *
-   * This method may be used to set the owner groups of any objects
-   * created hereafter.
+   * <p>This method may be used to set the owner groups of any objects
+   * created hereafter.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to
    * ownergroup objects.
-   *
    */
 
   ReturnVal        setDefaultOwner(Vector ownerInvids) throws RemoteException;
 
   /**
-   *
-   * This method may be used to cause the server to pre-filter any object
+   * <p>This method may be used to cause the server to pre-filter any object
    * listing to only show those objects directly owned by owner groups
    * referenced in the ownerInvids list.  This filtering will not restrict
    * the ability of the client to directly view any object that the client's
    * persona would normally have access to, but will reduce clutter and allow
    * the client to present the world as would be seen by administrator personas
-   * with just the listed ownerGroups accessible.<br><br>
+   * with just the listed ownerGroups accessible.</p>
    *
-   * This method cannot be used to grant access to objects that are accessible
-   * by the client's adminPersona.<br><br>
+   * <p>This method cannot be used to grant access to objects that are accessible
+   * by the client's adminPersona.</p>
    *
-   * Calling this method with ownerInvids set to null will turn off the filtering.
+   * <p>Calling this method with ownerInvids set to null will turn off the filtering.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
    *
@@ -235,10 +220,9 @@ public interface Session extends Remote {
   //  Database operations
 
   /**
+   * <p>List types of objects stored and manipulated through the Ganymede server.</p>
    *
-   * List types of objects stored and manipulated through the Ganymede server.<br><br>
-   *
-   * This method returns a vector of Base remote references.
+   * <p>This method returns a vector of Base remote references.</p>
    *
    * @deprecated Superseded by the more efficient getBaseList()
    *
@@ -248,8 +232,7 @@ public interface Session extends Remote {
   Vector      getTypes() throws RemoteException;
 
   /**
-   *
-   * Returns the root of the category tree on the server
+   * <p>Returns the root of the category tree on the server</p>
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
    *
@@ -259,78 +242,67 @@ public interface Session extends Remote {
   Category    getRootCategory() throws RemoteException;
 
   /**
-   *
-   * Returns a serialized representation of the basic category
-   * and base structure on the server.
+   * <p>Returns a serialized representation of the basic category
+   * and base structure on the server.</p>
    *
    * @see arlut.csd.ganymede.CategoryTransport
-   *
    */
 
   CategoryTransport    getCategoryTree() throws RemoteException;
 
   /**
-   *
-   * Returns a serialized representation of the object types
-   * defined on the server.
+   * <p>Returns a serialized representation of the object types
+   * defined on the server.</p>
    *
    * @see arlut.csd.ganymede.BaseListTransport
-   *
    */
 
   BaseListTransport    getBaseList() throws RemoteException;
 
   /**
+   * <p>Returns a vector of field definition templates, in display order.</p>
    *
-   * Returns a vector of field definition templates, in display order.<br><br>
-   *
-   * This vector may be cached, as it is static for this object type.
+   * <p>This vector may be cached, as it is static for this object type.</p>
    *
    * @see arlut.csd.ganymede.FieldTemplate
-   *
    */
 
   Vector      getFieldTemplateVector(short baseId) throws RemoteException;
 
   /**
-   *
-   * This method call initiates a transaction on the server.  This
+   * <p>This method call initiates a transaction on the server.  This
    * call must be executed before any objects are modified (created,
-   * edited, inactivated, removed).<br><br>
+   * edited, inactivated, removed).</p>
    *
-   * Currently each client can only have one transaction open. It
+   * <p>Currently each client can only have one transaction open. It
    * is an error to call openTransaction() while another transaction
-   * is still open, and an exception will be thrown in this case.
-   * 
+   * is still open, and an exception will be thrown in this case.</p>
    */
 
   ReturnVal   openTransaction(String description) throws RemoteException;
 
   /**
-   *
-   * This method call causes the server to checkpoint the current state
+   * <p>This method call causes the server to checkpoint the current state
    * of an open transaction on the server.  At any time thereafter,
    * the server can be instructed to revert the transaction to the
    * state at the time of this checkpoint by calling rollback()
-   * with the same key.<br><br>
+   * with the same key.</p>
    *
-   * Checkpointing only makes sense in the context of a transaction;
+   * <p>Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.
-   * 
+   * the server does not have a transaction open.</p>
    */
 
   void        checkpoint(String key) throws RemoteException;
 
   /**
+   * <p>This method call causes the server to roll back the state
+   * of an open transaction on the server.</p>
    *
-   * This method call causes the server to roll back the state
-   * of an open transaction on the server.<br><br>
-   *
-   * Checkpoints are held in a Stack on the server;  it is never
+   * <p>Checkpoints are held in a Stack on the server;  it is never
    * permissible to try to 'rollforward' to a checkpoint that
    * was itself rolled back.  That is, the following sequence is 
-   * not permissible.<br><br>
+   * not permissible.</p>
    *
    * <pre>
    * checkpoint("1");
@@ -341,30 +313,28 @@ public interface Session extends Remote {
    * rollback("2");
    * </pre>
    *
-   * At the time that the rollback("1") call is made, the server
+   * <p>At the time that the rollback("1") call is made, the server
    * forgets everything that has occurred in the transaction since
    * checkpoint 1.  checkpoint 2 no longer exists, and so the second
-   * rollback call will return false.<br><br>
+   * rollback call will return false.</p>
    *
-   * Checkpointing only makes sense in the context of a transaction;
+   * <p>Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.
+   * the server does not have a transaction open.</p>
    *
    * @return true if the rollback could be carried out successfully.
-   * 
    */
 
   boolean     rollback(String key) throws RemoteException;
 
   /**
-   *
-   * This method causes all changes made by the client to be 'locked in'
+   * <p>This method causes all changes made by the client to be 'locked in'
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients.<br><br>
+   * clients.</p>
    *
-   * If the transaction cannot be committed for some reason,
+   * <p>If the transaction cannot be committed for some reason,
    * commitTransaction() will abort the transaction if abortOnFail is
    * true.  In any case, commitTransaction() will return a ReturnVal
    * indicating whether or not the transaction could be committed, and
@@ -373,7 +343,7 @@ public interface Session extends Remote {
    * transaction remains open and it is up to the client to decide
    * whether to abort the transaction by calling abortTransaction(),
    * or to attempt to fix the reported problem and try another call
-   * to commitTransaction().
+   * to commitTransaction().</p>
    *
    * @param abortOnFail If true, the transaction will be aborted if it
    * could not be committed successfully.
@@ -383,79 +353,71 @@ public interface Session extends Remote {
    *         forcibly terminated due to a major error, the 
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
-   *
    */
 
   ReturnVal  commitTransaction(boolean abortOnFail) throws RemoteException;
 
   /**
-   *
-   * This method causes all changes made by the client to be 'locked in'
+   * <p>This method causes all changes made by the client to be 'locked in'
    * to the database.  When commitTransaction() is called, the changes
    * made by the client during this transaction is logged to a journal
    * file on the server, and the changes will become visible to other
-   * clients.<br><br>
+   * clients.</p>
    *
-   * commitTransaction() will return a ReturnVal indicating whether or
+   * <p>commitTransaction() will return a ReturnVal indicating whether or
    * not the transaction could be committed, and whether or not the
    * transaction remains open for further attempts at commit.  If
    * ReturnVal.doNormalProcessing is set to true, the transaction
    * remains open and it is up to the client to decide whether to
    * abort the transaction by calling abortTransaction(), or to
    * attempt to fix the reported problem and try another call to
-   * commitTransaction().
+   * commitTransaction().</p>
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
    *         forcibly terminated due to a major error, the 
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
-   * 
    */
 
   ReturnVal  commitTransaction() throws RemoteException;
 
   /**
-   *
-   * This method causes all changes made by the client to be thrown out
-   * by the database, and the transaction is closed.
+   * <p>This method causes all changes made by the client to be thrown out
+   * by the database, and the transaction is closed.</p>
    *
    * @return null if the transaction was cleared successfully,
    *         a non-null ReturnVal if there was some kind of abnormal condition.
-   *
    */
   
   ReturnVal     abortTransaction() throws RemoteException;
 
   /**
-   *
-   * This method allows clients to cause mail to be sent from the
+   * <p>This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.<br><br>
+   * sender.</p>
    *
-   * body is a StringBuffer instead of a String because RMI has a 64k
-   * serialization limit on the String class.
+   * <p>body is a StringBuffer instead of a String because RMI has a 64k
+   * serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
    * @param subject The subject of this mail, will have 'Ganymede:' prepended
    * by the server.
    * @param body The content of the message.
-   * 
    */
 
   void sendMail(String address, String subject, StringBuffer body) throws RemoteException;
 
   /**
-   *
-   * This method allows clients to cause mail to be sent from the
+   * <p>This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.<br><br>
+   * sender.</p>
    *
-   * body and HTMLbody are StringBuffer's instead of Strings because RMI
-   * has a 64k serialization limit on the String class.
+   * <p>body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
@@ -463,18 +425,16 @@ public interface Session extends Remote {
    * by the server.
    * @param body The plain-ASCII content of the message, or null if none.
    * @param HTMLbody The HTML content of the message, or null if none.
-   *
    */
 
   void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws RemoteException;
 
   /**
-   *
-   * This method provides the hook for doing a
+   * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
    * {@link arlut.csd.ganymede.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
-   * fields and objects that match the given query.
+   * fields and objects that match the given query.</p>
    *
    * @see arlut.csd.ganymede.Query
    */
@@ -482,19 +442,31 @@ public interface Session extends Remote {
   DumpResult dump(Query query) throws RemoteException;
 
   /**
+   * <p>This method allows the client to get a status update on a
+   * specific list of invids.</p>
    *
-   * This method allows the client to get a status update on a
-   * specific list of invids.<br><br>
-   *
-   * If any of the invids are not currently defined in the server, or
+   * <p>If any of the invids are not currently defined in the server, or
    * if the client doesn't have permission to view any of the invids,
    * those invids' status will not be included in the returned
-   * QueryResult.
+   * QueryResult.</p>
    *
    * @param invidVector Vector of Invid's to get the status for.
    */
 
   public QueryResult queryInvids(Vector invidVector) throws RemoteException;
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * @param name Label for an object
+   * @param type Object type id number
+   */
+
+  public Invid findLabeledObject(String name, short type) throws RemoteException;
 
   /**
    * <p>List objects in the database meeting the given query criteria.</p>
@@ -508,39 +480,33 @@ public interface Session extends Remote {
   QueryResult    query(Query query) throws RemoteException;
 
   /**
-   *
-   * This method returns the label for a specific invid.
-   *
+   * <p>This method returns the label for a specific invid.</p>
    */
 
   String    viewObjectLabel(Invid invid) throws RemoteException;
 
   /**
-   *
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
    *
    * @return A StringBuffer containing a record of events for the Invid in question,
    * or null if permissions are denied to view the history.
-   *
    */
 
   StringBuffer    viewObjectHistory(Invid invid, Date since) throws RemoteException;
 
   /**
-   *
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
    *
    * @return A StringBuffer containing a record of events for the Invid in question,
    * or null if permissions are denied to view the history.
-   *
    */
 
   StringBuffer    viewAdminHistory(Invid invid, Date since) throws RemoteException;

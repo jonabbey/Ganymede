@@ -4,8 +4,8 @@
 
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/03/23 06:22:15 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/05/07 05:21:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,11 +216,10 @@ public class QueryDataNode extends QueryNode {
   }
 
   /**
-   * Default field comparison node constructor.
+   * <p>Default field comparison node constructor.</p>
    *
-   * This constructor creates a query node that will be matched
-   * against an object's primary label field.
-   *
+   * <p>This constructor creates a query node that will be matched
+   * against an object's primary label field.</p>
    */
 
   public QueryDataNode(byte comparator, Object value)

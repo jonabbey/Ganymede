@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/04/28 10:22:56 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/05/07 05:21:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,6 @@ public class stopServer {
 
   public static void main(String argv[])
   {
-    File dataFile, logFile;
     String propFilename = null;
     String server_url;
     Server server = null;
@@ -90,7 +89,7 @@ public class stopServer {
     if (propFilename == null)
       {
 	System.err.println("Ganymede stopServer: Error, invalid command line parameters");
- 	System.err.print("Usage: java stopServer properties=<property file>");
+ 	System.err.println("Usage: java stopServer properties=<property file>");
 	return;
       }
 

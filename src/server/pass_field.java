@@ -6,8 +6,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:59 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/05/07 05:21:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,7 +51,14 @@ package arlut.csd.ganymede;
 import java.rmi.RemoteException;
 import java.util.*;
 
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                      pass_field
+
+------------------------------------------------------------------------------*/
+
 public interface pass_field extends db_field {
+
   int maxSize() throws RemoteException;
   int minSize() throws RemoteException;
 
@@ -126,20 +133,16 @@ public interface pass_field extends db_field {
   String getSalt() throws RemoteException;
 
   /**
-   *
-   * This method is used to set the password for this field,
-   * crypting it if this password field is stored crypted.
-   *
+   * <p>This method is used to set the password for this field,
+   * crypting it if this password field is stored crypted.</p>
    */
 
   ReturnVal setPlainTextPass(String text) throws RemoteException;
 
   /**
-   *
-   * This method is used to set a pre-crypted password for this field.
+   * <p>This method is used to set a pre-crypted password for this field.
    * This method will return false if this password field is not
-   * stored crypted.
-   *
+   * stored crypted.</p>
    */
 
   ReturnVal setCryptPass(String text) throws RemoteException;

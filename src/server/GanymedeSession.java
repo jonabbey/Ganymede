@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 1999/04/20 18:21:54 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 1999/05/07 05:21:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.132 $ %D%
+ * @version $Revision: 1.133 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -844,12 +844,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to tell the client where to look
-   * to access the Ganymede help document tree.
+   * <p>This method is used to tell the client where to look
+   * to access the Ganymede help document tree.</p>
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public String getHelpBase()
@@ -858,13 +856,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to allow the client to retrieve messages like
+   * <p>This method is used to allow the client to retrieve messages like
    * the motd from the server.  The client can specify that it only
    * wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -873,7 +870,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
-   *   
    */
 
   public StringBuffer getMessage(String key, boolean onlyShowIfNew)
@@ -896,13 +892,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to allow the client to retrieve messages like
+   * <p>This method is used to allow the client to retrieve messages like
    * the motd from the server.  The client can specify that it only
    * wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -934,12 +929,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns the identification string that the server
-   * has assigned to the user.
+   * <p>This method returns the identification string that the server
+   * has assigned to the user.</p>
    * 
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public String getMyUserName()
@@ -948,12 +941,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns a list of personae names available
-   * to the user logged in.
+   * <p>This method returns a list of personae names available
+   * to the user logged in.</p>
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public Vector getPersonae()
@@ -993,13 +984,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method is used to select an admin persona, changing the
+   * <p>This method is used to select an admin persona, changing the
    * permissions that the user has and the objects that are
-   * accessible in the database.
+   * accessible in the database.</p>
    *
    * @see arlut.csd.ganymede.Session
-   * 
    */
 
   public synchronized boolean selectPersona(String persona, String password)
@@ -1214,13 +1203,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method may be used to set the owner groups of any objects
-   * created hereafter.
+   * <p>This method may be used to set the owner groups of any objects
+   * created hereafter.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to
    * ownergroup objects.
-   *
    */
 
   public synchronized ReturnVal setDefaultOwner(Vector ownerInvids)
@@ -1331,10 +1318,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   //  Database operations
 
   /**
-   *
-   * This method returns a list of remote references to the Ganymede
+   * <p>This method returns a list of remote references to the Ganymede
    * object type definitions.  This method will throws a RuntimeException
-   * if it is called when the server is in schemaEditMode.<br><br>
+   * if it is called when the server is in schemaEditMode.</p>
    *
    * @deprecated Superseded by the more efficient getBaseList()
    * 
@@ -1383,7 +1369,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * Returns the root of the category tree on the server
+   * <p>Returns the root of the category tree on the server</p>
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
    *
@@ -2101,12 +2087,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
    *
-   * This method provides the hook for doing a
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * @param name Label for an object
+   * @param type Object type id number
+   */
+
+  public Invid findLabeledObject(String name, short type)
+  {
+    checklogin();
+
+    Query localquery = new Query(type, 
+				 new QueryDataNode(QueryDataNode.EQUALS, name), 
+				 false);
+
+    Vector results = internalQuery(localquery);
+
+    if (results == null || results.size() != 1)
+      {
+	return null;
+      }
+
+    Result tmp = (Result) results.elementAt(0);
+
+    return tmp.getInvid();
+  }
+
+  /**
+   * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
    * {@link arlut.csd.ganymede.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
-   * fields and objects that match the given query.
+   * fields and objects that match the given query.</p>
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Session
@@ -2354,9 +2370,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method provides the hook for doing all
+   * <p>This method provides the hook for doing all
    * manner of internal object listing for the Ganymede
-   * database.  Unfiltered.
+   * database.  Unfiltered.</p>
    *
    * @return A Vector of {@link arlut.csd.ganymede.Result Result} objects
    */
