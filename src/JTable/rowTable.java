@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.27 $ %D%
+  Version: $Revision: 1.28 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,9 +46,9 @@ import javax.swing.*;
  * access model based on a hashtable.
  *
  *
- * @see arlut.csd.Table.baseTable
+ * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.27 $ %D% 
+ * @version $Revision: 1.28 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {

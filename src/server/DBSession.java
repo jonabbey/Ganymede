@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 1999/05/26 23:17:26 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 1999/05/26 23:46:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.JDialog.*;
  * while DBSession is accessed only by (presumably trusted)
  * server-side code.</p>
  *
- * @version $Revision: 1.65 $ %D%
+ * @version $Revision: 1.66 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -800,7 +800,7 @@ final public class DBSession {
    *
    * <p>Note that this method does not specifically check to see whether permission
    * has been obtained to reactivate the object.. that's done in
-   * {@link arlut.csd.GanymedeSession#reactivate_db_object(arlut.csd.ganymede.Invid) 
+   * {@link arlut.csd.ganymede.GanymedeSession#reactivate_db_object(arlut.csd.ganymede.Invid) 
    * GanymedeSession.reactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be reactivated

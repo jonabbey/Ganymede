@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.150 $
-   Last Mod Date: $Date: 1999/05/26 23:17:14 $
+   Version: $Revision: 1.151 $
+   Last Mod Date: $Date: 1999/05/26 23:46:36 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.150 $ $Date: 1999/05/26 23:17:14 $ $Name:  $
+ * @version $Revision: 1.151 $ $Date: 1999/05/26 23:46:36 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -3628,8 +3628,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Chooses the default owner group for a newly created object.</p>
    *
    * <p>This must be called before Session.create_db_object is called.</p>
-   *
-   * @see defaultOwnerChosen.
    */
 
   public void chooseDefaultOwner(boolean forcePopup)
