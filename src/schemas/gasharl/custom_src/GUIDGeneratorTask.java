@@ -7,8 +7,8 @@
    
    Created: 25 September 2002
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2004/03/20 03:46:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2004/03/20 03:49:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,8 @@
 package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
+
+import org.doomdark.uuid.*;
 
 import java.util.*;
 import java.text.*;
@@ -173,9 +175,6 @@ public class GUIDGeneratorTask implements Runnable {
     catch (NotLoggedInException ex)
       {
       }
-    catch (InterruptedException ex)
-      {
-      }
     catch (Throwable ex)
       {
 	Ganymede.debug("Caught " + ex.getMessage());
@@ -191,7 +190,7 @@ public class GUIDGeneratorTask implements Runnable {
       }
   }
 
-  public boolean createGUIDs()
+  public boolean createGUIDs() throws NotLoggedInException
   {
     Vector users = mySession.getObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
@@ -214,7 +213,8 @@ public class GUIDGeneratorTask implements Runnable {
 
 	    if (!guidField.isDefined())
 	      {
-		String uuidString = gen.generateTimeBasedUUID(myAddress);
+		UUID uuid = gen.generateTimeBasedUUID(myAddress);
+		String uuidString = uuid.toString();
 
 		retVal = guidField.setValueLocal(uuidString);
 
