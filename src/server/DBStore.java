@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1037,6 +1037,9 @@ public class DBStore {
 	ns = new DBNameSpace("eventtoken", true);
 	nameSpaces.addElement(ns);
 
+	ns = new DBNameSpace("buildertask", true);
+	nameSpaces.addElement(ns);
+
 	// create owner base
 
 	b = new DBObjectBase(this, false);
@@ -1378,12 +1381,50 @@ public class DBStore {
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: Admin?";
 	bf.field_order = 6;
+
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
+    
+	setBase(b);
+
+	// create Builder Task Base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "Event";
+	b.type_code = (short) SchemaConstants.BuilderBase; // 5
+	b.displayOrder = b.type_code;
+
+	adminCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.BuilderTaskName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Task Name";
+	bf.field_order = 1;
+	bf.loading = true;
+	bf.setNameSpace("buildertask");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Name of this plug-in builder task";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.BuilderTaskClass;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Classname";
+	bf.badChars = "/:";
+	bf.field_order = 2;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.BuilderTaskName);
     
 	setBase(b);
       }
