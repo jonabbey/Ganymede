@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,7 +63,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * 
    */
 
-  public PermEntry
+  PermEntry
     permCache = null;
 
   /* -- */
@@ -1613,6 +1613,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	return false;  // if we're not in a transaction, we certainly can't be edited.
       }
+  }
+
+  /**
+   *
+   * This method clears this field's permCache.
+   *
+   */
+
+  public synchronized void clearPermCache()
+  {
+    permCache = null;
   }
 
   /**
