@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2002/03/29 03:57:57 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2002/06/14 01:24:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -233,6 +233,7 @@ public class Ganymede {
   public static String defaultrootpassProperty = null;
   public static String mailHostProperty = null;
   public static String returnaddrProperty = null;
+  public static String subjectPrefixProperty = null;
   public static String signatureFileProperty = null;
   public static String helpbaseProperty = null;
   public static String monitornameProperty = null;
@@ -1157,6 +1158,7 @@ public class Ganymede {
     mailHostProperty = System.getProperty("ganymede.mailhost");
     signatureFileProperty = System.getProperty("ganymede.signaturefile");
     returnaddrProperty = System.getProperty("ganymede.returnaddr");
+    subjectPrefixProperty = System.getProperty("ganymede.subjectprefix");
     helpbaseProperty = System.getProperty("ganymede.helpbase");
     monitornameProperty = System.getProperty("ganymede.monitorname");
     defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
@@ -1255,6 +1257,11 @@ public class Ganymede {
       {
 	System.err.println("Couldn't get the email return address property");
 	success = false;
+      }
+
+    if (subjectPrefixProperty == null)
+      {
+	subjectPrefixProperty = "Ganymede: ";
       }
 
     if (signatureFileProperty == null)
