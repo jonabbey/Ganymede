@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -198,7 +198,7 @@ final public class DBSession {
       {
 	try
 	  {
-	    Ganymede.debug("Created new object : " + e_object.getLabel());
+	    Ganymede.debug("Created new object : " + e_object.getLabel() + ", invid = " + e_object.getInvid());
 	    db_field[] fields = e_object.listFields(false);
 	    
 	    for (int i = 0; i < fields.length; i++)
