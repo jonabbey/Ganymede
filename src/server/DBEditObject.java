@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,8 +43,13 @@ import arlut.csd.JDialog.*;
  * All DBEditObjects are obtained in the context of a DBEditSet.  When
  * the DBEditSet is committed, the DBEditObject is made to replace the
  * original object from the DBStore.  If the EditSet is aborted, the
- * DBEditObject is dropped.
- * 
+ * DBEditObject is dropped.<br><br>
+ *
+ * <b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
+ * synchronized methods in DBEditObject and in subclasses thereof do not
+ * call synchronized methods in DBSession, as there is a strong possibility
+ * of nested monitor deadlocking.
+ *  
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
@@ -402,7 +407,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  synchronized void setStatus(byte new_status)
+  void setStatus(byte new_status)
   {
     switch (new_status)
       {
@@ -863,7 +868,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	gSession = (GanymedeSession) session;
 
-	return gSession.getPerm(getTypeID(), true).isCreatable();
+	return gSession.getPerm(getTypeID(), true).isCreatable(); // *sync* GanymedeSession
       }
 
     // note that we are going ahead and returning false here, as
@@ -907,14 +912,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	return true;		// we always allow the built in fields
       }
 
-    if (instantiateNewField(fieldID))
-      {
-	return gSession.getPerm(this, fieldID).isCreatable();
-      }
-    else
-      {
-	return false;
-      }
+    return instantiateNewField(fieldID);
   }
 
   /**
@@ -951,12 +949,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean instantiateNewField(short fieldID)
   {
-    if (fieldID <= 8)
-      {
-	return true;		// we always allow the built in fields
-      }
-
-    return gSession.getPerm(this, fieldID).isCreatable();
+    return gSession.getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
   }
 
   /**
@@ -1215,7 +1208,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * obtainChoiceList() method to get a list of valid choices.<br><br>
    *
    * This method will provide a reasonable default for targetted
-   * invid fields.
+   * invid fields.<br><br>
+   *
+   * NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.
    * 
    */
 
@@ -1620,7 +1617,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		  {
 		    while (field.size() > 0)
 		      {
-			retVal = field.deleteElement(0);
+			retVal = field.deleteElement(0); // *sync*
 
 			if (retVal != null && !retVal.didSucceed())
 			  {
@@ -1632,7 +1629,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 						     field.getName());
 			      }
 
-			    editset.rollback("del" + label);
+			    editset.rollback("del" + label); // *sync*
 
 			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							      "DBEditObject disapproved of deleting element from field " + 
@@ -1648,7 +1645,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    if (field.getType() != PERMISSIONMATRIX &&
 			field.getType() != PASSWORD)
 		      {
-			retVal = field.setValue(null);
+			retVal = field.setValue(null); // *sync*
 
 			if (retVal != null && !retVal.didSucceed())
 			  {
@@ -1660,7 +1657,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 						     field.getName());
 			      }
 
-			    editset.rollback("del" + label);
+			    editset.rollback("del" + label); // *sync*
 
 			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							      "DBEditObject could not clear field " + 
@@ -1698,7 +1695,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
     else
       {
-	editset.rollback("del" + label);
+	editset.rollback("del" + label); // *sync*
 
 	return Ganymede.createErrorDialog("DBEditObject.finalizeRemove() error",
 					  "Custom object logic could not do the remove properly");
@@ -1744,7 +1741,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public synchronized boolean isCommitting()
+  public boolean isCommitting()
   {
     return committing;
   }
@@ -1761,11 +1758,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().
    *
+   * Subclasses that override this method may wish to make this method 
+   * synchronized.
    *
    * @see arlut.csd.ganymede.DBEditSet
    */
 
-  public synchronized void commitPhase2()
+  public void commitPhase2()
   {
     clearTransientFields();
     return;
@@ -1778,11 +1777,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Generally, release() should be responsible for doing cleanup for
    * processes initiated by commitPhase1().  If commitPhase1() does
    * not do anything external to Ganymede, release() shouldn't either.
-   * release() should return immediately if isCommitting() is false;
+   * release() should return immediately if isCommitting() is false;<br><br>
+   *
+   * Subclasses that override this method may wish to make this method 
+   * synchronized.
    * 
    */
 
-  public synchronized void release()
+  public void release()
   {
     return;
   }
