@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/11/03 01:25:44 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/12/14 23:42:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -519,64 +519,67 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     DBObject roomObj = getSession().viewDBObject(roomInvid);
     Vector nets = roomObj.getFieldValuesLocal(roomSchema.NETWORKS);
-    
-    for (int i = 0; i < nets.size(); i++)
+
+    if (nets != null)
       {
-	netInvid = (Invid) nets.elementAt(i);
-	label = getGSession().viewObjectLabel(netInvid);
-	handle = new ObjectHandle(label, netInvid, false, false, false, true);
-
-	if (debug)
+	for (int i = 0; i < nets.size(); i++)
 	  {
-	    System.err.println("systemCustom.initializeNets(): processing net " + label);
-	  }
+	    netInvid = (Invid) nets.elementAt(i);
+	    label = getGSession().viewObjectLabel(netInvid);
+	    handle = new ObjectHandle(label, netInvid, false, false, false, true);
 
-	netsInRoom.addElement(handle);
-
-	// find out what nets are new with this new room invid and which we
-	// were already using
-
-	if (!ipAddresses.containsKey(netInvid))
-	  {
-	    // ok, we don't have an address for this net stored yet.. see whether
-	    // an interface hooked up to us is using this net.. if so, see if
-	    // it has an address and keep that if so.
-
-	    usingNet = false;
-
-	    if (interfaces != null)
+	    if (debug)
 	      {
-		for (int j = 0; j < interfaces.size(); j++)
+		System.err.println("systemCustom.initializeNets(): processing net " + label);
+	      }
+
+	    netsInRoom.addElement(handle);
+
+	    // find out what nets are new with this new room invid and which we
+	    // were already using
+
+	    if (!ipAddresses.containsKey(netInvid))
+	      {
+		// ok, we don't have an address for this net stored yet.. see whether
+		// an interface hooked up to us is using this net.. if so, see if
+		// it has an address and keep that if so.
+
+		usingNet = false;
+
+		if (interfaces != null)
 		  {
-		    interfaceObj = getSession().viewDBObject((Invid) interfaces.elementAt(j));
-
-		    // interfaceObj damn well shouldn't be null
-
-		    Invid netInvid2 = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
-
-		    if (netInvid2 != null && netInvid2.equals(netInvid))
+		    for (int j = 0; j < interfaces.size(); j++)
 		      {
-			address = (Byte[]) interfaceObj.getFieldValueLocal(interfaceSchema.ADDRESS);
+			interfaceObj = getSession().viewDBObject((Invid) interfaces.elementAt(j));
 
-			if (address != null)
+			// interfaceObj damn well shouldn't be null
+
+			Invid netInvid2 = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+
+			if (netInvid2 != null && netInvid2.equals(netInvid))
 			  {
-			    usingNet = true;
+			    address = (Byte[]) interfaceObj.getFieldValueLocal(interfaceSchema.ADDRESS);
 
-			    // remember this address for this net
+			    if (address != null)
+			      {
+				usingNet = true;
+
+				// remember this address for this net
 			
-			    ipAddresses.put(netInvid, address);
-			    break;
+				ipAddresses.put(netInvid, address);
+				break;
+			      }
 			  }
 		      }
 		  }
-	      }
 
-	    // if we didn't find an interface using this net, we'll need to generate
-	    // a new address for this network.
+		// if we didn't find an interface using this net, we'll need to generate
+		// a new address for this network.
 
-	    if (!usingNet)
-	      {
-		localAddresses.put(netInvid, netInvid);
+		if (!usingNet)
+		  {
+		    localAddresses.put(netInvid, netInvid);
+		  }
 	      }
 	  }
       }
