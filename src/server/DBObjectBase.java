@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,8 +14,11 @@
 
 package arlut.csd.ganymede;
 
+import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -30,7 +33,7 @@ import java.util.*;
  *
  */
 
-public class DBObjectBase {
+public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   static boolean debug = true;
 
@@ -50,7 +53,6 @@ public class DBObjectBase {
   String classname;
   Class classdef;
   short type_code;
-  boolean canInactivate;
 
   // runtime data
 
@@ -66,31 +68,111 @@ public class DBObjectBase {
   boolean writeInProgress;
   boolean dumpInProgress;
 
+  // Used to keep track of schema editing
+
+  DBSchemaEdit editor;
+  DBObjectBase original;	
+  boolean save;
+  boolean changed;
+
   /* -- */
 
-  public DBObjectBase(DBStore store)
+  /**
+   *
+   * Default constructor.
+   *
+   */
+
+  public DBObjectBase(DBStore store) throws RemoteException
   {
+    super();			// initialize UnicastRemoteObject
+
     writerList = new Vector();
     readerList = new Vector();
     dumperList = new Vector();
     this.store = store;
-    object_name = null;
-    classname = null;
+    object_name = "";
+    classname = "";
     classdef = null;
     type_code = 0;
-    canInactivate = false;
-    fieldHash = null;
-    objectHash = null;
+    fieldHash = new Hashtable();
+    objectHash = new Hashtable();
     maxid = 0;
+
+    editor = null;
+    original = null;
+    save = true;		// by default, we'll want to keep this
+    changed = false;
   }
 
-  public DBObjectBase(DataInput in, DBStore store) throws IOException
+  /**
+   *
+   * Creation constructor.  Used when the schema editor interface is
+   * used to create a new DBObjectBase.
+   *
+   */
+
+  public DBObjectBase(DBStore store, short id, DBSchemaEdit editor) throws RemoteException
   {
-    writerList = new Vector();
-    readerList = new Vector();
-    dumperList = new Vector();
-    this.store = store;
+    this(store);
+    type_code = id;
+    this.editor = editor;
+  }
+
+  /**
+   *
+   * receive constructor.  Used to initialize this DBObjectBase from disk
+   * and load the objects of this type in from the standing store.
+   *
+   */
+
+  public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
+  {
+    this(store);
     receive(in);
+  }
+
+  /**
+   *
+   * copy constructor.  Used to create a copy that we can play with for
+   * schema editing.
+   *
+   */
+
+  public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
+  {
+    this(original.store);
+    this.editor = editor;
+
+    object_name = original.object_name;
+    classname = original.classname;
+    classdef = original.classdef;
+    type_code = original.type_code;
+    
+    // make copies of all the old field definitions
+    // for this object type, and save them into our
+    // own field hash.
+    
+    Enumeration enum;
+    DBObjectBaseField field;
+    
+    enum = original.fieldHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	field = (DBObjectBaseField) enum.nextElement();
+	fieldHash.put(field.getKey(),
+		      new DBObjectBaseField(field, editor));
+      }
+
+    // remember the objects
+
+    objectHash = original.objectHash;
+
+    maxid = original.maxid;
+    
+    changed = false;
+    this.original = original;
   }
 
   void emit(DataOutput out) throws IOException
@@ -104,7 +186,6 @@ public class DBObjectBase {
     out.writeUTF(object_name);
     out.writeUTF(classname);
     out.writeShort(type_code);
-    out.writeBoolean(new Boolean(canInactivate));
 
     size = fieldHash.size();
 
@@ -168,8 +249,6 @@ public class DBObjectBase {
 	  }
       }
 
-    canInactivate = in.readBoolean().booleanValue();
-
     type_code = in.readShort();	// read our index for the DBStore's objectbase hash
 
     size = in.readShort();
@@ -179,7 +258,14 @@ public class DBObjectBase {
 	System.err.println("DBObjectBase.receive(): " + size + " fields in dictionary");
       }
 
-    fieldHash = new Hashtable(size);
+    if (size > 0)
+      {
+	fieldHash = new Hashtable(size);
+      }
+    else
+      {
+	fieldHash = new Hashtable();
+      }
 
     // read in the field dictionary for this object
 
@@ -231,7 +317,9 @@ public class DBObjectBase {
 
   synchronized DBEditObject createNewObject(DBEditSet editset)
   {
-    DBEditObject e_object;
+    DBEditObject 
+      e_object = null;
+
     Invid invid;
 
     /* -- */
@@ -240,7 +328,15 @@ public class DBObjectBase {
 
     if (classdef == null)
       {
-	e_object = new DBEditObject(this, invid, editset);
+	try
+	  {
+	    e_object = new DBEditObject(this, invid, editset);
+	  }
+	catch (RemoteException ex)
+	  {
+	    editset.getSession().setLastError("createNewObject failure: " + ex);
+	    e_object = null;
+	  }
       }
     else
       {
@@ -263,7 +359,7 @@ public class DBObjectBase {
 	try
 	  {
 	    c = classdef.getDeclaredConstructor(classArray);
-	    e_object = c.newInstance(parameterArray);
+	    e_object = (DBEditObject) c.newInstance(parameterArray);
 	  }
 	catch (NoSuchMethodException ex)
 	  {
@@ -292,7 +388,7 @@ public class DBObjectBase {
 
     if (e_object.initializeNewObject())
       {
-	editSet.addObject(e_object);
+	editset.addObject(e_object);
 	return e_object;
       }
     else
@@ -374,6 +470,7 @@ public class DBObjectBase {
    *
    * Returns the name of this object type
    *
+   * @see arlut.csd.ganymede.Base
    */
 
   public String getName()
@@ -383,13 +480,61 @@ public class DBObjectBase {
 
   /**
    *
+   * Sets the name for this object type
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public void setName(String newName)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not in an schema editing context");
+      }
+
+    object_name = newName;
+    changed = true;
+  }
+
+  /**
+   *
    * Returns the name of the class managing this object type
    *
+   * @see arlut.csd.ganymede.Base
    */
   
   public String getClassName()
   {
     return classname;
+  }
+
+  /**
+   *
+   * Sets the name for this object type
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public void setClassName(String newName)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not in an schema editing context");
+      }
+
+    classname = newName;
+
+    try
+      {
+	classdef = Class.forName(classname);
+      }
+    catch (ClassNotFoundException ex)
+      {
+	Ganymede.debug("class definition could not be found: " + ex);
+	classdef = null;
+      }
+
+    changed = true;
   }
 
   /**
@@ -421,24 +566,90 @@ public class DBObjectBase {
 
   /**
    *
+   * Returns true if the current session is permitted to
+   * create an object of this type.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public boolean canCreate(Session session)
+  {
+
+    // we're going to want to dispatch to the appropriate
+    // DBEditObject subclasses canCreate() method.
+
+    return false;
+  }
+
+  /**
+   *
    * Returns true if this object type can be inactivated
    *
+   * @see arlut.csd.ganymede.Base
    */
 
   public boolean canInactivate()
   {
-    return canInactivate;
+    if (classdef == null)
+      {
+	return DBEditObject.canBeInactivated();
+      }
+    else
+      {
+	Method m;
+	Boolean B;
+
+	try
+	  {
+	    m = classdef.getDeclaredMethod("canInactivate", null);
+	    B = (Boolean) m.invoke(null, null);
+	    return B.booleanValue();
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (SecurityException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (InvocationTargetException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+      }
   }
 
   /**
    *
    * Returns the invid type id for this object definition
    *
+   * @see arlut.csd.ganymede.Base
    */
 
-  public int getTypeID()
+  public short getTypeID()
   {
     return type_code;
+  }
+
+  /**
+   *
+   * Returns the invid type id for this object definition as
+   * a Short, suitable for use in a hash.
+   *
+   */
+
+  public Short getKey()
+  {
+    return new Short(type_code);
   }
 
   /**
@@ -451,6 +662,7 @@ public class DBObjectBase {
    * Question: do we want to return an array of DBFields here instead
    * of a vector?
    *
+   * @see arlut.csd.ganymede.Base
    */
 
   public Vector getFields()
@@ -469,6 +681,114 @@ public class DBObjectBase {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * This method creates a new base field and inserts it
+   * into the DBObjectBase field definitions hash.  This
+   * method can only be called from a DBSchemaEdit context.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+  
+  public synchronized BaseField createNewField()
+  {
+    short id;
+    DBObjectBaseField field;
+
+    /* -- */
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    id = getNextFieldID();
+
+    try
+      {
+	field = new DBObjectBaseField(this, editor);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't create field due to initialization error: " + ex);
+      }
+
+    // set its id
+
+    field.setID(id);
+
+    // and set it up in our field hash
+
+    fieldHash.put(new Short(id), field);
+
+    return field;
+  }
+
+  /**
+   *
+   * Get the next available field id for a new field.
+   *
+   */
+
+  synchronized short getNextFieldID()
+  {
+    short id;
+    Enumeration enum;
+    DBObjectBaseField fieldDef;
+
+    /* -- */
+
+    id = 0;
+
+    enum = fieldHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	fieldDef = (DBObjectBaseField) enum.nextElement();
+	if (fieldDef.getID() > id)
+	  {
+	    id = (short) (fieldDef.getID() + 1);
+	  }
+      }
+
+    return id;
+  }
+
+  /**
+   *
+   * Clear the editing flag.  This disables the DBObjectBase
+   * set methods on this ObjectBase and all dependent field
+   * definitions.
+   *
+   */
+  
+  synchronized void clearEditor(DBSchemaEdit editor)
+  {
+    Enumeration enum;
+    DBObjectBaseField fieldDef;
+
+    /* -- */
+
+    Ganymede.debug("entered clearEditor");
+
+    if (this.editor != editor)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+    
+    this.editor = null;
+
+    enum = fieldHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	fieldDef = (DBObjectBaseField) enum.nextElement();
+	fieldDef.editor = null;
+      }
+
+    original = null;
   }
 }
 

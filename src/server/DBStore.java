@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,14 +37,6 @@ public class DBStore {
 
   // type identifiers used in the object store
 
-  public static final short FIRST = 0;
-  public static final short BOOLEAN = 0;
-  public static final short NUMERIC = 1;
-  public static final short DATE = 2;
-  public static final short STRING = 3;
-  public static final short INVID = 4;
-  public static final short LAST = 4;
-
   static final String id_string = "Gstore";
   static final byte major_version = 1;
   static final byte minor_version = 0;
@@ -53,6 +45,13 @@ public class DBStore {
 
   /* - */
 
+  /*
+    All of the following should only be modified/accessed
+    in a critical section synchronized on the DBStore object.
+   */
+  
+  boolean schemaEditInProgress;	// lock for schema revision
+  short maxBaseId;		// to keep track of what ID to assign to new bases
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
@@ -74,9 +73,10 @@ public class DBStore {
 
   public DBStore()
   {
-    objectBases = null;
-    lockHash = null;
+    objectBases = new Hashtable(20); // default 
+    lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
+    schemaEditInProgress = false;
   }
 
   /**
@@ -147,8 +147,15 @@ public class DBStore {
 	  }
 	
 	baseCount = in.readShort();
-	
-	objectBases = new Hashtable(baseCount);
+
+	if (baseCount > 0)
+	  {
+	    objectBases = new Hashtable(baseCount);
+	  }
+	else
+	  {
+	    objectBases = new Hashtable();	
+	  }
 
 	// Actually read in the object bases
 	
@@ -158,6 +165,8 @@ public class DBStore {
 	    
 	    objectBases.put(new Short(tempBase.type_code), tempBase);
 	  }
+
+	maxBaseId = baseCount;
       }
     catch (IOException ex)
       {
@@ -350,8 +359,13 @@ public class DBStore {
    *
    */
 
-  public DBSession login(Object key)
+  public synchronized DBSession login(Object key)
   {
+    if (schemaEditInProgress)
+      {
+	throw new RuntimeException("can't login, the server's in schema edit mode");
+      }
+
     return new DBSession(this, key);
   }
 
@@ -389,5 +403,37 @@ public class DBStore {
   {
     return (DBObjectBase) objectBases.get(id);
   }
+
+  /**
+   *
+   * Returns a base id for a newly created base
+   * 
+   */
+
+  public synchronized short getNextBaseID()
+  {
+    return maxBaseId++;
+  }
+
+  /**
+   *
+   * Let go of a baseId if the base create was not
+   * committed.
+   * 
+   */
+
+  public synchronized void releaseBaseID(short id)
+  {
+    if (id == maxBaseId)
+      {
+	maxBaseId--;
+      }
+  }
+
+  public synchronized void setBase(short id, DBObjectBase base)
+  {
+    objectBases.put(new Short(id), base);
+  }
+
 }
 
