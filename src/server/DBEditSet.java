@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2002/10/09 02:05:05 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2002/10/30 22:20:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1451,9 +1451,11 @@ public class DBEditSet {
 	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
 
-	// DBEditObject.diff() also works with newly created objects
+	// For a newly created object, we can just use
+	// getPrintString(), which has the advantage of recording the
+	// contents of any embedded objects
 
-	diff = eObj.diff();
+	diff = eObj.getPrintString();
 
 	if (diff != null)
 	  {
