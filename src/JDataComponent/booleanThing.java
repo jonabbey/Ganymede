@@ -13,10 +13,7 @@ public class booleanThing {
 
   public booleanThing(String label)
     {
-      this.booleanLabel = label;
-      this.Default = false;
-
-      //booleanThing(label, false);
+      this(label, false);
     }
 
   public booleanThing(String label, boolean Default)
