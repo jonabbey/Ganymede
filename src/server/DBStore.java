@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1407,7 +1407,7 @@ public class DBStore {
 
     // manually insert the root (supergash) admin object
 
-    session = login("supergash");
+    session = login(Ganymede.rootname);
 
     session.id = "internal";
 
@@ -1417,17 +1417,17 @@ public class DBStore {
     inv = eO.getInvid();
 
     s = (StringDBField) eO.getField("Name");
-    s.setValue("supergash");
+    s.setValue(Ganymede.rootname);
     
     // create a supergash admin persona object 
 
     eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
 
     s = (StringDBField) eO.getField("Name");
-    s.setValue("supergash");
+    s.setValue(Ganymede.rootname);
     
     p = (PasswordDBField) eO.getField("Password");
-    p.setPlainTextPass(GanymedeConfig.newSGpass); // default supergash password
+    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 
     i = (InvidDBField) eO.getField(SchemaConstants.PersonaGroupsField);
     i.addElement(inv);

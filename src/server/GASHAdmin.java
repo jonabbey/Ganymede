@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -307,7 +307,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void runTaskNow(String taskName) throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	permDialog.DialogShow();
 	return;
@@ -318,7 +318,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void stopTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	permDialog.DialogShow();
 	return;
@@ -329,7 +329,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void disableTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	permDialog.DialogShow();
 	return;
@@ -340,7 +340,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void enableTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	permDialog.DialogShow();
 	return;
@@ -360,7 +360,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void shutdown() throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	return;
       }
@@ -370,7 +370,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void dumpDB() throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	return;
       }
@@ -380,7 +380,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void dumpSchema() throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	return;
       }
@@ -390,7 +390,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void reloadClasses() throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	return;
       }
@@ -400,7 +400,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void runInvidTest() throws RemoteException
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(GASHAdmin.rootname))
       {
 	return;
       }
@@ -447,13 +447,21 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * GASHAdminFrame is the main class for the Ganymede admin console.  The
+ * GASHAdminFrame constructor is the first piece of common code that is executed
+ * both in an applet context and as a stand-alone app.
+ *
+ */
+
 class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   static iAdmin admin = null;
   static boolean WeAreApplet = true;
   static String debugFilename = null;
 
-  /* - */
+  // ---
 
   Image question = null;
 
@@ -515,7 +523,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   
   rowTable table = null;
 
-  String url = "rmi://www.arlut.utexas.edu/ganymede.server";
+
+
   String headers[] = {"User", "System", "Status", "Connect Time", "Last Event"};
   int colWidths[] = {100,100,100,100,100};
 
@@ -533,6 +542,12 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem enableTaskMI = null;
   
   /* -- */
+
+  /**
+   *
+   * Constructor
+   *
+   */
 
   public GASHAdminFrame(String title, boolean WeAreApplet)
   {
@@ -613,7 +628,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     hostLabel = new JLabel("Ganymede Server Host:");
 
-    hostField = new JTextField(url, 40);
+    hostField = new JTextField(GASHAdmin.url, 40);
     hostField.setEditable(false);
     //hostField.setBackground(SystemColor.text);
     //hostField.setForeground(SystemColor.textText);
@@ -650,8 +665,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     adminField = new JTextField("", 40);
     adminField.setEditable(false);
-    //adminField.setBackground(SystemColor.text);
-    //adminField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -674,8 +687,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     stateField = new JTextField("", 40);
     stateField.setEditable(false);
-    //stateField.setBackground(SystemColor.text);
-    //stateField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -698,8 +709,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     startField = new JTextField("", 40);
     startField.setEditable(false);
-    //startField.setBackground(SystemColor.text);
-    //startField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -722,8 +731,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     dumpField = new JTextField("", 40);
     dumpField.setEditable(false);
-    //dumpField.setBackground(SystemColor.text);
-    //dumpField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -746,8 +753,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     journalField = new JTextField("", 40);
     journalField.setEditable(false);
-    //journalField.setBackground(SystemColor.text);
-    //journalField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -770,8 +775,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     checkedOutField = new JTextField("", 40);
     checkedOutField.setEditable(false);
-    //checkedOutField.setBackground(SystemColor.text);
-    //checkedOutField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -794,8 +797,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     locksField = new JTextField("", 40);
     locksField.setEditable(false);
-    //locksField.setBackground(SystemColor.text);
-    //locksField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -831,11 +832,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     topGBC.fill = GridBagConstraints.BOTH;
     topGBC.weighty = 1.0;
 
-    statusArea = new JTextArea("Admin Console Testing\n", 6, 50);
+    statusArea = new JTextArea("Ganymede Admin Console\n", 6, 50);
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
-    //statusArea.setBackground(SystemColor.text);
-    //statusArea.setForeground(SystemColor.textText);
 
     JPanel statusBox = new JPanel(new java.awt.BorderLayout());
     statusBox.add("Center", statusAreaPane);
@@ -916,7 +915,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     try
       {
-	Remote obj = Naming.lookup(url);
+	Remote obj = Naming.lookup(GASHAdmin.url);
 
 	if (obj instanceof Server)
 	  {
@@ -929,7 +928,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     catch (java.rmi.UnknownHostException ex)
       {
-	System.err.println("RMI: Couldn't find server\n" + url );
+	System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
       }
     catch (RemoteException ex)
       {
@@ -938,7 +937,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     catch (java.net.MalformedURLException ex)
       {
-	System.err.println("RMI: Malformed URL " + url );
+	System.err.println("RMI: Malformed URL " + GASHAdmin.url );
       }
 
     System.err.println("Bound to server object");
@@ -963,7 +962,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	return;
       }
 
-    if (!results.get("Account:").equals("supergash"))
+    if (!results.get("Account:").equals(GASHAdmin.rootname))
       {
 	controlMenu.remove(dumpMI);
 	controlMenu.remove(dumpSchemaMI);
@@ -1230,6 +1229,10 @@ public class GASHAdmin extends JApplet {
   static GASHAdmin applet = null;
   static GASHAdminFrame frame = null;
 
+  static String rootname = null;
+  static String serverhost = null;
+  static String url = null;
+  
   /* -- */
 
   // Our primary constructor.  This will always be called, either
@@ -1240,19 +1243,98 @@ public class GASHAdmin extends JApplet {
 
   }
   
-  public void init() 
+  public void init()
   {
+    serverhost = getParameter("ganymede.serverhost");
+
+    if (serverhost == null)
+      {
+	System.err.println("Couldn't get the server host property");
+	throw new RuntimeException("Couldn't get the server host property");
+      }
+    else
+      {
+	url = "rmi://" + serverhost + "/ganymede.server";
+      }
+
+    rootname = getParameter("ganymede.rootname");
+
+    if (rootname == null)
+      {
+	rootname = "supergash";
+      }
+
     frame = new GASHAdminFrame("Ganymede Admin Console", true);
   }
 
   public static void main(String[] argv)
   {
-    if (argv.length > 0)
+    if (argv.length < 1)
+      {
+	System.err.println("Error, no properties file specified.");
+	return;
+      }
+    else
+      {
+	if (!loadProperties(argv[0]))
+	  {
+	    System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
+	    return;
+	  }
+	else
+	  {
+	    System.out.println("Successfully loaded properties from file " + argv[0]);
+	  }
+      }
+
+    if (argv.length > 1)
       {
 	GASHAdminFrame.debugFilename = argv[1];
       }
 
+    // the frame constructor shows itself, and the gui thread takes
+    // care of keeping us going.
+
     frame = new GASHAdminFrame("Ganymede Admin Console", false);
+  }
+
+  private static boolean loadProperties(String filename)
+  {
+    Properties props = new Properties();
+    boolean success = true;
+
+    /* -- */
+
+    try
+      {
+	props.load(new BufferedInputStream(new FileInputStream(filename)));
+      }
+    catch (IOException ex)
+      {
+	return false;
+      }
+
+    serverhost = props.getProperty("ganymede.serverhost");
+
+    if (serverhost == null)
+      {
+	System.err.println("Couldn't get the server host property");
+	success = false;
+      }
+    else
+      {
+	url = "rmi://" + serverhost + "/ganymede.server";
+      }
+
+    rootname = props.getProperty("ganymede.rootname");
+
+    if (rootname == null)
+      {
+	System.err.println("Couldn't get the root name property");
+	success = false;
+      }
+
+    return success;
   }
 }
  

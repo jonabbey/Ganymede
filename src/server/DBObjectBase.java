@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -489,7 +489,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    personaObj = (DBObject) baseEnum.nextElement();
 
-	    if (personaObj.getLabel().equals("supergash") ||
+	    if (personaObj.getLabel().equals(Ganymede.rootname) ||
 		personaObj.getLabel().equals("monitor"))
 	      {
 		counter++;
@@ -506,7 +506,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    personaObj = (DBObject) baseEnum.nextElement();
 
-	    if (personaObj.getLabel().equals("supergash") ||
+	    if (personaObj.getLabel().equals(Ganymede.rootname) ||
 		personaObj.getLabel().equals("monitor"))
 	      {
 		personaObj.emit(out);
@@ -526,7 +526,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    ownerObj = (DBObject) baseEnum.nextElement();
 
-	    if (ownerObj.getLabel().equals("supergash"))
+	    if (ownerObj.getLabel().equals(Ganymede.rootname))
 	      {
 		counter++;
 	      }
@@ -542,7 +542,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    ownerObj = (DBObject) baseEnum.nextElement();
 
-	    if (ownerObj.getLabel().equals("supergash"))
+	    if (ownerObj.getLabel().equals(Ganymede.rootname))
 	      {
 		ownerObj.partialEmit(out);
 	      }

@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -509,7 +509,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   {
     GanymedeSession temp;
 
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return false;
       }
@@ -533,7 +533,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   {
     GanymedeSession temp;
 
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return false;
       }
@@ -594,7 +594,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     /* -- */
 
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return false;
       }
@@ -681,7 +681,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   public boolean dumpDB()
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return false;
       }
@@ -713,7 +713,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   public boolean dumpSchema()
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return false;
       }
@@ -812,7 +812,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   public void runInvidTest()
   {
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return;
       }
@@ -871,7 +871,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     /* -- */
 
-    if (!adminName.equals("supergash"))
+    if (!adminName.equals(Ganymede.rootname))
       {
 	return null;
       }
