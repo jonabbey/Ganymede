@@ -1,11 +1,11 @@
 /*
 
-   choiceThing.java
+   booleanThing.java
 
    Resource class for use with StringDialog.java
    
    Created: 16 June 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,7 +15,7 @@ package arlut.csd.JDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     choiceThing
+                                                                    booleanThing
 
 ------------------------------------------------------------------------------*/
 
