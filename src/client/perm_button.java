@@ -6,8 +6,8 @@
    
    Created: 20 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:04:18 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/07/22 05:33:40 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -66,7 +66,9 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 class perm_button extends JButton implements ActionListener {
-  
+
+  static final boolean debug = false;
+
   perm_field field;
   boolean enabled;
   Hashtable basehash;
@@ -75,6 +77,7 @@ class perm_button extends JButton implements ActionListener {
   JCheckBox tableView;
   perm_editor editor = null;
   boolean isActiveAlready = false;
+
   /* -- */
   
   /**
@@ -94,14 +97,6 @@ class perm_button extends JButton implements ActionListener {
 		      boolean justShowUser,
 		      String title)
     {
-      
-      
-      // Commented out stuff is to allow access to "good" editor while testing another
-      
-      //    JLabel label = new JLabel("myLabel");
-      //    tableView = new JCheckBox("Table View",false);
-      //    label.setBorder(new BevelBorder(BevelBorder.RAISED));
-      
       if (enabled)
 	{
 	  setText("Edit Permissions");
@@ -110,10 +105,6 @@ class perm_button extends JButton implements ActionListener {
 	{
 	  setText("View Permissions");
 	}
-      
-      //     this.setLayout(new BorderLayout());
-      //     this.add(label, "North");
-      //     this.add(tableView, "South");
       
       this.field = field;
       this.enabled = enabled;
@@ -132,35 +123,37 @@ class perm_button extends JButton implements ActionListener {
     {
       if ((e.getSource() == this)) // && (tableView.isSelected()))
 	{
-	  // 	System.out.println("Edit Button was pushed- table selected");
+	  if (debug)
+	    {
+	      System.out.println("Edit Button was pushed- table not selected");
+	    }
 	  
-	  // 	Frame parent = new Frame();
-	  // 	perm_editor editor = new perm_editor(field, 
-	  // 					     enabled, gc, 
-	  // 					     parent, "Permissions Editor: " + title);
-	  
-	  // 	System.out.println("Editor Created by perm button");
-	  //       }
- 
-	  //     else {
-	  
-	  System.out.println("Edit Button was pushed- table not selected");
-	  
+	  // Need to take care of accidental double clicks resulting
+	  // in two or more instances of perm_editor being
+	  // created. Even though perm_editor is modal, there is a
+	  // small gap in time between clicking the perm button and
+	  // the modal state taking effect- enough time for multiple
+	  // clicks on the button to create multiple editors.
 
-	  // Need to take care of accidental double clicks resulting in two or more instances 
-	  // of perm_editor being created. Even though perm_editor is modal, there is a small 
-	  // gap in time between clicking the perm button and the modal state taking effect- 
-	  // enough time for multiple clicks on the button to create multiple editors. 
-	  if ((editor == null) || (!editor.isActiveEditor())) { 
-	    Frame parent = new Frame();
-	    editor = new perm_editor(field, 
-				     enabled, gc, 
-				     parent, "Permissions Editor: " + title);
-	    
-	    System.out.println("Editor Created by perm button");
-	  } else {
-	    System.out.println("An editor already exists- new one not created");
-	  }
+	  if ((editor == null) || (!editor.isActiveEditor())) 
+	    { 
+	      Frame parent = new Frame();
+	      editor = new perm_editor(field, 
+				       enabled, gc, 
+				       parent, "Permissions Editor: " + title);
+	     
+	      if (debug)
+		{
+		  System.out.println("Editor Created by perm button");
+		}
+	    } 
+	  else 
+	    {
+	      if (debug)
+		{
+		  System.out.println("An editor already exists- new one not created");
+		}
+	    }
 	}
       
     }

@@ -5,8 +5,8 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/07/08 04:25:38 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/07/22 05:33:40 $
    Release: $Name:  $
 
    Module By: Brian O'Mara omara@arlut.utexas.edu
@@ -313,10 +313,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    return;
 	  }
 	
-	System.out.println("rowVector initialized");
-
 	if (debug)
 	  {
+	    System.out.println("rowVector initialized");
 	    System.err.println("got it, it " + (rowRootNode == null ? "is " : "isn't ") + "equal to null");
 	  }
       }

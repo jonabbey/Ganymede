@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.155 $
-   Last Mod Date: $Date: 1999/07/22 03:52:12 $
+   Version: $Revision: 1.156 $
+   Last Mod Date: $Date: 1999/07/22 05:33:39 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.155 $ $Date: 1999/07/22 03:52:12 $ $Name:  $
+ * @version $Revision: 1.156 $ $Date: 1999/07/22 05:33:39 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/07/22 03:52:12 $";
+  static String release_date = "$Date: 1999/07/22 05:33:39 $";
   static String release_number = null;
 
   // ---
@@ -985,7 +985,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     try
       {
-	ReturnVal rv = session.openTransaction("Ganymede GUI Client " + release_number);
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
 	rv = handleReturnVal(rv);
 
 	if ((rv != null) && (!rv.didSucceed()))
@@ -4121,7 +4121,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     try
       {
-	ReturnVal rv = session.openTransaction("Ganymede GUI Client " + release_number);
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client ");
 	
 	handleReturnVal(rv);
 	if ((rv != null) && (!rv.didSucceed()))

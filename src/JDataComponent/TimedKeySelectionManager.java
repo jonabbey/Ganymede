@@ -6,8 +6,8 @@
 
    Created: April 13, 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/04/14 19:04:04 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/07/22 05:33:22 $
    Module By: Jonathan Abbey 
 
    -----------------------------------------------------------------------
@@ -67,13 +67,13 @@ import javax.swing.*;
  * as long as the user doesn't hesitate for more than half a second
  * between keystrokes.</p>
  *
- * @version $Revision: 1.1 $ $Date: 1999/04/14 19:04:04 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 1999/07/22 05:33:22 $ $Name:  $
  * @author David M. Geary, Graphic Java Mastering the JFC Volume II: Swing
  */
 
 public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   /* - */
 
