@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.167 $
-   Last Mod Date: $Date: 2000/01/04 05:56:51 $
+   Version: $Revision: 1.168 $
+   Last Mod Date: $Date: 2000/02/11 07:09:29 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -14,10 +14,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -87,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.167 $ $Date: 2000/01/04 05:56:51 $ $Name:  $
+ * @version $Revision: 1.168 $ $Date: 2000/02/11 07:09:29 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/01/04 05:56:51 $";
+  static String release_date = "$Date: 2000/02/11 07:09:29 $";
   static String release_number = null;
 
   // ---
@@ -1602,13 +1604,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("Release number: ");
 	    buffer.append(release_number);
-	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.</p>");
+	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999, 2000 The University of Texas at Austin.</p>");
 	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
 	    buffer.append("under the conditions of the GNU General Public License.</p>");
 	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
-	    buffer.append("Erik Grostic, and Brian O'Mara.</p>");
+	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
 
 	    aboutMessage = buffer.toString();
 	  }

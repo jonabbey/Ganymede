@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/08/04 18:39:50 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/02/11 07:09:30 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.JDialog.*;
  * the client.  This panel is created in association with the "Owners"
  * tab in framePanel.</p>
  *
- * @version $Revision: 1.25 $ $Date: 1999/08/04 18:39:50 $ $Name:  $
+ * @version $Revision: 1.26 $ $Date: 2000/02/11 07:09:30 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -395,10 +395,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	    System.out.println("Unknown action command from popup: " + command);
 	  }
       } // end of popup processing, now it's just an add or remove kind of thing.
-    else if (o.getValue() instanceof Invid)
+    else
       {
-	Invid invid = (Invid)o.getValue();
-	int index = o.getIndex();
+	Invid invid = null;	// have to init for javac
+
+	if (o.getValue() instanceof Invid)
+	  {
+	    invid = (Invid) o.getValue();
+	  }
 	
 	try
 	  {
@@ -412,11 +416,32 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		  }
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
+	      }
+	    else if (o.getOperationType() == JValueObject.ADDVECTOR)
+	      {
+		retVal = field.addElements((Vector) o.getValue());
 
+		if (retVal != null)
+		  {
+		    gc.handleReturnVal(retVal);
+		  }
+
+		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
 	    else if (o.getOperationType() == JValueObject.DELETE)
 	      {
 		retVal = field.deleteElement(invid);
+
+		if (retVal != null)
+		  {
+		    gc.handleReturnVal(retVal);
+		  }
+
+		succeeded = (retVal == null) ? true : retVal.didSucceed();
+	      }
+	    else if (o.getOperationType() == JValueObject.DELETEVECTOR)
+	      {
+		retVal = field.deleteElements((Vector) o.getValue());
 
 		if (retVal != null)
 		  {

@@ -6,18 +6,20 @@
    
    Created: 26 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/10/29 21:44:45 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/02/11 07:09:26 $
    Module By: Michael Mulvaney, Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -65,7 +67,7 @@ import java.util.Vector;
 /**
  * <p>A GUI component for choosing an Invid for a scalar invid_field.</p>
  *
- * @version $Revision: 1.23 $ $Date: 1999/10/29 21:44:45 $ $Name:  $
+ * @version $Revision: 1.24 $ $Date: 2000/02/11 07:09:26 $ $Name:  $
  * @author Jonathan Abbey
  */
 

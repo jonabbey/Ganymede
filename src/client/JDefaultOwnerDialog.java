@@ -6,8 +6,8 @@
    
    Created: ??
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:09 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/02/11 07:09:26 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -118,6 +118,15 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	  }
 	chosen.addElement(e.getValue());
       }
+    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+      {
+	Vector newElements = (Vector) e.getValue();
+
+	for (int i = 0; i < newElements.size(); i++)
+	  {
+	    chosen.addElement(newElements.elementAt(i));
+	  }
+      }
     else if (e.getOperationType() == JValueObject.DELETE)
       {
 	if (debug)
@@ -125,6 +134,15 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	    System.out.println("removing element");
 	  }
 	chosen.removeElement(e.getValue());
+      }
+    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+      {
+	Vector newElements = (Vector) e.getValue();
+
+	for (int i = 0; i < newElements.size(); i++)
+	  {
+	    chosen.removeElement(newElements.elementAt(i));
+	  }
       }
 
     return true;

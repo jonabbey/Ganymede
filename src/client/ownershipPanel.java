@@ -2,22 +2,25 @@
 
    ownerPanel.java
 
-   The individual frames in the windowPanel.
+   The ownershipPanel is used in the Ganymede client to display
+   objects owned when the user opens a Ganymede Owner Group window.
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/07/26 22:19:53 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/02/11 07:09:31 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -64,9 +67,14 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>The ownershipPanel is used in the Ganymede client to display objects owned
+ * when the user opens a Ganymede Owner Group window.</P>
+ */
+
 public class ownershipPanel extends JPanel implements ItemListener {
 
-  boolean debug = true;
+  final static boolean debug = false;
 
   invid_field
     field;
@@ -103,6 +111,8 @@ public class ownershipPanel extends JPanel implements ItemListener {
   QueryDataNode
     node;
 
+  /* -- */
+
   public ownershipPanel(invid_field field, boolean editable, framePanel parent)
   {
     this.field = field;
@@ -110,7 +120,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
     this.parent = parent;
 
     gc = parent.wp.gc;
-    debug = gc.debug;
+    //    debug = gc.debug;
 
     setLayout(new BorderLayout());
 
@@ -173,7 +183,11 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     invalidate();
     parent.validate();
-    println("Done in thread, she's loaded!");
+
+    if (debug)
+      {
+	println("Done in thread, she's loaded!");
+      }
 
     JPanel emptyP = new JPanel();
     center.add("empty", emptyP);
@@ -229,9 +243,9 @@ public class ownershipPanel extends JPanel implements ItemListener {
   }
 
   private void println(String s)
-    {
-      System.out.println("OwnershipPanel: " + s);
-    }
+  {
+    System.out.println("OwnershipPanel: " + s);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -240,9 +254,15 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
 ------------------------------------------------------------------------------*/
 
-class objectPane extends JPanel implements JsetValueCallback, Runnable{
+/**
+ * <P>The objectPane class is a JPanel subclass used in the Ganymede client
+ * to display a list of objects of a given type contained in a Ganymede Owner
+ * Group.</P>
+ */
 
-  boolean debug = true;
+class objectPane extends JPanel implements JsetValueCallback, Runnable {
+
+  final static boolean debug = false;
 
   boolean
     stringSelector_loaded = false;
@@ -290,7 +310,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
     this.parent = parent;
 
     gc = parent.gc;
-    debug = gc.debug;
+    //    debug = gc.debug;
 
     setLayout(new BorderLayout());
     filler = new JPanel();
@@ -313,7 +333,10 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     isStarted = true;
 
-    println("Loading one of the panels");
+    if (debug)
+      {
+	println("Loading one of the panels");
+      }
 
     // Get the list of selected choices
 
@@ -410,7 +433,22 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  }
       }
 
-    ss = new StringSelector(possible, owned, this, editable, true, true);
+    JPopupMenu invidTablePopup = new JPopupMenu();
+    JMenuItem viewO = new JMenuItem("View object");
+    JMenuItem editO = new JMenuItem("Edit object");
+    invidTablePopup.add(viewO);
+    invidTablePopup.add(editO);
+
+    JPopupMenu invidTablePopup2 = new JPopupMenu();
+    JMenuItem viewO2 = new JMenuItem("View object");
+    JMenuItem editO2 = new JMenuItem("Edit object");
+    invidTablePopup2.add(viewO2);
+    invidTablePopup2.add(editO2);
+
+    ss = new StringSelector(possible, owned, this, editable, true, true,
+			    (possible != null && editable) ? 150 : 300,
+			    "Selected", "Available",
+			    invidTablePopup, invidTablePopup2);
 
     if (debug)
       {
@@ -451,7 +489,49 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     /* -- */
 
-    if (e.getOperationType() == JValueObject.ADD)
+    // First, are we being given a menu operation from StringSelector?
+    
+    if (e.getOperationType() == JValueObject.PARAMETER)
+      {
+	if (debug)
+	  {
+	    println("MenuItem selected in a StringSelector");
+	  }
+
+	String command = (String) e.getParameter();
+
+	if (command.equals("Edit object"))
+	  {
+	    if (debug)
+	      {
+		println("Edit object: " + e.getValue());
+	      }
+
+	    Invid invid = (Invid) e.getValue();
+		    
+	    gc.editObject(invid);
+
+	    return true;
+	  }
+	else if (command.equals("View object"))
+	  {
+	    if (debug)
+	      {
+		println("View object: " + e.getValue());
+	      }
+
+	    Invid invid = (Invid) e.getValue();
+		    
+	    gc.viewObject(invid);
+
+	    return true;
+	  }
+	else
+	  {
+	    println("Unknown action command from popup: " + command);
+	  }
+      }
+    else if (e.getOperationType() == JValueObject.ADD)
       {
 	if (debug)
 	  {
@@ -472,6 +552,29 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not add value to list: " + rx);
+	  }
+      }
+    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+      {
+	if (debug)
+	  {
+	    println("Adding objects to list");
+	  }
+
+	try
+	  {
+	    retVal = field.addElements((Vector)e.getValue());
+
+	    if (retVal != null)
+	      {
+		gc.handleReturnVal(retVal);
+	      }
+
+	    succeeded = (retVal == null) ? true : retVal.didSucceed();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not add values to list: " + rx);
 	  }
       }
     else if (e.getOperationType() == JValueObject.DELETE)
@@ -497,6 +600,29 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	    throw new RuntimeException("Could not delete value from list: " + rx);
 	  }
       }
+    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+      {
+	if (debug)
+	  {
+	    println("Adding objects to list");
+	  }
+
+	try
+	  {
+	    retVal = field.deleteElements((Vector)e.getValue());
+
+	    if (retVal != null)
+	      {
+		gc.handleReturnVal(retVal);
+	      }
+
+	    succeeded = (retVal == null) ? true : retVal.didSucceed();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not remove values from list: " + rx);
+	  }
+      }
 
     if (debug)
       {
@@ -507,13 +633,12 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
       {
 	gc.somethingChanged();
       }
-
+    
     return succeeded;
   }
 
   private void println(String s)
-    {
-      System.out.println("OwnershipPanel.objectPane: " + s);
-    }
-
+  {
+    System.out.println("OwnershipPanel.objectPane: " + s);
+  }
 }

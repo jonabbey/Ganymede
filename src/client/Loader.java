@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/10/26 20:02:04 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/02/11 07:09:27 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -53,6 +53,7 @@ import java.util.*;
 import java.rmi.*;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.Util.VecQuickSort;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,7 +65,7 @@ import arlut.csd.ganymede.*;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.15 $ $Date: 1999/10/26 20:02:04 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2000/02/11 07:09:27 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -248,7 +249,7 @@ public class Loader extends Thread {
 
   public Vector getBaseList()
   {
-    while (! baseListLoaded)
+    while (!baseListLoaded)
       {
 	if (debug)
 	  {
@@ -447,6 +448,8 @@ public class Loader extends Thread {
 	    System.out.println("*** BaseList is not null.");
 	  }
       }
+
+    (new VecQuickSort(baseList, null)).sort();
 
     baseListLoaded = true;
     notifyAll();

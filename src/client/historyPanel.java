@@ -6,18 +6,20 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/01/14 00:50:47 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/02/11 07:09:30 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -68,7 +70,7 @@ import arlut.csd.JCalendar.*;
 
 ------------------------------------------------------------------------------*/
 
-public class historyPanel extends JPanel implements ActionListener, JsetValueCallback{
+public class historyPanel extends JPanel implements ActionListener, JsetValueCallback {
 
   JTextArea
     historyText;

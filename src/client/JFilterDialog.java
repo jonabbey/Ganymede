@@ -7,8 +7,8 @@
    
    Created: 3 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:04:10 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/11 07:09:26 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -133,6 +133,20 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
 	filter.addElement(e.getValue());
       }
+    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+      {
+	if (debug)
+	  {
+	    System.out.println("Adding elements");
+	  }
+
+	Vector newValues = (Vector) e.getValue();
+
+	for (int i = 0; i < newValues.size(); i++)
+	  {
+	    filter.addElement(newValues.elementAt(i));
+	  }
+      }
     else if (e.getOperationType() == JValueObject.DELETE)
       {
 	if (debug)
@@ -142,6 +156,20 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
 	filter.removeElement(e.getValue());
 	
+      }
+    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+      {
+	if (debug)
+	  {
+	    System.out.println("Removing elements");
+	  }
+
+	Vector newValues = (Vector) e.getValue();
+
+	for (int i = 0; i < newValues.size(); i++)
+	  {
+	    filter.removeElement(newValues.elementAt(i));
+	  }
       }	
     return true;
   }

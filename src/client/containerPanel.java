@@ -6,18 +6,20 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 1999/11/03 01:25:10 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2000/02/11 07:09:28 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -97,7 +99,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.113 $ $Date: 1999/11/03 01:25:10 $ $Name:  $
+ * @version $Revision: 1.114 $ $Date: 2000/02/11 07:09:28 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1724,11 +1726,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    println("Unknown action command from popup: " + command);
 		  }
 	      }
-	    else if (v.getValue() instanceof Invid)
+	    else if (objectHash.get(sourceComponent) instanceof invid_field)
 	      {
-		// we assume this will work.. if we get a ClassCastException here,
-		// there's something wrong in the client logic
-
 		invid_field field = (invid_field) objectHash.get(sourceComponent);
 
 		/* -- */
@@ -1749,6 +1748,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			returnValue = field.addElement(v.getValue());
 		      }
+		    else if (v.getOperationType() == JValueObject.ADDVECTOR)
+		      {
+			if (debug)
+			  {
+			    println("Adding new value vector to string selector");
+			  }
+
+			returnValue = field.addElements((Vector) v.getValue());
+		      }
 		    else if (v.getOperationType() == JValueObject.DELETE)
 		      {
 			if (debug)
@@ -1758,17 +1766,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 			returnValue = field.deleteElement(v.getValue());
 		      }
+		    else if (v.getOperationType() == JValueObject.DELETEVECTOR)
+		      {
+			if (debug)
+			  {
+			    println("Removing value vector from field(string selector)");
+			  }
+
+			returnValue = field.deleteElements((Vector) v.getValue());
+		      }
 		  }
 		catch (RemoteException rx)
 		  {
 		    throw new RuntimeException("Could not change add/delete invid from field: " + rx);
 		  }
 	      }
-	    else if (v.getValue() instanceof String)
+	    else if (objectHash.get(v.getSource()) instanceof string_field)
 	      {
-		// we assume this will work.. if we get a ClassCastException here,
-		// there's something wrong in the client logic
-
 		string_field field = (string_field) objectHash.get(v.getSource());
 
 		/* -- */
@@ -1784,9 +1798,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      {
 			returnValue = field.addElement(v.getValue());
 		      }
+		    else if (v.getOperationType() == JValueObject.ADDVECTOR)
+		      {
+			returnValue = field.addElements((Vector) v.getValue());
+		      }
 		    else if (v.getOperationType() == JValueObject.DELETE)
 		      {
 			returnValue = field.deleteElement(v.getValue());
+		      }
+		    else if (v.getOperationType() == JValueObject.DELETEVECTOR)
+		      {
+			returnValue = field.deleteElements((Vector) v.getValue());
 		      }
 		  }
 		catch (RemoteException rx)
