@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 2000/11/21 12:57:25 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 2000/11/23 02:35:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2342,6 +2342,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     field.setName(newName);
+
+    // default it to boolean, until such time as a schema editor
+    // changes it
+
+    field.setType(FieldType.BOOLEAN);
 
     // and set it up in our field hash and add this to the sorted
     // fields vector

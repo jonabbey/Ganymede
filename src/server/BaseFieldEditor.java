@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/03/25 05:36:38 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/11/23 02:35:49 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -214,6 +214,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     addRow(editPanel, maxArrayN, "Max Array Size:", rowcount++);
 
     typeC = new JComboBox();
+
     typeC.addItem("Boolean");
     typeC.addItem("Numeric");
     typeC.addItem("Float");
@@ -224,10 +225,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     typeC.addItem("I.P.");
     typeC.addItem("Permission Matrix");
     typeC.addItemListener(this);
-
-    //choose the one that is the default
-
-    changeTypeChoice("Boolean");
 
     addRow(editPanel, typeC, "Field Type:", rowcount++);
 
@@ -729,6 +726,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("changeTypeChoice(" + selectedItem + ")");
+      }
+
     try
       {
 	if (selectedItem.equalsIgnoreCase("Boolean"))
@@ -865,6 +867,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		clearTypeChoice();
 		permissionShowing = true;
 	      }
+	  }
+	else
+	  {
+	    throw new RuntimeException("unrecognized selectedItem string: " + selectedItem);
 	  }
       }
     catch (RemoteException ex)
@@ -1313,6 +1319,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    typeC.addItem("Permission Matrix");
 	    typeC.getModel().setSelectedItem("Permission Matrix");
+	  }
+	else
+	  {
+	    throw new RuntimeException("unrecognized field type");
 	  }
 
 	// Here is where the editability is checked.

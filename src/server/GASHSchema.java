@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/11/22 01:50:31 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2000/11/23 02:35:53 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -86,8 +86,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   // --
 
-  GASHAdminFrame
-    frame;
+  JMenuItem schemaMI;
 
   SchemaEdit 
     editor;
@@ -182,11 +181,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   /* -- */
 
-  public GASHSchema(String title, SchemaEdit editor, GASHAdminFrame frame)
+  public GASHSchema(String title, SchemaEdit editor, JMenuItem schemaMI)
   {
     super(title);
 
-    this.frame = frame;
+    this.schemaMI = schemaMI;
     this.editor = editor;
 
     questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
@@ -1369,7 +1368,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't commit: " + ex);
 	  }
 
-	frame.schemaMI.setEnabled(true);
+	schemaMI.setEnabled(true);
 	setVisible(false);
       }
     else if (event.getSource() == cancelButton)
@@ -1383,7 +1382,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
 
-	frame.schemaMI.setEnabled(true);
+	schemaMI.setEnabled(true);
 	setVisible(false);
       }
     else

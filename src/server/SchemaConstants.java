@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/11/10 05:05:01 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2000/11/23 02:35:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -493,6 +493,12 @@ public interface SchemaConstants {
    * date: anchor point used to determine time of day, week, etc.
    */
   final static short TaskPeriodAnchor = 106;
+
+  /**
+   * string: vector of option strings that can be interpreted by
+   * a given builder task
+   */
+  final static short TaskOptionStrings = 107;
 
   /**
    * what's the last base we currently have defined as a mandatory base? 

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/11/04 03:42:44 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/11/23 02:35:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -95,6 +95,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   static final ReturnVal warning1 = genWarning1();
   static final ReturnVal warning2 = genWarning2();
+
+  static final boolean debug = false;
 
   /**
    * Object type definition for the database object class we are member of
@@ -4631,7 +4633,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	break;
 
       default:
-	result = "<<bad type code>>";
+	result = "<<bad type code: " + field_type + " >>";
       }
 
     if (array)
@@ -4699,7 +4701,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	break;
 
       default:
-	result = "<td>&lt;&lt;bad type code&gt;&gt;</td>";
+	result = "<td>&lt;&lt;bad type code: " + field_type + " &gt;&gt;</td>";
       }
 
     if (array)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 2000/11/21 12:57:27 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 2000/11/23 02:35:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.135 $ %D%
+ * @version $Revision: 1.136 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1824,6 +1824,14 @@ public final class DBStore {
 	bf.field_type = FieldType.DATE;
 	bf.field_name = "Period Anchor";
 	bf.comment = "When do we start counting period intervals from?";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskOptionStrings;
+	bf.field_type = FieldType.STRING;
+	bf.array = true;
+	bf.field_name = "Option Strings";
+	bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.TaskName);
