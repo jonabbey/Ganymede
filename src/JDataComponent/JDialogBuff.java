@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,6 +98,8 @@ public class JDialogBuff implements java.io.Serializable {
     while (index < chunks.size())
       {
 	chunk = (JDialogBuffChunk) chunks.elementAt(index);
+
+	// System.err.println("Retrieving extra chunk: " + chunk);
 
 	if (chunk.label.equals("@string"))
 	  {
@@ -389,6 +391,8 @@ public class JDialogBuff implements java.io.Serializable {
 
     /* -- */
 
+    //    System.err.println("Server adding chunk " + label + ":" + operand);
+
     if (buffer == null)
       {
 	buffer = new StringBuffer();
@@ -572,5 +576,10 @@ class JDialogBuffChunk {
   {
     this.label = label;
     this.value = value;
+  }
+
+  public String toString()
+  {
+    return label + ":" + value;
   }
 }
