@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:02 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/02/25 04:35:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -209,7 +209,6 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   {
     return true;
   }
-
 
   /**
    *

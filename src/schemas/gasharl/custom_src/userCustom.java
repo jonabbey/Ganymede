@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 1999/02/25 02:24:58 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 1999/02/25 04:35:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -390,44 +390,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   public boolean canInactivate(DBSession session, DBEditObject object)
   {
     return true;
-  }
-
-  /**
-   *
-   * Customization method to verify whether the user has permission
-   * to remove a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for removal by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.<br><br>
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   *
-   */
-
-  public boolean canRemove(DBSession session, DBObject object)
-  {
-    GanymedeSession myMaster = session.getGSession();
-
-    /* -- */
-
-    if (myMaster == null)
-      {
-	// hm, not an end-user.. let it go
-
-	return true;
-      }
-
-    // only supergash can delete users.. everyone else can only
-    // inactivate.
-
-    if (myMaster.isSuperGash())
-      {
-	return true;
-      }
-
-    return false;
   }
 
   /**
