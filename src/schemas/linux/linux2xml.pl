@@ -18,8 +18,8 @@
 # at http://www.megginson.com/Software/index.html.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.4 $
-# Date: $Date: 2000/09/15 06:31:09 $
+# Version: $Revision: 1.1 $
+# Date: $Date: 2000/11/11 07:22:23 $
 #
 #=====================================================================
 
