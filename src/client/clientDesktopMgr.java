@@ -7,8 +7,8 @@
 
    Created: 25 September 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/09/26 01:13:07 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/09/26 01:24:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ import javax.swing.*;
  * make sure that a inner frame resize doesn't result in the frame being stretched
  * so that its title bar is above the desktop's visible area.</p>
  *
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -84,6 +84,8 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
     y = rect.y;
     w = rect.width;
     h = rect.height;
+
+    super.beginDraggingFrame(frame);
   }
 
   public void dragFrame(JComponent frame, int x, int y)
@@ -107,6 +109,8 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
   public void endDraggingFrame(JComponent frame)
   {
     setBoundsForFrame(frame, x, y, frame.getWidth(), frame.getHeight());
+
+    super.endDraggingFrame(frame);
   }
 
   public void beginResizingFrame(JComponent frame, int dir)
@@ -117,6 +121,8 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
     y = rect.y;
     w = rect.width;
     h = rect.height;
+
+    super.beginResizingFrame(frame, dir);
   }
 
   public void resizeFrame(JComponent frame, int x, int y, int w, int h)
@@ -144,5 +150,7 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
   public void endResizingFrame(JComponent frame)
   {
     setBoundsForFrame(frame, x, y, w, h);
+
+    super.endResizingFrame(frame);
   }
 }
