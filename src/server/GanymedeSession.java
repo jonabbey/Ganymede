@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.254 $
-   Last Mod Date: $Date: 2002/03/14 20:28:27 $
+   Version: $Revision: 1.255 $
+   Last Mod Date: $Date: 2002/03/15 02:25:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.254 $ $Date: 2002/03/14 20:28:27 $
+ * @version $Revision: 1.255 $ $Date: 2002/03/15 02:25:43 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -166,7 +166,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * If true, the user is currently logged in.
    */
 
-  boolean logged_in = false;
+  private booleanSemaphore loggedInSemaphore = new booleanSemaphore(false);
 
   /**
    * If true, the user has had a soft timeout and needs to
@@ -177,18 +177,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   boolean timedout = false;
 
   /**
-   * A synchronization object to make sure that we don't get confused
-   * by multiple threads possible trying to kill the user off.
-   */
-
-  Object forceLock = new Object();
-
-  /**
    * A flag to let the forceOff() logic know that another thread has
    * already tried to knock off the user.
    */
 
-  boolean forcing_off = false;
+  private booleanSemaphore forcingSemaphore = new booleanSemaphore(false);
 
   /**
    * A flag indicating whether the client has supergash priviliges.  We
@@ -584,7 +577,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // construct our DBSession
 
-    logged_in = true;
+    loggedInSemaphore.set(true);
     client = null;
     username = sessionLabel;
     clienthost = sessionLabel;
@@ -704,7 +697,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // update status, update the admin consoles
 
-    logged_in = true;
+    loggedInSemaphore.set(true);
     status = "logged in";
     lastEvent = "logged in";
     GanymedeAdmin.refreshUsers();
@@ -736,6 +729,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public boolean isSuperGash()
   {
     return supergashMode;
+  }
+
+  public boolean isLoggedIn()
+  {
+    return loggedInSemaphore.isSet();
   }
 
   /**
@@ -956,14 +954,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    synchronized (forceLock)
+    if (!loggedInSemaphore.isSet() || forcingSemaphore.set(true))
       {
-	if (forcing_off || !logged_in)
-	  {
-	    return;
-	  }
-
-	forcing_off = true;
+	return;
       }
 
     Ganymede.debug("Forcing " + username + " off for " + reason);
@@ -988,9 +981,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// synchronized on this GanymedeSession, we could have a problem,
 	// though.
 
-	synchronized (forceLock)
+	synchronized (loggedInSemaphore)
 	  {
-	    if (logged_in)
+	    if (loggedInSemaphore.isSet())
 	      {
 		// Construct a vector of invid's to place in the log entry we
 		// are about to create.  This lets us search the log easily.
@@ -1078,7 +1071,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public void unreferenced()
   {
-    if (logged_in)
+    if (loggedInSemaphore.isSet())
       {
 	forceOff("dead client");
       }
@@ -1123,18 +1116,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // but this will help keep hapless admins on the console from
     // locking their console trying to kill deadlocked users.
     
-    // partial synchronization so that we don't get two or more threads 
-    // (i.e., the idle timer and the RMI unreferenced stuff and the client
-    // themself) all trying to log this session off simultaneously
-
-    synchronized (forceLock)
+    if (!loggedInSemaphore.set(false))
       {
-	if (!logged_in)
-	  {
-	    return;
-	  }
-
-	logged_in = false;
+	return;
       }
 
     // we do want to synchronize on our session for this part, so that
@@ -3442,7 +3426,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// could well have our lock revoked during execution
 	// of a query, so we'll check that as well.
 
-	while (logged_in && (rLock == null || session.isLocked(rLock)) && enum.hasMoreElements())
+	while (loggedInSemaphore.isSet() && 
+	       (rLock == null || session.isLocked(rLock)) && enum.hasMoreElements())
 	  {
 	    obj = (DBObject) enum.nextElement();
 
@@ -3471,7 +3456,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	if (!logged_in)
+	if (!loggedInSemaphore.isSet())
 	  {
 	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
 				       "GanymedeSession logged out during processing"); 
@@ -6732,7 +6717,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   void checklogin()
   {
-    if (!logged_in)
+    if (!loggedInSemaphore.isSet())
       {
 	throw new IllegalArgumentException("not logged in");
       }

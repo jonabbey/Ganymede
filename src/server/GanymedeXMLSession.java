@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2002/01/30 20:39:36 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2002/03/15 02:25:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -617,7 +617,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	categoryTree = null;
       }
  
-    if (session != null && session.logged_in)
+    if (session != null && session.isLoggedIn())
       {
 	session.logout();
 	session = null;

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2002/01/28 21:57:37 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2002/03/15 02:25:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -631,7 +631,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(i);
 	    
-	    if (session.logged_in)
+	    if (session.isLoggedIn())
 	      {
 		entries.addElement(session.getAdminEntry());
 	      }
