@@ -997,7 +997,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       type;
 
     int 
-      tmp_count;
+      tmp_count,
+      upgradeSkipCount = 0;
 
     /* -- */
 
@@ -1046,16 +1047,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    // Ditto, starting at DBStore version 2.7, with the
 	    // OwnerBase's OwnerObjectsOwned
 
-	    int count;
-
 	    if (Ganymede.db.isLessThan(2,3))
 	      {
-		count = in.readShort();
+		upgradeSkipCount = in.readShort();
 	      }
 	    else
 	      {
-		count = in.readInt();
+		upgradeSkipCount = in.readInt();
 	      }
+
+	    int count = upgradeSkipCount;
 
 	    while (count-- > 0)
 	      {
@@ -1175,6 +1176,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    // "%%% Loader skipping empty field {0}"
 	    System.err.println(ts.l("receive.skipping", definition.getName()));
 	  }
+      }
+
+    if (getTypeID() == SchemaConstants.OwnerBase && upgradeSkipCount != 0)
+      {
+	// "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
+	System.err.println(ts.l("receive.upgradeSkippingOwned", new Integer(upgradeSkipCount), this.getLabel()));
       }
   }
 
