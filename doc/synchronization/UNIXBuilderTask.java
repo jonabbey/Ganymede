@@ -15,7 +15,6 @@ import java.io.*;
 
 public class UNIXBuilderTask extends GanymedeBuilderTask {
 
-  private Runtime runtime = null;
   private String buildScript = null;
   private String md5passwdFile =  null;
   private String passwdFile = null;
