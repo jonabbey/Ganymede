@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,8 +92,7 @@ public class DBStore {
    *
    * Load the database from disk.
    *
-   * Currently, this method is the only way to peform intialization
-   * of the database.  This method loads both the database type
+   * This method loads both the database type
    * definition and database contents from a single disk file.
    *
    * @param filename Name of the database file
@@ -366,24 +365,21 @@ public class DBStore {
    *
    * <p>Get a session handle on this database</p>
    *
-   * <p>The key parameter is intended to provide a handle for
-   * whatever code integrates a DBStore to use to keep track of
-   * things.  This may be superfluous with the mere presence of 
-   * a DBSession.. I will probably change this, possibly to use
-   * a logging interface instance, possibly not.</p>
+   * <p>This is intended primarily for internal use
+   * for database initialization, hence the 'protected'.
    *
    * @param key Identifying key
    *
    */
 
-  public synchronized DBSession login(Object key)
+  protected synchronized DBSession login(Object key)
   {
     if (schemaEditInProgress)
       {
 	throw new RuntimeException("can't login, the server's in schema edit mode");
       }
 
-    return new DBSession(this, key);
+    return new DBSession(this, null, key);
   }
 
   /**
@@ -513,7 +509,7 @@ public class DBStore {
    * and DBObjectBaseField.isRemovable() and DBObjectBaseField.isEditable()
    */
 
-  void initialize()
+  void initializeSchema()
   {
     DBObjectBase b;
     DBObjectBaseField bf;
@@ -531,7 +527,7 @@ public class DBStore {
 	b.type_code = getNextBaseID(); // 0
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 2;
+	bf.field_code = SchemaConstants.AdminGroupField;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Group";
 	bf.field_order = 2;
@@ -541,7 +537,7 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 3;
+	bf.field_code = SchemaConstants.AdminNameField;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.field_order = 3;
@@ -554,18 +550,19 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 4;
-	bf.field_type = FieldType.STRING;
+	bf.field_code = SchemaConstants.AdminPasswordField;
+	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
 	bf.maxLength = 8;
 	bf.field_order = 4;
 	bf.removable = false;
 	bf.editable = false;
+	bf.crypted = true;
 	bf.comment = "Admin Password";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 5;
+	bf.field_code = SchemaConstants.AdminMembersField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Members";
 	bf.array = true;
@@ -578,7 +575,7 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 6;
+	bf.field_code = SchemaConstants.AdminGroupsField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Groups";
 	bf.array = true;
@@ -591,7 +588,7 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 7;
+	bf.field_code = SchemaConstants.AdminAssocUser;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "User";
 	bf.field_order = 7;
@@ -603,7 +600,7 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 8;
+	bf.field_code = SchemaConstants.AdminPrivs;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Privileges";
 	bf.field_order = 8;
@@ -613,7 +610,7 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 9;
+	bf.field_code = SchemaConstants.AdminObjectsOwned;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
@@ -631,7 +628,7 @@ public class DBStore {
 	b.type_code = getNextBaseID(); // 1
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 2;
+	bf.field_code = SchemaConstants.UserUserName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Username";
 	bf.minLength = 2;
@@ -647,18 +644,20 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 3;
-	bf.field_type = FieldType.STRING;
+	bf.field_code = SchemaConstants.UserPassword;
+	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
 	bf.maxLength = 8;
 	bf.field_order = 3;
 	bf.removable = false;
 	bf.editable = false;
+	bf.crypted = true;
+	bf.isCrypted();
 	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = 4;
+	bf.field_code = SchemaConstants.UserAdminRole;
 	bf.field_type = FieldType.INVID;
 	bf.allowedTarget = 0;
 	bf.targetField = 5;
@@ -670,7 +669,6 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
     
 	setBase(b);
-	
       }
     catch (RemoteException ex)
       {
@@ -686,26 +684,24 @@ public class DBStore {
 
     session.openTransaction();
 
-//     try
-//       {
-// 	session.openWriteLock();
-//       }
-//     catch (InterruptedException ex)
-//       {
-// 	System.err.println("Couldn't get write lock to create supergash object");
-// 	System.exit(0);
-//       }
-
     DBEditObject eO =(DBEditObject) session.createDBObject((short) 0); // create a new admin object
 
     StringDBField s = (StringDBField) eO.getField("Name");
     s.setValue("supergash");
     
-    s = (StringDBField) eO.getField("Password");
-    s.setValue(GanymedeConfig.newSGpass); // default supergash password
+    PasswordDBField p = (PasswordDBField) eO.getField("Password");
+    p.setValue(GanymedeConfig.newSGpass); // default supergash password
     
     session.commitTransaction();
   }
+
+  /*
+
+    -- The following methods are used to keep track of DBStore state and
+       are reflected in updates to any connected Admin consoles.  These
+       methods are for statistics keeping only. --
+
+   */
 
   /**
    *
