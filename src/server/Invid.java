@@ -10,13 +10,15 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
 package arlut.csd.ganymede;
+
+import java.io.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -47,14 +49,20 @@ public final class Invid implements java.io.Serializable {
 
   public Invid(short type, int num) 
   {
-    //    if ((type < FIRST) ||
-    //	(type > LAST))
-    //      {
-    //	throw new IndexOutOfBoundsException("type out of range " + type);
-    //      }
-
     this.type = type;
     this.num = num;
+  }
+
+  /**
+   *
+   * Receive constructor
+   *
+   */
+
+  public Invid(DataInput in) throws IOException
+  {
+    type = in.readShort();
+    num = in.readInt();
   }
 
   /**
@@ -142,6 +150,18 @@ public final class Invid implements java.io.Serializable {
   public int getNum() 
   {
     return num;
+  }
+
+  /**
+   *
+   * Method to write this Invid out to a stream. 
+   *
+   */
+
+  public void emit(DataOutput out) throws IOException
+  {
+    out.writeShort(type);
+    out.writeInt(num);
   }
 
   public String toString()
