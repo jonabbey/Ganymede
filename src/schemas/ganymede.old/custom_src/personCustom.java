@@ -5,7 +5,7 @@
    This file is a management class for person objects in Ganymede.
    
    Created: 25 March 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,6 +74,27 @@ public class personCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
   }
   
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    switch (fieldid)
+      {
+      case personSchema.LASTNAME:
+      case personSchema.FIRSTNAME:
+	return true;
+      }
+
+    return false;
+  }
+
   /**
    *
    * Hook to allow intelligent generation of labels for DBObjects
