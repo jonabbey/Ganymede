@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.61 $ %D%
+    Version: $Revision: 1.62 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2895,7 +2895,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 
         Invid currentChoice = (Invid) fieldInfo.getValue();
-	System.out.println("Current choice is : " + currentChoice + ", " + gc.getSession().viewObjectLabel(currentChoice));
+	String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
+
+	System.out.println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
 	
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
@@ -2921,40 +2923,38 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    combo.addItem(noneHandle);
 	  }
+	
+	// Find currentListHandle
 
-	/*
-	 * I am going to try to setSelectedItem and catch the
-	 * exception.  If that does it, then I doen't need this loop
-	 * anymore.
+	// Make sure the current choice is in the chooser, if there is
+	// a current choice.
 
-	 // Make sure the current choice is in thechooser, if there is
-	 // a current choice.
-
-	if (currentChoice != null)
+ 	if (currentChoice != null)
 	  {
 	    for (int j = 0; j < choices.size(); j++)
 	      {
 		listHandle thisChoice = (listHandle) choices.elementAt(j);
 		
 		if (thisChoice.getObject().equals(currentChoice))
-		  {
-		    if (debug)
-		      {
-			System.out.println("Found the current object in the list!");
-		      }
-		    currentListHandle = thisChoice;
-		    found = true;
-		    break;
-		  }
-	      }
+ 		  {
+ 		    if (debug)
+ 		      {
+ 			System.out.println("Found the current object in the list!");
+ 		      }
+ 		    currentListHandle = thisChoice;
+ 		    found = true;
+ 		    break;
+ 		  }
+ 	      }
 
-	    if (!found)
-	      {
-		currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
-		combo.addItem(currentListHandle);
-	      }
-	  }
-	
+ 	    if (!found)
+ 	      {
+ 		currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
+ 		combo.addItem(currentListHandle);
+ 	      }
+ 	  }
+
+	 /*
 	  *
 	  *
 	  */
@@ -2968,8 +2968,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("setting current choice: " + currentChoice);
+		System.out.println("setting current choice: " + currentChoiceLabel);
 	      }
+
 	    try
 	      {
 		combo.setSelectedItem(currentListHandle);
@@ -2980,11 +2981,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		combo.addItem(currentListHandle);
 		combo.setSelectedItem(currentListHandle);
 	      }
-
 	  }
 	else
 	  {
-	    if (true)//if (debug)
+	    if (debug)
 	      {
 		System.out.println("currentChoice is null");
 	      }
@@ -2993,9 +2993,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // noneHandle earlier.
 	    if (mustChoose)
 	      {
-		if (true)//debug)
+		if (debug)
 		  {
-		    System.out.println("Adding noneHAndle, because the currentchoice is null.");
+		    System.out.println("Adding noneHandle, because the currentchoice is null.");
 		  }
 
 		combo.addItem(noneHandle);
