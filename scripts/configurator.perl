@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.48 $
-# $Date: 2000/02/19 02:22:58 $
+# $Revision: 1.49 $
+# $Date: 2000/08/10 20:30:33 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -135,6 +135,8 @@ classfiles:
 	\@cd $rootdir/src/JTree; \\
 	./build
 	\@cd $rootdir/src/JTable; \\
+	./build
+	\@cd $rootdir/src/tools; \\
 	./build
 	\@cd $rootdir/src/server; \\
 	./build
@@ -429,6 +431,7 @@ removelastslash($swingdir);
 	  "$rootdir/src/JTable", "Ganymede Table Classes", "$classdir",
 	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$classdir",
 	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$classdir",
+	  "$rootdir/src/tools", "Ganymede Tool Classes", "$classdir",
 	  "$rootdir/src/server", "Ganymede Server Classes", "$classdir",
 	  "$rootdir/src/client", "Ganymede Client Classes", "$classdir",
 	  "$classdir", "Ganymede Jars", "$classdir",
@@ -479,6 +482,7 @@ while ($#schemas > 0) {
 	   "$rootdir/src/Util",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
+	   "$rootdir/src/tools",
 	   "$rootdir/src/server",
 	   "$rootdir/src/client",
 	   "$rootdir/src/JDataComponent",
