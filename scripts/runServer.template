@@ -49,4 +49,7 @@ $RMIREGISTRY $RMIPORT &
 # md5 passwords for Linux/FreeBSD/OpenBSD), you need to add -developschema to the
 # line below.
 
+# If you want the server to do a complete XML dump of the ganymede.db file on startup,
+# add -doXML to the line below
+
 $JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin properties=$PROPERTIES
