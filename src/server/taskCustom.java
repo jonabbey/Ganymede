@@ -6,8 +6,8 @@
    
    Created: 5 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/02/10 17:56:32 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/02/10 21:22:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -164,7 +164,17 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    return (fieldid == SchemaConstants.TaskName || fieldid == SchemaConstants.TaskClass);
+    if (fieldid == SchemaConstants.TaskName || fieldid == SchemaConstants.TaskClass)
+      {
+	return true;
+      }
+
+    if (fieldid == SchemaConstants.TaskPeriodUnit)
+      {
+	return object.isSet(SchemaConstants.TaskRunPeriodically);
+      }
+
+    return false;
   }
 
   /**
