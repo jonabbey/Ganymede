@@ -160,7 +160,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public GASHAdmin() 
   {
-    admin_logo = PackageResources.getImageResource(this, "ddroid_admin.jpg", getClass());
+    admin_logo = PackageResources.getImageResource(this, "ganymede_admin.jpg", getClass());
     GASHAdmin.applet = this;
   }
 
