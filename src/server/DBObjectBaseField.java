@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -96,8 +96,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     comment = "";
     trueLabel = "";
     falseLabel = "";
-    okChars = "";
-    badChars = "";
+    //    okChars = "";
+    //    badChars = "";
     
     field_code = 0;
     field_type = 0;
@@ -207,8 +207,24 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       {
 	out.writeShort(minLength);
 	out.writeShort(maxLength);
-	out.writeUTF(okChars);
-	out.writeUTF(badChars);
+	if (okChars == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(okChars);
+	  }
+	
+	if (badChars == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(badChars);
+	  }
+
 	if (namespace != null)
 	  {
 	    out.writeUTF(namespace.getName());
@@ -293,7 +309,19 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	minLength = in.readShort();
 	maxLength = in.readShort();
 	okChars = in.readUTF();
+	
+	if (okChars.equals(""))
+	  {
+	    okChars = null;
+	  }
+
 	badChars = in.readUTF();
+
+	if (badChars.equals(""))
+	  {
+	    badChars = null;
+	  }
+
 	nameSpaceId = in.readUTF();
 	
 	if (!nameSpaceId.equals(""))
