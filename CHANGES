@@ -269,6 +269,42 @@ sequence look like this:
         Old: ATL - Outgoing Inet Access Only
         New: ADG/OMG - Outgoing Inet Access Only
 
+13. [CLIENT] Put warning dialog up when editing inactivated objects
+
+A good number of admins here at ARL have ran into problems when they
+tried to manually edit inactivated users, rather than using the
+reactivation function that is available on the object tree right-click
+menu for inactivated objects.  The problem is that most admins here
+just set the password and commit the transaction, without realizing
+that they need to clear the Removal Date field.  Our server is
+configured to provide a 'reactivate' wizard when users use the
+right-click reactivation function, but users too often don't realize
+or remember that that function exists.
+
+In response to this, I have implemented a dialog box which will pop up
+if an admin attempts to edit an inactivated object, prompting the user
+to attempt to use the server's reactivation wizard rather than
+directly editing the object.
+
+This is pretty clean, but this will put more pressure on schema kit
+developers to insure that if they want an object type to be able to be
+inactivated rather than simply removed, they really will need to
+provide a reactivation function.
+
+14. [CLIENT] Synchronized the transaction cancel button to avoid exceptions
+
+The gui client now synchronizes its cancel button, to ensure that all
+object windows (which load data from the server on their own threads)
+have stopped loading before the client tells the server it wants its
+transaction cancelled.
+
+Previously, some of the client's loading threads could briefly race,
+continuing to try and call data loading methods on the server after
+the client's main GUI thread had already cancelled the transaction,
+which could cause the server to throw an exception down to the client.
+
+This change just serializes transaction cancellation a bit better.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
