@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.io.*;
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   // ---
 
@@ -105,6 +105,25 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// bases referenced from store.rootCategory into newBases
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
+
+	// All the bases referenced in newBases now should have their
+	// editor fields pointing to us.. check to make sure
+
+	if (debug)
+	  {
+	    Enumeration debugenum = newBases.elements();
+
+	    while (debugenum.hasMoreElements())
+	      {
+		DBObjectBase thisbase = (DBObjectBase) debugenum.nextElement();
+
+		if (thisbase.editor == null)
+		  {
+		    throw new RuntimeException("ERROR: The recursive copy left off setting editor for " + 
+					       thisbase.getName());
+		  }
+	      }
+	  }
 
 	// make a shallow copy of our namespaces vector.. note that we
 	// since DBNameSpace's are immutable once created, we don't
@@ -222,6 +241,22 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public Category getRootCategory()
   {
+    if (debug)
+      {
+	Enumeration debugenum = newBases.elements();
+
+	while (debugenum.hasMoreElements())
+	  {
+	    DBObjectBase thisbase = (DBObjectBase) debugenum.nextElement();
+
+	    if (thisbase.editor == null)
+	      {
+		throw new RuntimeException("ERROR: getRootCategory(): the recursive copy left off setting editor for " + 
+					   thisbase.getName());
+	      }
+	  }
+      }
+
     return rootCategory;
   }
 
@@ -509,7 +544,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
     catch (RemoteException ex)
       {
-	Ganymede.debug("createNewBase: couldn't initialize new ObjectBase" + ex);
+	Ganymede.debug("DBSchemaEdit.createNewBase(): couldn't initialize new ObjectBase" + ex);
 	throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
       }
 
@@ -548,18 +583,49 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     if (localCat == null)
       {
-	Ganymede.debug("DBScemaEdit: createNewBase couldn't find local copy of category object");
+	Ganymede.debug("DBSchemaEdit: createNewBase couldn't find local copy of category object");
 	throw new RuntimeException("couldn't get local version of " + path);
       }
 
+    // newBases is the same as the baseHash variables used in the category
+    // tree.. we load it up here so that the addNode() will be able to find
+    // it when goes through the RMI stub->local object getBaseFromBase()
+    // operation.
+
+    newBases.put(base.getKey(), base);
+
+    if (debug)
+      {
+	if (base.editor == null)
+	  {
+	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after newBases.put()");
+	  }
+      }
+
     localCat.addNode(base, false, true);
+
+    if (debug)
+      {
+	if (base.editor == null)
+	  {
+	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after addNode()");
+	  }
+	else
+	  {
+	    DBObjectBase testbase = (DBObjectBase) newBases.get(base.getKey());
+
+	    if (testbase.editor == null)
+	      {
+		throw new RuntimeException("DBSchemaEdit.createNewBase(): testbase's editor field is null after addNode()");
+	      }
+	  }
+	
+      }
     
     if (debug)
       {
 	Ganymede.debug("DBScemaEdit: created base: " + base.getKey());
       }
-    
-    newBases.put(base.getKey(), base);
 
     return base;
   }
@@ -590,7 +656,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("remote " + ex);
       }
 
-    System.err.println("deleteBase");
+    if (debug)
+      {
+	System.err.println("Calling deleteBase on base " + b.getName());
+      }
 
     if (!locked)
       {

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import arlut.csd.Util.*;
 
 public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public static void setDebug(boolean val)
   {
@@ -1918,7 +1918,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    //    Ganymede.debug("entered clearEditor");
+    if (debug)
+      {
+	Ganymede.debug("DBObjectBase.clearEditor(): clearing editor for " + getName());
+      }
 
     if (this.editor != editor)
       {

@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1810,17 +1810,45 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (targetNode.isOpen())
       {
+	if (debug)
+	  {
+	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+			       "over " + targetNode.getText() + " because node is open.");
+	  }
+
 	return false;
       }
 
     if (dragNode instanceof FieldNode)
       {
+	if (debug)
+	  {
+	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+			       "over " + targetNode.getText() + " because can't drag over field nodes");
+	  }
+
 	return false;
       }
 
     if (dragNode instanceof BaseNode)
       {
-	return (targetNode instanceof CatTreeNode);
+	boolean success = (targetNode instanceof CatTreeNode);
+
+	if (debug)
+	  {
+	    if (success)
+	      {
+		System.err.println("iconDragOver(): succeeding base " + dragNode.getText() + 
+				   " over category " + targetNode.getText());
+	      }
+	    else
+	      {
+		System.err.println("iconDragOver(): failing base " + dragNode.getText() + 
+				   " over non-category " + targetNode.getText());
+	      }
+	  }
+
+	return success;
       }
 
     if (dragNode instanceof CatTreeNode)
@@ -1856,6 +1884,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public void iconDragDrop(treeNode dragNode, treeNode targetNode)
   {
+    if (debug)
+      {
+	System.err.println("Dropping node " + dragNode.getText() + " on " + targetNode.getText());
+      }
+
     if (dragNode instanceof BaseNode)
       {
 	try
@@ -1892,7 +1925,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
 		  }
 
-		newCategory.addNode((CategoryNode) base, false, true);
+		newCategory.addNode(base, false, true);
 
 		BaseNode newNode = new BaseNode(targetNode, base.getName(), base,
 						null, true, 2, 2, baseMenu);
@@ -1991,6 +2024,25 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     treeNode parent = dragNode.getParent();
 
     /* -- */
+
+    if (debug)
+      {
+	if (aboveNode != null && belowNode != null)
+	  {
+	    System.err.println("dragLineTween(): " + dragNode.getText() +
+			       " above = " + aboveNode.getText() + ", below = " + belowNode.getText());
+	  }
+	else if (aboveNode != null)
+	  {
+	    System.err.println("dragLineTween(): " + dragNode.getText() +
+			       " above = " + aboveNode.getText());
+	  }
+	else
+	  {
+	    System.err.println("dragLineTween(): " + dragNode.getText() +
+			       " below = " + belowNode.getText());
+	  }
+      }
 
     if (belowNode == objects)
       {
@@ -2274,6 +2326,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    oldCategory.removeNode(base.getName());
 
 	    base.setDisplayOrder(displayOrder);
+
 	    newCategory.addNode((CategoryNode) base, false, true);
 
 	    tree.deleteNode(dragNode, false);
