@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -415,13 +415,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	throw new RuntimeException("couldn't refresh categories" + ex);
       }
 
-    try
+    if (developMode)
       {
-	refreshBuiltIns();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't refresh built-ins" + ex);
+	try
+	  {
+	    refreshBuiltIns();
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't refresh built-ins" + ex);
+	  }
       }
 
     refreshNamespaces();
