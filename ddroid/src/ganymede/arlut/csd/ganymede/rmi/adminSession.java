@@ -4,8 +4,8 @@
 
    Client side remote interface.
 
-   Client side interface definition for the Directory Droid adminSession Object.  The
-   Directory Droid adminSession object holds the state for the Directory Droid Admin console.
+   Client side interface definition for the Ganymede adminSession Object.  The
+   Ganymede adminSession object holds the state for the Ganymede Admin console.
 
    Created: 28 May 1996
    Last Mod Date: $Date$
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,12 +53,12 @@
    02111-1307, USA
 
 */
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -67,10 +67,10 @@ import arlut.csd.ddroid.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>adminSession is an RMI interface to the Directory Droid server's
- * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} class.  adminSession
+ * <p>adminSession is an RMI interface to the Ganymede server's
+ * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} class.  adminSession
  * is the remote interface used by the admin console to send system commands
- * to the Directory Droid server.</P>
+ * to the Ganymede server.</P>
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -88,7 +88,7 @@ public interface adminSession extends Remote {
 
   /**
    * <p>This method is used to allow the admin console to retrieve a remote reference to
-   * a {@link arlut.csd.ddroid.server.serverAdminAsyncResponder}, which will allow
+   * a {@link arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will allow
    * the admin console to poll the server for asynchronous messages from the server.</p>
    *
    * <p>This is used to allow the server to send admin notifications
@@ -120,13 +120,13 @@ public interface adminSession extends Remote {
   ReturnVal     forceBuild() throws RemoteException;
 
   /**
-   * Kick a user off of the Directory Droid server on behalf of this admin console
+   * Kick a user off of the Ganymede server on behalf of this admin console
    */
 
   ReturnVal     kill(String user) throws RemoteException;
 
   /**
-   * Kick all users off of the Directory Droid server on behalf of this admin console
+   * Kick all users off of the Ganymede server on behalf of this admin console
    */
 
   ReturnVal     killAll() throws RemoteException;
@@ -147,7 +147,7 @@ public interface adminSession extends Remote {
   ReturnVal     dumpDB() throws RemoteException;
 
   /**
-   * <p>run a long-running verification suite on the Directory Droid server
+   * <p>run a long-running verification suite on the Ganymede server
    * database's invid links</p>
    */
 
@@ -157,7 +157,7 @@ public interface adminSession extends Remote {
    * <p>run a long-running verification and repair operation on the Ganymede
    * server's invid database links</p>
    *
-   * <p>Removes any invid pointers in the Directory Droid database whose
+   * <p>Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
    * unless there is a bug some place in the server.</p>
    */
@@ -180,7 +180,7 @@ public interface adminSession extends Remote {
   ReturnVal     runEmbeddedSweep() throws RemoteException;
 
   /**
-   * <P>Causes a pre-registered task in the Directory Droid server
+   * <P>Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
    * will have no effect if the task is currently running.</P>
    *
@@ -191,7 +191,7 @@ public interface adminSession extends Remote {
 
   /**
    * <p>Causes a running task to be interrupted as soon as possible.
-   * Directory Droid tasks need to be specifically written to be able
+   * Ganymede tasks need to be specifically written to be able
    * to respond to interruption, so it is not guaranteed that the
    * task named will always be able to safely or immediately respond
    * to a stopTask() command.</p>
@@ -203,7 +203,7 @@ public interface adminSession extends Remote {
 
   /**
    * <P>Causes a registered task to be made ineligible for execution
-   * until {@link arlut.csd.ddroid.rmi.adminSession#enableTask(java.lang.String) enableTask()}
+   * until {@link arlut.csd.ganymede.rmi.adminSession#enableTask(java.lang.String) enableTask()}
    * is called.  This method will not stop a task that is currently
    * running.</P>
    *
@@ -214,7 +214,7 @@ public interface adminSession extends Remote {
 
   /**
    * <P>Causes a task that was temporarily disabled by
-   * {@link arlut.csd.ddroid.rmi.adminSession#disableTask(java.lang.String) disableTask()}
+   * {@link arlut.csd.ganymede.rmi.adminSession#disableTask(java.lang.String) disableTask()}
    * to be available for execution again.</P>
    *
    * @param name The name of the task to enable
@@ -225,13 +225,13 @@ public interface adminSession extends Remote {
   /**
    * <p>Lock the server to prevent client logins and edit the server
    * schema.  This method will return a {@link
-   * arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} remote reference to the
+   * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to the
    * admin console, which will present a graphical schema editor using
    * this remote reference.  The server will remain locked until the
    * admin console commits or cancels the schema editing session,
    * either through affirmative action or through the death of the
    * admin console or the network connection.  The {@link
-   * arlut.csd.ddroid.server.DBSchemaEdit DBSchemaEdit} class on the server
+   * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the server
    * coordinates everything.</p>
    */
 

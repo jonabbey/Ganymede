@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
 
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,12 +52,12 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -67,7 +67,7 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 /**
  * <p>Client side interface definition for the Ganymede
- * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}
+ * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
  * class.  This interface allows the client to query and edit type information
  * remotely.</p>
  *
@@ -136,10 +136,10 @@ public interface BaseField extends Remote {
 
   /**
    * <p>Returns id code for this field.  Each field in a
-   * {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * {@link arlut.csd.ganymede.server.DBObject DBObject}
    * has a unique code which identifies the field.  This code represents
    * the field in the on-disk data store, and is used by 
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * to choose what field to change in the setField method.</p>
    */
 
@@ -172,7 +172,7 @@ public interface BaseField extends Remote {
    * <p>Returns the field type</p>
    *
    * <p>Where type is one of the following
-   * constants defined in the {@link arlut.csd.ddroid.common.FieldType FieldType}
+   * constants defined in the {@link arlut.csd.ganymede.common.FieldType FieldType}
    * interface:</p>
    *
    * <pre>
@@ -245,7 +245,7 @@ public interface BaseField extends Remote {
   public boolean isIP() throws RemoteException;
 
   /**
-   * <p>Sets the {@link arlut.csd.ddroid.common.FieldType field type}
+   * <p>Sets the {@link arlut.csd.ganymede.common.FieldType field type}
    * for this field.  Changing the basic type of a field that is already being
    * used in the server will cause very bad things to happen.  The
    * right way to change an existing field is to delete the field, commit
@@ -436,7 +436,7 @@ public interface BaseField extends Remote {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public ReturnVal setBadChars(String s) throws RemoteException;
@@ -746,7 +746,7 @@ public interface BaseField extends Remote {
    * <p>This method is used to specify that this password field
    * should keep a copy of the password in plaintext on disk,
    * even if other hash methods are in use which could be
-   * used for Directory Droid login authentication.  If no hash methods
+   * used for Ganymede login authentication.  If no hash methods
    * are enabled for this password field, plaintext will be stored
    * on disk even if isPlainText() returns false for this field definition.</p>
    *
@@ -767,7 +767,7 @@ public interface BaseField extends Remote {
    * <p>This method is only for human information, and the precise
    * results returned are subject to change at any time.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public String getTypeDesc() throws RemoteException;

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,12 +51,12 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.adminAsyncMessage;
+import arlut.csd.ganymede.common.adminAsyncMessage;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -66,7 +66,7 @@ import arlut.csd.ddroid.common.adminAsyncMessage;
 
 /**
  * <p>Remote Interface exported by the {@link
- * arlut.csd.ddroid.server.serverAdminAsyncResponder} object.  The console
+ * arlut.csd.ganymede.server.serverAdminAsyncResponder} object.  The console
  * can call methods on this remote interface to query the server for
  * new asynchronous notification events.</p>
  */

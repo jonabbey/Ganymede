@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,13 +51,13 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -67,11 +67,11 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 /**
  * <P>Client side interface definition for the Ganymede
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} class.  This
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} class.  This
  * interface allows the client to query type information remotely, and allows
  * the schema editor in the admin console to remotely edit object type information.</P>
  *
- * <P>The {@link arlut.csd.ddroid.rmi.Category Category} interface is also vital to
+ * <P>The {@link arlut.csd.ganymede.rmi.Category Category} interface is also vital to
  * the client and schema editor's work with object types.</P>
  *
  * @version $Id$
@@ -103,14 +103,14 @@ public interface Base extends CategoryNode, Remote {
 
   /**
    * Returns the name of this object type.  Guaranteed
-   * to be unique in the Directory Droid server.
+   * to be unique in the Ganymede server.
    */
 
   public String getName() throws RemoteException;
 
   /**
    * Returns the name and category path of this object type.
-   * Guaranteed to be unique in the Directory Droid server.
+   * Guaranteed to be unique in the Ganymede server.
    */
 
   public String getPath() throws RemoteException;
@@ -153,7 +153,7 @@ public interface Base extends CategoryNode, Remote {
   public String getLabelFieldName() throws RemoteException;
 
   /**
-   * <p>Returns {@link arlut.csd.ddroid.rmi.BaseField BaseField}
+   * <p>Returns {@link arlut.csd.ganymede.rmi.BaseField BaseField}
    * base field definitions for objects of this type.
    *
    * <P>If includeBuiltIns is false, the fields returned will be the
@@ -167,7 +167,7 @@ public interface Base extends CategoryNode, Remote {
 
   /**
    * <p>This method returns a list of all
-   * {@link arlut.csd.ddroid.rmi.BaseField BaseField} references for the
+   * {@link arlut.csd.ganymede.rmi.BaseField BaseField} references for the
    * fields defined by this object type, in random order.</p>
    */
 
@@ -200,7 +200,7 @@ public interface Base extends CategoryNode, Remote {
    * object types will have inactivation protocols defined in the
    * server.  Those that do not can just be deleted.
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public boolean canInactivate() throws RemoteException;
@@ -209,8 +209,8 @@ public interface Base extends CategoryNode, Remote {
    * <p>Sets the name for this object type</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
 
   public ReturnVal setName(String newName) throws RemoteException;
@@ -221,10 +221,10 @@ public interface Base extends CategoryNode, Remote {
    *
    * <p>The newClassName argument must be fully qualified, and must
    * refer to one of two kinds of classes.  The first is a {@link
-   * arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass that
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass that
    * implements the requisite three constructors, a la the traditional
    * Ganymede customization hook.  The second is any class
-   * implementing the {@link arlut.csd.ddroid.common.DDPluginFactory
+   * implementing the {@link arlut.csd.ganymede.common.DDPluginFactory
    * DDPluginFactory} interface, which provides a set of factory
    * methods which return DBEditObject instances.</p>
    *
@@ -236,8 +236,8 @@ public interface Base extends CategoryNode, Remote {
    * server execution.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
 
   public ReturnVal setClassInfo(String newClassName, String newOptionString) throws RemoteException;
@@ -270,12 +270,12 @@ public interface Base extends CategoryNode, Remote {
    * <p>Choose what field will serve as this objectBase's label.  A fieldName
    * parameter of null will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ddroid.server.DBEditObject#getLabelHook(arlut.csd.ddroid.server.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
 
   public ReturnVal setLabelField(String fieldName) throws RemoteException;
@@ -284,24 +284,24 @@ public interface Base extends CategoryNode, Remote {
    * <p>Choose what field will serve as this objectBase's label.  A fieldID
    * parameter of -1 will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ddroid.server.DBEditObject#getLabelHook(arlut.csd.ddroid.server.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
 
   public ReturnVal setLabelField(short fieldID) throws RemoteException;
 
   /**
    * <p>Get the parent Category for this object type.  This is used by the
-   * Directory Droid client and schema editor to present object types in
+   * Ganymede client and schema editor to present object types in
    * a hierarchical tree.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
  
   public Category getCategory() throws RemoteException;
@@ -313,8 +313,8 @@ public interface Base extends CategoryNode, Remote {
    * 256.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    */
 
   public BaseField createNewField() throws RemoteException;
@@ -327,10 +327,10 @@ public interface Base extends CategoryNode, Remote {
    * the schema editor commits.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public ReturnVal deleteField(String fieldName) throws RemoteException;
@@ -341,7 +341,7 @@ public interface Base extends CategoryNode, Remote {
    * type in the database have this field defined, this method
    * will return true.
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public boolean fieldInUse(String fieldName) throws RemoteException;

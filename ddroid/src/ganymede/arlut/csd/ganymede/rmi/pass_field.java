@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,11 +51,11 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -166,7 +166,7 @@ public interface pass_field extends db_field {
 
   /**
    * <p>This method is used to force all known hashes into this password
-   * field.  Directory Droid does no verifications to insure that all of these
+   * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
    * these hashes are null or empty string, those hashes will be cleared.</p>
    *
@@ -174,7 +174,7 @@ public interface pass_field extends db_field {
    * if any.</p>
    *
    * <p>If this password field is not configured to support any of the
-   * various hash formats in the Directory Droid schema, an error will be returned.</p>
+   * various hash formats in the Ganymede schema, an error will be returned.</p>
    */
 
   public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,

@@ -4,9 +4,9 @@
 
    Client side remote interface.
 
-   Remote interface definition for the Directory Droid Server Object.  The
-   Directory Droid Server object provides the interface that clients use to
-   log in to the Directory Droid Server.
+   Remote interface definition for the Ganymede Server Object.  The
+   Ganymede Server object provides the interface that clients use to
+   log in to the Ganymede Server.
 
    Created: 1 April 1996
    Last Mod Date: $Date$
@@ -18,7 +18,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,12 +54,12 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 // Server is our remote access interface 
 
@@ -67,10 +67,10 @@ public interface Server extends Remote {
 
   /** 
    * <p>Client login method.  Establishes a {@link
-   * arlut.csd.ddroid.server.GanymedeSession GanymedeSession} object in the
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} object in the
    * server for the client, and returns a serializable {@link
-   * arlut.csd.ddroid.common.ReturnVal ReturnVal} object which will contain
-   * a {@link arlut.csd.ddroid.rmi.Session Session} remote reference
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.rmi.Session Session} remote reference
    * for the client to use, if login was successful.</p>
    *
    * <p>If login is not successful, the ReturnVal object will encode
@@ -86,10 +86,10 @@ public interface Server extends Remote {
 
   /** 
    * <p>XML Client login method.  Establishes a {@link
-   * arlut.csd.ddroid.server.GanymedeXMLSession GanymedeXMLSession} object
+   * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession} object
    * in the server for the client, and returns a serializable {@link
-   * arlut.csd.ddroid.common.ReturnVal ReturnVal} object which will contain
-   * a {@link arlut.csd.ddroid.rmi.XMLSession XMLSession} remote reference
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.rmi.XMLSession XMLSession} remote reference
    * for the client to use, if login was successful.</p>
    *
    * <p>If login is not successful, the ReturnVal object will encode
@@ -105,11 +105,11 @@ public interface Server extends Remote {
   public ReturnVal xmlLogin(String username, String password) throws RemoteException;
 
   /**
-   * <p>This method is used to process a Directory Droid admin console
-   * attachment.  The returned {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
-   * object will contain an {@link arlut.csd.ddroid.rmi.adminSession adminSession}
+   * <p>This method is used to process a Ganymede admin console
+   * attachment.  The returned {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+   * object will contain an {@link arlut.csd.ganymede.rmi.adminSession adminSession}
    * remote reference, accessible with the
-   *{@link arlut.csd.ddroid.common.ReturnVal#getAdminSession() getAdminSession()}
+   *{@link arlut.csd.ganymede.common.ReturnVal#getAdminSession() getAdminSession()}
    * method if the admin connect was successful.</p>
    *
    * <p>If the admin console connect was not successful, the reason why it failed
@@ -120,7 +120,7 @@ public interface Server extends Remote {
 
   /**
    * <p>Simple RMI test method.. this method is here so that the
-   * {@link arlut.csd.ddroid.client.ClientBase ClientBase} class
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class
    * can test to see whether it has truly gotten a valid RMI reference
    * to the server.</p>
    */

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,13 +50,13 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.PermMatrix;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.PermMatrix;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -66,7 +66,7 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 /**
  * <P>Client-side remote interface to the {@link
- * arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}
+ * arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
  * class.</P> 
  */
 
@@ -102,7 +102,7 @@ public interface perm_field extends db_field {
    * field, the default permissions value for this base will be returned
    * if defined, else getPerm() will return null.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public PermEntry getPerm(short baseID, short fieldID) throws RemoteException;
@@ -112,7 +112,7 @@ public interface perm_field extends db_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;base&gt;
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public PermEntry getPerm(short baseID) throws RemoteException;
@@ -125,7 +125,7 @@ public interface perm_field extends db_field {
    * field, the default permissions value for this base will be returned
    * if defined, else getPerm() will return null.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public PermEntry getPerm(Base base, BaseField field) throws RemoteException;
@@ -134,7 +134,7 @@ public interface perm_field extends db_field {
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;base&gt;</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public PermEntry getPerm(Base base) throws RemoteException;
@@ -157,9 +157,9 @@ public interface perm_field extends db_field {
    *
    * <P>This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
+   * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry 
+   * @see arlut.csd.ganymede.common.PermEntry 
    */
 
   public ReturnVal setPerm(short baseID, short fieldID, PermEntry entry) throws RemoteException;
@@ -170,9 +170,9 @@ public interface perm_field extends db_field {
    *
    * <P>This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
+   * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public ReturnVal setPerm(short baseID, PermEntry entry) throws RemoteException;
@@ -183,9 +183,9 @@ public interface perm_field extends db_field {
    *
    * <P>This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
+   * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry 
+   * @see arlut.csd.ganymede.common.PermEntry 
    */
 
   public ReturnVal setPerm(Base base, BaseField field, PermEntry entry) throws RemoteException;
@@ -196,9 +196,9 @@ public interface perm_field extends db_field {
    *
    * <P>This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
+   * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}.</P>
    *
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public ReturnVal setPerm(Base base, PermEntry entry) throws RemoteException;

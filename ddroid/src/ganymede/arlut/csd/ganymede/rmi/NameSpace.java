@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -63,7 +63,7 @@ import java.rmi.RemoteException;
 
 /**
  * <P>Client side interface for the Ganymede
- * {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} class.  This interface
+ * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} class.  This interface
  * allows the admin console to be able to view the name of the namespace and
  * view/set the case sensitivity of this namespace.</P>
  */

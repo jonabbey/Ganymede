@@ -4,9 +4,9 @@
 
    Client side remote interface.
 
-   Client side interface definition for the Directory Droid Session Object.  The
-   Directory Droid Session object holds the state for a Directory Droid client's session
-   with the Directory Droid server.  The Directory Droid session will also provide the
+   Client side interface definition for the Ganymede Session Object.  The
+   Ganymede Session object holds the state for a Ganymede client's session
+   with the Ganymede server.  The Ganymede session will also provide the
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -55,20 +55,20 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.BaseListTransport;
-import arlut.csd.ddroid.common.CategoryTransport;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.BaseListTransport;
+import arlut.csd.ganymede.common.CategoryTransport;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -78,25 +78,25 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 /**
  * <P>Client side interface definition for the
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} class.  The Session
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class.  The Session
  * interface is provided to the client by the
- * {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer}'s 
- * {@link arlut.csd.ddroid.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+ * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s 
+ * {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
  * method, and provides the client with an RMI reference that can be used
- * to communicate with the Directory Droid server.</P>
+ * to communicate with the Ganymede server.</P>
  *
  * <P>Many of the methods in this interface, when called, will return
  * remote object references that the client can in turn interact with
  * to perform operations on the server.  These include the
- * {@link arlut.csd.ddroid.rmi.db_object db_object} reference that can
- * be returned as part of a {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
- * return value, and the {@link arlut.csd.ddroid.rmi.db_field db_field}
+ * {@link arlut.csd.ganymede.rmi.db_object db_object} reference that can
+ * be returned as part of a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+ * return value, and the {@link arlut.csd.ganymede.rmi.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
  * @version $Id$
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
- * @see arlut.csd.ddroid.server.DBSession
+ * @see arlut.csd.ganymede.server.DBSession
  */
 
 public interface Session extends Remote {
@@ -128,8 +128,8 @@ public interface Session extends Remote {
 
   /**
    * <p>This method is used to tell the client where to look to access
-   * the Directory Droid help document tree.  The String returned is a URL
-   * for the root of the Directory Droid help web.</p>
+   * the Ganymede help document tree.  The String returned is a URL
+   * for the root of the Ganymede help web.</p>
    */
 
   String      getHelpBase() throws RemoteException;
@@ -176,7 +176,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method is used to allow the client to retrieve a remote reference to
-   * a {@link arlut.csd.ddroid.server.serverClientAsyncResponder}, which will allow
+   * a {@link arlut.csd.ganymede.server.serverClientAsyncResponder}, which will allow
    * the client to poll the server for asynchronous messages from the server.</p>
    *
    * <p>This is used to allow the server to send build status change notifications and
@@ -252,13 +252,13 @@ public interface Session extends Remote {
   //  Database operations
 
   /**
-   * <p>List types of objects stored and manipulated through the Directory Droid server.</p>
+   * <p>List types of objects stored and manipulated through the Ganymede server.</p>
    *
    * <p>This method returns a vector of Base remote references.</p>
    *
    * @deprecated Superseded by the more efficient getBaseList()
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   Vector      getTypes() throws RemoteException;
@@ -268,7 +268,7 @@ public interface Session extends Remote {
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
    *
-   * @see arlut.csd.ddroid.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Category
    */
 
   Category    getRootCategory() throws RemoteException;
@@ -278,7 +278,7 @@ public interface Session extends Remote {
    * and base structure on the server.  The returned CategoryTransport
    * will include only object types that are editable by the user.</p>
    *
-   * @see arlut.csd.ddroid.common.CategoryTransport
+   * @see arlut.csd.ganymede.common.CategoryTransport
    */
 
   CategoryTransport    getCategoryTree() throws RemoteException;
@@ -291,7 +291,7 @@ public interface Session extends Remote {
    * will only include those object types that are editable by the
    * client.
    *
-   * @see arlut.csd.ddroid.common.CategoryTransport
+   * @see arlut.csd.ganymede.common.CategoryTransport
    */
 
   CategoryTransport    getCategoryTree(boolean hideNonEditables) throws RemoteException;
@@ -300,7 +300,7 @@ public interface Session extends Remote {
    * <p>Returns a serialized representation of the object types
    * defined on the server.</p>
    *
-   * @see arlut.csd.ddroid.common.BaseListTransport
+   * @see arlut.csd.ganymede.common.BaseListTransport
    */
 
   BaseListTransport    getBaseList() throws RemoteException;
@@ -310,7 +310,7 @@ public interface Session extends Remote {
    *
    * <p>This vector may be cached, as it is static for this object type.</p>
    *
-   * @see arlut.csd.ddroid.common.FieldTemplate
+   * @see arlut.csd.ganymede.common.FieldTemplate
    */
 
   Vector      getFieldTemplateVector(short baseId) throws RemoteException;
@@ -412,7 +412,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method allows clients to cause mail to be sent from the
-   * Directory Droid server when they can't do it themselves.  The mail
+   * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
@@ -430,7 +430,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method allows clients to cause mail to be sent from the
-   * Directory Droid server when they can't do it themselves.  The mail
+   * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
@@ -450,15 +450,15 @@ public interface Session extends Remote {
   /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
-   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
    * <p>This version of dump() takes a query in string
-   * form, based on Deepak's ANTLR-specified Directory Droid
+   * form, based on Deepak's ANTLR-specified Ganymede
    * query grammar.</p>
    *
-   * @see arlut.csd.ddroid.common.Query
+   * @see arlut.csd.ganymede.common.Query
    */
 
   DumpResult dump(String queryString) throws RemoteException;
@@ -466,11 +466,11 @@ public interface Session extends Remote {
   /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
-   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
-   * @see arlut.csd.ddroid.common.Query
+   * @see arlut.csd.ganymede.common.Query
    */
 
   DumpResult dump(Query query) throws RemoteException;
@@ -511,7 +511,7 @@ public interface Session extends Remote {
    * labels of the viewable objects matching the provided query.</p>
    *
    * <p>This version of query() takes a query in string
-   * form, based on Deepak's ANTLR-specified Directory Droid
+   * form, based on Deepak's ANTLR-specified Ganymede
    * query grammar.</p>
    */
 
@@ -536,7 +536,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -549,7 +549,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -564,7 +564,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -577,9 +577,9 @@ public interface Session extends Remote {
 
   /**
    * <p>View an object from the database.  The ReturnVal returned will
-   * carry a {@link arlut.csd.ddroid.rmi.db_object db_object} reference,
+   * carry a {@link arlut.csd.ganymede.rmi.db_object db_object} reference,
    * which can be obtained by the client
-   * calling {@link arlut.csd.ddroid.common.ReturnVal#getObject() ReturnVal.getObject()}.
+   * calling {@link arlut.csd.ganymede.common.ReturnVal#getObject() ReturnVal.getObject()}.
    * If the object could not be
    * viewed for some reason, the ReturnVal will carry an encoded error
    * dialog for the client to display.</p>
@@ -605,17 +605,17 @@ public interface Session extends Remote {
    * <p>Check an object out from the database for editing.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
    * by the client calling
-   * {@link arlut.csd.ddroid.common.ReturnVal#getObject() ReturnVal.getObject()}.
+   * {@link arlut.csd.ganymede.common.ReturnVal#getObject() ReturnVal.getObject()}.
    * If the object could not be checked out for editing for some
    * reason, the ReturnVal will carry an encoded error dialog for the
    * client to display.</p>
    *
    * <p>Keep in mind that only one Session can have a particular
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} checked out for
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once checked out, the object will be unavailable
    * to any other sessions until this session calls 
-   * {@link arlut.csd.ddroid.rmi.Session#commitTransaction() commitTransaction()}
-   * or {@link arlut.csd.ddroid.rmi.Session#abortTransaction() abortTransaction()}.</p>
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}
+   * or {@link arlut.csd.ganymede.rmi.Session#abortTransaction() abortTransaction()}.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
@@ -630,10 +630,10 @@ public interface Session extends Remote {
    * will carry an encoded error dialog for the client to display.</p>
    *
    * <p>Keep in mind that only one Session can have a particular
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} checked out for
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
    * to any other sessions until this session calls 
-   * {@link arlut.csd.ddroid.rmi.Session#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
    *
@@ -657,7 +657,7 @@ public interface Session extends Remote {
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *    
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   ReturnVal   clone_db_object(Invid invid) throws RemoteException;
@@ -667,7 +667,7 @@ public interface Session extends Remote {
    *
    * <p>This method must be called within a transactional context.  The object's
    * change in status will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.rmi.Session#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * <p>Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
@@ -690,14 +690,14 @@ public interface Session extends Remote {
    * however.</p>
    *
    * <p>The client should check the returned ReturnVal's
-   * {@link arlut.csd.ddroid.common.ReturnVal#getObjectStatus() getObjectStatus()}
+   * {@link arlut.csd.ganymede.common.ReturnVal#getObjectStatus() getObjectStatus()}
    * method to see whether the re-activated object has an expiration date set.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
    * change in status will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.rmi.Session#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   ReturnVal     reactivate_db_object(Invid invid) throws RemoteException;
@@ -715,7 +715,7 @@ public interface Session extends Remote {
    *
    * <p>This method must be called within a transactional context.  The object's
    * removal will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.rmi.Session#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
    *         or null if there were no problems

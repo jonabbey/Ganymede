@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -65,7 +65,7 @@ import java.util.Vector;
 
 /**
  *
- * Client side interface definition for the Directory Droid DBBaseCategory class.  This
+ * Client side interface definition for the Ganymede DBBaseCategory class.  This
  * interface allows the client to manipulate a category's relationships.
  *
  */

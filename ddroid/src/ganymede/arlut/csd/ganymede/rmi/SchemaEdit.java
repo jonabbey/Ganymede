@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,12 +50,12 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -64,13 +64,13 @@ import arlut.csd.ddroid.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>Primary remote interface for Directory Droid schema editing.  The
- * Directory Droid admin console calls the 
- * {@link arlut.csd.ddroid.server.GanymedeAdmin#editSchema editSchema()} method on
- * a server-side {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} object
+ * <P>Primary remote interface for Ganymede schema editing.  The
+ * Ganymede admin console calls the 
+ * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
+ * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
  * to get access to
- * the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects which
- * hold the type definitions for the objects held in the Directory Droid server.  The
+ * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects which
+ * hold the type definitions for the objects held in the Ganymede server.  The
  * DBObjectBase objects in turn provide access to the definitions for
  * the fields held in those object types.</P>
  *
@@ -105,14 +105,14 @@ public interface SchemaEdit extends Remote {
   public Base[] getBases() throws RemoteException;
 
   /**
-   * <P>Returns a {@link arlut.csd.ddroid.rmi.Base Base} reference to 
+   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to 
    * match the id, or null if no match.</P>
    */
 
   public Base getBase(short id) throws RemoteException;
 
   /** 
-   * <P>Returns a {@link arlut.csd.ddroid.rmi.Base Base} reference to
+   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to
    * match the baseName, or null if no match.</P>
    */
 
@@ -120,7 +120,7 @@ public interface SchemaEdit extends Remote {
 
   /** 
    * <P>This method creates a new {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} object and returns
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
    * itself.</P>
@@ -130,7 +130,7 @@ public interface SchemaEdit extends Remote {
 
   /**
    * <P>This method deletes a {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase}, removing it from the
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}, removing it from the
    * Schema Editor's working set of bases.  The removal won't
    * take place for real unless the SchemaEdit is committed.</P>
    */
@@ -139,20 +139,20 @@ public interface SchemaEdit extends Remote {
 
   /**
    * <P>This method returns an array of defined 
-   * {@link arlut.csd.ddroid.rmi.NameSpace NameSpace} objects.</P>
+   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</P>
    */
 
   public NameSpace[] getNameSpaces() throws RemoteException;
 
   /**
-   * <P>This method returns a {@link arlut.csd.ddroid.rmi.NameSpace NameSpace} by matching name,
+   * <P>This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
    * or null if no match is found.</P>
    */
 
   public NameSpace getNameSpace(String spaceName) throws RemoteException;
 
   /**
-   * <P>This method creates a new {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} 
+   * <P>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
    * and generally make a nuisance of itself.</P>
@@ -162,7 +162,7 @@ public interface SchemaEdit extends Remote {
 
   /**
    * <P>This method deletes a
-   *  {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} object, returning true if
+   *  {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object, returning true if
    * the deletion could be carried out, false otherwise.</P>
    */
 

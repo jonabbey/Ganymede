@@ -3,7 +3,7 @@
    db_object.java
 
    This interface defines the methods that the client can remotely
-   call on a object held in the Directory Droid server.
+   call on a object held in the Ganymede server.
    
    Created: 11 April 1996
    Last Mod Date: $Date$
@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,14 +51,14 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -67,10 +67,10 @@ import arlut.csd.ddroid.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Remote reference to a Directory Droid {@link arlut.csd.ddroid.server.DBObject DBObject}
- * or {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}, the db_object is used by the
+ * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.server.DBObject DBObject}
+ * or {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}, the db_object is used by the
  * client to get information about and/or make changes to a object held
- * in the Directory Droid server.</p>
+ * in the Ganymede server.</p>
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -105,7 +105,7 @@ public interface db_object extends java.rmi.Remote {
   /**
    * <p>Returns a vector of custom field information records, in display order.</p>
    *
-   * @see arlut.csd.ddroid.common.FieldInfo
+   * @see arlut.csd.ganymede.common.FieldInfo
    */
 
   public Vector getFieldInfoVector() throws RemoteException;

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,12 +50,12 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -65,7 +65,7 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 /**
  * <P>Client-side remote interface for the
- * server-side {@link arlut.csd.ddroid.server.InvidDBField InvidDBField} class.
+ * server-side {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} class.
  */
 
 public interface invid_field extends db_field {

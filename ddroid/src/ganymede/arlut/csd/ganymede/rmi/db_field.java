@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,14 +52,14 @@
 
 */
 
-package arlut.csd.ddroid.rmi;
+package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.FieldInfo;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -67,9 +67,9 @@ import arlut.csd.ddroid.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 /**
- * <p>Remote reference to a Directory Droid {@link arlut.csd.ddroid.server.DBField DBField}, the
+ * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.server.DBField DBField}, the
  * db_field is used by the client to make changes to a field when editing the
- * {@link arlut.csd.ddroid.rmi.db_object db_object} the field is contained within.</p>
+ * {@link arlut.csd.ganymede.rmi.db_object db_object} the field is contained within.</p>
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
