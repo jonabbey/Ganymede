@@ -2,8 +2,8 @@
 #
 # Ganymede admin jar build script
 #
-# Version: $Revision: 1.7 $
-# Date: $Date: 1999/01/20 19:24:50 $
+# Version: $Revision: 1.8 $
+# Date: $Date: 1999/01/20 22:12:38 $
 #
 ############################################################
 
@@ -33,6 +33,34 @@ cd admin_classes
 cd arlut/csd
 rm -f Util
 ln -s $CLASSDIR/arlut/csd/Util .
+cd ../..
+
+# And the JDataComponent directory
+
+cd arlut/csd
+rm -f JDataComponent
+ln -s $CLASSDIR/arlut/csd/JDataComponent JDataComponent
+cd ../..
+
+# And the JDialog directory
+
+cd arlut/csd
+rm -f JDialog
+ln -s $CLASSDIR/arlut/csd/JDialog JDialog
+cd ../..
+
+# And the JTable directory
+
+cd arlut/csd
+rm -f JTable
+ln -s $CLASSDIR/arlut/csd/JTable JTable
+cd ../..
+
+# And the JTree directory
+
+cd arlut/csd
+rm -f JTree
+ln -s $CLASSDIR/arlut/csd/JTree JTree
 cd ../..
 
 ./sync_tree
