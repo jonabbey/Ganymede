@@ -1127,6 +1127,7 @@ public class DBEditSet {
       }
     catch (CommitFatalException ex)
       {
+	releaseWriteLock();
 	release();
 	return ex.getReturnVal();
       }
@@ -1134,6 +1135,7 @@ public class DBEditSet {
       {
 	Ganymede.debug(Ganymede.stackTrace(ex));
 
+	releaseWriteLock();
 	release();
 	return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
 					  ts.l("commit.commit_failure_text", ex.toString()));
@@ -1144,7 +1146,6 @@ public class DBEditSet {
 	// if we successfully released before, this is a no-op
 
 	releaseWriteLock();
-	this.deconstruct();
       }
   }
 
