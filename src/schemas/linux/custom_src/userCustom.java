@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -617,7 +617,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (field.getValue() == null)
       {
-	return null;
+	result = new ReturnVal(true, true); // have setValue() do the right thing
+
+	result.addRescanField(this.getInvid(), userSchema.HOMEDIR);
+
+	return result;
       }
 
     if (field.getValue().equals("root"))
