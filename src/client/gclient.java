@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.92 $ %D%
+   Version: $Revision: 1.93 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1823,14 +1823,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.out.println("got root category: " + dump.getName());
       }
 
-    CatTreeNode firstNode = new CatTreeNode(null, dump.getName(), dump,
-					    null, true, 
-					    OPEN_CAT, CLOSED_CAT, null);
-    tree.setRoot(firstNode);
+    //    CatTreeNode firstNode = new CatTreeNode(null, dump.getName(), dump,
+    //					    null, true, 
+    //					    OPEN_CAT, CLOSED_CAT, null);
+    //    tree.setRoot(firstNode);
 
     try
       {
-	recurseDownCategories(firstNode);
+	recurseDownCategories(null, dump);
       }
     catch (RemoteException rx)
       {
@@ -1850,33 +1850,32 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
-  void recurseDownCategories(CatTreeNode node) throws RemoteException
+  void recurseDownCategories(CatTreeNode node, Category c) throws RemoteException
   {
     Vector
       children;
 
-    Category c;
+    //    Category c;
     CategoryNode cNode;
 
     treeNode 
-      thisNode,
       prevNode;
 
     /* -- */
       
-    c = node.getCategory();
+    //    c = node.getCategory();
     
-    node.setText(c.getName());
+    //    node.setText(c.getName());
     
     children = c.getNodes();
 
     prevNode = null;
-    thisNode = node.getChild();
 
     for (int i = 0; i < children.size(); i++)
       {
 	// find the CategoryNode at this point in the server's category tree
-	cNode = (CategoryNode)children.elementAt(i);
+
+	cNode = (CategoryNode) children.elementAt(i);
 
 	if (cNode instanceof Base)
 	  {
@@ -1887,12 +1886,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		continue;	// we don't want to present embedded objects
 	      }
 	  }
-	  
-	prevNode = insertCategoryNode(cNode, prevNode, node);
 
-	if (prevNode instanceof CatTreeNode)
+	// if we have a single category at this level, we don't want
+	// to bodily insert it into the tree.. we'll just continue to
+	// recurse down with it.
+
+	if ((cNode instanceof Category) && (children.size() == 1))
 	  {
-	    recurseDownCategories((CatTreeNode)prevNode);
+	    recurseDownCategories(null, (Category) cNode);
+	  }
+	else
+	  {
+	    prevNode = insertCategoryNode(cNode, prevNode, node);
+
+	    if (prevNode instanceof CatTreeNode)
+	      {
+		recurseDownCategories((CatTreeNode)prevNode, (Category) cNode);
+	      }
 	  }
       }
   }
@@ -1939,12 +1949,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.out.println("Unknown instance: " + node);
       }
 
-    tree.insertNode(newNode, true);
-      
-    //    if (newNode instanceof BaseNode)
-    //      {
-    //	refreshObjects((BaseNode)newNode, false);
-    //      }
+    if ((newNode.getParent() == null) && (newNode.getPrevSibling() == null))
+      {
+	tree.setRoot(newNode);
+      }
+    else
+      {
+	tree.insertNode(newNode, false);
+      }
     
     return newNode;
   }
