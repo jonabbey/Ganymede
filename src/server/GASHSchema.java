@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,6 +70,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     objects;			// root category node
 
   treeNode
+    nodeAfterCategories,
     namespaces,			// top-level node for namespace listing
     builtIns;			// top-level node for (non-embedded) built-in field defs
 
@@ -355,13 +356,28 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     // create builtIn node
 
-    builtIns = new treeNode(null, "Built-In Fields", objects, true, 0, 1, builtInMenu);
-    tree.insertNode(builtIns, false);
+    if (developMode)
+      {
+	builtIns = new treeNode(null, "Built-In Fields", objects, true, 0, 1, builtInMenu);
+	tree.insertNode(builtIns, false);
 
-    // create namespaces node
+	// create namespaces node
+	
+	namespaces = new treeNode(null, "Namespaces", builtIns, true, 0, 1, nameSpaceMenu);
+	tree.insertNode(namespaces, false);
+	
+	nodeAfterCategories = builtIns;
+      }
+    else
+      {
+	// create namespaces node
+	
+	namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
+	tree.insertNode(namespaces, false);
+	
+	nodeAfterCategories = namespaces;
+      }
 
-    namespaces = new treeNode(null, "Namespaces", builtIns, true, 0, 1, nameSpaceMenu);
-    tree.insertNode(namespaces, false);
 
     // and initialize tree
 
@@ -787,6 +803,11 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 	    i++;
 	  }
+      }
+
+    if (isOpen)
+      {
+	tree.expandNode(builtIns, false);
       }
 
     tree.refresh();
@@ -1830,7 +1851,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    return false;
 	  }
 
-	if (belowNode == builtIns)
+	if (belowNode == nodeAfterCategories)
 	  {
 	    return true;
 	  }
@@ -1849,7 +1870,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		return false;
 	      }
 
-	    if (belowNode == builtIns)
+	    if (belowNode == nodeAfterCategories)
 	      {
 		return true;
 	      }
