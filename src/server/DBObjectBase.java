@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2000/10/31 09:20:44 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2000/10/31 23:22:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2174,7 +2174,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    field = (DBObjectBaseField) enum.nextElement();
 
-	    if (!field.isBuiltIn())
+	    if (field.isBuiltIn())
 	      {	    
 		result.addElement(field);
 	      }
