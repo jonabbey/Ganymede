@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/07/26 22:19:52 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/07/26 22:34:48 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
+ * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -813,7 +813,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
+ * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -861,7 +861,8 @@ class DeathWatcherThread extends Thread {
 
     new JErrorDialog(glogin.g_client, 
 		     "The server is disconnecting us: \n\n" + message + 
-		     "\n\n" + new Date());
+		     "\n\n" + new Date(),
+		     glogin.g_client.getErrorImage());
 
     // if we get here, the dialog has been put down
 
@@ -898,7 +899,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.58 $ $Date: 1999/07/26 22:19:52 $ $Name:  $
+ * @version $Revision: 1.59 $ $Date: 1999/07/26 22:34:48 $ $Name:  $
  * @author Jonathan Abbey
  */
 
