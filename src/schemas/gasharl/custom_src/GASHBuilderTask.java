@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/08/02 21:49:39 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/08/04 17:57:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -179,38 +179,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
 
-	// we write out a file that maps social security numbers to a
-	// user's primary email address and user name for the
-	// personnel office's phonebook database to use
-
-	try
-	  {
-	    out = openOutFile(path + "maildirect");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect file: " + ex);
-	  }
-	
-	if (out != null)
-	  {
-	    try
-	      {
-		DBObject user;
-		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
-		while (users.hasMoreElements())
-		  {
-		    user = (DBObject) users.nextElement();
-		    
-		    writeMaildirectLine(user, out);
-		  }
-	      }
-	    finally
-	      {
-		out.close();
-	      }
-	  }
+	writeMailDirect();
 
 	success = true;
       }
@@ -546,72 +515,121 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * we write out a file that maps social security numbers to a
+   * user's primary email address and user name for the
+   * personnel office's phonebook database to use
    *
-   * This method writes out a line to the maildirect GASH output file.
+   * This method writes lines to the maildirect GASH output file.
    *
    * The lines in this file look like the following.
    *
    * 999341010 jonabbey@arlut.utexas.edu broccol
    *
-   * @param object An object from the Ganymede user object base
-   * @param writer The destination for this user line
-   *
    */
 
-  private void writeMaildirectLine(DBObject object, PrintWriter writer)
+  private void writeMailDirect()
   {
-    String username;
-    String signature;
-    String socSecurity;
-    Invid category = null;
-    StringBuffer socBuffer = new StringBuffer();
+    PrintWriter out;
+    Hashtable map = new Hashtable(); // map ss addresses to DBObject
+    Hashtable results = new Hashtable(); // map ss addresses to strings
 
     /* -- */
 
-    result.setLength(0);
-
-    username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
-    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
-    socSecurity = (String) object.getFieldValueLocal(userSchema.SOCIALSECURITY);
-    category = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
-
-    if (normalCategory == null)
+    try
       {
-	if (category != null)
+	out = openOutFile(path + "maildirect");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect file: " + ex);
+	return;
+      }
+	
+    try
+      {
+	DBObject user;
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+	while (users.hasMoreElements())
 	  {
-	    String label;
+	    user = (DBObject) users.nextElement();
 
-	    label = getLabel(category);
+	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+	    String socSecurity = (String) user.getFieldValueLocal(userSchema.SOCIALSECURITY);
+	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    if (label != null && label.equals("normal"))
+	    StringBuffer socBuffer = new StringBuffer();
+		
+	    if (normalCategory == null)
 	      {
-		normalCategory = category;
+		if (category != null)
+		  {
+		    String label;
+
+		    label = getLabel(category);
+
+		    if (label != null && label.equals("normal"))
+		      {
+			normalCategory = category;
+		      }
+		  }
 	      }
+    
+	    if (username != null && signature != null && socSecurity != null && 
+		category != null && category.equals(normalCategory))
+	      {
+		for (int i = 0; i < socSecurity.length(); i++)
+		  {
+		    char c = socSecurity.charAt(i);
+
+		    if (c != '-')
+		      {
+			socBuffer.append(c);
+		      }
+		  }
+
+		if (map.containsKey(socBuffer.toString()))
+		  {
+		    // we've got more than one entry with the same
+		    // social security number.. that should only
+		    // happen if one of the users is an GASH admin.
+
+		    DBObject oldUser = (DBObject) map.get(socBuffer.toString());
+
+		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+
+		    if (field != null && field.isDefined())
+		      {
+			continue; // we've already got an admin record for this SS#
+		      }
+		  }
+
+		result.setLength(0);
+
+		result.append(socBuffer.toString());
+		result.append(" ");
+		result.append(signature);
+		result.append("@");
+		result.append(dnsdomain.substring(1)); // skip leading .
+		result.append(" ");
+		result.append(username);
+
+		map.put(socBuffer.toString(), user);
+		results.put(socBuffer.toString(), result.toString());
+	      }
+	  }
+
+	Enumeration lines = results.elements();
+
+	while (lines.hasMoreElements())
+	  {
+	    out.println((String) lines.nextElement());
 	  }
       }
-    
-    if (username != null && signature != null && socSecurity != null && 
-	category != null && category == normalCategory)
+    finally
       {
-	for (int i = 0; i < socSecurity.length(); i++)
-	  {
-	    char c = socSecurity.charAt(i);
-
-	    if (c != '-')
-	      {
-		socBuffer.append(c);
-	      }
-	  }
-
-	result.append(socBuffer.toString());
-	result.append(" ");
-	result.append(signature);
-	result.append("@");
-	result.append(dnsdomain.substring(1)); // skip leading .
-	result.append(" ");
-	result.append(username);
-
-	writer.println(result.toString());
+	out.close();
       }
   }
   

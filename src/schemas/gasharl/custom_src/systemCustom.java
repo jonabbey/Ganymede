@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/04/14 19:05:28 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/08/04 17:57:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -874,6 +874,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     if (field.getID() == systemSchema.SYSTEMTYPE)
       {
 	return true;
+      }
+    
+    if (field.getID() == systemSchema.PRIMARYUSER)
+      {
+	return false;		// allow the primary user to be set to <none>
       }
 
     return super.mustChoose(field);
