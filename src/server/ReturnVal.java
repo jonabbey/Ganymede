@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -321,21 +321,34 @@ public class ReturnVal implements java.io.Serializable {
     status = NONE;
   }
 
+  public void clear()
+  {
+    rescanList = null;
+    objRescanHash = null;
+    dialog = null;
+    callback = null;
+    status = NONE;
+    newObjectInvid = null;
+    remoteObjectRef = null;
+  }
+
   /**
    *
    * unionRescan merges field and object rescan requests from
    * the supplied ReturnVal with and rescan requests we contain.<br><br>
    *
    * It is used to allow multiple sources in InvidDBField to contribute
-   * rescan requests.
+   * rescan requests.<br><br>
+   *
+   * This method returns this so you can do a cascading return.
    *
    */
 
-  public void unionRescan(ReturnVal retVal)
+  public ReturnVal unionRescan(ReturnVal retVal)
   {
     if (retVal == null)
       {
-	return;
+	return this;
       }
 
     // add any rescan fields requested by retVal
@@ -390,6 +403,8 @@ public class ReturnVal implements java.io.Serializable {
 	    addRescanObject(objid, otherobj);
 	  }
       }
+
+    return this;
   }
 
   public void setStatus(byte status)
