@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/04/05 06:13:00 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/04/05 06:18:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -103,12 +103,12 @@ public class StringUtils {
 
   public static boolean containsOnly(String inputString, String legalChars)
   {
-    if (inputString == null)
+    if (inputString == null || inputString.length() == 0)
       {
 	return true;
       }
 
-    if (legalChars == null)
+    if (legalChars == null || legalChars.length() == 0)
       {
 	return false;
       }
@@ -206,6 +206,7 @@ public class StringUtils {
    * <p>Test rig</p>
    */
 
+  /*
   public static void main(String argv[])
   {
     String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
@@ -247,5 +248,24 @@ public class StringUtils {
       {
 	System.out.println("Fail test 2");
       }
+
+    if (StringUtils.containsOnly("", "abcdefg"))
+      {
+	System.out.println("Pass test 3");
+      }
+    else
+      {
+	System.out.println("Fail test 3");
+      }
+
+    if (!StringUtils.containsOnly("test", null))
+      {
+	System.out.println("Pass test 4");
+      }
+    else
+      {
+	System.out.println("Fail test 4");
+      }
   }
+  */
 }
