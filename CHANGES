@@ -359,13 +359,17 @@ button is used.
 
 This is in response to a bug report by Gil Kloepfer.
 
-18. [SERVER] Cleanups and refinements to transaction commit handling
+18. [SERVER] Cleanups and refinements to DBEditSet class
 
 The transaction commit() method code in DBEditSet has been radically
 reworked.  The biggest part of this reworking is a simple refactoring
 to make the code far simpler to read, but a number of reliability
 improvements were made in the process, and a few extremely unlikely
 yet nonetheless possible security race conditions were fixed.
+
+In addition, a lot of DBEditSet member fields have been made private,
+and special accessors have been added and method calls altered where
+needed to allow for interaction with other classes.
 
 19. [SERVER] Slight API change for DBEditObject subclasses
 
@@ -394,6 +398,14 @@ overrided those two methods, so I think it'll be unlikely that this
 API change will affect people, but if you are not able to recompile
 your schema kit and/or plugins with this version of the server, you
 may need to look at this issue.
+
+20. [SERVER] Shutdown Expedited
+
+The GanymedeBuilderTask base class will now inhibit any builder tasks
+from running at all once a server shutdown command has been issued.
+Previously, the server shutdown process only blocked phase 2 builds.
+This change makes it so that the server won't bother trying to write
+out data files that it won't do anything with before shutdown.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
