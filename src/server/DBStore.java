@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -121,6 +121,7 @@ public class DBStore {
   public synchronized void load(String filename)
   {
     FileInputStream inStream = null;
+    BufferedInputStream bufStream = null;
     DataInputStream in;
 
     DBObjectBase tempBase;
@@ -138,7 +139,8 @@ public class DBStore {
     try
       {
 	inStream = new FileInputStream(filename);
-	in = new DataInputStream(inStream);
+	bufStream = new BufferedInputStream(inStream);
+	in = new DataInputStream(bufStream);
 
 	try
 	  {
@@ -240,6 +242,17 @@ public class DBStore {
       }
     finally
       {
+	if (bufStream != null)
+	  {
+	    try
+	      {
+		bufStream.close();
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+
 	if (inStream != null)
 	  {
 	    try
@@ -323,9 +336,12 @@ public class DBStore {
   {
     File dbFile = null;
     FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
     DataOutputStream out = null;
+
     FileOutputStream textOutStream = null;
     PrintWriter textOut = null;
+
     Enumeration basesEnum;
     short baseCount, namespaceCount, categoryCount;
     DBDumpLock lock = null;
@@ -362,7 +378,8 @@ public class DBStore {
 	// and dump the whole thing
 
 	outStream = new FileOutputStream(filename);
-	out = new DataOutputStream(outStream);
+	bufStream = new BufferedOutputStream(outStream);
+	out = new DataOutputStream(bufStream);
 
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
@@ -420,6 +437,11 @@ public class DBStore {
 	if (out != null)
 	  {
 	    out.close();
+	  }
+
+	if (bufStream != null)
+	  {
+	    bufStream.close();
 	  }
 	   
 	if (outStream != null)
@@ -482,7 +504,9 @@ public class DBStore {
   {
     File dbFile = null;
     FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
     DataOutputStream out = null;
+
     FileOutputStream textOutStream = null;
     PrintWriter textOut = null;
     Enumeration basesEnum;
@@ -525,7 +549,8 @@ public class DBStore {
 	// and dump the whole thing
 
 	outStream = new FileOutputStream(filename);
-	out = new DataOutputStream(outStream);
+	bufStream = new BufferedOutputStream(outStream);
+	out = new DataOutputStream(bufStream);
 
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
@@ -594,6 +619,11 @@ public class DBStore {
 	if (out != null)
 	  {
 	    out.close();
+	  }
+
+	if (bufStream != null)
+	  {
+	    bufStream.close();
 	  }
 	   
 	if (outStream != null)
