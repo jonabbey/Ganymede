@@ -1,7 +1,86 @@
-Ganymede Release 0.99.3
-June 23, 1999
+Ganymede Release 0.99.4
+July ??, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.3 to 0.99.4 -------------------
+
+RELEASE DATE: July ??, 1999
+
+1. [SERVER] Optimizations to permissions system
+
+The simplifications to GanymedeSession.getPerm(object,field) that
+I did for 0.99.3 was in fact doing too much work, and the logic
+didn't flow clearly.
+
+GanymedeSession.getPerm(object, field) is now correct, efficient, and
+easy to read.
+
+2. [SERVER] Added new versions of anonymousLinkOK/UnlinkOK() to DBEditObject
+
+It was previously impossible to grant anonymous linking privileges to
+a field only when the other side of the link was being created in a
+particular object type/field.  This posed a problem in the
+circumstance where you want to allow a specific field in a given
+object type to be linked to another object type's backlinks field
+without having general editing permissions for the other object.
+
+I added a couple of new versions of these methods that take additional
+parameters identifying the originating object and field, so that
+customizers can take the other side of the proposed link into
+consideration before granting anonymous linking permissions.
+
+See the DBEditObject.anonymousLinkOK()/anonymousUnlinkOK() javadocs
+for details.  Hopefully I'll get around to writing a full-scale
+technical manual for Ganymede that will go into when/where you would
+use these methods.
+
+Modified InvidDBField.bind() and InvidDBField.unbind() to call the
+new versions.
+
+3. [CLIENT] Improved StringSelector used in String and Invid fields
+
+The StringSelector GUI component used in the client to allow editing
+of String and/or Invid vector fields has been fixed so that it does
+not include the text box for entering custom entries unless the
+StringSelector is editable.
+
+Fixed some minor GUI problems with the StringSelector resizing itself
+to a minimum size after adding a new entry to an empty
+no-choices-provided string selector, made the 'remove' button disable
+itself after removing something.
+
+4. [SCHEMA] Improved email list behavior in gasharl schema
+
+An email list owner can now add any user, list, or redirect to his
+list without having general editing privileges for that user, list,
+or redirect.
+
+This takes advantage of change #2, above.
+
+5. [INSTALL] Various improvements to the install process
+
+Modified installServer so that the custom loading instructions it
+writes out at the end is sent to a README.custom file in the installed
+server's directory rather than to screen.  No sense spewing a couple
+of screen's worth of customized install instructions if the user has
+to do cut and paste to save it to a file for reading.
+
+Added an installWeb script to install the web files into a designated
+directory, separate from the normal UNIX client install.  This has the
+advantage that you can install the web resourcs for Ganymede without
+having to have Swing installed locally (which installClient checked
+for.)
+
+Added a handy index.html file for the Ganymede web resources, got rid
+of the old activator and hotjava directories, added a nice set of web
+frames to allow the installer to bring up their browser and directly
+visit the directory where they installed the web resources.
+
+6. [SCHEMA] Fixed BSD schema master.passwd parser, Linux passwd parser
+
+The old Linux and BSD passwd file parsers would break if they
+encountered a user record with a blank password field.
 
 -------------------- Changes from 0.99.2 to 0.99.3 -------------------
 

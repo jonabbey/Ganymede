@@ -1,6 +1,108 @@
-\documentstyle{book}
+\documentclass{book}
+\usepackage{graphicx}
+\usepackage{html}
 \title{Ganymede Administration Manual}
-\author{Jonathan Abbey\\jonabbey@arlut.utexas.edu\\Applied Research Laboratories, The University of Texas at Austin}
+\author{Jonathan Abbey\\jonabbey@arlut.utexas.edu\\Applied Research
+Laboratories, The University of Texas at Austin}
 \begin{document}
 \maketitle
+\tableofcontents
+\chapter{Introduction}
+Ganymede is all about administration.  Administration of users,
+administration of email, administration of systems, and administration
+of almost anything else that principally involves the management of
+configuration data. That's a pretty wide mission statement, and some
+things definitely do fit into Ganymede better than others, but that's
+really Ganymede's purpose.  Ganymede is designed to hold your
+network's configuration data, to see that that data gets applied to
+your network as needed, and to insure that the data can safely be
+accessed and managed by many users.
+
+The world being what it is, your network is going to be different from
+every other network in the world.  You will have unique requirements
+for \htmlref{what sort of management data needs to be held}{Schema},
+for \htmlref{how that data needs to get propagated into your network
+environment}{Tasks}, and for \htmlref{how you will delegate management
+permissions to people in your organization}{Perms}.
+
+It is the purpose of this manual to teach you what you need to know in
+order to configure Ganymede to meet your unique requirements.
+
+This manual is \emph{not} intended to introduce you to Ganymede, nor
+to serve as a comprehensive technical overview.  Both of those tasks
+are adequately handled in the Ganymede paper from the LISA 98
+proceedings \cite{abbey98}.
+
+\section{Network Data Management}
+
+The Ganymede server is an active repository for structured network
+management data.  By ''active repository'', I mean that the Ganymede
+server doesn't just act as a generic data storage engine, but rather
+includes the ability to intelligently oversee all changes made to the
+data, and to manage relationships among data items.
+
+The Ganymede server stores all data as objects.  Every type of thing
+stored in the Ganymede server (like person records, user accounts,
+account groups, systems, DNS domains, etc.) has its own object type
+definition which describes what sort of data can be held in objects of
+that type.  For instance, figure \ref{userfields} shows the User
+object type as defined in the GASHARL schema kit.
+
+\begin{center}
+\begin{figure}
+	\includegraphics[width=4in]{userfields.ps}
+	\caption{Schema editor showing fields for the Ganymede user
+object in the GASHARL schema.}\label{userfields}
+\end{figure}
+\end{center}
+
+As discussed in the LISA paper, the Ganymede server's database knows
+about several different kinds of fields, many of which have various
+configuration options
+
+\begin{center}
+\begin{figure}
+\begin{tabular}{|l|r|} \hline
+\emph{Field Type} & \emph{Options} \\ \hline
+Strings & Vector/Scalar, (Dis-)allowed characters, max/min length\\
+Numbers & Max/Min Value \\
+Dates & Max/Min Value \\
+IP Addresses & IPv4 or IPv6\\
+Object References & Vector/Scalar, Allowed Target Object Type\\
+Booleans & \\
+Permission Bit Matrices & \\ \hline
+\end{tabular}
+\caption{Types of database fields that may be held in a Ganymede
+object}\label{fg:fieldtypes}
+\end{figure}
+\end{center}
+
+\section{Data Handling}
+
+\chapter{Permissions Management}\label{Perms}
+\section{Admin Personae}
+\section{Owner Groups}
+\section{Roles}
+\begin{figure}
+	\includegraphics[width=4in]{permedit.ps}
+	\caption{Permission bits from a Ganymede Role, as seen in the
+		 Ganymede client's permissions editor.}\label{rolefig}
+\end{figure}
+\label{Roles}
+\chapter{Admin Console}
+\chapter{Tasks}\label{Tasks}
+\chapter{Logging and Event Mailing}
+\label{Schema}
+\chapter{The Schema Editor}
+\chapter{Categories}
+\chapter{Object Types}
+\chapter{Field Types}
+\chapter{Task Customization}
+\chapter{Object Type Customization}
+\begin{thebibliography}{[XXX99]}
+	\bibitem[Abb98]{abbey98} Abbey J. and Mulvaney M. (1998)
+\textsl{Ganymede: An Extensible and Customizable Directory Management
+Framework}.  Proceedings of the 1998 USENIX LISA Conference, December,
+1998.
+\end{thebibliography}
 \end{document}

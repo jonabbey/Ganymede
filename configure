@@ -1,4 +1,17 @@
 #!/bin/sh
+#
+# This is the bootstrapping configuration script for Ganymede. The
+# only thing we count on to run this script is that /bin/sh works.
+#
+# Get enough information from the user to be able to find Perl 5 and
+# run scripts/configurator.perl.  We'll set a bunch of environment variables
+# for configurator.perl to use to do its thing.
+#
+# Release: $Name:  $
+# Version: $Revision: 1.9 $
+# Last Mod Date: $Date: 1999/07/07 02:22:27 $
+#
+###############################################################################
 
 echo "Ganymede configure script"
 echo
@@ -36,7 +49,6 @@ if  test ! -z "$userperl"; then
 	GPERL=$guessperl
 fi
 
-# echo $GPERL
 export GPERL
 
 # Find java
@@ -54,12 +66,11 @@ if  test ! -z "$userjava"; then
 	GJAVA=$guessjava
 fi
 
-# echo $GJAVA
 export GJAVA
 
 # Find swing libraries
 
-guessswing="/opt/depot/swing-1.1"
+guessswing="/opt/depot/swing-1.1.1beta2"
 
 echo "Where are the Swing jar files located? [$guessswing] \c"
 
@@ -71,10 +82,12 @@ if  test ! -z "$userswing"; then
 	GSWING=$guessswing
 fi
 
-# echo $GJAVA
 export GSWING
 
-# Get desired location of generated class files
+# If we are in develop mode, ask where we want to put the generated
+# class files.. this is so we can build the sources in the CVS tree
+# while placing the .class files into another location out of the
+# tree.
 
 if [ "$1" = "-develop" ]
     then

@@ -69,8 +69,10 @@ Things you will need:
   page. Users without any version of the Java plugin installed may or
   may not be directed to the right page for downloading.
 
-  The place to go to see about Sun's java plug-in is
-  http://java.sun.com/products/plugin/.
+  If you want to run the Ganymede client or admin console on a Win32
+  machine, download the latest version of the Java Runtime Environment
+  (1.2.1 at this writing) from
+  http://java.sun.com/products/jdk/1.2/jre/download-windows.html.
   
 --
 
