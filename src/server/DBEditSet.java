@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -166,6 +166,8 @@ public class DBEditSet {
   {
     // check point our objects
 
+    System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
+
     checkpoints.push(new DBCheckPoint(name, this));
 
     // and our namespaces
@@ -200,6 +202,8 @@ public class DBEditSet {
 
     /* -- */
 
+    System.err.println("DBEditSet.rollback(): rollback key " + name);
+
     found = false;
 
     for (int i = 0; i < checkpoints.size(); i++)
@@ -229,6 +233,10 @@ public class DBEditSet {
 	if (point.name.equals(name))
 	  {
 	    found = true;
+	  }
+	else
+	  {
+	    System.err.println("DBEditSet.rollback(): popping checkpoint " + point.name);
 	  }
       }
 
