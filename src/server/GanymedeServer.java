@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2001/02/08 17:03:14 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2001/02/13 06:36:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,12 +104,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static Hashtable activeUsers = new Hashtable();
 
   /**
-   * <P>A hashtable mapping user Invids a java.lang.Date object representing
-   * the last time that user logged into Ganymede.  This data structure is
-   * used to check to see if the server's motd.html file has changed since
-   * the user last logged in.  This hash of timestamps is not preserved
-   * in the ganymede.db file, so whenever the server is restarted, all users
-   * are presumed to need to see the motd.html file on their next login.</P>
+   * <P>A hashtable mapping user Invids to a java.lang.Date object
+   * representing the last time that user logged into Ganymede.  This
+   * data structure is used to check to see if the server's motd.html
+   * file has changed since the user last logged in.  This hash of
+   * timestamps is not preserved in the ganymede.db file, so whenever
+   * the server is restarted, all users are presumed to need to see
+   * the motd.html file on their next login.</P>
    */
 
   static Hashtable userLogOuts = new Hashtable();

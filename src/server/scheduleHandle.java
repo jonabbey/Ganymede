@@ -7,15 +7,16 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/02/21 19:50:26 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/02/13 06:36:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -153,8 +154,31 @@ public class scheduleHandle implements java.io.Serializable {
   /**
    * The task to run
    */
+
   transient Runnable task;
-  transient Thread thread, monitor;
+
+  /**
+   * If this task is currently running, this field will
+   * point to the running thread, otherwise it will be null.
+   */
+
+  transient Thread thread; 
+
+  /**
+   * If this task is currently running, this field will
+   * point to a monitor thread that is waiting for the task's
+   * thread to complete before reporting completion.  The
+   * monitor thread is effectively a wrapper thread that
+   * lets any arbitrary Runnable be scheduled and managed
+   * by GanymedeScheduler.
+   */
+
+  transient Thread monitor;
+
+  /**
+   * The GanymedeScheduler that this task is registered in.
+   */
+
   transient GanymedeScheduler scheduler = null;
 
   /* -- */
@@ -248,6 +272,8 @@ public class scheduleHandle implements java.io.Serializable {
       }
 
     monitor = null;
+    thread = null;
+
     isRunning = false;
     lastTime = new Date();
     scheduler.notifyCompletion(this);
@@ -345,11 +371,11 @@ public class scheduleHandle implements java.io.Serializable {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    monitor.interrupt();
-    thread.interrupt();		// this used to be a stop, but stop is deprecated
+    if (thread != null)
+      {
+	thread.interrupt();	// this used to be a stop, but stop is deprecated
 				// as unsafe in 1.2, so we do the next best thing
-
-    isRunning = false;
+      }
   }
 
   /**
@@ -532,9 +558,10 @@ class taskMonitor implements Runnable {
       }
     catch (InterruptedException ex)
       {
-	return;			// if interrupted, assume the scheduler is going down
       }
-
-    handle.notifyCompletion(); // tell the scheduler it has completed
+    finally
+      {
+	handle.notifyCompletion(); // tell the scheduler it has completed
+      }
   }
 }

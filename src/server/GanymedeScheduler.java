@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2001/02/09 00:04:45 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2001/02/13 06:36:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -680,7 +680,7 @@ public class GanymedeScheduler extends Thread {
 
 	handle.stop();
 
-	updateTaskInfo(true);
+	//	updateTaskInfo(true);
 
 	return true;
       }
@@ -1057,12 +1057,18 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
+    // note that it is only safe to do this loop on the
+    // currentlyRunning enumeration because cleanUp() is
+    // synchronized.. any threads that finish up will have to wait
+    // until we return before getting into
+    // GanymedeScheduler.notifyCompletion()
+
     enum = currentlyRunning.elements();
 
     while (enum.hasMoreElements())
       {
 	handle = (scheduleHandle) enum.nextElement();
-
+	
 	handle.stop();
       }
   }
