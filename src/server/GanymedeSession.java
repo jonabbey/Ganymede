@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 1999/01/26 05:30:31 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 1999/01/26 05:38:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.121 $ %D%
+ * @version $Revision: 1.122 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2436,7 +2436,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObjectBase containingBase = null;
     Enumeration enum;
     DBObject obj;
-    DBLock rLock;
+    DBLock rLock = null;
 
     /* -- */
 
@@ -2805,11 +2805,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    // don't consider objects we already have stored in the result
 
-		    if (result.containsInvid(x.getInvid()))
+		    if (result.containsInvid(transaction_object.getInvid()))
 		      {
 			if (debug)
 			  {
-			    System.err.println("don't need to add invid " + x.getInvid() + ", we got it first time");
+			    System.err.println("don't need to add invid " + transaction_object.getInvid() +
+					       ", we got it first time");
 			  }
 
 			continue;
