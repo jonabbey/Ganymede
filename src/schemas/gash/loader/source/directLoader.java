@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1254,6 +1254,19 @@ public class directLoader {
 	    // set the email targets
 
 	    sf = current_obj.getField(userSchema.EMAILTARGET);
+
+	    // the setValue logic for the user object will have created
+	    // a default email target for us.. we don't want it.
+
+	    while (sf.size() != 0)
+	      {
+		retVal = sf.deleteElement(0);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    break;	// oh, well.
+		  }
+	      }
 
 	    for (int i = 0; i < aliasInfo.targets.size(); i++)
 	      {
