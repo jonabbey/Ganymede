@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.15 $ %D%
+    Version: $Revision: 1.16 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,9 +34,9 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-public class containerPanel extends JBufferedPane implements ActionListener, JsetValueCallback, ItemListener{  
+public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
   
@@ -56,7 +56,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
     rowHash, 
     objectHash;
   
-  JBufferedPane 
+  JPanel 
     panel;			// currently not very useful.. ?
   
   TableLayout 
@@ -91,13 +91,13 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
   public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame)
   {
-    String tempString = null;
 
     /* -- */
 
     if (object == null)
       {
 	System.err.println("null object passed to containerPanel");
+	parent.setStatus("Could not get object.  Someone else might be editting it.  Try again at a later time.");
 	return;
       }
 
@@ -112,7 +112,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     //    setLayout(new BorderLayout());
 
-    //panel = new JBufferedPane();
+    //panel = new JPanel();
     layout = new TableLayout(false);
     layout.rowSpacing(5);
     setLayout(layout);
@@ -139,16 +139,16 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	  {
 	    try
 	      {
-		if (debug)
-		  {
-		    tempString = fields[i].getName();
-		  }
-	
-		if (fields[i].isBuiltIn())
+		short ID = fields[i].getID();
+		// Skip some fields.  custom panels hold the built ins, and a few others.
+		if (fields[i].isBuiltIn() || 
+		    ((object.getTypeID() == SchemaConstants.OwnerBase) &&
+		                             (ID == SchemaConstants.OwnerObjectsOwned)) 
+		    || (ID == SchemaConstants.UserAdminPersonae))
 		  {
 		    if (debug)
 		      {
-			System.out.println("Skipping a built in fieldfields");
+			System.out.println("Skipping a built in field: " + fields[i].getName());
 		      }
 		  }
 		else
@@ -260,6 +260,9 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 	try
 	  {
+	    String oldValue = (String)field.getValue();
+
+
 	    if (debug)
 	      {
 		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
@@ -274,13 +277,18 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      {
 		if (debug)
 		  {
-		    System.err.println("Could not change field, reverting to " + (String)field.getValue());
+		    System.err.println("Could not change field, reverting to " + oldValue);
 		  }
-		((JstringField)v.getSource()).setText((String)field.getValue());
-		if (debug)
-		  {
-		    System.err.println("Here's what went wrong: " + parent.getSession().getLastError());
-		  }
+		/*
+		((JstringField)v.getSource()).setText("");
+
+		// This isn't working for some reason
+		((JstringField)v.getSource()).setText(oldValue);
+
+		System.out.println("text is: " + ((JstringField)v.getSource()).getText());
+		System.out.println("text is: " + ((JstringField)v.getSource()).getValue());
+		*/
+		parent.setStatus("Could not change field: " + parent.getSession().getLastError());
 
 		returnValue = false;
 	      }
@@ -351,13 +359,17 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	System.out.println("Something happened in the vector panel");
 	parent.somethingChanged = true;
       }
-    else if (v.getSource() instanceof stringSelector)
+    else if (v.getSource() instanceof tStringSelector)
       {
 	if (debug)
 	  {
-	    System.out.println("value performed from stringSelector");
+	    System.out.println("value performed from tStringSelector");
 	  }
-	if (v.getValue() instanceof Invid)
+	if (v.getOperationType() == JValueObject.ERROR)
+	  {
+	    parent.setStatus((String)v.getValue());
+	  }
+	else if (v.getValue() instanceof Invid)
 	  {
 	    db_field field = (db_field)objectHash.get(v.getSource());
 	    if (field == null)
@@ -382,7 +394,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		      {
 			System.out.println("Removing value from field(strig selector)");
 		      }
-		    returnValue = (field.deleteElement(index));
+		    returnValue = (field.deleteElement(invid));
 		  }
 		if (debug)
 		  {
@@ -403,7 +415,8 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	  }
 	else if (v.getValue() instanceof String)
 	  {
-	    System.out.println("String stringSelector callback, not implemented yet");
+	    System.out.println("String tStringSelector callback, not implemented yet");
+	    returnValue = false;
 	  }
 	else
 	  {
@@ -428,6 +441,8 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       {
 	throw new RuntimeException("Could not call shouldRescan(): " + rx);
       }
+
+    System.out.println("returnValue: " + returnValue);
 
     return returnValue;
   }
@@ -671,12 +686,12 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	System.out.println("Adding StringSelector, its a vector of strings!");
       }
 
-    stringSelector ss = new stringSelector(field.choices().getLabels(),
+    tStringSelector ss = new tStringSelector(field.choices().getLabels(),
 					   field.getValues(), 
 					   this,
-					   editable);
+					   editable,
+					   100);
     objectHash.put(ss, field);
-    ss.setBorderStyle(1);
     ss.setCallback(this);
     addRow( ss, field.getName(), field.isVisible()); 
   }
@@ -732,7 +747,8 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	  }
       }
 
-    stringSelector ss = new stringSelector(choiceHandles, valueHandles, this, editable);
+    // ss is canChoose, mustChoose
+    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 100);
     objectHash.put(ss, field);
     ss.setCallback(this);
     addRow( ss, field.getName(), field.isVisible()); 
@@ -811,7 +827,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				  
 		for (int j = 0; j < choices.size(); j++)
 		  {
-		    choice.addPossibleValue((String)choices.elementAt(j));
+		    choice.addItem((String)choices.elementAt(j));
 		  }
 				  
 		choice.setEditable(editable);
@@ -820,7 +836,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				  
 		try
 		  {
-		    choice.setCurrentValue(field.getValue());
+		    choice.setSelectedItem(field.getValue());
 		  }
 		catch (RemoteException rx)
 		  {
@@ -851,7 +867,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		for (int j = 0; j < choices.size(); j++)
 		  {
 		    String thisChoice = (String)choices.elementAt(j);
-		    combo.addPossibleValue(thisChoice);
+		    combo.addItem(thisChoice);
 
 		    if (!found)
 		      {
@@ -871,7 +887,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				  
 		if (!found)
 		  {
-		    combo.addPossibleValue(currentChoice);
+		    combo.addItem(currentChoice);
 		  }
 
 		combo.setMaximumRowCount(8);
@@ -879,7 +895,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		combo.setEditable(false); // This should be true
 		combo.setVisible(true);
 
-		combo.setCurrentValue(currentChoice);
+		combo.setSelectedItem(currentChoice);
 		if (debug)
 		  {
 		    System.out.println("Setting current value: " + currentChoice);
@@ -904,10 +920,6 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	else
 	  {
 	    // It's not a choice
-	    if (debug)
-	      {
-		System.out.println("This is not a choice");
-	      }
       
 	    sf = new JstringField(20,
 				  field.maxSize(),
