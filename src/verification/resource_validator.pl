@@ -434,7 +434,11 @@ sub examine_java {
       # to search for another ts.l() call.
 
       if ($value eq "") {
-	print "*** Error, couldn't find property for key $key on line $line_number!!! ***\n";
+	if ($key =~ /optional/) {
+	  print "  Warning, couldn't find optional property for key $key on line $line_number\n";
+	} else {
+	  print "*** Error, couldn't find property for key $key on line $line_number!!! ***\n";
+	}
       } else {
 
 	($arg_count, $new_string, $line_number) = inchoverjavaargs($rest, *IN, $line_number);
