@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -241,7 +241,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     // if we aren't deleting this entry, reject any attempt to unlink
     // us from auto.home.default, if we are linked there.
 
-    if (!deleting &&invf.getValueString().equals("auto.home.default"))
+    if (!deleting && invf.getValueString().equals("auto.home.default"))
       {
 	return Ganymede.createErrorDialog("Error, auto.home.default is required",
 					  "Sorry, it is mandatory to have a directory entry on the auto.home.default map.");
