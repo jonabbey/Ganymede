@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.72 $ %D%
+   Version: $Revision: 1.73 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2650,7 +2650,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error.. can't delete non-existent object");
       }
 
-    if (!getPerm(vObj).isEditable())
+    if (!getPerm(vObj).isDeletable())
       {
 	setLastError("Don't have permission to delete object" + vObj.getLabel());
 
