@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/06/01 03:20:35 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/06/14 04:51:20 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,11 +72,13 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2000/06/01 03:20:35 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2000/06/14 04:51:20 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlobject {
+
+  final static boolean debug = true;
 
   /**
    * <p>The local identifier string for this object</p>
@@ -91,6 +93,13 @@ public class xmlobject {
    */
 
   String typeString = null;
+
+  /**
+   * <p>Action mode for this object, should be null,
+   * "create", "edit", "delete", or "inactivate". 
+   */
+
+  String actionMode = null;
 
   /**
    * <p>The short object type id for this object type.</p>
@@ -139,6 +148,12 @@ public class xmlobject {
 
   boolean forceCreate = false;
 
+  /**
+   * <p>If true, this object was an embedded object</p>
+   */
+
+  boolean embedded = false;
+
   /* -- */
 
   /**
@@ -153,8 +168,26 @@ public class xmlobject {
   
   public xmlobject(XMLElement openElement) throws SAXException
   {
+    this(openElement, false);
+  }
+
+  /**
+   * <p>This constructor takes the XMLElement defining an object to
+   * be created or manipulated on the server and loads all information
+   * for this object into the xmlobject created.</p>
+   *
+   * <p>This constructor reads all elements from the xmlclient
+   * XML stream up to and including the matching close element for
+   * this object.</p>
+   */
+  
+  public xmlobject(XMLElement openElement, boolean embedded) throws SAXException
+  {
+    this.embedded = embedded;
+
     // handle any attributes in the element
 
+    actionMode = openElement.getAttrStr("action");
     typeString = openElement.getAttrStr("type");
 
     try
@@ -181,6 +214,15 @@ public class xmlobject {
     if (openElement.isEmpty())
       {
 	return;
+      }
+
+    // if we're deleting or inactivating an object, we can't handle
+    // any subelements.. so complain if we are in those modes
+
+    if ("delete".equals(actionMode) || "inactivate".equals(actionMode))
+      {
+	throw new NullPointerException("XMLObject error: can't " + actionMode + 
+				       " a non-empty <object> element.");
       }
 
     // okay, we should contain some fields, then
@@ -216,6 +258,11 @@ public class xmlobject {
 	throw new RuntimeException("Ran into end of XML file while parsing data object " + 
 				   this.toString());
       }
+  }
+
+  public String getMode()
+  {
+    return actionMode;
   }
 
   /**
@@ -359,6 +406,11 @@ public class xmlobject {
 	throw new IllegalArgumentException("mode must be 0, 1, or 2.");
       }
 
+    if (debug)
+      {
+	System.err.println("Registering fields [" + mode + "] for object " + this.toString(false));
+      }
+
     // we want to create/register the fields in their display order..
     // this is to cohere with the expectations of custom server-side
     // code, which may need to have higher fields set before accepting
@@ -383,12 +435,16 @@ public class xmlobject {
 	// we only register invid's.  on mode 2, we register
 	// everything.
 
-	if (field.fieldDef.isInvid() && mode == 0)
+	if (field.fieldDef.isInvid() && !field.fieldDef.isEditInPlace() && mode == 0)
 	  {
+	    // skip invid's
+
 	    continue;
 	  }
-	else if (!field.fieldDef.isInvid() && mode == 1)
+	else if ((!field.fieldDef.isInvid() || field.fieldDef.isEditInPlace()) && mode == 1)
 	  {
+	    // skip non-invid's
+
 	    continue;
 	  }
 

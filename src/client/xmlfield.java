@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/06/06 05:52:09 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/06/14 04:51:20 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,11 +74,13 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.11 $ $Date: 2000/06/06 05:52:09 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 2000/06/14 04:51:20 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlfield implements FieldType {
+
+  final static boolean debug = true;
 
   /**
    * <p>Formatter that we use for generating and parsing date fields</p>
@@ -99,10 +101,13 @@ public class xmlfield implements FieldType {
 
   xmlobject owner;
 
+  // the following hold data values for this field
+
   Object value = null;		// if scalar
   Vector setValues = null;	// if vector
   Vector delValues = null;	// if vector
   Vector addValues = null;	// if vector
+  boolean registered = false;
 
   /* -- */
 
@@ -227,6 +232,10 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
+		// scalar invid fields are never embedded/edit in
+		// place, so we know that any value we found should be
+		// an <invid>
+
 		value = new xInvid(nextItem);
 	      }
 	  }
@@ -289,8 +298,7 @@ public class xmlfield implements FieldType {
 	  {
 	    try
 	      {
-		xPassword pValue = new xPassword(nextItem);
-		value = pValue;
+		value = new xPassword(nextItem);
 	      }
 	    catch (NullPointerException ex)
 	      {
@@ -416,8 +424,11 @@ public class xmlfield implements FieldType {
 	  }
 	else if (nextItem.matchesClose("add") || nextItem.matchesClose("delete"))
 	  {
-	    if (modeStack.peek().equals(nextItem.getName()))
+	    if (modeStack.size() > 1 && modeStack.peek().equals(nextItem.getName()))
 	      {
+		// we checked for modeStack.size() > 1 to cover the
+		// initial modeStack.push("add")
+
 		modeStack.pop();
 	      }
 	    else
@@ -454,14 +465,11 @@ public class xmlfield implements FieldType {
 	      }
 	    else if (fieldDef.getType() == FieldType.INVID)
 	      {
-		if (fieldDef.isEditInPlace() && nextItem.matches("object") && nextItem.getAttrStr("type") != null)
+		if (fieldDef.isEditInPlace() && nextItem.matches("object"))
 		  {
-		    // we've got an embedded object.. create it, and record it in
-		    // the xmlclient's createdObjects vector.
+		    // we've got an embedded object.. add it, we'll process it later
 
-		    newValue = new xmlobject((XMLElement) nextItem);
-
-		    xmlclient.xc.createdObjects.addElement(newValue);
+		    newValue = new xmlobject((XMLElement) nextItem, true);
 		  }
 		else
 		  {
@@ -489,6 +497,7 @@ public class xmlfield implements FieldType {
 		    if (addValues == null)
 		      {
 			addValues = new Vector();
+			canDoSetMode = false;
 		      }
 
 		    addValues.addElement(newValue);
@@ -498,6 +507,7 @@ public class xmlfield implements FieldType {
 		    if (delValues == null)
 		      {
 			delValues = new Vector();
+			canDoSetMode = false;
 		      }
 
 		    delValues.addElement(newValue);
@@ -748,6 +758,11 @@ public class xmlfield implements FieldType {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("Registering field " + this.toString());
+      }
+
     try
       {
 	if (fieldDef.isBoolean() || fieldDef.isNumeric() || fieldDef.isDate() ||
@@ -765,24 +780,34 @@ public class xmlfield implements FieldType {
 
 	    if (setValues != null)
 	      {
-		// need to explicitly delete all elements, then set new ones
+		// delete any values that are currently in the field
+		// but which are not in our setValues vector, then add
+		// any that are missing
 
-		result = field.deleteElements(field.getValues());
+		Vector currentValues = field.getValues();
+		Vector removeValues = VectorUtils.difference(currentValues, setValues);
+		Vector newValues = VectorUtils.difference(setValues, currentValues);
 
-		if (result != null && !result.didSucceed())
+		if (removeValues.size() != 0)
 		  {
-		    return result;
+		    result = field.deleteElements(removeValues);
+
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
 		  }
 
-		if (setValues.size() > 0)
+		if (newValues.size() > 0)
 		  {
-		    return field.addElements(setValues);
+		    return field.addElements(newValues);
 		  }
 		else
 		  {
-		    // skip a pointless server call if we
-		    // are doing a <set></set> to clear
-		    // the field
+		    // skip a pointless server call if we are doing a
+		    // <set></set> to clear the field, or if we have
+		    // already synchronized the field by deleting
+		    // elements
 
 		    return null;
 		  }
@@ -880,53 +905,30 @@ public class xmlfield implements FieldType {
 	  {
 	    if (!fieldDef.isArray())
 	      {
+		// scalar invid fields are never embedded/editInPlace
+
 		xInvid invidValue = (xInvid) value;
 
 		return owner.objref.setFieldValue(fieldDef.getID(), invidValue.getInvid());
 	      }
-	    else
+	    else if (!fieldDef.isEditInPlace())
 	      {
-		db_field field = owner.objref.getField(fieldDef.getID());
+		invid_field field = (invid_field) owner.objref.getField(fieldDef.getID());
 
 		/* -- */
 
 		if (setValues != null)
 		  {
-		    // need to explicitly delete all elements, then set new ones
+		    Vector currentValues = field.getValues();
+		    Vector invidValues = getExtantInvids(setValues);
+		    Vector removeValues = VectorUtils.difference(currentValues, invidValues);
+		    Vector newValues = VectorUtils.difference(invidValues, currentValues);
 		    
-		    result = field.deleteElements(field.getValues());
+		    result = field.deleteElements(removeValues);
 		    
 		    if (result != null && !result.didSucceed())
 		      {
 			return result;
-		      }
-
-		    Vector newValues = new Vector();
-
-		    for (int i = 0; i < setValues.size(); i++)
-		      {
-			Invid invid;
-
-			/* -- */
-			
-			// handle the embedded object case
-
-			if (setValues.elementAt(i) instanceof xmlobject)
-			  {
-			    invid = ((xmlobject) setValues.elementAt(i)).getInvid();
-			  }
-			else
-			  {
-			    invid = ((xInvid) setValues.elementAt(i)).getInvid();
-			  }
-
-			if (invid == null)
-			  {
-			    System.err.println("Error, couldn't resolve invid reference " + setValues.elementAt(i));
-			    return new ReturnVal(false);
-			  }
-
-			newValues.addElement(invid);
 		      }
 
 		    if (newValues.size() > 0)
@@ -935,93 +937,184 @@ public class xmlfield implements FieldType {
 		      }
 		    else
 		      {
-			// skip a pointless server call
-
-			return new ReturnVal(true);
+			// skip a pointless server call if we are doing a
+			// <set></set> to clear the field, or if we have
+			// already synchronized the field by deleting
+			// elements
+			
+			return null;
 		      }
 		  }
-
-		// we can have both add values and delete values if we had a case
-		// like
-		// <invidField>
-		//   <invid type="User" id="broccol"/>
-		//   <delete><invid type="User" id="amy"/></delete>
-		// </invidField>
-
+	    
 		if (addValues != null)
 		  {
-		    Vector newValues = new Vector();
-
-		    for (int i = 0; i < addValues.size(); i++)
-		      {
-			Invid invid;
-
-			/* -- */
-			
-			// handle embedded object case
-
-			if (addValues.elementAt(i) instanceof xmlobject)
-			  {
-			    invid = ((xmlobject) addValues.elementAt(i)).getInvid();
-			  }
-			else
-			  {
-			    invid = ((xInvid) addValues.elementAt(i)).getInvid();
-			  }
-
-			if (invid == null)
-			  {
-			    System.err.println("Error, couldn't resolve invid reference " + addValues.elementAt(i));
-			    return new ReturnVal(false);
-			  }
-
-			newValues.addElement(invid);
-		      }
-
-		    result = field.addElements(newValues);
-
+		    result = field.addElements(getExtantInvids(addValues));
+		    
 		    if (result != null && !result.didSucceed())
 		      {
 			return result;
 		      }
+		  }
+		
+		if (delValues != null)
+		  {
+		    result = field.deleteElements(getExtantInvids(delValues));
+		    
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
+		  }
+	      }
+	    else		// edit in place / embedded object case 
+	      {
+		invid_field field = (invid_field) owner.objref.getField(fieldDef.getID());
+
+		/* -- */
+		
+		Vector currentValues = field.getValues();
+		Vector needToBeEdited = null;
+		Vector needToBeCreated = null;
+		Vector needToBeRemoved = null;
+
+		if (setValues != null)
+		  {
+		    needToBeEdited = getExtantObjects(setValues);
+		    needToBeCreated = getNonRegisteredObjects(setValues);
+		    needToBeRemoved = VectorUtils.difference(currentValues, getExtantInvids(setValues));
+		  }
+
+		if (addValues != null)
+		  {
+		    needToBeEdited = getExtantObjects(addValues);
+		    needToBeCreated = getNonRegisteredObjects(addValues);
 		  }
 
 		if (delValues != null)
 		  {
-		    Vector oldValues = new Vector();
+		    needToBeRemoved = getExtantInvids(delValues);
+		  }
 
-		    for (int i = 0; i < delValues.size(); i++)
+		if (needToBeCreated != null)
+		  {
+		    for (int i = 0; i < needToBeCreated.size(); i++)
 		      {
-			Invid invid;
+			Object x = needToBeCreated.elementAt(i);
 
-			/* -- */
-			
-			// it would be really odd to see an embedded object
-			// case here, but no harm in being thorough
-
-			if (delValues.elementAt(i) instanceof xmlobject)
+			if (x instanceof xInvid)
 			  {
-			    invid = ((xmlobject) delValues.elementAt(i)).getInvid();
+			    throw new RuntimeException("Error, could not process <invid> " + 
+						       "element in embedded invid field: " +
+						       x.toString());
+			  }
+
+			xmlobject object = (xmlobject) x;
+
+			if (debug)
+			  {
+			    System.err.println("Creating embedded object " + object);
+			  }
+
+			result = field.createNewEmbedded();
+
+			if (result != null && !result.didSucceed())
+			  {
+			    String msg = result.getDialogText();
+				
+			    if (msg != null)
+			      {
+				System.err.println("Error creating new embedded " + object + ", reason: " + msg);
+			      }
+			    else
+			      {
+				System.err.println("Error creating " + object + ", no reason given.");
+			      }
 			  }
 			else
 			  {
-			    invid = ((xInvid) delValues.elementAt(i)).getInvid();
+			    object.invid = result.getInvid();
+			    object.objref = result.getObject();
 			  }
 
-			if (invid == null)
+			xmlclient.xc.embeddedObjects.addElement(object);
+
+			// register any non-invids on this embedded
+			// object.. this will trigger the creation of
+			// any more embedded objects recursively if
+			// need be
+
+			result = object.registerFields(0);
+
+			if (result != null && !result.didSucceed())
 			  {
-			    System.err.println("Error, couldn't resolve invid reference " + delValues.elementAt(i));
-			    return new ReturnVal(false);
+			    return result;
+			  }
+		      }
+		  }
+
+		if (needToBeEdited != null)
+		  {
+		    for (int i = 0; i < needToBeEdited.size(); i++)
+		      {
+			xmlobject object = (xmlobject) needToBeEdited.elementAt(i);
+
+			result = object.editOnServer(xmlclient.xc.session);
+			
+			if (result != null && !result.didSucceed())
+			  {
+			    String msg = result.getDialogText();
+			    
+			    if (msg != null)
+			      {
+				System.err.println("Error editing previous embedded " + object + 
+						   ", reason: " + msg);
+			      }
+			    else
+			      {
+				System.err.println("Error editing previous embedded " + object +
+						   ", no reason given.");
+			      }
 			  }
 
-			oldValues.addElement(invid);
+			xmlclient.xc.embeddedObjects.addElement(object);
+
+			// register any non-invids on this embedded
+			// object.. this will trigger the creation of
+			// any more embedded objects recursively if
+			// need be
+
+			result = object.registerFields(0);
+
+			if (result != null && !result.didSucceed())
+			  {
+			    return result;
+			  }
 		      }
+		  }
 
-		    result = field.deleteElements(oldValues);
-
-		    if (result != null && !result.didSucceed())
+		if (needToBeRemoved != null)
+		  {
+		    for (int i = 0; i < needToBeRemoved.size(); i++)
 		      {
-			return result;
+			Invid invid = (Invid) needToBeRemoved.elementAt(i);
+
+			result = field.deleteElement(invid);
+
+			if (result != null && !result.didSucceed())
+			  {
+			    String msg = result.getDialogText();
+			    
+			    if (msg != null)
+			      {
+				System.err.println("Error deleting embedded " + invid + 
+						   ", reason: " + msg);
+			      }
+			    else
+			      {
+				System.err.println("Error deleting previous embedded " + invid +
+						   ", no reason given.");
+			      }
+			  }
 		      }
 		  }
 	      }
@@ -1099,6 +1192,150 @@ public class xmlfield implements FieldType {
       }
 
     return null;
+  }
+
+  /**
+   * <P>This private helper method takes a Vector of xInvid and
+   * xmlobject objects (in the embedded object case) and returns
+   * a Vector of Invid objects.  If any xmlobjects in the input
+   * Vector did not map to pre-existing objects on the server,
+   * then no invid will be returned for those elements, and as
+   * a result, the returned vector may be smaller than the
+   * input.</P>
+   */ 
+
+  private Vector getExtantInvids(Vector values)
+  {
+    Invid invid;
+    Vector invids = new Vector();
+
+    /* -- */
+
+    if (values == null)
+      {
+	return invids;
+      }
+
+    // if we're an embedded object field, 
+
+    for (int i=0; i < values.size(); i++)
+      {
+	Object x = values.elementAt(i);
+
+	if (x instanceof xInvid)
+	  {
+	    invid = ((xInvid) x).getInvid();
+	  }
+	else if (x instanceof xmlobject)
+	  {
+	    invid = ((xmlobject) x).getInvid();
+	  }
+	else
+	  {
+	    System.err.println("Unrecognized XML element while processing Invid vector: " + x);
+	    continue;
+	  }
+
+	if (invid != null)
+	  {
+	    invids.addElement(invid);
+	  }
+      }
+
+    return invids;
+  }
+
+  /**
+   * <P>This private helper method takes a Vector of xInvid and
+   * xmlobject objects (in the embedded object case) and returns
+   * a Vector of xmlobjects that exist on the server.  Any xInvid
+   * objects in the input Vector, along with any xmlobject objects
+   * which do not correspond to pre-existing objects on the server
+   * will be omitted from the returned vector.</P>
+   */ 
+
+  private Vector getExtantObjects(Vector values)
+  {
+    Vector objects = new Vector();
+    Invid invid;
+
+    /* -- */
+
+    if (values == null)
+      {
+	return objects;
+      }
+
+    // if we're an embedded object field, 
+
+    for (int i=0; i < values.size(); i++)
+      {
+	Object x = values.elementAt(i);
+	
+	if (x instanceof xInvid)
+	  {
+	    continue;
+	  }
+	else if (x instanceof xmlobject)
+	  {
+	    if (((xmlobject) x).getInvid() != null)
+	      {
+		objects.addElement(x);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("Unrecognized XML element while processing Invid vector: " + x);
+	    continue;
+	  }
+      }
+
+    return objects;
+  }
+
+  /**
+   * <P>This private helper method takes a Vector of xInvid and
+   * xmlobject objects and returns a Vector of xInvids and xmlobjects
+   * that could not be resolved on the server.</P>
+   */
+
+  private Vector getNonRegisteredObjects(Vector values)
+  {
+    Vector objects = new Vector();
+    Invid invid;
+
+    /* -- */
+
+    if (values == null)
+      {
+	return objects;
+      }
+
+    for (int i=0; i < values.size(); i++)
+      {
+	Object x = values.elementAt(i);
+
+	if (x instanceof xInvid)
+	  {
+	    invid = ((xInvid) x).getInvid();
+	  }
+	else if (x instanceof xmlobject)
+	  {
+	    invid = ((xmlobject) x).getInvid();
+	  }
+	else
+	  {
+	    System.err.println("Unrecognized XML element while processing Invid vector: " + x);
+	    continue;
+	  }
+
+	if (invid == null)
+	  {
+	    objects.addElement(x);
+	  }
+      }
+
+    return objects;
   }
 
   /**

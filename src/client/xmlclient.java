@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/06/01 03:20:34 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/06/14 04:51:19 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.14 $ $Date: 2000/06/01 03:20:34 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 2000/06/14 04:51:19 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -182,6 +182,16 @@ public class xmlclient implements ClientListener {
    */
 
   public Vector editedObjects = new Vector();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject
+   * xmlobjects} that correspond to Ganymede server objects that have
+   * been created/checked out for editing during embedded invid field
+   * processing, and which need to have their invid fields registered
+   * after everything else is done.</p> 
+   */
+
+  public Vector embeddedObjects = new Vector();
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
@@ -588,8 +598,6 @@ public class xmlclient implements ClientListener {
 	  {
 	    if (item.matches("object"))
 	      {
-		String mode = item.getAttrStr("action");
-
 		xmlobject objectRecord = null;
 
 		try
@@ -608,6 +616,8 @@ public class xmlclient implements ClientListener {
 		System.err.print(".");
 
 		//	    System.err.println(item);
+
+		String mode = objectRecord.getMode();
 	    
 		if (mode == null || mode.equals("create"))
 		  {
@@ -1206,6 +1216,30 @@ public class xmlclient implements ClientListener {
 	  }
 	
 	attempt = object.registerFields(2); // invids and others
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error registering fields for " + object + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error registering fields for " + object + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    for (int i = 0; success && i < embeddedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) embeddedObjects.elementAt(i);
+	
+	attempt = object.registerFields(1); // only non-embedded invids
 
 	if (attempt != null && !attempt.didSucceed())
 	  {
