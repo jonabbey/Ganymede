@@ -306,7 +306,7 @@ public class treeNode implements Cloneable {
    * be overridden in subclasses.
    */
 
-  public void cleanup
+  public void cleanup()
   {
   }
 }
