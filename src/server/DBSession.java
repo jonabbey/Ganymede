@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2000/09/30 21:52:48 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2000/10/03 06:31:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.93 $ %D%
+ * @version $Revision: 1.94 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1667,27 +1667,6 @@ final public class DBSession {
       }
 
     return editSet.isInteractive();
-  }
-
-  /**
-   * <p>This method is used in non-interactive transactions.  The Invid linking
-   * logic normally guards Invid binding and unbinding with checkpoint/rollback
-   * to insure safety in case something doesn't complete.  In non-interactive
-   * transactions, InvidDBField bypasses these checks, on the assumption that
-   * a non-interactive client won't be able to deal with a bind failure anyway.
-   * In such cases, the InvidDBField logic will call setMustAbort() to block
-   * the DBSession from ever allowing a transaction commit thereafter, to
-   * insure that the server maintains its consistency.</p>
-   */
-
-  public void setMustAbort()
-  {
-    if (editSet == null)
-      {
-	throw new IllegalArgumentException("isInteractive() called with null editSet");
-      }
-
-    editSet.setMustAbort();
   }
 
   /**

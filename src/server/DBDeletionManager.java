@@ -7,8 +7,8 @@
 
    Created: 23 June 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/09/30 00:45:23 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/10/03 06:30:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,16 +104,44 @@ public class DBDeletionManager {
 
   public static synchronized boolean deleteLockObject(DBObject obj, DBSession session)
   {
-    DBEditObject eObj = obj.shadowObject;
+    DBEditObject eObj;
 
+    /* -- */
+
+    eObj = obj.shadowObject;
+
+    // N.B. the obj that we get as a parameter may well be a
+    // DBEditObject already if this session has checked it out for
+    // editing, but in that case eObj will be null, as DBEditObjects
+    // always have no shadowObject, and the following check won't
+    // complain, which is appropriate, since we are only interested in
+    // blocking out other sessions
+    
     if (eObj != null &&
 	(eObj.getStatus() == DBEditObject.DROPPING ||
 	 eObj.getStatus() == DBEditObject.DELETING))
       {
-	return false;
+	// just in case someone went to some effort to get around
+	// DBSession.viewDBObject()'s normal retrieval of an
+	// in-session DBEditObject, double check the session here,
+	// only reject if it's another session that has it marked for
+	// deletion
+
+	if (eObj.getSession() != session)
+	  {
+	    return false;
+	  }
       }
 
+    // if this session already marked the object in question for
+    // deletion, all the rest of this method will wind up not actually
+    // doing anything except wasting a bit of time
+
     Invid objInvid = obj.getInvid();
+
+    // invidList is a list of invid's that this session
+    // has locked
+
     Vector invidList = (Vector) sessions.get(session);
 
     if (invidList == null)
@@ -122,6 +150,11 @@ public class DBDeletionManager {
 	sessions.put(session, invidList);
       }
 
+    VectorUtils.unionAdd(invidList, objInvid);
+
+    // sessionList is a list of DBSession objects that
+    // have locked this invid
+
     Vector sessionList = (Vector) invids.get(objInvid);
 
     if (sessionList == null)
@@ -129,9 +162,8 @@ public class DBDeletionManager {
 	sessionList = new Vector();
 	invids.put(objInvid, sessionList);
       }
-    
-    invidList.addElement(objInvid);
-    sessionList.addElement(session);
+
+    VectorUtils.unionAdd(sessionList, session);
 
     return true;
   }
@@ -158,16 +190,24 @@ public class DBDeletionManager {
 
     if (sessionList != null)
       {
+	// if more than one session is associated with this invid, we
+	// can't allow deletion
+
 	if (sessionList.size() > 1)
 	  {
 	    return false;
 	  }
+
+	// if that one session isn't the one requesting deletion privs,
+	// we can't allow it either
 
 	if (sessionList.elementAt(0) != session)
 	  {
 	    return false;
 	  }
       }
+
+    // okay, go ahead and flag the object for deletion
 
     if (obj.getStatus() == DBEditObject.CREATING)
       {
@@ -215,12 +255,19 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>This method deletion-locks a vector of invids, returning false without changes
-   * if the deletion-locks could not all be performed.</p>
+   * <p>This method deletion-locks a vector of invids, returning false
+   * without changes if the deletion-locks could not all be
+   * performed.</p>
    */
 
   public static synchronized boolean addSessionInvids(DBSession session, Vector invidList)
   {
+    Invid invid;
+    DBObject obj;
+    DBEditObject eObj;
+
+    /* -- */
+
     if (invidList == null || invidList.size() == 0)
       {
 	return true;
@@ -231,12 +278,38 @@ public class DBDeletionManager {
 
     for (int i=0; i < toAdd.size(); i++)
       {
-	Invid invid = (Invid) toAdd.elementAt(i);
+	invid = (Invid) toAdd.elementAt(i);
+	obj = session.viewDBObject(invid);
+	eObj = obj.shadowObject;
+
+	// N.B. the obj that we get from session.viewDBObject() may
+	// well be a DBEditObject already if this session has checked
+	// it out for editing, but in that case eObj will be null, as
+	// DBEditObjects always have no shadowObject, and the
+	// following check won't complain, which is appropriate, since
+	// we are only interested in blocking out other sessions
+
+	if (eObj != null &&
+	    (eObj.getStatus() == DBEditObject.DROPPING ||
+	     eObj.getStatus() == DBEditObject.DELETING))
+	  {
+	    return false;
+	  }
+      }
+
+    // okay, we know that all off the objects in toAdd are not yet
+    // deletion locked.. go ahead and lock them all
+
+    for (int i=0; i < toAdd.size(); i++)
+      {
+	invid = (Invid) toAdd.elementAt(i);
+	obj = session.viewDBObject(invid);
 
 	if (!deleteLockObject(session.viewDBObject(invid), session))
 	  {
-	    revertSessionCheckpoint(session, currentList);
-	    return false;
+	    // eek, no way.  scream and whine!
+
+	    throw new Error("Error, addSessionInvids encountered an internal inconsistency");
 	  }
       }
 
@@ -278,6 +351,13 @@ public class DBDeletionManager {
   {
     Vector currentList = (Vector) sessions.get(session);
     Vector toRemove = VectorUtils.difference(currentList, invidList);
+    Vector badItems = VectorUtils.difference(invidList, currentList);
+
+    if (badItems.size() != 0)
+      {
+	throw new IllegalArgumentException("Error, DBDeletionManager.revertSessionCheckpoint() " +
+					   "fed invids that weren't deletion-locked");
+      }
 
     for (int i = 0; i < toRemove.size(); i++)
       {

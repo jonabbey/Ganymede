@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2000/10/02 22:00:18 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/10/03 06:30:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -206,9 +206,9 @@ public class DBEditSet {
 
   /**
    * <p>True if this DBEditSet is operating in non-interactive mode
-   * and an unsafe Invid bind operation failed.  In such cases, the
-   * server skipped a checkpoint/rollback and so has no choice but
-   * to condemn the whole transaction.</p>
+   * and a rollback was ordered.  In such cases, the server skipped
+   * doing the checkpoint and so has no choice but to condemn the
+   * whole transaction.</p>
    */
 
   private boolean mustAbort = false;
@@ -259,22 +259,6 @@ public class DBEditSet {
   }
 
   /**
-   * <p>This method is used in non-interactive transactions.  The Invid linking
-   * logic normally guards Invid binding and unbinding with checkpoint/rollback
-   * to insure safety in case something doesn't complete.  In non-interactive
-   * transactions, InvidDBField bypasses these checks, on the assumption that
-   * a non-interactive client won't be able to deal with a bind failure anyway.
-   * In such cases, the InvidDBField logic will call setMustAbort() to block
-   * the DBSession from ever allowing a transaction commit thereafter, to
-   * insure that the server maintains its consistency.</p>
-   */
-
-  public void setMustAbort()
-  {
-    this.mustAbort = true;
-  }
-
-  /**
    * <p>Method to find a DBObject / DBEditObject if it has
    * previously been checked out to this EditSet in some
    * fashion.</p>
@@ -310,6 +294,21 @@ public class DBEditSet {
 
   public synchronized boolean addObject(DBEditObject object)
   {
+    if (false)
+      {
+	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
+      }
+
+    // remember that we are not allowing objects that this object is
+    // pointing to via an asymmetric link to be deleted.. make sure
+    // that no one has already deleted an object we're pointing to, or
+    // else we can't check this object out
+
+    if (!DBDeletionManager.addSessionInvids(session, object.getASymmetricTargets()))
+      {
+	return false;
+      }
+
     if (!objects.containsKey(object.getInvid()))
       {
 	objects.put(object.getInvid(), object);
@@ -319,19 +318,6 @@ public class DBEditSet {
 	// transaction.
 
 	basesModified.put(object.objectBase, this);
-      }
-
-    if (false)
-      {
-	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
-      }
-
-    // remember that we are not allowing objects that this object
-    // is pointing to via an asymmetric link to be deleted
-
-    if (!DBDeletionManager.addSessionInvids(session, object.getASymmetricTargets()))
-      {
-	return false;
       }
 
     return true;
@@ -647,7 +633,11 @@ public class DBEditSet {
 
     if (!interactive)
       {
-	setMustAbort();
+	// oops, we're non-interactive and we didn't actually do the
+	// checkpoint we're being asked to go back to.. set the
+	// mustAbort flag so the transaction will never commit
+
+	this.mustAbort = true;
 
 	try
 	  {
@@ -658,7 +648,7 @@ public class DBEditSet {
 	    ex.printStackTrace();
 	  }
 
-	return true;
+	return false;
       }
 
     point = popCheckpoint(name, true); // this may wake up blocking checkpointers
@@ -1554,7 +1544,9 @@ public class DBEditSet {
 	  }
 
 	// And now it's just clean up time.  First we remove any
-	// delete locks that we had asserted during this transaction..
+	// delete locks that we had asserted during this
+	// transaction.. this will allow other sessions/threads to try
+	// to delete objects that we had pointed to asymmetrically
 
 	DBDeletionManager.releaseSession(session);
 

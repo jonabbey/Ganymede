@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.144 $
-   Last Mod Date: $Date: 2000/09/30 21:52:50 $
+   Version: $Revision: 1.145 $
+   Last Mod Date: $Date: 2000/10/03 06:31:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.144 $ %D%
+ * @version $Revision: 1.145 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1084,7 +1084,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// be able to revert the link to oldRemote if the transaction
 	// is cancelled.
 
-	if (DBDeletionManager.deleteLockObject(eObj, session))
+	if (DBDeletionManager.deleteLockObject(session.viewDBObject(newRemote), session))
 	  {
 	    return null;
 	  }
