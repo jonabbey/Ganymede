@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,27 +21,32 @@ import java.rmi.RemoteException;
 public class Result implements java.io.Serializable {
   
   db_object object;	// remote reference to an object on the server
+  String label = null;
 
   /* -- */
 
   public Result(db_object object)
   {
     this.object = object;
-  }
 
-  // toString() can't throw RemoteException because it is
-  // defined in class Object without so doing
+    try
+      {
+	label = object.getLabel();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't get label" + ex);
+      }
+  }
 
   public String toString()
   {
-    try 
-      {
-	return object.getLabel();
-      } 
-    catch (RemoteException ex)
-      {
-	return "";
-      }
+    return label;
+  }
+
+  public db_object getObject()
+  {
+    return object;
   }
 
   // ditto equals
