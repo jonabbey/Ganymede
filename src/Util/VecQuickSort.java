@@ -6,8 +6,8 @@
    
    Created: 12 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/11 06:56:14 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/03/01 04:46:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,18 +63,10 @@ import java.util.Vector;
  * {@link arlut.csd.Util.Compare Compare} interface for item
  * comparisons.</P>
  *
- * <P>Algorithm from</P>
+ * <P>Based on code by Eric van Bezooijen (eric@logrus.berkeley.edu)
+ * and Roedy Green (roedy@bix.com).</P>
  *
- * <PRE>
- *      Fundamentals of Data Structures in Pascal, 
- *      Ellis Horowitz and Sartaj Sahni,
- *	Second Edition, p.339
- *	Computer Science Press, Inc.
- *	Rockville, Maryland
- *	ISBN 0-88175-165-0
- * </PRE>
- *
- * @version $Revision: 1.5 $ $Date: 2000/02/11 06:56:14 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2000/03/01 04:46:21 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -109,46 +101,73 @@ public class VecQuickSort implements Compare {
       }
   }
 
-  void quick(int first, int last)
+  private void quick(int first, int last)
   {
-    int 
-      i,
-      j;
+    int j;
 
-    Object
-      k, 
-      tmp;
+    /* -- */
 
-    if (first<last)
+    if (first < last)
       {
-	i = first; j = last+1; k = objects.elementAt(first);
-	do
+	j = partition(first, last);
+	
+	if (j == last) 
 	  {
-	    do
-	      {
-		i++;
-	      } while ((i <= last) && comparator.compare(objects.elementAt(i), k) < 0);
-
-	    do
-	      {
-		j--;
-	      } while ((j >= first) && comparator.compare(objects.elementAt(j), k) > 0);
-
-	    if (i < j)
-	      {
-		tmp=objects.elementAt(j);
-		objects.setElementAt(objects.elementAt(i), j);
-		objects.setElementAt(tmp, i);
-	      }
-	  } while (j > i);
-
-	tmp = objects.elementAt(first);
-	objects.setElementAt(objects.elementAt(j), first);
-	objects.setElementAt(tmp, j);
-	quick(first, j-1);
-	quick(j+1, last);
+	    j--;
+	  }
+	
+	quick(first,j);
+	quick(j+1,last);
       }
   }
+
+  /**
+   * <P>Partition by splitting this chunk to sort in two and
+   * get all big elements on one side of the pivot and all
+   * the small elements on the other.</P>
+   */
+
+  private int partition(int first, int last)
+  {
+    Object pivot = objects.elementAt(first);
+
+    while (true)
+      {
+	while (comparator.compare(objects.elementAt(last), pivot) >= 0 &&
+	       last > first)
+	  {
+	    last--;
+	  }
+
+	while (comparator.compare(objects.elementAt(first), pivot) < 0 &&
+	       first < last)
+	  {
+	    first++;
+	  }
+
+	if (first < last)
+	  {
+	    swap(first, last);	// exchange objects on either side of the pivot
+	  } 
+	else
+	  {
+	    return last;
+	  }
+      }
+  }
+
+  private void swap(int i, int j)
+  {
+    Object tmp = objects.elementAt(i);
+    Object tmp2 = objects.elementAt(j);
+
+    objects.setElementAt(tmp, j);
+    objects.setElementAt(tmp2, i);
+  }
+
+  /**
+   * <P>Sort the elements</P>
+   */
 
   public void sort()
   {

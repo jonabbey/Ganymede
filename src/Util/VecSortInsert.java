@@ -7,8 +7,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/11/02 23:41:24 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/01 04:46:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import java.util.*;
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>
  *
- * @version $Revision: 1.4 $ $Date: 1999/11/02 23:41:24 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/03/01 04:46:22 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -238,7 +238,6 @@ public class VecSortInsert {
 	objects.addElement(element);
 	return;
       }
-
 
     // java integer division rounds towards zero
 
