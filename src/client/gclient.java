@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.213 $
-   Last Mod Date: $Date: 2003/03/13 00:51:08 $
+   Version: $Revision: 1.214 $
+   Last Mod Date: $Date: 2003/10/02 04:17:58 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.213 $ $Date: 2003/03/13 00:51:08 $ $Name:  $
+ * @version $Revision: 1.214 $ $Date: 2003/10/02 04:17:58 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -1493,7 +1493,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	Vector handleList = result.getHandles();
 
-	handle = (ObjectHandle) handleList.elementAt(0);
+	if (handleList.size() > 0)
+	  {
+	    handle = (ObjectHandle) handleList.elementAt(0);
+	  }
       }
     catch (RemoteException ex)
       {
