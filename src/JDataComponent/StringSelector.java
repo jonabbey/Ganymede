@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/06/25 22:02:13 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/10/27 18:35:49 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -94,7 +94,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.19 $ $Date: 1999/06/25 22:02:13 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 1999/10/27 18:35:49 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey 
  */
 
@@ -474,7 +474,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    addCustom.setEnabled(false);
 	    addCustom.setActionCommand("AddNewString");
 	    addCustom.addActionListener(this);
-	    customP.add("East", addCustom);
+	    customP.add("West", addCustom);
 
 	    // we only want this add button to be active when the user
 	    // has entered something in the text field.  Some users
