@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -724,7 +724,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     QueryRow row = (QueryRow) Rows.lastElement();
     row.removeRow();
     Rows.removeElementAt(Rows.size()-1);
-    inner_choice.refresh();
+    inner_choice.revalidate();
   }
 
   private void addRow()
@@ -743,8 +743,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   
   public void itemStateChanged(ItemEvent e)
   {
-    qaryChoice opChoice;
-
     /* -- */
 
     if (e.getSource() == editBox)
