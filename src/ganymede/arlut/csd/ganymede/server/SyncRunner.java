@@ -64,6 +64,7 @@ import arlut.csd.Util.TranslationService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -97,6 +98,7 @@ public class SyncRunner implements Runnable {
   private String directory;
   private String serviceProgram;
   private int transactionNumber;
+  private Hashtable matrix;
 
   /* -- */
 
@@ -105,9 +107,9 @@ public class SyncRunner implements Runnable {
     updateInfo(syncChannel);
   }
 
-  public void updateInfo(DBObject syncChannel)
+  public synchronized void updateInfo(DBObject syncChannel)
   {
-    if (syncChannel.getID() != SchemaConstants.SyncChannelBase)
+    if (syncChannel.getTypeID() != SchemaConstants.SyncChannelBase)
       {
 	// "Error, passed the wrong kind of DBObject."
 	throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
@@ -117,6 +119,10 @@ public class SyncRunner implements Runnable {
     this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
     this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
+    
+    FieldOptionDBField f = (FieldOptionDBField) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFields);
+
+    this.matrix = (Hashtable) f.matrix.clone();
   }
 
   /**
@@ -164,19 +170,135 @@ public class SyncRunner implements Runnable {
     return serviceProgram;
   }
 
+  /**
+   * <p>Returns true if this sync channel is configured to ever
+   * include objects of the given baseID.</p>
+   */
+
+  public boolean mayInclude(short baseID)
+  {
+    String x = getOption(baseID);
+    
+    return (x != null && x.equals("1"));
+  }
+
+  /**
+   * <p>Returns true if this sync channel is configured to ever
+   * include objects of the given baseID.</p>
+   */
+
+  public boolean mayInclude(DBObject object)
+  {
+    String x = getOption(object.getTypeID());
+    
+    return (x != null && x.equals("1"));
+  }
+
+  public boolean shouldInclude(DBEditObject object)
+  {
+    if (!mayInclude(object))
+      {
+	return false;
+      }
+
+    return false;		// XXX
+  }
+
+
+  /**
+   * <p>Returns true if the given object type (baseID) and field
+   * number (fieldID) should be included in this sync channel.  The
+   * hasChanged parameter should be set to true if the field being
+   * tested was changed in the current transaction, or false if it
+   * remains unchanged.</p>
+   */
+
+  public boolean shouldInclude(short baseID, short fieldID, boolean hasChanged)
+  {
+    String x = getOption(baseID, fieldID);
+
+    if (hasChanged)
+      {
+	return (x != null && (x.equals("1") || x.equals("2")));
+      }
+    else
+      {
+	return (x != null && x.equals("2"));
+      }
+  }
+
+  /**
+   * <p>Returns the option string, if any, for the given base and field.
+   * This option string should be one of three values:</p>
+   *
+   * <p>"0", meaning the field is never included in this sync channel, nor
+   * should it be examined to make a decision about whether a given
+   * object is written to this sync channel.</p>
+   *
+   * <p>"1", meaning that the field is included in this sync channel if
+   * it has changed, and that the object that includes the field
+   * should be written to the sync channel if this field was changed
+   * in the object.  If a field has an option string of "1" but has
+   * not changed in a given transaction, that field won't trigger the
+   * object to be written to the sync channel.</p>
+   *
+   * <p>"2", meaning that the field is always included in this sync
+   * channel if the object that it is contained in is sent to this
+   * sync channel, even if it wasn't changed in the transaction.  If
+   * this field was changed in a given transaction, that will suffice
+   * to cause an object that is changed in any fashion during a
+   * transaction to be sent to this sync channel.  In this sense, it
+   * is like "1", but with the added feature that it will "ride along"
+   * with its object to the sync channel, even if it wasn't changed
+   * during the transaction.</p>
+   *
+   * <p>If "1" or "2" is true for a field in a given object type, the
+   * corresponding option string for the object's type should be 1,
+   * signaling that at least some fields in the object should be sent
+   * to this sync channel when the object is involved in a
+   * transaction.</p>
+   */
+
+  private String getOption(short baseID, short fieldID)
+  {
+    return (String) matrix.get(FieldOptionDBField.matrixEntry(baseID, fieldID));
+  }
+
+  /**
+   * <p>Returns the option string, if any, for the given base.  This option
+   * string should be one of two values:</p>
+   *
+   * <p>"0", meaning that this object type will never be sent to this
+   * sync channel.</p>
+   *
+   * <p>"1", meaning that this object type may be sent to this sync
+   * channel if any field contained within it which has an option
+   * string of "1" or "2" was changed during the transaction.
+   */
+
+  private String getOption(short baseID)
+  {
+    return (String) matrix.get(FieldOptionDBField.matrixEntry(baseID));
+  }
+
   public void run()
   {
-    int myTransactionNumber = getTransactionNumber();
-    String myServiceProgram = getServiceProgram();
-    String invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
-
-    File
-      file;
+    int myTransactionNumber;
+    String myName, myServiceProgram, invocation;
+    File file;
 
     /* -- */
 
+    synchronized (this)
+      {
+	myName = getName();
+	myTransactionNumber = getTransactionNumber();
+	myServiceProgram = getServiceProgram();
+	invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
+      }
+
     // "SyncChannel {0} running"
-    Ganymede.debug(ts.l("run.running", getName()));
+    Ganymede.debug(ts.l("run.running", myName));
 
     file = new File(myServiceProgram);
 
@@ -194,21 +316,21 @@ public class SyncRunner implements Runnable {
 	catch (IOException ex)
 	  {
 	    // "Couldn''t exec SyncChannel {0}''s service program "{1}" due to IOException: {2}"
-	    Ganymede.debug(ts.l("run.ioException", getName(), myServiceProgram, ex));
+	    Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
 	  }
 	catch (InterruptedException ex)
 	  {
 	    // "Failure during exec of SyncChannel {0}''s service program "{1}""
-	    Ganymede.debug(ts.l("run.interrupted", getName(), myServiceProgram));
+	    Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
 	  }
       }
     else
       {
 	// ""{0}" doesn''t exist, not running external service program for SyncChannel {1}"
-	Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, getName()));
+	Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
       }
 
     // "SyncChannel {1} finished"
-    Ganymede.debug(ts.l("run.done", getName()));
+    Ganymede.debug(ts.l("run.done", myName));
   }
 }

@@ -163,7 +163,6 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    /*
     if (original != null)
       {
 	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
@@ -177,65 +176,34 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	return;
 
       case DELETING:
-	Ganymede.scheduler.unregisterTask(origName);
-
-	if (original.isSet(SchemaConstants.TaskRunOnCommit))
-	  {
-	    Ganymede.unregisterBuilderTask(origName);
-	  }
-
+	Ganymede.unregisterSyncChannel(origName);
 	break;
 
       case EDITING:
-	if (!origName.equals(taskName))
+	if (!origName.equals(channelName))
 	  {
-	    // we changed our task name.. ditch the old record
+	    // we changed our channel name.. find the old channel
+	    // runner, unregister it by that name, reconfigure it, and
+	    // re-register
 
-	    Ganymede.scheduler.unregisterTask(origName);
-
-	    if (original.isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.unregisterBuilderTask(origName);
-	      }
-
-	    // and re-register ourselves appropriately
-
-	    Ganymede.scheduler.registerTaskObject(this);
-
-	    if (isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.registerBuilderTask(taskName);
-	      }
+	    SyncRunner oldChannel = Ganymede.getSyncChannel(origName);
+	    Ganymede.unregisterSyncChannel(origName);
+	    oldChannel.updateInfo(this);
+	    Ganymede.registerSyncChannel(oldChannel);
 	  }
 	else
 	  {
-	    // no name change, go ahead and reschedule ourselves
+	    // no name change, go ahead and reconfigure it on the
+	    // fly.. the SyncRunner class is designed to be safe to
+	    // run updateInfo at any time.
 
-	    Ganymede.scheduler.registerTaskObject(this);
-
-	    // get the buildertask list updated to handle this task
-	    // on transaction commit appropriately
-
-	    if (original.isSet(SchemaConstants.TaskRunOnCommit) && !isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.unregisterBuilderTask(origName);
-	      }
-	    else if (isSet(SchemaConstants.TaskRunOnCommit) && !original.isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.registerBuilderTask(taskName);
-	      }
+	    SyncRunner channel = Ganymede.getSyncChannel(origName);
+	    channel.updateInfo(this);
 	  }
 	break;
 
       case CREATING:
-	Ganymede.scheduler.registerTaskObject(this);
-
-	if (isSet(SchemaConstants.TaskRunOnCommit))
-	  {
-	    Ganymede.registerBuilderTask(taskName);
-	  }
+	Ganymede.registerSyncChannel(new SyncRunner(this));
       }
-    */
   }
-
 }

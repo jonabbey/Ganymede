@@ -1180,16 +1180,15 @@ public class Ganymede {
 
   static void registerSyncChannel(SyncRunner channel)
   {
-    String channelName = channel.getName();
-
     if (debug)
       {
-	System.err.println(ts.l("registerSyncChannel.debug_register", channelName));
+	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
       }
 
     synchronized (syncRunners)
       {
-	arlut.csd.Util.VectorUtils.unionAdd(syncRunners, channelName);
+	Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
+	arlut.csd.Util.VectorUtils.unionAdd(syncRunners, channel.getName());
       }
   }
 
@@ -1200,7 +1199,26 @@ public class Ganymede {
 	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
       }
 
-    syncRunners.removeElement(channelName); // sync'ed on builderTasks vector method
+    synchronized (syncRunners)
+      {
+	Ganymede.scheduler.unregisterTask(channelName);
+	syncRunners.removeElement(channelName);
+      }
+  }
+
+  /**
+   * <p>This method returns a reference to a SyncRunner registered in
+   * the Ganymede scheduler.  It does not remove the SyncRunner from
+   * the scheduler, nor do anything other than return a reference to
+   * it.</p>
+   *
+   * <p>In particular, it is not guaranteed that the SyncRunner
+   * returned is not currently running.</p>
+   */
+
+  static SyncRunner getSyncChannel(String channelName)
+  {
+    return (SyncRunner) Ganymede.scheduler.getTask(channelName);
   }
 
   /**
