@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -117,6 +117,25 @@ class DBNameSpace extends UnicastRemoteObject implements NameSpace {
   public DBNameSpace(DBSchemaEdit editor, String name, boolean caseInsensitive) throws RemoteException
   {
     this.editor = editor;
+    this.name = name;
+    this.caseInsensitive = caseInsensitive;
+    uniqueHash = new GHashtable(caseInsensitive); // size?
+    reserved = new Hashtable();	// size?
+
+    original = null;
+  }
+
+  /**
+   *
+   * Constructor for new DBNameSpace for DBStore initialization.
+   *
+   * @param name Name for this name space
+   * @param caseInsensitive If true, case is disregarded in this namespace
+   */
+
+  public DBNameSpace(String name, boolean caseInsensitive) throws RemoteException
+  {
+    this.editor = null;
     this.name = name;
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
