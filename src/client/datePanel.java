@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,22 +106,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     gc = fp.wp.gc;
 
     setLayout(new BorderLayout());
-    
-    //    progressBar = new JProgressBar();
-    //    progressBar.setMinimum(0);
-    //    progressBar.setMaximum(6);
-    //    progressBar.setValue(0);
-
-    //    holder = new JPanel(false);
-    //    holder.add(new JLabel("Loading datePane"));
-    //    holder.add(progressBar);
-
-    //    add("Center", holder);
 
     invalidate();
     fp.validate();
-
-    //    progressBar.setValue(1);
 
     Thread thread = new Thread(this);
     thread.start();
@@ -135,12 +122,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     top_pane.setLayout(new BorderLayout());
     top_pane.setMaximumSize(top_pane.getPreferredSize());
 
-    //    progressBar.setValue(2);
-
     dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
     timeformat = new SimpleDateFormat("MMM dd, yyyy, at HH:mm a", Locale.getDefault());
-
-    //    progressBar.setValue(3);
 
     if (editable)
       {
@@ -155,8 +138,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       {
 	System.out.println("Done with thread in datePanel.");
       }
-
-    //    remove(holder);
 
     if (cal != null)  // in a non-editable the calendar might not be there
       {
@@ -173,8 +154,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   {
     my_Calendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
     
-    //    progressBar.setValue(4);
-
     try
       {
 	topLabel = new JLabel();
@@ -194,11 +173,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    topLabel.setText(label + " has not been set.");
 	  }
 	
-	//	progressBar.setValue(5);
-
 	cal = new JpanelCalendar(my_Calendar, this, true, true);
-
-	//	progressBar.setValue(6);
 
 	top_pane.add("Center", topLabel);
 	clear = new JButton("Clear date");
@@ -225,15 +200,11 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   {
     try
       {
-	//	progressBar.setValue(4);
-
 	if (field != null)
 	  {
 	    this.name = field.getName();
 
 	    Date d = (Date) field.getValue();
-
-	    //  progressBar.setValue(5);
 
 	    if (d != null)
 	      {
@@ -246,7 +217,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	  }
 	else
 	  {
-	    //	    progressBar.setValue(5);
 	    noneditable_dateLabel = new JLabel("No date is set");
 	  }
 	
@@ -256,8 +226,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       {
 	throw new RuntimeException("Could not check visibility: " + rx);
       }
-
-    //    progressBar.setValue(6);
   }
   
   public void actionPerformed(ActionEvent e)
