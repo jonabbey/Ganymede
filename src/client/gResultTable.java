@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -221,7 +221,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     Vector results = null;
 
-    setStatus("Querying server");
+    setStatus("Querying server", 0);
 
     if (query != null)
       {
@@ -240,6 +240,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	      {
 		System.err.println("null query dump result");
 	      }
+
 	    setStatus("No results");
 	  }
 	else
@@ -264,7 +265,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    setStatus("Loading table");
+    setStatus("Loading table", 0);
 
     headerVect = results.getHeaders();
     headers = new String[headerVect.size()];
@@ -364,7 +365,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // sort by the first column in ascending order
 
-    setStatus("Sorting table on first column");
+    setStatus("Sorting table on first column", 0);
 
     table.resort(0, true, false);
 
@@ -611,10 +612,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   // -- helper functions
-  
+
   private final void setStatus(String s)
   {
     wp.gc.setStatus(s);
+  }
+  
+  private final void setStatus(String s, int timeLimit)
+  {
+    wp.gc.setStatus(s, timeLimit);
   }
 
   private JMenuBar createMenuBar()
