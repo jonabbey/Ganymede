@@ -10,11 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -34,21 +32,16 @@ public class QueryResultContainer implements Serializable {
   List headers = null;
   List types = null;
   List rows = null;
-  
-  Map invidHash = null;
-  Map labelHash = null;
-
   Vector handles = null;
-  Vector labelList = null;
-  Vector invidList = null;
+  
+  transient Vector labelList = null;
+  transient Vector invidList = null;
 
   /* -- */
 
   public QueryResultContainer()
   {
     buffer = new StringBuffer();
-    invidHash = new HashMap();
-    labelHash = new HashMap();
     handles = new Vector();
     headers = new ArrayList();
     types = new ArrayList();
@@ -140,8 +133,6 @@ public class QueryResultContainer implements Serializable {
 
     if (invid != null)
       {
-	invidHash.put(invid, label);
-
 	if (invidList != null)
 	  {
 	    invidList.addElement(invid);
@@ -150,8 +141,6 @@ public class QueryResultContainer implements Serializable {
 
     if (label != null)
       {
-	labelHash.put(label, label);
-
 	if (labelList != null)
 	  {
 	    labelList.addElement(label);
@@ -292,7 +281,7 @@ public class QueryResultContainer implements Serializable {
 
   public synchronized boolean containsInvid(Invid invid)
   {
-    return invidHash.containsKey(invid);
+    return getInvids().contains(invid);
   }
 
   /**
@@ -305,7 +294,7 @@ public class QueryResultContainer implements Serializable {
 
   public synchronized boolean containsLabel(String label)
   {
-    return labelHash.containsKey(label);
+    return getLabels().contains(label);
   }
 
   /**
