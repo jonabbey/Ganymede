@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -401,11 +401,12 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    *
    * Method to obtain the SALT for a stored crypted password.  If the
-   * client is going to submit a pre-crypted password, it must be
-   * salted by the salt returned by this method.  If the password
-   * is stored in plaintext, null will be returned.
+   * client is going to submit a pre-crypted password for comparison
+   * against a stored crypted password by use of the matchCryptText()
+   * method, it must be salted by the salt returned by this method.
+   * If the password is stored in plaintext, null will be returned.
    * 
-   * @see arlut.csd.ganymede.pass_field
+   * @see arlut.csd.ganymede.pass_field 
    */
 
   public String getSalt()
