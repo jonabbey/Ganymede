@@ -7,7 +7,7 @@
    request.
    
    Created: 27 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,6 +47,6 @@ public interface Ganymediator extends Remote {
    *
    */
 
-  public ReturnVal respond(Hashtable returnHash);
+  public ReturnVal respond(Hashtable returnHash) throws RemoteException;
 
 }
