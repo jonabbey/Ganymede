@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.35 $ %D%
+    Version: $Revision: 1.36 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -774,16 +774,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // Check to see if anything needs updating.
 
-    try
+    if (returnValue)
       {
-	if (object.shouldRescan())
+	try
 	  {
-	    update();
+	    if (object.shouldRescan())
+	      {
+		update();
+	      }
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not call shouldRescan(): " + rx);
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not call shouldRescan(): " + rx);
+	  }
       }
 
     System.out.println("returnValue: " + returnValue);
@@ -800,6 +803,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void actionPerformed(ActionEvent e)
   {
+    boolean ok = false;
     if (e.getSource() instanceof JCheckBox)
       {
 	db_field field = (db_field)objectHash.get(e.getSource());
@@ -809,6 +813,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      
 	    if (field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected())))
 	      {
+		ok = true;
 		gc.somethingChanged = true;
 	      }
 	    else
@@ -831,17 +836,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     
     // Check to see if anything needs updating.
-
-    try
+    if (ok)
       {
-	if (object.shouldRescan())
+	try
 	  {
-	    update();
+	    if (object.shouldRescan())
+	      {
+		update();
+	      }
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not call shouldRescan(): " + rx);
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not call shouldRescan(): " + rx);
+	  }
       }
   }
 
