@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1213,10 +1213,19 @@ public class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PermMatrix;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
-	bf.field_name = "Access Bits";
+	bf.field_name = "Objects Owned Access Bits";
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Access bits, by object type";
+	bf.comment = "Access bits, by object type for objects owned by admins using this permission object";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PermDefaultMatrix;
+	bf.field_type = FieldType.PERMISSIONMATRIX;
+	bf.field_name = "Default Access Bits";
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Access bits, by object type for all objects on the part of admins using this permission object";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1441,38 +1450,21 @@ public class DBStore {
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
     b.setValue(new Boolean(false));
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermDefaultObj
+    // create SchemaConstants.PermDefaultObj
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); 
 
     s = (StringDBField) eO.getField(SchemaConstants.PermName);
     s.setValue("Default");
 
-    // create SchemaConstants.PermEndUserObj, the object that determines what end-users can
-    // do without any ownership of any objects
+    // what can users do with objects they own?  Includes users themselves
 
     pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
-    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
+    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view self, nothing else
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermEndUserObj
+    // what can arbitrary users do with objects they don't own?  nothing by default
 
-    s = (StringDBField) eO.getField(SchemaConstants.PermName);
-    s.setValue("End User");
-
-    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
-    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
-
-    // create SchemaConstants.PermSelfUserObj, the object that will restrict what end-users can do to their
-    // own user records
-
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermSelfUserObj
-
-    s = (StringDBField) eO.getField(SchemaConstants.PermName);
-    s.setValue("Self Permissions");
-
-    // By default, users will be able to view themselves and all their fields, anything
-    // else will have to be manually configured by the supergash administrator.
-
-    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
-    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); 
+    // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermDefaultMatrix);
 
     session.commitTransaction();
   }

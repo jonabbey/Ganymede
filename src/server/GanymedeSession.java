@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -76,8 +76,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   DBObject selfPermObj;
   PermMatrix selfPerm = null;
 
-  Invid selfPermissionObjectInvid = new Invid(SchemaConstants.PermBase,
-					      SchemaConstants.PermSelfUserObj);
   Invid personaInvid;
   Invid userInvid;
 
@@ -87,7 +85,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   boolean supergashMode = false;
   boolean beforeversupergash = false; // Be Forever Yamamoto
 
-  PermMatrix personaPerms;	// what permission bits are applicable to objects accessible by the current persona?
+  PermMatrix personaPerms;	// what permission bits are applicable to 
+				// objects accessible by the current persona? 
 
   PermMatrix defaultPerms;	// what permission bits are applicable to any generic objects not 
 				// specifically accessible by ownership relations by this persona?
@@ -813,16 +812,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public CategoryTransport getCategoryTree()
   {
-    if (Ganymede.catTransport == null)
+    if (supergashMode)
       {
+	if (Ganymede.catTransport == null)
+	  {
+	    synchronized (Ganymede.db)
+	      {
+		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory);
+		Ganymede.db.notifyAll(); // in case of locks
+	      }
+	  }
+
+	return Ganymede.catTransport;
+      }
+    else
+      {
+	// not in supergash mode.. download a subset of the category tree to the user
+
+	CategoryTransport transport;
+
 	synchronized (Ganymede.db)
 	  {
-	    Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory);
+	    transport = new CategoryTransport(Ganymede.db.rootCategory, this);
 	    Ganymede.db.notifyAll(); // in case of locks
 	  }
+	
+	return transport;
       }
-
-    return Ganymede.catTransport;
   }
 
   /**
@@ -2062,6 +2078,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    return null;	// in case the createDBObject() method rejected for some reason
 	  }
+
+	// now make ourselves owner of the object
 	
 	if (newObjectOwnerInvids != null)
 	  {
@@ -2630,7 +2648,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// object is a unique object that all instances of GanymedeSession must
 	// have access to.
 
-	selfPermObj = session.viewDBObject(selfPermissionObjectInvid);
+	selfPermObj = session.viewDBObject(SchemaConstants.PermBase, 
+					   SchemaConstants.PermDefaultObj);
 
 	PermissionMatrixDBField field = (PermissionMatrixDBField) selfPermObj.getField(SchemaConstants.PermMatrix);
 
@@ -2692,7 +2711,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (defaultObj != null)
       {
-	PermissionMatrixDBField permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix);
+	PermissionMatrixDBField permField;
+
+	/* -- */
+
+	permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermDefaultMatrix);
 
 	if (permField != null)
 	  {
@@ -2762,7 +2785,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    // calculate the union of all permission matrices in effect for this persona
 
-		    PermissionMatrixDBField pmdbf;
+		    PermissionMatrixDBField pmdbf, pmdbf2;
 		    DBObject pObj;
 		    
 		    for (int i = 0; i < vals.size(); i++)
@@ -2775,11 +2798,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 			if (pObj != null)
 			  {
+			    // The default permissions for this administrator consists of the
+			    // union of all default perms fields in all permission matrices for
+			    // this admin persona.
+
+			    // personaPerms is the union of all permissions applicable to objects that
+			    // are owned by this persona
+
 			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermMatrix);
+			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermDefaultMatrix);
 
 			    if (pmdbf != null)
 			      {
 				personaPerms = personaPerms.union(pmdbf);
+			      }
+
+			    if (pmdbf2 != null)
+			      {
+				defaultPerms = defaultPerms.union(pmdbf2);
+				personaPerms = personaPerms.union(pmdbf2);
 			      }
 			  }
 		      }
