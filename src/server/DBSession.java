@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2001/02/16 05:51:43 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2001/02/16 06:09:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.98 $ %D%
+ * @version $Revision: 1.99 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -281,7 +281,7 @@ final public class DBSession {
 	throw new RuntimeException("createDBObject called outside of a transaction");
       }
 
-    base = (DBObjectBase) store.objectBases.get(new Short(object_type));
+    base = store.getObjectBase(object_type);
 
     // we create the object.. this just gets the DBEditObject
     // created.. all of its fields will be created, but it won't be

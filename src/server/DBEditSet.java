@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2001/02/16 05:51:43 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2001/02/16 06:09:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -422,6 +422,10 @@ public class DBEditSet {
       {
 	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
       }
+
+    // if we're not interactive, we'll disregard any checkpointing, in
+    // favor of just failing the transaction at commit time if a
+    // rollback is later attempted
 
     if (!interactive)
       {
@@ -1408,7 +1412,9 @@ public class DBEditSet {
 	// it wasn't.  Any exceptions thrown at this point will
 	// propagate up, and let the chips fall where they may.
 
-	for (int i = 0; i < committedObjects.size(); i++)
+	int committedObjectsSize = committedObjects.size();
+
+	for (int i = 0; i < committedObjectsSize; i++)
 	  {
 	    eObj = (DBEditObject) committedObjects.elementAt(i);
 
