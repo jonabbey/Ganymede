@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,6 +106,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 		    sf = (StringDBField) obj.getField(SchemaConstants.UserUserName);
 		
 		    name = (String) sf.getNewValue();
+
+		    // now, if we weren't called from inside the user rename
+		    // logic, getNewValue() will be null.  Check it out.
+
+		    if (name == null)
+		      {
+			name = (String) sf.getValue();
+		      }
 		
 		    if (!str.startsWith(name + ":"))
 		      {
@@ -205,14 +213,10 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	// We don't want the PermSelfUserObj or PermEndUserObj to be shown as valid choices
 	// for this 
 
-	QueryNode root = new QueryAndNode(new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL, 
-									     QueryDataNode.EQUALS,
-									     new Invid(SchemaConstants.PermBase,
-										       SchemaConstants.PermSelfUserObj))),
-					  new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
-									     QueryDataNode.EQUALS,
-									     new Invid(SchemaConstants.PermBase,
-										       SchemaConstants.PermDefaultObj))));
+	QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
+							    QueryDataNode.EQUALS,
+							    new Invid(SchemaConstants.PermBase,
+								      SchemaConstants.PermDefaultObj)));
 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
