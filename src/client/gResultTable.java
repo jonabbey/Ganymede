@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,14 +17,17 @@ package arlut.csd.ganymede.client;
 import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;
+import java.io.*;
 import java.util.*;
 import java.text.*;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JTable.*;
+import arlut.csd.JDialog.*;
 import arlut.csd.Util.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.preview.*;  // This is for the FileChooser
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -33,6 +36,10 @@ import com.sun.java.swing.*;
 ------------------------------------------------------------------------------*/
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
+  
+  static final boolean debug = true;
+
+  // ---
 
   windowPanel wp;
   JPopupMenu popMenu;
@@ -41,7 +48,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   Session session;
   Query query;
   rowTable table = null;
-  JButton refreshButton;
+
+  JMenuBar mb;
 
   Container
     contentPane;
@@ -53,6 +61,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     super();			// JInternalFrame init
 
     this.setTitle("Query Results");
+
+    mb = createMenuBar();
+    setMenuBar(mb);
 
     this.wp = wp;
     this.session = session;
@@ -69,21 +80,130 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     contentPane.setLayout(new BorderLayout());
 
-    JPanel buttonPanel = new JPanel();
-    refreshButton = new JButton("Refresh Query");
-    refreshButton.addActionListener(this);
-    buttonPanel.add(refreshButton);
-    
-    contentPane.add("South", buttonPanel);
-
     loadResults(results);
   }
 
   public void actionPerformed(ActionEvent event)
   {
-    if (event.getSource() == refreshButton)
+    if (event.getActionCommand().equals("Refresh Query"))
       {
 	refreshQuery();
+	return;
+      }
+
+    if (event.getActionCommand().equals("Save Report"))
+      {
+	sendReport(false);
+	return;
+      }
+    
+    if (event.getActionCommand().equals("Mail Report"))
+      {
+	sendReport(true);
+	return;
+      }
+  }
+
+  public void sendReport(boolean mailit)
+  {
+    SaveDialog dialog = new SaveDialog(wp.gc, mailit, false);
+    Vector formatChoices = new Vector();
+    String addresses;
+    String format;
+    StringBuffer report = null;
+
+    /* -- */
+
+    formatChoices.addElement("Tab separated ASCII");
+    formatChoices.addElement("Comma separated ASCII");
+    formatChoices.addElement("HTML");
+
+    dialog.setFormatChoices(formatChoices);
+    
+    if (!dialog.showDialog())
+      {
+	return;
+      }
+
+    format = dialog.getFormat();
+
+    if (format.equals("HTML"))
+      {
+	report = generateHTMLRep();
+      }
+    else if (format.equals("Comma separated ASCII"))
+      {
+	report = generateTextRep(',');
+      }
+    else if (format.equals("Tab separated ASCII"))
+      {
+	report = generateTextRep('\t');
+      }
+    else
+      {
+	throw new RuntimeException("Error, SaveDialog returned unrecognized format! " + format);
+      }
+
+    if (mailit)
+      {
+	addresses = dialog.getRecipients();
+
+	try
+	  {
+	    session.sendMail(addresses, "Query Report", report);
+	  }
+	catch (RemoteException ex)
+	  {
+	    wp.gc.showErrorMessage("Trouble sending report", "Could not send mail.");
+	    throw new RuntimeException("Couldn't mail report " + ex);
+	  }
+
+	return;
+      }
+    else
+      {
+	JFileChooser chooser = new JFileChooser();
+	File file;
+	PrintWriter writer = null;
+
+	chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+	chooser.setDialogTitle("Save Report As");
+
+	int returnValue = chooser.showDialog(wp.gc, null);
+
+	if (!(returnValue == JFileChooser.APPROVE_OPTION))
+	  {
+	    return;
+	  }
+
+	file = chooser.getSelectedFile();
+    
+	if (file.exists())
+	  {
+	    StringDialog d = new StringDialog(wp.gc, "Warning, file ", 
+					      file.getName() + 
+					      " exists.  Are you sure you want to replace this file?",
+					      "Overwrite", "Cancel", null);
+	    Hashtable result = d.DialogShow();
+
+	    if (result == null)
+	      {
+		return;
+	      }
+	  }
+
+	try
+	  {
+	    writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+	  }
+	catch (java.io.IOException e)
+	  {
+	    wp.gc.showErrorMessage("Trouble saving", "Could not open the file.");
+	    return;
+	  }
+
+	writer.println(report.toString());
+	writer.close();
       }
   }
 
@@ -110,7 +230,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	if (buffer == null)
 	  {
-	    System.err.println("null query dump result");
+	    if (debug)
+	      {
+		System.err.println("null query dump result");
+	      }
 	    setStatus("No results");
 	  }
 	else
@@ -141,7 +264,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     headers = new String[headerVect.size()];
     used = new boolean[headerVect.size()];
 
-    System.err.println("gResultTable: " + headers.length + " headers returned by query");
+    if (debug)
+      {
+	System.err.println("gResultTable: " + headers.length + " headers returned by query");
+      }
     
     for (int i = 0; i < headers.length; i++)
       {
@@ -236,7 +362,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     table.resort(0, true, false);
 
-
     setStatus("Query Complete.");
 
     // the first time we're called, the table will not be visible, so we
@@ -292,9 +417,243 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
       }
   }
+
+  /**
+   *
+   * This method generates an HTML representation of the table's
+   * contents.
+   *
+   */
+
+  StringBuffer generateHTMLRep()
+  {
+    StringBuffer result = new StringBuffer();
+    Vector headers = table.getTableHeaders();
+    int colcount = headers.size();
+    int size = table.getRowCount();
+    Enumeration enum = table.keys();
+    Object rowKey;
+    String cellText;
+
+    /* -- */
+
+    // we just have to hope that the table isn't going to
+    // change while we're creating things.  There's actually
+    // a possibility for problems here, since the user is
+    // free to mess with the table while we work, but since
+    // we are likely to be dispatched from the GUI thread,
+    // this may not be an issue.
+
+    result.append("<HTML>\n");
+    result.append("<HEAD>\n");
+    result.append("<TITLE>Ganymede Table Dump</TITLE>\n");
+    result.append("</HEAD>\n");
+    result.append("<BODY BGCOLOR=\"#FFFFFF\">\n");
+    result.append("<H1>Ganymede Table Dump</H1>\n");
+    result.append("<HR>\n");
+    result.append("<TABLE BORDER>\n");
+    result.append("<TR>\n");
+    
+    for (int i = 0; i < headers.size(); i++)
+      {
+	result.append("<TH>");
+	result.append(headers.elementAt(i));
+	result.append("</TH>\n");
+      }
+
+    result.append("</TR>\n");
+
+    for (int i = 0; i < size; i++)
+      {
+	result.append("<TR>\n");
+
+	rowKey = enum.nextElement();
+
+	for (int j = 0; j < colcount; j++)
+	  {
+	    result.append("<TD>");
+
+	    cellText = table.getCellText(j, i);
+
+	    if (cellText != null)
+	      {
+		cellText = escapeHTML(cellText);
+		result.append(cellText);
+	      }
+
+	    result.append("</TD>\n");
+	  }
+
+	result.append("</TR>\n");
+      }
+
+    result.append("</TABLE><HR></BODY></HTML>\n");
+
+    return result;
+  }
+
+  /**
+   *
+   * This method generates a sepChar-separated dump of the table's
+   * contents, one line per row of the table.
+   *
+   */
+
+  StringBuffer generateTextRep(char sepChar)
+  {
+    StringBuffer result = new StringBuffer();
+    Vector headers = table.getTableHeaders();
+    int colcount = headers.size();
+    int size = table.getRowCount();
+    Object rowKey;
+    String cellText;
+
+    /* -- */
+
+    // we just have to hope that the table isn't going to
+    // change while we're creating things.  There's actually
+    // a possibility for problems here, since the user is
+    // free to mess with the table while we work, but since
+    // we are likely to be dispatched from the GUI thread,
+    // this may not be an issue.
+
+    for (int i = 0; i < size; i++)
+      {
+	for (int j = 0; j < colcount; j++)
+	  {
+	    if (j > 0)
+	      {
+		result.append(sepChar);
+	      }
+
+	    cellText = table.getCellText(j, i);
+
+	    if (cellText != null)
+	      {
+		cellText = escapeString(cellText, sepChar);
+		result.append(cellText);
+	      }
+	  }
+
+	result.append("\n");
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This helper method makes a field string safe to emit
+   * to a sepChar separated text file.
+   *
+   */
+
+  String escapeString(String string, char sepChar)
+  {
+    char[] chars;
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    chars = string.toCharArray();
+
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else if (chars[j] == '\t')
+	  {
+	    buffer.append("    ");
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    buffer.append("\\n");
+	  }
+	else if (chars[j] == sepChar)
+	  {
+	    buffer.append("\\");
+	    buffer.append(sepChar);
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    return buffer.toString();
+  }
+
+  /**
+   *
+   * This helper method makes a field string safe to emit
+   * to an HTML file.
+   *
+   */
+
+  String escapeHTML(String string)
+  {
+    char[] chars;
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    chars = string.toCharArray();
+
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '<')
+	  {
+	    buffer.append("&lt;");
+	  }
+	else if (chars[j] == '>')
+	  {
+	    buffer.append("&gt;");
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    return buffer.toString();
+  }
+
+  // -- helper functions
   
   private final void setStatus(String s)
   {
     wp.gc.setStatus(s);
   }
+
+  private JMenuBar createMenuBar()
+  {
+    JMenuBar menuBar = new JMenuBar();
+    menuBar.setBorderPainted(true);
+    
+    JMenu fileM = new JMenu("File");
+    menuBar.add(fileM);
+      
+    JMenuItem mailMI = new JMenuItem("Mail Report");
+    mailMI.addActionListener(this);
+
+    fileM.add(mailMI);
+
+    if (!glogin.isApplet())
+      {
+	JMenuItem saveMI = new JMenuItem("Save Report");
+	saveMI.addActionListener(this);
+	fileM.add(saveMI);
+      }
+
+    fileM.addSeparator();
+
+    JMenuItem reloadMI = new JMenuItem("Refresh Query");
+    reloadMI.addActionListener(this);
+    fileM.add(reloadMI);
+    
+    return menuBar;
+  }
+
 }
