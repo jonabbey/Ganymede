@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -898,7 +898,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  public synchronized DBEditObject createNewObject(DBEditSet editset)
+  public synchronized DBEditObject createNewObject(DBEditSet editset, Invid chosenSlot)
   {
     DBEditObject 
       e_object = null;
@@ -912,7 +912,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new NullPointerException("null editset in createNewObject");
       }
 
-    invid = new Invid(getTypeID(), getNextID());
+    if (chosenSlot == null)
+      {
+	invid = new Invid(getTypeID(), getNextID());
+      }
+    else
+      {
+	if (chosenSlot.getType() != type_code)
+	  {
+	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: bad type");
+	  }
+
+	if (objectHash.containsKey(new Integer(chosenSlot.getNum())))
+	  {
+	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: num already taken");
+	  }
+
+	invid = chosenSlot;
+      }
 
     if (classdef == null)
       {
