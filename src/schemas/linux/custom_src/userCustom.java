@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,7 +59,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    */
 
-  public userCustom(DBObjectBase objectBase) throws RemoteException
+  public userCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -70,7 +70,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    */
 
-  public userCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public userCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -82,7 +82,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    */
 
-  public userCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public userCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }

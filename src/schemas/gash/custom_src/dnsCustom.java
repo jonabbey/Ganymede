@@ -5,7 +5,7 @@
    This file is a management class for DNS domain objects in Ganymede.
    
    Created: 21 May 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,7 @@ public class dnsCustom extends DBEditObject {
    *
    */
 
-  public dnsCustom(DBObjectBase objectBase) throws RemoteException
+  public dnsCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -43,7 +43,7 @@ public class dnsCustom extends DBEditObject {
    *
    */
 
-  public dnsCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public dnsCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -55,7 +55,7 @@ public class dnsCustom extends DBEditObject {
    *
    */
 
-  public dnsCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public dnsCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }
