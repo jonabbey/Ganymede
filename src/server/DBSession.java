@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,11 +41,12 @@ public class DBSession {
     debug = val;
   }
 
-  DBObject adminObject;  // the admin object for the current user.
+  DBObject adminObject = null;  // the admin object for the current user.
   DBStore store;
   DBLock lock;
   DBEditSet editSet;
   String lastError;
+  String id = null;
   Object key;
 
   /* -- */
@@ -472,13 +473,17 @@ public class DBSession {
    * on the DBEditObjects to make changes to the database.  These changes
    * are actually performed when and if commitTransaction is called.
    *
+   * @param describe An optional string containing a comment to be
+   * stored in the modification history for objects modified by this
+   * transaction.
+   *
    * @see arlut.csd.ganymede.DBEditObject
    *
    */ 
 
-  public synchronized void openTransaction()
+  public synchronized void openTransaction(String describe)
   {
-    editSet = new DBEditSet(store, this);
+    editSet = new DBEditSet(store, this, describe);
   }
 
   /**
@@ -612,5 +617,28 @@ public class DBSession {
   public Object getKey()
   {
     return key;
+  }
+
+  /**
+   *
+   * This method is responsible for providing an identifier string
+   * for the user who this session belongs to, and is used for
+   * logging and what-not.
+   *
+   */
+
+  public String getID()
+  {
+    if (id != null)
+      {
+	return id;
+      }
+
+    if (adminObject != null)
+      {
+	return adminObject.getLabel();
+      }
+
+    return null;
   }
 }
