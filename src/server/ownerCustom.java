@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/11/07 09:20:53 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2002/10/09 01:19:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -109,14 +109,17 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
 	adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-	for (int i = 0; i < adminInvidList.size(); i++)
+	if (adminInvidList != null)
 	  {
-	    adminInvid = (Invid) adminInvidList.elementAt(i);
-	    adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
-
-	    if (adminAddr != null)
+	    for (int i = 0; i < adminInvidList.size(); i++)
 	      {
-		adminList.addElement(adminAddr);
+		adminInvid = (Invid) adminInvidList.elementAt(i);
+		adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
+		
+		if (adminAddr != null)
+		  {
+		    adminList.addElement(adminAddr);
+		  }
 	      }
 	  }
 
