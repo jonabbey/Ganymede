@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.8 $ %D%
+    Version: $Revision: 1.9 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,7 +34,7 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-public class containerPanel extends JScrollPane implements ActionListener, JsetValueCallback, ItemListener{  
+public class containerPanel extends JBufferedPane implements ActionListener, JsetValueCallback, ItemListener{  
 
   static final boolean debug = true;
 
@@ -127,10 +127,10 @@ public class containerPanel extends JScrollPane implements ActionListener, JsetV
       
     //    setLayout(new BorderLayout());
 
-    panel = new JBufferedPane();
+    //panel = new JBufferedPane();
     layout = new TableLayout(false);
     layout.rowSpacing(5);
-    panel.setLayout(layout);
+    setLayout(layout);
       
     // Get the list of fields
     
@@ -160,7 +160,8 @@ public class containerPanel extends JScrollPane implements ActionListener, JsetV
 		  }
 		int id = fields[i].getID();
 		if ((id == SchemaConstants.ExpirationField) || 
-		    (id == SchemaConstants.RemovalField))
+		    (id == SchemaConstants.RemovalField)    ||
+		    (id == SchemaConstants.OwnerListField))
 		  {
 		    // don't add these
 		    if (debug)
@@ -185,10 +186,7 @@ public class containerPanel extends JScrollPane implements ActionListener, JsetV
 	System.out.println("Done with loop");
       }
 
-    vp = new JViewport();
-    vp.add(panel);
-    vp.setBackingStoreEnabled(false);
-    setViewportView(vp);
+    //setViewportView(panel);
   }
 
   /**
