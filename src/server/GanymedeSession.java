@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,6 +69,8 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   Vector visibilityFilterInvids = null; // vector of Invids pointing to owner groups that the admin wants
 				        // his set of objects displayed to be limited to.
+
+  QueryResult ownerList = null;	// if we've had a getOwnerGroups call made, the result will be cached here
 
   /* -- */
 
@@ -292,6 +294,8 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     GanymedeServer.activeUsers.remove(username);
     GanymedeAdmin.refreshUsers();
 
+    ownerList = null;		// make GC happier
+
     Ganymede.debug("User " + username + " logged off");
 
     this.username = null;
@@ -407,6 +411,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	personaInvid = personaObject.getInvid();
 	personaTimeStamp = null;
 	updatePerms();
+	ownerList = null;
 	return true;
       }
 
@@ -434,6 +439,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     /* -- */
 
+    if (ownerList != null)
+      {
+	return ownerList;
+      }
+
     if (personaInvid == null)
       {
 	return result;		// empty list
@@ -444,8 +454,15 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     if (supergashMode)
       {
-	return query(new Query(SchemaConstants.OwnerBase));
+	Query q = new Query(SchemaConstants.OwnerBase);
+	q.setFiltered(false);
+
+	ownerList = query(q);	// save for our cache
+
+	return ownerList;
       }
+
+    // otherwise, we've got to do a very little bit of legwork
 
     inf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
 
@@ -504,7 +521,8 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	groups = children;
       }
     
-    return result;
+    ownerList = result;
+    return ownerList;
   }
 
   /**
@@ -890,7 +908,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	    if (supergashMode)
 	      {
-		if (filterMatch(obj))
+		if (!query.filtered || filterMatch(obj))
 		  {
 		    result.addRow(obj);
 		  }
@@ -906,7 +924,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		if ((!query.editableOnly && perm.isVisible()) ||
 		    (query.editableOnly && perm.isEditable()))
 		  {
-		    if (filterMatch(obj))
+		    if (!query.filtered || filterMatch(obj))
 		      {
 			result.addRow(obj);
 		      }
@@ -1062,7 +1080,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
 		  }
 
-		if (filterMatch(obj))
+		if (!query.filtered || filterMatch(obj))
 		  {
 		    result.addRow(obj);
 		  }
@@ -1079,7 +1097,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 			Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
 		      }
 			
-		    if (filterMatch(obj))
+		    if (!query.filtered || filterMatch(obj))
 		      {
 			result.addRow(obj);
 		      }
@@ -1298,7 +1316,30 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     
     if (getPerm(type).isCreatable())
       {
+	if (newObjectOwnerInvids == null)
+	  {
+	    if (ownerList == null)
+	      {
+		getOwnerGroups();
+	      }
+
+	    // if we have only one group possible, we'll assume we're putting it in that,
+	    // otherwise since the client hasn't done a setDefaultOwner() call, we're
+	    // gonna have to abort before even trying to create the object.	    
+
+	    if (ownerList.size() != 1)
+	      {
+		setLastError("Can't create new object, no way of knowing what owner group to place it in");
+		return null;
+	      }
+	  }
+
 	newObj = session.createDBObject(type);
+
+	if (newObj == null)
+	  {
+	    return null;	// in case the createDBObject() method rejected for some reason
+	  }
 	
 	if (newObjectOwnerInvids != null)
 	  {
@@ -1308,6 +1349,12 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	      {
 		inf.addElement(newObjectOwnerInvids.elementAt(i));
 	      }
+	  }
+	else
+	  {
+	    InvidDBField inf = (InvidDBField) newObj.getField(SchemaConstants.OwnerListField);
+
+	    inf.addElement(ownerList.getInvid(0));
 	  }
       }
     else
