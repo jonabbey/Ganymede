@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,15 +40,29 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   private boolean developMode = false;  // CAUTION!! Should be false unless the schema elements
 				        // that the Ganymede server depends on are being deliberately
 				        // altered!
-  private boolean locked;
-  Admin console;
-  DBStore store;
-  Vector oldNameSpaces;
-  Hashtable oldBases;
-  short maxId;
-  DBBaseCategory rootCategory;
 
-  Hashtable newBases;
+  private boolean locked;	// if true, this DBSchemaEdit object has already been
+				// committed or aborted
+
+  DBStore store;		// the DBStore object whose DBObjectBases are being edited
+
+  Hashtable newBases;		// this holds a copy of the DBObjectBase objects comprising
+				// the DBStore's database.  All changes made during Base editing
+				// are performed on the copies held in this hashtable.. if the
+				// DBSchemaEdit session is aborted, newBases is thrown away.
+				// If the DBSchemaEdit session is confirmed, newBases replaces
+				// store.db.objectBases.
+
+  short maxId;			// id of the highest DBObjectBase object in newBases
+
+  Vector oldNameSpaces;		// this holds the original vector of namespace objects extant
+				// at the time the DBSchemaEdit editing session is established.
+
+  DBBaseCategory rootCategory;	// root node of the working DBBaseCategory tree.. if the
+				// DBSchemaEdit session is committed, this DBBaseCategory tree
+				// will replace store.rootCategory.
+
+  Admin console;		// remote client handle
 
   /* -- */
 
@@ -79,7 +93,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
-	// duplicate the existing category tree
+	// duplicate the existing category tree and all the contained
+	// bases
 
 	maxId = store.maxBaseId;
 	newBases = new Hashtable();
@@ -89,7 +104,16 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
-	// make copies of all of our namespaces.. 
+	// make a shallow copy of our namespaces vector.. note that we
+	// since DBNameSpace's are immutable once created, we don't
+	// need to worry about creating new ones, or about correcting
+	// the DBNameSpace references in the duplicated DBObjectBaseFields.
+
+	// we use oldNameSpaces to undo any namespace additions or deletions
+	// we do in store.nameSpaces during our editing.
+
+	// note that we'll have to change our namespaces logic if/when
+	// DBNameSpace objects become mutable.
 
 	oldNameSpaces = new Vector();
     
@@ -97,14 +121,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  {
 	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
 	    oldNameSpaces.addElement(ns);
-	  }
-
-	store.nameSpaces.removeAllElements();
-
-	for (int i=0; i < oldNameSpaces.size(); i++)
-	  {
-	    ns = (DBNameSpace) oldNameSpaces.elementAt(i);
-	    store.nameSpaces.addElement(new DBNameSpace(this, ns));
 	  }
 
       } // end synchronized (store)
@@ -148,6 +164,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new IllegalArgumentException("can't create new built-ins when developMode is false");
       }
 
+    // We use the userbase as our model for the built-ins.. when we commit,
+    // we'll make all non-embedded bases have the same built-in fields
+    // as userbase
+
     synchronized(store)
       {
 	DBObjectBase base = (DBObjectBase) getBase(SchemaConstants.UserBase);
@@ -155,6 +175,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	short nextId = 0;
 
 	/* -- */
+
+	// identify the id for the next new built-in field
 
 	for (int i = 0; i < fields.size(); i++)
 	  {
@@ -278,7 +300,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    *
    * Returns a list of bases from the current (non-committed) state of the system.
    *
-   *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
    * that are not to be embedded.
@@ -303,33 +324,26 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	base = (Base) enum.nextElement();
 
-	if (embedded)
+	try
 	  {
-	    try
+	    if (base.isEmbedded())
 	      {
-		if (base.isEmbedded())
+		if (embedded)
 		  {
 		    size++;
 		  }
 	      }
-	    catch (RemoteException ex)
+	    else
 	      {
-		throw new RuntimeException("caught remote: " + ex);
+		if (!embedded)
+		  {
+		    size++;
+		  }
 	      }
 	  }
-	else
+	catch (RemoteException ex)
 	  {
-	    try
-	      {
-		if (!base.isEmbedded())
-		  {
-		    size++;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote: " + ex);
-	      }
+	    throw new RuntimeException("caught remote: " + ex);
 	  }
       }
 
@@ -340,33 +354,26 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	base = (Base) enum.nextElement();
 
-	if (embedded)
+	try
 	  {
-	    try
+	    if (base.isEmbedded())
 	      {
-		if (base.isEmbedded())
+		if (embedded)
 		  {
 		    bases[i++] = base;
 		  }
 	      }
-	    catch (RemoteException ex)
+	    else
 	      {
-		throw new RuntimeException("caught remote: " + ex);
+		if (!embedded)
+		  {
+		    bases[i++] = base;
+		  }
 	      }
 	  }
-	else
+	catch (RemoteException ex)
 	  {
-	    try
-	      {
-		if (!base.isEmbedded())
-		  {
-		    bases[i++] = base;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote: " + ex);
-	      }
+	    throw new RuntimeException("caught remote: " + ex);
 	  }
       }
 
@@ -386,13 +393,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     Base[] bases;
     Enumeration enum;
     int i = 0;
-    int size = 0;
     Base base;
 
     /* -- */
 
-    size = newBases.size();
-    bases = new Base[size];
+    bases = new Base[newBases.size()];
     enum = newBases.elements();
 
     while (enum.hasMoreElements())
@@ -608,6 +613,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	i = 0;
 	
 	enum = store.nameSpaces.elements();
+
 	while (enum.hasMoreElements())
 	  {
 	    spaces[i++] = (NameSpace) enum.nextElement();
@@ -636,6 +642,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     synchronized (store)
       {
 	enum = store.nameSpaces.elements();
+
 	while (enum.hasMoreElements())
 	  {
 	    ns = (NameSpace) enum.nextElement();
@@ -680,6 +687,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     try
       {
 	ns = new DBNameSpace(this, name, caseInsensitive);
+
 	synchronized (store)
 	  {
 	    store.nameSpaces.addElement(ns);
@@ -721,6 +729,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	for (int i = 0; i < store.nameSpaces.size(); i++)
 	  {
 	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+
 	    if (ns.getName().equals(name))
 	      {
 		store.nameSpaces.removeElementAt(i);
@@ -788,7 +797,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      }
 	    else
 	      {
-		Ganymede.debug("did not got base");
+		Ganymede.debug("did not got base.. this shouldn't happen");
 	      }
 
 	    base.clearEditor(this);
@@ -800,18 +809,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	store.maxBaseId = maxId;
 	store.objectBases = newBases; // all the bases already have containingHash pointing to newBases
 	store.rootCategory = rootCategory;
-
-	Ganymede.debug("DBSchemaEdit: iterating over namespaces");
-
-	// and now the name spaces
-
-	for (int i=0; i < store.nameSpaces.size(); i++)
-	  {
-	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
-	    ns.original = null;
-	  }
-
-	Ganymede.debug("DBSchemaEdit: done with namespaces");
 
 	// and unlock the server
 
@@ -1021,6 +1018,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     // future name change validations
 
     Enumeration enum = store.objectBases.elements();
+
     while (enum.hasMoreElements())
       {
 	base = (DBObjectBase) enum.nextElement();
