@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/06/15 05:39:29 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/06/26 20:43:25 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.18 $ $Date: 2000/06/15 05:39:29 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2000/06/26 20:43:25 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -863,7 +863,18 @@ public class xmlclient implements ClientListener {
       {
 	try
 	  {
+	    if (debug)
+	      {
+		System.err.println("Calling findLabeledObject() on " + typeId + ":" + objId);
+	      }
+
 	    invid = session.findLabeledObject(objId, typeId);
+
+	    if (debug)
+	      {
+		System.err.println("Returned from findLabeledObject() on " + typeId + ":" + objId);
+		System.err.println("findLabeledObject() returned " + invid);
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1057,7 +1068,7 @@ public class xmlclient implements ClientListener {
       {
 	System.out.println("Opening transaction");
 
-	attempt = session.openTransaction("xmlclient client (" + username + ")");
+	attempt = session.openTransaction("xmlclient client (" + username + ")", false);
 	    
 	if (attempt != null && !attempt.didSucceed())
 	  {

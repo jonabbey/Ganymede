@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/06/14 05:03:52 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/06/26 20:43:26 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.11 $ $Date: 2000/06/14 05:03:52 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 2000/06/26 20:43:26 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -115,6 +115,13 @@ public class xmlobject {
    */
 
   Invid invid = null;
+
+  /**
+   * <p>If true, the invid for this field is known to not exist on the
+   * server.</p>
+   */
+
+  boolean knownNonExistent = false;
 
   /**
    * <p>The object number, if known.  This may be used to identify
@@ -299,7 +306,7 @@ public class xmlobject {
 
 	try
 	  {
-	    invid = objref.getInvid();
+	    this.setInvid(objref.getInvid());
 	  }
 	catch (RemoteException ex)
 	  {
@@ -321,6 +328,7 @@ public class xmlobject {
   public ReturnVal editOnServer(Session session)
   {
     ReturnVal result;
+    Invid localInvid;
 
     /* -- */
     
@@ -333,34 +341,13 @@ public class xmlobject {
 				   this.toString());
       }
 
-    if (invid == null)
-      {
-	if (num == -1 && id != null)
-	  {
-	    try
-	      {
-		invid = session.findLabeledObject(id, type.shortValue());
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-	  }
-	else
-	  {
-	    if (num != -1)
-	      {
-		invid = new Invid(type.shortValue(), num);
-	      }
-	  }
-      }
+    localInvid = getInvid();
 
-    if (invid != null)
+    if (localInvid != null)
       {
 	try
 	  {
-	    result = session.edit_db_object(invid);
+	    result = session.edit_db_object(localInvid);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -471,7 +458,7 @@ public class xmlobject {
 
   public Invid getInvid()
   {
-    if (invid == null)
+    if (invid == null && !knownNonExistent)
       {
 	if (num != -1)
 	  {
@@ -483,7 +470,23 @@ public class xmlobject {
 
 	    try
 	      {
+		if (debug)
+		  {
+		    System.err.println("Calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		  }
+
 		invid = xmlclient.xc.session.findLabeledObject(id, type.shortValue());
+
+		if (invid == null)
+		  {
+		    knownNonExistent = true;
+		  }
+
+		if (debug)
+		  {
+		    System.err.println("Called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		    System.err.println("findLabeledObject() returned " + invid + "[3]");
+		  }
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -494,6 +497,18 @@ public class xmlobject {
       }
 
     return invid;
+  }
+
+  /**
+   * <p>This method sets the invid for this object, if it is discovered
+   * from the server during processing.  Used to provide invids for
+   * newly created embedded objects, for instance.<p>
+   */
+
+  public void setInvid(Invid invid)
+  {
+    this.invid = invid;
+    this.knownNonExistent = false;
   }
 
   /**

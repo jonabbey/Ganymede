@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/06/17 00:23:50 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/06/26 20:43:26 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.14 $ $Date: 2000/06/17 00:23:50 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 2000/06/26 20:43:26 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1035,7 +1035,7 @@ public class xmlfield implements FieldType {
 			  }
 			else
 			  {
-			    object.invid = result.getInvid();
+			    object.setInvid(result.getInvid());
 			    object.objref = result.getObject();
 			  }
 
