@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -152,7 +152,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    *
-   * Copy constructor, used during schema editing
+   * Copy constructor, used during schema editing.<br><br>
+   *
+   * <b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY FIELDS
+   * TO THIS CLASS!</b>
    *
    */
 
@@ -186,6 +189,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     badChars = original.badChars;
     namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
     caseInsensitive = original.caseInsensitive;
+    multiLine = original.multiLine;
 
     editInPlace = original.editInPlace;
     allowedTarget = original.allowedTarget;
