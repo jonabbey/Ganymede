@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.22 $ %D%
+  Version: $Revision: 1.23 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.22 $ %D% 
+ * @version $Revision: 1.23 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -388,7 +388,7 @@ public class rowTable extends baseTable implements ActionListener {
    *
    */
 
-  public void selectRow(Object key)
+  public synchronized void selectRow(Object key)
   {
     Object rowKey;
 
