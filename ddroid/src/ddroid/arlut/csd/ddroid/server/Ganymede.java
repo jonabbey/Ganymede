@@ -733,11 +733,23 @@ public class Ganymede {
       {
 	debug(ts.l("main.info_setup_okay"));
       }
+
+    String portString = ParseArgs.getArg("telnet", argv);
     
-    /*
-    jythonServer = new JythonServer();
-    jythonServer.run();
-    */
+    if (portString != null)
+      {
+	try
+	  {
+	    int portNumber = Integer.parseInt(portString);
+	    
+	    jythonServer = new JythonServer();
+	    jythonServer.run(portNumber);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    debug(ts.l("main.badport", portString));
+	  }
+      }
     
     debug(ts.l("main.info_ready"));
   }

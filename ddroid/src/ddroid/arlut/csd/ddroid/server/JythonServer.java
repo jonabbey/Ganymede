@@ -45,11 +45,11 @@ public class JythonServer extends Thread {
     super("JythonServer");
   }
    
-  public void run()
+  public void run(int portNumber)
   {
     try
       {
-        listen();
+        listen(portNumber);
       }
     catch (IOException ex)
       {
@@ -57,7 +57,7 @@ public class JythonServer extends Thread {
       }
   }
 
-  private void listen() throws IOException 
+  private void listen(int portNumber) throws IOException 
   {
     Socket s;
     Thread t;
@@ -66,7 +66,7 @@ public class JythonServer extends Thread {
     
     try
       {
-        sock = new ServerSocket(4444);
+        sock = new ServerSocket(portNumber);
       }
     catch (IOException e)
       {
