@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,12 +52,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   DBSession session;
 
+  // the following variables are used to allow us to cache data that we use
+  // in permissions handling in this GanymedeSession instead of having to
+  // always check the database
+
   DBObjectBase personaBase = null;
   Date personaTimeStamp;
   DBObject personaObj;		// our current persona object
 
   DBObjectBase permBase = null;
   Date permTimeStamp;
+
   DBObject selfPermObj;
   PermMatrix selfPerm = null;
 
@@ -65,6 +70,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					      SchemaConstants.PermSelfUserObj);
   Invid personaInvid;
   Invid userInvid;
+
+  // the following variables keep track of general permissions and visibility
+  // state in this GanymedeSession
 
   boolean supergashMode = false;
   boolean beforeversupergash = false; // Be Forever Yamamoto
@@ -341,7 +349,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // logout the client, abort any DBSession transaction going
 
-    session.releaseAllReadLocks(); // given that we're synchronized, will we ever have locks here?
     session.logout();
 
     if (!forced_off)
@@ -1147,7 +1154,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * databases
    *
    * @param query The query to be handled
-   * @param internal Should the query filter setting be honored?
+   * @param internal If true, the query filter setting will not be honored
+   * @param forTransport If true, the QueryResult will build a buffer for serialization
    *
    */
 
@@ -1249,7 +1257,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
-	    setLastError("Couldn't find field identifier in query optimizer");
+	    if (base.getLabelField() != -1)
+	      {
+		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
+	      }
+	    else
+	      {
+		setLastError("Couldn't find field identifier in query optimizer");
+		return null;
+	      }
+	  }
+
+	if (fieldDef == null)
+	  {
+	    Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer");
 	    return null;
 	  }
 
@@ -1261,42 +1282,39 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    DBObject resultobject;
 	    DBNameSpace ns = fieldDef.namespace;
-	    DBField resultfield = ns.lookup(node.value);
 
-	    /* -- */
-
-	    if (resultfield == null)
+	    synchronized (ns)
 	      {
-		return result;	// no result
-	      }
-	    else
-	      {
-		// a namespace can map across different field and
-		// object types.. make sure we've got an instance of
-		// the right kind of field
+		DBField resultfield = ns.lookup(node.value);
 
-		if (resultfield.definition != fieldDef)
+		// note that DBNameSpace.lookup() will always point us to a field
+		// that is currently in the main database, so we don't need to
+		// worry that the namespace slot is pointing to a field in a
+		// checked-out object.
+		
+		if (resultfield == null)
 		  {
-		    return result; // no match
+		    return result;	// no result
 		  }
-
-		resultobject = resultfield.owner;
-	      }
-		    
-	    // Note that the namespace could point us into an object that
-	    // is currently checked out by another transaction.. make sure
-	    // that we have the right to see this object
-	    
-	    synchronized (resultobject)
-	      {
-		if (!(resultobject instanceof DBEditObject) ||
-		    (session != null && resultobject.editset != null &&
-		     resultobject.editset.equals(session.editSet)))
+		else
 		  {
+		    // a namespace can map across different field and
+		    // object types.. make sure we've got an instance of
+		    // the right kind of field
+
+		    if (resultfield.definition != fieldDef)
+		      {
+			return result; // no match
+		      }
+
+		    resultobject = resultfield.owner;
+		    
+		    // addResultRow() will do our permissions checking for us
+
 		    addResultRow(resultobject, query, result, internal);
-
+		
 		    System.err.println("Returning result from optimized query");
-
+		
 		    return result;
 		  }
 	      }
@@ -1333,14 +1351,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	System.err.println("Query: " + username + " : got read lock");
       }
 
-    enum = base.objectHash.keys();
+    enum = base.objectHash.elements();
 
     // need to check in here to see if we've had the lock yanked
 
     while (session.isLocked(rLock) && enum.hasMoreElements())
       {
-	key = (Integer) enum.nextElement();
-	obj = (DBObject) base.objectHash.get(key);
+	obj = (DBObject) enum.nextElement();
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
@@ -1394,7 +1411,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    System.err.println("Query: " + username + " : scanning intratransaction objects");
 	  }
 
-	synchronized(session.editSet)
+	synchronized (session.editSet)
 	  {
 	    enum = session.editSet.objects.elements();
 
@@ -1437,6 +1454,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				Ganymede.debug("Error, couldn't find a containing object for an embedded query");
 				continue;	// try next match
 			      }
+			  }
+
+			// make sure we've found an object of the proper type.. if we're not
+			// querying on an embedded object type, the above clause won't have
+			// been run.  DBQueryHandler.matches() doesn't check object type, so
+			// we need to do it here before we add this to our result.
+
+			if (obj.getTypeID() != containingBase.getTypeID())
+			  {
+			    continue;
 			  }
 
 			addResultRow(obj, query, result, internal);
@@ -1679,7 +1706,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * fields in a DBObject go through a view_db_object() method
    * or else the object will not properly know who owns it, which
    * is critical for it to be able to properly authenticate field
-   * access.
+   * access.  Keep in mind, however, that view_db_object clones the
+   * DBObject in question, so this method is very heavyweight.
    *
    * @see arlut.csd.ganymede.Session
    */
@@ -1709,7 +1737,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * fields in a DBObject go through a view_db_object() method
    * or else the object will not properly know who owns it, which
    * is critical for it to be able to properly authenticate field
-   * access.
+   * access.  Keep in mind, however, that view_db_object clones the
+   * DBObject in question, so this method is very heavyweight.
    *
    */
 
