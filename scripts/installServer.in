@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.17 $
-# $Date: 2000/09/15 06:24:35 $
+# $Revision: 1.18 $
+# $Date: 2000/09/15 07:36:40 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -509,7 +509,7 @@ chmod 0750, "$installdir/bin/logscan.pl";
 # Copy and process the xmlclient script into place
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "PROPERTIES" => "$installdir/client.properties",
+	       "PROPERTIES" => "$installdir/ganymede.properties",
 	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
   
 open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
