@@ -6,15 +6,15 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2004/02/05 20:51:47 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2004/03/20 03:18:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    The University of Texas at Austin.
 
    Contact information
@@ -56,6 +56,8 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.FileOps;
+
+import org.doomdark.uuid.*;
 
 import java.util.*;
 import java.io.*;
@@ -249,6 +251,23 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	*/
 
+	StringDBField guidField = (StringDBField) getField(GUID);
+
+	if (guidField == null)
+	  {
+	    return Ganymede.createErrorDialog("User Initialization Failure",
+					      "Couldn't find the guid field.. schema problem?");
+	  }
+
+	String guid = generateGUID(); // create a globally unique uid
+
+	retVal = guidField.setValueLocal(guid);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
 	NumericDBField numField = (NumericDBField) getField(UID);
 
 	if (numField == null)
@@ -358,6 +377,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	return Ganymede.loginError(ex);
       }
+  }
+
+  /**
+   * <p>Private method to create a globally unique UID value suitable
+   * for certain LDAP applications</p>
+   */
+
+  private String generateGUID()
+  {
+    UUIDGenerator gen = UUIDGenerator.getInstance();
+    UUID guid = gen.generateTimeBasedUUID(new EthernetAddress("8:0:20:fd:6b:7")); // csdsun9
+
+    return guid.toString();
   }
 
   /**

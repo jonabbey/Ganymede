@@ -6,8 +6,8 @@
    
    Created: 12 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2003/08/02 00:15:15 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2004/03/20 03:18:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,6 +70,7 @@ public interface userSchema {
 
   final static short USERNAME=100;
   final static short UID=256;
+  final static short GUID=277;
   final static short PASSWORD=101;
   final static short CATEGORY=273;
   final static short FULLNAME=257;
