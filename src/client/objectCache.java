@@ -7,7 +7,7 @@
    can use it wherever.
    
    Created: 7 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -128,6 +128,11 @@ public class objectCache {
   public void putList(Object key, objectList list)
   {
     idMap.put(key, list);
+  }
+
+  public void removeList(Object key)
+  {
+    idMap.remove(key);
   }
 
   public void clearCaches()
