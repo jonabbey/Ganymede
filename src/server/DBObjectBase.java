@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2000/09/27 22:34:15 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2000/09/29 00:42:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1056,6 +1056,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
+    this.label_id = -1;
+    this.classname = null;
+    this.embedded = false;
+
     item = reader.getNextItem(true);
 
     if (item == null || !item.matches("objectdef"))
@@ -1084,6 +1088,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	else if (item.matches("embedded"))
 	  {
 	    embedded = true;
+	  }
+	else if (item.matches("label"))
+	  {
+	    Integer labelInt = item.getAttrInt("fieldid");
+
+	    if (labelInt != null)
+	      {
+		label_id = labelInt.shortValue();
+	      }
 	  }
 	else if (item.matches("fielddef"))
 	  {
@@ -1134,12 +1147,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   synchronized ReturnVal compareXMLDef(XMLItem objectDef, XMLReader reader)
   {
     XMLItem item;
+    short xmlLabelID = -1;
     boolean xmlEmbedded = false;
     String xmlClassName = null;
     Hashtable fieldChecklist = new Hashtable();
     DBObjectBaseField field;
 
     /* -- */
+
+    /* XXXX
+
+       We need to figure out a way to make compareXMLDef be aware of any
+       field order differences.. ?
+
+       XXXX
+    */
 
     // build up a hashtable of custom fields that already exist in
     // this object definition.. we'll remove items when we find them
@@ -1177,6 +1199,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	else if (item.matches("embedded"))
 	  {
 	    xmlEmbedded = true;
+	  }
+	else if (item.matches("label"))
+	  {
+	    Integer labelInt = item.getAttrInt("fieldid");
+
+	    if (labelInt != null)
+	      {
+		xmlLabelID = labelInt.shortValue();
+	      }
 	  }
 	else if (item.matches("fielddef"))
 	  {
@@ -1252,6 +1283,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 					  " doesn't have the same embedded status as specified in the XML stream.\n" +
 					  "Class definition in database: " + embedded + "\n" +
 					  "Class definition in XML stream: " + xmlEmbedded);
+      }
+
+    if (label_id != xmlLabelID)
+      {
+	return Ganymede.createErrorDialog("mismatch",
+					  "Object named " + object_name +
+					  " doesn't have the same label field as specified in the XML stream.\n" +
+					  "Class definition in database: " + label_id + "\n" +
+					  "Class definition in XML stream: " + xmlLabelID);
       }
 
     if ((classname == null && xmlClassName != null) || !classname.equals(xmlClassName))

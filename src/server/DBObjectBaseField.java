@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2000/09/27 22:34:16 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2000/09/29 00:42:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1245,7 +1245,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		  }
 		else if (item.matches("regexp") && isString())
 		  {
-		    regexpPat = item.getAttrStr("val");
+		    setRegexpPat(item.getAttrStr("val"));
 		  }
 		else if (item.matches("multiline") && isString())
 		  {
@@ -1356,18 +1356,18 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     /* -- */
 
+    // in principle, it'd be keen to write this function so it used
+    // the java reflection API to do this comparison, but there are
+    // actually a few things that we don't want to compare, and some
+    // things we need to do identity vs. equality testing on, so for
+    // now the onus is on maintainers of DBObjectBaseField to keep
+    // this method up to date.
+
     if (this.base != otherField.base)
       {
 	return Ganymede.createErrorDialog("compare",
 					  "field " + this.toString() + " is not contained in the same " +
 					  "kind of object as " + otherField.toString());
-      }
-
-    // name of this field
-
-    if (!field_name.equals(otherField.field_name))
-      {
-	diffs.append("Field name " + field_name + " doesn't match " + otherField.field_name + "\n");
       }
 
     // id of this field in the current object
@@ -1379,7 +1379,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	// this is a blocker, go ahead and just complain
 
 	return Ganymede.createErrorDialog("compare",
-					  diffs.toString());
+					  "field " + this.toString() + " has a fundamental incompatibility with field " +
+					  otherField.toString() + "\n" + diffs.toString());
       }
 
     // data type contained herein
@@ -1391,12 +1392,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	// this is a blocker, go ahead and just complain
 
 	return Ganymede.createErrorDialog("compare",
-					  diffs.toString());
+					  "field " + this.toString() + " has a fundamental incompatibility with field " +
+					  otherField.toString() + "\n" + diffs.toString());
+      }
+
+    // name of this field
+
+    if (!field_name.equals(otherField.field_name))
+      {
+	diffs.append("Field name " + field_name +
+		     " doesn't match " + otherField.field_name + "\n");
       }
 
     if (visibility != otherField.visibility)
       {
-	diffs.append("Field visibility " + visibility + " doesn't match " + otherField.visibility + "\n");
+	diffs.append("Field visibility " + visibility +
+		     " doesn't match " + otherField.visibility + "\n");
       }
 
     // name of class to manage user interactions with this field
@@ -1412,45 +1423,147 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (comment != otherField.comment || !comment.equals(otherField.comment))
       {
-	// how about that clever if, huh?  the first check takes care
-	// of the case where either but not both of classname or
-	// otherField.classname is null
+	// ditto
 
 	diffs.append("Field comment " + comment + " doesn't match " + otherField.comment + "\n");
       }
 
-    /*
-      // more work to do
+    if (array != otherField.array)
+      {
+	diffs.append("Field vector/scalar flag " + array + " doesn't match " + otherField.array + "\n");
+      }
 
-    array = original.array;	// true if this field is an array type
-    limit = original.limit;
+    if (limit != otherField.limit)
+      {
+	diffs.append("Field array size limit " + limit + " doesn't match " + otherField.limit + "\n");
+      }
 
-    labeled = original.labeled;
-    trueLabel = original.trueLabel;
-    falseLabel = original.falseLabel;
+    // check for boolean type, and for boolean-only params
 
-    minLength = original.minLength;
-    maxLength = original.maxLength;
-    okChars = original.okChars;
-    badChars = original.badChars;
-    namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
-    multiLine = original.multiLine;
-    regexpPat = original.regexpPat;
-    regexp = original.regexp;
+    if (field_type == FieldType.BOOLEAN)
+      {
+	if (labeled != otherField.labeled)
+	  {
+	    diffs.append("Field boolean labeled flag " + labeled +
+			 " doesn't match " + otherField.labeled + "\n");
+	  }
 
-    editInPlace = original.editInPlace;
-    allowedTarget = original.allowedTarget;
-    targetField = original.targetField;
+	if (trueLabel != otherField.trueLabel || !trueLabel.equals(otherField.trueLabel))
+	  {
+	    // ditto
+	    
+	    diffs.append("Field trueLabel " + trueLabel +
+			 " doesn't match " + otherField.trueLabel + "\n");
+	  }
 
-    crypted = original.crypted;
-    md5crypted = original.md5crypted;
-    storePlaintext = original.storePlaintext;
-    */
+	if (falseLabel != otherField.falseLabel || !falseLabel.equals(otherField.falseLabel))
+	  {
+	    // ditto
+	    
+	    diffs.append("Field falseLabel " + falseLabel +
+			 " doesn't match " + otherField.falseLabel + "\n");
+	  }
+      }
+
+    // check for invid type, and for invid-only params
+
+    if (field_type == FieldType.INVID)
+      {
+	if (editInPlace != otherField.editInPlace)
+	  {
+	    diffs.append("Field edit in place flag " + editInPlace + 
+			 " doesn't match " + otherField.editInPlace + "\n");
+	  }
+
+	if (allowedTarget != otherField.allowedTarget)
+	  {
+	    diffs.append("Field allowed object type " + allowedTarget +
+			 " doesn't match " + otherField.allowedTarget + "\n");
+	  }
+
+	if (targetField != otherField.targetField)
+	  {
+	    diffs.append("Field field symmetry target " + targetField +
+			 " doesn't match " + otherField.targetField + "\n");
+	  }
+      }
+
+    if (field_type == FieldType.PASSWORD)
+      {
+	if (crypted != otherField.crypted)
+	  {
+	    diffs.append("Field password UNIX crypt flag " + crypted + 
+			 " doesn't match " + otherField.crypted + "\n");
+	  }
+
+	if (md5crypted != otherField.md5crypted)
+	  {
+	    diffs.append("Field password md5 crypt flag " + md5crypted +
+			 " doesn't match " + otherField.md5crypted + "\n");
+	  }
+
+	if (storePlaintext != otherField.storePlaintext)
+	  {
+	    diffs.append("Field password retain plaintext flag " + storePlaintext +
+			 " doesn't match " + otherField.storePlaintext + "\n");
+	  }
+      }
+
+    if (field_type == FieldType.STRING)
+      {
+	if (multiLine != otherField.multiLine)
+	  {
+	    diffs.append("Field string multiline flag " + multiLine +
+			 " doesn't match " + otherField.multiLine + "\n");
+	  }
+      }
+
+    // and now a few more attributes that can apply to more than one field type
+
+    if (minLength != otherField.minLength)
+      {
+	diffs.append("Field string/password minLength " + minLength + " doesn't match " + otherField.minLength + "\n");
+      }
+
+    if (maxLength != otherField.maxLength)
+      {
+	diffs.append("Field string/password maxLength " + maxLength + " doesn't match " + otherField.maxLength + "\n");
+      }
+
+    if (okChars != otherField.okChars || !okChars.equals(otherField.okChars))
+      {
+	// ditto
+
+	diffs.append("Field okChars " + okChars + " doesn't match " + otherField.okChars + "\n");
+      }
+
+    if (badChars != otherField.badChars || !badChars.equals(otherField.badChars))
+      {
+	// ditto
+
+	diffs.append("Field badChars " + badChars + " doesn't match " + otherField.badChars + "\n");
+      }
+
+    if (regexpPat != otherField.regexpPat || !regexpPat.equals(otherField.regexpPat))
+      {
+	// ditto
+
+	diffs.append("Field regexpPat " + regexpPat + " doesn't match " + otherField.regexpPat + "\n");
+      }
+
+    if (namespace != otherField.namespace)
+      {
+	diffs.append("Field namespace " + namespace + " doesn't match " + otherField.namespace + "\n");
+      }
+
+    // and now, return
 
     if (diffs.length() != 0)
       {
 	return Ganymede.createErrorDialog("compare",
-					  diffs.toString());
+					  "field " + this.toString() + " has the following " +
+					  "differences relative to field " +
+					  otherField.toString() + "\n" + diffs.toString());
       }
 
     // success
