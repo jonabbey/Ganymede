@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.159 $
-   Last Mod Date: $Date: 1999/10/09 00:59:59 $
+   Version: $Revision: 1.160 $
+   Last Mod Date: $Date: 1999/10/26 20:02:06 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.159 $ $Date: 1999/10/09 00:59:59 $ $Name:  $
+ * @version $Revision: 1.160 $ $Date: 1999/10/26 20:02:06 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/10/09 00:59:59 $";
+  static String release_date = "$Date: 1999/10/26 20:02:06 $";
   static String release_number = null;
 
   // ---
@@ -451,7 +451,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     showHelpMI,
     toggleToolBarMI;
 
-  private boolean
+  boolean
     defaultOwnerChosen = false;
 
   JMenuItem
@@ -1419,6 +1419,28 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     
     return baseToShort;
+  }
+
+  /**
+   * <p>Returns the type name for a given object.</p>
+   *
+   * <p>If the loader thread hasn't yet downloaded that information, this
+   * method will block until the information is available.</p>
+   */
+
+  public String getObjectType(Invid objId)
+  {
+    try
+      {
+	Hashtable baseMap = getBaseMap(); // block
+	BaseDump base = (BaseDump) baseMap.get(new Short(objId.getType()));
+
+	return base.getName();
+      }
+    catch (NullPointerException ex)
+      {
+	return "<unknown>";
+      }
   }
 
   /**
@@ -3095,12 +3117,36 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * the client's tree display, status caching, etc.</p>
    */
 
-  public boolean deleteObject(Invid invid)
+  public boolean deleteObject(Invid invid, boolean showDialog)
   {
     ReturnVal retVal;
     boolean ok = false;
 
     /* -- */
+
+    if (showDialog)
+      {
+	try
+	  {
+	    StringDialog d = new StringDialog(this, "Verify deletion", 
+					      "Are you sure you want to delete " + 
+					      getObjectType(invid) + " " +
+					      session.viewObjectLabel(invid) + "?", 
+					      "Yes", "No", getQuestionImage());
+	    Hashtable result = d.DialogShow();
+	    
+	    if (result == null)
+	      {
+		setStatus("Cancelled!");
+
+		return false;
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+	  }
+      }
 
     setWaitCursor();
 
@@ -3541,27 +3587,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else
       {
-	try
-	  {
-	    StringDialog d = new StringDialog(this, "Verify deletion", 
-					      "Are you sure you want to delete " + 
-					      session.viewObjectLabel(invid), 
-					      "Yes", "No");
-	    Hashtable result = d.DialogShow();
-
-	    if (result == null)
-	      {
-		setStatus("Cancelled!");
-	      }
-	    else
-	      {
-		deleteObject(invid);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
-	  }
+	deleteObject(invid, true);
       }
   }
 
@@ -3712,7 +3738,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	defaultOwnerChosen = false;
       }
-
   }
 
   /**
@@ -4861,7 +4886,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    InvidNode invidN = (InvidNode)node;
 	    Invid invid = invidN.getInvid();
 
-	    deleteObject(invid);
+	    deleteObject(invid, true);
 	  }
 	else  // Should never get here, but just in case...
 	  {
@@ -5072,10 +5097,11 @@ class PersonaListener implements ActionListener {
 		gc.cancelTransaction();
 		gc.buildTree();
 		gc.currentPersonaString = newPersona;
+		gc.defaultOwnerChosen = false; // force a new default owner to be chosen
 		gc.setNormalCursor();
 		
 		gc.setStatus("Successfully changed persona to " + newPersona);
-		gc.getPersonaDialog().updatePersonaMenu();		
+		gc.getPersonaDialog().updatePersonaMenu();	
 	      }
 	    else
 	      {

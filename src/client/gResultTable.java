@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/10/26 19:35:51 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/10/26 20:02:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.29 $ $Date: 1999/10/26 19:35:51 $ $Name:  $
+ * @version $Revision: 1.30 $ $Date: 1999/10/26 20:02:05 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -519,7 +519,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     else if (event.getSource() == deleteMI)
       {
-	wp.getgclient().deleteObject((Invid)key);
+	wp.getgclient().deleteObject((Invid)key, true);
       }
     else if (event.getSource() == inactivateMI)
       {

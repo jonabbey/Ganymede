@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/03/24 03:28:23 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/10/26 20:02:04 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import arlut.csd.ganymede.*;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.14 $ $Date: 1999/03/24 03:28:23 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 1999/10/26 20:02:04 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -327,6 +327,7 @@ public class Loader extends Thread {
 
     return baseNames;
   }
+
 
   /**
    * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
