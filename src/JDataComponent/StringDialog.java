@@ -120,13 +120,17 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   public StringDialog(DialogRsrc Resource) 
   {
     super(Resource.frame, Resource.title, true);
+
+    if (debug)
+      {
+	System.err.println("StringDialog constructor");
+      }
       
     componentHash = new Hashtable();
     valueHash = new Hashtable();
 
     objects = Resource.getObjects();
     components = new Vector(objects.size());
-    
 
     mainPanel = new JPanel();
     mainPanel.setLayout(new BorderLayout());
@@ -190,16 +194,29 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
     getContentPane().add(mainPanel);
 
+    if (debug)
+      {
+	System.err.println("StringDialog: adding objects");
+      }
+
     // add stuff to panel here
 
     if (objects != null)
       {
-	// System.out.println("objects != null");
+	if (debug)
+	  {
+	    System.out.println("objects != null");
+	  }
+
 	int numberOfObjects = objects.size();
 	
 	if (numberOfObjects > 0) 
 	  {
-	    // System.out.println("objects.size() > 0"); 
+	    if (debug)
+	      {
+		System.out.println("objects.size() > 0"); 
+	      }
+
 	    panel = new JInsetPanel();
 	    table = new TableLayout(false);
 	    panel.setLayout(table);
@@ -213,6 +230,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
 		if (element instanceof stringThing)
 		  {
+		    if (debug)
+		      {
+			System.out.println("Adding string field(JstringField)");
+		      }
+		    
 		    stringThing st = (stringThing)element;
 		    JstringField sf = new JstringField();
 		    sf.setEditable(true);
@@ -227,12 +249,12 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		  {
 		    if (debug)
 		      {
-			System.out.println("Adding password field(JstringField)");
+			System.out.println("Adding password field(JpasswordField)");
 		      }
 
 		    passwordThing pt = (passwordThing)element;
 		    JpasswordField sf = new JpasswordField();
-		    //		    sf.setEchoChar('*');
+
 		    sf.setEditable(true);
 		    sf.setCallback(this); 
 		    addRow(panel, sf, pt.getLabel(), i);
@@ -242,6 +264,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		  }
 		else if (element instanceof booleanThing)
 		  {
+		    if (debug)
+		      {
+			System.out.println("Adding boolean field (JcheckboxField)");
+		      }
+
 		    booleanThing bt = (booleanThing)element;
 		    JcheckboxField cb = new JcheckboxField();
 		    cb.setCallback(this);
@@ -254,9 +281,25 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		  }
 		else if (element instanceof choiceThing)
 		  {
+		    if (debug)
+		      {
+			System.out.println("Adding choice field (JComboBox)");
+		      }
+
 		    choiceThing ct = (choiceThing)element;
 		    JComboBox ch = new JComboBox();
+
+		    if (debug)
+		      {
+			System.out.println("Getting choice lists");
+		      }
+
 		    Vector items = ct.getItems();
+
+		    if (debug)
+		      {
+			System.out.println("Got choice lists");
+		      }
 
 		    if (items == null)
 		      {
@@ -270,7 +313,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 			  {
 			    String str = (String)items.elementAt(j);
 			    ch.addItem(str);
-			      
 			  }
 
 			ch.addItemListener(this);
@@ -291,32 +333,39 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		  }
 	      }
 
+	    if (debug)
+	      {
+		System.err.println("Created components, registering callbacks.");
+	      }
+
 	    for (int i = 0; i < components.size() - 1; i++)
 	      {
-
 		JComponent c = (JComponent)components.elementAt(i);
 
 		if (c instanceof JstringField)
 		  {
-		    ((JstringField)c).addActionListener(new ActionListener()
-						      {
-							public void actionPerformed(ActionEvent e) {
-							  JComponent thisComp = (JComponent)e.getSource();
-							  
-							  ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-							}
-						      });
+		    JstringField sf = (JstringField) c;
+		    sf.addActionListener(
+					 new ActionListener()
+					 {
+					   public void actionPerformed(ActionEvent e) {
+					     JComponent thisComp = (JComponent)e.getSource();
+					     
+					     ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+					   }
+					 });
 		  }
 		else if (c instanceof JpasswordField)
 		  {
-		    ((JpasswordField)c).addActionListener(new ActionListener()
-							{
-							  public void actionPerformed(ActionEvent e) {
-							    JComponent thisComp = (JComponent)e.getSource();
-							    
-							    ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-							  }
-							});
+		    JpasswordField pf = (JpasswordField) c;
+		    pf.addActionListener(new ActionListener()
+					 {
+					   public void actionPerformed(ActionEvent e) {
+					     JComponent thisComp = (JComponent)e.getSource();
+					     
+					     ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+					   }
+					 });
 		  }
 	      }
 
