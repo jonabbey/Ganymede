@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2001/06/05 22:43:18 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2001/06/15 16:34:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -546,6 +546,32 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
 	  }
       }
+  }
+
+  /**
+   * <p>Handy public accessor for the login semaphore, for
+   * possible use by plug-in task code.</p>
+   */
+
+  public static loginSemaphore getLoginSemaphore()
+  {
+    return GanymedeServer.lSemaphore;
+  }
+
+  /**
+   * <p>Gated enabled test.  If this method returns null, logins are allowed
+   * at the time checkEnabled() is called.  This method is to be used by admin
+   * consoles, which should not connect to the server during schema editing or
+   * server shut down, but which should not affect the login count for reasons
+   * of blocking a schema edit disable, say.</p>
+   *
+   * @return null if logins are currently enabled, or a message string if they
+   * are disabled.
+   */
+
+  public static String checkEnabled()
+  {
+    return GanymedeServer.lSemaphore.checkEnabled();
   }
 
   /**

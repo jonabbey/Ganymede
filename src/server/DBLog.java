@@ -12,15 +12,15 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/10/09 05:51:49 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/06/15 16:34:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -50,7 +50,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -240,6 +241,43 @@ public class DBLog {
   }
 
   /**
+   * <p>This method sends out a generic mail message that will not be logged.
+   * If mailToObjects and/or mailToObjects are true, mail may be sent
+   * to email addresses associated with the objects in the invids Vector,
+   * in addition to the recipients list.</p>
+   *
+   * @param recipients a Vector of email addresses to send this message
+   * to.  May legally be null or empty, in which case mail will be sent
+   * to anyone needed according to the mailToObjects and mailToOwners
+   * parameters
+   * @param title The email subject for this message, will have 'Ganymede: ' prepended
+   * to it.
+   * @param description The message itself
+   * @param mailToObjects If true, this event's mail will go to any
+   * email addresses associated with objects referenced by event.
+   * @param mailToOwners If true, this event's mail will go to the owners
+   * of any objects referenced by event.
+   * @param invids A vector of Invids to consult for possible mail targetting
+   */
+
+  public void sendMail(Vector recipients, String title, String description,
+		       boolean mailToObjects, boolean mailToOwners, Vector invids)
+  {
+    DBLogEvent event;
+
+    /* -- */
+
+    // create a log event
+		    
+    event = new DBLogEvent("mailout", description, null, null, invids, recipients);
+
+    // we've already put the description in the event, don't need
+    // to provide a separate description string to mailNotify
+    
+    this.mailNotify(title, null, event, mailToObjects, mailToOwners, null);
+  }
+
+  /**
    * <P>This method is used to handle an email notification event, where
    * the mail title should reflect detailed information about the
    * event, and extra descriptive information is to be sent out.</P>
@@ -255,11 +293,38 @@ public class DBLog {
    * of any objects referenced by event.
    */
 
+  public void mailNotify(String title, String description,
+			 DBLogEvent event,
+			 boolean mailToOwners,
+			 DBSession session)
+  {
+    this.mailNotify(title, description, event, true, mailToOwners, session);
+  }
+
+  /**
+   * <P>This method is used to handle an email notification event, where
+   * the mail title should reflect detailed information about the
+   * event, and extra descriptive information is to be sent out.</P>
+   *
+   * <P>mailNotify() will send the message to the owners of any objects
+   * referenced by event if mailToOwners is true.</P>
+   *
+   * <P>description and/or title may be null, in which case the proper
+   * strings will be extracted from the event's database record</P>
+   *
+   * @param event A single event to be logged, with its own timestamp.
+   * @param mailToObjects If true, this event's mail will go to any
+   * email addresses associated with objects referenced by event.
+   * @param mailToOwners If true, this event's mail will go to the owners
+   * of any objects referenced by event.
+   */
+
   public synchronized void mailNotify(String title, String description,
-				      DBLogEvent event, boolean mailToOwners,
+				      DBLogEvent event, boolean mailToObjects,
+				      boolean mailToOwners,
 				      DBSession session)
   {
-    systemEventType type;
+    systemEventType type = null;
 
     /* -- */
 
@@ -279,30 +344,31 @@ public class DBLog {
     // event's notifcation to.. we do it before the writeEntry() call so
     // that the log will record who the mail was sent to.
 
-    if (mailToOwners)
+    calculateMailTargets(event, session, null, mailToObjects, mailToOwners);
+
+    // As long as we're not processing a generic mailout, log the
+    // event to the log file, and look up the system event code
+
+    if (!event.eventClassToken.equals("mailout"))
       {
-	calculateMailTargets(event, session, null);
-      }
+	currentTime.setTime(System.currentTimeMillis());
+	event.writeEntry(logWriter, currentTime, null);
 
-    // log the event to the log file.
+	type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
-    currentTime.setTime(System.currentTimeMillis());
-    event.writeEntry(logWriter, currentTime, null);
-    
-    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
+	if (type == null)
+	  {
+	    Ganymede.debug("Error in DBLog.mailNotify(): unrecognized eventClassToken: " + 
+			   event.eventClassToken);
+	    return;
+	  }
 
-    if (type == null)
-      {
-	Ganymede.debug("Error in DBLog.mailNotify(): unrecognized eventClassToken: " + 
-		       event.eventClassToken);
-	return;
-      }
-
-    if (!type.mail)
-      {
-	Ganymede.debug("Logic error in DBLog.mailNotify():  eventClassToken not configured for mail delivery: " + 
-		       event.eventClassToken);
-	return;
+	if (!type.mail)
+	  {
+	    Ganymede.debug("Logic error in DBLog.mailNotify():  eventClassToken not configured for mail delivery: " + 
+			   event.eventClassToken);
+	    return;
+	  }
       }
     
     if (debug)
@@ -312,7 +378,16 @@ public class DBLog {
 
     // prepare our message, word wrap it
 
-    String message = type.description + "\n\n" + event.description + "\n\n";
+    String message;
+
+    if (type == null)
+      {
+	message = event.description + "\n\n";
+      }
+    else
+      {
+	message = type.description + "\n\n" + event.description + "\n\n";
+      }
 
     if (description != null)
       {
@@ -328,7 +403,34 @@ public class DBLog {
     // get our list of recipients from the event's enumerated list of recipients
     // and the event code's address list.
 
-    Vector emailList = VectorUtils.union(event.notifyVect, type.addressVect);
+    Vector emailList;
+
+    if (type == null)
+      {
+	emailList = event.notifyVect;
+      }
+    else
+      {
+	emailList = VectorUtils.union(event.notifyVect, type.addressVect);
+      }
+
+    String titleString;
+
+    if (type == null)
+      {
+	titleString = "Ganymede: " + title;
+      }
+    else
+      {
+	if (title == null)
+	  {
+	    titleString = "Ganymede: " + type.name;
+	  }
+	else
+	  {
+	    titleString = "Ganymede: " + title;
+	  }
+      }
 
     // and now..
     
@@ -338,7 +440,7 @@ public class DBLog {
 
 	mailer.sendmsg(Ganymede.returnaddrProperty,
 		       emailList,
-		       "Ganymede: " + ((title == null) ? type.name : title),
+		       titleString,
 		       message);
       }
     catch (IOException ex)
@@ -977,7 +1079,7 @@ public class DBLog {
 
 	if (type.ccToOwners)
 	  {
-	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects));
+	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects, true, true));
 	  }
 
 	// who should we say the mail is from?
@@ -1082,7 +1184,7 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects));
+	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true));
       }
 
     mailList = VectorUtils.union(mailList, type.addressVect);
@@ -1402,6 +1504,20 @@ public class DBLog {
       }
   }
 
+  private void calculateMailTargets(DBLogEvent event, DBSession session, 
+				    systemEventType eventType)
+  {
+    if (eventType == null)
+      {
+	this.calculateMailTargets(event, session, eventType, true, true);
+      }
+    else
+      {
+	this.calculateMailTargets(event, session, eventType, eventType.ccToOwners,
+				  eventType.ccToOwners);
+      }
+  }
+
   /**
    * <P>This method generates a list of additional email addresses that
    * notification for this event should be sent to, based on the
@@ -1414,7 +1530,8 @@ public class DBLog {
    */
 
   private void calculateMailTargets(DBLogEvent event, DBSession session, 
-				    systemEventType eventType)
+				    systemEventType eventType, boolean mailToObjects,
+				    boolean mailToOwners)
   {
     Vector 
       notifyVect,
@@ -1436,12 +1553,13 @@ public class DBLog {
 	System.err.println(event.toString());
       }
 
-    if (eventType == null || eventType.ccToOwners)
+    if (eventType == null)
       {
-	// first we calculate what email addresses we should notify
-	// based on the ownership of the objects
-
-	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects));
+	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects, mailToObjects, mailToOwners));
+      }
+    else if (eventType.ccToOwners)
+      {
+	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects, true, true));
       }
     else
       {
@@ -1475,19 +1593,6 @@ public class DBLog {
 	System.err.println("DBLog.java: calculateMailTargets: exiting");
 	System.err.println(event.toString());
       }
-  }
-
-  /**
-   * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
-   * representing objects touched
-   * during a transaction, and returns a Vector of email addresses that
-   * should be notified of operations affecting the objects in the
-   * &lt;objects&gt; list.</P>
-   */
-
-  public Vector calculateOwnerAddresses(Vector objects)
-  {
-    return DBLog.calculateOwnerAddresses(objects, gSession.getSession());
   }
 
   /**
@@ -1578,6 +1683,19 @@ public class DBLog {
       }
   }
 
+  /**
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
+   * representing objects touched
+   * during a transaction, and returns a Vector of email addresses that
+   * should be notified of operations affecting the objects in the
+   * &lt;objects&gt; list.</P>
+   */
+
+  public Vector calculateOwnerAddresses(Vector objects, boolean mailToObjects, boolean mailToOwners)
+  {
+    return DBLog.calculateOwnerAddresses(objects, mailToObjects, mailToOwners, gSession.getSession());
+  }
+
   //
   //
   //
@@ -1586,6 +1704,7 @@ public class DBLog {
   //
   //
 
+  
   /**
    * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
    * representing objects touched
@@ -1595,6 +1714,19 @@ public class DBLog {
    */
 
   static public Vector calculateOwnerAddresses(Vector objects, DBSession session)
+  {
+    return calculateOwnerAddresses(objects, true, true, session);
+  }
+  
+  /**
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
+   * representing objects touched
+   * during a transaction, and returns a Vector of email addresses that
+   * should be notified of operations affecting the objects in the
+   * &lt;objects&gt; list.</P>
+   */
+
+  static public Vector calculateOwnerAddresses(Vector objects, boolean mailToObjects, boolean mailToOwners, DBSession session)
   {
     Enumeration objectsEnum, ownersEnum;
     Invid invid, ownerInvid;
@@ -1636,12 +1768,17 @@ public class DBLog {
 
 	// first off, does the object itself have anyone it wants to notify?
 
-	if (object.hasEmailTarget())
+	if (mailToObjects && object.hasEmailTarget())
 	  {
 	    results = VectorUtils.union(results, object.getEmailTargets());
 	  }
 
 	// okay, now we've got to see about notifying the owners..
+
+	if (!mailToOwners)
+	  {
+	    return results;
+	  }
 
 	if (object.isEmbedded())
 	  {
