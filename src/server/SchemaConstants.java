@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -76,14 +76,13 @@ public interface SchemaConstants {
   final static short PermBase = 2; // this base contains a set of permission bits constraining the admin personae's power
 
   final static short PermName = 100;
-  final static short PermMatrix = 101;
+  final static short PermMatrix = 101; // permissions applying to objects owned by admin personae
   final static short PermPersonae = 102; // what admin personae are using this priv matrix?
+  final static short PermDefaultMatrix = 103; // permissions applying to all objects not owned by the relevant personae
 
   // the following are fixed object id's
 
   final static short PermDefaultObj = 1;
-  final static short PermEndUserObj = 2;
-  final static short PermSelfUserObj = 3;
 
   /* users have a defined set of fields */
 
