@@ -906,10 +906,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    try 
 	      {
-		ok = callback.setValuePerformed(new JValueObject(this, 
-								 startDragIndex,
-								 JValueObject.MOVE,
-								 dragNode));
+		ok = callback.setValuePerformed(new JMoveValueObject(this, 
+								     startDragIndex,
+								     dragNode));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
