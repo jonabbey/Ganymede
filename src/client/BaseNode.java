@@ -4,12 +4,17 @@
    Tree node subclass used by gclient.java
 
    Created: 15 January 1999
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/01/16 01:27:23 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/16 01:54:58 $
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
 */
+
+package arlut.csd.ganymede.client;
+
+import arlut.csd.ganymede.*;
+import arlut.csd.JTree.*;
 
 /*------------------------------------------------------------------------------
                                                                            Class
