@@ -8,8 +8,8 @@
    
    Created: 16 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/05/23 01:06:26 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/05/23 03:54:14 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import javax.swing.*;
  * image on the left side, used for the about.. and motd features
  * in the Ganymede client.
  *   
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  * @author Mike Mulvaney
  *
  */
@@ -172,6 +172,16 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     text.setText(s);
     layout(550,400);
     scrollpane.getViewport().setViewPosition(new Point(0,0));
+  }
+
+  public void setVisible(boolean state)
+  {
+    super.setVisible(state);
+
+    if (state)
+      {
+	ok.requestFocus();
+      }
   }
 
   public void actionPerformed(ActionEvent e)
