@@ -7,8 +7,8 @@
    
    Created: 18 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:14 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/03/01 22:27:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,7 +63,7 @@ public class SystemLoader {
   Hashtable systems = new Hashtable();
 
   private StreamTokenizer tokens;
-  private FileInputStream inStream;
+  private BufferedReader inReader;
 
   /* -- */
 
@@ -77,79 +77,93 @@ public class SystemLoader {
 
     try
       {
-	inStream = new FileInputStream(filename);
+	inReader = new BufferedReader(new FileReader(filename));
       }
     catch (FileNotFoundException ex)
       {
 	System.err.println("Couldn't find " + filename);
       }
 
-    tokens = new StreamTokenizer(inStream);
-
-    tokens.resetSyntax();
-    tokens.wordChars(0, Integer.MAX_VALUE);
-    tokens.eolIsSignificant(true);
-    tokens.whitespaceChars(' ', ' ');
-    tokens.whitespaceChars('\t', '\t');
-    tokens.ordinaryChar(':');	// field separator
-    tokens.ordinaryChar(',');	// field separator
-    tokens.ordinaryChar('>');	// marker for type 2 lines
-    tokens.ordinaryChar('\n');
-
-    while (tokens.ttype != StreamTokenizer.TT_EOF)
+    try
       {
-	tokens.nextToken();
+	tokens = new StreamTokenizer(inReader);
 
-	if (tokens.ttype == StreamTokenizer.TT_EOF)
+	tokens.resetSyntax();
+	tokens.wordChars(0, Integer.MAX_VALUE);
+	tokens.eolIsSignificant(true);
+	tokens.whitespaceChars(' ', ' ');
+	tokens.whitespaceChars('\t', '\t');
+	tokens.ordinaryChar(':');	// field separator
+	tokens.ordinaryChar(',');	// field separator
+	tokens.ordinaryChar('>');	// marker for type 2 lines
+	tokens.ordinaryChar('\n');
+
+	while (tokens.ttype != StreamTokenizer.TT_EOF)
 	  {
-	    continue;
-	  }
+	    tokens.nextToken();
 
-	if (tokens.ttype == '>')
-	  {
-	    // read an interface
-
-	    System.out.print(">");
-	    interfaceCount++;
-
-	    try
+	    if (tokens.ttype == StreamTokenizer.TT_EOF)
 	      {
-		interfaceTmp = new interfaceObj(tokens);
-		systemTmp = (system) systems.get(interfaceTmp.systemName);
-		systemTmp.interfaces.addElement(interfaceTmp);
+		continue;
 	      }
-	    catch (IOException ex)
-	      {
-		// oops
 
-		interfaceTmp = null;
-		System.err.println("IOException reading an interface");
+	    if (tokens.ttype == '>')
+	      {
+		// read an interface
+
+		System.out.print(">");
+		interfaceCount++;
+
+		try
+		  {
+		    interfaceTmp = new interfaceObj(tokens);
+		    systemTmp = (system) systems.get(interfaceTmp.systemName);
+		    systemTmp.interfaces.addElement(interfaceTmp);
+		  }
+		catch (IOException ex)
+		  {
+		    // oops
+
+		    interfaceTmp = null;
+		    System.err.println("IOException reading an interface");
+		  }
 	      }
-	  }
-	else
-	  {
-	    tokens.pushBack();
-
-	    System.out.print(".");
-
-	    try
+	    else
 	      {
-		systemTmp = new system(tokens);
-		//		systemTmp.display();
-	      }
-	    catch (IOException ex)
-	      {
-		// oops
+		tokens.pushBack();
 
-		systemTmp = null;
+		System.out.print(".");
+
+		try
+		  {
+		    systemTmp = new system(tokens);
+		    //		systemTmp.display();
+		  }
+		catch (IOException ex)
+		  {
+		    // oops
+
+		    systemTmp = null;
 		
-		System.err.println("IOException reading a system");
-	      }
+		    System.err.println("IOException reading a system");
+		  }
 
-	    if (systemTmp != null)
-	      {
-		systems.put(systemTmp.systemName, systemTmp);
+		if (systemTmp != null)
+		  {
+		    systems.put(systemTmp.systemName, systemTmp);
+		  }
 	      }
+	  }
+      }
+    finally
+      {
+	try
+	  {
+	    inReader.close();
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("unknown IO exception caught: " + ex);
 	  }
       }
 

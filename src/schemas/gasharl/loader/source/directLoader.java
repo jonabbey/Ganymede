@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/02/26 22:52:08 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/03/01 22:27:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ public class directLoader {
 
   static Invid gashadminPermInvid;		// the standard GASH admin privileges
 
-  static FileInputStream inStream = null;
+  static BufferedReader inReader = null;
   static boolean done = false;
 
   static Group groupObj;
@@ -491,7 +491,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("input/admin_info");
+	inReader = new BufferedReader(new FileReader("input/admin_info"));
       }
     catch (FileNotFoundException ex)
       {
@@ -500,76 +500,90 @@ public class directLoader {
       }
 
     Admin adminObj;
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     Admin.initTokenizer(tokens);
 
     System.out.println("Scanning admin_info");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		adminObj = new Admin();
+		done = adminObj.loadLine(tokens);
+
+		if (adminObj.name != null)
+		  {
+		    if (adminObj.name.equals(Ganymede.rootname))
+		      {
+			System.err.println("Skipping over supergash");
+			continue;
+		      }
+
+		    boolean found = false;
+		    OwnerGroup ogRec = null;
+
+		    // go through the existing owner group definitions, see if
+		    // there is one that matches the new admin object.. if so,
+		    // just remember that that user is a member of that owner
+		    // group
+		
+		    for (int i = 0; !found && i < ownerGroups.size(); i++)
+		      {
+			ogRec = (OwnerGroup) ownerGroups.elementAt(i);
+		    
+			if (ogRec.compatible(adminObj))
+			  {
+			    ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
+			    found = true;
+			  }
+		      }
+		
+		    if (!found)
+		      {
+			if (adminObj.mask != null && !adminObj.mask.equals("*"))
+			  {
+			    // create a new owner group
+			
+			    ogRec = new OwnerGroup(adminObj);
+			    ownerGroups.addElement(ogRec);
+			  }
+			else	// the admin is a member of supergash
+			  {
+			    ogRec = supergash;
+			  }
+
+			ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
+		      }
+		
+		    // System.out.println("Putting " + adminObj.name + " : " + ogRec);
+
+		    adminUsers.put(adminObj.name, ogRec);
+
+		    if (!done)
+		      {
+			System.out.print(".");
+		      }
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+      }
+    finally
       {
 	try
 	  {
-	    adminObj = new Admin();
-	    done = adminObj.loadLine(tokens);
-
-	    if (adminObj.name != null)
-	      {
-		if (adminObj.name.equals(Ganymede.rootname))
-		  {
-		    System.err.println("Skipping over supergash");
-		    continue;
-		  }
-
-		boolean found = false;
-		OwnerGroup ogRec = null;
-
-		// go through the existing owner group definitions, see if
-		// there is one that matches the new admin object.. if so,
-		// just remember that that user is a member of that owner
-		// group
-		
-		for (int i = 0; !found && i < ownerGroups.size(); i++)
-		  {
-		    ogRec = (OwnerGroup) ownerGroups.elementAt(i);
-		    
-		    if (ogRec.compatible(adminObj))
-		      {
-			ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
-			found = true;
-		      }
-		  }
-		
-		if (!found)
-		  {
-		    if (adminObj.mask != null && !adminObj.mask.equals("*"))
-		      {
-			// create a new owner group
-			
-			ogRec = new OwnerGroup(adminObj);
-			ownerGroups.addElement(ogRec);
-		      }
-		    else	// the admin is a member of supergash
-		      {
-			ogRec = supergash;
-		      }
-
-		    ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
-		  }
-		
-		// System.out.println("Putting " + adminObj.name + " : " + ogRec);
-
-		adminUsers.put(adminObj.name, ogRec);
-
-		if (!done)
-		  {
-		    System.out.print(".");
-		  }
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
@@ -577,17 +591,8 @@ public class directLoader {
 	  }
       }
 
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
-      }
-
     System.err.println("\nOwner Groups identified:");
-
+    
     for (int i = 0; i < ownerGroups.size(); i++)
       {
 	System.err.println(ownerGroups.elementAt(i));
@@ -609,7 +614,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("input/user_categories");
+	inReader = new BufferedReader(new FileReader("input/user_categories"));
 	done = false;
       }
     catch (FileNotFoundException ex)
@@ -618,54 +623,59 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     UserCategory.initTokenizer(tokens);
 
     System.out.println("Scanning user_categories");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		categoryObj = new UserCategory();
+		done = categoryObj.loadLine(tokens);
+
+		if (!done && categoryObj.valid)
+		  {
+		    userCategories.put(categoryObj.name, categoryObj);
+
+		    if (debug)
+		      {
+			System.out.println("\n\n");
+			categoryObj.display();
+		      }
+		    else
+		      {
+			System.out.print(".");
+		      }
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+
+	System.out.println();
+	System.out.println("Done scanning user_categories");
+      }
+    finally
       {
 	try
 	  {
-	    categoryObj = new UserCategory();
-	    done = categoryObj.loadLine(tokens);
-
-	    if (!done && categoryObj.valid)
-	      {
-		userCategories.put(categoryObj.name, categoryObj);
-
-		if (debug)
-		  {
-		    System.out.println("\n\n");
-		    categoryObj.display();
-		  }
-		else
-		  {
-		    System.out.print(".");
-		  }
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    System.out.println();
-    System.out.println("Done scanning user_categories");
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }    
   }
 
@@ -684,7 +694,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("input/user_info");
+	inReader = new BufferedReader(new FileReader("input/user_info"));
 	done = false;
       }
     catch (FileNotFoundException ex)
@@ -693,54 +703,59 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     User.initTokenizer(tokens);
 
     System.out.println("Scanning user_info");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		userObj = new User();
+		done = userObj.loadLine(tokens);
+
+		if (!done && userObj.valid)
+		  {
+		    users.put(userObj.name, userObj);
+
+		    if (debug)
+		      {
+			System.out.println("\n\n");
+			userObj.display();
+		      }
+		    else
+		      {
+			System.out.print(".");
+		      }
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+
+	System.out.println();
+	System.out.println("Done scanning user_info");
+      }
+    finally
       {
 	try
 	  {
-	    userObj = new User();
-	    done = userObj.loadLine(tokens);
-
-	    if (!done && userObj.valid)
-	      {
-		users.put(userObj.name, userObj);
-
-		if (debug)
-		  {
-		    System.out.println("\n\n");
-		    userObj.display();
-		  }
-		else
-		  {
-		    System.out.print(".");
-		  }
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    System.out.println();
-    System.out.println("Done scanning user_info");
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
   }
 
@@ -837,12 +852,11 @@ public class directLoader {
   {
     // and the group file
 
-    inStream = null;
     done = false;
 
     try
       {
-	inStream = new FileInputStream("input/group_info");
+	inReader = new BufferedReader(new FileReader("input/group_info"));
       }
     catch (FileNotFoundException ex)
       {
@@ -850,52 +864,57 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     Group.initTokenizer(tokens);
 
     System.out.println("Scanning group_info");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		groupObj = new Group();
+		done = groupObj.loadLine(tokens);
+
+		if (!done && groupObj.valid)
+		  {
+		    groups.put(groupObj.name, groupObj);
+		    groupID.put(new Integer(groupObj.gid), groupObj);
+
+		    if (debug)
+		      {
+			System.out.println("\n\n");
+			groupObj.display();
+		      }
+		    else
+		      {
+			System.out.print(".");
+		      }
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+      }
+    finally
       {
 	try
 	  {
-	    groupObj = new Group();
-	    done = groupObj.loadLine(tokens);
-
-	    if (!done && groupObj.valid)
-	      {
-		groups.put(groupObj.name, groupObj);
-		groupID.put(new Integer(groupObj.gid), groupObj);
-
-		if (debug)
-		  {
-		    System.out.println("\n\n");
-		    groupObj.display();
-		  }
-		else
-		  {
-		    System.out.print(".");
-		  }
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
 
     System.out.println();
@@ -908,12 +927,11 @@ public class directLoader {
 
   private static void scanUserNetgroups()
   {
-    inStream = null;
     done = false;
 
     try
       {
-	inStream = new FileInputStream("input/netgroup");
+	inReader = new BufferedReader(new FileReader("input/netgroup"));
       }
     catch (FileNotFoundException ex)
       {
@@ -921,44 +939,49 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     UserNetgroup.initTokenizer(tokens);
 
     System.out.println("Scanning netgroup for user entries");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		uNetObj = new UserNetgroup();
+		done = uNetObj.loadLine(tokens);
+
+		//	    uNetObj.display();
+
+		if (!done)
+		  {
+		    System.out.print(".");
+		    userNetgroup.put(uNetObj.netgroup_name, uNetObj);
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+      }
+    finally
       {
 	try
 	  {
-	    uNetObj = new UserNetgroup();
-	    done = uNetObj.loadLine(tokens);
-
-	    //	    uNetObj.display();
-
-	    if (!done)
-	      {
-		System.out.print(".");
-		userNetgroup.put(uNetObj.netgroup_name, uNetObj);
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
 
     System.out.println();
@@ -973,12 +996,11 @@ public class directLoader {
   {
     System.out.println("\nScanning System Types\n");
 
-    inStream = null;
     done = false;
 
     try
       {
-	inStream = new FileInputStream("input/internet_assignment");
+	inReader = new BufferedReader(new FileReader("input/internet_assignment"));
       }
     catch (FileNotFoundException ex)
       {
@@ -986,42 +1008,47 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     SystemType.initTokenizer(tokens);
 
     SystemType st;
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		st = new SystemType();
+		done = st.loadLine(tokens);
+
+		if (!done)
+		  {
+		    st.display();
+		    systemTypes.put(st.name, st);
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+      }
+    finally
       {
 	try
 	  {
-	    st = new SystemType();
-	    done = st.loadLine(tokens);
-
-	    if (!done)
-	      {
-		st.display();
-		systemTypes.put(st.name, st);
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
 
     System.out.println();
@@ -1036,12 +1063,11 @@ public class directLoader {
   {
     System.out.println("\nScanning Rooms\n");
 
-    inStream = null;
     done = false;
 
     try
       {
-	inStream = new FileInputStream("input/networks_by_room.cpp");
+	inReader = new BufferedReader(new FileReader("input/networks_by_room.cpp"));
       }
     catch (FileNotFoundException ex)
       {
@@ -1049,67 +1075,72 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     Room.initTokenizer(tokens);
 
     String ipNetName;
     Room room;
 
-    while (!done)
+    try
       {
-	try
+	while (!done)
 	  {
-	    room = new Room();
-	    done = room.loadLine(tokens);
-	    
-	    // if we got a room ok, show what it looks like and register
-	    // the room and the network info for that room in our
-	    // datastructures.
-
-	    if (room.loaded)
+	    try
 	      {
-		if (debug)
+		room = new Room();
+		done = room.loadLine(tokens);
+	    
+		// if we got a room ok, show what it looks like and register
+		// the room and the network info for that room in our
+		// datastructures.
+
+		if (room.loaded)
 		  {
-		    room.display();
-		  }
-
-		if (rooms.containsKey(room.name))
-		  {
-		    System.err.println("** Error, multiple room definitions for " + room.name);
-		    continue;
-		  }
-
-		rooms.put(room.name, room);
-
-		for (int i = 0; i < room.nets.size(); i++)
-		  {
-		    ipNetName = (String) room.nets.elementAt(i);
-
-		    if (!networks.containsKey(ipNetName))
+		    if (debug)
 		      {
-			networks.put(ipNetName, ipNetName);
+			room.display();
+		      }
+
+		    if (rooms.containsKey(room.name))
+		      {
+			System.err.println("** Error, multiple room definitions for " + room.name);
+			continue;
+		      }
+
+		    rooms.put(room.name, room);
+
+		    for (int i = 0; i < room.nets.size(); i++)
+		      {
+			ipNetName = (String) room.nets.elementAt(i);
+
+			if (!networks.containsKey(ipNetName))
+			  {
+			    networks.put(ipNetName, ipNetName);
+			  }
 		      }
 		  }
 	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
 	  }
-	catch (EOFException ex)
+      }
+    finally
+      {
+	try
 	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
 
     System.out.println();
@@ -1140,12 +1171,11 @@ public class directLoader {
 
   private static void scanSystemNetgroups()
   {
-    inStream = null;
     done = false;
 
     try
       {
-	inStream = new FileInputStream("input/netgroup");
+	inReader = new BufferedReader(new FileReader("input/netgroup"));
       }
     catch (FileNotFoundException ex)
       {
@@ -1153,45 +1183,50 @@ public class directLoader {
 	done = true;
       }
 
-    StreamTokenizer tokens = new StreamTokenizer(inStream);
+    StreamTokenizer tokens = new StreamTokenizer(inReader);
 
     SystemNetgroup.initTokenizer(tokens);
 
     System.out.println("\nScanning netgroup for system entries\n");
 
-    while (!done)
+    try
+      {
+	while (!done)
+	  {
+	    try
+	      {
+		sNetObj = new SystemNetgroup();
+		done = sNetObj.loadLine(tokens);
+
+		//	    sNetObj.display();
+		//	    System.out.println();
+
+		if (!done)
+		  {
+		    System.out.print(".");
+		    systemNetgroup.put(sNetObj.netgroup_name, sNetObj);
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+      }
+    finally
       {
 	try
 	  {
-	    sNetObj = new SystemNetgroup();
-	    done = sNetObj.loadLine(tokens);
-
-	    //	    sNetObj.display();
-	    //	    System.out.println();
-
-	    if (!done)
-	      {
-		System.out.print(".");
-		systemNetgroup.put(sNetObj.netgroup_name, sNetObj);
-	      }
-	  }
-	catch (EOFException ex)
-	  {
-	    done = true;
+	    inReader.close();
 	  }
 	catch (IOException ex)
 	  {
 	    System.err.println("unknown IO exception caught: " + ex);
 	  }
-      }
-
-    try
-      {
-	inStream.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("unknown IO exception caught: " + ex);
       }
 
     System.out.println();
