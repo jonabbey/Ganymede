@@ -2285,6 +2285,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    invid = (Invid) element;
 	  }
+
+	if (invid != null)
+	  {
+	    objectHash.put(objId, invid);
+	  }
       }
 
     return invid;

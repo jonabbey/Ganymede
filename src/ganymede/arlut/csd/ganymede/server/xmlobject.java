@@ -536,10 +536,10 @@ public class xmlobject {
 
 	    if (debug)
 	      {
-		xSession.err.println("Calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		xSession.err.println("xmlobject calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
 	      }
 
-	    invid = xSession.getInvid(type.shortValue(), id);
+	    invid = xSession.session.findLabeledObject(id, type.shortValue());
 
 	    if (invid == null)
 	      {
@@ -548,7 +548,7 @@ public class xmlobject {
 
 	    if (debug)
 	      {
-		xSession.err.println("Called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
 		xSession.err.println("findLabeledObject() returned " + invid + "[3]");
 	      }
 	  }
