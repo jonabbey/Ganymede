@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/03/19 05:10:54 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/03/19 21:31:45 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -148,7 +148,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
    * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
    * @param width Width in pixels of the string list box.  If <= 0, the list box will be
-   * auto-sized
+   * auto-sized, with a 20 char minimum width
    *
    */
 
@@ -160,7 +160,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     /* - */
 
-    String longString = null;
+    // longString is used to calculate the minimum width of
+    // a JstringListBox in the absence of a defined width.
+
+    String longString = "this is the minimum!";
 
     /* -- */
 
