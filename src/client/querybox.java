@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -716,6 +716,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       {
 	returnVal = createQuery();
 	returnVal = setFields(returnVal);
+	unregister();
 	setVisible(false);	// close down
       } 
     else if (e.getSource() == CancelButton)
@@ -726,6 +727,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
 
 	returnVal = null;
+	unregister();
 	setVisible(false);
       } 
 
@@ -747,6 +749,27 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }
   } 
+
+  /**
+   *
+   * This method makes sure that any JdateField's contained in
+   * the querybox pop down their calendar dialogs.
+   *
+   */
+
+  private synchronized void unregister()
+  {
+    for (int i = 0; i < Rows.size(); i++)
+      {
+	QueryRow row = (QueryRow) Rows.elementAt(i);
+	
+	if ((row.operand != null) &&
+	    (row.operand instanceof JdateField))
+	  {
+	    ((JdateField) row.operand).unregister();
+	  }
+      }
+  }
 
   private void removeRow()
   {
@@ -1285,6 +1308,11 @@ class QueryRow implements ItemListener {
       {
 	if (operand != null)
 	  {
+	    if (operand instanceof JdateField)
+	      {
+		((JdateField) operand).unregister();
+	      }
+
 	    operand.setVisible(false);
 	    operandContainer.remove(operand);
 	    operand = null;
@@ -1455,6 +1483,14 @@ class QueryRow implements ItemListener {
     panel.remove(fieldChoice);
     panel.remove(boolChoice);
     panel.remove(compareChoice);
+
+    if (operand instanceof JdateField)
+      {
+	// pop down a popped up calendar
+
+	((JdateField) operand).unregister();
+      }
+
     panel.remove(operandContainer);
   }
 
