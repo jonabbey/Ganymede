@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1118,7 +1118,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setAllowedTarget(short val)
+  public synchronized void setTargetBase(short val)
   {
     // should we check that this is a valid target code?
 

@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -96,7 +96,7 @@ public interface BaseField extends Remote {
   public boolean isSymmetric() throws RemoteException;
   public short getTargetField() throws RemoteException;
 
-  public void setAllowedTarget(short val) throws RemoteException;
+  public void setTargetBase(short val) throws RemoteException;
   public void setSymmetry(boolean b) throws RemoteException;
   public void setTargetField(short val) throws RemoteException;
   
