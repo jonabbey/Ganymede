@@ -51,6 +51,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     mainPanel,
     buttonPanel;
 
+  //JMultiLineLabel
   JLabel
     textLabel;
 
@@ -132,8 +133,8 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     textPanel = new JPanel();
     textPanel.setLayout(new BorderLayout());
 
+    //textLabel = new JMultiLineLabel(Resource.getText());
     textLabel = new JLabel(Resource.getText());
-      
     textPanel.add("Center", textLabel);
       
     textBorder = new EtchedBorder(textPanel, 2, 5);
