@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 1999/07/22 05:34:18 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 1999/07/26 22:22:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.74 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.75 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -737,6 +737,25 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	// omit OwnerObjectsOwned
       }
+    else if (objectBase.getTypeID() == SchemaConstants.PersonaBase)
+      {
+	// in a partial emit, we're only going to write out the definitions
+	// for supergash (whatever it's called) and monitor, so we don't need
+	// to write out the user and email fields.. likewise, we don't need
+	// to write out the privs field, since supergash always has all privs
+	// and monitor should never have any.
+
+	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaNameField));
+	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminConsole));
+	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminPower));
+	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaLabelField));
+      }
+    else
+      {
+	throw new RuntimeException("Error, partialEmit() called on an object that is not a persona or owner group.");
+      }
+
+    // count the fields we're actually going to write out
 
     enum = fields.elements();
 
@@ -750,11 +769,13 @@ public class DBObject implements db_object, FieldType, Remote {
 	    counter++;
 	  }
       }
+
+    // and write them out
+
+    //    System.err.println("emitting fields");
     
     out.writeShort(counter);    
 
-    //    System.err.println("emitting fields");
-   
     enum = fields.elements();
 
     while (enum.hasMoreElements())

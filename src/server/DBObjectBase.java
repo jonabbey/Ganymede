@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 1999/07/23 04:53:59 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 1999/07/26 22:22:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -697,7 +697,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * to disk, for use by the DBStore dumpSchema() method.</p>
    *
    * <p>Note that some objects are emitted by this method, specifically
-   * things like the the supergash owner group, and the like.</p>
+   * things like the supergash owner group, and the like.</p>
    */
 
   synchronized void partialEmit(DataOutput out) throws IOException
@@ -806,7 +806,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	    if (invid.getNum() <= 2)
 	      {
-		personaObj.emit(out);
+		personaObj.partialEmit(out);
 	      }
 	  }
       }
@@ -845,7 +845,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	  }
       }
-    else  // just write everything in this base out
+    else  // just write everything in this base out, using standard emit()
       {
 	out.writeInt(objectTable.size());
 	

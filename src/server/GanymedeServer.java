@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 1999/07/08 04:27:44 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 1999/07/26 22:22:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -618,7 +618,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 						       null));
 	  }
 
-	throw new RemoteException("Bad Admin Account / Password"); // do we have to throw remote here?
+	return null;
       }
 
     adminSession aSession = new GanymedeAdmin(admin, fullprivs, clientName, clienthost);

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/07/23 04:53:59 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/07/26 22:22:08 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -135,6 +135,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   JPasswordField password = null;
   JButton quitButton = new JButton("Quit");
   JButton loginButton= null;
+
+  Image errorImage = null;
 
   /* -- */
 
@@ -453,13 +455,19 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 			     "Login error",
 			     "Couldn't log in to the Ganymede server... perhaps it is down?\n\nException: " + 
 			     rx.getMessage(),
-			     "OK", null).DialogShow();
+			     "OK", null,
+			     getErrorImage()).DialogShow();
 	  }
-
-	if (admin == null)
+	catch (IllegalArgumentException ex)
 	  {
+	    new StringDialog(new JFrame(),
+			     "Couldn't log in to the Ganymede Server",
+			     "Couldn't log in to the Ganymede server.\n\nBad username/password or " +
+			     "insufficient permissions to run the Ganymede admin console.",
+			     "OK", null, 
+			     getErrorImage()).DialogShow();
+	    
 	    password.setText("");
-	    System.err.println("Could not get admin.");
 	    return;
 	  }
 
@@ -577,6 +585,23 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       {
 	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
+  }
+
+  /**
+   * <p>Loads and returns the error Image for use in client dialogs.</p>
+   * 
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().</p>
+   */
+
+  public final Image getErrorImage()
+  {
+    if (errorImage == null)
+      {
+	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+      }
+    
+    return errorImage;
   }
 }
 
@@ -1091,7 +1116,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 					  "Ganymede Server Dump",
 					  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
 					  "Yes", "No", question);
-
 	  }
 
 	if (dumpDialog.DialogShow() != null)
@@ -1439,6 +1463,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	System.err.println("Error: Didn't get server reference.  Exiting now.");
 	return;
+      }
+
+    if (aSession == null)
+      {
+	throw new IllegalArgumentException();
       }
 
     if (debug)
