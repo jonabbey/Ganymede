@@ -6,7 +6,7 @@
    BSD 4.4 group file
    
    Created: 29 August 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ import java.util.*;
 
 public class Group {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   public static void initTokenizer(StreamTokenizer tokens)
   {
