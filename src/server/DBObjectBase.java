@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2000/09/29 00:42:11 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2000/09/30 23:03:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1406,6 +1406,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	    catch (ClassNotFoundException ex)
 	      {
+		// it might seem like we would emit this message a lot
+		// of a class file wasn't in our custom.jar file, but
+		// in fact createHook only gets called once
+		// usually.. even if we can't find the class, we'll
+		// pass back a default DBEditObject
+
 		System.err.println("DBObjectBase.receive(): class definition could not be found: " + ex);
 		classdef = null;
 	      }
@@ -1533,6 +1539,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	invid = chosenSlot;
       }
 
+    // it is crucial that we will have called createHook() before
+    // getting here, or else we might return a non-differentiated
+    // DBEditObject instead of a proper object of custom class type
+
     if (classdef == null)
       {
 	e_object = new DBEditObject(this, invid, editset);
@@ -1608,11 +1618,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   synchronized int getNextID()
   {
-    //    if (debug)
-    //      {
-    //	System.err.println("DBObjectBase.getNextID(): " + object_name + "'s maxid is " + maxid);
-    //      }
-
     return ++maxid;
   }
 

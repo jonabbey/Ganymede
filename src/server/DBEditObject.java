@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 2000/09/27 22:34:14 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 2000/09/30 23:03:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.135 $ $Date: 2000/09/27 22:34:14 $ $Name:  $
+ * @version $Revision: 1.136 $ $Date: 2000/09/30 23:03:00 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2527,7 +2527,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     ReturnVal retVal = null;
     DBField field;
     Enumeration enum;
-    DBSession session;
     String label = getLabel();	// remember the label before we clear it
 
     /* -- */
@@ -2629,8 +2628,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			
 		    if (retVal != null && !retVal.didSucceed())
 		      {
-			session = editset.getSession();
-			    
 			editset.rollback("del" + label); // *sync*
 			    
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
@@ -2662,8 +2659,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		    if (retVal != null && !retVal.didSucceed())
 		      {
-			session = editset.getSession();
-
 			editset.rollback("del" + label); // *sync*
 
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
@@ -2705,8 +2700,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		    if (retVal != null && !retVal.didSucceed())
 		      {
-			session = editset.getSession();
-
 			editset.rollback("del" + label); // *sync*
 
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
@@ -2730,8 +2723,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    session = editset.getSession();
-
 		    editset.rollback("del" + label); // *sync*
 
 		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
