@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -115,7 +115,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     object;
 
   windowPanel
-    parent;
+    wp;
 
   String 
     title,
@@ -127,7 +127,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   notesPanel
     my_notesPanel = null;
 
-  public framePanel(db_object object, boolean editable, windowPanel parent, String title)
+  public framePanel(db_object object, boolean editable, windowPanel winP, String title)
     {
       if (debug)
 	{
@@ -135,11 +135,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
     
       this.title = title;
-      this.parent = parent;
+      this.wp = winP;
       this.object = object;
       this.editable = editable;
 
-      parent.parent.setStatus("Building window.");
+      setStatus("Building window.");
 
       // Window properties
       setMaximizable(true);
@@ -150,7 +150,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
       progressPanel = new JPanel();
-      progressPanel.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
+      //progressPanel.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
       progressBar = new JProgressBar();
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
@@ -180,7 +180,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       setTitle(title);
       
-      JMenuBar mb = parent.createMenuBar(editable, object, this);
+      JMenuBar mb = wp.createMenuBar(editable, object, this);
       setMenuBar(mb);
 
       // Now setup the framePanel layout
@@ -191,9 +191,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       
       
-      //fields = (Vector)parent.parent.getBaseHash().get(object);
-	
-
       // Add the panels to the tabbedPane
       general = new JScrollPane();
       pane.addTab("General", null, general);
@@ -242,8 +239,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       contentPane.remove(progressPanel);
       contentPane.add("Center", pane);
 
-      contentPane.invalidate();
-      parent.validate();
+      //contentPane.invalidate();
+      contentPane.validate();
     }
 
   /**
@@ -256,6 +253,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       return my_notesPanel;
     }
 
+  /*
+  public void invalidate()
+  {
+    System.out.println("--Invalidate framePanel");
+    super.invalidate();
+  }
+
+  public void validate()
+  {
+    System.out.println("--validate framePanel");
+    super.validate();
+  }
+  */
+    
   //This need to be changed to show the progress bar
   void create_general_panel()
     {
@@ -264,17 +275,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.out.println("Creating general panel");
 	}
       
-      containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this, progressBar);
+      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar);
 
-      cp.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+      cp.setBorder(wp.emptyBorder10);
 
       general.setViewportView(cp);
       //general.setViewportView(progressBar);
       general_created = true;
-      general.invalidate();
-      validate();
+      //general.invalidate();
+      //pane.validate();
     }
 
+  // Don't use this
   public void validate_general()
     {
       general.invalidate();
@@ -564,7 +576,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (! general_created)
 	    {
-	      parent.parent.setStatus("Creating general panel");
+	      setStatus("Creating general panel");
 	      create_general_panel();
 	    }
 	}
@@ -572,7 +584,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (! expiration_date_created)
 	    {
-	      parent.parent.setStatus("Creating dates panel");
+	      setStatus("Creating dates panel");
 	      create_expiration_date_panel();
 	    }
 	}
@@ -580,7 +592,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (! removal_date_created)
 	    {
-	      parent.parent.setStatus("Creating dates panel");
+	      setStatus("Creating dates panel");
 	      create_removal_date_panel();
 	    }
 	}
@@ -588,7 +600,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (! notes_created)
 	    {
-	      parent.parent.setStatus("Creating notes panel");
+	      setStatus("Creating notes panel");
 	      create_notes_panel();
 	    }
 	}
@@ -596,7 +608,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (! owner_created)
 	    {
-	      parent.parent.setStatus("Creating owner panel");
+	      setStatus("Creating owner panel");
 	      create_owner_panel();
 	    }
 	}
@@ -621,7 +633,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
 	}
       
-      parent.parent.setStatus("Done");
+      setStatus("Done");
       
     }
 
@@ -634,12 +646,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   windowPanel getWindowPanel()
     {
-      return parent;
+      return wp;
     }
 
   private void setStatus(String status)
     {
-      parent.parent.setStatus(status);
+      wp.gc.setStatus(status);
     }
-      }
-	  //framePanel
+}
+	
