@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.251 $
-   Last Mod Date: $Date: 2002/01/14 22:24:13 $
+   Version: $Revision: 1.252 $
+   Last Mod Date: $Date: 2002/02/26 18:44:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.251 $ $Date: 2002/01/14 22:24:13 $
+ * @version $Revision: 1.252 $ $Date: 2002/02/26 18:44:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4924,6 +4924,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     return this.sendXML(receiver, true, true, logOffOnFailure);
   }
+
+  /**
+   * <p>Private server-side helper method used to transmit the server's database in XML
+   * format to an {@link arlut.csd.ganymede.FileReceiver FileReceiver} remote receiving
+   * interface.</p>
+   */
 
   private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean sendSchema, boolean logOffOnFailure)
   {
