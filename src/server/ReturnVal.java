@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -268,6 +268,28 @@ public class ReturnVal implements java.io.Serializable {
       }
 
     return results;
+  }
+
+  /**
+   *
+   * This method returns an encoded string representing
+   * the objects and fields to be rescanned by the
+   * client in response to this ReturnVal.<br><br>
+   *
+   * To be used for debugging.
+   *
+   */
+
+  public String dumpRescanInfo()
+  {
+    if (rescanList != null)
+      {
+	return rescanList.toString();
+      }
+    else
+      {
+	return "none";
+      }
   }
 
   /**
