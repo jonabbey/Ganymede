@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/03/16 06:33:23 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/06/14 04:53:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     super(original, editset);
 
-    if (getGSession().enableOversight)
+    if (getGSession().enableOversight && getGSession().enableWizards)
       {
 	initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
       }
@@ -172,7 +172,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     // If we are being created in an interactive context, 
     // create the first interface
 
-    if (getGSession().enableOversight)
+    if (getGSession().enableOversight && getGSession().enableWizards)
       {
 	InvidDBField invField = (InvidDBField) getField(systemSchema.INTERFACES);
 
@@ -1058,7 +1058,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     // we only want to do the checks/work in this method if we aren't
     // in bulk load mode.
 
-    if (!gSession.enableOversight)
+    if (!gSession.enableOversight || !gSession.enableWizards)
       {
 	return null;
       }

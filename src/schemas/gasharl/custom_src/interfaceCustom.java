@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/01/29 02:30:44 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/06/14 04:53:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -380,7 +380,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// we don't want to mess with the available-network
 	// management code if we are doing bulk-loading.
 
-	if (!gSession.enableOversight)
+	if (!gSession.enableOversight || !gSession.enableWizards)
 	  {
 	    return null;
 	  }
@@ -488,6 +488,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == interfaceSchema.ADDRESS)
       {
+	// don't get fancy if we're bulk loading
+
+	if (!gSession.enableOversight || !gSession.enableWizards)
+	  {
+	    return null;
+	  }
+
 	if (myNet != null)
 	  {
 	    // we need to turn off the wizardHook's intercession
@@ -575,6 +582,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
+    if (!gSession.enableWizards)
+      {
+	return null;
+      }
+
     // we don't want to play our address/ipnet games if we're being deleted.
 
     if (deleting)
