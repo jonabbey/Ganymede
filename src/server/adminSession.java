@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/02/10 05:33:42 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/05/26 18:28:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,23 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.util.Date;
+
+/**
+ * <p>GanymedeAdmin is the server-side implementation of the adminSession
+ * interface;  GanymedeAdmin provides the means by which privileged users
+ * can carry out privileged operations on the Ganymede server, including
+ * status monitoring and administrative activities.</p>
+ *
+ * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
+ * GanymedeAdmin implements {@link arlut.csd.ganymede.adminSession adminSession},
+ * providing a hook for the admin console to talk to.  On the other,
+ * GanymedeAdmin contains a lot of static fields and methods which the
+ * server code uses to communicate information to any admin consoles
+ * that are attached to the server at any given time.</p>
+ *
+ * @version $Revision: 1.11 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ */
 
 public interface adminSession extends Remote {
 

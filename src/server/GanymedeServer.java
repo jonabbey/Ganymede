@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/04/17 03:28:03 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/05/26 18:28:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,12 +63,11 @@ import java.rmi.server.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * The GanymedeServer object is created by Ganymede at start-up time
+ * <p>The GanymedeServer object is created by the
+ * {@link arlut.csd.ganymede.Ganymede Ganymede class} at start-up time
  * and published to the net for client logins via RMI.  As such,
  * the GanymedeServer object is the first Ganymede code that a client
- * will directly interact with.
- *
+ * will directly interact with.</p>
  */
 
 public class GanymedeServer extends UnicastRemoteObject implements Server {
