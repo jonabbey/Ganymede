@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.84 $ %D%
+   Version: $Revision: 1.85 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3266,6 +3266,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	if (succeeded)
 	  {
+	    setStatus("Transaction successfully committed.");
 	    wp.closeEditables();
 
 	    setSomethingChanged(false);
@@ -3300,6 +3301,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 	else if (!retVal.doNormalProcessing)
 	  {
+	    setStatus("Transaction could not successfully commit.");
+
 	    // This is just like a cancel.  Something went wrong, and
 	    // the server cancelled our transaction.  We dont' need to
 	    // call cancelTransaction, however, and we don't need to
@@ -3391,6 +3394,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  {
 	    if (retVal.didSucceed())
 	      {
+		setStatus("Transaction cancelled.");
+		
 		if (debug)
 		  {
 		    System.out.println("Cancel succeeded");
@@ -3398,6 +3403,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      }
 	    else
 	      {
+		setStatus("Error on server, transaction cancel failed.");
+
 		System.out.println("Everytime I think I'm out, they pull me back in!  Something went wrong with the cancel.");
 		return;
 	      }
