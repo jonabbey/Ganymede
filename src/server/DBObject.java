@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.34 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.35 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -706,7 +706,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public Vector getFieldInfoVector()
+  synchronized public Vector getFieldInfoVector(boolean customOnly)
   {
     Vector results = new Vector();
     Enumeration enum;
@@ -720,7 +720,10 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       {
 	field = (DBField) enum.nextElement();
 
-	results.addElement(new FieldInfo(field));
+	if (!(field.isBuiltIn() && customOnly))
+	  {
+	    results.addElement(new FieldInfo(field));
+	  }
       }
 
     // sort by display order

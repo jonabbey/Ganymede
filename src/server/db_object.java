@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.7 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.8 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -58,9 +58,11 @@ public interface db_object extends java.rmi.Remote {
    *
    * @see arlut.csd.ganymede.FieldInfo
    *
+   * @param customOnly If true, built-in fields won't be included in the returned vector
+   *
    */
 
-  public Vector getFieldInfoVector() throws RemoteException;
+  public Vector getFieldInfoVector(boolean customOnly) throws RemoteException;
 
   /**
    *
