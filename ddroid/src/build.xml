@@ -43,10 +43,17 @@
   <property name="use.ssl" value="true"/>
   <property name="do.signjars" value="true"/>
 
-  <property name="priv_key.alias" value="GanymedeServerSSLKeys"/>
+
+
+  <!-- This keystore passphrase must match that in arlut.csd.ddroid.common.RMISSLServerSocketFactory -->
   <property name="priv_key.storepass" value="ganypassphrase"/>
+
+  <!-- Let's make the private server key valid for 10 years -->
   <property name="priv_key.days_valid" value="3650"/>
-  <property name="priv_key.keystore" value="${build.crypto}/GanymedeServerKey"/>
+
+  <!-- This filename should not be changed -->
+  <property name="priv_key.keystore" value="${build.crypto}/GanymedeSSLServerKeys"/>
+  <property name="priv_key.alias" value="GanymedeServerKey"/>
   <property name="priv_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
   <property name="pubcert.truststore" value="${build.crypto}/client.truststore"/>
   <property name="pubcert.storepass" value="gclientpassphrase"/>
