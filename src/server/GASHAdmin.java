@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2000/05/27 01:47:41 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2000/06/26 21:37:02 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1555,6 +1555,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setServerStart(Date date)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setServerStart()");
+      }
+
     serverStart = date;
 
     if (frame != null)
@@ -1570,6 +1575,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setLastDumpTime(Date date)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setLastDumpTime()");
+      }
+
     if (frame != null)
       {
 	if (date == null)
@@ -1590,6 +1600,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setTransactionsInJournal(int trans)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setTransactionsInJournal()");
+      }
+
     if (frame != null)
       {
 	frame.journalField.setText("" + trans);
@@ -1603,6 +1618,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setObjectsCheckedOut(int objs)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setObjectsCheckedOut()");
+      }
+
     if (frame != null)
       {
 	frame.checkedOutField.setText("" + objs);
@@ -1616,6 +1636,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setLocksHeld(int locks)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setLocksHeld()");
+      }
+
     if (frame != null)
       {
 	frame.locksField.setText("" + locks);
@@ -1632,6 +1657,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeStatus(String status)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.changeStatus()");
+      }
+
     if (frame != null)
       {
 	frame.statusArea.append(status);
@@ -1646,6 +1676,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeAdmins(String adminStatus)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.changeAdmins()");
+      }
+
     if (frame != null)
       {
 	frame.adminField.setText(adminStatus);
@@ -1659,6 +1694,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeState(String state)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.changeState()");
+      }
+
     if (frame != null)
       {
 	frame.stateField.setText(state);
@@ -1675,6 +1715,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeUsers(Vector entries)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.changeUsers()");
+      }
+
     if (frame == null)
       {
 	return;
@@ -1725,6 +1770,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeTasks(Vector tasks)
   {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.changeTasks()");
+      }
+
     if (frame == null)
       {
 	return;
