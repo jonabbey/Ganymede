@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.97 $ %D%
+   Version: $Revision: 1.98 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.97 $ %D%
+ * @version $Revision: 1.98 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1490,9 +1490,23 @@ public final class InvidDBField extends DBField implements invid_field {
 	    continue;
 	  }
 
-	if (!tmpField.containsElementLocal(myInvid))
+	// see if this invid field points back to us.
+
+	if (tmpField.isVector())
 	  {
-	    continue;
+	    if (!tmpField.containsElementLocal(myInvid))
+	      {
+		continue;
+	      }
+	  }
+	else
+	  {
+	    Invid tempInvid = (Invid) tmpField.getValueLocal();
+
+	    if (tempInvid == null || !tempInvid.equals(myInvid))
+	      {
+		continue;
+	      }
 	  }
 
 	// if the field is symmetric and doesn't point to us, we won't
