@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/12/04 22:47:30 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2002/08/02 08:43:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -85,7 +85,10 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private org.xml.sax.Parser parser;
   private org.xml.sax.InputSource inputSource;
   private org.xml.sax.Locator locator;
-  private Vector buffer;
+  private final XMLItem[] buffer;
+  private int enqueuePtr = 0;
+  private int dequeuePtr = 0;
+  private int bufferContents = 0;
   private int bufferSize;
 
   /**
@@ -146,14 +149,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(xmlFilename));
     inputSource = new InputSource(inStream);
 
-    buffer = new Vector();
-
     if (bufferSize < 20)
       {
 	bufferSize = 20;
       }
 
     this.bufferSize = bufferSize;
+
+    buffer = new XMLItem[bufferSize];
 
     if (false) // optimize for single processor
       {
@@ -215,8 +218,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     BigPipedInputStream bpis = new BigPipedInputStream(sourcePipe);
     inputSource = new InputSource(bpis);
 
-    buffer = new Vector();
     this.bufferSize = bufferSize;
+    buffer = new XMLItem[bufferSize];
+
     this.skipWhiteSpace = skipWhiteSpace;
     this.err = err;
 
@@ -251,7 +255,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  {
 	    finished = true;	// assume we won't be seeing whitespace chars
 
-	    while (!done && pushback == null && buffer.size() == 0)
+	    while (!done && pushback == null && bufferContents == 0)
 	      {
 		try
 		  {
@@ -263,7 +267,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		  }
 	      }
 
-	    if (done && pushback == null && buffer.size() == 0)
+	    if (done && pushback == null && bufferContents == 0)
 	      {
 		return null;
 	      }
@@ -275,14 +279,13 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    else
 	      {
-		value = (XMLItem) buffer.elementAt(0);
-		buffer.removeElementAt(0);
+		value = dequeue();
 
 		// if we have drained the buffer below the low water
 		// mark, wake up the SAX parser thread and let it
 		// start filling us up again
 
-		if (buffer.size() <= lowWaterMark)
+		if (bufferContents <= lowWaterMark)
 		  {
 		    buffer.notifyAll();
 		  }
@@ -355,7 +358,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	    // wait until there's data to be had
 
-	    while (!done && pushback == null && buffer.size() == 0)
+	    while (!done && pushback == null && bufferContents == 0)
 	      {
 		try
 		  {
@@ -369,7 +372,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	    // if we're out of data and there will be no more, exit
 
-	    if (done && pushback == null && buffer.size() == 0)
+	    if (done && pushback == null && bufferContents == 0)
 	      {
 		return null;
 	      }
@@ -382,7 +385,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    else
 	      {
-		value = (XMLItem) buffer.elementAt(0);
+		value = buffer[dequeuePtr];
 	      }
 
 	    if (skipWhiteSpaceChars)
@@ -780,9 +783,16 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
   }
 
-  private final void pourIntoBuffer(XMLItem item)
+  private final void pourIntoBuffer(XMLItem item) throws SAXException
   {
-    buffer.addElement(item);
+    try
+      {
+	enqueue(item);
+      }
+    catch (InterruptedException ex)
+      {
+	throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+      }
 
     // the buffer needs all xml items, since whitespace
     // is filtered out later in the processing chain,
@@ -812,7 +822,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     // high water mark, wake up the consumers
     // and let them start draining
 
-    if (buffer.size() >= highWaterMark)
+    if (bufferContents >= highWaterMark)
       {
 	buffer.notifyAll();
       }
@@ -875,7 +885,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -921,7 +931,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -977,7 +987,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1025,7 +1035,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1088,7 +1098,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1143,7 +1153,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1213,7 +1223,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1266,7 +1276,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1318,7 +1328,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	while (!done && buffer.size() >= bufferSize)
+	while (!done && bufferContents >= bufferSize)
 	  {
 	    try
 	      {
@@ -1343,6 +1353,54 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	done = true;
 	err.println(exception.getMessage());
 	pourIntoBuffer(new XMLError(exception, locator, true));
+      }
+  }
+
+  /**
+   * private enqueue method.  assumes that the calling code will check
+   * bounds.
+   */
+
+  private void enqueue(XMLItem item) throws InterruptedException
+  {
+    synchronized (buffer)
+      {
+	while (bufferContents >= bufferSize)
+	  {
+	    buffer.wait();
+	  }
+
+	buffer[enqueuePtr] = item;
+
+	if (++enqueuePtr >= bufferSize)
+	  {
+	    enqueuePtr = 0;
+	  }
+
+	bufferContents++;
+      }
+  }
+
+  /**
+   * private dequeue method.  assumes that the calling code will check
+   * bounds.
+   */
+
+  private XMLItem dequeue()
+  {
+    synchronized (buffer)
+      {
+	XMLItem result = buffer[dequeuePtr];
+	buffer[dequeuePtr] = null;
+
+	if (++dequeuePtr >= bufferSize)
+	  {
+	    dequeuePtr = 0;
+	  }
+
+	bufferContents--;
+	
+	return result;
       }
   }
 }
