@@ -6,7 +6,7 @@
    GASH netgroup_ file
    
    Created: 17 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -103,7 +103,7 @@ public class SystemNetgroup {
 	  {
 	    //	    System.out.print(" " + tokens.sval);
 
-	    String tmp = tokens.sval;
+	    String tmp = getNextBit(tokens);
 
 	    if (tmp.indexOf('(') == -1)
 	      {
@@ -115,7 +115,7 @@ public class SystemNetgroup {
 	      {
 		// we've got a system entry
 
-		String tmp2 = tmp.substring(tmp.indexOf(',') + 1, tmp.lastIndexOf(','));
+		String tmp2 = tmp.substring(1, tmp.indexOf(','));
 		systems.addElement(tmp2);
 	      }
 	  }
