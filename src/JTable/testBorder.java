@@ -22,7 +22,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
    
   Created: 31 January 1997
-  Version: $Revision: 1.2 $ %D%
+  Version: $Revision: 1.3 $ %D%
   Module By: Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,7 @@ public class testBorder extends Panel {
     add("Center", borderMe);
   }
 
-  public Insets insets()
+  public Insets getInsets()
   {
     return new Insets(xinset, yinset, xinset, yinset);
   }

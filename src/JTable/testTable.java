@@ -20,7 +20,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 5 June 1996
-  Version: $Revision: 1.8 $ %D%
+  Version: $Revision: 1.9 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -232,7 +232,7 @@ public class testTable extends Applet implements arlut.csd.JTable.rowSelectCallb
 	System.err.println("XX resizing frame");
       }
 
-    frame.resize(300, 300);
+    frame.setSize(300, 300);
 
     if (debug)
       {
