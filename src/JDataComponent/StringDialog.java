@@ -187,7 +187,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 	if (numberOfObjects > 0) 
 	  {
 	    // System.out.println("objects.size() > 0"); 
-	    panel = new InsetPanel();
+	    panel = new JInsetPanel();
 	    table = new TableLayout(false);
 	    panel.setLayout(table);
 	    table.rowSpacing(10);
