@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package csd.DBStore;
 
-import csd.DBStore.*;
 import java.io.*;
 import java.util.*;
 
@@ -59,6 +58,38 @@ class DBNameSpace {
 
   /*----------------------------------------------------------------------------
                                                                           method
+                                                                        lookup()
+  
+  This method allows the namespace to be used as a unique valued search index.
+
+  Note that this lookup only works for precise equality lookup.. i.e., strings
+  must be the same capitalization and the whole works.
+
+  As well, this method is really probably useful in the context of a DBReadLock,
+  but we're not doing anything to enforce this requirement at this point.
+
+  ----------------------------------------------------------------------------*/
+  public synchronized DBField lookup(Object value)
+  {
+    DBNameSpaceHandle handle;
+
+    /* -- */
+
+    if (uniqueHash.containsKey(value))
+      {
+	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+	if (handle.field != null)
+	  {
+	    return handle.field;
+	  }
+      }
+
+    return null;
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
                                                                       testmark()
 
   This method tests to see whether a value in the namespace can be marked as
@@ -67,7 +98,11 @@ class DBNameSpace {
   editset to acquire a value needed if the editset transaction is aborted.
 
   For array db fields, all elements in the array should be testmark'ed
-  in the context of a synchronized block on the namespace
+  in the context of a synchronized block on the namespace before going back
+  and marking each value (while still in the synchronized block on the
+  namespace).. this ensures that we won't mark several values in an array
+  before discovering that one of the values in a DBArrayField is already
+  taken
 
   ----------------------------------------------------------------------------*/
   public synchronized boolean testmark(DBEditSet editSet, Object value)
@@ -76,7 +111,7 @@ class DBNameSpace {
 
     /* -- */
 
-    if (uniqueHash.containskey(value))
+    if (uniqueHash.containsKey(value))
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
@@ -98,13 +133,26 @@ class DBNameSpace {
     return true;
   }
 
-  public synchronized boolean mark(DBEditSet editSet, Object value, DBField field)
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                          mark()
+
+  This method marks a value as being used in this namespace.  Marked
+  values are held in editSet's, which are free to shuffle these
+  reserved values around during processing.  The inuse and original
+  fields in the namespace object are used during unique value searches
+  to do direct hash lookups without getting confused by any shuffling
+  being performed by a current thread.
+
+  ----------------------------------------------------------------------------*/
+
+  synchronized public boolean mark(DBEditSet editSet, Object value, DBField field)
   {
     DBNameSpaceHandle handle;
     
     /* -- */
 
-    if (uniqueHash.containskey(value))
+    if (uniqueHash.containsKey(value))
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
@@ -121,6 +169,8 @@ class DBNameSpace {
 	    handle.original = true;
 	    handle.inuse = true;
 	    handle.shadowField = field;
+
+	    remember(editSet, value);
 	  }
 	else
 	  {
@@ -144,6 +194,9 @@ class DBNameSpace {
 
 		handle.inuse = true;
 		handle.shadowField = field;
+
+		// we don't have to make a note in reserved since
+		// we already have this value noted in the editset?
 	      }
 	  }
       }
@@ -156,7 +209,11 @@ class DBNameSpace {
 	handle.inuse = true;
 	handle.shadowField = field;
 	uniqueHash.put(value, handle);
+
+	remember(editSet, value);
       }
+
+    return true;
   }
 
   /*----------------------------------------------------------------------------
@@ -168,8 +225,12 @@ class DBNameSpace {
   to juggle values in namespace associated fields without allowing another
   editset to acquire a value needed if the editset transaction is aborted.
 
-  For array db fields, all elements in the array should be testmark'ed
-  in the context of a synchronized block on the namespace.
+  For array db fields, all elements in the array should be testunmark'ed
+  in the context of a synchronized block on the namespace before actually
+  unmarking all the values.  See the comments in testmark() for the logic
+  here.  Note that testunmark() is less useful than testmark() because
+  we really aren't expecting anything to prevent us from unmarking()
+  something.
 
   ----------------------------------------------------------------------------*/
   public synchronized boolean testunmark(DBEditSet editSet, Object value)
@@ -178,7 +239,7 @@ class DBNameSpace {
 
     /* -- */
 
-    if (uniqueHash.containskey(value))
+    if (uniqueHash.containsKey(value))
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
@@ -204,13 +265,23 @@ class DBNameSpace {
 				// be unmarking it
   }
 
-  public synchronized void unmark(DBEditSet editSet, Object value)
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                        unmark()
+
+  Used to mark a value as not used in the namespace.  Unmarked values are not
+  available for other threads / editset's until commit is called on this
+  namespace on behalf of this editset.
+
+  ----------------------------------------------------------------------------*/
+
+  public synchronized boolean unmark(DBEditSet editSet, Object value)
   {
     DBNameSpaceHandle handle;
     
     /* -- */
 
-    if (uniqueHash.containskey(value))
+    if (uniqueHash.containsKey(value))
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
@@ -226,7 +297,9 @@ class DBNameSpace {
 	    handle.owner = editSet;
 	    handle.original = true;
 	    handle.inuse = false;
-	    handle.shadowfield = null;
+	    handle.shadowField = null;
+
+	    remember(editSet, value);
 	  }
 	else
 	  {
@@ -253,11 +326,20 @@ class DBNameSpace {
 	handle.inuse = true;
 	handle.shadowField = null;
 	uniqueHash.put(value, handle);
+
+	remember(editSet, value);
       }
+
+    return true;
   }
 
-  // method to revert an editSet's namespace modifications to
-  // the original state
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                         abort()
+  Method to revert an editSet's namespace modifications to its
+  original state.  Used when a transaction is rolled back.
+
+  ----------------------------------------------------------------------------*/
 
   public synchronized void abort(DBEditSet editSet)
   {
@@ -278,12 +360,12 @@ class DBNameSpace {
 
     valueVect = (Vector) reserved.get(editSet);
 
-    // loop over the values in the namespace that were changes or affected
+    // loop over the values in the namespace that were changed or affected
     // by this editset
 
     for (int i = 0; i < valueVect.size(); i++)
       {
-	handle = uniqueHash.get(valueVect.elementAt(i));
+	handle = (DBNameSpaceHandle) uniqueHash.get(valueVect.elementAt(i));
 
 	// if the handle was originally in the namespace,
 	// clear the shadowfield. if the handle wasn't in the
@@ -300,11 +382,21 @@ class DBNameSpace {
 	    uniqueHash.remove(valueVect.elementAt(i));
 	  }
       }
+
+    // we're done with this editSet
+
+    reserved.remove(editSet);
   }
 
-  // method to put the editSet's current namespace modifications into
-  // final effect and to make any abandoned values available for other
-  // namespaces.
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                        commit()
+
+  Method to put the editSet's current namespace modifications into
+  final effect and to make any abandoned values available for other
+  namespaces.
+
+  ----------------------------------------------------------------------------*/
 
   public synchronized void commit(DBEditSet editSet)
   {
@@ -330,20 +422,58 @@ class DBNameSpace {
 
     for (int i = 0; i < valueVect.size(); i++)
       {
-	handle = uniqueHash.get(valueVect.elementAt(i));
+	handle = (DBNameSpaceHandle) uniqueHash.get(valueVect.elementAt(i));
 
 	if (handle.inuse)
 	  {
+	    // if the transaction wishes to retain this value, update
+	    // our handle to go along with the new order
+
 	    handle.owner = null;
 	    handle.field = handle.shadowField;
 	    handle.shadowField = null;
 	  }
 	else
 	  {
+	    // this value will be floating free and easy, unused and
+	    // unloved.  forget about it.
+
 	    uniqueHash.remove(valueVect.elementAt(i));
 	  }
       }
+
+    // we're done with this editSet
+
+    reserved.remove(editSet);
   }  
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                      remember()
+
+  Remember that this editSet has changed the location/status of this value.
+
+  This is a private convenience method.
+
+  ----------------------------------------------------------------------------*/
+  private void remember(DBEditSet editSet, Object value)
+  {
+    Vector tmpvect;
+
+    /* -- */
+
+    if (!reserved.containsKey(editSet))
+      {
+	tmpvect = new Vector();
+	tmpvect.addElement(value);
+	reserved.put(editSet, tmpvect);
+      }
+    else
+      {
+	tmpvect = (Vector) reserved.get(editSet);
+	tmpvect.addElement(value);
+      }
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -362,11 +492,19 @@ DBEditObject class.
 
 class DBNameSpaceHandle {
 
-  DBEditSet owner;
-  boolean original;
-  boolean inuse;
-  boolean temp;
-  DBField field;		// so the hash can be used as an index
+  DBEditSet owner;		// if this value is currently being shuffled
+				// by a transaction, this is the transaction
+
+  boolean original;		// remember if the value was in use at the
+				// start of the transaction
+
+  boolean inuse;		// is the value currently in use?
+
+  DBField field;		// so the namespace hash can be used as an index
+				// field always points to the field that contained
+				// this value at the time this field was last
+				// committed in a transaction
+
   DBField shadowField;		// if this handle is currently being edited
 				// by an editset, shadowField points to the
 				// new field
@@ -389,15 +527,5 @@ class DBNameSpaceHandle {
   public boolean matches(DBEditSet set)
   {
     return (this.owner == set);
-  }
-
-  public void markInUse()
-  {
-    this.inuse = true;
-  }
-
-  public void markNotInUse()
-  {
-    this.inuse = false;
   }
 }
