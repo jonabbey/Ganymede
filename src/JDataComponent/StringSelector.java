@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2001/06/27 19:24:40 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2001/06/27 19:50:39 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.33 $ $Date: 2001/06/27 19:24:40 $ $Name:  $
+ * @version $Revision: 1.34 $ $Date: 2001/06/27 19:50:39 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -151,10 +151,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   LineBorder
     lborder = new LineBorder(Color.black);
-
-  Vector
-    inVector = new Vector(),
-    outVector = new Vector();
   
   int rowWidth;
 
@@ -276,6 +272,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
 			String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
   {
+    Vector
+      inVector = new Vector(),
+      outVector = new Vector();
+
+    /* -- */
+
     org_in = inLabel;
     org_out = outLabel;
 
@@ -1424,12 +1426,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   public Vector getChosenHandles()
   {
-    if (inVector == null)
-      {
-	return new Vector();
-      }
-
-    return (Vector) inVector.clone();
+    return in.getSelectedHandles();
   }
 
   /**
@@ -1439,6 +1436,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   public Vector getChosenStrings()
   {
+    Vector inVector = in.getSelectedHandles();
     Vector result = new Vector();
 
     if (inVector == null)
