@@ -7,8 +7,8 @@
    
    Created: 10 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:42 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/08/31 03:51:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,7 +216,7 @@ public class GHashtable extends Hashtable {
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                         GHandle
+                                                                            GKey
 
 This class provides a mapping to allow keys of differing capitalization to be
 treated as identical in a hashtable, while allowing the capitalization-preserved
@@ -234,6 +234,11 @@ class GKey {
 
   GKey(Object key)
   {
+    if (key == null)
+      {
+	throw new NullPointerException("Null key value");
+      }
+
     if (key instanceof String)
       {
 	orig = key;

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2000/07/12 04:41:01 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2000/08/31 03:51:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.124 $ %D%
+ * @version $Revision: 1.125 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1082,187 +1082,6 @@ public final class DBStore {
 	    outStream.close();
 	  }
       }
-  }
-
-  /**
-   * <p>Load the database, in XML form, from disk.</p>
-   *
-   * <p>This method loads both the database type definition and database
-   * contents from a single XML file.</p>
-   *
-   * @param filename Name of the database file
-   * @param reallyLoad if true, we'll actually fully load the database.
-   * If false, we'll just get the schema loaded so we can report on it.
-   */
-
-  public synchronized void importXML(String filename, boolean reallyLoad)
-  {
-    XMLReader reader = null;
-    XMLItem item;
-
-    /* -- */
-
-    try
-      {
-	try
-	  {
-	    reader = new XMLReader(filename, 20, true);	// skip blank chardata
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("caught io exception in importXML");
-	  }
-
-	item = reader.getNextItem();
-
-	if (!(item instanceof XMLStartDocument))
-	  {
-	    System.err.println("error.. XMLReader didn't return an XMLStartDocument first");
-	  }
-
-	item = reader.getNextItem();
-
-	System.err.println(item);
-
-	if (!item.matches("ganymede"))
-	  {
-	    System.err.println("error.. XMLReader didn't have ganymede element first");
-	  }
-	else
-	  {
-	    Integer major = item.getAttrInt("major");
-	    Integer minor = item.getAttrInt("minor");
-
-	    if (major == null || minor == null)
-	      {
-		System.err.println("error, ganymede minor or major number missing");
-	      }
-
-	    if (major_xml_version < major.intValue())
-	      {
-		System.err.println("error, ganymede major number too high");
-	      }
-	    
-	    if (major_xml_version == major.intValue() &&
-		minor_xml_version < minor.intValue())
-	      {
-		System.err.println("error, ganymede minor number too high");
-	      }
-	  }
-
-	item = reader.peekNextItem();
-
-	System.err.println(item);
-
-	if (item.matches("ganyschema"))
-	  {
-	    // read schema
-
-	    System.err.println("Reading schema");
-	    
-	    item = reader.getNextItem();
-
-	    boolean done = false;
-
-	    while (!done)
-	      {
-		item = reader.getNextItem();
-
-		if (item == null)
-		  {
-		    System.err.println("Error, came to end of stream without encountering </ganydata>");
-		    done = true;
-		  }
-		else if (item.matchesClose("ganyschema"))
-		  {
-		    done = true;
-		  }
-		else if (item instanceof XMLError)
-		  {
-		    System.err.println(item);
-		  }
-		else
-		  {
-		    System.err.println(item);
-		  }
-	      }
-	  }
-	else if (item.matches("ganydata"))
-	  {
-	    // read data objects
-
-	    System.err.println("Reading data objects.. no schema");
-	    
-	    item = reader.getNextItem();
-	  }
-	else
-	  {
-	    System.err.println("error, unrecognized item " + item);
-	  }
-
-	item = reader.peekNextItem();
-
-	while (item != null && !item.matches("ganydata"))
-	  {
-	    reader.getNextItem();
-	    item = reader.peekNextItem();
-	  }
-
-	if (item != null && item.matches("ganydata"))
-	  {
-	    System.err.println("Reading data objects");
-	    
-	    item = reader.getNextItem();
-
-	    boolean done = false;
-
-	    while (!done)
-	      {
-		item = reader.getNextItem();
-
-		if (item == null)
-		  {
-		    System.err.println("Error, came to end of stream without encountering </ganydata>");
-		    done = true;
-		  }
-		else if (item.matchesClose("ganydata"))
-		  {
-		    done = true;
-		  }
-		else if (item instanceof XMLError)
-		  {
-		    System.err.println(item);
-		  }
-		else
-		  {
-		    System.err.println(item);
-		  }
-	      }
-	  }
-	
-	item = reader.getNextItem();
-
-	while (item != null && !item.matchesClose("ganymede"))
-	  {
-	    System.err.println(item);
-	    item = reader.getNextItem(); // skip empty char data
-	  }
-
-	if (item == null)
-	  {
-	    System.err.println("XML Reader came to end of stream.");
-	  }
-	else if (item.matchesClose("ganymede"))
-	  {
-	    System.err.println("XML Reader found </ganymede>");
-	  }
-      }
-    finally
-      {
-	reader.close();
-      }
-    
-    return;
   }
 
   /**

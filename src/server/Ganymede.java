@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2000/08/25 21:22:57 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2000/08/31 03:51:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -534,8 +534,6 @@ public class Ganymede {
 	    ex.printStackTrace();
 	    debug("IOException dumping XML schema: " + ex.getMessage());
 	  }
-	
-	//	db.importXML(dbFilename + ".xml", false);
       }
 
     // set up the log

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2000/08/09 02:22:17 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2000/08/31 03:51:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -225,7 +225,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public XMLSession xmlLogin(String clientName, String clientPass) throws RemoteException
   {
-    return new GanymedeXMLSession(processLogin(clientName, clientPass, null, false));
+    GanymedeXMLSession xSession = new GanymedeXMLSession(processLogin(clientName, clientPass, null, false));
+    xSession.start();
+    return xSession;
   }
 
   /**
