@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,14 +119,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public boolean initializeNewObject()
   {
+    // If we are being created in an interactive context, 
     // create the first interface
 
-    InvidDBField invField = (InvidDBField) getField(systemSchema.INTERFACES);
+    if (getGSession().enableOversight)
+      {
+	InvidDBField invField = (InvidDBField) getField(systemSchema.INTERFACES);
 
-    // we shouldn't throw a null pointer here, as we should always have the
-    // INTERFACES field available
+	// we shouldn't throw a null pointer here, as we should always have the
+	// INTERFACES field available
 
-    invField.createNewEmbedded(true);
+	invField.createNewEmbedded(true);
+      }
 
     return true;
   }
