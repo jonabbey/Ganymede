@@ -7,8 +7,8 @@
    
    Created: 3 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/10/31 00:00:48 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/10/31 00:48:54 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -72,6 +72,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
   JButton cancel, done;
   Vector filter, available = null;
   gclient gc;
+  boolean changed = false;
 
   /* -- */
 
@@ -133,6 +134,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	    System.out.println("Adding element");
 	  }
 
+	changed = true;
 	filter.addElement(e.getValue());
       }
     else if (e.getOperationType() == JValueObject.ADDVECTOR)
@@ -141,6 +143,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	  {
 	    System.out.println("Adding elements");
 	  }
+
+	changed = true;
 
 	Vector newValues = (Vector) e.getValue();
 
@@ -156,8 +160,9 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	    System.out.println("removing element");
 	  }
 
+	changed = true;
+
 	filter.removeElement(e.getValue());
-	
       }
     else if (e.getOperationType() == JValueObject.DELETEVECTOR)
       {
@@ -165,6 +170,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	  {
 	    System.out.println("Removing elements");
 	  }
+
+	changed = true;
 
 	Vector newValues = (Vector) e.getValue();
 
@@ -187,7 +194,12 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
 	    if ((retVal == null) || (retVal.didSucceed()))
 	      {
-		gc.clearTree();
+		if (changed)
+		  {
+		    gc.clearCaches();
+		    gc.clearTree();
+		  }
+
 		this.setVisible(false);
 	      }
 	    else
@@ -200,10 +212,13 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	  {
 	    throw new RuntimeException("Could not set filter: " + rx);
 	  }
+
+	changed = false;
       }
     else if (e.getSource() == cancel)
       {
 	this.setVisible(false);
+	changed = false;
       }
   }
 }
