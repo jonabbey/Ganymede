@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 2000/09/17 10:04:34 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 2000/09/22 18:50:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.127 $ %D%
+ * @version $Revision: 1.128 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1532,7 +1532,7 @@ public final class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerCcAdmins;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc: All Admins";
+	bf.field_name = "Cc All Admins";
 	bf.loading = false;
 	bf.comment = "If checked, mail to this owner group will be sent to the admins";
 	b.addFieldToEnd(bf);
@@ -1679,7 +1679,7 @@ public final class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RoleDelegatable;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Delegatable Role?";
+	bf.field_name = "Delegatable Role";
 	bf.comment = "If true, this role can be granted to admins created/edited by Personae with this role.";
 	b.addFieldToEnd(bf);
 
@@ -1759,14 +1759,14 @@ public final class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventMailBoolean;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Send Mail?";
+	bf.field_name = "Send Mail";
 	bf.comment = "If true, occurrences of this event will be emailed";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc: Admin?";
+	bf.field_name = "Cc Admin";
 
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
 	b.addFieldToEnd(bf);
@@ -1827,14 +1827,14 @@ public final class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc: Admin?";
+	bf.field_name = "Cc Admin";
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventMailOwners;
 	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc: Owner Groups?";
+	bf.field_name = "Cc Owner Groups";
 	bf.comment = "If true, mail for this event will always be cc'ed to the owner groups owning the object";
 	b.addFieldToEnd(bf);
 
