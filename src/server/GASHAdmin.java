@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -139,6 +139,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   public void setServerStart(Date date)
   {
     serverStart = date;
+
     if (frame != null)
       {
 	frame.startField.setText(date.toString());
@@ -478,6 +479,8 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   {
     SchemaEdit editor = null;
 
+    /* -- */
+
     System.err.println("Trying to get SchemaEdit handle");
 
     try
@@ -530,8 +533,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   // ---
 
   Image question = null;
-
-  //Server server = null;
 
   JMenuBar mbar = null;
   JMenu controlMenu = null;
@@ -588,8 +589,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   // resources for the users connected table
   
   rowTable table = null;
-
-
 
   String headers[] = {"User", "System", "Status", "Connect Time", "Last Event"};
   int colWidths[] = {100,100,100,100,100};
@@ -687,8 +686,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 				       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
 				       "Yes", "No", question);
 
-    //    setBackground(Color.white);
-
     java.awt.GridBagLayout topGBL = new java.awt.GridBagLayout();
     java.awt.GridBagConstraints topGBC = new java.awt.GridBagConstraints();
 
@@ -702,8 +699,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     hostField = new JTextField(GASHAdmin.url, 40);
     hostField.setEditable(false);
-    //hostField.setBackground(SystemColor.text);
-    //hostField.setForeground(SystemColor.textText);
 
     topPanel = new JPanel();
 
@@ -964,6 +959,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     getContentPane().add(tabPane);
 
     // pack and load
+
     try
       {
 	admin.refreshMe();
@@ -987,9 +983,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    System.err.println("couldn't open RMI debug log: " + ex);
 	  }
       }
-
-
-
   }
 
   // our button / dialog handler
@@ -999,6 +992,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     if (event.getSource() == quitMI)
       {
 	System.err.println("Quitting");
+
 	try
 	  {
 	    admin.disconnect();
@@ -1012,6 +1006,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    adminPanel.quitButton.setEnabled(true);
 	    adminPanel.loginButton.setEnabled(true);
 	    setVisible(false);
+
 	    // This shouldn't kill everything off, but it does for now.  Need to fix this later.
 	    
 	    if (! WeAreApplet)
@@ -1026,6 +1021,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	if (dumpDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative dump request");
+
 	    try
 	      {
 		admin.dumpDB();
@@ -1079,6 +1075,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	if (shutdownDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative shutdown request");
+
 	    try
 	      {
 		admin.shutdown();
@@ -1292,58 +1289,60 @@ public class GASHAdmin extends JApplet {
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
-
   }
 
   public static void main(String[] argv)
-    {
-      if (argv.length < 1)
-	{
-	  System.err.println("Error, no properties file specified.");
-	  return;
-	}
-      else
-	{
-	  if (!loadProperties(argv[0]))
-	    {
-	      System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
-	      return;
-	    }
-	  else
-	    {
-	      System.out.println("Successfully loaded properties from file " + argv[0]);
-	    }
-	}
+  {
+    if (argv.length < 1)
+      {
+	System.err.println("Error, no properties file specified.");
+	return;
+      }
+    else
+      {
+	if (!loadProperties(argv[0]))
+	  {
+	    System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
+	    return;
+	  }
+	else
+	  {
+	    System.out.println("Successfully loaded properties from file " + argv[0]);
+	  }
+      }
 
-      if (argv.length > 1)
-	{
-	  GASHAdminFrame.debugFilename = argv[1];
-	}
+    if (argv.length > 1)
+      {
+	GASHAdminFrame.debugFilename = argv[1];
+      }
 
-      applet = new GASHAdmin();
+    applet = new GASHAdmin();
 
-      // the frame constructor shows itself, and the gui thread takes
-      // care of keeping us going.
-      JFrame loginFrame = new JFrame("Admin console login");
-      java.awt.Container c = loginFrame.getContentPane();
+    // the frame constructor shows itself, and the gui thread takes
+    // care of keeping us going.
 
-      c.setLayout(new BorderLayout());
-      c.add("Center", applet.createLoginPanel());
+    JFrame loginFrame = new JFrame("Admin console login");
+    java.awt.Container c = loginFrame.getContentPane();
 
-      /* RMI initialization stuff. We do this for our iClient object. */
+    c.setLayout(new BorderLayout());
+    c.add("Center", applet.createLoginPanel());
 
-      System.setSecurityManager(new RMISecurityManager());
+    /* RMI initialization stuff. We do this for our iClient object. */
 
-      loginFrame.pack();
-      loginFrame.show();      
-    }
+    System.setSecurityManager(new RMISecurityManager());
+    
+    loginFrame.pack();
+    loginFrame.show();      
+  }
 
   public JPanel createLoginPanel()
   {
     JPanel panel = new JPanel();
-
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
+
+    /* -- */
+
     panel.setLayout(gbl);
 
     gbc.gridx = 0;
@@ -1383,7 +1382,6 @@ public class GASHAdmin extends JApplet {
     password.setEchoChar('*');
     panel.add(password);
     
-
     gbc.gridx = 0;
     gbc.gridy = 3;
 
@@ -1411,8 +1409,6 @@ public class GASHAdmin extends JApplet {
 	    }
 	}});
 
-    
-
     quitButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e)
 	{
@@ -1429,59 +1425,58 @@ public class GASHAdmin extends JApplet {
   }
 
   public iAdmin login(String username, String password)
-    {
-      iAdmin admin = null;
+  {
+    iAdmin admin = null;
 
-      /* -- */
-
-      /* Get a reference to the server */
-
-      try
-	{
-	  Remote obj = Naming.lookup(GASHAdmin.url);
-
-	  if (obj instanceof Server)
-	    {
-	      server = (Server) obj;
-	    }
-	}
-      catch (NotBoundException ex)
-	{
-	  System.err.println("RMI: Couldn't bind to server object\n" + ex );
-	  return null;
-	}
-      catch (java.rmi.UnknownHostException ex)
-	{
-	  System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
-	  return null;
-	}
-      catch (RemoteException ex)
-	{
-	  ex.printStackTrace();
-	  System.err.println("RMI: RemoteException during lookup.\n" + ex);
-	  return null;
-	}
-      catch (java.net.MalformedURLException ex)
-	{
-	  System.err.println("RMI: Malformed URL " + GASHAdmin.url );
-	  return null;
-	}
-
-      System.err.println("Bound to server object");
-
-      try
-	{
-	  admin = new iAdmin(frame, server, username, password);
-	}
-      catch ( RemoteException rx)
-	{
-	  System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
-	  return null;
-	}
+    /* -- */
     
-      return admin;
+    /* Get a reference to the server */
     
-    }
+    try
+      {
+	Remote obj = Naming.lookup(GASHAdmin.url);
+
+	if (obj instanceof Server)
+	  {
+	    server = (Server) obj;
+	  }
+      }
+    catch (NotBoundException ex)
+      {
+	System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	return null;
+      }
+    catch (java.rmi.UnknownHostException ex)
+      {
+	System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
+	return null;
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	System.err.println("RMI: RemoteException during lookup.\n" + ex);
+	return null;
+      }
+    catch (java.net.MalformedURLException ex)
+      {
+	System.err.println("RMI: Malformed URL " + GASHAdmin.url );
+	return null;
+      }
+
+    System.err.println("Bound to server object");
+
+    try
+      {
+	admin = new iAdmin(frame, server, username, password);
+      }
+    catch (RemoteException rx)
+      {
+	System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
+	return null;
+      }
+    
+    return admin;
+  }
 
   private static boolean loadProperties(String filename)
   {
@@ -1512,7 +1507,6 @@ public class GASHAdmin extends JApplet {
       }
 
     rootname = props.getProperty("ganymede.rootname");
-
 
     if (rootname == null)
       {
