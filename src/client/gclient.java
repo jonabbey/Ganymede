@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,6 +89,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     statusBorder = new CompoundBorder(loweredBorder, emptyBorder5),
     statusBorderRaised = new CompoundBorder(raisedBorder, emptyBorder5);
 
+  //
+  // Yum, caches
+  //
 
   private Vector
     baseList;            // List of base types.  Vector of Bases.
@@ -104,6 +107,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
                                      // Create and Delete are pending on the Commit button. 
    
   protected Hashtable
+    invidNodeHash = new Hashtable(),
     templateHash,
     cachedLists = new Hashtable();
 
@@ -112,8 +116,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     loader;      // Use this to do start up stuff in a thread
   
   boolean
-    somethingChanged = false;
+    somethingChanged = false;  // This will be set to true if the user changes anything
   
+  helpPanel
+    help = null;
+
   protected Vector
     filter = new Vector();    // List of owner groups to show, these are listHandles
 
@@ -146,6 +153,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftTop,
     rightTop,
     mainPanel;   //Everything is in this, so it is double buffered
+
+  Image
+    search,
+    pencil,
+    trash,
+    creation;
 
   public JLabel
     leftL,
@@ -184,7 +197,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     removeAllMI,
     rebuildTreeMI,
     filterQueryMI,
-    defaultOwnerMI;
+    defaultOwnerMI,
+    showHelpMI;
 
   private boolean
     defaultOwnerChosen = false;
@@ -197,14 +211,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     inactivateObjectMI,
     menubarQueryMI = null;
 
-  JMenuItem
-    roseMI,
+  JCheckBoxMenuItem
+    javaLFMI,
+    motifMI,
     win95MI;
 
   JMenu 
     actionMenu,
     windowMenu,
     fileMenu,
+    helpMenu,
     LandFMenu,
     PersonaMenu = null;
 
@@ -231,6 +247,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   {
     super("Ganymede Client: "+g.my_client.getName()+" logged in");
 
+
+    System.out.println("Shortcut key mask: " + KeyEvent.getKeyText(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
     System.out.println("Starting gclient");
 
 
@@ -244,14 +263,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     session = s;
     _myglogin = g;
 
+    System.out.println("Setting motif");
+    setMotif();
+    System.out.println("Done setting motif");
+
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", mainPanel);
-
-    //BorderLayout layout = new BorderLayout();
-    //setLayout( layout );
 
     templateHash = new Hashtable();
 
@@ -262,15 +282,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Make the menu bar
     menubar = new JMenuBar();    
-    menubar.setBorderPainted(true);
+    //menubar.setBorderPainted(true);
     
+
     // File menu
     fileMenu = new JMenu("File");
-    logoutMI = new JMenuItem("Logout");
+    logoutMI = new JMenuItem("Logout", new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
     removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
-    rebuildTreeMI = new JMenuItem("Rebuild Tree");
+    rebuildTreeMI = new JMenuItem("Rebuild Tree", new MenuShortcut(KeyEvent.VK_R));
     rebuildTreeMI.addActionListener(this);
 
     filterQueryMI = new JMenuItem("Filter Query");
@@ -289,27 +310,27 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // Action menu
     actionMenu = new JMenu("Actions");
 
-    editObjectMI = new JMenuItem("Edit Object");
+    editObjectMI = new JMenuItem("Edit Object", new MenuShortcut(KeyEvent.VK_E));
     editObjectMI.setActionCommand("open object for editing");
     editObjectMI.addActionListener(this);
 
-    viewObjectMI = new JMenuItem("View Object");
+    viewObjectMI = new JMenuItem("View Object", new MenuShortcut(KeyEvent.VK_V));
     viewObjectMI.setActionCommand("open object for viewing");
     viewObjectMI.addActionListener(this);
     
-    cloneObjectMI = new JMenuItem("Clone Object");
+    cloneObjectMI = new JMenuItem("Clone Object", new MenuShortcut(KeyEvent.VK_C));
     cloneObjectMI.setActionCommand("choose an object for cloning");
     cloneObjectMI.addActionListener(this);
 
-    deleteObjectMI = new JMenuItem("Delete Object");
+    deleteObjectMI = new JMenuItem("Delete Object", new MenuShortcut(KeyEvent.VK_D));
     deleteObjectMI.setActionCommand("delete an object");
     deleteObjectMI.addActionListener(this);
 
-    inactivateObjectMI = new JMenuItem("Inactivate Object");
+    inactivateObjectMI = new JMenuItem("Inactivate Object", new MenuShortcut(KeyEvent.VK_I));
     inactivateObjectMI.setActionCommand("inactivate an object");
     inactivateObjectMI.addActionListener(this);
 
-    menubarQueryMI = new JMenuItem("Query");
+    menubarQueryMI = new JMenuItem("Query", new MenuShortcut(KeyEvent.VK_Q));
     menubarQueryMI.addActionListener(this);
 
     actionMenu.add(menubarQueryMI);
@@ -327,12 +348,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     windowMenu = new JMenu("Windows");
 
     // Look and Feel menu
+    ButtonGroup group = new ButtonGroup();
     LandFMenu = new JMenu("Look");
-    roseMI = new JMenuItem("Rose");
-    roseMI.addActionListener(this);
-    win95MI = new JMenuItem("Win95");
+    motifMI = new JCheckBoxMenuItem("Motif");
+    group.add(motifMI);
+    motifMI.setSelected(true);
+    motifMI.addActionListener(this);
+    win95MI = new JCheckBoxMenuItem("Basic");
+    group.add(win95MI);
     win95MI.addActionListener(this);
-    LandFMenu.add(roseMI);
+    javaLFMI = new JCheckBoxMenuItem("Java L&F");
+    group.add(javaLFMI);
+    javaLFMI.addActionListener(this);
+
+    LandFMenu.add(motifMI);
+    LandFMenu.add(javaLFMI);
     LandFMenu.add(win95MI);
 
     // Personae menu
@@ -361,10 +391,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	throw new RuntimeException("Could not load personas: " + rx);
       }
 
+    // Help menu
+    helpMenu = new JMenu("Help");
+    showHelpMI = new JMenuItem("Help", new MenuShortcut(KeyEvent.VK_H));
+    showHelpMI.addActionListener(this);
+    helpMenu.add(showHelpMI);
+
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
     menubar.add(actionMenu);
     menubar.add(windowMenu);
+    menubar.add(helpMenu);
+    menubar.setHelpMenu(helpMenu);
     if (personasExist)
       {
 	menubar.add(PersonaMenu);
@@ -395,19 +433,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     Image redOpenFolder = PackageResources.getImageResource(this, "openfolder-red.gif", getClass());
     Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
     
-    Image trash = PackageResources.getImageResource(this, "trash.gif", getClass());
-    Image creation = PackageResources.getImageResource(this, "creation.gif", getClass());
-    Image pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
+    trash = PackageResources.getImageResource(this, "trash.gif", getClass());
+    creation = PackageResources.getImageResource(this, "creation.gif", getClass());
+    pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
 
     images = new Image[NUM_IMAGE];
     images[OPEN_BASE] =  openFolder;
-    //images[OPEN_BASE_DELETE] = openFolder;
-    //images[OPEN_BASE_CREATE] = openFolder;
-    //images[OPEN_BASE_CHANGED] = openFolder;
     images[CLOSED_BASE ] = closedFolder;
-    //images[CLOSED_BASE_DELETE] = closedFolder;
-    //images[CLOSED_BASE_CREATE] = closedFolder;
-    //images[CLOSED_BASE_CHANGED] = closedFolder;
     
     images[OPEN_FIELD] = list;
     images[OPEN_FIELD_DELETE] = trash;
@@ -420,16 +453,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     images[OPEN_CAT] = redOpenFolder;
     images[CLOSED_CAT] = redClosedFolder;
-
-
-    // What is this for?
-    for (int j = 0; j < 3; j++)
-      {
-	if (images[j] == null)
-	  {
-	    System.out.println("Image is null " + j);
-	  }
-      }
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white, this, images,
@@ -452,8 +475,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     leftL = new JLabel("Objects");
     leftTop.setLayout(new BorderLayout());
-    leftTop.setBackground(ClientColor.menu);
-    leftTop.setForeground(ClientColor.menuText);
+    //leftTop.setBackground(ClientColor.menu);
+    //leftTop.setForeground(ClientColor.menuText);
     leftTop.add("Center", leftL);
 
     leftP.add("North", leftTop);
@@ -498,11 +521,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightL = new JLabel("Open objects");
     
     rightTop = new JPanel(false);
-    rightTop.setBackground(ClientColor.menu);
-    rightTop.setForeground(ClientColor.menuText);
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
-    rightTop.add("West", rightL);
+    //rightTop.add("West", rightL);
+    rightTop.add("West", createToolbar);
     timerLabel = new JLabel("                                       ", JLabel.RIGHT);
 
     timer = new connectedTimer(timerLabel, 5000);
@@ -513,14 +535,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
     JPanel bottomButtonP = new JPanel(false);
-    //JPanel leftButtonP = new JPanel(false);
-    //bottomButtonP.setLayout(new BorderLayout());
-    //bottomButtonP.add("West", leftButtonP);
     rightP.add(bottomButtonP,"South");
-
-    // Taskbar to track windows
-    //WindowBar windowBar = new WindowBar(wp, rightP);
-    //wp.addWindowBar(windowBar);
 
     commit = new JButton("Commit");
     commit.setOpaque(true);
@@ -546,20 +561,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // Create the bottomBar, for the bottom of the window
 
     JPanel bottomBar = new JPanel(false);
-    bottomBar.setBackground(ClientColor.menu);
-    bottomBar.setForeground(ClientColor.menuText);
     bottomBar.setLayout(new BorderLayout());
 
     statusLabel = new JTextField();
-    statusLabel.setOpaque(true);
     statusLabel.setEditable(false);
-    statusLabel.setBackground(ClientColor.menu);
-    statusLabel.setForeground(ClientColor.menuText);
     statusLabel.setBorder(statusBorder);
 
     JLabel l = new JLabel("Status: ");
-    l.setBackground(ClientColor.menu);
-    l.setForeground(ClientColor.menuText);
     JPanel lP = new JPanel(new BorderLayout());
     lP.setBorder(statusBorder);
     lP.add("Center", l);
@@ -568,7 +576,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     bottomBar.add("Center", statusLabel);
     mainPanel.add("South", bottomBar);
 
-    statusLabel.setText("Starting up");
+    setStatus("Starting up");
 
     try
       {
@@ -587,12 +595,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     pack();
     setSize(800, 600);
     show();
+    
+    setStatus("Ready.");
   }
 
   /**
    * Returns the templateHash.
    *
    * Template Hash is a hash of object type ID's (Short) -> Vector of FieldTemplates
+   * Use this instead of templateHash directly, because you never know where we will
+   * get it from(evil grin).
    */
   public Hashtable getTemplateHash()
   {
@@ -607,14 +619,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public Vector getTemplateVector(Short id)
   {
     Vector result = null;
+    Hashtable th = getTemplateHash();
 
-    if (templateHash.containsKey(id))
+    if (th.containsKey(id))
       {
 	if (debug)
 	  {
 	    System.out.println("Found the template, using cache.");
 	  }
-	result = (Vector)templateHash.get(id);
+	result = (Vector)th.get(id);
 
       }
     else
@@ -627,7 +640,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 
 	    result = session.getFieldTemplateVector(id.shortValue());
-	    templateHash.put(id, result);
+	    th.put(id, result);
 
 
 	  }
@@ -644,55 +657,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public void clearCaches()
   {
+    if (debug)
+      {
+        System.out.println("Clearing caches");
+      }
+
     cachedLists.clear();
   }
-
-  /*  public Vector getHandleVector(Object id)
-  {
-    Vector result = null;
-
-    if (cachedLists.containsKey(id))
-      {
-	result = (Vector)cachedLists.get(id);
-	setStatus("Using cached copy");
-      }
-    else
-      {
-	try
-	{
-	setStatus("Downloading new copy");
-	    
-	    }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not load template vector: " + rx);
-	  }
-      }
-    return result;
-    
-  }*/
-
-  /*
-  public void invalidate()
-  {
-    System.out.println("--Invalidate gclient");
-    super.invalidate();
-  }
-
-  public void validate()
-  {
-    System.out.println("--validate gclient");
-    super.validate();
-  }
-
-  public void doLayout()
-  {
-    System.out.println("{{doLayout gclient: ");
-    super.doLayout();
-    System.out.println("}}doLayout gclient over");
-  }
-
-  */
 
   public void update(Graphics g)
   {
@@ -772,11 +743,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return statusLabel.getText();
   }
   
-  public void setRose()
+  public void setMotif()
   {
     try 
       {
-	UIManager.setLookAndFeel("com.sun.java.swing.rose.RoseLookAndFeel");
+	UIManager.setLookAndFeel("com.sun.java.swing.motif.MotifLookAndFeel");
 	SwingUtilities.updateComponentTreeUI(this);
 	leftP.invalidate();
 	invalidate();
@@ -804,8 +775,64 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  public void setJavaLF()
+  {
+    try
+      {
+	UIManager.setLookAndFeel("com.sun.java.swing.jlf.JLFLookAndFeel");
+	SwingUtilities.updateComponentTreeUI(this);
+	leftP.invalidate();
+	invalidate();
+	validate();
+      } 
+    catch (Exception e) 
+      {
+	System.out.println(e);
+      }
+  }
+
+  /**
+   * Show the help window.
+   *
+   * This might someday take an argument, which would show a starting page
+   * or some more specific help.
+   */
+   
+  public void showHelpWindow()
+    {
+      if (help == null)
+	{
+	  help = new helpPanel(this);
+	}
+      else
+	{
+	  help.setVisible(true);
+	}
+    }
   // Private methods
 
+  void JToolBar createToolbar()
+  {
+    JToolBar toolBar = new JToolBar();
+
+    JButton b = new JButton(pencil);
+    b.setActionCommand("open object for editing");
+    b.addActionListener(this);
+    toolBar.add(b);
+
+    JButton b = new JButton(trash);
+    b.setActionCommand("delete an object");
+    b.addActionListener(this);
+    toolBar.add(b);
+
+    JButton b = new JButton(search);
+    b.setActionCommand("open object for viewing");
+    b.addActionListener(this);
+    toolBar.add(b);
+
+
+    return toolBar;
+  }
 
   /**
    * This clears out the tree and completely rebuilds it.
@@ -976,17 +1003,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     while (deleted.hasMoreElements())
       {
-	InvidNode node = ((CacheInfo)deleteHash.get(deleted.nextElement())).getNode();
-	if (committed)
+	Invid invid = (Invid)deleted.nextElement();
+	InvidNode node = (InvidNode)invidNodeHash.get(invid);
+	if (node != null)
 	  {
-	    System.out.println("Deleteing node: " + node.getText());
-	    tree.deleteNode(node, false);
-	  }
-	else
-	  {
-	    System.out.println("Canceling the delete");
-	    // Change icon back
-	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	    if (committed)
+	      {
+
+		System.out.println("Deleteing node: " + node.getText());
+		tree.deleteNode(node, false);
+		invidNodeHash.remove(invid);
+	      }
+	    else
+	      {
+		System.out.println("Canceling the delete");
+		// Change icon back
+		node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	      }
 	  }
       }
     
@@ -1000,22 +1033,24 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     while (created.hasMoreElements())
       {
 	Invid invid = (Invid)created.nextElement();
-	InvidNode node = ((CacheInfo)createHash.get(invid)).getNode();
-	if (committed)
+	InvidNode node = (InvidNode)invidNodeHash.get(invid);
+	if (node != null)
 	  {
-	    System.out.println("Committing created node: " + node.getText());
-	    // change the icon
-	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
-	    node.setText(session.viewObjectLabel(invid));
-	  }
-	else
-	  {
-	    System.out.println("Canceling created node: " + node.getText());
-	    tree.deleteNode(node, false);
-
+	    if (committed)
+	      {
+		System.out.println("Committing created node: " + node.getText());
+		// change the icon
+		node.setImages(OPEN_FIELD, CLOSED_FIELD);
+		node.setText(session.viewObjectLabel(invid));
+	      }
+	    else
+	      {
+		System.out.println("Canceling created node: " + node.getText());
+		tree.deleteNode(node, false);
+		invidNodeHash.remove(invid);
+	      }
 	  }
       }
-
     createHash.clear();
 
     //
@@ -1026,24 +1061,33 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     while (changed.hasMoreElements())
       {
 	Invid invid = (Invid)changed.nextElement();
-	CacheInfo info = (CacheInfo)changedHash.get(invid);
-	InvidNode node = info.getNode();
-	if (committed)
+	InvidNode node = (InvidNode)invidNodeHash.get(invid);
+	if (node != null)
 	  {
-	    if (debug)
+	    if (committed)
 	      {
-		// This shouldn't be the original label.
-		System.out.println("Updating node: " + node.getText() + " to " + info.getOriginalLabel());
+		if (debug)
+		  {
+		    // This shouldn't be the original label.
+		    System.out.println("Updating node: " + node.getText());
+		  }
+		try
+		  {
+		    node.setText(session.viewObjectLabel(invid));
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not get label: " + rx);
+		  }
 	      }
-	    node.setText(info.getOriginalLabel());
+	    else
+	      {
+		System.out.println("Cancelled, no change to object?");
+		// Don't know what to do here, maybe change back?  then
+		// don't need the change up there either.
+	      }
+	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
 	  }
-	else
-	  {
-	    System.out.println("Cancelled, no change to object?");
-	    // Don't know what to do here, maybe change back?  then
-	    // don't need the change up there either.
-	  }
-	node.setImages(OPEN_FIELD, CLOSED_FIELD);
 
       }
 
@@ -1213,6 +1257,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 					      CLOSED_FIELD,
 					      objectPM);
 	    
+	    invidNodeHash.put(invid, objNode);
+	    setIconForNode(invid);
+	   
 	    tree.insertNode(objNode, false);
 
 	    oldNode = objNode;
@@ -1253,22 +1300,78 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  
+  public void setIconForNode(Invid invid)
+  {
+    InvidNode node = (InvidNode)invidNodeHash.get(invid);
+    if (node == null)
+      {
+	System.out.println("There is no node for this invid, silly!");
+      }
+    else
+      {
+	if (deleteHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.print("Setting icon to delete.");
+	      }
+	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+	  }
+	else if (createHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.print("Setting icon to create.");
+	      }
+	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
+	  }
+	else if (changedHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.print("Setting icon to edit.");
+	      }
+	    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+	  }
+	else
+	  {
+	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	  }
+      }
+  }
 
-  // Actions on objects
+  /********************************************************************************
+   *
+   * actions on objects.
+   *
+   *
+   * These are the methods to use to do something to an object.
+   *
+   ********************************************************************************/
 
-  public void editObject(Invid invid, InvidNode node)
+  /**
+   * open a new window to edit the object.
+   *
+   * Use this to edit objects, so gclient can keep track of the caches, tree nodes,
+   * and all the other dirty work.  This should be the only place windowPanel.addWindow
+   * is called for editing purposes.
+   */
+  public void editObject(Invid invid)
   {
     try
       {
 	db_object o = session.edit_db_object(invid);
 	wp.addWindow(o, true);
-	changedHash.put(invid, new CacheInfo(new Short(o.getTypeID()), session.viewObjectLabel(invid), null, node));
-	if (node != null)
+	InvidNode node = null;
+	if (invidNodeHash.containsKey(invid))
 	  {
-	    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
-	    tree.refresh();
+	    node = (InvidNode)invidNodeHash.get(invid);
 	  }
+
+	changedHash.put(invid, new CacheInfo(new Short(o.getTypeID()), session.viewObjectLabel(invid), null));
+
+	setIconForNode(invid);
+	tree.refresh();
       }
     catch(RemoteException rx)
       {
@@ -1276,6 +1379,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  /**
+   * Open a new window to view the current object.
+   */
   public void viewObject(Invid invid)
   {
     try
@@ -1290,7 +1396,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   }
 
-  public boolean deleteObject(Invid invid, InvidNode node)
+  /**
+   * Delete the object.
+   *
+   * Also takes care of caches and treeNodes.  
+   */
+  public boolean deleteObject(Invid invid)
   {
     boolean ok = false;
     try
@@ -1305,6 +1416,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	ok = session.remove_db_object(invid);
 	if (ok)
 	  {
+
+	    InvidNode node = (InvidNode)invidNodeHash.get(invid);
+
 	    // Check out the deleteHash.  If this one is already on there,
 	    // then I don't know what to do.  If it isn't, then add a new
 	    // cache info.  I guess maybe update the name or something,
@@ -1315,7 +1429,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 	    else
 	      {
-		deleteHash.put(invid, new CacheInfo(id, session.viewObjectLabel(invid), null,node));
+		deleteHash.put(invid, new CacheInfo(id, session.viewObjectLabel(invid), null));
 	      }
 
 	    // Take this object out of the cachedLists, if it is in there
@@ -1335,10 +1449,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		      }
 		  }
 	      }
-
-	    if (node != null)
+	    
+	    if (invidNodeHash.containsKey(invid))
 	      {
-		node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+		setIconForNode(invid);
 		tree.refresh();
 	      }
 
@@ -1380,14 +1494,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else
       {
-	try
-	  {
-	    wp.addWindow(session.edit_db_object(invid), true);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not edit object: " + rx);
-	  }
+	editObject(invid);
       }
   
 
@@ -1523,7 +1630,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 	    else
 	      {
-		deleteObject(invid, null);
+		deleteObject(invid);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -1552,9 +1659,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public void chooseFilter()
   {
-    // This could be moved, only cache is filter is changed?
-    System.out.println("Clearing caches");
-    cachedLists.clear();
+    // This could be moved, only cache if filter is changed?
+    clearCaches();
     if (filterDialog == null)
       {
 	filterDialog = new JFilterDialog(this);
@@ -1698,6 +1804,51 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	wp.closeEditables();
 	somethingChanged = false;
 	session.commitTransaction();
+
+	if (somethingChanged)
+	  {
+	    // Might need to fix the tree nodes
+	    // Now go through changed list and revert any names that may be needed
+	    Enumeration changed = changedHash.keys();
+	    while (changed.hasMoreElements())
+	      {
+		Invid invid = (Invid)changed.nextElement();
+		CacheInfo info = (CacheInfo)changedHash.get(invid);
+		String label = null;
+
+		try
+		  {
+		    label = session.viewObjectLabel(invid);
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not get label: " + rx);
+		  }
+		
+		InvidNode node = (InvidNode)invidNodeHash.get(invid);
+		if (node != null)
+		  {
+		    node.setText(label);
+		  }
+
+		if (cachedLists.containsKey(info.getBaseID()))
+		  {
+		    System.out.println("This changed base is cached, fixing it back.");
+		    Vector list = (Vector)cachedLists.get(info.getBaseID());
+		    for (int i = 0; i < list.size(); i++)
+		      {
+			if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
+			  {
+			    System.out.println("Found it! removing it.");
+			    list.removeElementAt(i);
+			    list.addElement(new listHandle(label, invid));
+			    break;
+			  }
+		      }
+		  }
+	      }	    
+
+	  }
 	
 	wp.refreshTableWindows();
 	session.openTransaction("gclient");
@@ -1736,11 +1887,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    if (cachedLists.containsKey(info.getBaseID()))
 		{
-		  System.out.println("This one is hashed, sticking it back in.");
-		  Vector list = (Vector)cachedLists.get(info.getBaseID());
-		  list.addElement(new listHandle(info.getOriginalLabel(), invid));
+		  if (createHash.containsKey(invid))
+		    {
+		      System.out.println("Can't fool me: you just created this object!");
+		    }
+		  else
+		    {
+		      System.out.println("This one is hashed, sticking it back in.");
+		      Vector list = (Vector)cachedLists.get(info.getBaseID());
+		      list.addElement(new listHandle(info.getOriginalLabel(), invid));
+		    }
 		}
-
+	    
 	  }
 	
 	// Next up is created list: remove all the added stuff.
@@ -1794,11 +1952,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	somethingChanged = false;
 	session.openTransaction("glient");
-	// This will fix up the tree (remove the trash cans)
+	// This will fix up the tree (remove the trash cans), and clear hashes
 	refreshTree(false);
 
-	// Now we are done
-	deleteHash.clear();
       }
     catch (RemoteException rx)
       {
@@ -1809,98 +1965,121 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   
   public void actionPerformed(java.awt.event.ActionEvent event)
   {
-    if (event.getSource() == cancel)
+    Object source = event.getSource();
+
+    if (source instanceof JButton)
       {
-	System.err.println("cancel button clicked");
-
-	cancelTransaction();
-
-
-      }
-    else if (event.getSource() == commit)
-      {
-	System.out.println("commit button clicked");
-
-	commitTransaction();
-	
-      }
-    else if (event.getSource() == menubarQueryMI)
-      {
-
-	querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
-	Query q = box.myshow();
-
-	if (q != null)
+	if (source == cancel)
 	  {
-	    DumpResult buffer = null;
-
-	    try
+	    if (debug)
 	      {
-		buffer = session.dump(q);
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote: " + ex);
+		System.out.println("cancel button clicked");
 	      }
 
-	    wp.addTableWindow(session, q, buffer, "Query Results");
+	    cancelTransaction();
 	  }
-      }
-    else if (event.getSource() == removeAllMI)
-      {
-	if (OKToProceed())
+	else if (source == commit)
 	  {
-	    wp.closeAll();
-	  }
-      }
-    else if (event.getSource() == rebuildTreeMI)
-      {
-	rebuildTree();
-      }
-    else if (event.getActionCommand().equals("open object for editing"))
-      {
-	editObjectDialog();
-      }
-    else if (event.getActionCommand().equals("open object for viewing"))
-      {
-	viewObjectDialog();
-      }
-    else if (event.getActionCommand().equals("choose an object for cloning"))
-      {
-	cloneObjectDialog();
-      }
-    else if (event.getActionCommand().equals("delete an object"))
-      {
-	deleteObjectDialog();
-      }
-    else if (event.getActionCommand().equals("inactivate an object"))
-      {
-	inactivateObjectDialog();
-      }
-    else if (event.getActionCommand().equals("Filter Query"))
-      {
-	chooseFilter();
-      }
-    else if (event.getActionCommand().equals("Set Default Owner"))
-      {
-	chooseDefaultOwner(true);
-      }
-    
+	    if (debug)
+	      {
+		System.out.println("commit button clicked");
+	      }
 
-    else if (event.getSource() == logoutMI)
-      {
-	if (OKToProceed())
-	  {
-	    logout();
+	    commitTransaction();	
 	  }
       }
-    else if (event.getSource() == roseMI)
+    else if (source instanceof JMenuItem)
       {
-	setRose();
-      }
-    else if (event.getSource() == win95MI)
-      {
-	setBasic();
+	if (source == menubarQueryMI)
+	  {
+
+	    querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
+	    Query q = box.myshow();
+
+	    if (q != null)
+	      {
+		DumpResult buffer = null;
+
+		try
+		  {
+		    buffer = session.dump(q);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+
+		wp.addTableWindow(session, q, buffer, "Query Results");
+	      }
+	  }
+	else if (source == removeAllMI)
+	  {
+	    if (OKToProceed())
+	      {
+		wp.closeAll();
+	      }
+	  }
+	else if (source == rebuildTreeMI)
+	  {
+	    rebuildTree();
+	  }
+	else if (source == logoutMI)
+	  {
+	    if (OKToProceed())
+	      {
+		logout();
+	      }
+	  }
+	else if (source == motifMI)
+	  {
+	    setMotif();
+	  }
+	else if (source == win95MI)
+	  {
+	    setBasic();
+	  }
+	else if (source == javaLFMI)
+	  {
+	    setJavaLF();
+	  }
+
+	// Now just look at the ones that have action commands.
+	else
+	  {
+	    String command = event.getActionCommand();
+	    if (command.equals("open object for editing"))
+	      {
+		editObjectDialog();
+	      }
+	    else if (command.equals("open object for viewing"))
+	      {
+		viewObjectDialog();
+	      }
+	    else if (command.equals("choose an object for cloning"))
+	      {
+		cloneObjectDialog();
+	      }
+	    else if (command.equals("delete an object"))
+	      {
+		deleteObjectDialog();
+	      }
+	    else if (command.equals("inactivate an object"))
+	      {
+		inactivateObjectDialog();
+	      }
+	    else if (command.equals("Filter Query"))
+	      {
+		chooseFilter();
+	      }
+	    else if (command.equals("Set Default Owner"))
+	      {
+		chooseDefaultOwner(true);
+	      }
+	    else if (command.equals("Help"))
+	      {
+		showHelpWindow();
+	      }
+	  }
       }
     else
       {
@@ -1995,36 +2174,38 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		  {
 		    chooseDefaultOwner(false);
 		  }
+
 		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
 		wp.addWindow(obj, true);
 
 		Invid invid = obj.getInvid();
 
-		InvidNode objNode = new InvidNode(baseN, 
-						  "New Object", 
-						  invid,
-						  null, false,
-						  OPEN_FIELD_CREATE,
-						  CLOSED_FIELD_CREATE,
-						  objectPM);
-
-		// If the base node is closed, open it.
-
-		if (!baseN.isOpen())
-		  {
-		    tree.expandNode(baseN, false);
-		  }
-
 		if (cachedLists.containsKey(id))
 		  {
 		    Vector list = (Vector)cachedLists.get(id);
 		    list.addElement(new listHandle("New Object", invid));
-
 		  }
 
-		// Redraw the tree now
-		tree.insertNode(objNode, true);
-		createHash.put(obj.getInvid(), new CacheInfo(id, "New Object", null, objNode));
+		// If the base node is open, deal with the node.
+
+		if (baseN.isLoaded())
+		  {
+		    InvidNode objNode = new InvidNode(baseN, 
+						      "New Object", 
+						      invid,
+						      null, false,
+						      OPEN_FIELD_CREATE,
+						      CLOSED_FIELD_CREATE,
+						      objectPM);
+
+		    createHash.put(obj.getInvid(), new CacheInfo(id, "New Object", null));
+
+		    invidNodeHash.put(invid, objNode);
+		    setIconForNode(invid);
+
+		    tree.insertNode(objNode, true);
+		  }
+
 		somethingChanged = true;
 	      }
 	    catch (RemoteException rx)
@@ -2162,7 +2343,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  
 	    Invid invid = invidN.getInvid();
 		
-	    editObject(invid, invidN);
+	    editObject(invid);
 	  }
 	else
 	  {
@@ -2178,7 +2359,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    InvidNode invidN = (InvidNode)node;
 	    Invid invid = invidN.getInvid();
 
-	    deleteObject(invid, invidN);
+	    deleteObject(invid);
 
 	  }
 	else  // Should never get here, but just in case...
@@ -2414,18 +2595,14 @@ class CacheInfo {
     originalLabel,
     currentLabel;
 
-  private InvidNode
-    node;
-
   private Short
     baseID;
 
-  public CacheInfo(Short baseID, String originalLabel, String currentLabel, InvidNode node)
+  public CacheInfo(Short baseID, String originalLabel, String currentLabel)
   {
     this.baseID = baseID;
     this.originalLabel = originalLabel;
     this.currentLabel = currentLabel;
-    this.node = node;
   }
 
   public void setOriginalLabel(String label)
@@ -2453,8 +2630,4 @@ class CacheInfo {
     return currentLabel;
   }
 
-  public InvidNode getNode()
-  {
-    return node;
-  }
 }
