@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/06/29 22:00:34 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/07/02 19:17:32 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.39 $ $Date: 2001/06/29 22:00:34 $ $Name:  $
+ * @version $Revision: 1.40 $ $Date: 2001/07/02 19:17:32 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -583,6 +583,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 						  {
 						    // they've typed the full thing here, stop.
 
+						    out.setSelectedValue(matchingItem, true);
 						    return;
 						  }
 						else if (item.toString().startsWith(curVal))
@@ -594,6 +595,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 					    if (matching == 1)
 					      {
+						out.setSelectedValue(matchingItem, true);
 						custom.setText(matchingItem);
 						custom.select(curLen, matchingItem.length());
 						return;
