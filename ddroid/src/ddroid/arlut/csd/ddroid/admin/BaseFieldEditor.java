@@ -73,6 +73,8 @@ import arlut.csd.JDataComponent.JnumberField;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.JstringArea;
 import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDataComponent.JLabelPanel;
+import arlut.csd.JDataComponent.JStretchPanel;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.ddroid.common.FieldType;
 import arlut.csd.ddroid.common.ReturnVal;
@@ -93,7 +95,7 @@ import arlut.csd.ddroid.rmi.SchemaEdit;
  * responsible for displaying and editing field definitions.</p>
  */
 
-class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener {
+class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
 
@@ -111,7 +113,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
   //  java.awt.CardLayout
   // card;
 
-  JPanel 
+  JLabelPanel 
     editPanel;
 
   GASHSchema 
@@ -170,12 +172,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
     ipShowing,
     permissionShowing;
 
-  GridBagLayout
-    gbl = new GridBagLayout();
-  
-  GridBagConstraints
-    gbc = new GridBagConstraints();
-
   /* -- */
 
   /**
@@ -195,16 +191,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 
     fieldDef = null;
     this.owner = owner;
-    
-    editPanel = new JPanel();
-    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    editPanel.setLayout(gbl);
 
-    int rowcount = 0;
-    
+    editPanel = setupEditPanel();
+    setComponent(editPanel);
+  }
+   
+  private JLabelPanel setupEditPanel()
+  {
     idN = new JnumberField(20,  false, false, 0, 0);
-    addRow(editPanel, idN, "Field ID:", rowcount++);
-    
+
     // only allow characters that can be used as an XML entity name.
     // We allow the space char (which is not allowed as an XML entity
     // name), but disallow the underscore char, which we use in place
@@ -214,25 +209,20 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
 			     null);
     nameS.setCallback(this);
-    addRow(editPanel, nameS, "Field Name:", rowcount++);
 
     classS = new JstringField(20, 100,  true, false, null, null);
     classS.setCallback(this);
-    addRow(editPanel, classS, "Class name:", rowcount++);
 
     commentT = new JstringArea(4, 20);
     JScrollPane commentScroll = new JScrollPane(commentT);
     commentT.setCallback(this);
-    addRow(editPanel, commentScroll, "Comment:", rowcount++);
-    
+
     // This one is different:
     vectorCF = new JcheckboxField(null, false, true);
     vectorCF.setCallback(this);
-    addRow(editPanel, vectorCF, "Vector:", rowcount++);
 
     maxArrayN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxArrayN.setCallback(this);
-    addRow(editPanel, maxArrayN, "Max Array Size:", rowcount++);
 
     typeC = new JComboBox();
 
@@ -247,84 +237,94 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
     typeC.addItem("Permission Matrix");
     typeC.addItemListener(this);
 
-    addRow(editPanel, typeC, "Field Type:", rowcount++);
-
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "UNIX Crypted:" , rowcount++);
 
     md5cryptedCF = new JcheckboxField(null, false, true);
     md5cryptedCF.setCallback(this);
-    addRow(editPanel, md5cryptedCF, "FreeBSD-style MD5 Crypted:" , rowcount++);
 
     apachemd5cryptedCF = new JcheckboxField(null, false, true);
     apachemd5cryptedCF.setCallback(this);
-    addRow(editPanel, apachemd5cryptedCF, "Apache-style MD5 Crypted:" , rowcount++);
 
     winHashcryptedCF = new JcheckboxField(null, false, true);
     winHashcryptedCF.setCallback(this);
-    addRow(editPanel, winHashcryptedCF, "Windows/Samba Crypted:" , rowcount++);
 
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
-    addRow(editPanel, plainTextCF, "Store PlainText:" , rowcount++);
 
     multiLineCF = new JcheckboxField(null, false, true);
     multiLineCF.setCallback(this);
-    addRow(editPanel, multiLineCF, "MultiLine Field:" , rowcount++);
 
     minLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
-    addRow(editPanel, minLengthN, "Minimum String Size:", rowcount++);
-    
+
     maxLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
-    addRow(editPanel, maxLengthN, "Maximum String Size:", rowcount++);
 
     regexpS = new JstringField(20, 100, true, false, null, null);
     regexpS.setCallback(this);
-    addRow(editPanel, regexpS, "Regular Expression:", rowcount++);
 
     regexpDescS = new JstringField(20, 400, true, false, null, null);
     regexpDescS.setCallback(this);
-    addRow(editPanel, regexpDescS, "RegExp Description:", rowcount++);
-   
+
     OKCharS = new JstringField(20, 100,  true, false, null, null);
     OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, "Allowed Chars:", rowcount++);
 
     BadCharS = new JstringField(20, 100,  true, false, null, null);
     BadCharS.setCallback(this);
-    addRow(editPanel, BadCharS, "Disallowed Chars:", rowcount++);
 
     namespaceC = new JComboBox();
     namespaceC.addItemListener(this);
 
-    addRow(editPanel, namespaceC, "Namespace:", rowcount++);
-    
     labeledCF = new JcheckboxField(null, false, true);
     labeledCF.setCallback(this);
-    addRow(editPanel, labeledCF, "Labeled:", rowcount++);
 
     trueLabelS = new JstringField(20, 100,  true, false, null, null);
     trueLabelS.setCallback(this);
-    addRow(editPanel, trueLabelS, "True Label:", rowcount++);
 
     falseLabelS = new JstringField(20, 100,  true, false, null, null);
     falseLabelS.setCallback(this);
-    addRow(editPanel, falseLabelS, "False Label:", rowcount++);
 
     editInPlaceCF = new JcheckboxField(null, false, true);
     editInPlaceCF.setCallback(this);
-    addRow(editPanel, editInPlaceCF, "Edit In Place:", rowcount++);
 
     targetC = new JComboBox();
     targetC.addItemListener(this);
-    addRow(editPanel, targetC, "Target Object:", rowcount++);
 
     fieldC = new JComboBox();
     fieldC.addItemListener(this);
-    addRow(editPanel, fieldC, "Target Field:", rowcount++);
+
+    // ------------------------------------------------------------
+
+    editPanel = new JLabelPanel();
+    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+    editPanel.setFixedSizeLabelCells(true);
+    editPanel.addFillRow("Field ID:", idN);
+    editPanel.addFillRow("Field Name:", nameS);
+    editPanel.addFillRow("Class name:", classS);
+    editPanel.addFillRow("Comment:", commentScroll);
+    editPanel.addFillRow("Vector:", vectorCF);
+    editPanel.addFillRow("Max Array Size:", maxArrayN);
+    editPanel.addFillRow("Field Type:", typeC);
+    editPanel.addFillRow("UNIX Crypted:", cryptedCF);
+    editPanel.addFillRow("FreeBSD-style MD5 Crypted:", md5cryptedCF);
+    editPanel.addFillRow("Apache-style MD5 Crypted:", apachemd5cryptedCF);
+    editPanel.addFillRow("Windows/Samba Crypted:", winHashcryptedCF);
+    editPanel.addFillRow("Store PlainText:", plainTextCF);
+    editPanel.addFillRow("MultiLine Field:", multiLineCF);
+    editPanel.addFillRow("Minimum String Size:", minLengthN);
+    editPanel.addFillRow("Maximum String Size:", maxLengthN);
+    editPanel.addFillRow("Regular Expression:", regexpS);
+    editPanel.addFillRow("RegExp Description:", regexpDescS);
+    editPanel.addFillRow("Allowed Chars:", OKCharS);
+    editPanel.addFillRow("Disallowed Chars:", BadCharS);
+    editPanel.addFillRow("Namespace:", namespaceC);
+    editPanel.addFillRow("Labeled:", labeledCF);
+    editPanel.addFillRow("True Label:", trueLabelS);
+    editPanel.addFillRow("False Label:", falseLabelS);
+    editPanel.addFillRow("Edit In Place:", editInPlaceCF);
+    editPanel.addFillRow("Target Object:", targetC);
+    editPanel.addFillRow("Target Field:", fieldC);
 
     booleanShowing = true;
     numericShowing = false;
@@ -335,7 +335,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
     passwordShowing = false;
     ipShowing = false;
 
-    add(editPanel);
+    return editPanel;
   }
 
   void clearFields()
@@ -358,49 +358,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
     maxLengthN.setText("");
   }
 
-  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
-  {
-    addRow(parent, comp, label, row, true);
-  }
-
-  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row, boolean visible)
-  {
-    JLabel l = new JLabel(label);
-
-    rowHash.put(comp, l);
-    
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    gbc.anchor = GridBagConstraints.WEST;
-
-    gbc.weightx = 0.0;
-    gbc.gridx = 0;
-    gbc.gridy = row;
-    gbl.setConstraints(l, gbc);
-    parent.add(l);
-
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.gridx = 1;
-    gbc.weightx = 1.0;
-    gbl.setConstraints(comp, gbc);
-    parent.add(comp);
-
-    setRowVisible(comp, visible);
-  }
-
-  void setRowVisible(java.awt.Component comp, boolean b)
-  {
-    java.awt.Component c = (java.awt.Component) rowHash.get(comp);
-
-    if (c == null)
-      {
-	return;
-      }
-
-    comp.setVisible(b);
-    c.setVisible(b);
-  }
-
   // This goes through all the components, and sets the visibilities
 
   void checkVisibility()
@@ -412,73 +369,73 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 
     if (stringShowing || ipShowing || referenceShowing)
       {
-	setRowVisible(vectorCF, true);
-	setRowVisible(maxArrayN, vectorCF.isSelected());
+	editPanel.setRowVisible(vectorCF, true);
+	editPanel.setRowVisible(maxArrayN, vectorCF.isSelected());
       }
     else			// anything else can't be vector
       {
-	setRowVisible(vectorCF, false);
-	setRowVisible(maxArrayN, false);
+	editPanel.setRowVisible(vectorCF, false);
+	editPanel.setRowVisible(maxArrayN, false);
       }
 
     if (passwordShowing)
       {
-	setRowVisible(cryptedCF, true);
-	setRowVisible(md5cryptedCF, true);
-	setRowVisible(apachemd5cryptedCF, true);
-	setRowVisible(winHashcryptedCF, true);
-	setRowVisible(plainTextCF, true);
+	editPanel.setRowVisible(cryptedCF, true);
+	editPanel.setRowVisible(md5cryptedCF, true);
+	editPanel.setRowVisible(apachemd5cryptedCF, true);
+	editPanel.setRowVisible(winHashcryptedCF, true);
+	editPanel.setRowVisible(plainTextCF, true);
       }
     else
       {
-	setRowVisible(cryptedCF, false);
-	setRowVisible(md5cryptedCF, false);
-	setRowVisible(apachemd5cryptedCF, false);
-	setRowVisible(winHashcryptedCF, false);
-	setRowVisible(plainTextCF, false);
+	editPanel.setRowVisible(cryptedCF, false);
+	editPanel.setRowVisible(md5cryptedCF, false);
+	editPanel.setRowVisible(apachemd5cryptedCF, false);
+	editPanel.setRowVisible(winHashcryptedCF, false);
+	editPanel.setRowVisible(plainTextCF, false);
       }
 
-    setRowVisible(labeledCF, booleanShowing);
+    editPanel.setRowVisible(labeledCF, booleanShowing);
 
     if (booleanShowing)
       {
-	setRowVisible(trueLabelS, labeledCF.isSelected());
-	setRowVisible(falseLabelS, labeledCF.isSelected());
+	editPanel.setRowVisible(trueLabelS, labeledCF.isSelected());
+	editPanel.setRowVisible(falseLabelS, labeledCF.isSelected());
       }
     else
       {
-	setRowVisible(trueLabelS, false);
-	setRowVisible(falseLabelS, false);
+	editPanel.setRowVisible(trueLabelS, false);
+	editPanel.setRowVisible(falseLabelS, false);
       }
 
-    setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
-    setRowVisible(regexpS, stringShowing);
-    setRowVisible(regexpDescS, stringShowing);
-    setRowVisible(OKCharS, stringShowing || passwordShowing);
-    setRowVisible(BadCharS, stringShowing || passwordShowing);
-    setRowVisible(minLengthN, stringShowing || passwordShowing);
-    setRowVisible(maxLengthN, stringShowing || passwordShowing);
-    setRowVisible(namespaceC, stringShowing || numericShowing || ipShowing);
+    editPanel.setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
+    editPanel.setRowVisible(regexpS, stringShowing);
+    editPanel.setRowVisible(regexpDescS, stringShowing);
+    editPanel.setRowVisible(OKCharS, stringShowing || passwordShowing);
+    editPanel.setRowVisible(BadCharS, stringShowing || passwordShowing);
+    editPanel.setRowVisible(minLengthN, stringShowing || passwordShowing);
+    editPanel.setRowVisible(maxLengthN, stringShowing || passwordShowing);
+    editPanel.setRowVisible(namespaceC, stringShowing || numericShowing || ipShowing);
 
     if (referenceShowing)
       {
-	setRowVisible(editInPlaceCF, true);
-	setRowVisible(targetC, true);
+	editPanel.setRowVisible(editInPlaceCF, true);
+	editPanel.setRowVisible(targetC, true);
 
 	if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase("<any>"))
 	  {
-	    setRowVisible(fieldC, false);
+	    editPanel.setRowVisible(fieldC, false);
 	  }
 	else
 	  {
-	    setRowVisible(fieldC, true);
+	    editPanel.setRowVisible(fieldC, true);
 	  }
       }
     else
       {
-	setRowVisible(editInPlaceCF, false);
-	setRowVisible(targetC, false);
-	setRowVisible(fieldC, false);
+	editPanel.setRowVisible(editInPlaceCF, false);
+	editPanel.setRowVisible(targetC, false);
+	editPanel.setRowVisible(fieldC, false);
       }
 
     editPanel.doLayout();
@@ -774,9 +731,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
       {
 	if (selectedItem.equalsIgnoreCase("Boolean"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.BOOLEAN));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.BOOLEAN)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -789,9 +744,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Numeric"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.NUMERIC));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.NUMERIC)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -804,9 +757,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Float"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.FLOAT));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.FLOAT)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -819,9 +770,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Date"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.DATE));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -834,9 +783,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("String"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.STRING));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.STRING)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -849,9 +796,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Object Reference"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.INVID));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.INVID)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -864,9 +809,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Password"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.PASSWORD));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.PASSWORD)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -879,9 +822,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("I.P."))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.IP));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.IP)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -894,9 +835,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  }
 	else if (selectedItem.equalsIgnoreCase("Permission Matrix"))
 	  {
-	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX));
-	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX)))
 	      {
 		refreshFieldEdit(true);
 		return;
@@ -1146,7 +1085,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	    if (fieldDef.isEditInPlace())
 	      {
 		vectorCF.setSelected(true, false);
-		owner.handleReturnVal(fieldDef.setArray(true));
+		handleReturnVal(fieldDef.setArray(true));
 	      }
 
 	    // important.. we want to avoid mucking with the targetC GUI combobox if
@@ -1218,7 +1157,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 			    
 			try
 			  {
-			    owner.handleReturnVal(fieldDef.setTargetBase(null));
+			    handleReturnVal(fieldDef.setTargetBase(null));
 			  }
 			catch (RemoteException rx)
 			  {
@@ -1309,7 +1248,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 			
 			try
 			  {
-			    owner.handleReturnVal(fieldDef.setTargetField(null));
+			    handleReturnVal(fieldDef.setTargetField(null));
 			  }
 			catch (RemoteException rx)
 			  {
@@ -1505,9 +1444,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("nameS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setName((String) v.getValue()));
-	    fieldNode.setText((String) v.getValue());
-	    owner.tree.refresh();
+	    if (handleReturnVal(fieldDef.setName((String) v.getValue())))
+	      {
+		fieldNode.setText((String) v.getValue());
+		owner.tree.refresh();
+	      }
+	    else
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == classS)
 	  {
@@ -1516,7 +1461,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("classS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setClassName((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setClassName((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == commentT)
 	  {
@@ -1525,7 +1473,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("commentT");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setComment((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setComment((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == maxArrayN)
 	  {
@@ -1534,19 +1485,28 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("maxArrayN");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue()));
+	    if (!handleReturnVal(fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == vectorCF)
 	  {
-	    //setRowVisible(maxArrayN, vectorCF.getValue());
+	    //editPanel.setRowVisible(maxArrayN, vectorCF.getValue());
 
 	    if (debug)
 	      {
 		System.out.println("vectorCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setArray(vectorCF.isSelected()));
-	    checkVisibility();
+	    if (handleReturnVal(fieldDef.setArray(vectorCF.isSelected())))
+	      {
+		checkVisibility();
+	      }
+	    else
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == regexpS)
 	  {
@@ -1558,11 +1518,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	    // setting a regexp can fail if it can't be properly
 	    // parsed
 
-	    ReturnVal retVal = fieldDef.setRegexpPat((String) v.getValue());
-
-	    retVal = owner.handleReturnVal(retVal);
-
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!handleReturnVal(fieldDef.setRegexpPat((String) v.getValue())))
 	      {
 		regexpS.setText(fieldDef.getRegexpPat());
 	      }
@@ -1574,11 +1530,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("regexpDescS");
 	      }
 
-	    ReturnVal retVal = fieldDef.setRegexpDesc((String) v.getValue());
-
-	    retVal = owner.handleReturnVal(retVal);
-
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!handleReturnVal(fieldDef.setRegexpDesc((String) v.getValue())))
 	      {
 		regexpDescS.setText(fieldDef.getRegexpDesc());
 	      }
@@ -1590,7 +1542,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("OkCharS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setOKChars((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setOKChars((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == BadCharS)
 	  {
@@ -1599,7 +1554,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("BadCharS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setBadChars((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setBadChars((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == minLengthN)
 	  {
@@ -1608,7 +1566,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("minLengthN");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setMinLength(((Integer)v.getValue()).shortValue()));
+	    if (!handleReturnVal(fieldDef.setMinLength(((Integer)v.getValue()).shortValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == maxLengthN)
 	  {
@@ -1617,7 +1578,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("maxLengthN");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setMaxLength(((Integer)v.getValue()).shortValue()));
+	    if (!handleReturnVal(fieldDef.setMaxLength(((Integer)v.getValue()).shortValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == trueLabelS)
 	  {
@@ -1626,7 +1590,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("trueLabelS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setTrueLabel((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setTrueLabel((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == falseLabelS)
 	  {
@@ -1635,7 +1602,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("falseLabelS");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setFalseLabel((String) v.getValue()));
+	    if (!handleReturnVal(fieldDef.setFalseLabel((String) v.getValue())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == labeledCF)
 	  {
@@ -1654,8 +1624,9 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("editInPlaceCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
-	    editField(fieldNode, true);	// force full recalc and refresh
+	    handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
+
+	    refreshFieldEdit(true); // we need to refresh on success or failure here
 	  }
 	else if (comp == cryptedCF)
 	  {
@@ -1664,26 +1635,31 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("cryptedCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setCrypted(cryptedCF.isSelected()));
-
-	    // a password field has to have plaintext stored if it
-	    // is not to store the password in crypted form.
-
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		&& !plainTextCF.isSelected())
+	    if (handleReturnVal(fieldDef.setCrypted(cryptedCF.isSelected())))
 	      {
-		plainTextCF.setValue(true);
-	      }
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
+		
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
-	      {
-		plainTextCF.setEnabled(false);
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(true);
+		refreshFieldEdit(false);
 	      }
 	  }
 	else if (comp == md5cryptedCF)
@@ -1693,24 +1669,29 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("md5cryptedCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setMD5Crypted((md5cryptedCF.isSelected())));
-
-	    // a password field has to have plaintext stored if it
-	    // is not to store the password in crypted form.
-
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		&& !plainTextCF.isSelected())
+	    if (handleReturnVal(fieldDef.setMD5Crypted((md5cryptedCF.isSelected()))))
 	      {
-		plainTextCF.setValue(true);
-	      }
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
-	      {
-		plainTextCF.setEnabled(false);
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
+
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(true);
+		refreshFieldEdit(false);
 	      }
 	  }
 	else if (comp == apachemd5cryptedCF)
@@ -1720,26 +1701,31 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("apachemd5cryptedCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setApacheMD5Crypted((apachemd5cryptedCF.isSelected())));
-
-	    // a password field has to have plaintext stored if it
-	    // is not to store the password in crypted form.
-
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		&& !plainTextCF.isSelected())
+	    if (handleReturnVal(fieldDef.setApacheMD5Crypted((apachemd5cryptedCF.isSelected()))))
 	      {
-		plainTextCF.setValue(true);
-	      }
-
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
-	      {
-		plainTextCF.setEnabled(false);
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
+		
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
+		
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(true);
+		refreshFieldEdit(false);
 	      }
 	  }
 	else if (comp == winHashcryptedCF)
@@ -1749,26 +1735,31 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("winHashcryptedCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setWinHashed((winHashcryptedCF.isSelected())));
-
-	    // a password field has to have plaintext stored if it
-	    // is not to store the password in crypted form.
-
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
-		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		&& !plainTextCF.isSelected())
+	    if (handleReturnVal(fieldDef.setWinHashed((winHashcryptedCF.isSelected()))))
 	      {
-		plainTextCF.setValue(true);
-	      }
-
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
-	      {
-		plainTextCF.setEnabled(false);
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
+		
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
+		
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(true);
+		refreshFieldEdit(false);
 	      }
 	  }
 	else if (comp == plainTextCF)
@@ -1778,7 +1769,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("plainTextCF");
 	      }
 
-	    owner.handleReturnVal(fieldDef.setPlainText(plainTextCF.isSelected()));
+	    if (!handleReturnVal(fieldDef.setPlainText(plainTextCF.isSelected())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == multiLineCF)
 	  {
@@ -1787,7 +1781,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 		System.out.println("multiLineCF: " + multiLineCF.isSelected());
 	      }
 
-	    owner.handleReturnVal(fieldDef.setMultiLine(multiLineCF.isSelected()));
+	    if (!handleReturnVal(fieldDef.setMultiLine(multiLineCF.isSelected())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	return true;
       }
@@ -1882,7 +1879,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 
 			// we're making this field unacceptable as a label
 
-			owner.handleReturnVal(currentBase.setLabelField(null));
+			handleReturnVal(currentBase.setLabelField(null));
 		      }
 		    catch (RemoteException rx)
 		      {
@@ -1952,18 +1949,14 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  {
 	    if (item.equalsIgnoreCase("<none>"))
 	      {
-		ReturnVal retval = owner.handleReturnVal(fieldDef.setNameSpace(null));
-
-		if (retval != null && !retval.didSucceed())
+		if (!handleReturnVal(fieldDef.setNameSpace(null)))
 		  {
 		    refreshFieldEdit(true);
 		  }
 	      }
 	    else
 	      {
-		ReturnVal retval = owner.handleReturnVal(fieldDef.setNameSpace(item));
-
-		if (retval != null && !retval.didSucceed())
+		if (!handleReturnVal(fieldDef.setNameSpace(item)))
 		  {
 		    refreshFieldEdit(true);
 		  }
@@ -1997,7 +1990,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  {
 	    try
 	      {
-		owner.handleReturnVal(fieldDef.setTargetBase(null));
+		if (!handleReturnVal(fieldDef.setTargetBase(null)))
+		  {
+		    refreshFieldEdit(true);
+		  }
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2028,16 +2024,17 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 			System.out.println("Setting target base to " + item);
 		      }
 
-		    owner.handleReturnVal(fieldDef.setTargetBase(item));
-
-		    // if we've changed our target base, clear out the
-		    // target field to avoid accidental confusion if our
-		    // new target base has a valid target field with the
-		    // same id code as our old target field.
-		    
-		    if ((oldBaseName != null) && !oldBaseName.equals(item))
+		    if (handleReturnVal(fieldDef.setTargetBase(item)))
 		      {
-			owner.handleReturnVal(fieldDef.setTargetField(null));
+			// if we've changed our target base, clear out the
+			// target field to avoid accidental confusion if our
+			// new target base has a valid target field with the
+			// same id code as our old target field.
+			
+			if ((oldBaseName != null) && !oldBaseName.equals(item))
+			  {
+			    handleReturnVal(fieldDef.setTargetField(null));
+			  }
 		      }
 		  }
 		catch (RemoteException rx)
@@ -2063,12 +2060,18 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 	  {
 	    if (item.equals("<none>"))
 	      {
-		owner.handleReturnVal(fieldDef.setTargetField(null));
+		if (!handleReturnVal(fieldDef.setTargetField(null)))
+		  {
+		    refreshFieldEdit(true);
+		  }
 	      }
 	    else
 	      {
-		owner.handleReturnVal(fieldDef.setTargetField(item));
-	      } 
+		if (!handleReturnVal(fieldDef.setTargetField(item)))
+		  {
+		    refreshFieldEdit(true);
+		  }
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -2085,7 +2088,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
   {
     this.fieldNode = null;
     this.fieldDef = null;	// remote reference
-    this.editPanel = null;
     this.owner = null;
     this.changeLabelTypeDialog = null;
     this.commentT = null;
@@ -2120,11 +2122,21 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
 
     this.rowHash = null;
 
-    this.gbl = null;
-    this.gbc = null;
-
     // and clean up the AWT's linkages
 
     this.removeAll();		// should be done on GUI thread
+
+    if (editPanel != null)
+      {
+	editPanel.cleanup();
+	editPanel = null;
+      }
+  }
+
+  private boolean handleReturnVal(ReturnVal retVal)
+  {
+    ReturnVal rv = owner.handleReturnVal(retVal);
+
+    return (rv == null || rv.didSucceed());
   }
 }

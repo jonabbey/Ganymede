@@ -378,7 +378,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    // find the auto.home.default map, if we can.
 
-	    Vector results = getGSession().internalQuery(new Query((short) 277, 
+	    Vector results = getGSession().internalQuery(new Query((short) 277, // automounter map
 								   new QueryDataNode(QueryDataNode.EQUALS,
 										     "auto.home.default"),
 								   false));
@@ -538,7 +538,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// copy that value.  Else we'll leave it blank for the user to
 	// set.
 
-	Invid category = (Invid) origObj.getFieldValue(userSchema.CATEGORY);
+	Invid category = (Invid) origObj.getFieldValueLocal(userSchema.CATEGORY);
 	
 	if (session.getGSession().viewObjectLabel(category).equals("normal"))
 	  {
@@ -565,8 +565,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    newOnes = newVolumes.getValues();
-	    oldOnes = oldVolumes.getValues();
+	    newOnes = newVolumes.getValuesLocal();
+	    oldOnes = oldVolumes.getValuesLocal();
 	  }
 
 	DBObject origVolume;
@@ -1079,7 +1079,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	    while (stringfield.size() > 0)
 	      {
-		retVal = stringfield.deleteElement(0);
+		retVal = stringfield.deleteElementLocal(0);
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1092,7 +1092,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  }
 	      }
 
-	    stringfield.addElement(forward);
+	    stringfield.addElementLocal(forward);
 	  }
 
 	// determine what will be the date 3 months from now
@@ -1306,7 +1306,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	    while (stringfield.size() > 0)
 	      {
-		retVal = stringfield.deleteElement(0);
+		retVal = stringfield.deleteElementLocal(0);
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1318,7 +1318,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    for (int i = 0; i < strings.length; i++)
 	      {
-		stringfield.addElement(strings[i]);
+		stringfield.addElementLocal(strings[i]);
 	      }
 	  }
 
@@ -1458,7 +1458,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    name = (String) ((DBField) getField(USERNAME)).getValue();
+	    name = (String) ((DBField) getField(USERNAME)).getValueLocal();
 
 	    if (name != null)
 	      {
@@ -1468,7 +1468,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// and any aliases defined
 
-	Vector values = ((DBField) getField(ALIASES)).getValues();
+	Vector values = ((DBField) getField(ALIASES)).getValuesLocal();
 
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -1954,14 +1954,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    String oldMail = oldName + mailsuffix;
 
-	    if (sf.containsElement(oldMail))
+	    if (sf.containsElementLocal(oldMail))
 	      {
-		sf.deleteElement(oldMail);
-		sf.addElement(value + mailsuffix);
+		sf.deleteElementLocal(oldMail);
+		sf.addElementLocal(value + mailsuffix);
 	      }
 	    else if (sf.size() == 0)
 	      {
-		sf.addElement(value + mailsuffix);
+		sf.addElementLocal(value + mailsuffix);
 	      }
 	
 	    inv = (InvidDBField) getField(PERSONAE);
@@ -1973,7 +1973,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    // rename all the associated personae with the new user name
 
-	    personaeInvids = inv.getValues();
+	    personaeInvids = inv.getValuesLocal();
 
 	    for (int i = 0; i < personaeInvids.size(); i++)
 	      {
@@ -2282,7 +2282,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// If this is a newly created user, we won't pester them about setting
 	// or changing the user name field.
 
-	if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
+	if ((field.getValueLocal() == null) || (getStatus() == ObjectStatus.CREATING))
 	  {
 	    result = new ReturnVal(true, true); // have setValue() do the right thing
 
@@ -2295,7 +2295,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return result;
 	  }
 
-	String oldname = (String) field.getValue();
+	String oldname = (String) field.getValueLocal();
 
 	if (!gSession.enableWizards)
 	  {
@@ -2707,7 +2707,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // get the volumes defined for the user on auto.home.default
 
     InvidDBField mapEntries = (InvidDBField) getField(userSchema.VOLUMES);
-    Vector entries = mapEntries.getValues();
+    Vector entries = mapEntries.getValuesLocal();
 
     if (entries.size() < 1)
       {
@@ -2983,7 +2983,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // get the volumes defined for the user on auto.home.default
 
     InvidDBField mapEntries = (InvidDBField) getOriginal().getField(userSchema.VOLUMES);
-    Vector entries = mapEntries.getValues();
+    Vector entries = mapEntries.getValuesLocal();
 
     if (entries.size() < 1)
       {

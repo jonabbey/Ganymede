@@ -8,21 +8,28 @@ package arlut.csd.ddroid.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import org.python.core.PyException;
 import org.python.core.PySystemState;
-import org.python.util.PythonInterpreter;
+import org.python.util.InteractiveConsole;
+
+import arlut.csd.Util.TranslationService;
 
 /**
  * @author Deepak Giridharagopal <deepak@arlut.utexas.edu>
  *
  */
 public class JythonServer extends Thread {
+
   /* The server's listener socket */ 
   private ServerSocket sock = null;
   
@@ -64,7 +71,7 @@ public class JythonServer extends Thread {
     catch (IOException e)
       {
         System.err.println("Could not listen on port: 4444.");
-        System.exit(-1);
+        return;
       }
 
     while (true)
@@ -78,7 +85,7 @@ public class JythonServer extends Thread {
                 break;
               }
           }
-          
+
         t = new JythonServerWorker(s, new JythonServerProtocol(s));
         t.start();
       }
@@ -104,8 +111,6 @@ public class JythonServer extends Thread {
       }
   }
 }
-
-
   
 /**
  * @author Deepak Giridharagopal <deepak@arlut.utexas.edu>
@@ -114,18 +119,30 @@ public class JythonServer extends Thread {
  * of input from the client and execs them inside a Jython interpreter.
  */
 class JythonServerProtocol {
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.JythonServerProtocol");
+
+  public static String doneString = null;
+
   private Socket socket;
-  private PythonInterpreter interp;
+  private InteractiveConsole interp;
   private StringWriter buffer;
   private String prompt = ">>> ";
 
   public JythonServerProtocol(Socket sock) 
   {
+    JythonServerProtocol.doneString = ts.l("global.done");
+
     this.socket = sock;
     
     buffer = new StringWriter(64);
     
-    interp = new PythonInterpreter(null, new PySystemState());
+    interp = new InteractiveConsole();
     interp.setOut(buffer);
     interp.setErr(buffer);
     
@@ -140,37 +157,42 @@ class JythonServerProtocol {
   public String processInput(String input)
   {
     String output;
+    boolean moreInputRequired;
     
     if (input == null)
       {
-        return "\nHello " + socket.getInetAddress().toString() + "\n" + 
-               "Welcome to the Directory Droid Jython interpreter!\n\n" +
-               "Type \"quit\" to exit.\n" + prompt;
+	// '\nHello {0}\nWelcome to the Directory Droid Jython interpreter!\n\nType "quit" to exit.\n{1}'
+	return ts.l("processInput.greeting", socket.getInetAddress().getHostAddress(), prompt);
       }
     
-    if (input.equals("quit"))
+    if (input.equals(ts.l("processInput.quitcommand")))
       {
-        return "Goodbye.";
+        return doneString;
       }
-      
+
     try
       {
-        interp.exec(input);
+        moreInputRequired = interp.push(input);
+        if (moreInputRequired)
+          {
+            return "... ";
+          }
+        
         buffer.flush();
         output = buffer.toString();
+        interp.resetbuffer();
         buffer.getBuffer().setLength(0);
       }
     catch (PyException pex) 
       {
-        output = pex.toString();
+      	output = buffer.toString() + "\n" + pex.toString();
+      	interp.resetbuffer();
+      	buffer.getBuffer().setLength(0);
       }
     
     return output + prompt;
   }
-  
 }
-
-
 
 /**
  * @author deepak
@@ -178,6 +200,13 @@ class JythonServerProtocol {
  * Handles passing input and output to the above Protocol class.
  */
 class JythonServerWorker extends Thread {
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.JythonServerWorker");
   
   private Socket socket = null;
   private JythonServerProtocol protocol = null;
@@ -193,29 +222,157 @@ class JythonServerWorker extends Thread {
   {
     try
       {
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            socket.getInputStream()));
-
+        OutputStream rawOutput = socket.getOutputStream();
+        InputStream rawInput = socket.getInputStream();
+        PrintWriter out = new PrintWriter(rawOutput, true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(rawInput));
+      
         String inputLine, outputLine;
-
-        /* Send the HELO */
-        outputLine = protocol.processInput(null);
-        out.print(outputLine);
-        out.flush();
-
-        /* Here is the read-eval-print loop */
-        while ((inputLine = in.readLine()) != null)
+        
+        /* Check to make sure that this telnet session is from localhost */
+        InetAddress clientAddress = socket.getInetAddress();
+        if (!clientAddress.equals(java.net.InetAddress.getByName(Ganymede.serverHostProperty))
+            && !clientAddress.getHostAddress().equals("127.0.0.1"))
           {
-            outputLine = protocol.processInput(inputLine);
+            // Permission denied
+            out.println(ts.l("run.denied_not_localhost"));
+            out.flush();
+            socket.close();
+            return;
+          }
+
+        /* Check to see if logins are allowed */
+        try
+          {
+            String error = Ganymede.server.lSemaphore.increment(0);
+            if (error != null)
+              {
+                if (error.equals("shutdown"))
+                  {
+		    // "ERROR: The server is currently waiting to shut down.  No logins will be accepted until the server has restarted"
+                    out.print(ts.l("run.nologins_shutdown"));
+                  }
+                else
+                  {
+		    // "ERROR: Can't log in to the Directory Droid server.. semaphore disabled: {0}"
+                    out.print(ts.l("run.nologins_semaphore", error));
+                  }
+		out.print("\n");
+                out.flush();
+                socket.close();
+                return;
+              }
+          }
+        catch (InterruptedException ex)
+          {
+            ex.printStackTrace(out);
+            out.flush();
+            socket.close();
+            return;
+          }
+	
+        try
+          {
+	    // "Username"
+            out.print(ts.l("run.username"));
+	    out.print(": ");
+            out.flush();
+            String username = in.readLine();
+
+            /* Telnet terminal codes */
+            
+            /* IAC WILL ECHO */
+            byte[] echoOff = { (byte)255, (byte)251, (byte)1 };
+            /* IAC DO ECHO */
+            byte[] echoOffResponse = { (byte)255, (byte)253, (byte)1 };
+            /* IAC WONT ECHO */
+            byte[] echoOn  = { (byte)255, (byte)252, (byte)1 };
+            /* IAC DONT ECHO */
+            byte[] echoOnResponse = { (byte)255, (byte)254, (byte)1 };
+            /* Holds the client response to each terminal code */
+            byte[] responseBuffer = new byte[3];
+
+	    // "Password" 
+            out.print(ts.l("run.password"));
+	    out.print(": ");
+            out.flush();
+
+            /* Disable client-side character echo while the user types in 
+             * the password  */
+            rawOutput.write(echoOff);
+            rawOutput.flush();
+            rawInput.read(responseBuffer, 0, 3);
+            if (!Arrays.equals(responseBuffer, echoOffResponse))
+              {
+              	out.print("Your telnet client won't properly suppress character echo.");
+              	out.flush();
+              	socket.close();
+              	return;
+              }
+
+            String password = in.readLine();
+
+            /* Now re-enable client-side character echo so we can conduct
+             * business as usual */
+            rawOutput.write(echoOn);
+            rawOutput.flush();
+            rawInput.read(responseBuffer, 0, 3);
+            if (!Arrays.equals(responseBuffer, echoOnResponse))
+              {
+              	out.print("Your telnet client won't properly resume character echo.");
+              	out.flush();
+              	socket.close();
+              	return;
+              }
+
+            /* Authenticate the user */
+            int validationResult = Ganymede.server.validateAdminUser(username,
+                                                                     password);
+
+            /* A result of 3 means that this user has interpreter access
+             * privileges. Anything else means that we give 'em the boot. */
+            if (validationResult != 3)
+              {
+                try
+                  {
+                    Thread.currentThread().sleep(3000);
+                  }
+                catch (InterruptedException ex)
+                  {
+                    /* Move along */
+                  }
+
+		// "Permission denied."
+                out.print(ts.l("run.denied"));
+		out.print("\n");
+                out.flush();
+                socket.close();
+                return;
+              }
+
+            /* Send the HELO */
+            outputLine = protocol.processInput(null);
             out.print(outputLine);
             out.flush();
-            if (outputLine.equals("Goodbye."))
-              break;
+
+            /* Here is the read-eval-print loop */
+            while ((inputLine = in.readLine()) != null)
+              {
+                outputLine = protocol.processInput(inputLine);
+                out.print(outputLine);
+                out.flush();
+                if (outputLine.equals(JythonServerProtocol.doneString))
+                  break;
+              }
+            out.close();
+            in.close();
+            socket.close();
           }
-        out.close();
-        in.close();
-        socket.close();
+        finally
+          {
+            /* Make sure to register the logout */
+            Ganymede.server.lSemaphore.decrement();
+          }
       }
     catch (IOException e)
       {

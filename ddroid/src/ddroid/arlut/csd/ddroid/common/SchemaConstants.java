@@ -306,6 +306,11 @@ public interface SchemaConstants {
    * PersonaNameField and PersonaAssocUser.
    */
   final static short PersonaLabelField = 108;
+  
+  /**
+   * boolean, does this role have access to the administrative interpreter?
+   */
+  final static short PersonaInterpreterPower = 109;
 
 
   /** Object number for a pre-defined object used by the server */

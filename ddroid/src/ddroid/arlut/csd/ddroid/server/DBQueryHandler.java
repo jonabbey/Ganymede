@@ -56,9 +56,11 @@ package arlut.csd.ddroid.server;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.Query;
 import arlut.csd.ddroid.common.QueryAndNode;
+import arlut.csd.ddroid.common.QueryDeRefNode;
 import arlut.csd.ddroid.common.QueryDataNode;
 import arlut.csd.ddroid.common.QueryNode;
 import arlut.csd.ddroid.common.QueryNotNode;
@@ -168,6 +170,79 @@ public class DBQueryHandler {
 		    nodeMatch(session, ((QueryOrNode)qN).child2, obj));
 	  }
 
+	if (qN instanceof QueryDeRefNode)
+	  {
+	    InvidDBField invidField = null;
+	    
+	    /* - */
+
+	    QueryDeRefNode n = (QueryDeRefNode) qN;
+
+	    try
+	      {
+		if (n.fieldname != null)
+		  {
+		    invidField = (InvidDBField) obj.getField(n.fieldname);
+		  }
+		else if (n.fieldId != -1)
+		  {
+		    invidField = (InvidDBField) obj.getField(n.fieldId);		    
+		  }
+		else
+		  {
+		    return false;
+		  }
+	      }
+	    catch (ClassCastException ex)
+	      {
+		return false; // not an invid field, oh well
+	      }
+
+	    // check out the field, including permissions, up front
+
+	    if (invidField == null || !invidField.isDefined() || !invidField.verifyReadPermission(session))
+	      {
+		return false;
+	      }
+
+	    if (invidField.isVector())
+	      {
+		values = invidField.getValuesLocal();
+
+		for (int i = 0; i < values.size(); i++)
+		  {
+		    Invid invid = (Invid) values.elementAt(i);
+
+		    DBObject derefObj = DBStore.viewDBObject(invid);
+
+		    if (!session.getPerm(derefObj).isVisible())
+		      {
+			continue;
+		      }
+
+		    if (nodeMatch(session, n.queryTree, derefObj))
+		      {
+			return true;
+		      }
+		  }
+
+		return false;
+	      }
+	    else
+	      {
+		Invid invid = (Invid) invidField.getValueLocal();
+
+		DBObject derefObj = DBStore.viewDBObject(invid);
+
+		if (!session.getPerm(derefObj).isVisible())
+		  {
+		    return false;
+		  }
+
+		return nodeMatch(session, n.queryTree, derefObj);
+	      }
+	  }
+
 	if (qN instanceof QueryDataNode)
 	  {
 	    DBField field = null;
@@ -191,30 +266,10 @@ public class DBQueryHandler {
 		  }
 	      }
 
-	    if (n.fieldname != null)
-	      {
-		field = (DBField) obj.getField(n.fieldname);
-
-		if ((field != null) && (field.isDefined()))
-		  {
-		    if (field.isVector())
-		      {
-			values = field.getValues();
-		      }
-		    else
-		      {
-			value = field.getValue();
-		      }
-		  }
-		else
-		  {
-		    return false;
-		  }
-	      }
-	    else if (n.fieldId == -1)
+	    if (n.fieldId == -1)
 	      {
 		value = obj.getLabel();
-
+		
 		if (debug)
 		  {
 		    System.err.println("Doing comparison against object label: " + value);
@@ -222,18 +277,36 @@ public class DBQueryHandler {
 	      }
 	    else
 	      {
-		field = (DBField) obj.getField(n.fieldId);
+		// find the field, by name or id
+
+		if (n.fieldname != null)
+		  {
+		    field = (DBField) obj.getField(n.fieldname);
+		  }
+		else
+		  {
+		    field = (DBField) obj.getField(n.fieldId);
+		  }
 
 		if ((field != null) && (field.isDefined()))
 		  {
+		    if (!field.verifyReadPermission(session))
+		      {
+			return false;
+		      }
+		    
 		    if (field.isVector())
 		      {
-			values = field.getValues();
+			values = field.getValuesLocal();
 		      }
 		    else
 		      {
-			value = field.getValue();
+			value = field.getValueLocal();
 		      }
+		  }
+		else if (n.comparator == QueryDataNode.EQUALS && n.value.equals(Boolean.FALSE))
+		  {
+		    return true; // a boolean field may not be present/defined if false
 		  }
 		else
 		  {
@@ -301,7 +374,39 @@ public class DBQueryHandler {
 		    System.err.println("Comparing vector field size: " + values.size() + " < " + intval + "?");
 		  }
 
-		return (values.size() > intval);
+		return (values.size() < intval);
+	      
+	      case QueryDataNode.LENGTHLEEQ:
+
+		if (!field.isVector())
+		  {
+		    throw new RuntimeException("Can't do an array test on a scalar field.");
+		  }
+
+		intval = ((Integer) n.value).intValue();
+
+		if (debug)
+		  {
+		    System.err.println("Comparing vector field size: " + values.size() + " <= " + intval + "?");
+		  }
+
+		return (values.size() <= intval);	      
+		
+	      case QueryDataNode.LENGTHGREQ:
+
+		if (!field.isVector())
+		  {
+		    throw new RuntimeException("Can't do an array test on a scalar field.");
+		  }
+
+		intval = ((Integer) n.value).intValue();
+
+		if (debug)
+		  {
+		    System.err.println("Comparing vector field size: " + values.size() + " >= " + intval + "?");
+		  }
+
+		return (values.size() >= intval);		
 	      }
 
 	    // okay.  Now we check each field type

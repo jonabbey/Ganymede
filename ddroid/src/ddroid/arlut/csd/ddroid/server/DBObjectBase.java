@@ -80,6 +80,7 @@ import org.python.core.PyInteger;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLItem;
@@ -142,6 +143,13 @@ import arlut.csd.ddroid.rmi.Session;
 public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode, JythonMap {
 
   static boolean debug = true;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBObjectBase");
 
   /**
    * <P>More debugging.</P>
@@ -679,21 +687,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): enter");
+	System.err.println(ts.l("receive.enter"));
       }
 
     setName(in.readUTF());	// we use setName to filter out any bad chars in transition to 1.0
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): object base name: " + object_name);
+	System.err.println(ts.l("receive.basename", object_name));
       }
 
     classname = in.readUTF();
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): class name: " + classname);
+	System.err.println(ts.l("receive.classname", classname));
       }
 
     if (store.isAtLeast(2,6))
@@ -713,7 +721,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): " + size + " fields in dictionary");
+	System.err.println(ts.l("receive.fieldcount", new Integer(size)));
       }
 
     // read in the custom field dictionary for this object
@@ -744,26 +752,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (store.isLessThan(2,0))
       {
 	new VecQuickSort(customFields, comparator).sort();
-
-	if (false)
-	  {
-	    System.err.println("** Sorted DBObjectBase " + getName());
-
-	    for (int i = 0; i < customFields.size(); i++)
-	      {
-		Object x = customFields.elementAt(i);
-
-		if (x instanceof DBObjectBaseField)
-		  {
-		    System.err.print("Field [" + ((DBObjectBaseField) x).tmp_displayOrder);
-		    System.err.println("] = " + ((DBObjectBaseField) x).getName());
-		  }
-		else
-		  {
-		    System.err.println("**XXX***");
-		  }
-	      }
-	  }
       }
 
     // at file version 1.1, we introduced label_id's.
@@ -779,7 +767,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): " + label_id + " is object label");
+	System.err.println(ts.l("receive.label", new Integer(label_id)));
       }
 
     // at file version 1.3, we introduced object base categories's.
@@ -834,7 +822,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (debug)
       {
-    	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
+    	System.err.println(ts.l("receive.reading", new Integer(object_count)));
       }
 
     Vector tmpIterationSet = new Vector(object_count);
@@ -845,11 +833,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     for (int i = 0; i < object_count; i++)
       {
-	//	if (debug)
-	//	  {
-	//	    System.err.println("DBObjectBase.receive(): reading object " + i);
-	//	  }
-
 	tempObject = new DBObject(this, in, false);
 
 	if (tempObject.getID() > maxid)
@@ -868,7 +851,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (debug)
       {
-	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
+	System.err.println(ts.l("receive.maxid", object_name, new Integer(maxid)));
       }
   }
 
@@ -1075,13 +1058,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (root == null || !root.matches("objectdef"))
       {
-	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + 
-					   root);
+	// "DBObjectBase.setXML(): root element != open objectdef: {0}"
+	throw new IllegalArgumentException(ts.l("setXML.baddoc", root));
       }
 
     if (xmldebug)
       {
-	err.println("Setting XML for object Base.." + root);
+	// "Setting XML for object Base..{0}"
+	err.println(ts.l("setXML.debugroot", root));
       }
 
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
@@ -1093,8 +1077,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (_objectName == null || _objectName.equals(""))
       {
 	return Ganymede.createErrorDialog("xml",
-					  "DBObjectBase.setXML(): objectdef missing name attribute:\n " + 
-					  root.getTreeString());
+					  // "DBObjectBase.setXML(): objectdef missing name attribute:\n {0}"
+					  ts.l("setXML.missingname", root.getTreeString()));
       }
 
     // we call setName() at the bottom, after we know for sure what our
@@ -1105,13 +1089,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (_idInt == null)
       {
 	return Ganymede.createErrorDialog("xml",
-					  "DBObjectBase.setXML(): objectdef missing id attribute:\n " + 
-					  root.getTreeString());
+					  // "DBObjectBase.setXML(): objectdef missing id attribute:\n {0}"
+					  ts.l("setXML.missingid", root.getTreeString()));
       }
 
     if (xmldebug)
       {
-	err.println("Setting id");
+	// "Setting id"
+	err.println(ts.l("setXML.debugid"));
       }
 
     retVal = setTypeID(_idInt.shortValue());
@@ -1127,7 +1112,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Scanning fields");
+	// "Scanning fields"
+	err.println(ts.l("setXML.debugscanning"));
       }
 
     XMLItem children[] = root.getChildren();
@@ -1145,16 +1131,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (_fieldNameStr == null || _fieldIDInt == null)
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Field definition missing name and/or id: " + 
-						  item.getTreeString());
+						  // "Field definition missing name and/or id: {0}"
+						  ts.l("setXML.noid", item.getTreeString()));
 	      }
 
 	    if (nameTable.containsKey(_fieldNameStr))
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "More than one field in objectdef: " + 
-						  root.getTreeString() + 
-						  "\ncontains field name " + _fieldNameStr);
+						  // "More than one field in objectdef: {0}\ncontains field name {1}"
+						  ts.l("setXML.dupfieldname", root.getTreeString(), _fieldNameStr));
 	      }
 
 	    DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldNameStr);
@@ -1162,9 +1147,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (_field != null && _field.isBuiltIn())
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Can't set a field:\n " + item.getTreeString() + 
-						  "\nwith the same name as a pre-existing built-in field in objectdef:\n" +
-						  root.getTreeString());
+						  // "Can't set a field:\n{0}\nwith the same name as a pre-existing built-in field in objectdef:\n{1}"
+						  ts.l("setXML.sysfield", item.getTreeString(), root.getTreeString()));
 	      }
 
 	    nameTable.put(_fieldNameStr, item);
@@ -1172,16 +1156,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (_fieldIDInt.shortValue() < 100)
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Can't modify or set a field:\n " + item.getTreeString() + 
-						  "\nwith a field id in the global field range:\n" +
-						  root.getTreeString());
+						  // "Can't modify or set a field:\n{0}\nwith a field id in the global field range:\n{1}"
+						  ts.l("setXML.noglobals", item.getTreeString(), root.getTreeString()));
 	      }
 
 	    if (idTable.containsKey(_fieldIDInt))
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "More than one field in objectdef: " + root.getTreeString() + 
-						  "\ncontains field id " + _fieldIDInt);
+						  // "More than one field in objectdef: {0}\ncontains field id {1}"
+						  ts.l("setXML.dupfieldid", root.getTreeString(), _fieldIDInt));
 	      }
 
 	    idTable.put(_fieldIDInt, item);
@@ -1192,7 +1175,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Calculating fields to delete");
+	// "Calculating fields to delete"
+	err.println(ts.l("setXML.debugdels"));
       }
 
     // we've got a vector of Integers for the field id's we are going to be
@@ -1214,7 +1198,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
 
-	err.println("\t\tDeleting field " + _field.getName());
+	// "\t\tDeleting field {0}"
+	err.println(ts.l("setXML.deleting", _field.getName()));
 
 	retVal = deleteField(_field.getName());
 
@@ -1237,8 +1222,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (classSet)
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Objectdef contains more than one classdef element:\n" +
-						  root.getTreeString());
+						  // "Objectdef contains more than one classdef element:\n{0}"
+						  ts.l("setXML.dupclassdef", root.getTreeString()));
 	      }
 
 	    _classStr = item.getAttrStr("name");
@@ -1256,8 +1241,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (labelSet)
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Objectdef contains more than one label element:\n" +
-						  root.getTreeString());
+						  // "Objectdef contains more than one label element:\n{0}"
+						  ts.l("setXML.duplabel", root.getTreeString()));
 	      }
 
 	    _labelInt = item.getAttrInt("fieldid");
@@ -1284,7 +1269,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 		if (xmldebug)
 		  {
-		    err.println("Setting XML on new field " + item);
+		    // "Setting XML on new field {0}"
+		    err.println(ts.l("setXML.debugnew", item));
 		  }
 
 		retVal = newField.setXML(item, resolveInvidLinks, err);
@@ -1298,7 +1284,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	    else
 	      {
-		err.println("\t\tEditing field " + item.getAttrStr("name"));
+		// "\t\tEditing field {0}"
+		err.println(ts.l("setXML.editing", item.getAttrStr("name")));
 		
 		retVal = newField.setXML(item, resolveInvidLinks, err);
 
@@ -1311,8 +1298,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	else
 	  {
 	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized XML item: " + item + " in objectdef:\n" +
-					      root.getTreeString());
+					      // "Unrecognized XML item: {0} in objectdef:\n{1}"
+					      ts.l("setXML.unrecognized", item, root.getTreeString()));
 	  }
       }
 
@@ -1320,7 +1307,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Setting label field");
+	// "Setting label field"
+	err.println(ts.l("setXML.debuglabel"));
       }
 
     if (_labelInt == null)
@@ -1339,7 +1327,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Setting class name");
+	// "Setting class name"
+	err.println(ts.l("setXML.debugclass"));
       }
     
     retVal = setClassInfo(_classStr, _classOptionStr);
@@ -1356,7 +1345,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Setting object name");
+	// "Setting object name"
+	err.println(ts.l("setXML.debugname"));
       }
     
     retVal = setName(_objectName);
@@ -1371,7 +1361,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Sorting fields");
+	// "Sorting fields"
+	err.println(ts.l("setXML.debugsorting"));
       }
 
     Vector _newCustom = new Vector();
@@ -1385,8 +1376,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	if (_field == null)
 	  {
 	    return Ganymede.createErrorDialog("xml",
-					      "Couldn't find field " + _fieldID +
-					      "while resorting customFields.");
+					      // "Couldn't find field {0} while resorting customFields."
+					      ts.l("setXML.mysteryfield", _fieldID));
 	  }
 
 	_newCustom.addElement(_field);
@@ -1399,14 +1390,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if ((_intersection.size() != customFields.size()) ||
 	(_intersection.size() != _newCustom.size()))
       {
-	err.println("Consistency error while resorting customFields in base " + getName());
+	// "Consistency error while resorting customFields in base {0}"
+	err.println(ts.l("setXML.inconsistent", getName()));
 
 	err.println("customFields.size() = " + customFields.size());
 	err.println("_newCustom.size() = " + _newCustom.size());
 	err.println("_intersection.size() = " + _intersection.size());
 
 	return Ganymede.createErrorDialog("xml",
-					  "Consistency error while resorting customFields.");
+					  // "Consistency error while resorting customFields."
+					  ts.l("setXML.consistencyerror"));
       }
     
     customFields = _newCustom;
@@ -1415,7 +1408,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Done processing object base " + root);
+	// "Done processing object base {0}"
+	err.println(ts.l("setXML.debugdone", root));
       }
 
     return null;
@@ -1546,7 +1540,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		// usually.. even if we can't find the class, we'll
 		// pass back a default DBEditObject
 
-		System.err.println("DBObjectBase.createHook(): class definition could not be found: " + ex);
+		// "DBObjectBase.createHook(): class definition could not be found: {0}"
+		System.err.println(ts.l("createHook.noclass", ex));
 		classdef = null;
 	      }
 	  }
@@ -1667,7 +1662,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (editset == null)
       {
-	throw new NullPointerException("null editset in createNewObject");
+	// "null editset in createNewObject"
+	throw new NullPointerException(ts.l("createNewObject.noeditset"));
       }
 
     if (chosenSlot == null)
@@ -1678,7 +1674,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    if (objectTable.containsKey(chosenSlot.getNum()))
 	      {
-		throw new IllegalArgumentException("bad invid chosen in createNewObject: num already taken");
+		// "bad invid chosen in createNewObject: num already taken"
+		throw new IllegalArgumentException(ts.l("createNewObject.badinvid"));
 	      }
 	  }
       }
@@ -1686,12 +1683,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	if (chosenSlot.getType() != type_code)
 	  {
-	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: bad type");
+	    // "bad chosen_slot passed into createNewObject: bad type"
+	    throw new IllegalArgumentException(ts.l("createNewObject.badslottype"));
 	  }
 
 	if (objectTable.containsKey(chosenSlot.getNum()))
 	  {
-	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: num already taken");
+	    // "bad chosen_slot passed into createNewObject: num already taken"
+	    throw new IllegalArgumentException(ts.l("createNewObject.badslotnum"));
 	  }
 
 	invid = chosenSlot;
@@ -1776,8 +1775,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      {
 		if (error_code != null)
 		  {
-		    String errormsg = "createNewObject failure: " + 
-		      error_code + " in trying to construct custom object";
+		    // "createNewObject failure: {0} in trying to construct custom object"
+		    String errormsg = ts.l("createNewObject.failure1", error_code);
 		    Ganymede.debug(errormsg);
 		    throw new DDroidManagementException(errormsg);
 		  }
@@ -1828,8 +1827,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
         try
           {
-            c = classdef.getDeclaredConstructor(classArray);
-            shadowObject = (DBEditObject) c.newInstance(parameterArray);
+            /*
+             * First, try to use classdef's factory method to create the object.
+             * If that doesn't work (if the classdef has no factory methods, for
+             * example), then use a default constructor.
+             */
+
+            shadowObject = invokeFactory(classArray, parameterArray);
+            if (shadowObject == null)
+              {
+                c = classdef.getDeclaredConstructor(classArray);
+                shadowObject = (DBEditObject) c.newInstance(parameterArray);
+              }
           }
         catch (NoSuchMethodException ex)
           {
@@ -1866,8 +1875,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      {
 		if (error_code != null)
 		  {
-		    String errormsg = "createNewObject failure: " + error_code
-		      + " in trying to check out custom object";
+		    // "createNewObject failure: {0} in trying to check out custom object"
+		    String errormsg = ts.l("createNewObject.failure2", error_code);
 		    Ganymede.debug(errormsg);
 		    throw new DDroidManagementException(errormsg);
 		  }
@@ -2044,7 +2053,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     // make sure we strip any chars that would cause this object name
@@ -2070,8 +2079,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	if (this.editor.getBase(newName) != null)
 	  {
 	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      "Can't rename base " + object_name + 
-					      " to " + newName + ", that name is already taken.");
+					      // "Can't rename base {0} to {1}, that name is already taken."
+					      ts.l("setName.norename", object_name, newName));
 	  }
       }
     else
@@ -2079,8 +2088,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	if (this.store.getObjectBase(newName) != null)
 	  {
 	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      "Can't rename base " + object_name + 
-					      " to " + newName + ", that name is already taken.");
+					      // "Can't rename base {0} to {1}, that name is already taken."
+					      ts.l("setName.norename", object_name, newName));
 	  }
       }
 
@@ -2144,9 +2153,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized ReturnVal setClassInfo(String newClassName, String newOptionString)
   {
+    /*
+     * Remember the original values we've got, just in case the new values don't
+     * take for whatever reason.
+     */
+    String originalClassName = classname;
+    Class originalClassDef = classdef;
+    DBEditObject originalObjectHook = objectHook;
+    
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if ((newClassName == classname ||
@@ -2173,6 +2190,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     classOptionString = newOptionString;
+      	
+    // Reset the classdef so that createHook can load the newly specified
+    // class via class.forName()
+
+    classdef = null;
 
     // try to create an object using the proposed class
     // information.. if we can't, no big deal, it'll just have to be
@@ -2184,26 +2206,28 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     catch (RemoteException ex)
       {
+	// Restore our state back to the way it was originally
+	
+	classname = originalClassName;
+	classdef = originalClassDef;
+	objectHook = originalObjectHook;
+		
 	return Ganymede.createErrorDialog("setClassInfo Failure",
-					  "Internal RemoteException in setClassInfo: " + Ganymede.stackTrace(ex));
+					  // "Internal RemoteException in setClassInfo: {0}"
+					  ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
       }
 
     if (objectHook.getClass().getName().equals("arlut.csd.ddroid.server.DBEditObject") &&
 	!classname.equals("arlut.csd.ddroid.server.DBEditObject"))
       {
-	ReturnVal retVal = new ReturnVal(true);	// success, but...
+	ReturnVal retVal = new ReturnVal(false);
 
 	if (classOptionString == null)
 	  {
 	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
-					     "Couldn't find class " + classname +
-					     " in the server's CLASSPATH.  This probably means that " +
-					     "you have not yet rebuilt the custom.jar file with this class " +
-					     "added.\n\nThis classname has been set for object type " + getName() +
-					     " in " +
-					     "the server, but will not take effect until the server is restarted " +
-					     "with this class available to the server.\n\n" +
-					     "This object base will not be managed with custom code unless and until this is fixed.\n",
+					     // "Couldn't find class {0} in the server's CLASSPATH.  This probably means
+					     // that you have not yet rebuilt the custom.jar file with this class added."
+					     ts.l("setClassInfo.noclass", classname),
 					     "Ok",
 					     null,
 					     "error.gif"));
@@ -2211,18 +2235,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	else
 	  {
 	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
-					     "Couldn't load custom management logic from class " + classname + 
-					     " using class option string '" + classOptionString + "'.\n\n" +
-					     "This may mean that " +
-					     "you have not yet rebuilt the custom.jar file with the " + classname +
-					     " class added, or that the resource specified in the option string can not found by " +
-					     classname + "'s factory methods.\n\n" +
-					     "This object base will not be managed with custom code unless and until this is fixed.\n",
+					     // "Couldn't load custom management logic from class {0} using class option string '\
+					     // {1}'.\n\nThis may mean that you have not yet rebuilt the custom jar file with the {0} class added, or that \
+					     // the resource specified in the option string can not be found by {0}'s factory methods."
+					     ts.l("setClassInfo.noclassoption", classname, classOptionString),
 					     "Ok",
 					     null,
 					     "error.gif"));
 	  }
 
+	// Restore our state back to the way it was originally
+	
+	classname = originalClassName;
+	classdef = originalClassDef;
+	objectHook = originalObjectHook;
+	
 	return retVal;
       }
 
@@ -2259,8 +2286,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (oldField == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Error, can't move field " + fieldName +
-					  ", no such field in object type.");
+					  // "Error, can't move field {0}, no such field in object type."
+					  ts.l("moveFieldAfter.nomove", fieldName));
       }
 
     if (previousFieldName == null || previousFieldName.equals(""))
@@ -2275,9 +2302,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (prevField == null || !customFields.contains(prevField))
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Error, can't move field " + fieldName +
-					  " after " + previousFieldName +
-					  ", no such field in object type.");
+					  // "Error, can't move field {0} after {1}, no such field in object type."
+					  ts.l("moveFieldAfter.nofield", fieldName, previousFieldName));
       }
 
     customFields.removeElement(oldField);
@@ -2307,9 +2333,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (oldField == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Error, can't move field " + fieldName +
-					  ", no such field in object type.");
+					  // "Error, can't move field {0}, no such field in object type."
+					  ts.l("moveFieldBefore.nomove", fieldName));
       }
+
 
     if (nextFieldName == null || nextFieldName.equals(""))
       {
@@ -2323,9 +2350,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (nextField == null || !customFields.contains(nextField))
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Error, can't move field " + fieldName +
-					  " before " + nextFieldName +
-					  ", no such field in object type.");
+					  // "Error, can't move field {0} before {1}, no such field in object type."
+					  ts.l("moveFieldBefore.nofield", fieldName, nextFieldName));
       }
 
     customFields.removeElement(oldField);
@@ -2381,20 +2407,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if ((objectId != type_code) && (type_code != -1))
       {
 	return Ganymede.createErrorDialog("xml",
-					  "Can't change the type_code for an existing object base");
+					  // "Can't change the type_code for an existing object base"
+					  ts.l("setTypeID.notypemutation"));
       }
 
     if (store.getObjectBase(objectId) != null)
       {
 	return Ganymede.createErrorDialog("xml",
-					  "Can't set the type_code for object base " + toString() +
-					  " to that of an existing object base");
+					  // "Can't set the type_code for object base {0} to that of an existing object base"
+					  ts.l("setTypeID.typeconflict", this.toString()));
       }
 
     type_code = objectId;
@@ -2601,7 +2628,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't call in a non-edit context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if (fieldName == null)
@@ -2615,7 +2642,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (bF == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "setLabelField() called with an unrecognized field name.");
+					  // "setLabelField() called with an unrecognized field name."
+					  ts.l("setLabelField.badfieldname"));
       }
 
     try
@@ -2648,13 +2676,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't call in a non-edit context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if ((fieldID != -1) && (null == getField(fieldID)))
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "setLabelField() called with an unrecognized field id.");
+					  // "setLabelField() called with an unrecognized field id."
+					  ts.l("setLabelField.badfieldid"));
       }
 
     label_id = fieldID;
@@ -2694,7 +2723,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't set category in non-edit context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     this.category = category;
@@ -2720,7 +2749,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't call in a non-edit context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     id = getNextFieldID();
@@ -2731,7 +2760,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("couldn't create field due to initialization error: " + ex);
+	// "Couldn't create field due to initialization error: {0}"
+	throw new RuntimeException(ts.l("createNewField.noluck", ex));
       }
 
     // set its id
@@ -2740,13 +2770,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // give it an initial, unique name
 
-    String newName = "New Field";
+    String newName = ts.l("createNewField.defaultname");
 
     int i = 2;
 
     while (getField(newName) != null)
       {
-	newName = "New Field " + i++;
+	newName = ts.l("createNewField.defaultname") + i++;
       }
 
     field.setName(newName);
@@ -2783,14 +2813,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("can't call in a non-edit context");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if (fieldInUse(fieldName))
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "deleteField() called on object type " + getName() + 
-					  " with a field name ( " + fieldName + "). that is in use in the database");
+					  // "deleteField() called on object type {0} with a field name ({1}) that is in use in the database."
+					  ts.l("deleteField.fieldused", getName(), fieldName));
       }
 
     field = (DBObjectBaseField) getField(fieldName);
@@ -2798,16 +2828,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (field == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "deleteField() called on object type " + getName() + 
-					  " with an unrecognized field name ( " + fieldName + ").");
+					  // "deleteField() called on object type {0} with an unrecognized field name ({1})."
+					  ts.l("deleteField.fieldunknown", getName(), fieldName));
       }
 
     if (!field.isRemovable())
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "deleteField() called on object type " + getName() + 
-					  " with a system field name ( " + fieldName + 
-					  "). that may not be deleted");
+					  // "deleteField() called on object type {0} with a system field name ({1}) that may not be deleted."
+					  ts.l("deleteField.sysfield", getName(), fieldName));
       }
 
     removeField(field);
@@ -2872,7 +2901,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (fieldDef == null)
       {
-	throw new RuntimeException("can't check for non-existent field: " + fieldName);
+	// "Can't check for non-existent field: {0}"
+	throw new RuntimeException(ts.l("fieldInUse.nofield", fieldName));
       }
 
     id = fieldDef.getID();
@@ -2909,8 +2939,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	catch (RemoteException ex)
 	  {
-	    throw new RuntimeException("Error, couldn't create hook in getObjectHook(). " + 
-				       ex.getMessage());
+	    // "Error, couldn't create hook in getObjectHook().\n{0}"
+	    throw new RuntimeException(ts.l("getObjectHook.error", Ganymede.stackTrace(ex)));
 	  }
       }
 
@@ -2953,7 +2983,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (invid.getType() != this.getTypeID())
       {
-	throw new IllegalArgumentException("wrong invid type");
+	// "Wrong Invid type"
+	throw new IllegalArgumentException(ts.l("getObject.badtype"));
       }
 
     return objectTable.get(invid.getNum());
@@ -2997,12 +3028,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (DBSchemaEdit.debug)
       {
-	Ganymede.debug("DBObjectBase.clearEditor(): clearing editor for " + getName());
+	// "DBObjectBase.clearEditor(): clearing editor for {0}"
+	Ganymede.debug(ts.l("clearEditor.clearing", getName()));
       }
 
     if (this.editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
     
     this.editor = null;
@@ -3116,7 +3148,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	   
 	    if (DBSchemaEdit.debug)
 	      {
-		System.err.println("Updating base reference on " + obj);
+		// "Updating base reference on {0}"
+		System.err.println(ts.l("updateBaseRefs.updating", obj));
 	      }
 
 	    obj.updateBaseRefs(this);
@@ -3189,11 +3222,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	if (state)
 	  {
-	    Ganymede.logAssert("double write lock in DBObjectBase");
+	    // "double write lock in DBObjectBase"
+	    Ganymede.logAssert(ts.l("setWriteInProgress.doublelock"));
 	  }
 	else
 	  {
-	    Ganymede.logAssert("double write unlock in DBObjectBase");
+	    // "double write unlock in DBObjectBase"
+	    Ganymede.logAssert(ts.l("setWriteInProgress.doubleunlock"));
 	  }
       }
   }
@@ -3464,7 +3499,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (field.getID() <= SchemaConstants.FinalSystemField)
       {
-	throw new IllegalArgumentException("Error, attempted to add a system field using addFieldToStart().");
+	// "Error, attempted to add a system field using addFieldToStart()."
+	throw new IllegalArgumentException(ts.l("addFieldToStart.sysfield"));
       }
 
     fieldTable.put(field);
@@ -3481,7 +3517,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (field.getID() <= SchemaConstants.FinalSystemField)
       {
-	throw new IllegalArgumentException("Error, attempted to add a system field using addFieldToEnd().");
+	// "Error, attempted to add a system field using addFieldToEnd()."
+	throw new IllegalArgumentException(ts.l("addFieldToEnd.sysfield"));
       }
 
     fieldTable.put(field);
@@ -3526,7 +3563,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (field.getID() > SchemaConstants.FinalSystemField)
       {
-	throw new IllegalArgumentException("Error, attempted to add a non-system field using addSystemField().");
+	// "Error, attempted to add a non-system field using addSystemField()."
+	throw new IllegalArgumentException(ts.l("addSystemField.nonsysfield"));
       }
 
     fieldTable.put(field);
@@ -3549,10 +3587,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	customFields.removeElement(field);
       }
   }
-
-  
-  
-  
 
   /* *************************************************************************
    *

@@ -60,6 +60,7 @@ public class QueryDataNode extends QueryNode {
 
   static final long serialVersionUID = 1435603665496067800L;
 
+  static public final byte NONE = 0;
   static public final byte FIRST = 1;
 
   static public final byte EQUALS = 1;
@@ -77,15 +78,18 @@ public class QueryDataNode extends QueryNode {
 
   static public final byte FIRSTVECOP = 0;
   
-  static public final byte NONE = 0;
   static public final byte CONTAINS = 1;
   static public final byte LENGTHEQ = 4;
   static public final byte LENGTHGR = 5;
   static public final byte LENGTHLE = 6;
+  static public final byte LENGTHLEEQ = 7;
+  static public final byte LENGTHGREQ = 8;
 
-  static public final byte LASTVECOP = 6;
+  static public final byte LASTVECOP = 8;
 
+  static public final short LABELVAL = -1;
   static public final short INVIDVAL = -2;
+  static public final short UNUSEDVAL = -99;
 
   /* - */
 
@@ -110,7 +114,7 @@ public class QueryDataNode extends QueryNode {
   public QueryDataNode(String fieldname, byte comparator, byte vecOp, Object value)
   {
     this.fieldname = fieldname;
-    this.fieldId = -1;
+    this.fieldId = UNUSEDVAL;
 
     if ((comparator < FIRST || comparator > LAST) &&
 	(vecOp == NONE))
@@ -140,7 +144,7 @@ public class QueryDataNode extends QueryNode {
   public QueryDataNode(String fieldname, byte comparator, Object value)
   {
     this.fieldname = fieldname;
-    this.fieldId = -1;
+    this.fieldId = UNUSEDVAL;
 
     if (comparator < FIRST || comparator > LAST)
       {
@@ -229,7 +233,7 @@ public class QueryDataNode extends QueryNode {
   public QueryDataNode(byte comparator, Object value)
   {
     this.fieldname = null;
-    this.fieldId = -1;
+    this.fieldId = LABELVAL;
 
     if (comparator < FIRST || comparator > LAST)
       {
@@ -351,7 +355,10 @@ public class QueryDataNode extends QueryNode {
 
     result.append(" ");
 
-    result.append(value.toString());
+    if (value != null)
+      {
+        result.append(value.toString());
+      }
 
     return result.toString();
   }

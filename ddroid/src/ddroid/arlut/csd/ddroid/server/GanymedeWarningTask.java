@@ -254,7 +254,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		    obj = mySession.session.viewDBObject(invid);
 
-		    actionDate = (Date) obj.getFieldValue(SchemaConstants.ExpirationField);
+		    actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.ExpirationField);
 
 		    tempString.append(getExpirationWarningMesg(obj));
 		    
@@ -326,7 +326,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		    obj = mySession.session.viewDBObject(invid);
 
-		    actionDate = (Date) obj.getFieldValue(SchemaConstants.RemovalField);
+		    actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
 		    tempString.append("\n\nRemoval scheduled to take place on or after " + actionDate.toString()); 
 		    
@@ -398,7 +398,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		obj = mySession.session.viewDBObject(invid);
 
-		actionDate = (Date) obj.getFieldValue(SchemaConstants.ExpirationField);
+		actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.ExpirationField);
 
 		tempString.append(getExpirationWarningMesg(obj));
 		    
@@ -462,7 +462,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		obj = mySession.session.viewDBObject(invid);
 
-		actionDate = (Date) obj.getFieldValue(SchemaConstants.RemovalField);
+		actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
 		tempString.append("\n\nRemoval scheduled to take place on or after " + actionDate.toString()); 
 		    
@@ -520,7 +520,7 @@ public class GanymedeWarningTask implements Runnable {
   public String getExpirationWarningMesg(DBObject object)
   {
     StringBuffer tempString = new StringBuffer();
-    Date actionDate = (Date) object.getFieldValue(SchemaConstants.ExpirationField);
+    Date actionDate = (Date) object.getFieldValueLocal(SchemaConstants.ExpirationField);
     String typeName = object.getTypeName();
     String label = object.getLabel();
 

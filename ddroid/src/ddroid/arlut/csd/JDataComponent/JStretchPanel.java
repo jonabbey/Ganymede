@@ -1,25 +1,27 @@
 /*
+   JStretchPanel.java
 
-   NotLoggedInException.java
- 
-   Created: 11 March 2003
+   This class defines a JPanel that contains a single, centered, stretched
+   component.
+   
+   Created: 20 August 2004
+
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
 
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Directory Droid Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996 - 2004
    The University of Texas at Austin
 
    Contact information
 
-   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -49,29 +51,59 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.JDataComponent;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                            NotLoggedInException
+                                                                     JStretchPanel
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid-specific RemoteException subclass that can be
- * thrown by the server if a method is called on a GanymedeSession
- * after that session has terminated.</p>
+ * <p>This class defines a JPanel that contains a single, centered, stretched
+ * component.</p>
+ *
+ * <p>All methods on a constructed JStretchPanel object should be called on the
+ * GUI thread once the JStretchPanel has been added to a GUI container.</p>
  */
 
-public class NotLoggedInException extends java.rmi.RemoteException {
+public class JStretchPanel extends JPanel {
 
-  public NotLoggedInException()
+  public JStretchPanel()
   {
     super();
+    setup();
   }
 
-  public NotLoggedInException(String s)
+  public JStretchPanel(boolean doubleBuffer)
   {
-    super(s);
+    super(doubleBuffer);
+    setup();
+  }
+
+  private void setup()
+  {
+    setLayout(new BorderLayout());
+  }
+
+  public synchronized void setComponent(Component comp)
+  {
+    removeAll();
+    add("Center", comp);
+  }
+
+  public synchronized void cleanup()
+  {
+    removeAll();
   }
 }

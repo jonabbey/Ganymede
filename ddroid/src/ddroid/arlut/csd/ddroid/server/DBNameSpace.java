@@ -412,6 +412,40 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     return _handle.getField(Ganymede.internalSession);
   }
 
+  /**
+   *
+   * <p>This method allows the namespace to be used as a unique valued 
+   * search index.</p>
+   *
+   * <p>Note that this lookup only works for precise equality lookup.. i.e., 
+   * strings must be the same capitalization and the whole works.</p>
+   *
+   * <p>As well, this method is really probably useful in the context of
+   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * at this point.</p>
+   *
+   * @param session The GanymedeSession to use to lookup the containing object..
+   * useful when a GanymedeSession is doing the looking up of value
+   * @param value The value to search for in the namespace hash.
+   *
+   */
+
+  public synchronized DBField lookup(GanymedeSession session, Object value)
+  {
+    DBNameSpaceHandle _handle;
+
+    /* -- */
+
+    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+    if (_handle == null)
+      {
+	return null;
+      }
+
+    return _handle.getField(session);
+  }
+
   /*----------------------------------------------------------------------------
                                                                           method
                                                                       testmark()

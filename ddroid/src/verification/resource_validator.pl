@@ -14,11 +14,11 @@
 # This code does not attempt to be comprehensive in its operation..
 # there are a number of significant simplifying assumptions:
 #
-# To wit, that all localization retrievals will be pulled from
-# a resource bundle whose name is identical to that of the fully qualified
-# class name of the containing file, and that all retrievals will
-# be made using a TranslationService variable named 'ts', with a
-# localize method named 'l'.
+# To wit, that all localization retrievals will be pulled from a
+# resource bundle whose name is identical to that of the fully
+# qualified class name of the containing file, and that all retrievals
+# will be made using a class-local static or member TranslationService
+# variable named 'ts', with a localize method named 'l'.
 #
 # If these assumptions hold, then resource_validator.pl will check all
 # source files under this directory against the appropriate
@@ -36,6 +36,8 @@ use lib "$FindBin::Bin/Modules";
 
 use Config::Properties;
 
+$| = 1;				# don't buffer stdout, to assist debug
+
 if (defined $ARGV[0]) {
   $scan_root = "$ARGV[0]/ddroid/arlut/csd/ddroid";
   $properties_root = "$ARGV[0]/resources";
@@ -45,6 +47,7 @@ if (defined $ARGV[0]) {
 }
 
 $showall_props = 0;
+$showallfiles = 0;
 
 #########################################################################
 #
@@ -93,15 +96,17 @@ sub find_javas {
 sub countparams {
   my ($string) = @_;
 
-  # okay, this is super lame.. just going to look for {0}, {1}, etc.,
-  # keeping a counter as we substitute the templatization points out
-  # for <>.  I'd do this better if I didn't have such an allergy to
-  # doing manual character loops in perl. TMTOWTDI.
+  # Because template substitution points may be reused in a
+  # localization string, we need to actually examine the digits in the
+  # {0}, {1}, {2 Date} style substitution points to find the index of
+  # the highest substitution point.
 
   my $count = 0;
 
-  while ($string =~ /[^\\]\{\d/ || $string =~ /^\{\d/){
-    $count = $count + 1;
+  while ($string =~ /[^\\]\{(\d)/ || $string =~ /^\{(\d)/){
+    if ($1 + 1 > $count) {
+      $count = $1 + 1;
+    }
     $string =~ s/\{[^\}]+\}/<>/;
   }
 
@@ -339,7 +344,7 @@ sub inchoverjavaargs {
 sub examine_java {
   my ($jfile) = @_;
 
-  my ($properties, $classname, $mode, $package, $propname, $proppath, $working, $key);
+  my ($properties, $sourcename, $mode, $package, $propname, $proppath, $working, $key);
   my ($value, $prop_param_count, $rest, $arg_count);
   my (%seen, $hashref, $prop);
 
@@ -348,9 +353,14 @@ sub examine_java {
 
   $jfile =~ /\/([^\/]*)\.java$/;
 
-  $classname = $1;
+  $sourcename = $1;
 
   $mode = 0;
+
+  if ($showallfiles)
+    {
+      print "FILE: $jfile\n";
+    }
 
   open (IN, "<$jfile") || die "Couldn't open $jfile";
   while (<IN>) {
@@ -361,15 +371,10 @@ sub examine_java {
     if (/TranslationService\.getTranslationService\(\"([^\"]*)\"\)/) {
       $propname = $1;
 
-      if ($showall_props) {
-	print "\nFound use of property bundle $propname in Class $package.$classname\n\n";
+      if ($propname ne "$package.$sourcename") {
+	print "$propname in $sourcename\n";
       } else {
-	print "$package.$classname\n";
-      }
-
-      if ($propname ne "$package.$classname") {
-	print "***  Error, property/classname mismatch ***\n";
-	return;
+	print "$propname\n";
       }
 
       $proppath = $propname;

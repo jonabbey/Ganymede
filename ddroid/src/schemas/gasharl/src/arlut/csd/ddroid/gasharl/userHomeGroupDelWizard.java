@@ -56,6 +56,7 @@ package arlut.csd.ddroid.gasharl;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.QueryResult;
 import arlut.csd.ddroid.common.ReturnVal;
@@ -364,7 +365,15 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	// will go ahead and unregister us and let the GROUPLIST modification
 	// go through to completion.
 
-	retVal = invF.deleteElement(index);
+	try
+	  {
+	    retVal = invF.deleteElement(index);
+	  }
+	catch (DDPermissionsException ex)
+	  {
+	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+						"Permissions error in deleting old home group.");
+	  }
 
 	if (retVal == null || retVal.didSucceed())
 	  {

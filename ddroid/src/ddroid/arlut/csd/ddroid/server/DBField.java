@@ -63,6 +63,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.FieldInfo;
 import arlut.csd.ddroid.common.FieldTemplate;
 import arlut.csd.ddroid.common.Invid;
@@ -400,7 +401,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isVector())
       {
-	return target.setValue(getValue(), local, true); // inhibit wizards..
+	return target.setValueLocal(getValueLocal(), true); // inhibit wizards..
       }
     else
       {
@@ -408,18 +409,11 @@ public abstract class DBField implements Remote, db_field {
 
 	/* -- */
 
-	if (!local)
-	  {
-	    valuesToCopy = getValues();
-	  }
-	else
-	  {
-	    valuesToCopy = getValuesLocal();
-	  }
+	valuesToCopy = getValuesLocal();
 
 	// we want to inhibit wizards and allow partial failure
 
-	retVal = target.addElements(valuesToCopy, local, true, true);
+	retVal = target.addElementsLocal(valuesToCopy, true, true);
 
 	// the above operation could fail if we don't have write
 	// privileges for the target field, so we'll return an
@@ -680,7 +674,7 @@ public abstract class DBField implements Remote, db_field {
 
 	if (currentValues.size() != 0)
 	  {
-	    return deleteElements(currentValues);
+	    return deleteElementsLocal(currentValues);
 	  }
 	else
 	  {
@@ -883,42 +877,16 @@ public abstract class DBField implements Remote, db_field {
    *
    */
 
-  public Object getValue()
+  public Object getValue() throws DDPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
+	throw new DDPermissionsException("permission denied to read this field " + getName());
       }
 
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
-      }
-
-    return value;
-  }
-
-  /**
-   *
-   * Returns the value of this field, if a scalar.  This method
-   * is intended to be used by the virtualizing hook to use to
-   * return the default value if the virtualizer wants to pass
-   * through.
-   *
-   * @see arlut.csd.ddroid.rmi.db_field
-   *
-   */
-
-  public Object getValue(boolean virtualize)
-  {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
-      }
-
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
+	throw new DDPermissionsException("scalar accessor called on vector " + getName());
       }
 
     return value;
@@ -967,6 +935,24 @@ public abstract class DBField implements Remote, db_field {
   public final ReturnVal setValueLocal(Object value)
   {
     return setValue(value, true, false);
+  }
+
+  /**
+   * <P>Sets the value of this field, if a scalar.</P>
+   *
+   * <P><B>This method is server-side only, and bypasses permissions
+   * checking.</B></P>
+   *
+   * <P>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</P>
+   *
+   * @param value Value to set this field to
+   * @param noWizards If true, wizards will be skipped
+   */
+
+  public final ReturnVal setValueLocal(Object value, boolean noWizards)
+  {
+    return setValue(value, true, noWizards);
   }
 
   /**
@@ -1144,12 +1130,12 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public Vector getValues()
+  public Vector getValues() throws DDPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + 
-					   getName());
+	throw new DDPermissionsException("permission denied to read this field " + 
+					 getName());
       }
 
     if (!isVector())
@@ -1170,11 +1156,11 @@ public abstract class DBField implements Remote, db_field {
    *
    */
 
-  public Object getElement(int index)
+  public Object getElement(int index) throws DDPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
+	throw new DDPermissionsException("permission denied to read this field " + getName());
       }
 
     if (!isVector())
@@ -1184,7 +1170,27 @@ public abstract class DBField implements Remote, db_field {
 
     if (index < 0)
       {
-	throw new IllegalArgumentException("invalid index " + index + " on field " + getName());
+	throw new ArrayIndexOutOfBoundsException("invalid index " + index + " on field " + getName());
+      }
+
+    return getVectVal().elementAt(index);
+  }
+
+  /**
+   * <p>Returns the value of an element of this field,
+   * if a vector.</p>
+   */
+
+  public Object getElementLocal(int index)
+  {
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
+    if (index < 0)
+      {
+	throw new ArrayIndexOutOfBoundsException("invalid index " + index + " on field " + getName());
       }
 
     return getVectVal().elementAt(index);
@@ -1203,7 +1209,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
   
-  public final ReturnVal setElement(int index, Object value)
+  public final ReturnVal setElement(int index, Object value) throws DDPermissionsException
   {
     if (!isVector())
       {
@@ -1219,7 +1225,7 @@ public abstract class DBField implements Remote, db_field {
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new ArrayIndexOutOfBoundsException("invalid index " + index);
       }
 
     return rescanThisField(setElement(index, value, false, false));
@@ -1255,10 +1261,17 @@ public abstract class DBField implements Remote, db_field {
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new ArrayIndexOutOfBoundsException("invalid index " + index);
       }
 
-    return setElement(index, value, true, false);
+    try
+      {
+	return setElement(index, value, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should not happen
+      }
   }
 
   /**
@@ -1272,7 +1285,7 @@ public abstract class DBField implements Remote, db_field {
    * needed to be passed back about side-effects.</p>
    */
 
-  public final ReturnVal setElement(int index, Object submittedValue, boolean local)
+  public final ReturnVal setElement(int index, Object submittedValue, boolean local) throws DDPermissionsException
   {
     return setElement(index, submittedValue, local, false);
   }
@@ -1288,7 +1301,7 @@ public abstract class DBField implements Remote, db_field {
    * needed to be passed back about side-effects.</p>
    */
   
-  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
+  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws DDPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1304,8 +1317,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible.
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object, field " +
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object, field " +
+					 getName());
       }
 
     retVal = verifyNewValue(submittedValue);
@@ -1433,7 +1446,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final ReturnVal addElement(Object value)
+  public final ReturnVal addElement(Object value) throws DDPermissionsException
   {
     return rescanThisField(addElement(value, false, false));
   }
@@ -1450,7 +1463,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal addElementLocal(Object value)
   {
-    return addElement(value, true, false);
+    try
+      {
+	return addElement(value, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -1466,7 +1486,7 @@ public abstract class DBField implements Remote, db_field {
    * @param local If true, permissions checking will be skipped
    */
 
-  public final ReturnVal addElement(Object submittedValue, boolean local)
+  public final ReturnVal addElement(Object submittedValue, boolean local) throws DDPermissionsException
   {
     return addElement(submittedValue, local, false);
   }
@@ -1485,7 +1505,7 @@ public abstract class DBField implements Remote, db_field {
    * @param noWizards If true, wizards will be skipped
    */
 
-  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
+  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws DDPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1496,8 +1516,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+					 getName());
       }
 
     if (!isVector())
@@ -1611,7 +1631,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final ReturnVal addElements(Vector values)
+  public final ReturnVal addElements(Vector values) throws DDPermissionsException
   {
     return rescanThisField(addElements(values, false, false));
   }
@@ -1633,7 +1653,49 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal addElementsLocal(Vector values)
   {
-    return addElements(values, true, false);
+    try
+      {
+	return addElements(values, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
+  }
+
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param noWizards If true, wizards will be skipped
+   * @param partialSuccessOk If true, addElements will add any values that
+   * it can, even if some values are refused by the server logic.  Any
+   * values that are skipped will be reported in a dialog passed back
+   * in the returned ReturnVal
+   */
+
+  public final ReturnVal addElementsLocal(Vector values, boolean noWizards, boolean partialSuccessOk)
+  {
+    try
+      {
+	return addElements(values, true, noWizards, partialSuccessOk);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -1654,7 +1716,7 @@ public abstract class DBField implements Remote, db_field {
    * @param local If true, permissions checking will be skipped
    */
 
-  public final ReturnVal addElements(Vector submittedValues, boolean local)
+  public final ReturnVal addElements(Vector submittedValues, boolean local) throws DDPermissionsException
   {
     return addElements(submittedValues, local, false);
   }
@@ -1679,7 +1741,7 @@ public abstract class DBField implements Remote, db_field {
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local,
-				     boolean noWizards)
+				     boolean noWizards) throws DDPermissionsException
   {
     return addElements(submittedValues, local, noWizards, false);
   }
@@ -1708,7 +1770,7 @@ public abstract class DBField implements Remote, db_field {
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
-					    boolean noWizards, boolean partialSuccessOk)
+					    boolean noWizards, boolean partialSuccessOk) throws DDPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1721,8 +1783,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+					 getName());
       }
 
     if (!isVector())
@@ -1933,7 +1995,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final ReturnVal deleteElement(int index)
+  public final ReturnVal deleteElement(int index) throws DDPermissionsException
   {
     return rescanThisField(deleteElement(index, false, false));
   }
@@ -1949,7 +2011,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal deleteElementLocal(int index)
   {
-    return deleteElement(index, true, false);
+    try
+      {
+	return deleteElement(index, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -1961,7 +2030,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public final ReturnVal deleteElement(int index, boolean local)
+  public final ReturnVal deleteElement(int index, boolean local) throws DDPermissionsException
   {
     return deleteElement(index, local, false);
   }
@@ -1975,7 +2044,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
+  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws DDPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1985,8 +2054,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+					 getName());
       }
 
     if (!isVector())
@@ -1998,8 +2067,8 @@ public abstract class DBField implements Remote, db_field {
 
     if ((index < 0) || (index >= values.size()))
       {
-	throw new IllegalArgumentException("invalid index " + index + 
-					   " in deleting element in field " + getName());
+	throw new ArrayIndexOutOfBoundsException("invalid index " + index + 
+						 " in deleting element in field " + getName());
       }
 
     eObj = (DBEditObject) owner;
@@ -2066,7 +2135,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final ReturnVal deleteElement(Object value)
+  public final ReturnVal deleteElement(Object value) throws DDPermissionsException
   {
     return rescanThisField(deleteElement(value, false, false));
   }
@@ -2082,7 +2151,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal deleteElementLocal(Object value)
   {
-    return deleteElement(value, true, false);
+    try
+      {
+	return deleteElement(value, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -2094,7 +2170,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public final ReturnVal deleteElement(Object value, boolean local)
+  public final ReturnVal deleteElement(Object value, boolean local) throws DDPermissionsException
   {
     return deleteElement(value, local, false);
   }
@@ -2108,12 +2184,12 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards)
+  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws DDPermissionsException
   {
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object " +
+					 getName());
       }
 
     if (!isVector())
@@ -2155,7 +2231,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public ReturnVal deleteAllElements()
+  public ReturnVal deleteAllElements() throws DDPermissionsException
   {
     return this.deleteElements(this.getValues());
   }
@@ -2178,7 +2254,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final ReturnVal deleteElements(Vector values)
+  public final ReturnVal deleteElements(Vector values) throws DDPermissionsException
   {
     return rescanThisField(deleteElements(values, false, false));
   }
@@ -2200,7 +2276,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal deleteElementsLocal(Vector values)
   {
-    return deleteElements(values, true, false);
+    try
+      {
+	return deleteElements(values, true, false);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -2218,7 +2301,7 @@ public abstract class DBField implements Remote, db_field {
    * <P>Server-side method only</P>
    */
 
-  public final ReturnVal deleteElements(Vector valuesToDelete, boolean local)
+  public final ReturnVal deleteElements(Vector valuesToDelete, boolean local) throws DDPermissionsException
   {
     return deleteElements(valuesToDelete, local, false);
   }
@@ -2238,7 +2321,7 @@ public abstract class DBField implements Remote, db_field {
    * <P>Server-side method only</P>
    */
 
-  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
+  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws DDPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -2251,8 +2334,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
-					   getName());
+	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+					 getName());
       }
 
     if (!isVector())
@@ -2378,7 +2461,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ddroid.rmi.db_field
    */
 
-  public final boolean containsElement(Object value)
+  public final boolean containsElement(Object value) throws DDPermissionsException
   {
     return containsElement(value, false);
   }
@@ -2395,7 +2478,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final boolean containsElementLocal(Object value)
   {
-    return containsElement(value, true);
+    try
+      {
+	return containsElement(value, true);
+      }
+    catch (DDPermissionsException ex)
+      {
+	throw new RuntimeException(ex);	// should never happen
+      }
   }
 
   /**
@@ -2408,11 +2498,11 @@ public abstract class DBField implements Remote, db_field {
    * @param local If false, read permissin is checked for this field
    */
 
-  public boolean containsElement(Object value, boolean local)
+  public boolean containsElement(Object value, boolean local) throws DDPermissionsException
   {
     if (!local && !verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
+	throw new DDPermissionsException("permission denied to read this field " + getName());
       }
 
     if (!isVector())
@@ -2753,6 +2843,45 @@ public abstract class DBField implements Remote, db_field {
        }
 
      PermEntry pe = owner.getFieldPerm(getID());
+
+     if (pe == null)
+       {
+	 return false;
+       }
+
+     return pe.isVisible();
+   }
+
+  /** 
+   * <P>Overridable method to verify that the current {@link
+   * arlut.csd.ddroid.server.DBSession DBSession} / {@link
+   * arlut.csd.ddroid.server.DBEditSet DBEditSet} has permission to read
+   * values from this field.</P>
+   *
+   * <p>This version of verifyReadPermission() is intended to be used
+   * in a context in which it would be too expensive to make a
+   * read-only duplicate copy of a DBObject from the DBObjectBase's
+   * object table, strictly for the purpose of associating a
+   * GanymedeSession with the DBObject for permissions
+   * verification.</p>
+   */
+
+   public boolean verifyReadPermission(GanymedeSession gSession)
+   {
+     if (gSession == null)
+       {
+	 return true; // we don't know who is looking at us, assume it's a server-local access
+       }
+
+     PermEntry pe = gSession.getPerm(owner, getID());
+
+     // if there is no permission explicitly recorded for the field,
+     // inherit from the object as a whole
+
+     if (pe == null)
+       {
+	 pe = gSession.getPerm(owner);
+       }
 
      if (pe == null)
        {

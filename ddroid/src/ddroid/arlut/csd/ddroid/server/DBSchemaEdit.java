@@ -876,6 +876,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
+      	// Clear the Jython class cache
+      
+      	JythonEditObjectFactory.unloadAllURIs();
+	
 	// first the new object bases
 
 	en = newBases.elements();
@@ -951,7 +955,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	ex.printStackTrace();
       }
-
+      
     // and unlock the server
 
     GanymedeAdmin.setState("Normal Operation");

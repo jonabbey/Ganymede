@@ -160,6 +160,28 @@ public class StringUtils {
   }
 
   /**
+   * <p>This method takes a string and, if the string starts and
+   * ends with either " or ', returns the contained string.</p>
+   *
+   * <p>Returns the original input string if the inputString's first
+   * and last characters were not matching single or double quote
+   * characters.</p>
+   */
+
+  public static String dequote(String inputString)
+  {
+    int last = inputString.length()-1;
+
+    if ((inputString.charAt(0) == '"' && inputString.charAt(last) == '"') ||
+	(inputString.charAt(0) == '\'' && inputString.charAt(last) == '\''))
+      {
+	return inputString.substring(1, last);
+      }
+
+    return inputString;
+  }
+
+  /**
    * <P>This method takes a (possibly multiline) inputString 
    * containing subsequences matching splitString and returns
    * an array of Strings which contain the contents of the inputString

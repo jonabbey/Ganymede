@@ -51,25 +51,32 @@
 
 package arlut.csd.ddroid.admin;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.Insets;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
+import javax.swing.border.EtchedBorder;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
+import javax.swing.JButton;
 
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JnumberField;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDataComponent.JButtonPanel;
+import arlut.csd.JDataComponent.JLabelPanel;
+import arlut.csd.JDataComponent.JStretchPanel;
 import arlut.csd.ddroid.common.ReturnVal;
 import arlut.csd.ddroid.rmi.Base;
 import arlut.csd.ddroid.rmi.BaseField;
@@ -86,7 +93,7 @@ import arlut.csd.ddroid.rmi.BaseField;
  * label, class).</p>
  */
 
-class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
+class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListener, ActionListener {
 
   static final boolean debug = false;
 
@@ -105,29 +112,23 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     typeN;
 
   JstringField 
-    nameS;
-
-  JLabel
-    classL,
-    classOptionL;
+    nameS,
+    classS,
+    classOptionS;
 
   JButton
-    classEditButton;
+    classInfoResetButton, classInfoSetButton;
 
   JComboBox
     labelC;
 
-  JPanel 
-    editPanel;
+  JLabelPanel 
+    editPanel, classPanel;
+
+  JButtonPanel buttonPanel;
 
   GASHSchema
      owner;
-
-  GridBagLayout
-    gbl = new GridBagLayout();
-  
-  GridBagConstraints
-    gbc = new GridBagConstraints();
 
   /* -- */
 
@@ -146,13 +147,14 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     base = null;
     this.owner = owner;
 
-    editPanel = new JPanel(false);
-    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    editPanel.setLayout(gbl);
-    
+    editPanel = this.setupEditPanel();
+    setComponent(editPanel);
+  }
+
+  private JLabelPanel setupEditPanel()
+  {
     typeN = new JnumberField(30, false, false, 0, 0);
     typeN.setCallback(this);
-    addRow(editPanel, typeN, "ObjectType ID:", 0, 0);
 
     // only allow characters that can be used as an XML entity name.
     // We allow the space char (which is not allowed as an XML entity
@@ -163,24 +165,45 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
 			     null);
     nameS.setCallback(this);
-    addRow(editPanel, nameS, "Object Type:", 1, 0);
-
-    addRow(editPanel, new JSeparator(), "", 2, 5);
-
-    classL = new JLabel();
-    addRow(editPanel, classL, "Class name:", 3, 0);
-
-    classOptionL = new JLabel();
-    addRow(editPanel, classOptionL, "Class Option String:", 4, 0);
-
-    addRow(editPanel, new JSeparator(), "", 5, 5);
 
     labelC = new JComboBox();
     labelC.addItemListener(this);
 
-    addRow(editPanel, labelC, "Label:", 6, 0);
+    // Let's create an interior panel to store our class name / option
+    // setting stuff.. we won't set a callback on these string fields,
+    // as we only want to process them when we get a button press on
+    // the 'set' button.
 
-    add(editPanel);
+    classS = new JstringField(30, 100, true, false,
+			      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.", 
+			      null);
+
+    classOptionS = new JstringField(30, 100, true, false,
+				    null, null);
+
+    classInfoResetButton = new JButton("Reset");
+    classInfoSetButton = new JButton("Set");
+
+    buttonPanel = new JButtonPanel(JButtonPanel.RIGHT,false);
+    buttonPanel.addButton(classInfoResetButton);
+    buttonPanel.addButton(classInfoSetButton);
+    buttonPanel.addListeners(this);
+
+    classPanel = new JLabelPanel(false);
+    classPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+    classPanel.setFontStyle(Font.PLAIN);
+    classPanel.addFillRow("Name:", classS);
+    classPanel.addFillRow("Option String:", classOptionS);
+    classPanel.addFillRow(null, buttonPanel);
+
+    editPanel = new JLabelPanel(false);
+    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+    editPanel.addFillRow("ObjectType ID:", typeN);
+    editPanel.addFillRow("Object Type:", nameS);
+    editPanel.addRow("Class Information:", classPanel);
+    editPanel.addRow("Label:", labelC);
+
+    return editPanel;
   }
 
   /**
@@ -201,8 +224,8 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
       {
 	typeN.setValue(base.getTypeID());
 	nameS.setText(base.getName());
-	classL.setText(base.getClassName());
-	classOptionL.setText(base.getClassOptionString());
+	classS.setText(base.getClassName());
+	classOptionS.setText(base.getClassOptionString());
 	refreshLabelChoice();
       }
     catch (RemoteException ex)
@@ -328,6 +351,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
       }
   }
 
+  /**
+   * <p>implementing {@link java.awt.event.ItemListener ItemListener}</p>
+   */
+
   public void itemStateChanged(ItemEvent e)
   {
     if (!listenToCallbacks)
@@ -384,6 +411,50 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	  }
       }
   }
+
+  /**
+   * <p>implementing {@link java.awt.event.ActionListener ActionListener}</p>
+   */
+
+  public void actionPerformed(ActionEvent e)
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    if (e.getSource() == classInfoResetButton)
+      {
+	try
+	  {
+	    classS.setText(base.getClassName());
+	    classOptionS.setText(base.getClassOptionString());
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+    else if (e.getSource() == classInfoSetButton)
+      {
+	try
+	  {
+	    retVal = owner.handleReturnVal(base.setClassInfo(classS.getValue(), classOptionS.getValue()));
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		// revert
+		classS.setText(base.getClassName());
+		classOptionS.setText(base.getClassOptionString());
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+  }
+
+  /**
+   * <p>implementing {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}</p>
+   */
 
   public boolean setValuePerformed(JValueObject v)
   {
@@ -445,29 +516,6 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     return true;
   }
 
-  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row, int vertSpacing)
-  {
-    JLabel l = new JLabel(label);
-    
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    gbc.anchor = GridBagConstraints.WEST;
-
-    gbc.insets = new Insets(vertSpacing, 0, vertSpacing, 0);
-
-    gbc.weightx = 0.0;
-    gbc.gridx = 0;
-    gbc.gridy = row;
-    gbl.setConstraints(l, gbc);
-    parent.add(l);
-
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.gridx = 1;
-    gbc.weightx = 1.0;
-    gbl.setConstraints(comp, gbc);
-    parent.add(comp);
-  }
-
   /**
    * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
    */
@@ -478,19 +526,34 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     this.base = null;	// remote reference
     this.typeN = null;
     this.nameS = null;
-    this.classL = null;
-    this.classOptionL = null;
-    this.classEditButton = null;
+    this.classS = null;
+    this.classOptionS = null;
+    this.classInfoResetButton = null;
+    this.classInfoSetButton = null;
     this.labelC = null;
-    this.editPanel = null;
     this.owner = null;
-
-    this.gbl = null;
-    this.gbc = null;
 
     // and clean up the AWT's linkages
 
     this.removeAll();		// should be done on GUI thread
+
+    if (editPanel != null)
+      {
+	editPanel.cleanup();
+	editPanel = null;
+      }
+
+    if (classPanel != null)
+      {
+	classPanel.cleanup();
+	classPanel = null;
+      }
+
+    if (buttonPanel != null)
+      {
+	buttonPanel.cleanup();
+	buttonPanel = null;
+      }
   }
 }
 

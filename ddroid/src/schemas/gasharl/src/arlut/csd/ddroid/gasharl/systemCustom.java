@@ -286,8 +286,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 	else
 	  {
-	    newOnes = newInterfaces.getValues();
-	    oldOnes = oldInterfaces.getValues();
+	    newOnes = newInterfaces.getValuesLocal();
+	    oldOnes = oldInterfaces.getValuesLocal();
 	  }
 
 	DBObject origVolume;
@@ -1142,8 +1142,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	
 	while (sourceField.size() > 0)
 	  {
-	    String alias = (String) sourceField.getElement(0);
-	    sourceField.deleteElement(0);
+	    String alias = (String) sourceField.getElementLocal(0);
+	    sourceField.deleteElementLocal(0);
 	    aliasesField.addElementLocal(alias);
 	  }
 

@@ -454,6 +454,22 @@ public interface Session extends Remote {
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
+   * <p>This version of dump() takes a query in string
+   * form, based on Deepak's ANTLR-specified Directory Droid
+   * query grammar.</p>
+   *
+   * @see arlut.csd.ddroid.common.Query
+   */
+
+  DumpResult dump(String queryString) throws RemoteException;
+
+  /**
+   * <p>This method provides the hook for doing a
+   * fast database dump to a string form.  The 
+   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * returned comprises a formatted dump of all visible
+   * fields and objects that match the given query.</p>
+   *
    * @see arlut.csd.ddroid.common.Query
    */
 
@@ -485,6 +501,21 @@ public interface Session extends Remote {
    */
 
   public Invid findLabeledObject(String name, short type) throws RemoteException;
+
+  /**
+   * <p>List objects in the database meeting the given query criteria.</p>
+   *
+   * <p>The database will be read-locked during the query, assuring
+   * a transaction-consistent view of the database.  The QueryResult
+   * returned comprises a formatted dump of the invid's and
+   * labels of the viewable objects matching the provided query.</p>
+   *
+   * <p>This version of query() takes a query in string
+   * form, based on Deepak's ANTLR-specified Directory Droid
+   * query grammar.</p>
+   */
+
+  QueryResult    query(String queryString) throws RemoteException;
 
   /**
    * <p>List objects in the database meeting the given query criteria.</p>

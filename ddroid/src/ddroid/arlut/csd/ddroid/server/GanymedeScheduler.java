@@ -61,6 +61,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.SchemaConstants;
 import arlut.csd.ddroid.common.scheduleHandle;
@@ -203,8 +204,8 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    taskName = (String) object.getFieldValue(SchemaConstants.TaskName);
-    taskClass = (String) object.getFieldValue(SchemaConstants.TaskClass);
+    taskName = (String) object.getFieldValueLocal(SchemaConstants.TaskName);
+    taskClass = (String) object.getFieldValueLocal(SchemaConstants.TaskClass);
     taskDefInvid = object.getInvid();
 
     if (taskName == null || taskClass == null)

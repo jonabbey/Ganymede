@@ -383,7 +383,6 @@ public final class loginSemaphore {
 		ex.printStackTrace();
 	      }
 	  }
-	
       }
   }
 }

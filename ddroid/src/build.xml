@@ -126,6 +126,8 @@ refresh the jar files.
   </target>
 
   <target name ="validate">
+    <echo>Validating localization resources
+    </echo>
     <exec executable="verification/resource_validator.pl" failonerror="true">
       <arg file="."/>
     </exec>

@@ -163,7 +163,7 @@ public class JythonTask implements Runnable {
       {
         DBObject taskDefObj = Ganymede.internalSession.session.viewDBObject(taskDefObjInvid);
         
-        Vector options = taskDefObj.getFieldValues(SchemaConstants.TaskOptionStrings);
+        Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
 
         if (options == null || options.size() == 0)
           {

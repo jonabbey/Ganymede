@@ -87,6 +87,7 @@ import arlut.csd.ddroid.common.AdminEntry;
 import arlut.csd.ddroid.common.BaseListTransport;
 import arlut.csd.ddroid.common.CategoryTransport;
 import arlut.csd.ddroid.common.ClientMessage;
+import arlut.csd.ddroid.common.DDParseException;
 import arlut.csd.ddroid.common.DumpResult;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.NotLoggedInException;
@@ -1474,7 +1475,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	for (int i = 0; i < inv.size(); i++)
 	  {
-	    results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
+	    results.addElement(viewObjectLabel((Invid)inv.getElementLocal(i)));
 	  }
       }
 
@@ -1581,7 +1582,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     for (int i = 0; i < inv.size(); i++)
       {
-	invid = (Invid) inv.getElement(i);
+	invid = (Invid) inv.getElementLocal(i);
 
 	// it's okay to use the faster viewDBObject() here, because we
 	// are always going to be doing this for internal purposes
@@ -2643,6 +2644,35 @@ final public class GanymedeSession implements Session, Unreferenced {
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
+   * <p>This version of dump() takes a query in string
+   * form, based on Deepak's ANTLR-specified Directory Droid
+   * query grammar.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
+   * @see arlut.csd.ddroid.common.Query
+   * @see arlut.csd.ddroid.rmi.Session
+   */
+
+  public synchronized DumpResult dump(String queryString) throws NotLoggedInException, DDParseException
+  {
+    checklogin();
+
+    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    Query query = transmuter.transmuteQueryString(queryString);
+    
+    return dump(query);
+  }
+
+  /**
+   * <p>This method provides the hook for doing a
+   * fast database dump to a string form.  The 
+   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * returned comprises a formatted dump of all visible
+   * fields and objects that match the given query.</p>
+   *
    * <p>This method uses the GanymedeSession query() apparatus, and
    * may not be called from a DBEditObject's commitPhase1/2() methods
    * without risking deadlock.</p>
@@ -2667,16 +2697,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     DBObjectBase base = null;
 
-    /**
-     *
-     * What sort of result should we give back?   If the query
-     * was done on an embedded type, we're going to return
-     * the object(s) that ultimately contain matching results.
-     *
-     */
-
-    DBObjectBase containingBase = null;
-
     boolean embedded;
 
     /* -- */
@@ -2699,28 +2719,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	base = Ganymede.db.getObjectBase(query.objectName);
       }
 
-    if (query.returnType != -1)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnType);
-      }
-    else if (query.returnName != null)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnName);
-      }
-
     if (base == null)
       {
 	setLastError("No such base");
 	return null;
       }
-
-    if (containingBase == null)
-      {
-	setLastError("No such return type");
-	return null;
-      }
-
-    embedded = base.isEmbedded();
 
     if (debug)
       {
@@ -2728,14 +2731,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     setLastEvent("dump");
-
-    if (embedded)
-      {
-	if (debug)
-	  {
-	    Ganymede.debug("Searching for results of type " + containingBase.getName());
-	  }
-      }
 
     if (debug)
       {
@@ -2767,7 +2762,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
-    Vector baseFields = containingBase.getFields();
+    Vector baseFields = base.getFields();
 
     for (int i = 0; i < baseFields.size(); i++)
       {
@@ -2782,7 +2777,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // listed.  If they really, really want to see them, let
 	    // them say so explicitly.
 
-	    if (!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
+	    if (!(base.getTypeID() == SchemaConstants.OwnerBase &&
 		  field.getID() == SchemaConstants.OwnerObjectsOwned))
 	      {
 		if (supergashMode)
@@ -2898,6 +2893,31 @@ final public class GanymedeSession implements Session, Unreferenced {
    * manner of simple object listing for the Ganymede
    * database.</p>
    *
+   * <p>This version of query() takes a query in string
+   * form, based on Deepak's ANTLR-specified Directory Droid
+   * query grammar.</p>
+   *
+   * <p>This method may not be called from a DBEditObject's
+   * commitPhase1/2() methods without risking deadlock.</p>
+   *
+   * @see arlut.csd.ddroid.rmi.Session 
+   */
+
+  public QueryResult query(String queryString) throws NotLoggedInException, DDParseException
+  {
+    checklogin();
+
+    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    Query query = transmuter.transmuteQueryString(queryString);
+    
+    return queryDispatch(query, false, true, null, null);
+  }
+
+  /**
+   * <p>This method provides the hook for doing all
+   * manner of simple object listing for the Ganymede
+   * database.</p>
+   *
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
    *
@@ -2927,20 +2947,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    QueryResult result = queryDispatch(query, false, true, null, perspectiveObject);
-
-    // any associated queries?
-
-    if (query.linkedQueries != null)
-      {
-	for (int i = 0; i < query.linkedQueries.size(); i++)
-	  {
-	    result = result.intersection(queryDispatch((Query) query.linkedQueries.elementAt(i), 
-						       false, true, null, perspectiveObject));
-	  }
-      }
-
-    return result;
+    return queryDispatch(query, false, true, null, perspectiveObject);
   }
 
   /**
@@ -2999,11 +3006,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
-    DBObjectBase containingBase = null;
     Enumeration en;
     DBObject obj;
     DBLock rLock = null;
-    boolean returnContainingObject = false;
     boolean scanUsingLabelHook = false;
 
     /* -- */
@@ -3031,46 +3036,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return null;
       }
 
-    if (query.returnType != -1)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnType);
-      }
-    else if (query.returnName != null)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnName); // *sync* DBStore
-      }
-
-    if (containingBase == null)
-      {
-	setLastError("No such return type");
-	return null;
-      }
-
-    // the client can do searches for a top-level object based on the
-    // contents of a field in an embedded object.. if the requested
-    // containingBase does not equal the type of base we are searching
-    // on, we'll be sure and return results citing the containing
-    // object
-
-    if (containingBase != base)
-      {
-	returnContainingObject = true;
-      }
-
-    if (debug)
-      {
-	// is this base corresponding to an embedded object?
-
-	if (base.isEmbedded())
-	  {
-	    System.err.println("Query on embedded type: " + base.getName());
-	  }
-	else
-	  {
-	    System.err.println("Query on non-embedded type " + base.getName());
-	  }
-      }
-
     // are we able to optimize the query into a direct lookup?  If so,
     // we won't need to get a lock on the database, since viewDBObject()
     // will be nice and atomic for our needs
@@ -3089,22 +3054,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    DBObject resultobject = session.viewDBObject((Invid) node.value);
 
-	    // if we are being asked to return the top-level container
-	    // object, search up the container hierarchy for the root
-
-	    if (returnContainingObject)
-	      {
-		resultobject = getContainingObj(resultobject);
-	      }
-
 	    addResultRow(resultobject, query, result, internal, perspectiveObject);
 
-	    // if we have any linked queries here, handle that.  It
-	    // would be weird if someone wanted a particular invid
-	    // only if some criteria on an embedded object was
-	    // acceptable, but who are we to pre-judge?
-
-	    return intersectQueries(query, result, null);
+	    return result;
 	  }
 
 	// we're looking at a data field.. determine which field we're
@@ -3145,70 +3097,51 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	  }
 
-	if (!scanUsingLabelHook && fieldDef == null)
-	  {
-	    Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer for base " + base);
-	    Ganymede.debug("       query node: " + node);
-	    return null;
-	  }
-
 	// now we've either got a field definition that we can try to
 	// do a direct look up on, or we will be scanning labels using
 	// the label hook
 
-	// if we're not scanning on the label hook, see if we have a
-	// hash namespace constraint on the field we're searching
-	// against, and if so, do a direct hash lookup rather than
-	// iterating over the object base
-
 	if (!scanUsingLabelHook && fieldDef.namespace != null)
 	  {
-	    // aha!  We've got an optimized case!
-	    
-	    if (debug)
+	    // if we're not scanning on the label hook, see if we have a
+	    // hash namespace constraint on the field we're searching
+	    // against, and if so, do a direct hash lookup rather than
+	    // iterating over the object base
+
+	    if (fieldDef == null)
 	      {
-		System.err.println("Eureka!  Optimized query!\n" + query.toString());
+		Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer for base " + base);
+		Ganymede.debug("       query node: " + node);
+		return null;
 	      }
-
-	    DBObject resultobject;
-	    DBNameSpace ns = fieldDef.namespace;
-
-	    synchronized (ns)
+	    else
 	      {
-		DBField resultfield = null;
-
-		// if we are looking to match against an IP address
-		// field and we were given a String, we need to
-		// convert that String to an array of Bytes before
-		// looking it up in the namespace
-
-		if (fieldDef.isIP() && node.value instanceof String)
+		// aha!  We've got an optimized case!
+	    
+		if (debug)
 		  {
-		    Byte[] ipBytes = null;
+		    System.err.println("Eureka!  Optimized query!\n" + query.toString());
+		  }
 
-		    try
-		      {
-			ipBytes = IPDBField.genIPV4bytes((String) node.value);
-		      }
-		    catch (IllegalArgumentException ex)
-		      {
-		      }
-		    
-		    if (ipBytes != null)
-		      {
-			resultfield = ns.lookup(ipBytes);
-		      }
+		DBObject resultobject;
+		DBNameSpace ns = fieldDef.namespace;
 
-		    // it's hard to tell here whether any fields of
-		    // this type will accept IPv6 bytes, so if we
-		    // don't find it as an IPv4 address, look for it
-		    // as an IPv6 address
+		synchronized (ns)
+		  {
+		    DBField resultfield = null;
 
-		    if (resultfield == null)
+		    // if we are looking to match against an IP address
+		    // field and we were given a String, we need to
+		    // convert that String to an array of Bytes before
+		    // looking it up in the namespace
+
+		    if (fieldDef.isIP() && node.value instanceof String)
 		      {
+			Byte[] ipBytes = null;
+
 			try
 			  {
-			    ipBytes = IPDBField.genIPV6bytes((String) node.value);
+			    ipBytes = IPDBField.genIPV4bytes((String) node.value);
 			  }
 			catch (IllegalArgumentException ex)
 			  {
@@ -3216,78 +3149,92 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    
 			if (ipBytes != null)
 			  {
-			    resultfield = ns.lookup(ipBytes);
+			    resultfield = ns.lookup(this, ipBytes);
+			  }
+
+			// it's hard to tell here whether any fields of
+			// this type will accept IPv6 bytes, so if we
+			// don't find it as an IPv4 address, look for it
+			// as an IPv6 address
+
+			if (resultfield == null)
+			  {
+			    try
+			      {
+				ipBytes = IPDBField.genIPV6bytes((String) node.value);
+			      }
+			    catch (IllegalArgumentException ex)
+			      {
+			      }
+		    
+			    if (ipBytes != null)
+			      {
+				resultfield = ns.lookup(this, ipBytes);
+			      }
 			  }
 		      }
-		  }
-		else
-		  {
-		    // we don't allow associating Invid fields with a
-		    // namespace, so we don't try to convert strings
-		    // to invids here for a namespace-optimized lookup
-
-		    resultfield = ns.lookup(node.value); // *sync* DBNameSpace
-
-		    if (debug)
+		    else
 		      {
-			System.err.println("Did a namespace lookup in " + ns.getName() + 
-					   " for value " + node.value);
-			System.err.println("Found " + resultfield);
-		      }
-		  }
+			// we don't allow associating Invid fields
+			// with a namespace, so we don't need to try
+			// to convert strings to invids here for a
+			// namespace-optimized lookup
 
-		// note that DBNameSpace.lookup() will always point us
-		// to a field that is currently in the main database,
-		// so we don't need to worry that the namespace slot
-		// is pointing to a field in a checked-out object.
-		
-		if (resultfield == null)
-		  {
-		    return intersectQueries(query, result, null);
-		  }
-		else
-		  {
-		    // a namespace can map across different field and
-		    // object types.. make sure we've got an instance
-		    // of the right kind of field
+			resultfield = ns.lookup(this, node.value); // *sync* DBNameSpace
 
-		    if (resultfield.getFieldDef() != fieldDef)
-		      {
 			if (debug)
 			  {
-			    System.err.println("Error, didn't find the right kind of field");
-			    System.err.println("Found: " + resultfield.getFieldDef());
-			    System.err.println("Wanted: " + fieldDef);
+			    System.err.println("Did a namespace lookup in " + ns.getName() + 
+					       " for value " + node.value);
+			    System.err.println("Found " + resultfield);
+			  }
+		      }
+
+		    if (resultfield == null)
+		      {
+			return result;
+		      }
+		    else
+		      {
+			// a namespace can map across different field and
+			// object types.. make sure we've got an instance
+			// of the right kind of field
+
+			if (resultfield.getFieldDef() != fieldDef)
+			  {
+			    if (debug)
+			      {
+				System.err.println("Error, didn't find the right kind of field");
+				System.err.println("Found: " + resultfield.getFieldDef());
+				System.err.println("Wanted: " + fieldDef);
+			      }
+
+			    return result;
 			  }
 
-			return intersectQueries(query, result, null);
-		      }
+			// since we used this GanymedeSession to do
+			// the namespace lookup, we know that the
+			// owner object will be in the version we are
+			// editing, if any
 
-		    resultobject = resultfield.owner;
+			resultobject = resultfield.owner;
 
-		    if (debug)
-		      {
-			System.err.println("Found object: " + resultobject);
-		      }
+			if (debug)
+			  {
+			    System.err.println("Found object: " + resultobject);
+			  }
 
-		    // if we're matching an embedded, we want to return our
-		    // container.
+			// addResultRow() will do our permissions checking for us
 
-		    if (returnContainingObject)
-		      {
-			resultobject = getContainingObj(resultobject);
-		      }
-		    
-		    // addResultRow() will do our permissions checking for us
-
-		    addResultRow(resultobject, query, result, internal, perspectiveObject);
+			addResultRow(resultobject, query, result, internal, perspectiveObject);
 		
-		    if (debug)
-		      {
-			System.err.println("Returning result from optimized query");
-		      }
+			if (debug)
+			  {
+			    System.err.println("Returning result from optimized query");
+			  }
 		
-		    return intersectQueries(query, result, null);
+			return result;
+		      }
 		  }
 	      }
 	  }
@@ -3299,63 +3246,16 @@ final public class GanymedeSession implements Session, Unreferenced {
     // deadlock situations.  DBSession.openReadLock() will take care of
     // that for us by taking a vector to lock.
 
+    // XXX need to revise this bit to try and create a list of bases
+    // to lock by traversing over any QueryDeRefNodes in the QueryNode
+    // tree.
+
     Vector baseLock = new Vector();
 
     baseLock.addElement(base);
 
     // lock the containing base as well, if it differs.. this will
     // keep things consistent
-
-    if (containingBase != null)
-      {
-	VectorUtils.unionAdd(baseLock, containingBase);
-      }
-
-    // if we have linked queries, we'll want to lock all bases that
-    // get touched.
-    
-    if (query.linkedQueries != null)
-      {
-	DBObjectBase adjunctBase = null;
-	DBObjectBase adjunctContainingBase = null;
-
-	for (int i = 0; i < query.linkedQueries.size(); i++)
-	  {
-	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
-
-	    // the Query spec says that linked queries won't have their
-	    // linked queries honored.. enforce that here.
-
-	    if (adjunctQuery.linkedQueries != null)
-	      {
-		Ganymede.debug(ts.l("queryDispatch.linked_warning"));
-
-		adjunctQuery.linkedQueries = null;
-	      }
-	    
-	    if (adjunctQuery.objectType != -1)
-	      {
-		adjunctBase = Ganymede.db.getObjectBase(adjunctQuery.objectType);
-	      }
-	    else if (adjunctQuery.objectName != null)
-	      {
-		adjunctBase = Ganymede.db.getObjectBase(adjunctQuery.objectName);
-	      }
-
-	    VectorUtils.unionAdd(baseLock, adjunctBase);
-
-	    if (adjunctQuery.returnType != -1)
-	      {
-		adjunctContainingBase = Ganymede.db.getObjectBase(adjunctQuery.returnType);
-	      }
-	    else if (adjunctQuery.returnName != null)
-	      {
-		adjunctContainingBase = Ganymede.db.getObjectBase(adjunctQuery.returnName);
-	      }
-
-	    VectorUtils.unionAdd(baseLock, adjunctContainingBase);
-	  }
-      }
 
     if (debug)
       {
@@ -3370,11 +3270,11 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	// with the new DBObjectBase.iterationSet support, we no
 	// longer need to use a DBReadLock to lock the database unless
-	// we are needing to do a composite query over more than one
-	// base, as when doing a query that includes embedded types.
-	// If our baseLock vector only has one base, we can just do a
-	// direct iteration over the base's iterationSet snapshot, and
-	// avoid doing locking entirely.
+	// we are needing to do a query involving invid field
+	// dereferencing as when doing a query that includes embedded
+	// types.  If our baseLock vector only has one base, we can
+	// just do a direct iteration over the base's iterationSet
+	// snapshot, and avoid doing locking entirely.
 
 	if (extantLock != null) 
 	  {
@@ -3435,27 +3335,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    obj = (DBObject) en.nextElement();
 
+	    // if we're editing it, let's look at our version of it
+
+	    if (obj.shadowObject != null && obj.shadowObject.getSession() == session)
+	      {
+		obj = obj.shadowObject;
+	      }
+
 	    if (DBQueryHandler.matches(this, query, obj))
 	      {
-		// if we are processing an embedded type, we want to add
-		// the ultimate container of the embedded object to the
-		// result list
-
-		if (returnContainingObject)
-		  {
-		    obj = getContainingObj(obj);
-		  }
-
-		if (obj == null)
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("queryDispatch(): Couldn't find containing object!");
-		      }
-
-		    continue;	// try next match
-		  }
-
 		addResultRow(obj, query, result, internal, perspectiveObject);
 	      }
 	  }
@@ -3481,7 +3369,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// note that we have to do this even though
 	// DBSession.viewDBObject() will look in our transaction's
 	// working set for us, as there may be newly created objects
-	// that are not yet held in the database.  
+	// that are not yet held in the database, so our loop over
+	// iterationSet might have missed something.
 
 	// that is, viewDBObject() above will provide the version of
 	// the object in our transaction if it has been changed in the
@@ -3505,7 +3394,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		// don't consider objects of the wrong type here.
 
-		if (transaction_object.getTypeID() != query.objectType)
+		if (transaction_object.getTypeID() != base.getTypeID())
 		  {
 		    continue;
 		  }
@@ -3514,17 +3403,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		if (result.containsInvid(transaction_object.getInvid()))
 		  {
-		    if (debug)
-		      {
-			System.err.println("don't need to add invid " + transaction_object.getInvid() +
-					   ", we got it first time");
-		      }
-
 		    continue;
 		  }
 
-		// don't show objects that are being deleted or
-		// dropped
+		// don't show objects in our transaction that are
+		// being deleted or dropped
 
 		if (transaction_object.getStatus() == ObjectStatus.DELETING ||
 		    transaction_object.getStatus() == ObjectStatus.DROPPING)
@@ -3534,41 +3417,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		if (DBQueryHandler.matches(this, query, transaction_object))
 		  {
-		    if (returnContainingObject)
-		      {
-			obj = getContainingObj(transaction_object);
-		      }
-		    else
-		      {
-			obj = transaction_object;
-		      }
-
-		    if (obj == null)
-		      {
-			Ganymede.debug(ts.l("queryDispatch.containment_error"));
-			continue;	// try next match
-		      }
-
-		    // make sure we've found an object of the
-		    // proper type.. if we're not querying on an
-		    // embedded object type, the above clause
-		    // won't have been run.
-
-		    // DBQueryHandler.matches() doesn't check
-		    // object type, so we need to do it here
-		    // before we add this to our result.
-
-		    if (obj.getTypeID() != containingBase.getTypeID())
-		      {
-			if (debug)
-			  {
-			    Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
-			  }
-
-			continue;
-		      }
-
-		    addResultRow(obj, query, result, internal, perspectiveObject);
+		    addResultRow(transaction_object, query, result, internal, perspectiveObject);
 		  }
 	      }
 
@@ -3585,12 +3434,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 			   base.getName() + " completed");
 	  }
 
-	// now handle any linked queries, return the results to the
-	// user.  this is safe to do outside of the synchronization on
-	// the editset because we require a read lock to do queries on
-	// more than one base at a time.
-
-	return intersectQueries(query, result, rLock);
+	return result;
       }
     finally
       {
@@ -3602,54 +3446,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    session.releaseLock(rLock);	// *sync* DBSession DBStore
 	  }
       }
-  }
-
-  /**
-   * <P>This private method takes care of intersecting the result
-   * of a query operation against any linked queries to filter
-   * a cluster of queries.  This is only of interest when performing
-   * a query on both embedded and non-embedded fields of a given
-   * object type.</P>
-   */
-
-  private QueryResult intersectQueries(Query query, QueryResult temp_result, DBLock rLock)
-  {
-    if (query.linkedQueries != null)
-      {
-	if (debug)
-	  {
-	    System.err.println("Primary query result: " + temp_result.size());
-	  }
-
-	for (int i = 0; i < query.linkedQueries.size(); i++)
-	  {
-	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
-
-	    // note that we pass rLock into queryDispatch so that we re-use our
-	    // lock
-
-	    QueryResult adjunctResult = queryDispatch(adjunctQuery, false, false,
-						      rLock, null);
-
-	    if (debug)
-	      {
-		System.err.println("Adjunct query (" + adjunctQuery.objectName +
-				   ") result: " + adjunctResult.size());
-	      }
-
-	    if (temp_result != null)
-	      {
-		temp_result = temp_result.intersection(adjunctResult);
-
-		if (debug)
-		  {
-		    System.err.println("Intersection result: " + temp_result.size());
-		  }
-	      }
-	  }
-      }
-
-    return temp_result;
   }
 
   /**
@@ -3733,146 +3529,27 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    Ganymede.debug("not discounting out of hand");
 	  }
 	
-	if (session.isTransactionOpen())
+	if (perspectiveObject == null)
 	  {
-	    // Do we have a version of this object checked out?
-
 	    if (debug)
 	      {
-		Ganymede.debug("transaction open");
+		    Ganymede.debug("not using perspective object");
 	      }
-
-	    x = session.editSet.findObject(obj.getInvid()); // *sync* DBEditSet
-
-	    if (x == null)
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("didn't find this object in our transaction");
-		  }
-
-		// nope, go ahead and return the object as we found it in the
-		// main hash
-
-		if (perspectiveObject == null)
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("not using perspective object");
-		      }
-
-		    result.addRow(obj.getInvid(), obj.getLabel(), obj.isInactivated(),
-				  obj.willExpire(), obj.willBeRemoved(), perm.isEditable());
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("using perspective object");
-		      }
-
-		    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
-				  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
-				  perm.isEditable());
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("found this object in our transaction");
-
-		    Ganymede.debug(x.getLabel() + ", invid: " + x.getInvid());
-		  }
-
-		// yup we found it.. if we are deleting or dropping it, we don't want 
-		// to return it
-		
-		if (x.getStatus() != ObjectStatus.DELETING &&
-		    x.getStatus() != ObjectStatus.DROPPING)
-		  {
-		    // ok, we're editing it or creating it.. now, does it still meet
-		    // the search criteria?
-
-		    if (debug)
-		      {
-			Ganymede.debug("editing or creating");
-		      }
-
-		    if (DBQueryHandler.matches(this, query, x))
-		      {
-			if (debug)
-			  {
-			    Ganymede.debug("still matching");
-			  }
-
-			if (perspectiveObject == null)
-			  {
-			    if (debug)
-			      {
-				Ganymede.debug("not using perspective object");
-			      }
-
-			    result.addRow(x.getInvid(), x.getLabel(), 
-					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
-					  true);
-			  }
-			else
-			  {
-			    if (debug)
-			      {
-				Ganymede.debug("using perspective object");
-			      }
-
-			    result.addRow(x.getInvid(), perspectiveObject.lookupLabel(x), 
-					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
-					  true);
-			  }
-			// we must be able to edit it, since it's checked out
-		      }
-		    else
-		      {
-			if (debug)
-			  {
-			    Ganymede.debug("not still matching");
-			  }
-		      }
-		  }
-	      }
+	    
+	    result.addRow(obj.getInvid(), obj.getLabel(), 
+			  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			  perm.isEditable());
 	  }
 	else
 	  {
 	    if (debug)
 	      {
-		Ganymede.debug("transaction not open");
+		Ganymede.debug("using perspective object");
 	      }
 
-	    // we don't have a transaction open, so there's no worry
-	    // about us having a different version of the object open
-	    // in our transaction
-	    
-	    if (perspectiveObject == null)
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("not using perspective object");
-		  }
-
-		result.addRow(obj.getInvid(), obj.getLabel(), 
-			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
-			      perm.isEditable());
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("using perspective object");
-		  }
-
-		result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
-			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
-			      perm.isEditable());
-	      }
+	    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
+			  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			  perm.isEditable());
 	  }
       }
   }

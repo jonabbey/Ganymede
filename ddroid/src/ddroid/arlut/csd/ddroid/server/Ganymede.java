@@ -664,7 +664,7 @@ public class Ganymede {
 	else
 	  {
 	    // we don't want to bind to a system name that will
-	    // resolve to 127.0.0.1, or else other the rmiregistry
+	    // resolve to 127.0.0.1, or else otherwise the rmiregistry
 	    // will attempt to report our address as loopback, which
 	    // won't do anyone any good
 

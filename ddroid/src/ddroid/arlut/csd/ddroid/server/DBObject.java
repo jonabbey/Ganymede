@@ -77,8 +77,10 @@ import java.util.Vector;
 import org.python.core.PyInteger;
 
 import arlut.csd.Util.JythonMap;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.FieldInfo;
 import arlut.csd.ddroid.common.FieldTemplate;
 import arlut.csd.ddroid.common.FieldType;
@@ -190,6 +192,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   static boolean debug = false;
   final static boolean debugEmit = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBObject");
 
   // ---
 
@@ -634,7 +643,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (index == -1)
       {
-	throw new IllegalArgumentException("Unrecognized fieldcode: + fieldcode");
+	// "Unrecognized fieldcode: {0}"
+	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", new Integer(fieldcode)));
       }
 
     if (permCacheAry == null)
@@ -898,8 +908,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	if (count == 0)
 	  {
-	    Ganymede.debug("**** Error: writing object with no fields: " + 
-			   objectBase.getName() + " <" + getID() + ">");
+	    // "**** Error: writing object with no fields: {0}"
+	    Ganymede.debug(ts.l("emit.nofields", 
+				objectBase.getName() + " <" + getID() + ">"));
 	  }
 
 	out.writeShort(count);
@@ -958,7 +969,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (debug && tmp_count == 0)
       {
-	System.err.println("DBObject.receive(): No fields reading object " + getID());
+	// "DBObject.receive(): No fields reading object {0}"
+	System.err.println(ts.l("receive.nofields", new Integer(getID())));
       }
 
     fieldAry = new DBField[tmp_count];
@@ -975,9 +987,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	if (definition == null && fieldcode != SchemaConstants.BackLinksField)
 	  {
-	    System.err.println("What the heck?  Null definition for " + 
-			       objectBase.getName() + ", fieldcode = " + fieldcode +
-			       ", " + i + "th field in object");
+	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
+	    System.err.println(ts.l("receive.nulldef", this.getTypeName(), new Integer(fieldcode), new Integer(i)));
 	  }
 	else if (fieldcode == SchemaConstants.BackLinksField)
 	  {
@@ -1050,7 +1061,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	if (tmp == null)
 	  {
-	    throw new Error("Don't recognize field type in datastore");
+	    // "Don't recognize field type in datastore."
+	    throw new Error(ts.l("receive.badfieldtype"));
 	  }
 
 	if (!journalProcessing && (definition.namespace != null))
@@ -1066,8 +1078,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  {
 		    if (definition.namespace.containsKey(tmp.key(j)))
 		      {
-			throw new RuntimeException("Non-unique value " + tmp.key(j) + " detected in vector field " + 
-						   definition + " which is constrained by namespace " + definition.namespace);
+			// "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
+			throw new RuntimeException(ts.l("receive.vectornamespace", tmp.key(j), definition, definition.namespace));
 		      } 
 
 		    definition.namespace.putHandle(tmp.key(j), 
@@ -1080,8 +1092,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		
 		if (definition.namespace.containsKey(tmp.key()))
 		  {
-		    throw new RuntimeException("Non-unique value " + tmp.key() + " detected in scalar field " + 
-					       definition + " which is constrained by namespace " + definition.namespace);
+		    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
+		    throw new RuntimeException(ts.l("receive.scalarnamespace", tmp.key(), definition, definition.namespace));
 		  }
 
 		definition.namespace.putHandle(tmp.key(), 
@@ -1097,8 +1109,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  }
 	else
 	  {
-	    System.err.println("%%% Loader skipping empty field " + 
-			       definition.getName());
+	    // "%%% Loader skipping empty field {0}"
+	    System.err.println(ts.l("receive.skipping", definition.getName()));
 	  }
       }
   }
@@ -1262,7 +1274,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// couldn't clear the shadow..  this editSet
 	// wasn't the one to create the shadow
 
-	Ganymede.debug("DBObject.clearShadow(): couldn't clear, editset mismatch");
+	// "DBObject.clearShadow(): couldn't clear, editset mismatch"
+	Ganymede.debug(ts.l("clearShadow.mismatch"));
 
 	return false;
       }
@@ -1293,21 +1306,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
-    if (false)
-      {
-	System.err.println("DBObject.getFieldInfoVector(): " + this.toString());
-      }
-
     synchronized (fieldAry)
       {
 	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
 	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-	    
-	    if (false)
-	      {
-		System.err.println("fieldDef: " + fieldDef);
-	      }
 	    
 	    field = retrieveField(fieldDef.getID());
 	    
@@ -1319,26 +1322,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  }
 		catch (IllegalArgumentException ex)
 		  {
-		    if (false)
-		      {
-			System.err.println("Caught IllegalArgumentException building FieldInfo for " + field.toString());
-			ex.printStackTrace();
-		      }
-		    
 		    // we had a permissions failure reading this
 		    // field.. skip it.
 		  }
 	      }
-	    else if (debug)
-	      {
-		System.err.println("Couldn't get field for fieldDef id " + fieldDef.getID());
-	      }
 	  }
-      }
-
-    if (false)
-      {
-	System.err.println("Returning a result vector with " + results.size() + " elements");
       }
 
     return results;
@@ -1400,7 +1388,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	if (field == null)
 	  {
-	    throw new IllegalArgumentException("null value passed to saveField");
+	    // "null value passed to saveField"
+	    throw new IllegalArgumentException(ts.l("saveField.null"));
 	  }
 	
 	short hashindex = (short) ((field.getID() & 0x7FFF) % fieldAry.length);
@@ -1422,7 +1411,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      {
 		// couldn't find it
 		
-		throw new ArrayIndexOutOfBoundsException("full fieldAry hash");
+		// "full fieldAry hash"
+		throw new ArrayIndexOutOfBoundsException(ts.l("saveField.full"));
 	      }
 	  }
 	
@@ -1453,7 +1443,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	if (field == null)
 	  {
-	    throw new IllegalArgumentException("null value passed to replaceField");
+	    // "null value passed to replaceField"
+	    throw new IllegalArgumentException(ts.l("replaceField.null"));
 	  }
 
 	short id = field.getID();
@@ -1476,7 +1467,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    if (index == hashindex)
 	      {
 		// couldn't find it
-		throw new IllegalArgumentException("Error, DBObject.replaceField could not find matching field");
+
+		// "Error, DBObject.replaceField could not find matching field"
+		throw new IllegalArgumentException(ts.l("replaceField.none"));
 	      }
 	  }
 
@@ -1994,8 +1987,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     // we override in DBEditObject
 
-    return Ganymede.createErrorDialog("Server: Error in DBObject.setFieldValue()",
-				      "setFieldValue called on a non-editable object");
+    // "Server: Error in DBObject.setFieldValue()"
+    // "setFieldValue called on a non-editable object"
+
+    return Ganymede.createErrorDialog(ts.l("setFieldValue.noneditable"),
+				      ts.l("setFieldValue.noneditabletext"));
   }
 
   /**
@@ -2006,7 +2002,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ddroid.rmi.db_object
    */
 
-  public Object getFieldValue(short fieldID)
+  public Object getFieldValue(short fieldID) throws DDPermissionsException
   {
     DBField f = (DBField) getField(fieldID);
 
@@ -2019,12 +2015,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f.isVector())
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't get scalar value on vector field " + fieldID);
-	  }
-
-	return null;
+	// "Couldn't get scalar value on vector field {0}"
+	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", new Integer(fieldID)));
       }
 
     return f.getValue();
@@ -2048,12 +2040,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f.isVector())
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't get scalar value on vector field " + fieldID);
-	  }
-
-	return null;
+	// "Couldn't get scalar value on vector field {0}"
+	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", new Integer(fieldID)));
       }
 
     return f.getValueLocal();
@@ -2079,7 +2067,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f.isVector())
       {
-	throw new RuntimeException("Can't call isSet on a vector field.");
+	// "Can't call isSet on a vector field."
+	throw new RuntimeException(ts.l("isSet.vector"));
       }
 
     Boolean bool = (Boolean) f.getValueLocal();
@@ -2095,7 +2084,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ddroid.rmi.db_object
    */
 
-  public Vector getFieldValues(short fieldID)
+  public Vector getFieldValues(short fieldID) throws DDPermissionsException
   {
     DBField f = (DBField) getField(fieldID);
 
@@ -2108,12 +2097,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (!f.isVector())
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't get vector value on scalar field " + fieldID);
-	  }
-
-	return null;
+	// "Couldn't get vector values on scalar field {0}"
+	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", new Integer(fieldID)));
       }
 
     return f.getValues();
@@ -2144,12 +2129,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (!f.isVector())
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't get vector value on scalar field " + fieldID);
-	  }
-
-	return null;
+	// "Couldn't get vector values on scalar field {0}"
+	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", new Integer(fieldID)));
       }
 
     return f.getValuesLocal();
@@ -2304,10 +2285,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		if (newBase.getField(field.getID()) != null && field.isDefined())
 		  {
 		    saveField(field); // safe since we start with an empty fieldAry
-		  }
-		else
-		  {
-		    System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getID());
 		  }
 	      }
 	  }
@@ -2722,11 +2699,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  }
       }
   }
-
-  
-  
-  
-  
 
   /* *************************************************************************
   *

@@ -61,6 +61,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.FieldType;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.NotLoggedInException;
@@ -1612,7 +1613,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    // the field.  If we have a problem, we'll return a
 	    // dialog describing the fields that could not be
 	    // cloned, but we won't fail the operation.
-		
+
 	    retVal = origField.copyFieldTo(newField, local);
 
 	    if (retVal != null && retVal.getDialog() != null)
@@ -2677,25 +2678,36 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    // if this is an InvidDBField, deleteElement()
 		    // will convert this request into a deletion of
 		    // the embedded object.
-		    
-		    retVal = field.deleteElement(0); // *sync*
-		    
-		    if (retVal != null && !retVal.didSucceed())
+
+		    try
+		      {
+			retVal = field.deleteElement(0); // *sync*
+
+			if (retVal != null && !retVal.didSucceed())
+			  {
+			    editset.rollback("del" + label); // *sync*
+			    
+			    if (retVal.getDialog() != null)
+			      {
+				return retVal;
+			      }
+			    
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject disapproved of deleting element from field " + 
+							      field.getName());
+			  }
+			else
+			  {
+			    finalResult.unionRescan(retVal);
+			  }
+		      }
+		    catch (DDPermissionsException ex)
 		      {
 			editset.rollback("del" + label); // *sync*
-			
-			if (retVal.getDialog() != null)
-			  {
-			    return retVal;
-			  }
-			
+
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject disapproved of deleting element from field " + 
+							  "Permissions violation during deletion of element from field " + 
 							  field.getName());
-		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
 		      }
 		  }
 	      }

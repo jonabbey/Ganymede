@@ -1,8 +1,8 @@
 /*
 
-   NotLoggedInException.java
+   DDPermissionsException.java
  
-   Created: 11 March 2003
+   Created: 27 August 2004
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
@@ -53,24 +53,24 @@ package arlut.csd.ddroid.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                            NotLoggedInException
+                                                          DDPermissionsException
 
 ------------------------------------------------------------------------------*/
 
 /**
  * <p>This is a Directory Droid-specific RemoteException subclass that can be
- * thrown by the server if a method is called on a GanymedeSession
- * after that session has terminated.</p>
+ * thrown by the server if a method is called which can cause a reject due to
+ * permissions failure.</p>
  */
 
-public class NotLoggedInException extends java.rmi.RemoteException {
+public class DDPermissionsException extends java.rmi.RemoteException {
 
-  public NotLoggedInException()
+  public DDPermissionsException()
   {
     super();
   }
 
-  public NotLoggedInException(String s)
+  public DDPermissionsException(String s)
   {
     super(s);
   }

@@ -103,7 +103,7 @@ class memoryStatusTask implements Runnable, silentTask {
    * <p>Localization resouce bundle for this class.</p>
    */
 
-  static TranslationService ts = null;
+  private static TranslationService ts = null;
 
   static int count = 0;
 

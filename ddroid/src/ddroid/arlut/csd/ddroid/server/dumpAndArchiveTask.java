@@ -72,7 +72,7 @@ import arlut.csd.Util.TranslationService;
 
 class dumpAndArchiveTask implements Runnable {
 
-  static TranslationService ts = null;
+  private static TranslationService ts = null;
 
   public dumpAndArchiveTask()
   {

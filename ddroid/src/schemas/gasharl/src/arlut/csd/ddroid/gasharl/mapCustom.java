@@ -54,6 +54,7 @@ package arlut.csd.ddroid.gasharl;
 
 import java.util.Vector;
 
+import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.NotLoggedInException;
 import arlut.csd.ddroid.common.QueryResult;
@@ -310,7 +311,18 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 		// object.  The invid linking system will then take care
 		// of removing it from the map object's ENTRIES field.
 
-		ReturnVal retVal = invf.deleteElement(invid);
+		ReturnVal retVal = null;
+
+		try
+		  {
+		    retVal = invf.deleteElement(invid);
+		  }
+		catch (DDPermissionsException ex)
+		  {
+		    retVal = Ganymede.createErrorDialog("mapCustom: Error",
+							"Permissions error unlinking user " + getGSession().viewObjectLabel(user) +
+							" from map.");
+		  }
 
 		if (retVal != null && !retVal.didSucceed())
 		  {

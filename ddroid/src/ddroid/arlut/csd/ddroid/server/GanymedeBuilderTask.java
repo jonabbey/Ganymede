@@ -649,7 +649,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
       {
 	DBObject taskDefObj = getObject(taskDefObjInvid);
 
-	Vector options = taskDefObj.getFieldValues(SchemaConstants.TaskOptionStrings);
+	Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
 
 	if (options == null || options.size() == 0)
 	  {

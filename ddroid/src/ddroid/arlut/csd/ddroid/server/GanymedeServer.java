@@ -959,10 +959,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     QueryNode root;
     DBObject obj;
     PasswordDBField pdbf;
+    int validationResult;
 
     String clienthost;
-
-    /* -- */
 
     String error = GanymedeServer.lSemaphore.checkEnabled();
 
@@ -970,72 +969,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
 					  ts.l("admin.semaphore_failure", error));
-      }
-
-    // we want to match against either the persona name field or
-    // the new persona label field.  This lets us work with old
-    // versions of the database or new.  Going forward we'll
-    // want to match here against the PersonaLabelField.
-    
-    // note.. this is a hack for compatibility.. the
-    // personalabelfield will always be good, but if it does not
-    // exist, we'll go ahead and match against the persona name
-    // field as long as we don't have an associated user in that
-    // persona.. this is to avoid confusing 'broccol:supergash'
-    // with 'supergash'
-    
-    // the persona label field would be like 'broccol:supergash',
-    // whereas the persona name would be 'supergash', which could
-    // be confused with the supergash account.
-    
-    root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
-			   new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
-							      QueryDataNode.EQUALS, clientName),
-					    new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
-									       QueryDataNode.DEFINED, null))));
-    
-    userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-    
-    Vector results = loginSession.internalQuery(userQuery);
-    
-    for (int i = 0; !found && (i < results.size()); i++)
-      {
-	obj = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
-	    
-	pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
-	    
-	if (pdbf != null && pdbf.matchPlainText(clientPass))
-	  {
-	    if (clientName.equals(Ganymede.rootname))
-	      {
-		found = true;
-		fullprivs = true;
-	      }
-	    else
-	      {
-		BooleanDBField privField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminConsole);
-
-		if (privField != null && privField.value())
-		  {
-		    found = true;
-		  }
-		else
-		  {
-		    continue;	// no perms for admin console
-		  }
-
-		BooleanDBField fullField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminPower);
-
-		if (fullField != null && fullField.value())
-		  {
-		    fullprivs = true;
-		  }
-		else
-		  {
-		    fullprivs = false;
-		  }
-	      }
-	  }
       }
 
     try
@@ -1056,8 +989,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	clienthost = "unknown";
       }
+
+    validationResult = validateAdminUser(clientName, clientPass);
     
-    if (!found)
+    if (validationResult == 0)
       {
 	if (Ganymede.log != null)
 	  {
@@ -1070,6 +1005,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 	
 	return null;
+      }
+      
+    if (validationResult == 1)
+      {
+      	fullprivs = false;
+      }
+    else if (validationResult >= 2)
+      {
+      	fullprivs = true;
       }
 
     // creating a new GanymedeAdmin can block if we are currently
@@ -1101,6 +1045,91 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     return retVal;
   }
 
+  /**
+   * This method determines whether the specified username/password combination
+   * is valid.
+   * 
+   * @param clientName The username
+   * @param clientPass The password
+   * @return 0 if the login fails,
+   * 0 if the login succeeds but the user doesn't have admin console privileges,
+   * 1 if the login succeeds and the user is allowed basic admin console access,
+   * 2 if the login succeeds and the user is allowed full admin console privileges,
+   * 3 if the login succeeds and the user is allowed interpreter access.
+   */
+
+  public synchronized int validateAdminUser(String clientName, String clientPass)
+  {
+    Query userQuery;
+    QueryNode root;
+    DBObject obj;
+    PasswordDBField pdbf;
+
+    root = new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName);
+    userQuery = new Query(SchemaConstants.PersonaBase, root, false);
+    Vector results = loginSession.internalQuery(userQuery);
+
+    // If there is no admin persona with the given name, then bail
+    if (results.size() == 0)
+      {
+      	return 0;
+      }
+    
+    obj = loginSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+    pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
+	    
+    if (pdbf != null && pdbf.matchPlainText(clientPass))
+      {
+        // Are we the One True Amazing Supergash Root User Person? He gets
+      	// full privileges by default.
+        if (clientName.equals(Ganymede.rootname))
+          {
+            return 3;
+          }
+        else
+          {
+            BooleanDBField privField = (BooleanDBField) obj
+                .getField(SchemaConstants.PersonaAdminConsole);
+
+            // Is this user prohibited from accessing the admin console?
+            if (privField != null && !privField.value())
+              {
+                return 0;
+              }
+
+            BooleanDBField fullField = (BooleanDBField) obj
+                .getField(SchemaConstants.PersonaAdminPower);
+
+            // Ok, they can access the admin console...but do they have full
+            // privileges?
+            if (fullField != null && !fullField.value())
+              {
+              	return 1;
+              }
+            
+            BooleanDBField interpreterField = (BooleanDBField) obj
+            	.getField(SchemaConstants.PersonaInterpreterPower);
+            
+            // Ok, they have full privileges...but can they access the admin 
+            // interpreter?
+            if (interpreterField != null && interpreterField.value())
+              {
+              	return 3;
+              }
+            else
+              {
+              	return 2;
+              }
+            
+          }
+      }
+    else
+      // The password didn't match
+      {
+      	return 0;
+      }
+  }
+  
   /**
    * <p>This method is used by the
    * {@link arlut.csd.ddroid.server.GanymedeAdmin#shutdown(boolean) shutdown()}

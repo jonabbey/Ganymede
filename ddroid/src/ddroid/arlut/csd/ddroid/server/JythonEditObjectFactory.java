@@ -150,10 +150,35 @@ public class JythonEditObjectFactory {
         Ganymede.debug("Initializing interpreter");
         initializeInterpreter();
       }
-    return loadJythonClass(base.getClassOptionString(), base, invid, editset, original);
+    
+    String uri = null;
+    
+    /* If we've been handed a DBObjectBase, use it to find the URI (which
+     * is held in the DBObjectBase's options string). If we don't have one,
+     * the we must have been called from the copy constructor and we should
+     * have a non-null DBObject. We can get its parent DBObjectBase and then
+     * get the options string from there.
+     */
+    if (base != null)
+      {
+        uri = base.getClassOptionString();
+      }
+    else if (original != null)
+      {
+        uri = original.getBase().getClassOptionString();
+      }
+    
+    return loadJythonClass(uri, base, invid, editset, original);
   }
   
-  private static void initializeInterpreter()
+  /**
+   * <p>
+   * Sets up the Jython interpreter and ensures that it can find any requisite
+   * external libraries
+   * </p> 
+   */
+  
+  private synchronized static void initializeInterpreter()
   {
     PySystemState.initialize();
     interp = new PythonInterpreter(null, new PySystemState());
@@ -170,7 +195,22 @@ public class JythonEditObjectFactory {
       }
   }
   
-  private static DBEditObject loadJythonClass(String uri, DBObjectBase base, Invid invid, DBEditSet editset, DBObject original)
+  /**
+   * <p>
+   * This method takes the given URI and transforms the Jython text it points to into
+   * a Java object. All of the other arguments as simply passed to the Jython text's 
+   * constructor.
+   * </p>
+   *
+   * <p>
+   * This will only load the Jython text once...after that it's cached. To unload
+   * the uri's class definition, use the unloadURI method.
+   * </p>
+   * 
+   * @return a newly constructed DBEditObject subclass
+   */
+  
+  private synchronized static DBEditObject loadJythonClass(String uri, DBObjectBase base, Invid invid, DBEditSet editset, DBObject original)
   {
     if (uri == null || uri.equals(""))
       {
@@ -180,7 +220,7 @@ public class JythonEditObjectFactory {
     try
       {
         Ganymede.debug("Invoking Jython loader");
-        interp.exec("from JythonEditObjectBootstrapper import get_jythonEditObject");
+        interp.exec("from JythonEditObjectBootstrapper import *");
         
         /* We'll go ahead an pass in all of the args we've got, null or not. The
          * Jython class' constructor is smart enough to figure out which superclass
@@ -200,6 +240,41 @@ public class JythonEditObjectFactory {
         Ganymede.debug(pex.toString());
         throw new DDroidManagementException(pex.toString());
       }
+  }
+  
+  /**
+   * <p>
+   * Removes the class definition associated with the given URI from the
+   * class cache. This method should only be used to designate that the
+   * next time the given URI is loaded, you should bypass the cache.
+   * </p>
+   * 
+   * @param uri the uri we want to reset. If this is <b>null</b>, then
+   * <b>ALL</b> of the class definitions in the cache will be unloaded
+   */
+  
+  public synchronized static void unloadURI(String uri)
+  {
+    if (interp == null)
+      {
+        return;
+      }
+    
+    interp.set("uri_to_unload", uri);
+    interp.exec("unload_class(uri_to_unload)");
+  }
+
+  /**
+   * <p>
+   * Similar to {@link arlut.csd.ddroid.server.JythonEditObjectFactory.unloadURI unloadURI},
+   * except this method will unload <b>ALL</b> of the class definitions
+   * in the cache.
+   * </p>
+   */
+  
+  public synchronized static void unloadAllURIs()
+  {
+    unloadURI(null);
   }
   
 }

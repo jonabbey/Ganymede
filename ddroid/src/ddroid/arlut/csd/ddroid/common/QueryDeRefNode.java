@@ -1,14 +1,14 @@
 /*
 
-   NotLoggedInException.java
- 
-   Created: 11 March 2003
+   QueryDeRefNode.java
+
+   Created: 28 August 2004
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
 
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
@@ -19,7 +19,6 @@
 
    Contact information
 
-   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -53,25 +52,75 @@ package arlut.csd.ddroid.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                            NotLoggedInException
+                                                                  QueryDeRefNode
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid-specific RemoteException subclass that can be
- * thrown by the server if a method is called on a GanymedeSession
- * after that session has terminated.</p>
+ * <p>This class is used to represent a linked Query in a Query tree.
+ * A QueryDeRefNode is matched against an Invid field, and the QueryNode
+ * tree carried by the QueryDeRefNode is then evaluated against each
+ * DBObject pointed to through the Invid field.</p>
  */
 
-public class NotLoggedInException extends java.rmi.RemoteException {
+public class QueryDeRefNode extends QueryNode {
 
-  public NotLoggedInException()
+  public String fieldname;
+  public short fieldId;
+  public QueryNode queryTree;
+
+  /* -- */
+
+  /**
+   * Named field deref constructor.
+   */
+
+  public QueryDeRefNode(String fieldname, QueryNode tree)
   {
-    super();
+    this.fieldname = fieldname;
+    this.fieldId = -1;
+    this.queryTree = tree;
   }
 
-  public NotLoggedInException(String s)
+  /**
+   * Numbered field deref constructor.
+   */
+
+  public QueryDeRefNode(short fieldid, QueryNode tree)
   {
-    super(s);
+    this.fieldId = fieldid;
+    this.fieldname = null;
+    this.queryTree = tree;
+  }
+
+  /**
+   *
+   * Diagnostic aid.
+   *
+   */
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (fieldname != null)
+      {
+	result.append(fieldname);
+      }
+    else
+      {
+	result.append("<");
+	result.append(Short.toString(fieldId));
+	result.append(">");
+      }
+
+    result.append("->");
+
+    if (queryTree != null)
+      {
+	result.append(queryTree.toString());
+      }
+
+    return result.toString();
   }
 }

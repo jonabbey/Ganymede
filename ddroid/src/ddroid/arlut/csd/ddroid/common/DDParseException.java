@@ -1,8 +1,8 @@
 /*
 
-   NotLoggedInException.java
+   DDParseException.java
  
-   Created: 11 March 2003
+   Created: 27 August 2004
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
@@ -53,24 +53,24 @@ package arlut.csd.ddroid.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                            NotLoggedInException
+								DDParseException
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid-specific RemoteException subclass that can be
- * thrown by the server if a method is called on a GanymedeSession
- * after that session has terminated.</p>
+ * <p>This is a Directory Droid-specific RemoteException subclass that
+ * can be thrown by the server if a parse method is called with a
+ * string that does not match the parser's grammar.</p>
  */
 
-public class NotLoggedInException extends java.rmi.RemoteException {
+public class DDParseException extends java.rmi.RemoteException {
 
-  public NotLoggedInException()
+  public DDParseException()
   {
     super();
   }
 
-  public NotLoggedInException(String s)
+  public DDParseException(String s)
   {
     super(s);
   }

@@ -183,15 +183,15 @@ public class JButtonPanel extends JPanel {
 	break;
       }
 
-    gbc.gridy = 0;
-
     gbc.fill = GridBagConstraints.NONE;
-    gbc.weightx = 1.0;
+    gbc.weightx = 0.0;
+    gbc.weighty = 0.0;
     gbc.gridx = col;
+    gbc.gridy = 0;
 
     gbl.setConstraints(comp, gbc);
 
-    add(comp);
+    gPanel.add(comp);
 
     col = col + 1;
 

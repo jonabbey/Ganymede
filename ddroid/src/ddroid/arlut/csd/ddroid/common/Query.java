@@ -78,108 +78,68 @@ import java.util.Vector;
 
 public class Query implements java.io.Serializable {
 
-  static final long serialVersionUID = 2321965429672608993L;
+  static final long serialVersionUID = 7921652227732781133L;
 
   // ---
 
   /**
+   * <p>The id of the object type that the queryNodes are looking
+   * to match on.</p>
    *
-   * The name of the object type that the queryNodes are looking
-   * to match on.
-   *
-   */
-
-  public String objectName = null;
-
-  /**
-   *
-   * The name of the object type that the query should return.. used
-   * in the case where the search is performed on embedded objects.
-   *
-   */
-
-  public String returnName = null;
-
-  /**
-   *
-   * We want to be able to save a query on the server and re-issue it
-   * on behalf of the user.  If we are saved, the name to save under
-   * will be here.  We may or may not want it here.
-   *
-   */
-
-  public String saveName = null;
-
-  /**
-   *
-   * The id of the object type that the queryNodes are looking
-   * to match on.
-   *
+   * <p>If this value is left at -1, objectName will be consulted
+   * instead.</p>
    */
 
   public short objectType = -1;
 
   /**
+   * <p>The name of the object type that the queryNodes are looking
+   * to match on.</p>
    *
-   * The id of the object type that the query should return.. used
-   * in the case where the search is performed on embedded objects.
-   *
+   * <p>This value is consulted only if objectType is left at -1.</p>
    */
 
-  public short returnType = -1;
+  public String objectName = null;
 
   /**
+   * <p>We want to be able to save a query on the server and re-issue it
+   * on behalf of the user.  If we are saved, the name to save under
+   * will be here.  We may or may not want it here.</p>
    *
-   * The root of a graph of QueryNodes that encodes the desired
-   * search criteria.
-   *
+   * <p>I don't believe anything in the server actually uses this yet.</p>
+   */
+
+  public String saveName = null;
+
+  /**
+   * <p>The root of a graph of QueryNodes that encodes the desired
+   * search criteria.</p>
    */
 
   public QueryNode root;
 
   /**
-   *
-   * If true, this query will only be matched against objects in the
-   * database that the user has permission to edit.
-   *
+   * <p>If true, this query will only be matched against objects in the
+   * database that the user has permission to edit.</p>
    */
 
   public boolean editableOnly;
 
   /**
-   *
-   * If true, this query will only be matched against the subset of
+   * <p>If true, this query will only be matched against the subset of
    * objects in the database that the user has requested via
-   * the Session filter mechanism.
-   *
+   * the Session filter mechanism.</p>
    */
 
   public boolean filtered = false;
 
   /**
-   *
-   * A list of field id's in Short form that the server will take into
+   * <p>A list of field id's in Short form that the server will take into
    * account when returning a data dump.  If null, the default fields
-   * will be returned.
-   * 
+   * will be returned.</p>
    */
 
   public Hashtable permitList = null;
-
-  /**
-   *
-   * A Vector of Query's that can be associated with this query.<br><br>
-   * 
-   * This vector is used to allow the inclusion of queries on embedded objects..
-   * If linkedQueries != null, the server will issue a second (third, fourth)
-   * query, returning the intersection of the results.<br><br>
-   *
-   * It does no good to have linkedQueries that do not map back to the same
-   * result object type.<br><br>
-   *
-   */
-
-  public Vector linkedQueries = null;
 
   /* -- */
 
@@ -195,7 +155,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType, QueryNode root, boolean editableOnly)
   {
-    this.returnType = this.objectType = objectType;
+    this.objectType = objectType;
     this.root = root;
     this.editableOnly = editableOnly;
 
@@ -213,7 +173,7 @@ public class Query implements java.io.Serializable {
 
   public Query(String objectName, QueryNode root, boolean editableOnly)
   {  
-    this.returnName = this.objectName = objectName;
+    this.objectName = objectName;
     this.root = root;
     this.editableOnly = editableOnly;
 
@@ -229,7 +189,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType, QueryNode root)
   {
-    this.returnType = this.objectType = objectType;
+    this.objectType = objectType;
     this.root = root;
 
     editableOnly = true;
@@ -245,7 +205,7 @@ public class Query implements java.io.Serializable {
 
   public Query(String objectName, QueryNode root)
   {
-    this.returnName = this.objectName = objectName;
+    this.objectName = objectName;
     this.root = root;
 
     objectType = -1;
@@ -260,7 +220,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType)
   {
-    this.returnType = this.objectType = objectType;
+    this.objectType = objectType;
 
     objectName = null;
     root = null;
@@ -275,7 +235,7 @@ public class Query implements java.io.Serializable {
 
   public Query(String objectName)
   {
-    this.returnName = this.objectName = objectName;
+    this.objectName = objectName;
 
     objectType = -1;
     root = null;
@@ -309,17 +269,6 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * <p>This method sets the desired return type, for use
-   * in performing queries on embedded types when a
-   * parent type is what is desired.</p>
-   */
-
-  public void setReturnType(short returnType)
-  {
-    this.returnType = returnType;
-  }
-
-  /**
    * <p>This method adds a field identifier to the list of
    * fields that may be returned.  Once this method
    * is called with a field identifier, the query will
@@ -337,33 +286,6 @@ public class Query implements java.io.Serializable {
       }
 
     permitList.put(new Short(id), this);
-  }
-
-  /**
-   * <p>This method allows the client to add a list of subordinate queries
-   * to this query.  The queries attached to this query *will not*
-   * have their subordinate queries processed.</p>
-   * 
-   * <p>Queries added with this method are used to allow queries to
-   * include checks on embedded objects.</p>
-   *
-   * <p>It does no good to pass queries to addQuery that do not have
-   * the same return type as this query.</p>
-   */
-
-  public void addQuery(Query query)
-  {
-    if (query.returnType != this.returnType)
-      {
-	throw new IllegalArgumentException("Couldn't add an incompatible query");
-      }
-
-    if (linkedQueries == null)
-      {
-	linkedQueries = new Vector();
-      }
-
-    linkedQueries.addElement(query);
   }
 
   public String toString()
@@ -384,24 +306,13 @@ public class Query implements java.io.Serializable {
 	result.append("\n");
       }
 
-    if (returnType != -1)
-      {
-	result.append("returnType = ");
-	result.append(returnType);
-	result.append("\n");
-      }
-
-    if (returnName != null)
-      {
-	result.append("returnName = ");
-	result.append(returnName);
-	result.append("\n");
-      }
-
     result.append("editableOnly = ");
     result.append(editableOnly ? "True\n" : "False\n");
 
-    result.append(root.toString());
+    if (root != null)
+      {
+        result.append(root.toString());
+      }
 
     return result.toString();
   }

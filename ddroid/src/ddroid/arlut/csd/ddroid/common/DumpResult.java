@@ -54,7 +54,13 @@
 
 package arlut.csd.ddroid.common;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -90,7 +96,7 @@ import java.util.Vector;
  * <p>The GUI client uses this object to generate its query result tables.</p>.
  */
 
-public class DumpResult implements java.io.Serializable {
+public class DumpResult implements java.io.Serializable, List {
 
   static final boolean debug = false;
 
@@ -218,14 +224,24 @@ public class DumpResult implements java.io.Serializable {
    * getTypes()}.</p>
    */
   
-  public Vector getFieldRow(int row)
+  public Vector getFieldRow(int rowNumber)
   {
     if (!unpacked)
       {
 	unpackBuffer();
       }
 
-    return (Vector) rows.elementAt(row);
+    Map rowMap = (Map) rows.get(rowNumber);
+    Vector row = new Vector(headers.size());
+    Iterator iter;
+    String currentHeader;
+    
+    for (iter = headers.iterator(); iter.hasNext();)
+      {
+      	currentHeader = (String) iter.next();
+      	row.add(rowMap.get(currentHeader));
+      }
+    return row;
   }
 
   /**
@@ -244,7 +260,7 @@ public class DumpResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return ((Vector) rows.elementAt(row)).elementAt(col);
+    return (getFieldRow(row)).elementAt(col);
   }
 
   /**
@@ -268,8 +284,9 @@ public class DumpResult implements java.io.Serializable {
     String results = buffer.toString();
     arlut.csd.Util.SharedStringBuffer tempString = new arlut.csd.Util.SharedStringBuffer();
     int index = 0;
-    Vector rowVect;
+    Map rowMap;
     short currentFieldType = -1;
+    String currentHeader;
 
     /* -- */
 
@@ -402,7 +419,7 @@ public class DumpResult implements java.io.Serializable {
 
 	// now read in the fields for this invid
 
-	rowVect = new Vector();
+	rowMap = new HashMap(headers.size());
 
 	while (chars[index] != '\n')
 	  {
@@ -428,7 +445,8 @@ public class DumpResult implements java.io.Serializable {
 
 	    index++;		// skip |
 
-	    currentFieldType = ((Short) types.elementAt(rowVect.size())).shortValue();
+	    currentFieldType = ((Short) types.elementAt(rowMap.size())).shortValue();
+	    currentHeader = (String) headers.elementAt(rowMap.size());
 
 	    switch (currentFieldType)
 	      {
@@ -441,13 +459,13 @@ public class DumpResult implements java.io.Serializable {
 
 		if (tempString.toString().equals("null") || tempString.toString().equals(""))
 		  {
-		    rowVect.addElement(null);
+		    rowMap.put(currentHeader, null);
 		  }
 		else
 		  {
 		    try
 		      {
-			rowVect.addElement(new Date(Long.parseLong(tempString.toString())));
+			rowMap.put(currentHeader, new Date(Long.parseLong(tempString.toString())));
 		      }
 		    catch (NumberFormatException ex)
 		      {
@@ -461,13 +479,13 @@ public class DumpResult implements java.io.Serializable {
 		if (tempString.toString().equals("null") ||
 		    tempString.toString().equals(""))
 		  {
-		    rowVect.addElement(null);
+		    rowMap.put(currentHeader, null);
 		  }
 		else
 		  {
 		    try
 		      {
-			rowVect.addElement(new Integer(tempString.toString()));
+			rowMap.put(currentHeader, new Integer(tempString.toString()));
 		      }
 		    catch (NumberFormatException ex)
 		      {
@@ -482,13 +500,13 @@ public class DumpResult implements java.io.Serializable {
  		if (tempString.toString().equals("null") ||
  		    tempString.toString().equals(""))
  		  {
- 		    rowVect.addElement(null);
+ 		    rowMap.put(currentHeader, null);
  		  }
  		else
  		  {
  		    try
  		      {
- 			rowVect.addElement(new Double(tempString.toString()));
+ 			rowMap.put(currentHeader, new Double(tempString.toString()));
  		      }
  		    catch (NumberFormatException ex)
  		      {
@@ -499,11 +517,11 @@ public class DumpResult implements java.io.Serializable {
  		break;
 
 	      default:
-		rowVect.addElement(tempString.toString());
+		rowMap.put(currentHeader, tempString.toString());
 	      }
 	  }
-
-	rows.addElement(rowVect);
+	
+	rows.addElement(rowMap);
 
 	index++; // skip newline
       }
@@ -545,5 +563,256 @@ public class DumpResult implements java.io.Serializable {
 	rows.removeAllElements();
 	rows = null;
       }
+  }
+
+  /* ------------------------------------------------------------------------
+   * This is the start of the List interface implementation
+   * 
+   */
+  
+  /* This is a no-op since a DumpResult is immutable.
+   * 
+   * @see java.util.List#add(int, java.lang.Object)
+   */
+  public void add(int index, Object element)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since a DumpResult is immutable.
+   * 
+   * @see java.util.Collection#add(java.lang.Object)
+   */
+  public boolean add(Object o)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.Collection#addAll(java.util.Collection)
+   */
+  public boolean addAll(Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.List#addAll(int, java.util.Collection)
+   */
+  public boolean addAll(int index, Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.Collection#clear()
+   */
+  public void clear()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* 
+   * @see java.util.Collection#contains(java.lang.Object)
+   */
+  public boolean contains(Object o)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.contains(o);
+  }
+  
+  /* 
+   * @see java.util.Collection#containsAll(java.util.Collection)
+   */
+  public boolean containsAll(Collection c)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.containsAll(c);
+  }
+  
+  /* 
+   * @see java.util.List#get(int)
+   */
+  public Object get(int index)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.get(index);
+  }
+  
+  /* 
+   * @see java.util.List#indexOf(java.lang.Object)
+   */
+  public int indexOf(Object o)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.indexOf(o);
+  }
+  
+  /* 
+   * @see java.util.Collection#isEmpty()
+   */
+  public boolean isEmpty()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.isEmpty();
+  }
+  
+  /* 
+   * @see java.util.Collection#iterator()
+   */
+  public Iterator iterator()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.iterator();
+  }
+  
+  /* 
+   * @see java.util.List#lastIndexOf(java.lang.Object)
+   */
+  public int lastIndexOf(Object o)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.lastIndexOf(o);
+  }
+  
+  /* 
+   * @see java.util.List#listIterator()
+   */
+  public ListIterator listIterator()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.listIterator();
+  }
+  
+  /* 
+   * @see java.util.List#listIterator(int)
+   */
+  public ListIterator listIterator(int index)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.listIterator(index);
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.List#remove(int)
+   */
+  public Object remove(int index)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   *
+   * @see java.util.Collection#remove(java.lang.Object)
+   */
+  public boolean remove(Object o)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.Collection#removeAll(java.util.Collection)
+   */
+  public boolean removeAll(Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.Collection#retainAll(java.util.Collection)
+   */
+  public boolean retainAll(Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* This is a no-op since DumpResult is immutable.
+   * 
+   * @see java.util.List#set(int, java.lang.Object)
+   */
+  public Object set(int index, Object element)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /* 
+   * @see java.util.Collection#size()
+   */
+  public int size()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.size();
+  }
+  
+  /* 
+   * @see java.util.List#subList(int, int)
+   */
+  public List subList(int fromIndex, int toIndex)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.subList(fromIndex, toIndex);
+  }
+  
+  /* 
+   * @see java.util.Collection#toArray()
+   */
+  public Object[] toArray()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.toArray();
+  }
+  
+  /* 
+   * @see java.util.Collection#toArray(java.lang.Object[])
+   */
+  public Object[] toArray(Object[] a)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+    return rows.toArray(a);
   }
 }

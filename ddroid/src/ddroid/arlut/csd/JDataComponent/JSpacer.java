@@ -1,12 +1,11 @@
 /*
+   JSpacer.java
 
-   gcTask.java
-
-   This task allows a Directory Droid administrator to trigger a
-   server-side garbage collection cycle through the Directory Droid
-   Administration Console.
-
-   Created: 20 May 2004
+   This class defines an invisible space holder that can be placed
+   into a GridBagLayout-managed container to make sure that a certain
+   minimum row or column size is maintained.
+   
+   Created: 20 August 2004
 
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -19,12 +18,11 @@
 	    
    Directory Droid Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996 - 2004
    The University of Texas at Austin
 
    Contact information
 
-   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -54,49 +52,87 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.JDataComponent;
 
-import arlut.csd.Util.TranslationService;
+import java.awt.Dimension;
+import javax.swing.JComponent;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                          gcTask
+                                                                     JSpacer
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Runnable class to do a synchronous garbage collection run.  Issued
- * by the {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
- *
- * <p>I'm not sure that there is any point to having a synchronous garbage
- * collection task.. the idea was that we could schedule a full gc when
- * the server was likely not to be busy so as to keep things trim for when
- * the server was busy, but the main() entry point isn't yet scheduling this
- * for a particularly good time.</p>
+ * <p>This class defines an invisible space holder that can be placed
+ * into a GridBagLayout-managed container to make sure that a certain
+ * minimum row or column size is maintained.</p>
  */
 
-class gcTask implements Runnable {
+public class JSpacer extends JComponent {
 
-  /**
-   * <p>Localization resouce bundle for this class.</p>
-   */
+  private int height;
+  private int width;
+  private Dimension size;
 
-  private static TranslationService ts = null;
-
-  public gcTask()
+  public JSpacer(int height, int width)
   {
-    if (ts == null)
+    this.height = height;
+    this.width = width;
+    this.size = new Dimension(height, width);
+  }
+
+  public synchronized int getWidth()
+  {
+    return width;
+  }
+
+  public synchronized int getHeight()
+  {
+    return height;
+  }
+
+  public Dimension getMinimumSize()
+  {
+    return size;
+  }
+
+  public Dimension getMaximumSize()
+  {
+    return size;
+  }
+
+  public Dimension getPreferredSize()
+  {
+    return size;
+  }
+
+  public synchronized Dimension getSize(Dimension x)
+  {
+    if (x == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.gcTask");
+	return size;
+      }
+    else
+      {
+	x.width = this.width;
+	x.height = this.height;
+
+	return x;
       }
   }
 
-  public void run()
+  public synchronized void setPreferredSize(Dimension input)
   {
-    Ganymede.debug(ts.l("running"));
-    System.gc();
-    Ganymede.debug(ts.l("completed"));
-    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
-				 Runtime.getRuntime().totalMemory());
+    this.height = input.height;
+    this.width = input.width;
+    this.size = input;
+  }
+
+  public synchronized void setSpacerSize(int x, int y)
+  {
+    this.width = x;
+    this.height = y;
+    this.size = new Dimension(x,y);
   }
 }

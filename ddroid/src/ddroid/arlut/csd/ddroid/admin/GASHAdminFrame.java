@@ -117,7 +117,7 @@ import arlut.csd.Util.PackageResources;
  *
  */
 
-class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
+public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   static GASHAdminDispatch adminDispatch = null;
   static GASHSchema schemaEditor = null;

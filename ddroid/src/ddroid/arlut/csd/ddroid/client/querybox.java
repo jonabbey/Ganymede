@@ -109,12 +109,14 @@ import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.FixedListCompare;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.StringUtils;
 import arlut.csd.ddroid.common.BaseDump;
 import arlut.csd.ddroid.common.DumpResult;
 import arlut.csd.ddroid.common.FieldTemplate;
 import arlut.csd.ddroid.common.Query;
 import arlut.csd.ddroid.common.QueryAndNode;
 import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryDeRefNode;
 import arlut.csd.ddroid.common.QueryNode;
 import arlut.csd.ddroid.common.QueryNotNode;
 import arlut.csd.ddroid.common.SchemaConstants;
@@ -181,7 +183,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   JCheckBox allBox = new JCheckBox("All objects of type selected above");
   JComboBox baseChoice = new JComboBox();
 
-  // This is so we can hind the middle panel when the show all button is clicked
+  // This is so we can hide the middle panel when the show all button is clicked
 
   CardLayout 
     card_layout;
@@ -192,8 +194,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     fields;			// FieldTemplates for the selectedBase
 
   BaseDump selectedBase = null;
-
-  String baseName;
 
   boolean 
     editOnly = false,
@@ -234,13 +234,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     JScrollPane choice_pane = new JScrollPane();
     JPanel contentPane = new JPanel();
  
-
     /* -- */
-
-    if (debug)
-      {
-	System.out.println("Hi! I'm your happy query friend!");
-      }
 
     tabPane = new JTabbedPane();
 
@@ -290,7 +284,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     base_panel.setLayout(bp_gbl);
 
-     
     // - Create the choice window containing the fields 
 
     Vector baseNames = new Vector();
@@ -468,11 +461,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("querybox.resetFieldChoices(): basename = " + baseName);
-      }
-
     fieldChoices.removeAllElements();
 
     for (int i=0; fields != null && (i < fields.size()); i++) 
@@ -519,12 +507,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	mapNameToId(name, new Short(selectedBase.getTypeID()));
 	
 	// and finally add to fieldChoices
-	
-	if (debug)
-	  {
-	    System.err.println("querybox: adding field " + name + " to choices for base " + 
-			       baseName);
-	  }
 	
 	fieldChoices.addElement(name);
       }
@@ -603,33 +585,35 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     for (int j=0; fields != null && (j < fields.size()); j++)
       { 
 	tempField = (FieldTemplate) fields.elementAt(j);
-	      
-	if (tempField.getID() != SchemaConstants.OwnerListField &&
-	    tempField.getID() != SchemaConstants.BackLinksField)
+
+	// ignore containing objects and the like...
+
+	if (tempField.getID() == SchemaConstants.OwnerListField ||
+	    tempField.getID() == SchemaConstants.BackLinksField)
 	  {
-	    // ignore containing objects and the like...
-
-	    myName = tempField.getName();
-	    myName = basePrefix + "/" + myName;  // slap on the prefix
-
-	    // save the embedded information in our Embedded vector
-
-	    Embedded.addElement(myName);
-		
-	    mapNameToTemplate(myName, tempField);
-		   
-	    // Also, save the information on the target base
-	    // in a hashtable
-		      
-	    // the ID will be used in creating the query for the 
-	    // edit-in-place
-		    
-	    // if tempIDobj isn't null, then we've got 
-	    // something beneath an edit in place. Add the
-	    // id of the lowest level base to the baseIDHash
-
-	    mapNameToId(myName, lowestBase);
+	    continue;
 	  }
+	      
+	myName = tempField.getName();
+	myName = basePrefix + "/" + myName;  // slap on the prefix
+
+	// save the embedded information in our Embedded vector
+	
+	Embedded.addElement(myName);
+		
+	mapNameToTemplate(myName, tempField);
+		   
+	// Also, save the information on the target base
+	// in a hashtable
+		      
+	// the ID will be used in creating the query for the 
+	// edit-in-place
+	
+	// if tempIDobj isn't null, then we've got 
+	// something beneath an edit in place. Add the
+	// id of the lowest level base to the baseIDHash
+	
+	mapNameToId(myName, lowestBase);
 
 	if (tempField.isEditInPlace())
 	  {
@@ -654,7 +638,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }
   }
-
+  
   /**
    *
    * This internal method takes the current state of the rows in the
@@ -671,15 +655,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   {
     QueryNode myNode;
     QueryRow row;
-    String myBaseName;
-    Hashtable baseQueries = new Hashtable();
-    Vector baseQVec;
+    Vector qNodes;
     Query result = null;
-    short returnType;
 
     /* -- */
-
-    returnType = selectedBase.getTypeID();
 
     // If showAllItems is true, then we need to show everything.
 
@@ -688,82 +667,23 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	return new Query((String)baseChoice.getSelectedItem(), null, editOnly);
       }
 
+    qNodes = new Vector();
+
     for (int i = 0; i < Rows.size(); i++)
       {
 	row = (QueryRow) Rows.elementAt(i);
 
-	try
-	  {
-	    myBaseName = row.getBase().getName();
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("Whoah, guess Base really was remote! " + ex.getMessage());
-	    return null;
-	  }
-
-	// We have a hash of base names because of our need to enable
-	// querying on fields in embedded objects.  We basically send
-	// a set of queries to the server, one per base that we're
-	// interested in.  The primary query that we send to the server
-	// specifies the return type we're interested in.
-
-	if (baseQueries.get(myBaseName) == null)
-	  {
-	    baseQVec = new Vector();
-	    baseQVec.addElement(row.getQueryNode());
-	    baseQueries.put(myBaseName, baseQVec);
-	  }
-	else
-	  {
-	    baseQVec = (Vector) baseQueries.get(myBaseName);
-	    baseQVec.addElement(row.getQueryNode());
-	  }
+	qNodes.addElement(row.getQueryNode());
       }
 
-    // ok, we now have a hash of base names that we're going
-    // to need to issue queries on.. 
+    myNode = (QueryNode) qNodes.elementAt(0);
 
-    Enumeration en = baseQueries.keys();
-
-    while (en.hasMoreElements())
+    for (int i = 1; i < qNodes.size(); i++)
       {
-	myBaseName = (String) en.nextElement();
-	baseQVec = (Vector) baseQueries.get(myBaseName);
-
-	myNode = (QueryNode) baseQVec.elementAt(0);
-
-	// if baseQVec has more than one element, And in the remainder
-	// of the query nodes for this base.
-
-	for (int i = 1; i < baseQVec.size(); i++)
-	  {
-	    myNode = new QueryAndNode(myNode, (QueryNode) baseQVec.elementAt(i));
-	  }
-
-	if (result == null)
-	  {
-	    result = new Query(myBaseName, myNode, editOnly);
-	    result.setReturnType(returnType);
-	   
-	    if (debug)
-	      {
-		System.err.println("Creating primary Query on base " + myBaseName);
-	      }
-	  }
-	else
-	  {
-	    Query adjunctQuery = new Query(myBaseName, myNode, editOnly);
-	    adjunctQuery.setReturnType(returnType);
-
-	    result.addQuery(adjunctQuery);
-
-	    if (debug)
-	      {
-		System.err.println("Creating adjunct Query on base " + myBaseName);
-	      }
-	  }
+	myNode = new QueryAndNode(myNode, (QueryNode) qNodes.elementAt(i));
       }
+
+    result = new Query(selectedBase.getName(), myNode, editOnly);
 
     return result;
   }
@@ -1773,12 +1693,41 @@ class QueryRow implements ItemListener {
 
   public QueryNode getQueryNode()
   {
-    QueryNode myNode;
-    Object value = null;
+    QueryDeRefNode rootNode = null;
+    QueryDeRefNode deRefNode = null;
+    QueryNode terminalNode = null;
 
+    Object value = null;
     String localFieldName = parent.getFieldFromEmbedded(fieldName);
+    String pathElements[] = null;
 
     /* -- */
+
+    // first we need to see if we are working with an embedded field..
+
+    // XXX this is based on the presumption (currently enforced by
+    // DBObjectBaseField.setName()) that a field cannot have slashes
+    // (/'s) in its name.
+
+    if (this.fieldName.indexOf('/') > -1)
+      {
+	pathElements = StringUtils.split(this.fieldName, "/");
+
+	for (int i = 0; i < (pathElements.length-1); i++)
+	  {
+	    if (rootNode == null)
+	      {
+		rootNode = new QueryDeRefNode(pathElements[i], null);
+		deRefNode = rootNode;
+	      }
+	    else
+	      {
+		QueryDeRefNode nextLinkNode = new QueryDeRefNode(pathElements[i], null);
+		deRefNode.queryTree = nextLinkNode;
+		deRefNode = nextLinkNode;
+	      }
+	  }
+      }
 
     if (operand instanceof JnumberField)
       {
@@ -1898,21 +1847,29 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 
-	myNode = new QueryDataNode(localFieldName, opValue, arrayOp, value);
+	terminalNode = new QueryDataNode(localFieldName, opValue, arrayOp, value);
 
 	if (debug)
 	  {
-	    System.err.println("QueryDataNode: " + myNode.toString());
+	    System.err.println("QueryDataNode: " + terminalNode.toString());
 	  }
 	    
 	// -- if not is true then add a not node
 	    
 	if (isNot())
 	  {
-	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
 	  } 
-	    
-	return myNode;
+
+	if (deRefNode != null)
+	  {
+	    deRefNode.queryTree = terminalNode;
+	    return rootNode;
+	  }
+	else
+	  {
+	    return terminalNode;
+	  }
       }
     else if (!operator.startsWith("Same"))
        {
@@ -1969,21 +1926,29 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 	    
-	myNode = new QueryDataNode(localFieldName, opValue, value);
+	terminalNode = new QueryDataNode(localFieldName, opValue, value);
 
 	if (debug)
 	  {
-	    System.err.println("QueryDataNode: " + myNode.toString());
+	    System.err.println("QueryDataNode: " + terminalNode.toString());
 	  }
 	    
 	// -- if not is true then add a not node
 	    
 	if (isNot())
 	  {
-	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
 	  } 
-	    
-	return myNode;
+
+	if (deRefNode != null)
+	  {
+	    deRefNode.queryTree = terminalNode;
+	    return rootNode;
+	  }
+	else
+	  {
+	    return terminalNode;
+	  }
       }
     else
       {
@@ -2039,17 +2004,25 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 
-	myNode = new QueryAndNode(new QueryDataNode(localFieldName, QueryDataNode.GREATEQ, lowDate),
-				  new QueryDataNode(localFieldName, QueryDataNode.LESS, hiDate));
+	terminalNode = new QueryAndNode(new QueryDataNode(localFieldName, QueryDataNode.GREATEQ, lowDate),
+					new QueryDataNode(localFieldName, QueryDataNode.LESS, hiDate));
 	    
 	// -- if not is true then add a not node
 	    
 	if (isNot())
 	  {
-	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
 	  } 
 	    
-	return myNode;
+	if (deRefNode != null)
+	  {
+	    deRefNode.queryTree = terminalNode;
+	    return rootNode;
+	  }
+	else
+	  {
+	    return terminalNode;
+	  }
       }
   }
 
