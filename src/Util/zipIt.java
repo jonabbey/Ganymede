@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/12/02 10:09:20 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/12/02 10:11:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,23 @@ public class zipIt {
    * directory to zip, false will be returned.</P>
    */
 
-  public static boolean zipDirectory(String directoryPath, String zipFileName) throws IOException
+  public static boolean zipDirectory(String directoryPath, String zipFileNames) throws IOException
+  {
+    return zipDirectory(directoryPath, zipFileNames, true);
+  }
+
+  /**
+   * <P>This method takes care of zipping up a directory of files into a zip file.</P>
+   *
+   * <P>This method will not support subdirectories in the directory specified.. only
+   * flat files in the specific directoryPath will be zipped into zipFileName.</P>
+   *
+   * <P>This method returns true if a zip file was successfully created, and false
+   * or an IOException if none could be.  If there were no files in the given
+   * directory to zip, false will be returned.</P>
+   */
+
+  public static boolean zipDirectory(String directoryPath, String zipFileName, boolean includeZips) throws IOException
   {
     File targetFile = new File(zipFileName);
 
@@ -102,24 +118,33 @@ public class zipIt {
 	throw new IOException("Error, couldn't find directory to zip.");
       }
 
-    String filenames[] = directory.list(new FilenameFilter()
-					{
-					  /**
-					   * <P>This method comprises the FileNameFilter body, and is used to avoid
-					   * zipping existing zip files into new backups.</P>
-					   */
-					  
-					  public boolean accept(File dir, String name)
-					    {
-					      if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
-						{
-						  return false;
-						}
-					      
-					      return true;
-					    }
-					});
-    
+    String filenames[];
+
+    if (includeZips)
+      {
+	filenames = directory.list();
+      }
+    else
+      {
+	filenames = directory.list(new FilenameFilter()
+				   {
+				     /**
+				      * <P>This method comprises the FileNameFilter body, and is used to avoid
+				      * zipping existing zip files into new backups.</P>
+				      */
+				     
+				     public boolean accept(File dir, String name)
+				       {
+					 if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
+					   {
+					     return false;
+					   }
+					 
+					 return true;
+				       }
+				   });
+      }
+
     if (filenames.length > 0)
       {
 	Vector filenameVect = new Vector();
