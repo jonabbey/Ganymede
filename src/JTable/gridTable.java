@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 17 June 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D% 
+ * @version $Revision: 1.3 $ %D% 
  */
 
 public class gridTable extends baseTable {
@@ -70,11 +70,13 @@ public class gridTable extends baseTable {
 		   Color hRowLineColor,
 		   String[] headers,
 		   boolean horizLines, boolean vertLines,
-		   boolean vertFill, boolean hVertFill)
+		   boolean vertFill, boolean hVertFill,
+		   PopupMenu menu)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill);
+	  headers, horizLines, vertLines, vertFill, hVertFill,
+	  menu);
 
     if (debug)
       {
@@ -91,7 +93,7 @@ public class gridTable extends baseTable {
    *
    */
 
-  public gridTable(int[] colWidths, String[] headers)
+  public gridTable(int[] colWidths, String[] headers, PopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -104,7 +106,8 @@ public class gridTable extends baseTable {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 true, true, true, true);
+	 true, true, true, true,
+	 menu);
 
     if (debug)
       {
