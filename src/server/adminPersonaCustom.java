@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -159,7 +159,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	return setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
       }
 
-    if (userInvid == null || descrip == null)
+    if ((newName == null && userInvid == null) || descrip == null)
       {
 	return setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
       }
