@@ -128,6 +128,16 @@ public class PasswordClient implements ClientListener {
 
     try
       {
+	client.connect();
+      }
+    catch (Exception ex)
+      {
+	error("Connection to Ganymede server failed: " + ex.getMessage());
+	return false;
+      }
+
+    try
+      {
 	// First we need a referrence to a Session object.  This is
 	// accomplished through the ClientBase's login method.
 	session = client.login(username, oldPassword);
@@ -277,7 +287,6 @@ public class PasswordClient implements ClientListener {
 	    error("Error commiting transaction, password change failed.");
 	  }
       }
-  
     catch (RemoteException ex)
       {
 	error("Caught remote exception in authenticate: " + ex);
