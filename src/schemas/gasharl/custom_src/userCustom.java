@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2001/07/13 20:02:18 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2001/07/18 02:41:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3159,7 +3159,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     buffer.append("Thanks for your cooperation.\nYour friend,\n\tGanymede.\n");
 
     editset.logMail(addresses, 
-		    "User home directory on map " + mapName + "moved",
+		    "User home directory on map " + mapName + " moved",
 		    buffer.toString());
   }
 
