@@ -6,7 +6,7 @@
    BSD passwd, master.passwd, and group files.
    
    Created: 30 July 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -173,7 +173,7 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = path + "nisbuilder";
+	buildScript = path + "bsd_builder";
       }
 
     file = new File(buildScript);
