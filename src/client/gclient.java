@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,11 +91,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     statusBorder = new CompoundBorder(loweredBorder, emptyBorder5),
     statusBorderRaised = new CompoundBorder(raisedBorder, emptyBorder5);
 
+  private int
+    containerPanelCount = 0;
+
   //
   // Yum, caches
   //
 
   private Vector
+    containerPanels = new Vector(),
     baseList;            // List of base types.  Vector of Bases.
 
   private Hashtable
@@ -106,8 +110,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     baseMap = null,                  // Hash of Short to Base
     changedHash = new Hashtable(),   // Hash of objects that might have changed
     deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
-    createHash = new Hashtable();    // Hash of objects waiting to be created
+    createHash = new Hashtable(),    // Hash of objects waiting to be created
                                      // Create and Delete are pending on the Commit button. 
+    baseToShort = null;              // Map of Base to Short
    
   protected Hashtable
     invidNodeHash = new Hashtable(),
@@ -202,6 +207,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   JMenuItem 
     logoutMI,
+    getLastErrorMI,
     removeAllMI,
     rebuildTreeMI,
     filterQueryMI,
@@ -298,6 +304,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     fileMenu = new JMenu("File");
     logoutMI = new JMenuItem("Logout", new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
+
+    getLastErrorMI = new JMenuItem("Get Last Error");
+    getLastErrorMI.addActionListener(this);
     removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
     rebuildTreeMI = new JMenuItem("Rebuild Tree", new MenuShortcut(KeyEvent.VK_R));
@@ -313,6 +322,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
     fileMenu.addSeparator();
+    fileMenu.add(getLastErrorMI);
     fileMenu.add(logoutMI);
 
 
@@ -745,6 +755,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     return baseMap;
 
+  }
+
+  public Hashtable getBaseToShort()
+  {
+    if (baseToShort == null)
+      {
+	baseToShort = loader.getBaseToShort();
+      }
+    
+    return baseToShort;
   }
 
   /**
@@ -1813,6 +1833,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return defaultOwnerChosen;
   }
 
+  public synchronized void registerNewContainerPanel(containerPanel cp)
+  {
+    containerPanels.addElement(cp);
+    System.out.println(" inc. containerPanelCount = " + containerPanelCount);
+  }
+
+  public synchronized void containerPanelFinished(containerPanel cp)
+  {
+    containerPanels.removeElement(cp);
+    System.out.println(" dec. containerPanelCount = " + containerPanelCount);
+    this.notify();
+  }
+
   /*
    * This checks to see if anything has been changed.  Basically, if edit panels are
    * open and have been changed in any way, then somethingChanged will be true and 
@@ -1948,10 +1981,39 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  public void cancelTransaction()
+  public synchronized void cancelTransaction()
   {
     try
       {
+	// First we need to tell all the container Panels to stop loading
+	for (int i = 0; i < containerPanels.size(); i++)
+	  {
+	    System.out.println("Shutting down containerPanel");
+	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+	    
+	    cp.stopLoading();
+	  }
+	
+	long startTime = System.currentTimeMillis();
+	while ((containerPanels.size() > 0) && (System.currentTimeMillis() - startTime > 10000))
+	  {
+	    try
+	      {
+		System.out.println("Waiting for containerPanels to shut down.");
+		this.wait(1000);
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for container panels to stop: " + x);
+	      }
+	  }
+
+	if (debug && (containerPanels.size() > 0))
+	  {
+	    System.out.println("Hmm, containerPanels is still not empty, the timeout must have kicked in.  Oh well.");
+	  }
+	
+	
 	wp.closeEditables();
 	session.abortTransaction();
 
@@ -2104,6 +2166,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  if (OKToProceed())
 	    {
 	      logout();
+	    }
+	}
+      else if (source == getLastErrorMI)
+	{
+	  try
+	    {
+	      System.out.println("Last error: " + getSession().getLastError());
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not get last error: " +rx);
 	    }
 	}
       else if (command.equals("open object for editing"))
