@@ -407,6 +407,18 @@ Previously, the server shutdown process only blocked phase 2 builds.
 This change makes it so that the server won't bother trying to write
 out data files that it won't do anything with before shutdown.
 
+21. [SERVER, ADMIN CONSOLE] Added support for Apache md5 hash format
+
+The Ganymede PasswordDBFile class now has support for working with
+passwords hashed using the variant Md5Crypt() algorithm that the
+Apache web server supports for its htpasswd files.  Implementing this
+support involved changes to the Ganymede database file format (now up
+to file format 2.4), along with changes to the RMI interface
+definition for the schema editor and for the password field interface.
+
+Because of these changes, Ganymede 1.0.10 will not work properly with
+an admin console or client from Ganymede 1.0.9 or earlier.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001

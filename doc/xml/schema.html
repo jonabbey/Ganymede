@@ -639,6 +639,16 @@
 	<td>&lt;md5crypted/&gt;</td>
       </tr>
       <tr>
+	<td></td><td>apachemd5crypted</td>
+	<td>
+	  <p>The <b>apachemd5crypted</b> element is an optional, empty
+	  element.  If this element is present, the Ganymede server
+	  will store the contents of this password in Apache-style
+	  md5crypt() format.</p>
+	</td>
+	<td>&lt;apachemd5crypted/&gt;</td>
+      </tr>
+      <tr>
 	<td></td><td>winHashed</td>
 	<td>
 	  <p>The <b>winHashed</b> element is an optional, empty
@@ -656,14 +666,15 @@
 	  element.  If this element is present, the Ganymede server
 	  will store the plaintext of passwords stored in this field
 	  to disk.  Normally, if the Ganymede server has either
-	  <b>crypted</b>, <b>md5crypted</b>, or <b>winHashed</b> set,
-	  the server will never dump the plaintext of passwords in
-	  this field to disk, as it is capable of authenticating
-	  logins against any of the supported hash formats.  If
-	  the <b>plaintext</b> element is present, the password will
-	  be preserved in plaintext form in the ganymede.db file,
-	  regardless of whether or not the password is also handled
-	  via one of the encryption hashes.</p>
+	  <b>crypted</b>, <b>md5crypted</b>, <b>apachemd5crypted<b/>,
+	  or <b>winHashed</b> set, the server will never dump the
+	  plaintext of passwords in this field to disk, as it is
+	  capable of authenticating logins against any of the
+	  supported hash formats.  If the <b>plaintext</b> element is
+	  present, the password will be preserved in plaintext form in
+	  the ganymede.db file, regardless of whether or not the
+	  password is also handled via one of the encryption
+	  hashes.</p>
 	</td>
 	<td>&lt;plaintext/&gt;</td>
       </tr>
@@ -831,7 +842,7 @@ Limited to 16 for NFS.&lt;/comment&gt;
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:17:30 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Fri Jul 27 21:39:55 CDT 2001
+Last modified: Thu Mar 28 22:21:47 CST 2002
 <!-- hhmts end -->
   </body>
 </html>

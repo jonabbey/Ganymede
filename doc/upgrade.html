@@ -7,7 +7,7 @@
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Upgrade Guide<br>Release 1.0.9 - 4 December 2001</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Upgrade Guide<br>Release 1.0.10 - 4 December 2001</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>UPGRADE</code> text file
@@ -61,12 +61,24 @@ discussed.  If you can, view this document with a web browser as
     server directory, and put it in a safe place.  You may also want
     to use the <a href="xml/xmlclient.html">xml client</a> to dump
     a copy of your current database to an XML file for safekeeping,
-    just in case.</p>
+    just in case.<p>
 
-    <p>Now, you'll want to take the new Ganymede distribution and
-    unpack it, <a href="glossary.html#configure">configure</a> it, and
-    run <a href="glossary.html#installServer">installServer</a> to
-    install the new server code into a scratch directory.</p>
+    <p>Note that it's very important to shut down your existing server
+    cleanly before performing an upgrade.  The database file format
+    may change slightly between versions of the Ganymede server, and
+    Ganymede's data loading routines currently take more care at
+    handling version differences when reading the ganymede.db file
+    than when reading the transaction journal.  Cleanly shutting down
+    the server gives the server an opportunity to coalesce all
+    transactions into the ganymede.db file, and will help avoid
+    problems in the upgrade.</p>
+
+    <p>Now, assuming you've done a clean shutdown of your old server
+    and made backup copies of everything, you'll want to take the new
+    Ganymede distribution and unpack it, <a
+    href="glossary.html#configure">configure</a> it, and run <a
+    href="glossary.html#installServer">installServer</a> to install
+    the new server code into a scratch directory.</p>
       
     <p>Once you have installed the new server into a scratch
     directory, you can go ahead and copy the new <a
@@ -239,7 +251,7 @@ discussed.  If you can, view this document with a web browser as
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Fri Jul 27 22:19:10 CDT 2001 -->
 <!-- hhmts start -->
-Last modified: Tue Dec  4 01:12:16 CST 2001
+Last modified: Thu Mar 28 22:19:14 CST 2002
 <!-- hhmts end -->
   </body>
 </html>

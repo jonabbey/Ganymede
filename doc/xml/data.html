@@ -680,9 +680,9 @@ The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
-<b>&lt;password&gt;</b> element may contain any or all of the five
+<b>&lt;password&gt;</b> element may contain any or all of the six
 optional attributes, <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
-<b>lanman</b> and <b>ntmd4</b>.  If the <b>plaintext</b> attribute is
+<b>apachemd5crypt</b>, <b>lanman</b> and <b>ntmd4</b>.  If the <b>plaintext</b> attribute is
 present, all other hashes will be ignored, and the Ganymede server
 will generate new hashes as needed from the plaintext given. If none of the optional
 attributes are present, the password field will be cleared. All of
@@ -732,6 +732,13 @@ in FreeBSD-style md5Crypt() format.  The client will transmit this
 password to the server, and will clear any pre-existing plain text
 information stored in this field in the server.</dd>
 
+<dt><b>apachemd5crypt</b></dt>
+
+<dd>This attribute, if present, contains a password string pre-hashed
+in Apache-style md5Crypt() format.  The client will transmit this
+password to the server, and will clear any pre-existing plain text
+information stored in this field in the server.</dd>
+
 <dt><b>lanman</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
@@ -758,7 +765,7 @@ information stored in this field in the server.</dd>
 <td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2">&lt;password crypt="nxGots4NO.BJY" md5crypt="$1$apr1$f398vNQ51gnzf"/&gt;</td></tr>
+<tr><td COLSPAN="2">&lt;password crypt="nxGots4NO.BJY" md5crypt="$1$o8/.....$f398vNQ51gnzf"/&gt;</td></tr>
 </table></center>
 
 <!-- INVID -->
@@ -912,7 +919,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Tue Nov 20 16:09:32 CST 2001
+Last modified: Thu Mar 28 22:23:59 CST 2002
 <!-- hhmts end -->
   </body>
 </html>
