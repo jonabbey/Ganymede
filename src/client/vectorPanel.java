@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.19 $ %D%
+  Version: $Revision: 1.20 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -245,7 +245,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   datefield.maxDate(),
 						   ca,
 						   this);
-		    addElement(datefield.getName(), df);
+		    addElement(df);
 		  }
 		else
 		  {
@@ -255,7 +255,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   null,
 						   null,
 						   ca);
-		    addElement(datefield.getName(),df);
+		    addElement(df);
 		  }
 	      }
 	  }
@@ -299,7 +299,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   this);
 		    
 		sf.setText(((Integer)numfield.getElement(i)).toString());
-		addElement(numfield.getName(), sf);
+		addElement(sf);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -333,7 +333,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		ipf.setValue((Byte[]) ipfield.getElement(i));
 		ipf.setCallback(this);
 		
-		addElement(ipfield.getName(), ipf);
+		addElement(ipf);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -374,7 +374,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    containerPanel cp = new containerPanel(object,
 							   invidfield.isEditable() && editable,
 							   parent.parent,
-							   parent, container.frame);
+							   parent, container.frame,
+							   null, false);
 		    cp.setBorder(new LineBorder(Color.black));
 		    
 		    //		    addElement(object.getLabel(), cp);
@@ -457,7 +458,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       parent.parent,
 						       parent, container.frame);
 		cp.setBorder(new LineBorder(Color.black));
-		addElement("New Element", cp);
+		addElement("New Element", cp, true);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -484,7 +485,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 					       ca,
 					       this);
 			
-		addElement("New date", df);
+		addElement(df);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -508,7 +509,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 					    true,
 					    ipfield.v6Allowed());
 		ipf.setCallback(this);
-		addElement("New IP address", ipf);
+		addElement(ipf);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -554,7 +555,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 						     
 		  
-		addElement("New number", sf);
+		addElement(sf);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -594,16 +595,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void addElement(Component c)
   {
-    addElement("Title(temp)", c);
+    addElement(null, c, false);
   }
 	
-  /* This method is used to add an item to the vector.
-   * Since on the last element on the vector has a plus
-   * button, this item is going to be added to the end
-   * of the vector.
-   */
-
   public void addElement(String title, Component c)
+  {
+    addElement(title,c,false);
+  }
+
+  public void addElement(String title, Component c, boolean expand)
   {
     if (c == null)
       {
@@ -793,13 +793,22 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	short index = (short)compVector.indexOf(v.getSource());
 	System.out.println(" index = " + index);
 
-	try
+	
+	if (v.getOperationType() == JValueObject.ERROR)
 	  {
-	    returnValue = changeElement((Byte[])v.getValue(), index);
+	    parent.getgclient().setStatus((String)v.getValue());
+	    returnValue = false;
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not set value of date field: " + rx);
+	    try
+	      {
+		returnValue = changeElement((Byte[])v.getValue(), index);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not set value of date field: " + rx);
+	      }
 	  }
       }
     else
