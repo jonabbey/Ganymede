@@ -156,6 +156,14 @@ In response to a so-simple-it's-brilliant suggestion by David Cummins,
 I have tweaked the Ganymede client to display a count of the rows
 returned in the title bar of the client's query results window.
 
+14. [CLIENT] Various tweaks for better behavior under JDK 1.5 beta
+
+I've made some slight tweaks to the client and console's GUI layout to
+improve behavior when running under the JDK 1.5 beta.  This includes
+modifications to the JNLP launch files in webforms so that the user
+will be given the option of using versions 1.2 through 1.5 of the Java
+runtime.
+
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
 RELEASE DATE: December 9, 2002
