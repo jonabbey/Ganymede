@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -131,6 +131,8 @@ public interface BaseField extends Remote {
 
   public boolean isCrypted() throws RemoteException;
   public void setCrypted(boolean b) throws RemoteException;
+  public boolean isPlainText() throws RemoteException;
+  public void setPlainText(boolean b) throws RemoteException;
   
   // convenience methods
 
