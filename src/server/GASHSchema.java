@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1627,9 +1627,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     maxLengthN;			// string
 
   checkboxField
-    vectorCF,			// all
+    vectorCF,			// all but password
     labeledCF,			// boolean
-    editInPlaceCF;		// invid
+    editInPlaceCF,		// invid
+    cryptedCF;			// password
 
   Choice
     typeC,			// all
@@ -1648,7 +1649,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     numericShowing,
     dateShowing,
     stringShowing,
-    referenceShowing;
+    referenceShowing,
+    passwordShowing;
 
   /* -- */
 
@@ -1708,63 +1710,69 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     typeC.add("Date");
     typeC.add("String");
     typeC.add("Object Reference");
+    typeC.add("Password");
     typeC.addItemListener(this);
 
     //choose the one that is the default
     changeTypeChoice("Boolean");
+
+    cryptedCF = new checkboxField(null, false, ca, true);
+    cryptedCF.setCallback(this);
+    addRow(editPanel, cryptedCF, "Stored Crypted:" , 7);
    
     addRow(editPanel, typeC, "Field Type:", 6);
 
     minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
-    addRow(editPanel, minLengthN, "Minimum String Size:", 7);
+    addRow(editPanel, minLengthN, "Minimum String Size:", 8);
     
     maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
-    addRow(editPanel, maxLengthN, "Maximum String Size:", 8);
+    addRow(editPanel, maxLengthN, "Maximum String Size:", 9);
    
     OKCharS = new stringField(20, 100, ca, true, false, null, null);
     OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, "Allowed Chars:", 9);
+    addRow(editPanel, OKCharS, "Allowed Chars:", 10);
 
     BadCharS = new stringField(20, 100, ca, true, false, null, null);
     BadCharS.setCallback(this);
-    addRow(editPanel, BadCharS, "Disallowed Chars:", 10);
+    addRow(editPanel, BadCharS, "Disallowed Chars:", 11);
 
     namespaceC = new Choice();
     namespaceC.addItemListener(this);
 
-    addRow(editPanel, namespaceC, "Namespace:", 11);
+    addRow(editPanel, namespaceC, "Namespace:", 12);
     
     labeledCF = new checkboxField(null, false, ca, true);
     labeledCF.setCallback(this);
-    addRow(editPanel, labeledCF, "Labeled:", 12);
+    addRow(editPanel, labeledCF, "Labeled:", 13);
 
     trueLabelS = new stringField(20, 100, ca, true, false, null, null);
     trueLabelS.setCallback(this);
-    addRow(editPanel, trueLabelS, "True Label:", 13);
+    addRow(editPanel, trueLabelS, "True Label:", 14);
 
     falseLabelS = new stringField(20, 100, ca, true, false, null, null);
     falseLabelS.setCallback(this);
-    addRow(editPanel, falseLabelS, "False Label:", 14);
+    addRow(editPanel, falseLabelS, "False Label:", 15);
 
     editInPlaceCF = new checkboxField(null, false, ca, true);
     editInPlaceCF.setCallback(this);
-    addRow(editPanel, editInPlaceCF, "Edit In Place:", 15);
+    addRow(editPanel, editInPlaceCF, "Edit In Place:", 16);
 
     targetC = new Choice();
     targetC.addItemListener(this);
-    addRow(editPanel, targetC, "Target Object:", 16);
+    addRow(editPanel, targetC, "Target Object:", 17);
 
     fieldC = new Choice();
     fieldC.addItemListener(this);
-    addRow(editPanel, fieldC, "Target Field:", 17);
+    addRow(editPanel, fieldC, "Target Field:", 18);
 
     booleanShowing = true;
     numericShowing = false;
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
+    passwordShowing = false;
 
     add(editPanel);
   }
@@ -1820,9 +1828,20 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   void checkVisibility()
   {
-    setRowVisible(maxArrayN, vectorCF.getState());
+    if (passwordShowing)
+      {
+	setRowVisible(vectorCF, false);
+	setRowVisible(maxArrayN, vectorCF.getState());
 
-    // Now check the nameC choice stuff
+	setRowVisible(cryptedCF, true);
+      }
+    else
+      {
+	setRowVisible(vectorCF, true);
+	setRowVisible(maxArrayN, vectorCF.getState());
+
+	setRowVisible(cryptedCF, false);
+      }
 
     setRowVisible(labeledCF, booleanShowing);
 
@@ -1837,10 +1856,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	setRowVisible(falseLabelS, false);
       }
 
-    setRowVisible(OKCharS, stringShowing);
-    setRowVisible(BadCharS, stringShowing);
-    setRowVisible(minLengthN, stringShowing);
-    setRowVisible(maxLengthN, stringShowing);
+    setRowVisible(OKCharS, stringShowing || passwordShowing);
+    setRowVisible(BadCharS, stringShowing || passwordShowing);
+    setRowVisible(minLengthN, stringShowing || passwordShowing);
+    setRowVisible(maxLengthN, stringShowing || passwordShowing);
     setRowVisible(namespaceC, stringShowing);
 
     if (referenceShowing)
@@ -2065,6 +2084,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
+    passwordShowing = false;
 
     try
       {
@@ -2092,6 +2112,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  {
 	    referenceShowing = true;
 	    fieldDef.setType(FieldType.INVID);
+	  }
+	else if (selectedItem.equalsIgnoreCase("Password"))
+	  {
+	    passwordShowing = true;
+	    fieldDef.setType(FieldType.PASSWORD);
 	  }
       }
     catch (RemoteException ex)
@@ -2142,6 +2167,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
+    passwordShowing = false;
 
     try
       {
@@ -2185,6 +2211,18 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		namespaceC.select(fieldDef.getNameSpaceLabel());
 		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
 	      }
+	  }
+	else if (fieldDef.isPassword())
+	  {
+	    minLengthN.setValue(fieldDef.getMinLength());
+	    maxLengthN.setValue(fieldDef.getMaxLength());
+	    OKCharS.setText(fieldDef.getOKChars());
+	    BadCharS.setText(fieldDef.getBadChars());
+	    
+	    typeC.select("Password");
+	    passwordShowing = true;
+
+	    cryptedCF.setState(fieldDef.isCrypted());
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -2314,6 +2352,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  }
 
 	//Here is where the editability is checked.
+
 	commentT.setEditable(isEditable);
 	nameS.setEditable(isEditable);
 	classS.setEditable(isEditable);
@@ -2325,6 +2364,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	maxArrayN.setEditable(isEditable);
 	minLengthN.setEditable(isEditable);
 	maxLengthN.setEditable(isEditable);
+
+	cryptedCF.setEnabled(isEditable);
 	vectorCF.setEnabled(isEditable);
 	labeledCF.setEnabled(isEditable);
 	editInPlaceCF.setEnabled(isEditable);
@@ -2433,6 +2474,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  {
 	    System.out.println("editInPlaceCF");
 	    fieldDef.setEditInPlace(editInPlaceCF.getState());
+	  }
+	else if (comp == cryptedCF)
+	  {
+	    System.out.println("cryptedCF");
+	    fieldDef.setCrypted(cryptedCF.getState());
 	  }
 	return true;
       }
