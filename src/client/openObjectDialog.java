@@ -141,7 +141,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     middle.add(type);
 	
     text = new JstringField(20, true);
-    text.setCallback(this);
+    //text.setCallback(this);
     JLabel editTextL = new JLabel("Object Name:");
     
     gbc.fill = GridBagConstraints.NONE;
@@ -178,7 +178,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   public Invid chooseInvid()
   {
     pack();
-    text.requestFocus();
+    type.requestFocus();
 		    
     setVisible(true);
 
