@@ -310,15 +310,20 @@ directory.</p>
 	address.</p>
 </dd>
 
-<dt><b>What port should the RMI registry supporting Ganymede run on?</b></dt>
+<dt><b>What port should the Ganymede server use for its RMI registry?</b></dt>
 <dd>
 	<p>The RMI registry is a network lookup service that is used
-	by the Ganymede clients to establish communications with the
-	Ganymede server.  By default, port number 1099 is used. If you
-	are running certain other Java services, you may already have
-	an RMI registry running, in which case you should pick another
-	port number to run the Ganymede registry on.  You may want to
-	use 1100, 1101, or another non-used tcp port.</p>
+	to initialize communications between the Ganymede clients and
+	the Ganymede server.  By default, port number 1099 is used for
+	RMI registration. If you are running certain other Java
+	services, you may already have an RMI registry running, in
+	which case you should pick another port number to run the
+	Ganymede registry on.  You may want to use 1100, 1101, or
+	another non-used tcp port.</p>
+
+        <p>Note that from version 2.0 onwards, the Ganymede server
+        handles the RMI registration as part of its normal
+        functioning, and no external rmiregistry process need be run.</p>
 </dd>
 
 <dt><b>What mailhost should Ganymede use to send out diagnostic mail?</b></dt>
@@ -495,10 +500,7 @@ README file.</p>
 <p>Once you have installed your schema kit, you can go ahead and run
 the server.  You do this by running the <a
 href="glossary.html#runServer">runServer</a> script in the server's
-<b>bin/</b> directory.  <a
-href="glossary.html#runServer">runServer</a> starts up the rmiregistry
-on the port you indicated when running <b>installServer</b>, then runs
-the Ganymede server itself.</p>
+<b>bin/</b> directory.</p>
 
 <p>The Ganymede server is a pure Java application, so when you run
 it, you are really running your platform's java execution environment
@@ -578,16 +580,15 @@ option set to generate a <a
 href="glossary.html#debug.log">debug.log</a> file in your server's
 top-level directory.</p>
 
-<p>While the server is running, you should see two separate Java
-processes running, one for the rmiregistry, and one for the Ganymede
-server.  If you are running the Ganymede server on a Linux system, you
-may see what looks like a very large number of Java processes running.
+<p>While the server is running, you should see at least one Java
+process running, that being the Ganymede server.  If you are running
+the Ganymede server on certain versions of the Linux system, you may
+see what looks like a very large number of Java processes running.
 This is perfectly normal.  In current versions of Linux, the
 <code>ps</code> and <code>top</code> commands will show you a separate
-entry for each thread that is running in a given process.  Both the
-rmiregistry and the Ganymede server are heavily multithreaded, so you
-should expect to see dozens of Java threads running on a Linux
-system.</p>
+entry for each thread that is running in a given process.  The
+Ganymede server is heavily multithreaded, so you should expect to see
+a bunch of Java threads running on a Linux system.</p>
 
 <p>When you want to shut the server down, you'll just need to order it
 to shut down from the Ganymede admin console (which we'll talk about
@@ -600,20 +601,6 @@ shutting down.  The Ganymede server is designed to recover smoothly on
 restart if it is killed or if the system crashes or is rebooted at any
 point during its execution, but the server might spend a bit of time
 on clean up work on start up in such cases.</p>
-
-<p>Shutting down the server won't automatically stop the rmiregistry
-process, so you will have to do a bit of manual cleanup to get rid of
-it if it bothers you to leave it running.  Otherwise, the Ganymede
-server will re-attach to the rmiregistry when you restart the server,
-but you'll see an exception message displayed when the <a
-href="glossary.html#runServer">runServer</a> tries and fails to start
-a new rmiregistry process on the same port.</p>
-
-<p>If you know that you don't want to start the server back up again,
-it is perfectly fine to go ahead and use the Unix <code>kill</code>
-command to kill off the rmiregistry process.  Just be careful you've
-got the one on the right port, or else you might cause problems for
-any other Java services that are running on your system.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -774,9 +761,9 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
 <dt><b>What port is the RMI registry supporting Ganymede running on?</b></dt>
 <dd>
 	<p>As with installClient and installServer, this is asking you
-	for the port number for the Ganymede server's rmiregistry.
-	This number must match the one used when you installed the
-	server.</p>
+	for the port number that the Ganymede server is placing its
+	internal rmiregistry on.  This number must match the one used
+	when you installed the server.</p>
 </dd>
 <dt><b>Where should the web access files be installed?</b></dt>
 <dd>
