@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.172 $
-   Last Mod Date: $Date: 2000/05/04 04:17:42 $
+   Version: $Revision: 1.173 $
+   Last Mod Date: $Date: 2000/06/30 04:24:42 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.172 $ $Date: 2000/05/04 04:17:42 $ $Name:  $
+ * @version $Revision: 1.173 $ $Date: 2000/06/30 04:24:42 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/05/04 04:17:42 $";
+  static String release_date = "$Date: 2000/06/30 04:24:42 $";
   static String release_number = null;
 
   // ---
@@ -1067,7 +1067,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	// changePersona will block until the user does something
 	// with the persona selection dialog
 
-	changePersona();
+	changePersona(false);
 	personaDialog.updatePassField(currentPersonaString);
       }
 
@@ -1425,6 +1425,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     });
 
     statusThread.setClock(timeToLive);
+  }
+
+  /**
+   * <p>This method is triggered by the Ganymede server if the client
+   * is idle long enough.  This method will downgrade the user's
+   * login to a minimum privilege level if possible, requiring
+   * the user to enter their admin password again to regain
+   * admin privileges.</p>
+   */
+
+  public final void softTimeout()
+  {
+    // we use invokeLater so that we free up the RMI thread
+    // which messaged us, and so we play nice with the Java
+    // display thread
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	personaListener.softTimeOutHandler();
+      }
+    });
   }
 
   /**
@@ -3720,9 +3741,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * user makes a choice in the dialog box.</p>
    */
 
-  void changePersona()
+  void changePersona(boolean requirePassword)
   {
-    personaDialog = new PersonaDialog(client);
+    personaDialog = new PersonaDialog(client, requirePassword);
     personaDialog.pack();	// force it to re-center itself.
     personaDialog.setVisible(true); // block
   }
@@ -4428,7 +4449,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else if (command.equals("change persona"))
       {
-	changePersona();
+	changePersona(false);
       }
     else if (command.equals("create new object"))
       {
@@ -5155,6 +5176,8 @@ class PersonaListener implements ActionListener {
   boolean
     listen = true;
 
+  // ---
+
   PersonaListener(Session session, gclient parent)
   {
     this.session = session;
@@ -5178,20 +5201,29 @@ class PersonaListener implements ActionListener {
 
 	if (debug) { System.out.println("radiobutton says: " + newPersona); }
       }
-
     else if (event.getSource() instanceof JButton)
       {    
 	newPersona = gc.getPersonaDialog().getNewPersona();
 
-	if (newPersona.equals(gc.currentPersonaString))
+	if (!gc.getPersonaDialog().requirePassword && newPersona.equals(gc.currentPersonaString))
 	  {
 	    if (debug) {gc.showErrorMessage("You are already in that persona."); }
 	    return;
 	  }
 
-	// Deal with trying to change w/ uncommitted transactions
-	if (gc.getSomethingChanged())
+	if (gc.getPersonaDialog().debug)
 	  {
+	    System.err.println("personaListener processing jbutton");
+	  }
+
+	// Deal with trying to change w/ uncommitted transactions
+	if (gc.getSomethingChanged() && !gc.getPersonaDialog().requirePassword)
+	  {
+	    if (gc.getPersonaDialog().debug)
+	      {
+		System.err.println("personaListener attempting to verify transaction commit/cancel");
+	      }
+
 	    // need to ask: commit, cancel, abort?
 	    StringDialog d = new StringDialog(gc,
 					      "Changing personas",
@@ -5204,7 +5236,6 @@ class PersonaListener implements ActionListener {
 	    if (result == null)
 	      {
 		gc.setStatus("Persona change cancelled");
-		gc.getPersonaDialog().updatePersonaMenu();
 		return;
 	      }
 	    else
@@ -5216,69 +5247,140 @@ class PersonaListener implements ActionListener {
 	
 	// Now change the persona
 	
-	boolean personaChangeSuccessful = false;	
 	String password = null;
 	
 	// All admin level personas have a : in them.  Only admin level
-	// personas need passwords.
+	// personas need passwords, unless we are forcing a password
 	
-	if (newPersona.indexOf(":") > 0)
+	if (gc.getPersonaDialog().requirePassword || newPersona.indexOf(":") > 0)
 	  {
 	    password = gc.getPersonaDialog().getPasswordField();
 	  }
 	
-	try
-	  {	      
-	    personaChangeSuccessful = session.selectPersona(newPersona, password);
-	    
-	    if (personaChangeSuccessful)
+	if (gc.getPersonaDialog().debug)
+	  {
+	    System.err.println("personaListener attempting to set the persona");
+	  }
+
+	if (!setPersona(newPersona, password))
+	  {
+	    if (gc.getPersonaDialog().requirePassword)
 	      {
-		gc.setWaitCursor();
-		gc.setStatus("Changing persona.");
-		
-		// List of creatable object types might have changed.
-		
-		gc.createDialog = null;
-		gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
-		
-		gc.ownerGroups = null;
-		gc.clearCaches();
-		gc.loader.clear();  // This reloads the hashes
-		gc.cancelTransaction();
-		gc.buildTree();
-		gc.currentPersonaString = newPersona;
-		gc.defaultOwnerChosen = false; // force a new default owner to be chosen
-		gc.setNormalCursor();
-		
-		gc.setStatus("Successfully changed persona to " + newPersona);
-		gc.getPersonaDialog().updatePersonaMenu();	
+		if (gc.getPersonaDialog().debug)
+		  {
+		    System.err.println("personaListener requirePassword=true, failed to setPersona");
+		  }
+
+		return;
+		//		gc.showErrorMessage("Wrong password"); 
 	      }
 	    else
 	      {
 		gc.showErrorMessage("Error: could not change persona", 
 				    "Perhaps the password was wrong.", 
 				    gc.getErrorImage());
-		
-		gc.setStatus("Persona change failed");
 	      }
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
-	  }
+	    if (gc.getPersonaDialog().debug)
+	      {
+		System.err.println("personaListener succeeded setPersona");
+	      }
 
-	gc.getPersonaDialog().setHidden(true);
+	    gc.getPersonaDialog().changedOK = true;
+	    gc.getPersonaDialog().setHidden(true);
+
+	    if (gc.getPersonaDialog().debug)
+	      {
+		System.err.println("personaListener called setHidden");
+	      }
+	  }
       }
     else
       {
 	System.out.println("Persona Listener doesn't understand that action.");
-      }    
+      }
+  }
+
+  public synchronized boolean setPersona(String newPersona, String password)
+  {
+    boolean personaChangeSuccessful = false;	
+
+    if (gc.getPersonaDialog().debug)
+      {
+	System.err.println("personaListener setPersona()");
+      }
+
+    try
+      {
+	if (gc.getPersonaDialog().debug)
+	  {
+	    System.err.println("personaListener setPersona() calling server");
+	  }
+
+	personaChangeSuccessful = session.selectPersona(newPersona, password);
+
+	if (gc.getPersonaDialog().debug)
+	  {
+	    System.err.println("personaListener setPersona() called server");
+	  }
+	
+	if (personaChangeSuccessful)
+	  {
+	    if (gc.getPersonaDialog().debug)
+	      {
+		System.err.println("personaListener setPersona() succeeded");
+	      }
+
+	    gc.setWaitCursor();
+	    gc.setStatus("Changing persona.");
+		
+	    // List of creatable object types might have changed.
+		
+	    gc.createDialog = null;
+	    gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
+		
+	    gc.ownerGroups = null;
+	    gc.clearCaches();
+	    gc.loader.clear();  // This reloads the hashes
+	    gc.cancelTransaction();
+	    gc.buildTree();
+	    gc.currentPersonaString = newPersona;
+	    gc.defaultOwnerChosen = false; // force a new default owner to be chosen
+	    gc.setNormalCursor();
+		
+	    gc.setStatus("Successfully changed persona to " + newPersona);
+
+	    return true;
+	  }
+	else
+	  {
+	    if (gc.getPersonaDialog().debug)
+	      {
+		System.err.println("personaListener setPersona() failed");
+	      }
+
+	    return false;
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
+      }
+  }
+
+  public void softTimeOutHandler()
+  {
+    setPersona(gc.my_username, null);
+    gc.changePersona(true);
   }
 }
 
 /*------------------------------------------------------------------------------
                                                                            class
                                                                        CacheInfo
+
 ------------------------------------------------------------------------------*/
 
 /**

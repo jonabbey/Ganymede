@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2000/06/02 21:12:05 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2000/06/30 04:24:43 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -88,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
+ * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -825,6 +825,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    g_client.setBuildStatus(e.getMessage());
 	  }
       }
+    else if (e.getType() == e.SOFTTIMEOUT)
+      {
+	if (g_client != null)
+	  {
+	    g_client.softTimeout();
+	  }
+      }
   }
 
   /**
@@ -880,7 +887,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
+ * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -918,6 +925,7 @@ class DeathWatcherThread extends Thread {
 
     try
       {
+	glogin.g_client.getPersonaDialog().changedOK = true;
 	glogin.g_client.getPersonaDialog().setHidden(true);
       }
     catch (NullPointerException ex)
@@ -973,7 +981,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
+ * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
  * @author Jonathan Abbey
  */
 

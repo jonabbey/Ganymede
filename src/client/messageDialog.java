@@ -8,8 +8,8 @@
    
    Created: 16 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/29 05:08:53 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/06/30 04:24:43 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import arlut.csd.JDialog.JCenterDialog;
  * image on the left side, used for the about.. and motd features
  * in the Ganymede client.
  *   
- * @version $Revision: 1.7 $ %D%
+ * @version $Revision: 1.8 $ %D%
  * @author Mike Mulvaney
  *
  */
@@ -80,6 +80,9 @@ public class messageDialog extends JCenterDialog implements ActionListener{
 
   JEditorPane
     text;
+
+  JScrollPane
+    scrollpane;
 
   JButton
     ok;
@@ -121,7 +124,9 @@ public class messageDialog extends JCenterDialog implements ActionListener{
     text.setEditable(false);
     text.setForeground(java.awt.Color.black);
 
-    topPanel.add("Center", new JScrollPane(text));
+    scrollpane = new JScrollPane(text);
+
+    topPanel.add("Center", scrollpane);
     topPanel.add("West", picture);
     topPanel.add("South", new JSeparator());
 
@@ -155,6 +160,7 @@ public class messageDialog extends JCenterDialog implements ActionListener{
     text.setContentType("text/html");
     text.setText(s);
     layout(550,400);
+    scrollpane.getViewport().setViewPosition(new Point(0,0));
   }
 
   /**
@@ -170,6 +176,7 @@ public class messageDialog extends JCenterDialog implements ActionListener{
     text.setContentType("text/plain");
     text.setText(s);
     layout(550,400);
+    scrollpane.getViewport().setViewPosition(new Point(0,0));
   }
 
   public void actionPerformed(ActionEvent e)

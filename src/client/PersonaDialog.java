@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/08/04 18:39:48 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/06/30 04:24:42 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDataComponent.JMultiLineLabel;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,13 +65,13 @@ import arlut.csd.JDialog.JCenterDialog;
 /**
  * <p>Persona selection dialog</p>
  *
- * @version $Revision: 1.8 $ $Date: 1999/08/04 18:39:48 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/06/30 04:24:42 $ $Name:  $
  * @author Brian O'Mara
  */
 
 public class PersonaDialog extends JCenterDialog implements ActionListener {
 
-  private final static boolean debug = false;
+  public final static boolean debug = false;
 
   // ---
 
@@ -97,17 +98,27 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     currentPersonaString,
     newPersona;
 
+  public boolean requirePassword = false;
+  public boolean changedOK = false;
+
   /* -- */
 
-  public PersonaDialog(gclient gc)
+  public PersonaDialog(gclient gc, boolean requirePassword)
   {
     super(gc, "Choose Persona", true);
 
+    this.requirePassword = requirePassword;
     this.gc = gc;
+
     this.personae = gc.personae;
     this.personaListener = gc.personaListener;
     this.my_username = gc.my_username;
     this.currentPersonaString = gc.currentPersonaString;
+
+    if (requirePassword)
+      {
+	enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+      }
 
     // Main dialog container
 
@@ -120,14 +131,12 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     pane.add("Center", topPanel); // Personae go here.
     pane.add("South", buttonPanel); // "OK" button.
     
-
     // "OK" button
 
     login = new JButton("OK");
     buttonPanel.add(login);
     login.addActionListener(personaListener);
     login.addActionListener(this);
-
 
     // Panel to hold persona radiobuttons and pass field
 
@@ -138,9 +147,30 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 					TitledBorder.TOP));
 
     JLabel image = new JLabel(new ImageIcon(gc.personaIcon));
-    image.setBorder(new EmptyBorder(new Insets(10,15,0,0)));
-    image.setVerticalAlignment(JLabel.TOP);
-    personaPanel.add("West", image);
+    
+    if (requirePassword)
+      {
+	image.setBorder(new EmptyBorder(new Insets(10,15,0,15)));
+	image.setVerticalAlignment(JLabel.TOP);
+
+	JPanel topPersonaPanel = new JPanel(new BorderLayout());
+
+	JMultiLineLabel explanation = new JMultiLineLabel("\nThe Ganymede server timed you out due to inactivity.\n\n" +
+							  "You will have to re-authenticate with your password in " +
+							  "order to continue using Ganymede.");
+
+	explanation.setBorder(new EmptyBorder(new Insets(0,0,0,10)));
+
+	topPersonaPanel.add("West", image);
+	topPersonaPanel.add("Center", explanation);
+	personaPanel.add("North", topPersonaPanel);
+      }
+    else
+      {
+	image.setBorder(new EmptyBorder(new Insets(10,15,0,0)));
+	image.setVerticalAlignment(JLabel.TOP);
+	personaPanel.add("West", image);
+      }
 
     topPanel.add("Center", personaPanel);
     topPanel.add("South", new JSeparator());
@@ -156,7 +186,6 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     personaGroupRB = new ButtonGroup();
     
     if (debug) { System.out.println("Adding persona stuff"); }
-    
     
     // Build up persona list as radiobutton group
     
@@ -190,24 +219,66 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     pane.revalidate(); // Win95 browser fix??
     updatePassField(currentPersonaString);
   }
-  
+
   public void actionPerformed(ActionEvent e)
   {
     // Hitting enter after typing pass is like clicking OK.
 
     if (e.getSource() instanceof JPasswordField) 
       {
+	// do this so the PersonaListener gets it
+
 	login.doClick();
       }
     else 
       {
-	// Clicking OK hides the dialog
+	// Clicking OK hides the dialog, as long as
+	// we aren't forcing a password
+
+	if (requirePassword && getPasswordField().equals(""))
+	  {
+	    if (debug)
+	      {
+		System.err.println("Rejecting actionPerformed.doClick() due to password");
+	      }
+
+	    return;
+	  }
+
 	setHidden(true);
+      }
+  }
+
+  // intercept window closure, make sure we're ok
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    if (!requirePassword || changedOK)
+      {
+	super.processWindowEvent(e);
+      }
+    else if (e.getID() == WindowEvent.WINDOW_CLOSING)
+      {
+	super.processWindowEvent(e);
+
+	if (requirePassword && !changedOK)
+	  {
+	    gc.logout();
+	  }
+      }
+    else
+      {
+	super.processWindowEvent(e);
       }
   }
 
   public void setHidden(boolean bool)
   {
+    if (debug)
+      {
+	System.err.println("setHidden");
+      }
+
     bool = !bool;
     login.setEnabled(bool);
     password.setEnabled(bool);
@@ -240,8 +311,9 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 
     // If still same persona or base user (no ":" in name) then disable password field
 
-    if ((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) || 
-	(newPersona.indexOf(":") < 0)) 
+    if (!requirePassword &&
+	((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) || 
+	 (newPersona.indexOf(":") < 0)))
       {
 	password.setText("");
 	password.setEditable(false);
@@ -256,49 +328,10 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 	password.requestFocus();
       }
   }
-
-  public void updatePersonaMenu()
-  {
-    if (debug) { System.out.println("--Updating persona menu"); }
-
-    if (personaGroupRB != null)
-      {
-	Enumeration RButtons = personaGroupRB.getElements();
-	
-	while (RButtons.hasMoreElements())
-	  {
-	    // Weed out nonRadioButtons if exist
-
-	    Object next = RButtons.nextElement();
-	    if (!(next instanceof JRadioButton)) 
-	      {
-		break;
-	      }
-	    else
-	      {
-		JRadioButton rb = (JRadioButton)next;
-		// Again, compare lowercase... 
-
-		if ((rb.getActionCommand().toLowerCase()).equals(currentPersonaString.toLowerCase()))
-		  {
-		    if (debug) { System.out.println("Calling setState(true)"); }
-		  
-		    rb.removeActionListener(personaListener);
-		    rb.doClick();
-		    rb.requestFocus();
-		    rb.addActionListener(personaListener);
-		    updatePassField(currentPersonaString);
-		    break; // Selecting this one sets others to false
-		  }
-	      }
-	  }
-      }
-  }
   
   // Access to most recent RButton selection. 
   String getNewPersona(){
     return newPersona;
   }
-
 }
 

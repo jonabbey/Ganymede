@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/06/02 21:12:05 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/06/30 04:24:41 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.16 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 2000/06/30 04:24:41 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -374,7 +374,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    * @see arlut.csd.ganymede.Client
    */
 
-  public synchronized void forceDisconnect(String reason)
+  public void forceDisconnect(String reason)
   {
     connected = false;
     session = null;
@@ -383,9 +383,11 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
     ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
 
-    for (int i = 0; i < listeners.size(); i++)
+    Vector myVect = (Vector) listeners.clone();
+
+    for (int i = 0; i < myVect.size(); i++)
       {
-	((ClientListener)listeners.elementAt(i)).disconnected(e);
+	((ClientListener)myVect.elementAt(i)).disconnected(e);
       }
   }
 
@@ -397,13 +399,15 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    * @see arlut.csd.ganymede.Client
    */
 
-  public synchronized void sendMessage(int messageType, String status)
+  public void sendMessage(int messageType, String status)
   {
     ClientEvent e = new ClientEvent(messageType, status);
 
-    for (int i = 0; i < listeners.size(); i++)
+    Vector myVect = (Vector) listeners.clone();
+
+    for (int i = 0; i < myVect.size(); i++)
       {
-	((ClientListener)listeners.elementAt(i)).messageReceived(e);
+	((ClientListener)myVect.elementAt(i)).messageReceived(e);
       }
   }
 
@@ -418,7 +422,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    * from the server after construction..</p>
    */
 
-  private synchronized void sendErrorMessage(String message)
+  private void sendErrorMessage(String message)
   {
     ClientEvent e = new ClientEvent(message);
 
