@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2001/03/19 20:06:20 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/03/21 04:27:17 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -558,10 +558,16 @@ public class smbencrypt {
 	  }
       }
   }
+
+  /**
+   * <p>This method actually performs the standard LANMAN DES hashing, using
+   * the 14 byte password array p14 as the hashing key and the magic
+   * string 'KGS!@#$%' as the data to be hashed.</p>
+   */
   
   static void E_P16(byte[] p14, byte[] p16)
   {
-    byte sp8[] = {0x4b, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25};
+    byte sp8[] = {0x4b, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25}; // KGS!@#$%
     
     /* -- */
     
