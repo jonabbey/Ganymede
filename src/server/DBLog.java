@@ -5,22 +5,20 @@
    This class manages recording events in the system log and
    generating reports from the system log based on specific criteria.
 
-   Most of the methods in this class must be synchronized, both to
-   keep the logfile itself orderly, and to allow the various
-   log-processing methods iin DBLogEvent to re-use the 'multibuffer'
-   StringBuffer.
+   Most of the methods in this class must be synchronized to keep the
+   logfile itself orderly.
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2003/02/22 03:58:23 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2003/02/27 00:01:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -161,14 +159,6 @@ public class DBLog {
    */
 
   Qsmtp mailer;
-
-  /**
-   *
-   * Reusable StringBuffer for transaction processing.
-   * 
-   */
-
-  SharedStringBuffer multibuffer = new SharedStringBuffer();
 
   /**
    *
@@ -510,8 +500,6 @@ public class DBLog {
 
     /* -- */
     
-    multibuffer.setLength(0);
-
     if (closed)
       {
 	throw new RuntimeException("log already closed.");
@@ -562,8 +550,7 @@ public class DBLog {
 				      admin,
 				      adminName,
 				      objects,
-				      null,
-				      multibuffer);
+				      null);
     start.setTransactionID(transactionID);
     start.setLogTime(currentTime);
     logController.writeEvent(start);
@@ -638,7 +625,7 @@ public class DBLog {
 	    // now we record in the event who we actually sent the
 	    // mail to, so it is logged properly
 
-	    event.notifyVect = sentTo;
+	    event.setMailTargets(sentTo);
 
 	    // and write it to our log
 
@@ -695,8 +682,7 @@ public class DBLog {
 				       admin,
 				       adminName,
 				       null,
-				       null,
-				       multibuffer);
+				       null);
     finish.setTransactionID(transactionID);
     finish.setLogTime(currentTime);
     logController.writeEvent(finish);
@@ -1317,20 +1303,6 @@ public class DBLog {
       }
   }
 
-  private void calculateMailTargets(DBLogEvent event, DBSession session, 
-				    systemEventType eventType)
-  {
-    if (eventType == null)
-      {
-	this.calculateMailTargets(event, session, eventType, true, true);
-      }
-    else
-      {
-	this.calculateMailTargets(event, session, eventType, eventType.ccToOwners,
-				  eventType.ccToOwners);
-      }
-  }
-
   /**
    * <P>This method generates a list of additional email addresses that
    * notification for this event should be sent to, based on the
@@ -1343,7 +1315,8 @@ public class DBLog {
    */
 
   private void calculateMailTargets(DBLogEvent event, DBSession session, 
-				    systemEventType eventType, boolean mailToObjects,
+				    systemEventType eventType, 
+				    boolean mailToObjects,
 				    boolean mailToOwners)
   {
     Vector 
@@ -1368,11 +1341,16 @@ public class DBLog {
 
     if (eventType == null)
       {
-	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects, mailToObjects, mailToOwners));
+	notifyVect = VectorUtils.union(event.notifyVect, 
+				       calculateOwnerAddresses(event.objects,
+							       mailToObjects,
+							       mailToOwners));
       }
     else if (eventType.ccToOwners)
       {
-	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects, true, true));
+	notifyVect = VectorUtils.union(event.notifyVect, 
+				       calculateOwnerAddresses(event.objects, 
+							       true, true));
       }
     else
       {
@@ -1391,8 +1369,6 @@ public class DBLog {
 									      session));
 	  }
       }
-
-    // now update notifyList
 
     event.setMailTargets(notifyVect);
 
@@ -1433,7 +1409,15 @@ public class DBLog {
 
     /* -- */
 
-    calculateMailTargets(event, session, transactionType);
+    if (transactionType == null)
+      {
+	calculateMailTargets(event, session, transactionType, true, true);
+      }
+    else
+      {
+	calculateMailTargets(event, session, transactionType, transactionType.ccToOwners,
+			     transactionType.ccToOwners);
+      }
     
     enum = event.notifyVect.elements();
 

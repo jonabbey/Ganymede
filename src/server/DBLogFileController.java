@@ -8,8 +8,8 @@
    
    Created: 18 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/02/22 03:58:23 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/02/27 00:01:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,38 +70,34 @@ import arlut.csd.Util.*;
  * arlut.csd.ganymede.DBLog DBLog} class, using an on-disk text file for
  * the storage format.</p>
  *
- * <p>The file format used by this controller is the classic Ganymede log style,
- * in which each event is stored on a line, with parameters separated by
- * pipe characters.  This file format is documented in the server doc
- * directory at doc/logDesign.html, or on the web at
+ * <p>The file format used by this controller is the classic Ganymede log
+ * style, in which each event is stored on a line, with parameters
+ * separated by pipe characters.  This file format is documented in the
+ * server doc directory at doc/logDesign.html, or on the web at
  * http://www.arlut.utexas.edu/gash2/design/logDesign.html</p>
  *
- * @version $Revision: 1.1 $ $Date: 2003/02/22 03:58:23 $
+ * @version $Revision: 1.2 $ $Date: 2003/02/27 00:01:49 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class DBLogFileController implements DBLogController {
 
   String logFileName = null;
-  FileOutputStream logStream = null;
   PrintWriter logWriter = null;
-
-  /**
-   *
-   * We use this buffer everywhere in this class to avoid creating
-   * StringBuffers as much as we can.  Note that everything in this
-   * class that uses the multibuffer must be sure not to call other
-   * methods that themselves use the multibuffer in a way that would
-   * conflict.  We're buying efficiency with some fragility here.
-   *
-   */
-
-  SharedStringBuffer multibuffer;
 
   /* -- */
 
+  /**
+   * <p>This constructor should be used for normal purposes in order to have
+   * full log file functionality.</p>
+   */
+
   public DBLogFileController(String filename) throws IOException
   {
+    FileOutputStream logStream = null;
+
+    /* -- */
+
     logFileName = filename;
     logStream = new FileOutputStream(logFileName, true); // append
     logWriter = new PrintWriter(logStream, true); // auto-flush on newline
@@ -110,13 +106,30 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <p>This method writes the given event to the persistent storage managed by
-   * this controller.</p>
+   * <p>This constructor is used to connect a DBLogFileController to an already
+   * existing PrintWriter.  Unlike with the filename constructor, this version
+   * does not emit a newline to terminate any incomplete entry in the PrintWriter's
+   * stream.  This constructor is thus suitable for use with StringWriters.</p>
+   *
+   * <p>Note that if this constructor is used, the retrieveHistory() method will
+   * throw an IllegalArgumentException, as there will be no file available to read
+   * from.</p>
+   */
+
+  public DBLogFileController(PrintWriter logWriter)
+  {
+    this.logFileName = null;
+    this.logWriter = logWriter;
+  }
+
+  /**
+   * <p>This method writes the given event to the persistent storage
+   * managed by this controller.</p>
    *
    * @param event The DBLogEvent to be recorded
    */
 
-  public void writeEvent(DBLogEvent event)
+  public synchronized void writeEvent(DBLogEvent event)
   {
     logWriter.print(event.time.getTime());
     writeSep(logWriter);
@@ -172,28 +185,39 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <P>This method is used to scan the persistent log storage for log events that match
-   * invid and that have occurred since sinceTime.</P>
+   * <P>This method is used to scan the persistent log storage for log
+   * events that match invid and that have occurred since
+   * sinceTime.</P>
    *
-   * @param invid If not null, retrieveHistory() will only return events involving
-   * this object invid.
+   * @param invid If not null, retrieveHistory() will only return
+   * events involving this object invid.
    *
-   * @param sinceTime if not null, retrieveHistory() will only return events
-   * occuring on or after the time specified in this Date object.
+   * @param sinceTime if not null, retrieveHistory() will only return
+   * events occuring on or after the time specified in this Date
+   * object.
    *
-   * @param keyOnAdmin if true, rather than returning a string containing events
-   * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
-   * performed on behalf of the administrator with invid &lt;invid&gt;.
+   * @param keyOnAdmin if true, rather than returning a string
+   * containing events that involved &lt;invid&gt;, retrieveHistory()
+   * will return a string containing events performed on behalf of the
+   * administrator with invid &lt;invid&gt;.
    *
-   * @param fullTransactions if true, the buffer returned will include all events in any
-   * transactions that involve the given invid.  if false, only those events in a transaction
-   * directly affecting the given invid will be returned.
+   * @param fullTransactions if true, the buffer returned will include
+   * all events in any transactions that involve the given invid.  if
+   * false, only those events in a transaction directly affecting the
+   * given invid will be returned.
    *
-   * @return A human-readable multiline string containing a list of history events
+   * @return A human-readable multiline string containing a list of
+   * history events
    */
 
-  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin, boolean fullTransactions)
+  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, 
+						   boolean keyOnAdmin, boolean fullTransactions)
   {
+    if (logFileName == null)
+      {
+	throw new IllegalArgumentException("DBLogFileController: no filename specified");
+      }
+
     StringBuffer buffer = new StringBuffer();
     DBLogEvent event = null;
     String line;
@@ -201,11 +225,17 @@ public class DBLogFileController implements DBLogController {
 
     boolean afterSinceTime = false;
     String dateString;
+    long sinceLong = 0;
     long timeCode;
     Date time;
 
     BufferedReader in = null;
     FileReader reader = null;
+
+    if (sinceTime != null)
+      {
+	sinceLong = sinceTime.getTime();
+      }
 
     // if we don't have a log helper or we aren't looking for a
     // specific invid, just read from the file directly
@@ -220,18 +250,21 @@ public class DBLogFileController implements DBLogController {
 
 	    if (keyOnAdmin)
 	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty + " -a " + invid.toString());
+		helperProcess = runtime.exec(Ganymede.logHelperProperty +
+					     " -a " + invid.toString());
 	      }
 	    else
 	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty + " " + invid.toString());
+		helperProcess = runtime.exec(Ganymede.logHelperProperty + 
+					     " " + invid.toString());
 	      }
 
 	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + Ganymede.logHelperProperty);
+	    System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + 
+			       Ganymede.logHelperProperty);
 	    in = null;
 	  }
       }
@@ -282,27 +315,17 @@ public class DBLogFileController implements DBLogController {
 		  {
 		    throw new IOException("couldn't parse time code");
 		  }
-		
-		time = new Date(timeCode);
-		
-		if (time.before(sinceTime))
+
+		if (timeCode < sinceLong)
 		  {
 		    continue;	// don't even bother parsing the rest of the line
 		  }
-		else
-		  {
-		    afterSinceTime = true;
-		  }
+		
+		time = new Date(timeCode);
+		afterSinceTime = true;
 	      }
 
-	    if (event == null)
-	      {
-		event = new DBLogEvent(line);
-	      }
-	    else
-	      {
-		event.loadLine(line);
-	      }
+	    event = parseEvent(line);
 
 	    boolean found = false;
 
@@ -341,14 +364,20 @@ public class DBLogFileController implements DBLogController {
 		  {
 		    transactionID = event.transactionID;
 
-		    String tmp2 = "---------- Transaction " + event.time.toString() + ": " + event.adminName + 
+		    String tmp2 = "---------- Transaction " + 
+		      event.time.toString() +
+		      ": " + 
+		      event.adminName + 
 		      " ----------\n";
 		    
 		    buffer.append(tmp2);
 		  }
 		else if (event.eventClassToken.equals("finishtransaction"))
 		  {
-		    String tmp2 = "---------- End Transaction " + event.time.toString() + ": " + event.adminName + 
+		    String tmp2 = "---------- End Transaction " + 
+		      event.time.toString() +
+		      ": " + 
+		      event.adminName + 
 		      " ----------\n\n";
 		    
 		    buffer.append(tmp2);
@@ -363,7 +392,11 @@ public class DBLogFileController implements DBLogController {
 		  }
 		else
 		  {
-		    String tmp = event.time.toString() + ": " + event.adminName + "  " + event.eventClassToken +
+		    String tmp = event.time.toString() +
+		      ": " + 
+		      event.adminName +
+		      "  " + 
+		      event.eventClassToken +
 		      WordWrap.wrap(event.description, 78, "\t") + "\n";
 
 		    buffer.append(tmp);
@@ -403,6 +436,130 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
+   * <p>This method sets the fields for this DBLogEvent from a logfile
+   * line.</p>
+   */
+
+  public DBLogEvent parseEvent(String line) throws IOException
+  {
+    int i, j;
+    String dateString;
+    char[] cary;
+    long timeCode;
+    String tmp;
+
+    DBLogEvent event = new DBLogEvent();
+
+    /* -- */
+
+    if (line == null || (line.trim().equals("")))
+      {
+	throw new IOException("empty log line");
+      }
+
+    StringBuffer buf = new StringBuffer();
+
+    //    System.out.println("Trying to create DBLogEvent: " + line);
+
+    cary = line.toCharArray();
+
+    i = line.indexOf('|');
+
+    if (i == -1)
+      {
+	throw new IOException("malformed log line: " + line);
+      }
+
+    dateString = line.substring(0, i);
+    
+    try
+      {
+	timeCode = new Long(dateString).longValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new IOException("couldn't parse time code");
+      }
+    
+    event.time = new Date(timeCode);
+    
+    j = i+1;
+    i = scanSep(cary, j);	// find next |, skip human readable date
+    
+    j = i+1;
+    i = scanSep(cary, j);
+    
+    event.eventClassToken = readNextField(cary, j);
+    
+    j = i+1;
+    i = scanSep(cary, j);
+    
+    tmp = readNextField(cary, j);
+    
+    if (!tmp.equals(""))
+      {
+	event.admin = Invid.createInvid(tmp);	// get admin invid
+      }
+    else
+      {
+	// we have to be sure to do this.
+
+	event.admin = null;
+      }
+
+    j = i+1;
+    i = scanSep(cary, j);
+
+    event.adminName = readNextField(cary, j); // get admin name
+    
+    j = i+1;
+    i = scanSep(cary, j);
+
+    event.transactionID = readNextField(cary, j); // get transaction id
+
+    j = i+1;
+    i = scanSep(cary, j);
+
+    // read the object invid list.. re-use event.objects if it already
+    // exists
+
+    event.objects = readObjectVect(cary, j);
+
+    j = i+1;
+    i = scanSep(cary, j);
+
+    event.description = readNextField(cary, j); // get text description
+
+    j = i+1;
+    i = scanSep(cary, j);
+
+    // read the email address list..
+
+    event.notifyVect = readNotifyVect(cary, j);
+
+    if (event.notifyVect != null)
+      {
+	StringBuffer buf2 = new StringBuffer();
+
+	for (int k = 0; k < event.notifyVect.size(); k++)
+	  {
+	    if (k > 0)
+	      {
+		buf2.append(", ");
+	      }
+	    
+	    buf2.append((String) event.notifyVect.elementAt(k));
+	  }
+
+	event.notifyList = buf2.toString();
+      }
+
+    event.augmented = true;
+
+    return event;
+  }
+
+  /**
    *
    * Write a field separator to the log file
    *
@@ -421,9 +578,7 @@ public class DBLogFileController implements DBLogController {
 
   private final void writeStr(PrintWriter logWriter, String in)
   {
-    escapeStr(in);
-
-    logWriter.write(multibuffer.getValue(), 0, multibuffer.length());
+    logWriter.write(escapeStr(in));
   }
 
   /**
@@ -433,13 +588,13 @@ public class DBLogFileController implements DBLogController {
    *
    */
 
-  private final SharedStringBuffer escapeStr(String in)
+  private final String escapeStr(String in)
   {
     char[] ary = in.toCharArray();
 
     /* -- */
 
-    multibuffer.setLength(0);
+    StringBuffer buf = new StringBuffer(ary.length);
 
     // do it
 
@@ -447,19 +602,19 @@ public class DBLogFileController implements DBLogController {
       {
 	if (ary[i] == '\n')
 	  {
-	    multibuffer.append("\\n");
+	    buf.append("\\n");
 	  }
 	else if (ary[i] == '\\')
 	  {
-	    multibuffer.append("\\\\");
+	    buf.append("\\\\");
 	  }
 	else
 	  {
-	    multibuffer.append(ary[i]);
+	    buf.append(ary[i]);
 	  }
       }
 
-    return multibuffer;
+    return buf.toString();
   }
 
   /**
@@ -495,34 +650,25 @@ public class DBLogFileController implements DBLogController {
 
   private String readNextField(char[] line, int startIndex)
   {
-    boolean doit = true;
-
-    /* -- */
-
-    multibuffer.setLength(0);
+    StringBuffer buf = new StringBuffer(line.length);
 
     for (int i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
-	doit = true;
-
 	if (line[i] == '\\')	// skip backslashing
 	  {
 	    i++;
 
 	    if (line[i] == 'n')
 	      {
-		multibuffer.append('\n');
-		doit = false;
+		buf.append('\n');
+		continue;
 	      }
 	  }
 
-	if (doit)
-	  {
-	    multibuffer.append(line[i]);
-	  }
+	buf.append(line[i]);
       }
 
-    return multibuffer.toString();
+    return buf.toString();
   }
 
   /**
@@ -536,22 +682,15 @@ public class DBLogFileController implements DBLogController {
    *
    */
 
-  private Vector readObjectVect(char[] line, int startIndex, Vector result)
+  private Vector readObjectVect(char[] line, int startIndex)
   {
     int i;
 
+    Vector result = new Vector();
+
     /* -- */
 
-    if (result == null)
-      {
-	result = new Vector();
-      }
-    else
-      {
-	result.removeAllElements();
-      }
-
-    multibuffer.setLength(0);
+    StringBuffer buf = new StringBuffer();
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -562,15 +701,15 @@ public class DBLogFileController implements DBLogController {
 
 	if (line[i] == ',')
 	  {
-	    if (multibuffer.length() != 0)
+	    if (buf.length() != 0)
 	      {
-		result.addElement(Invid.createInvid(multibuffer.toString()));
-		multibuffer.setLength(0); // clear for next
+		result.addElement(Invid.createInvid(buf.toString()));
+		buf = new StringBuffer();
 	      }
 	  }
 	else
 	  {
-	    multibuffer.append(line[i]);
+	    buf.append(line[i]);
 	  }
       }
 
@@ -578,9 +717,9 @@ public class DBLogFileController implements DBLogController {
       {
 	if (line[i] == '|')
 	  {
-	    if (multibuffer.length() != 0)
+	    if (buf.length() != 0)
 	      {
-		result.addElement(Invid.createInvid(multibuffer.toString()));
+		result.addElement(Invid.createInvid(buf.toString()));
 	      }
 	  }
       }
@@ -603,22 +742,15 @@ public class DBLogFileController implements DBLogController {
    *
    */
 
-  private Vector readNotifyVect(char[] line, int startIndex, Vector result)
+  private Vector readNotifyVect(char[] line, int startIndex)
   {
     int i;
 
+    Vector result = new Vector();
+
     /* -- */
 
-    if (result == null)
-      {
-	result = new Vector();
-      }
-    else
-      {
-	result.removeAllElements();
-      }
-
-    multibuffer.setLength(0);
+    StringBuffer buf = new StringBuffer();
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -629,15 +761,15 @@ public class DBLogFileController implements DBLogController {
 
 	if (line[i] == ',' || line[i] == '|')
 	  {
-	    if (multibuffer.length() != 0)
+	    if (buf.length() != 0)
 	      {
-		result.addElement(multibuffer.toString().trim());
-		multibuffer.setLength(0); // clear for next
+		result.addElement(buf.toString());
+		buf = new StringBuffer();
 	      }
 	  }
 	else
 	  {
-	    multibuffer.append(line[i]);
+	    buf.append(line[i]);
 	  }
       }
 
@@ -649,8 +781,14 @@ public class DBLogFileController implements DBLogController {
    * controller.</p>
    */
   
-  public void close()
+  public synchronized void close()
   {
-    logWriter.close();
+    if (logWriter != null)
+      {
+	logWriter.close();
+      }
+
+    logWriter = null;
+    logFileName = null;
   }
 }
