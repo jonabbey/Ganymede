@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,8 +35,8 @@ import java.util.*;
  * headers of the table, to the body of the table as a whole, to the individual
  * columns of the table, and to the individual cells themselves.</p>
  *
- * <p>The baseTable supports intelligent scrollbars, dynamic column sizing, and
- * user adjustable columns.</p>
+ * <p>The baseTable supports intelligent scrollbars, dynamic column sizing,
+ * user adjustable columns, and popup menus.</p>
  *
  * <p>baseTable is not yet a full featured table/grid component.
  * baseTable currently doesn't support the selection of individual
@@ -52,16 +52,16 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.8 $ %D%
+ * @version $Revision: 1.9 $ %D%
  */
 
-public class baseTable extends Panel implements AdjustmentListener {
+public class baseTable extends Panel implements AdjustmentListener, ActionListener {
   
   static final boolean debug = false;
 
   /* - */
   
-  private tableCanvas 
+  tableCanvas 
     canvas;
 
   // the following variables are non-private. tableCanvas accesses them.
@@ -184,6 +184,17 @@ public class baseTable extends Panel implements AdjustmentListener {
     this.vertFill = vertFill;
     this.hVertFill = hVertFill;
     this.menu = menu;
+
+    if (menu!= null)
+      {
+	MenuItem temp;
+
+	for (int i = 0; i < menu.getItemCount(); i++)
+	  {
+	    temp = menu.getItem(i);
+	    temp.addActionListener(this);
+	  }
+      }
 
     if (this.horizLines)
       {
@@ -611,10 +622,6 @@ public class baseTable extends Panel implements AdjustmentListener {
 
   public final void setColJust(int x, int just, boolean repaint)
   {
-    tableCell cell;
-
-    /* -- */
-
     if (cols[x].attr == null)
       {
 	cols[x].attr = new tableAttr(this);
@@ -754,10 +761,6 @@ public class baseTable extends Panel implements AdjustmentListener {
 
   public final void setTableJust(int just, boolean repaint)
   {
-    tableCell cell;
-
-    /* -- */
-
     if (just < tableAttr.JUST_LEFT || just >= tableAttr.JUST_INHERIT)
       {
 	throw new IllegalArgumentException();
@@ -1159,6 +1162,7 @@ public class baseTable extends Panel implements AdjustmentListener {
 	    cell = getCell(i,j);
 	    cell.text = null;
 	    cell.attr = null;
+	    cell.menu = null;
 	  }
       }
 
@@ -1166,6 +1170,17 @@ public class baseTable extends Panel implements AdjustmentListener {
 
     reShape();
     refreshTable();
+  }
+
+  /**
+   *
+   * Override this method to implement the popup menu hook.
+   *
+   */
+
+  public void actionPerformed(ActionEvent e)
+  {
+    return;
   }
 
   /**
@@ -2493,6 +2508,14 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	x = x + h_offset;
       }
 
+    // for Win32
+
+    if (e.isPopupTrigger())
+      {
+	popupHandler(e);
+	return;
+      }
+
     if (colDrag != 0)
       {
 	if (debug)
@@ -2826,29 +2849,46 @@ class tableCell {
   tableAttr attr;
   boolean selected;
   PopupMenu menu;
+  baseTable rt;
 
-  public tableCell(String text, tableAttr attr)
+  public tableCell(baseTable rt, String text, tableAttr attr, PopupMenu menu)
   {
+    this.rt = rt;
     this.text = text;
     this.attr = attr;
     this.selected = false;
-    this.menu = null;
+
+    if (rt == null && menu != null)
+      {
+	throw new IllegalArgumentException("must define baseTable in cell to attach popup menu.");
+      }
+    else
+      {
+	this.menu = menu;
+
+	if (menu!= null)
+	  {
+	    MenuItem temp;
+
+	    for (int i = 0; i < menu.getItemCount(); i++)
+	      {
+		temp = menu.getItem(i);
+		temp.addActionListener(rt);
+	      }
+
+	    rt.canvas.add(menu);
+	  }
+      }
   }
 
   public tableCell(String text)
   {
-    this.text = text;
-    this.attr = null;
-    this.selected = false;
-    this.menu = null;
+    this(null, text, null, null);
   }
 
   public tableCell()
   {
-    this.text = null;
-    this.attr = null;
-    this.selected = false;
-    this.menu = null;
+    this(null, null, null, null);
   }
 }
 
@@ -2894,13 +2934,35 @@ class tableCol {
 
   /* -- */
 
-  tableCol(baseTable rt, String header, float origWidth, tableAttr attr)
+  tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
+	   PopupMenu menu)
   {
+    if (rt == null && menu != null)
+      {
+	throw new IllegalArgumentException("must define baseTable in col to attach popup menu.");
+      }
+
     this.rt = rt;
     this.header = header;
     this.origWidth = origWidth;
     this.attr = attr;
-    this.menu = null;
+    this.menu = menu;
+
+    // the code below is necessary for when we enable column
+    // menus.
+
+    if (menu!= null)
+      {
+	MenuItem temp;
+
+	for (int i = 0; i < menu.getItemCount(); i++)
+	  {
+	    temp = menu.getItem(i);
+	    temp.addActionListener(rt);
+	  }
+
+	rt.canvas.add(menu);
+      }
 
     if (this.attr != null)
       {
@@ -2908,5 +2970,10 @@ class tableCol {
       }
 
     this.width = (int) origWidth;
+  }
+
+  tableCol(baseTable rt, String header, float origWidth, tableAttr attr)
+  {
+    this(rt, header, origWidth, attr, null);
   }
 }

@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.9 $ %D% 
+ * @version $Revision: 1.10 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -87,17 +87,6 @@ public class rowTable extends baseTable implements ActionListener {
 	  menu);
 
     this.callback = callback;
-
-    if (menu!= null)
-      {
-	MenuItem temp;
-
-	for (int i = 0; i < menu.getItemCount(); i++)
-	  {
-	    temp = menu.getItem(i);
-	    temp.addActionListener(this);
-	  }
-      }
 
     index = new Hashtable();
     crossref = new Vector();
