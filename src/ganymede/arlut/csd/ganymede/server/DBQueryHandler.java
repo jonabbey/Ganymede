@@ -88,8 +88,8 @@ import arlut.csd.Util.TranslationService;
  * logic (including namespace-indexed query optimization).  This class is just
  * responsible for applying a recursive QueryNode tree to a particular object.</P>
  *
- * @see {@link arlut.csd.ganymede.common.QueryNode QueryNode}
- * @see {@link arlut.csd.ganymede.common.Query Query}
+ * @see arlut.csd.ganymede.common.QueryNode
+ * @see arlut.csd.ganymede.common.Query
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu

@@ -96,8 +96,8 @@ import java.util.HashMap;
  * generates an old, Ganymede-style arlut.csd.ganymede.common.Query, with attendant
  * arlut.csd.ganymede.common.QueryNode tree.</p>
  *
- * @see {@link arlut.csd.ganymede.common.QueryNode QueryNode}
- * @see {@link arlut.csd.ganymede.common.Query Query}
+ * @see arlut.csd.ganymede.common.QueryNode
+ * @see arlut.csd.ganymede.common.Query
  *
  * @version $Id$
  * @author Deepak Giridharagopal, deepak@arlut.utexas.edu
