@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -663,6 +663,46 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
+   * Return a serializable, read-only copy of the maximum permissions
+   * that can be set for this field's permission matrix.  This matrix
+   * is drawn from the union of delegatable roles that the client's
+   * adminPersona is a member of.<br><br>
+   * 
+   * This method will return null if this perm_field is not associated
+   * with an object that is being edited, or if the client is logged
+   * into the server as supergash.
+   * 
+   * @see arlut.csd.ganymede.perm_field
+   *
+   */
+
+  public PermMatrix getTemplateMatrix()
+  {
+    if (!(owner instanceof DBEditObject))
+      {
+	return null;
+      }
+
+    if (owner.gSession.isSuperGash())
+      {
+	return null;
+      }
+
+    if (getID() == SchemaConstants.RoleMatrix)
+      {
+	return owner.gSession.delegatablePersonaPerms;
+      }
+
+    if (getID() == SchemaConstants.RoleDefaultMatrix)
+      {
+	return owner.gSession.delegatableDefaultPerms;
+      }
+
+    return null;
+  }
+
+  /**
+   *
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;
    *
@@ -1267,7 +1307,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("entry is null");
       }
     
-    if (getName().equals("Owned Object Bits"))
+    if (getID() == SchemaConstants.RoleMatrix)
       {
 	if (owner.gSession.personaPerms == null)
 	  {
@@ -1289,7 +1329,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	return entry.equals(entry.intersection(adminPriv));
       }
-    else if (getName().equals("Default Bits"))
+    else if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
 	if (owner.gSession.defaultPerms == null)
 	  {

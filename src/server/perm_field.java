@@ -5,7 +5,7 @@
    Client-side interface to the PermissionMatrixDBField class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,21 @@ public interface perm_field extends db_field {
    */
 
   public PermMatrix getMatrix() throws RemoteException;
+
+  /**
+   *
+   * Return a serializable, read-only copy of the maximum permissions
+   * that can be set for this field's permission matrix.  This matrix
+   * is drawn from the union of delegatable roles that the client's
+   * adminPersona is a member of.<br><br>
+   * 
+   * This method will return null if this perm_field is not associated
+   * with an object that is being edited, or if the client is logged
+   * into the server as supergash.
+   * 
+   */
+
+  public PermMatrix getTemplateMatrix() throws RemoteException;
 
   /**
    *
