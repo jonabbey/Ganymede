@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/02/16 18:57:05 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/02/16 18:57:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -101,7 +101,6 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   {
     super(original, editset);
   }
-
 
   /**
    *
