@@ -37,7 +37,6 @@
 		  <SELECT NAME="client" onChange="UpdateText()">
 		    <OPTION value="Standard Client" SELECTED>Standard Client
 		    <OPTION value="Admin Console">Admin Console
-		    <OPTION value="Password Client">Password Client
 		  </SELECT>
 	      </center>
 	    </font>
@@ -173,11 +172,6 @@
           if (clientSel == "Admin Console") { 
             URLhead = "console";
           } 
-          else {
-            if (clientSel == "Password Client") { 
-              URLhead = "password";
-            }
-          }
         }
 
         // Get checked JVM
