@@ -6,8 +6,19 @@ README.first
 Welcome.  This thing that you just downloaded is version 1.0 of the
 Ganymede network directory management system.
 
-You should read the following documents to get oriented with Ganymede,
-in roughly this order:
+This archive contains the Ganymede server, clients, and documentation.
+
+This archive does not contain customization code to make Ganymede
+useful in any specific context.  You will want to download (or create)
+a schema kit that provides a database schema, custom plug-in Java
+classes to intelligently manage objects in your database, and both
+Java code and external scripts to take data from the Ganymede database
+and to propagate it into your network environment.  We have published
+a 'userKit' package which customizes Ganymede for user and group
+account management on UNIX, Windows NT, and Samba.
+
+You should read the following documents to get oriented with the
+Ganymede system, in roughly this order:
 
 1. README
 2. FAQ
