@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/05/07 05:57:52 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/10/26 21:30:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -718,12 +718,7 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    handle = (scheduleHandle) currentlyRunning.get(name);
-
-    if (handle == null)
-      {
-	handle = (scheduleHandle) currentlyScheduled.get(name);
-      }
+    handle = findHandle(name);
 
     if (handle == null)
       {
@@ -755,12 +750,7 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    handle = (scheduleHandle) currentlyRunning.get(name);
-
-    if (handle == null)
-      {
-	handle = (scheduleHandle) currentlyScheduled.get(name);
-      }
+    handle = findHandle(name);
 
     if (handle == null)
       {
@@ -773,6 +763,33 @@ public class GanymedeScheduler extends Thread {
 	updateTaskInfo(true);
 	return true;
       }
+  }
+
+  /**
+   * <p>Private helper to find a given handle by name amongst the
+   * various internal structures.  Unsynchronized, so call from
+   * a synchronized method if you care.</p>
+   */
+
+  private final scheduleHandle findHandle(String name)
+  {
+    scheduleHandle handle = null;
+
+    /* -- */
+
+    handle = (scheduleHandle) currentlyRunning.get(name);
+
+    if (handle == null)
+      {
+	handle = (scheduleHandle) currentlyScheduled.get(name);
+      }
+
+    if (handle == null)
+      {
+	handle = (scheduleHandle) onDemand.get(name);
+      }
+
+    return handle;
   }
 
   /**
