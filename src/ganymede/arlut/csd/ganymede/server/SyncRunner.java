@@ -770,6 +770,7 @@ public class SyncRunner implements Runnable {
     try
       {
 	shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
+	GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
 	if (shutdownState != null)
 	  {
@@ -830,6 +831,7 @@ public class SyncRunner implements Runnable {
     finally
       {
 	GanymedeServer.shutdownSemaphore.decrement();
+	GanymedeBuilderTask.decPhase2(true); // so that the client no longer sees the phase 2 icon rolling
       }
 
     // "SyncRunner {0} finished"
