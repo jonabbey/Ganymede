@@ -6,7 +6,7 @@
    reports from the system log based on specific criteria.
    
    Created: 31 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,11 +27,24 @@ import arlut.csd.Util.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * This class manages recording events in the system log and generating
+ * reports from the system log based on specific criteria.
+ *
+ */
+
 public class DBLog {
 
   static final boolean debug = false;
 
   // -- 
+
+  /**
+   *
+   * The signature to be appended to any outgoing mail
+   *
+   */
 
   String signature = null;
   String logFileName = null;
@@ -40,9 +53,30 @@ public class DBLog {
   PrintWriter logWriter = null;
   Date currentTime = new Date();
   boolean closed = false;
+
+  /**
+   *
+   * We keep a table of the system event codes to speed the logging process.
+   *
+   */
+
   Hashtable eventCodes = new Hashtable(); // maps event codes strings to DBObjects
 
+  /**
+   *
+   * Our mail relay.
+   *
+   */
+
   Qsmtp mailer;
+
+  /**
+   *
+   * Reusable StringBuffer for transaction processing.
+   * 
+   */
+
+  StringBuffer multibuffer = new StringBuffer();
 
   /* -- */
 
@@ -139,6 +173,10 @@ public class DBLog {
       {
 	System.err.println("Writing log event " + event.eventClassToken);
       }
+
+    // we calculate the list of email addresses that we want to send this
+    // event's notifcation to.. we do it before the writeEntry() call so
+    // that the log will record who the mail was sent to.
 
     if (mailToOwners)
       {
@@ -254,6 +292,10 @@ public class DBLog {
       }
 
     currentTime.setTime(System.currentTimeMillis());
+
+    // We haven't augmented event with the mail targets here.. the log
+    // won't record who gets notified for system events.  This is OK.
+
     event.writeEntry(logWriter, currentTime, null);
     
     type = (eventType) eventCodes.get(event.eventClassToken);
@@ -336,7 +378,6 @@ public class DBLog {
   public synchronized void logTransaction(Vector logEvents, String adminName, 
 					  Invid admin)
   {
-    StringBuffer buffer = new StringBuffer();
     String transactionID;
     boolean found;
     DBLogEvent event;
@@ -344,6 +385,8 @@ public class DBLog {
     Hashtable mailOuts = new Hashtable();
 
     /* -- */
+    
+    multibuffer.setLength(0);
 
     if (closed)
       {
@@ -372,12 +415,17 @@ public class DBLog {
 	  }
       }
 
+    // write out a start-of-transaction line to the log
+
     new DBLogEvent("starttransaction",
 		   "Start Transaction",
 		   admin,
 		   adminName,
 		   objects,
-		   null).writeEntry(logWriter, currentTime, transactionID);
+		   null,
+		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
+
+    // write out all the log events in this transaction
 
     for (int i = 0; i < logEvents.size(); i++)
       {
@@ -388,16 +436,27 @@ public class DBLog {
 	    System.err.println("Writing: " + event.description);
 	  }
 
+	// we are keeping a bunch of buffers, one for each combination
+	// of email addresses that we've encountered.. different
+	// addresses or groups of addresses may get a different subset
+	// of the mail for this transaction, the mailOut logic handles
+	// that.
+
 	appendMailOut(event, mailOuts);
 	event.writeEntry(logWriter, currentTime, transactionID);
       }
+
+    // write out an end-of-transaction line to the log
 
     new DBLogEvent("finishtransaction",
 		   "Finish Transaction",
 		   admin,
 		   adminName,
 		   null,
-		   null).writeEntry(logWriter, currentTime, transactionID);
+		   null,
+		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
+
+    // now, for each distinct set of recipients, mail them their summary
 
     enum = mailOuts.elements();
 
