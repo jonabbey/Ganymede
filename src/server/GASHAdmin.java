@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2004/02/05 22:01:18 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2004/02/05 23:09:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -186,7 +186,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     appletContentPane = loginFrame.getContentPane();
 
     appletContentPane.setLayout(new BorderLayout());
-    appletContentPane.add("Center", applet);
+    appletContentPane.add(applet, "Center");
 
     loginFrame.pack();
     loginFrame.setSize(265,380);
@@ -310,7 +310,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbl.setConstraints(ul, gbc);
     panel.add(ul);
     
-    username = new JTextField(15);
+    username = new JTextField(20);
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -328,7 +328,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbl.setConstraints(pl, gbc);
     panel.add(pl);
 
-    password = new JPasswordField(15);
+    password = new JPasswordField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
