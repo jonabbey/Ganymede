@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/14 05:11:30 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/22 06:27:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -223,7 +223,9 @@ public class XMLElement extends XMLItem {
 	return false;
       }
 
-    return val.equals("1");
+    return (val.equals("1") || 
+	    val.equalsIgnoreCase("true") || 
+	    val.equalsIgnoreCase("t"));
   }
 
   /**
