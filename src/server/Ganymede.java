@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,7 @@ public class Ganymede {
   public static String dbFilename;
   public static final boolean debug = true;
   public static Date startTime = new Date();
+  public static String debugFilename = null;
 
   /* -- */
 
@@ -36,15 +37,20 @@ public class Ganymede {
 
     /* -- */
 
-    if (argv.length != 1)
+    if (argv.length < 1)
       {
 	System.out.println("Error: invalid command line parameters");
-	System.out.println("Usage: java Ganymede <dbfile>");
+	System.out.println("Usage: java Ganymede <dbfile> [<rmi debug file>]");
 	return;
       }
     else
       {
 	dbFilename = argv[0];
+
+	if (argv.length >= 2)
+	  {
+	    debugFilename = argv[1];
+	  }
       }
 
     boolean stop = true;
@@ -113,6 +119,18 @@ public class Ganymede {
     debug("Initializing Security Manager");
 
     System.setSecurityManager(new RMISecurityManager());
+
+    if (debugFilename != null)
+      {
+	try
+	  {
+	    RemoteServer.setLog(new FileOutputStream(debugFilename));
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("couldn't open RMI debug log: " + ex);
+	  }
+      }
 
     // Create a Server object
 
