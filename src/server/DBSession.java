@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,7 @@ public class DBSession {
     debug = val;
   }
 
-  DBObject adminObject = null;  // the admin object for the current user.
+  GanymedeSession GSession;
   DBStore store;
   DBLock lock;
   DBEditSet editSet;
@@ -68,11 +68,11 @@ public class DBSession {
    *
    */
    
-  DBSession(DBStore store, DBObject adminObject, Object key)
+  DBSession(DBStore store, GanymedeSession GSession, Object key)
   {
     this.store = store;
     this.key = key;
-    this.adminObject = adminObject;
+    this.GSession = GSession;
 
     editSet = null;
     lastError = null;
@@ -668,16 +668,30 @@ public class DBSession {
 
   public String getID()
   {
+    String result = "";
+    DBObject obj;
+
+    /* -- */
+
     if (id != null)
       {
 	return id;
       }
 
-    if (adminObject != null)
+    obj = GSession.getUser();
+
+    if (obj != null)
       {
-	return adminObject.getLabel();
+	result = obj.getLabel();
       }
 
-    return null;
+    obj = GSession.getPersona();
+
+    if (obj != null)
+      {
+	result += ":" + obj.getLabel();
+      }
+
+    return result;
   }
 }
