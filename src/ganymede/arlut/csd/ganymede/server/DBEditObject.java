@@ -532,6 +532,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final DBSession getSession()
   {
+    // to handle use of this method in DBEditObject objectHook
+    // subclass usage without throwing a NullPointerException
+
+    if (editset == null)
+      {
+	return null;
+      }
+
     return editset.getSession();
   }
 
