@@ -120,6 +120,21 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public static boolean debug = false;
 
+  /**
+   * <p>If this boolean is set to true, when the Ganymede client is
+   * run as an application, the login box will hide itself away when
+   * the client's main frame is up.</p>
+   *
+   * <p>Unfortunately, I don't think that it's generally possible to
+   * duplicate this sort of behavior when running Ganymede as an
+   * applet, so it may be more confusing to enable this behavior than
+   * not.</p>
+   *
+   * <p>I'm leaving it off for now. - JDA 14 February 2005 </p>
+   */
+
+  public static boolean hideLoginWhenApplication = false;
+
   public static String 
     properties_file = null,
     serverhost = null,
@@ -727,6 +742,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	  }
 
+	showLoginBox();
 	enableButtons(true);
       }
   }
@@ -901,6 +917,32 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // including perhaps blocking on the persona dialog.
     
     g_client.start();
+
+    // and let's play hide the salami
+
+    hideLoginBox();
+  }
+
+  public void hideLoginBox()
+  {
+    if (hideLoginWhenApplication)
+      {
+	if (!isApplet() && my_frame != null)
+	  {
+	    my_frame.setVisible(false);
+	  }
+      }
+  }
+
+  public void showLoginBox()
+  {
+    if (hideLoginWhenApplication)
+      {
+	if (!isApplet() && my_frame != null)
+	  {
+	    my_frame.setVisible(true);
+	  }
+      }
   }
 
   // These are for the ClientListener
