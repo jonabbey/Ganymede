@@ -142,6 +142,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   static final boolean debug = false;
   static final boolean permsdebug = false;
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeSession");
 
   // ---
 
