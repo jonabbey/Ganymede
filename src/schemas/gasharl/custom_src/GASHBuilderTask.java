@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1348,7 +1348,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("DNSBuilder.writeSystem(): Warning!  hosts_info line " + 
+	System.err.println("GASHBuilder.writeSystem(): Warning!  hosts_info line " + 
 			   sysname + " overflows the GASH line length!");
       }
 
@@ -1416,14 +1416,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (ipField == null)
       {
-	System.err.println("DNSBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
+	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
 			   " has no IP address!  Skipping!");
 	return;
       }
 
     if (!ipField.isIPV4())
       {
-	System.err.println("DNSBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
+	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
 			   " has an IPV6 record!  This isn't compatible with the GASH makefiles!  Skipping!");
 	return;
       }
@@ -1466,7 +1466,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("DNSBuilder.writeInterface(): Warning!  hosts_info type 2 line " + 
+	System.err.println("GASHBuilder.writeInterface(): Warning!  hosts_info type 2 line " + 
 			   ((hostname == null) ? sysname : hostname) +
 			   " overflows the GASH line length!");
       }
