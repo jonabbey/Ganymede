@@ -13,7 +13,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 
 
-public class createObjectDialog extends JDialog implements ActionListener {
+public class createObjectDialog extends JCenterDialog implements ActionListener {
 
   private boolean debug = false;
 
