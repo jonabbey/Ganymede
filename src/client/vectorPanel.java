@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.39 $ %D%
+  Version: $Revision: 1.40 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -43,9 +43,21 @@ import com.sun.java.swing.border.*;
  * This module provides for a generic vector of objects, and can be
  * used to implement a collection edit in place (composite) objects,
  * each with its own containerPanel.
- * 
- * @see elementWrapper
  *
+ * Usually this is used to hold a vector of elementWrappers.  Each elementWrapper
+ * contains a containerPanel, so any kind of object can be displayed.  The vectorPanel
+ * handles the creation and deletion of objects in the vector, as well as displays
+ * the elementWrappers.
+ *
+ * Note: addNewElement is very different from the various addElement
+ * methods.  addNewElement does all the work involved in creating a
+ * new element, like calling create_db_object and instantiating a new
+ * elementWrapper.  addElement takes a created element, and adds it
+ * into the vectorPanel, incrementing the size and actually adding it
+ * to the panel.
+ *
+ * @see elementWrapper
+ * 
  */
 
 public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, Runnable {
@@ -144,6 +156,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     setLayout(new BorderLayout());
 
     // Set up the titled border
+    //
+    // The titled border should say "field.name(): Vector".  For example,
+    // "Systems: Vector"  The titledBorder surrounds the entire vectorPanel,
+    // separating it from the rest of the components.
+
     EmptyBorder eb = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
     TitledBorder tb;
 
@@ -170,6 +187,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     addB = new JButton("Add " + name);
 
     // Set up pop up menu
+    //
+    // The popup menu appears when the right mouse button is clicked inside the
+    // TitledBorder but outside of the elementWrappers.  It basically presents a
+    // menu with either "expand" or "close" options.
     popupMenu = new JPopupMenu();
     expandLevelMI = new JMenuItem("Expand this level");
     expandLevelMI.addActionListener(this);
@@ -200,10 +221,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     popupMenu.show(this, x, y);
   }
 
+  // This method creates the vector panel.  It creates an IPField of
+  // elementWrapper for each element of the vector.  This method is
+  // only called when the vectorPanel is created.
+
   private void createVectorComponents()
   {
-    // Took out some more redundant checking
-
     if (my_field instanceof ip_field)
       {
 	if (debug)
@@ -246,6 +269,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	    if (!isEditInPlace)
 	      {
+		// The vectorPanel only handles edit-in-place fields.
+		// If it is not edit-in-place, then the field should
+		// just get a StringSelector.
 		throw new RuntimeException("Don't give me(the vectorPanel!)  non edit-in-place invid_fields.");		
 	      }
 
@@ -263,6 +289,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    System.out.println("Adding Invid to edit in place vector panel");
 		  }
 
+		// Sometimes the window is closed or the client logs
+		// out.  when this happens,
+		// contianerPanel.keepLoading() will return false, and
+		// we should stop loading now.  We don't need to clean
+		// up or anything, because when keepLoading() is
+		// false, the window is gone anyway.
+
 		if (! container.keepLoading())
 		  {
 		    if (debug)
@@ -274,6 +307,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		Invid inv = (Invid)(invidfield.getElement(i));
 		   
+		// We need to get an object to give to the
+		// containerPanel.  If we are editing, this should be
+		// a view_db_object.  Otherwise, it is an
+		// edit_db_object.
+		
 		db_object object = null;
 		if (editable)
 		  {
@@ -287,7 +325,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 
 		containerPanel cp = new containerPanel(object,
-						       editable, // && isFieldEditable()?  should non-editable fields have editable edit in places?  I guess not, because it will be a view_db_object if editable is false anyway.
+						       editable,
 						       wp.gc,
 						       wp, container.frame,
 						       null, false);
@@ -338,7 +376,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * This method constructs the elementWrapper and the component of
    * the appropriate type.  This is called when the add button is
    * clicked, but there is no reason why it couldn't be called from
-   * other places.
+   * other places if you wanted to add a new element.
    * 
    */
 
