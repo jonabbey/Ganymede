@@ -1254,7 +1254,7 @@ object on the server would be represented in the XML file as:</p>
         &lt;invid type="Group" id="omssys"/&gt;
         &lt;invid type="Group" id="omsnet"/&gt;
     &lt;/Groups&gt;
-    &lt;Home_Group&gt;&lt;invid type="Group" id="omssys"&gt;&lt;/Home_Group&gt;
+    &lt;Home_Group&gt;&lt;invid type="Group" id="omssys"/&gt;&lt;/Home_Group&gt;
     &lt;Email_Aliases&gt;
         &lt;string val="abbey"/&gt;
         &lt;string val="jonabbey"/&gt;
@@ -1668,11 +1668,13 @@ The <b>val</b> attribute takes data strings of the form "<b>Sun, 03
 Dec 1995 00:00:00</b>", in which case the date is interpreted in the
 local timezone of the machine running the xmlclient or "<b>Sun, 03 Dec
 1995 00:00:00 CDT</b>", in which the date will be interpreted by the
-specified timezone.  The precise form of date val string that may be
-parsed by the xmlclient, in particular the characters of the date and
-month, may differ according to the default Java locale of the JVM
-running the xmlclient.  To avoid any possibility for imprecision, it
-may be necessary to instead use the <b>timecode</b> attribute.</dd>
+specified timezone.  The standard UNIX date format "<b>Tue Jul 11
+01:18:21 CDT 2000</b>" is also supported. The precise form of date val
+string that may be parsed by the xmlclient, in particular the
+characters of the date and month, may differ according to the default
+Java locale of the JVM running the xmlclient.  To avoid any
+possibility for imprecision, it may be necessary to instead use the
+<b>timecode</b> attribute.</dd>
 
 <dt><b>timecode</b></dt>
 <dd>The contents of the <b>timecode</b> attribute contains a 64 bit
@@ -1688,7 +1690,7 @@ multiply a 32 bit timecode by 1,000.</dd>
 <td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2">&lt;date val="Wed, 28 Jun 2000 13:13:02" timecode="962215982000"/&gt;</td></tr>
+<tr><td COLSPAN="2">&lt;date val="Wed 28 Jun 2000 13:13:02" timecode="962215982000"/&gt;</td></tr>
 
 </tr>
 </table></center>
@@ -1916,7 +1918,7 @@ object on the server, regardless of whatever other activity the
     <HR noshade WIDTH="100%">
     
     <FONT FACE="Arial,Helvetica">
-      <i>Last modified: Wed Apr 19 16:17:15 CDT 2000, <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></i>
+      <i>Last modified: Thu Jun 15 01:27:25 CDT 2000, <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></i>
     </FONT>
     
   </BODY>
