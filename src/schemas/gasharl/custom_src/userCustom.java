@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,7 +86,11 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   {
     if (!field.getName().equals("Shell"))
       {
-	System.err.println("userCustom: obtainChoice returning null for non-shell field.");
+	if (debug)
+	  {
+	    System.err.println("userCustom: obtainChoice returning null for non-shell field.");
+	  }
+
 	return null;
       }
 
@@ -119,7 +123,11 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    System.err.println("userCustom: obtainChoice returning " + shellChoices + " for shell field.");
+    if (debug)
+      {
+	System.err.println("userCustom: obtainChoice returning " + shellChoices + " for shell field.");
+      }
+
     return shellChoices;
   }
 
