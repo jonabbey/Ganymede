@@ -264,7 +264,10 @@ while (<INPUT>) {
   } elsif (defined $propconvert{$1}) {
     print OUTPUT "$1=$propconvert{$1}\n";
   } else {
-    print "No customized value for template entry $1 - copying value from template\n";
+    if ($debug) {
+      print "No customized value for template entry $1 - copying value from template\n";
+    }
+
     print OUTPUT $_;
   }
 }
