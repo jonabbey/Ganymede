@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/08/09 02:22:19 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/08/25 21:23:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,11 +77,36 @@ public final class GanymedeXMLSession implements XMLSession {
 
   GanymedeSession session;
 
+  /**
+   * <p>The XML parser object handling XML data from the client</p>
+   */
+
+  XMLReader reader;
+
+  /**
+   * <p>The data stream used to write data from the client to the
+   * XML parser.</p>
+   */
+
+  PipedOutputStream pipe;
+
   /* -- */
 
   public GanymedeXMLSession(GanymedeSession session)
   {
     this.session = session;
+
+    try
+      {
+	pipe = new PipedOutputStream();
+	reader = new XMLReader(pipe);
+      }
+    catch (IOException ex)
+      {
+	System.err.println("IO Exception in initializing GanymedeXMLSession.");
+	ex.printStackTrace();
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
@@ -98,7 +123,41 @@ public final class GanymedeXMLSession implements XMLSession {
 
   public ReturnVal xmlSubmit(byte[] bytes)
   {
-    return null;
+    try
+      {
+	pipe.write(bytes);
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog("xmlSubmit i/o error",
+					  ex.getMessage());
+      }
+
+    String progress = reader.getFailureMessage(true);
+
+    if (!reader.isDone())
+      {
+	if (progress.length() > 0)
+	  {
+	    ReturnVal retVal = new ReturnVal(true);
+	    retVal.setDialog(new JDialogBuff("XML client messages",
+					     progress,
+					     "OK",
+					     null,
+					     "ok.gif"));
+	    
+	    return retVal;
+	  }
+	else
+	  {
+	    return null;	// success, nothing to report
+	  }
+      }
+    else
+      {
+	return Ganymede.createErrorDialog("XML submit errors",
+					  progress);
+      }
   }
 
   /**

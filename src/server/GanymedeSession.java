@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.194 $
-   Last Mod Date: $Date: 2000/08/22 06:43:44 $
+   Version: $Revision: 1.195 $
+   Last Mod Date: $Date: 2000/08/25 21:23:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.194 $ $Date: 2000/08/22 06:43:44 $
+ * @version $Revision: 1.195 $ $Date: 2000/08/25 21:23:53 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1468,9 +1468,29 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    Ganymede.debug("User " + username + " switching to nonprivileged without timedout verification");
 	  }
 
+	// the GUI client will close transactions first, but since we
+	// might not be working on behalf of the GUI client, let's
+	// make sure
+
+	if (session.editSet != null)
+	  {
+	    String description = session.editSet.description;
+	    boolean interactive = session.editSet.isInteractive();
+
+	    // close the existing transaction
+
+	    abortTransaction();
+
+	    // open a new one with the same description and
+	    // interactivity
+
+	    openTransaction(description, interactive);
+	  }
+
 	personaObject = null;
 	personaInvid = null;
 	personaName = null;
+	remoteObjectCache.clear();
 	updatePerms(true);
 	ownerList = null;
 	userInfo = null;	// null our admin console cache
@@ -1517,6 +1537,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (timedout)
 	  {
 	    timedout = false;
+	  }
+
+	// the GUI client will close transactions first, but since we
+	// might not be working on behalf of the GUI client, let's
+	// make sure
+
+	if (session.editSet != null)
+	  {
+	    String description = session.editSet.description;
+	    boolean interactive = session.editSet.isInteractive();
+
+	    // close the existing transaction
+
+	    abortTransaction();
+
+	    // open a new one with the same description and
+	    // interactivity
+
+	    openTransaction(description, interactive);
 	  }
 
 	personaInvid = personaObject.getInvid();
@@ -2030,7 +2069,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     /* - */
 
     remoteObjectCache.clear();
-
 
     session.openTransaction(username + " on " + describe + ", time = " + new Date(),
 			    interactive); // *sync* DBSession
@@ -4011,6 +4049,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (genProxy)
 	  {
 	    result.setObject(((DBObject) objref).getProxy());
+	    return result;
 	  }
 	else if (this.remotelyAccessible)
 	  {
@@ -4167,6 +4206,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (genProxy)
 	      {
 		result.setObject(((DBObject) objref).getProxy());
+		return result;
 	      }
 	    else if (this.remotelyAccessible)
 	      {
@@ -4180,10 +4220,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  }
 
 		((DBObject) objref).exportFields();
-
-		result.setObject(objref);
 	      }
 
+	    result.setObject(objref);
 	    return result;
 	  }
 	else
@@ -4333,14 +4372,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (genProxy)
 	      {
 		result.setObject(newObj.getProxy());
+		return result;
 	      }
 	    else if (this.remotelyAccessible)
 	      {
-		// the exportObject call will fail if the object has
-		// already been exported.  Unfortunately, there doesn't
-		// seem to be much way to tell this beforehand, so
-		// we won't bother to try.
-
 		try
 		  {
 		    UnicastRemoteObject.exportObject(newObj);
@@ -4351,9 +4386,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  }
 
 		((DBObject) newObj).exportFields();
-
-		result.setObject(newObj);
 	      }
+
+	    result.setObject(newObj);
 
 	    return result;
 	  }
@@ -4467,6 +4502,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (genProxy)
       {
 	result.setObject(newObj.getProxy());
+	return result;
       }
     else if (this.remotelyAccessible)
       {
@@ -4481,8 +4517,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	((DBObject) newObj).exportFields();
 
-	result.setObject(newObj);
       }
+
+    result.setObject(newObj);
 
     return result;
   }
@@ -4577,7 +4614,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     retVal2.setLocalObject(retVal.getLocalObject());
     retVal2.setObject(retVal.getObject());
     
-    return retVal;
+    return retVal2;
   }
 
   /**
