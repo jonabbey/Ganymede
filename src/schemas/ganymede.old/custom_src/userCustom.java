@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -466,7 +466,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 						 "OK",
 						 "Cancel",
 						 "question.gif");
-	    dialog.addPassword("New Password");
+	    dialog.addPassword("New Password", true);
 
 	    updateShellChoiceList();
 	    dialog.addChoice("Shell", userCustom.shellChoices.getLabels());
