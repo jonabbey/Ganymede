@@ -1,0 +1,615 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede File Glossary 0.99.1 - 27 May 1999</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.1 - 27 May 1999</FONT></h1>
+<hr>
+    <p>This page contains descriptions of various significant files that are part
+    of the Ganymede package.</p>
+
+    <ul>
+      <li><a href="#installation">Installation Scripts</a>
+      <ul>
+      <li><a href="#configure">configure</a></li>
+      <li><a href="#installServer">installServer</a></li>
+      <li><a href="#installClient">installClient</a></li>
+      <li><a href="#installClient2">installClient2</a></li>
+      <li><a href="#distribclean">distribclean</a></li>
+      <li><a href="#runDirectLoader">runDirectLoader</a></li>
+      <li><a href="#config.sh">config.sh</a></li>
+      </ul></li>
+
+      <li><a href="#serverfiles">Server Files</a>
+      <ul>
+      <li><a href="#ganymede.properties">ganymede.properties</a></li>
+      <li><a href="#ganymede.db">ganymede.db</a></li>
+      <li><a href="#ganymede.schema">ganymede.schema</a></li>
+      <li><a href="#journal">journal</a></li>
+      <li><a href="#log">log</a></li>
+      <li><a href="#ganymedeServer.jar">ganymedeServer.jar</a></li>
+      <li><a href="#custom.jar">custom.jar</a></li>
+      </ul></li>
+
+      <li><a href="#serverscripts">Server Scripts</a>
+      <ul>
+      <li><a href="#runServer">runServer</a></li>
+      <li><a href="#stopServer">stopServer</a></li>
+      <li><a href="#decodeDB">decodeDB</a></li>
+      </ul></li>
+
+      <li><a href="#clientfiles">Client Files</a>
+      <ul>
+      <li><a href="#client.properties">client.properties</a></li>
+      <li><a href="#ganymede.jar">ganymede.jar</a></li>
+      <li><a href="#ganymedeAdmin.jar">ganymedeAdmin.jar</a></li>
+      </ul></li>
+
+      <li><a href="#clientscripts">Client Scripts</a>
+      <ul>
+      <li><a href="#ganymede">ganymede</a></li>
+      <li><a href="#ganymedeAdmin">ganymedeAdmin</a></li>
+      <li><a href="#rpcpass">rpcpass</a></li>
+      </ul></li>
+
+    </ul>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b><a name="installation">Installation Scripts</b></h2></td>
+      </tr>
+    </table> 
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="configure"><b>configure</b></h3></td></tr></table> 
+    
+    <p><font color="#ff0000"><code><b>configure</b></code></font> is
+    the first script that must be run after unpacking the UNIX
+    Ganymede distribution.  configure asks a few questions to
+    determine the location of Perl 5.003 or later, as well as the
+    jdk binaries and the Swing GUI library.  <font
+      color="#ff0000"><code><b>configure</b></code></font> then
+    creates the <a href="#installServer">installServer</a>, <a
+      href="#installClient">installClient</a>, and <a
+      href="#installClient2">installClient2</a> scripts used to
+    actually install the server and client software, and generates
+    the makefiles and configure.sh files used to customize the src
+    tree for building on your system.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installServer"><b>installServer</b></h3></td></tr></table> 
+    
+    <p><font
+      color="#ff0000"><code><b>installServer</b></code></font> is a Bourne shell script generated
+    by the <a href="#configure">configure</a> script when the Ganymede distribution is
+    first unpacked and configured.  <font color="#ff0000"><code><b>installServer</b></code></font>
+    configures and installs the Ganymede server in its own directory, along with
+    all documentation and necessary files.</p>
+    
+    <p><font color="#ff0000"><code><b>installServer</b></code></font> will ask a
+    number of questions about your environment, including the
+    identity of the machine on which the Ganymede server will be
+    run, the location where you want the Ganymede server
+    installed, and the port number that the server's rmi registry should
+    be run on.  Once all questions have been answered, 
+    <font color="#ff0000"><code><b>installServer</b></code></font> will create an installation
+    directory for the server to be run out of.  During this process,
+    <font color="#ff0000"><code><b>installServer</b></code></font>
+    creates <code>bin</code>, <code>db</code>, <code>doc</code>, <code>jars</code>,
+    <code>html</code>, and optional <code>schema</code> directories under
+    the installation location, and installs various files into them
+    to support the server's execution.</p>
+    
+    <p>Many files installed by <font
+      color="#ff0000"><code><b>installServer</b></code></font> are
+    customized as they are copied to their destination.  This
+    customization is sufficient to be able to run the server
+    immediately from the installation directory.  When <font
+      color="#ff0000"><code><b>installServer</b></code></font>
+    finishes installing everything, it will write to stdout a customized
+    recommendation on how to proceed with loading and running the
+    server.  Be sure and read the instructions, as they'll help you get
+    started with the server.</p>
+    
+    <p>Once <font
+      color="#ff0000"><code><b>installServer</b></code></font> creates
+    the installed server tree, you should probably set the file
+    permissions on the tree to restrict who has access to the server
+    installation, as there will be sensitive data held under the
+    server's installation directory.</p>
+    
+    <p><font color="#ff0000"><code><b>installServer</b></code></font> only
+    needs to be run once.  Once you have generated the server and client
+    installation directories, you can dispose of the original Ganymede
+    distribution directory unless you will want to edit and rebuild the
+    Ganymede sources at some later time.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installClient"><b>installClient</b></h3></td></tr></table> 
+    
+    <p><font
+      color="#ff0000"><code><b>installClient</b></code></font> is a
+    Bourne shell script generated by the <a
+      href="#configure">configure</a> script when the Ganymede
+    distribution is first unpacked and configured.  <font
+      color="#ff0000"><code><b>installClient</b></code></font>
+    configures and installs the Ganymede client and admin console in
+    their own directory, along with all documentation and necessary
+    files.</p>
+
+    <p>The directory created by installClient includes a
+    <code>bin</code> directory containing <a
+    href="#ganymede">ganymede</a>, <a
+    href="#ganymedeAdmin">ganymedeAdmin</a>, and <a
+    href="#rpcpass">rpcpass</a>.  An <code>html</code> directory
+    is also created, containing customized .html files that your users
+    can access to run the Ganymede client and admin console in their web
+    browsers.  Two <code>html</code> sub-directories are created,
+    <code>activator</code>, which contains .html files suitable for use
+    with the Java Plug-in, and <code>hotjava</code>, which is suitable
+    for any web browser that provides support for RMI and Swing with
+    its built-in JVM.  Right now, only Sun's hotjava qualifies, but hopefully
+    Mozilla will support Sun's JVM using their OJI API.</p>
+    
+    <p><font color="#ff0000"><code><b>installClient</b></code></font> only
+    needs to be run once.  Once you have generated the server and client
+    installation directories, you can dispose of the original Ganymede
+    distribution directory unless you will want to edit and rebuild the
+    Ganymede sources at some later time.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installClient2"><b>installClient2</b></h3></td></tr></table> 
+    
+    <p><font color="#ff0000"><code><b>installClient2</b></code></font>
+    is the same as <a href="#installClient">installClient</A>, except designed to create a
+    client installation configured for use with Java 1.2 rather than Java 1.1.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="distribclean"><b>distribclean</b></h3></td></tr></table> 
+    
+    <p><font color="#ff0000"><code><b>distribclean</b></code></font>
+    is a Bourne shell script, used to remove all of the scaffolding
+    and unnecessary files created when building the Ganymede
+    distribution.  <font
+      color="#ff0000"><code><b>distribclean</b></code></font> is run
+    immediately before creating a Ganymede distribution archive, and
+    probably has no practical use if you are not packaging Ganymede
+    for download.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="runDirectLoader"><b>runDirectLoader</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>runDirectLoader</b></code></font> is a Bourne
+    shell script located in a schema kit's <code>loader</code> sub-directory.  It is used
+    in conjunction with a <a href="#ganymede.schema">ganymede.schema</a> file to load data
+    from pre-existing data files (passwd, group, NIS, or Gash files, depending on the
+    schema kit) into a <a href="#ganymede.db">ganymede.db</a> file for use with the
+    Ganymede server.</p>
+
+    <p><font
+    color="#ff0000"><code><b>runDirectLoader</b></code></font> is
+    configured with a <a href="#config.sh">config.sh</a> file by the
+    <a href="#installServer">installServer</a> script when the server
+    is installed, and should be run after the server is installed, from the
+    server's <code>schema/loader</code> directory.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="config.sh"><b>config.sh</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>config.sh</b></code></font>
+    files are generated by the <a href="#configure">configure</a> and
+    <a href="#installServer">installServer</a> scripts, to customize
+    various build and loader scripts in the source and server
+    trees.  Both Bourne shell and Perl scripts consult these files to
+    get file paths and other customized information.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><a name="serverfiles"><b>Server Files</b></h2></td>
+      </tr>
+    </table> 
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="server.properties"><b>ganymede.properties</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>ganymede.properties</b></code></font> is the server's
+    configuration file, located in the top-level directory of the server installation tree.
+    <font color="#ff0000"><code><b>ganymede.properties</b></code></font> sets a bunch of
+    file paths used by the server, as well as RMI and password information needed by both
+    the <a href="#runServer">runServer</a> and the <a href="#stopServer">stopServer</a>
+    commands.</p>
+
+    <p><font color="#ff0000"><code><b>ganymede.properties</b></code></font> may
+    contain schema-specific configuration as well as the basic configuration properties
+    needed by the server.</p>
+
+    <p>The <font color="#ff0000"><code><b>ganymede.properties</b></code></font> file
+    is commented, and most properties in it should be self-explanatory.  The one property
+    that you should be particularly aware of is the <code>ganymede.defaultrootpass</code> property,
+    which holds the server's supergash (root) password.  This property is used to
+    set the server's password every time that <a href="#runServer">runServer</a> is
+    run, unless <a href="#runServer">runServer</a> has been edited to remove the "-resetadmin"
+    command line flag.  You can remove the <code>ganymede.defaultrootpass</code> property entry
+    if you want to keep the plaintext password out of your file system, but if you do
+    remove <code>ganymede.defaultrootpass</code>, the 
+    <a href="#stopServer">stopServer</a> command will no longer be able to log into the
+    server to shut it down.</p>
+    
+    <p>The Ganymede client installation has its own <a href="#client.properties">client.properties</a>
+    file.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede.db"><b>ganymede.db</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>ganymede.db</b></code></font> is the server's binary database
+    file, located in the <code>db</code> subdirectory of the Ganymede server directory.
+    <font color="#ff0000"><code><b>ganymede.db</b></code></font> contains both the
+    database contents and the database schema definition used by the server.  Everything
+    the server knows about its configuration and stored data is held in the
+    <font color="#ff0000"><code><b>ganymede.db</b></code></font> file.  If you ever
+    upgrade to a new version of Ganymede, you can generally just copy your old
+    <font color="#ff0000"><code><b>ganymede.db</b></code></font> file to the new server's
+    <code>db</code> directory to bring your data and configuration forward.</p>
+
+    <p>The <font color="#ff0000"><code><b>ganymede.db</b></code></font>
+    file is read by the server on start-up.  Once loaded, the server never consults the
+    <font color="#ff0000"><code><b>ganymede.db</b></code></font> file on disk.  Changes
+    made to the database during operation are written to the <a href="#journal">journal</a>
+    file.  Periodically, and on shut-down, the server will consolidate the database by writing out a new copy
+    of <font color="#ff0000"><code><b>ganymede.db</b></code></font>, and resetting the
+    <a href="#journal">journal</a> file.  The consolidation logic is written so that if the
+    server is killed at any time during the consolidation, the server will be able to
+    properly recover when restarted.</p>
+
+    <p>Manually deleting the <font color="#ff0000"><code><b>ganymede.db</b></code></font> file
+    would be a really bad idea, however.</p>
+
+    <p>You can view the object type definition information encoded in a 
+    <font color="#ff0000"><code><b>ganymede.db</b></code></font> file by using the
+    <a href="#decodeDB">decodeDB</a> command.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede.schema"><b>ganymede.schema</b></h3></td></tr></table> 
+
+    <p>A <font color="#ff0000"><code><b>ganymede.schema</b></code></font> file is essentially
+    a <a href="#ganymede.db">ganymede.db</a> file stripped of any user data.
+    It is generated by the server in response to a 'dump schema' command from the admin console,
+    which is done in order to distribute pre-configured and empty 
+    <font color="#ff0000"><code><b>ganymede.schema</b></code></font> files with schema kits.</p>
+    
+    <p>You can view the object type definition information encoded in a 
+    <font color="#ff0000"><code><b>ganymede.schema</b></code></font> file by using the
+    <a href="#decodeDB">decodeDB</a> command.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="journal"><b>journal</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>journal</b></code></font> file is located in the
+    <code>db</code> subdirectory of the Ganymede server directory.  
+    <font color="#ff0000"><code><b>journal</b></code></font> is a binary file which contains
+    a transcript of transactions committed since the server last consolidated the 
+    <a href="#ganymede.db">ganymede.db</a> file.  If the server is killed and the journal
+    file is deleted, all transactions not consolidated into the <a href="#ganymede.db">ganymede.db</a> file
+    will be forgotten, although the <a href="#log">log</a> file will still record the lost
+    changes.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="log"><b>log</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>log</b></code></font> file is located in the
+    <code>db</code> subdirectory of the Ganymede server directory, and contains a text
+    record of all changes made to the server's database, as well as user and admin login and
+    logout events. The log file is designed to be easily processed, and is actually consulted
+    by the Ganymede server to report history information for database objects.</p>
+
+    <p>See the <a href="logDesign.html">log file format</a> file for details on the log file's
+    structure.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeServer.jar"><b>ganymedeServer.jar</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>ganymedeServer.jar</b></code></font> contains all of
+    the compiled Java code needed by the <a href="#runServer">runServer</a>
+    and <a href="#stopServer">stopServer</a> commands.  It is located in the <code>jars</code>
+    sub-directory of the Ganymede server installation directory.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="custom.jar"><b>custom.jar</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>custom.jar</b></code></font>
+    contains any custom classes included with the installed schema kit
+    needed by the <a href="#runServer">Ganymede server</a>.  It is
+    located in the <code>schema</code> sub-directory of the Ganymede
+    server installation directory, with a symlink in the
+    <code>jars</code> sub-directory.</p>
+
+    <p>See the <a href="customization/index.html">Customization Guide</a> for details on the contents
+    and construction of <font color="#ff0000"><code><b>custom.jar</b></code></font>.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><a name="serverscripts"><b>Server Scripts</b></h2></td>
+      </tr>
+    </table> 
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="runServer"><b>runServer</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>runServer</b></code></font> is a
+    Bourne shell script, located in the <code>bin</code> directory under the
+    location where you installed the server using the <a
+    href="#installServer">installServer</a> script. <font color="#ff0000"><code><b>runServer</b></code></font> runs the
+    Ganymede server and the RMI registry that the server depends
+    on.</p>
+
+    <p>If you look at the <font
+    color="#ff0000"><code><b>runServer</b></code></font> script, you
+    will see that it includes a few shell variables that were
+    customized by the <a href="#installServer">installServer</a>
+    script.  These include the location of the java executable, the
+    location of the rmiregistry command, CLASSPATH information, and
+    the location of the <A
+    href="#server.properties">ganymede.properties</a> file, which
+    contains the configuration information consulted by the server
+    during its operation.</p>
+
+    <p>The <font color="#ff0000"><code><b>runServer</b></code></font> script is commented, and may be edited to enable
+    a high level of RMI debug logging and to disable automatic
+    resetting of the supergash password.  
+    Consult the <font color="#ff0000"><code><b>runServer</b></code></font> script
+    for details.</p>
+
+    <p>The Ganymede server will typically emit debugging and status
+    information to stderr and stdout.. it is generally helpful to
+    capture the output of the server, as in</p>
+    
+    <pre>runServer >& server.log &</pre>
+
+    if you are using the csh or tcsh shells, or
+
+    <pre>runServer > server.log 2>&1 &</pre>
+
+    if you are using sh, bash, or ksh.
+
+    <p>Notice that it is necessary to manually background the 
+    <font color="#ff0000"><code><b>runServer</b></code></font>
+    script.  Unlike a C language daemon, the Ganymede server cannot
+    fork and background itself.  <b>Be careful!</b> If you forget to
+    background the <font color="#ff0000"><code><b>runServer</b></code></font> command and hit ctrl-C, or otherwise send
+    a kill signal to the <font color="#ff0000"><code><b>runServer</b></code></font> command, the Ganymede server will
+    immediately die, without warning users logged into the Ganymede
+    server or doing a clean database dump.</p>
+
+    <p>Because the Ganymede server uses a journal file to record
+    transactions, the database won't be corrupted, but if a
+    transaction was in the process of being written to the journal
+    file, it may be lost, and any DNS or NIS build in progress will be
+    abruptly halted, with possible problems resulting.</p>
+
+    <p>The proper way to shut down the Ganymede server is to use the admin console's
+    'Shutdown Ganymede' menu item or the <a href="#stopServer">stopServer</a> script.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="stopServer"><b>stopServer</b></h3></td></tr></table> 
+    
+    <p><font color="#ff0000"><code><b>stopServer</b></code></font>
+    is a Bourne shell script, located in the server's
+    <code>bin</code> directory, which when run will connect to the server using RMI and
+    order it to shut down.  It depends on having access to the <A
+    href="#server.properties">ganymede.properties</a> file in order to
+    determine the address of the running server as well as the
+    server's supergash password.  If you have removed the supergash
+    password from the <A
+    href="#server.properties">ganymede.properties</a> file in order to
+    keep the password secret, <font color="#ff0000"><code><b>stopServer</b></code></font> will not be able to login to
+    the server to bring it down.</p>
+
+    <p><font color="#ff0000"><code><b>stopServer</b></code></font> uses the admin console's API to shut the server
+    down, and it may take a small amount of time to shut down the
+    server, in order to allow transactions in the process of being
+    committed to complete.  When the server goes down, all users
+    logged onto the Ganymede server will receive a message indicating
+    that the server is immediately going down, and that they have been
+    disconnected.  Any uncommitted changes made by active users will
+    be lost.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="decodeDB"><b>decodeDB</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>decodeDB</b></code></font> is a Bourne shell script located in the
+    server's <code>bin</code> directory. <font color="#ff0000"><code><b>decodeDB</b></code></font>
+    is used for diagnostic and development purposes, to print out a report of the object types
+    and parameters encoded by a <a href="#ganymede.db">ganymede.db</a> or 
+    <a href="#ganymede.schema">ganymede.schema</a> file.</p>
+
+    <p>Usage:</p>
+
+    <pre>	decodeDB ../db/ganymede.db</pre>
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><a name="clientfiles"><b>Client Files</b></h2></td>
+      </tr>
+    </table> 
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="client.properties"><b>client.properties</b></h3></td></tr></table> 
+
+    <p><font
+    color="#ff0000"><code><b>client.properties</b></code></font> is
+    the client and admin console's configuration file, located in the
+    top-level directory of the client installation tree.  The client's
+    <font
+    color="#ff0000"><code><b>client.properties</b></code></font>
+    file contains much less information than the server's <a
+    href="#server.properties">ganymede.properties</a>
+    file.. mostly just enough information to be able to find the
+    server's RMI address.  The <font
+    color="#ff0000"><code><b>client.properties</b></code></font>
+    file is commented, and most properties in it should be
+    self-explanatory.  The <code>ganymede.rootname</code> property
+    contains the root account name so that the admin console can
+    verify supergash-level permissions.  This is more for interface
+    convenience sake on the part of the admin console.. changing this
+    property will not allow the user to gain any privileges through
+    the admin console.</p>
+
+    <p><font
+    color="#ff0000"><code><b>client.properties</b></code></font> is used by the
+    <a href="#ganymede">ganymede</a>, <a href="#ganymedeAdmin">ganymedeAdmin</a>
+    and <a href="#rpcpass">rpcpass</a> commands, but not by the .html files used
+    for client web-access.  The .html files include the properties held in the
+    <font color="#ff0000"><code><b>client.properties</b></code></font> file in the
+    form of applet parameters, and are self-contained.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede.jar"><b>ganymede.jar</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>ganymede.jar</b></code></font> contains all of
+    the compiled Java code needed by the <a href="#runServer">ganymede</a> and
+    <a href="#rpcpass">rpcpass</a> client executables.
+    It is located in the <code>jars</code> sub-directory of the Ganymede client installation directory.</p>
+
+    <p>A copy is placed in the <code>html</code> sub-directories created for web browser
+    client access.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeAdmin.jar"><b>ganymedeAdmin.jar</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>ganymedeAdmin.jar</b></code></font> contains all of
+    the compiled Java code needed by the <a href="#ganymedeAdmin">ganymedeAdmin</a>
+    client executable.
+    It is located in the <code>jars</code> sub-directory of the Ganymede client installation directory.</p>
+
+    <p>A copy is placed in the <code>html</code> sub-directories created for web browser
+    admin console access.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><a name="clientscripts"><b>Client Scripts</b></h2></td>
+      </tr>
+    </table> 
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede"><b>ganymede</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>ganymede</b></code></font> is a
+    Bourne shell script used to run the GUI Ganymede client from a
+    UNIX command prompt.  It is configured and installed in the client
+    installation's <code>bin</code> directory by the <a
+    href="#installClient">installClient</a> script.The DISPLAY
+    environment variable must be set to your X display.</p>
+
+    <p>The <font color="#ff0000"><code><b>ganymede</b></code></font> script
+    uses the <a href="#client.properties">client.properties</a> file to locate
+    the Ganymede server's RMI address.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeAdmin"><b>ganymedeAdmin</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>ganymedeAdmin</b></code></font> is a
+    Bourne shell script used to run the GUI admin console from a
+    UNIX command prompt.  It is configured and installed in the client
+    installation's <code>bin</code> directory by the <a
+    href="#installClient">installClient</a> script.  The DISPLAY
+    environment variable must be set to your X display.</p>
+
+    <p>The <font color="#ff0000"><code><b>ganymedeAdmin</b></code></font> script
+    uses the <a href="#client.properties">client.properties</a> file to locate
+    the Ganymede server's RMI address.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="rpcpass"><b>rpcpass</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>rpcpass</b></code></font> is a
+    Bourne shell script used to propagate password and shell changes from external code
+    to the Ganymede server.  It is configured and installed in the client
+    installation's <code>bin</code> directory by the <a href="#installClient">installClient</a>
+    script.</p>
+
+    <p><font color="#ff0000"><code><b>rpcpass</b></code></font> is
+    designed to be used with the -x/--execute option present in
+    versions 1.3.6.92 and later of the Linux NISkit's rpc.yppasswdd
+    daemon (included in the <a
+    href="http://www.suse.de/~kukuk/linux/nis.html">ypserv
+    distribution</a>), to allow NIS password change operations to be
+    propagated to Ganymede.</p>
+
+    <p>When run, rpcpass reads a single line from stdin,
+    which should be of the form</p>
+
+    <pre>&lt;username&gt; o:&lt;oldpass&gt; p:&lt;new cryptpass&gt; s:&lt;shell&gt; g:&lt;gcos&gt;\n</pre>
+
+    <p>Where the p:, s:, and g: fields are each optional.</p>
+
+    <p>After reading this line from stdin, rpcpass will connect to
+    the Ganymede server and change the password and/or shell.  If
+    this operation succeeds, rpcpass will emit a single line
+    to stdout,</p>
+
+    <pre>OK\n</pre>
+
+    <p>which is to be read by rpc.yppasswdd to signal success.  If
+    there are any problems, these will be described in a 
+    report to stdout, which rpc.yppasswdd will take as a failure
+    signal.</p>
+
+    <p>Note that while the rpc.yppasswdd daemon may pass gcos information to
+    rpcpass, the gecos field is formatted differently on different
+    operating systems, and so rpcpass does not attempt to handle it at
+    all.</p>
+
+    <p>Of course, any program can use the rpcpass program to propagate
+    password/shell change requests to Ganymede, not just the Linux NIS
+    kit's rpc.yppasswdd daemon.</p>
+
+    <p>The <font color="#ff0000"><code><b>rpcpass</b></code></font> script
+    uses the <a href="#client.properties">client.properties</a> file to locate
+    the Ganymede server's RMI address.</p>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+    <!-- hhmts start -->
+Last modified: Thu May 27 21:34:07 CDT 1999
+<!-- hhmts end -->
+  </body>
+</html>
