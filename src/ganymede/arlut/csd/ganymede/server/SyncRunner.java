@@ -79,11 +79,138 @@ import com.jclark.xml.output.UTF8XMLWriter;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used in the Ganymede server to handle sync channel
- * synchronization.  It is responsible for acting as a Runnable in the
- * Ganymede scheduler (when run, it executes the external service program for
- * a given sync channel queue) and for tracking the data associated with the
- * sync channel.</p>
+ * <p>This class is used in the Ganymede server to handle Sync
+ * Channel-style incremental synchronization.  Unlike the full-state
+ * {@link arlut.csd.ganymede.server.GanymedeBuilderTask} system,
+ * SyncRunner is not designed to be customized through subclassing.
+ * Each SyncRunner uses the same standard logic for writing out
+ * synchronization data files in XML.  Each SyncRunner registered with
+ * the Ganymede server is attached to a Sync Channel object in the
+ * Ganymede data store.  This Sync Channel database object provides
+ * all of the configuration controls which determine where the XML
+ * files are written, what external program should be used to process
+ * the XML files, and what objects and fields should be included in
+ * the files.</p>
+ *
+ * <p>Like {@link arlut.csd.ganymede.server.GanymedeBuilderTask},
+ * SyncRunner synchronization is done in a split phase manner, in
+ * which step 1 writes out data files and step 2 executes an external
+ * script to process the files.  Unlike GanymedeBuilderTask,
+ * SyncRunner's step 1 is done synchronously with transaction commit.
+ * Every time a transaction is committed, the Ganymede server compares
+ * the objects involved in the transaction against every registered
+ * Sync Channel object.  If any of the objects or fields created,
+ * deleted, or edited during the transaction matches against the list
+ * of object and fields being monitored by the Sync Channel, the Sync
+ * Channel writes an XML file to the Sync Channel's output directory.</p>
+ *
+ * <p>Each XML file that is created in a Sync Channel output directory
+ * is given a unique filename, based on the number of transactions
+ * committed by the Ganymede server since the server was setup.  The
+ * first transaction committed is transaction 0, the second is 1, and
+ * so forth.  These transaction numbers are global in the Ganymede
+ * server.. every time any transaction is committed, the transaction
+ * number is incremented, whether or not any Sync Channel matches
+ * against the transaction.</p>
+ *
+ * <p>These XML files are written out synchronously with the
+ * transaction commit.  What this means is that the transaction is not
+ * counted as successfully committed until all Sync Channels that
+ * match against the transaction successfully write and flush their
+ * XML files to the proper output directory.  If there is any problem
+ * that prevents all of the Sync Channels from being written to
+ * successfully, the transaction will be aborted as if it never
+ * happened.  All of this is done with proper ACID transactional
+ * guarantees.  The Sync Channel implementation is designed so that
+ * the Ganymede server can be killed at any time without leaving a
+ * transaction partially committed between the sync channels and the
+ * Ganymede journal file.  Either a transaction is completely recorded
+ * to the sync channels and the journal, or it will not be recorded to
+ * any sync channel or the journal.</p>
+ *
+ * <p>All of this behavior corresponds to the logic that is
+ * implemented in the {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
+ * method in the GanymedeBuilderTask class.  The SyncRunner equivalent
+ * to the {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
+ * method is provided by the Service Program specified in the
+ * corresponding Sync Channel object in the Ganymede data store.</p>
+ *
+ * <p>Whenever any transaction is successfully committed, each Sync
+ * Runner is requested for execution by the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler}.  When the Sync Runner
+ * is scheduled, it calls its external Service Program, passing the
+ * most recently committed transaction number as a single command line
+ * argument.  The Service Program is meant to examine the Directory
+ * Path specified in the Sync Channel object, and to process any XML
+ * files with numbers less than or equal to its command line argument.
+ * As is the case with GanymedeBuilderTask, the GanymedeScheduler will
+ * not relaunch a SyncRunner until the previous execution of the
+ * SyncRunner completes.  Unlike GanymedeBuilderTask, the Ganymede
+ * server does not prevent new files from being written out while the
+ * Service Program is being executed.  It is the responsibility of the
+ * Service Program to ignore any XML files that it finds with
+ * transaction numbers higher than that passed to it on the command
+ * line.</p>
+ *
+ * <p>In this way, the Sync Channel system allows transactions to be
+ * committed at a rapid rate, while allowing the Service Program to
+ * take as little or as much time as is required to process
+ * transactions.  The principle of back-to-back builds is very much
+ * part of this Ganymede synchronization mechanism as well.</p>
+ *
+ * <p>Because the Sync Channel transaction files are generated while
+ * the transaction is being committed, the Sync Channel writing code
+ * has complete access to the before and after state of all objects in
+ * the transaction.  This before and after information is incorporated
+ * into each XML file, so that the external Service Program has access
+ * to the change context in order to apply the appropriate changes
+ * against the directory service target.</p>
+ *
+ * <p>Because Sync Channel synchronization is based on applying
+ * changes to a directory service target, it works best on directory
+ * services that can be updated incrementally, like LDAP.  It is not
+ * designed for systems that require full-state replacement in order
+ * to make changes at all, such as NIS or classical DNS.  Even for
+ * systems that can accept incremental changes, however, the use of
+ * discrete deltas for Ganymede synchronization can be problematic.
+ * If an XML transaction file cannot successfully be applied to a
+ * directory service target, the Ganymede server has no way of knowing
+ * this, because the Service Program is not run until sometime after
+ * the transaction has been successfully committed.</p>
+ *
+ * <p>In order to cope with this, the Sync Channel system has
+ * provisions for doing 'full-state' XML dumps as well.  You can do
+ * this manually by using the Ganymede xmlclient.  The command you
+ * want looks like</p>
+ *
+ * <pre>
+ *   xmlclient -dumpdata sync=Users > full_users_sync.xml
+ * </pre>
+ *
+ * <p>The effect of this command is to dump all data in the server
+ * that matches the filters for the 'Users' Sync Channel to the
+ * full_users_sync.xml file.  Note that in order for this to work, you
+ * should make sure that your Sync Channel's name does not include any
+ * whitespace.  Java's command line parsing logic is fundamentally
+ * broken, and makes it impossible to portably process command line
+ * parameters with internal whitespace.  Note as well that, as with
+ * all xmlclient dump operations, the database is locked against
+ * transaction commits while this is running, so this operation can
+ * only be done by a supergash-level account.</p>
+ *
+ * <p>You would use such a full state sync file for those cases where
+ * the incremental synchronization system experiences a loss of
+ * synchronization between the Ganymede server and the target
+ * directory service.  The idea is that your external Service Program
+ * should in some way be able to recognize that it is being given a
+ * full state dump, and undertake a more lengthy and computationally
+ * expensive process of reconciliation to bring the directory service
+ * target into compliance with the data in the Ganymede server.</p>
+ * 
+ * <p>See the Ganymede synchronization guide for more details on all
+ * of this.</p>
  */
 
 public class SyncRunner implements Runnable {
