@@ -1142,7 +1142,7 @@ public class DBEditSet {
 	releaseWriteLock();
 	release();
 	return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
-					  ts.l("commit.commit_failure_text", ex.toString()));
+					  ts.l("commit.commit_failure_text", Ganymede.stackTrace(ex)));
       }
     finally
       {
@@ -1298,7 +1298,7 @@ public class DBEditSet {
 	catch (Throwable ex)
 	  {
 	    retVal = Ganymede.createErrorDialog(ts.l("commit_handlePhase1.exception"),
-						ex.getMessage());
+						Ganymede.stackTrace(ex));
 
 	    eObj.release(false);
 
@@ -1529,7 +1529,7 @@ public class DBEditSet {
 	    // "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
 	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
 								      ts.l("commit_persistTransaction.ioexception_text",
-									   ex.getMessage())));
+									   Ganymede.stackTrace(ex))));
 	  }
 	else
 	  {
@@ -1537,7 +1537,7 @@ public class DBEditSet {
 	    // "Couldn''t commit transaction, an exception was caught persisting to the journal.\n\n{0}"
 	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
 								      ts.l("commit_persistTransaction.exception_text",
-									   ex.getMessage())));
+									   Ganymede.stackTrace(ex))));
 	  }
       }
   }
@@ -1586,20 +1586,20 @@ public class DBEditSet {
 		// 
 		// {0}
 
-		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", inex.toString()));
+		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
 	      }
 
 	    if (ex instanceof IOException)
 	      {
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
 									  ts.l("commit_writeSyncChannels.ioexception_text",
-									       ex.getMessage())));
+									       Ganymede.stackTrace(ex))));
 	      }
 	    else
 	      {
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
 									  ts.l("commit_writeSyncChannels.exception_text",
-									       ex.getMessage())));
+									       Ganymede.stackTrace(ex))));
 	      }
 	  }
       }
@@ -1618,7 +1618,7 @@ public class DBEditSet {
       {
 	for (int i = 0; i < Ganymede.syncRunners.size(); i++)
 	  {
-	    SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+	    SyncRunner sync = Ganymede.getSyncChannel((String) Ganymede.syncRunners.elementAt(i));
 
 	    try
 	      {
@@ -1670,14 +1670,14 @@ public class DBEditSet {
 	    // 
 	    // {0}
 
-	    Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", inex.toString()));
+	    Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", Ganymede.stackTrace(ex)));
 	  }
 
 	// "Couldn''t finalize transaction to journal.  IOException caught writing to journal."
 	// "Couldn''t finalize transaction to journal, the server may have run out of disk space.\n\n{0}"
 	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
 								  ts.l("commit_finalizeTransaction.exception_text",
-								       ex.getMessage())));
+								       Ganymede.stackTrace(ex))));
       }
     finally
       {
