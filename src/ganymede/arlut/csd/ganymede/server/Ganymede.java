@@ -506,7 +506,7 @@ public class Ganymede {
 	    // ***
 	    // *** You need either to restore the {1} file, or to remove the {0} file.
 	    // ***
-	    debug(ts.l("main.orphan_journal", dbFilename, Ganymede.journalProperty));
+	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
 	    return;
 	  }
 
@@ -686,11 +686,12 @@ public class Ganymede {
 
     scheduler.start();
 
-    // and install the tasks listed in the database
+    // and install the tasks and sync channels listed in the database
 
     try
       {
 	registerTasks();
+	registerSyncChannels();
       }
     catch (NotLoggedInException ex)
       {
@@ -1213,6 +1214,50 @@ public class Ganymede {
     // here?
   }
 
+  /**
+   * This method scans the database for valid SyncChannel entries and
+   * adds them to the syncRunners vector.
+   */
+
+  static private void registerSyncChannels() throws NotLoggedInException
+  {
+    Vector objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
+    DBObject object;
+
+    /* -- */
+
+    if (objects != null)
+      {
+	if (objects.size() == 0)
+	  {
+	    System.err.println(ts.l("registerSyncChannels.no_syncs"));
+	  }
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    object = (DBObject) objects.elementAt(i);
+	    SyncRunner runner = new SyncRunner(object);
+
+	    if (debug)
+	      {
+		System.err.println(ts.l("registerSyncChannels.processing_sync", runner.toString()));
+	      }
+
+	    registerSyncChannel(runner);
+	  }
+      }
+    else
+      {
+	System.err.println(ts.l("registerSyncChannels.no_syncs"));
+      }
+  }
+
+  /**
+   * <p>This method links the given SyncRunner object into the list of
+   * registered Sync Channels used at transaction commit time, and
+   * makes it available for the scheduler to run.</p>
+   */
+
   static void registerSyncChannel(SyncRunner channel)
   {
     if (debug)
@@ -1226,6 +1271,12 @@ public class Ganymede {
 	arlut.csd.Util.VectorUtils.unionAdd(syncRunners, channel.getName());
       }
   }
+
+  /**
+   * <p>This method unlinks the named SyncRunner object from the list
+   * of registered Sync Channels used at transaction commit time, and
+   * removes it from the Ganymede scheduler.</p>
+   */
 
   static void unregisterSyncChannel(String channelName)
   {

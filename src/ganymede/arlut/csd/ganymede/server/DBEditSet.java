@@ -380,7 +380,21 @@ public class DBEditSet {
 
   public DBEditObject[] getObjectList()
   {
-    return (DBEditObject[]) objects.values().toArray();
+    synchronized (objects)
+      {
+	int size = objects.size();
+	
+	DBEditObject[] results = new DBEditObject[size];
+	
+	Iterator iter = objects.values().iterator();
+	
+	for (int i = 0; i < size; i++)
+	  {
+	    results[i] = (DBEditObject) iter.next();
+	  }
+	
+	return results;
+      }
   }
 
   /**
@@ -1104,7 +1118,6 @@ public class DBEditSet {
 	commit_handlePhase2();
 	commit_integrateChanges();
 	releaseWriteLock();
-	this.deconstruct();
 
 	return null;
       }
@@ -1131,6 +1144,7 @@ public class DBEditSet {
 	// if we successfully released before, this is a no-op
 
 	releaseWriteLock();
+	this.deconstruct();
       }
   }
 
@@ -1540,7 +1554,7 @@ public class DBEditSet {
 	  {
 	    for (i = 0; i < Ganymede.syncRunners.size(); i++)
 	      {
-		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
 
 		sync.writeSync(persistedTransaction, objectList);
 	      }

@@ -140,7 +140,7 @@ public class SyncRunner implements Runnable {
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
     this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
     
-    FieldOptionDBField f = (FieldOptionDBField) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFields);
+    FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
     this.matrix = (Hashtable) f.matrix.clone();
   }
@@ -210,21 +210,19 @@ public class SyncRunner implements Runnable {
 	    switch (syncObject.getStatus())
 	      {
 	      case ObjectStatus.CREATING:
-		xmlOut.startElementIndent("delta");
-		xmlOut.attribute("state", "object created");
+		xmlOut.startElementIndent("addobject");
 		xmlOut.indentOut();
 		syncObject.emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.endElementIndent("delta");
+		xmlOut.endElementIndent("addobject");
 		break;
 
 	      case ObjectStatus.DELETING:
-		xmlOut.startElementIndent("delta");
-		xmlOut.attribute("state", "object deleted");
+		xmlOut.startElementIndent("deleteobject");
 		xmlOut.indentOut();
 		syncObject.getOriginal().emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.endElementIndent("delta");
+		xmlOut.endElementIndent("deleteobject");
 		break;
 
 	      case ObjectStatus.EDITING:
@@ -238,6 +236,7 @@ public class SyncRunner implements Runnable {
       {
 	xmlOut.indentIn();
 	xmlOut.endElementIndent("transaction");
+	xmlOut.skipLine();
 	xmlOut.close();
       }
   }
@@ -517,37 +516,50 @@ public class SyncRunner implements Runnable {
     // "SyncRunner {0} running"
     Ganymede.debug(ts.l("run.running", myName));
 
-    file = new File(myServiceProgram);
-
-    if (file.exists())
+    if (getServiceProgram() != null)
       {
-	if (runtime == null)
-	  {
-	    runtime = Runtime.getRuntime();
-	  }
+	file = new File(getServiceProgram());
 
-	try
+	if (file.exists())
 	  {
-	    FileOps.runProcess(invocation);
+	    if (runtime == null)
+	      {
+		runtime = Runtime.getRuntime();
+	      }
+	    
+	    try
+	      {
+		FileOps.runProcess(invocation);
+	      }
+	    catch (IOException ex)
+	      {
+		// "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
+		Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// "Failure during exec of SyncRunner {0}''s service program "{1}""
+		Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
+	      }
 	  }
-	catch (IOException ex)
+	else
 	  {
-	    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
-	    Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
-	  }
-	catch (InterruptedException ex)
-	  {
-	    // "Failure during exec of SyncRunner {0}''s service program "{1}""
-	    Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
+	    // ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
+	    Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
 	  }
       }
     else
       {
-	// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
-	Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
+	// "No external service program defined for SyncRunner {0}, not servicing {0}!"
+	Ganymede.debug(ts.l("run.undefined", myName));
       }
 
     // "SyncRunner {0} finished"
     Ganymede.debug(ts.l("run.done", myName));
+  }
+
+  public String toString()
+  {
+    return this.getName();
   }
 }

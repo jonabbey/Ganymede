@@ -1410,7 +1410,7 @@ public final class DBStore implements JythonMap {
 
   public synchronized void updateTransactionNumber(int nextNumber) throws IntegrityConstraintException
   {
-    if (nextNumber != transactionNumber + 1)
+    if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
       {
 	// "Inconsistent transaction number detected while reading transaction from journal, skipping"
 	throw new IntegrityConstraintException(ts.l("setTransactionNumber.badnumber"));

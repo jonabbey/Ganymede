@@ -916,6 +916,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return;			// server-local session, we won't time it out
       }
 
+    if (!loggedInSemaphore.isSet())
+      {
+	return;
+      }
+
     long millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
 
     int minutesIdle = (int) (millisIdle / 60000);

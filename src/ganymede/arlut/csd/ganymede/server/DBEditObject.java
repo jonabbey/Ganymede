@@ -3610,46 +3610,44 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    continue;
 	  }
 
-	if (myField != null && origField == null)
+	if (myField != null && myField.isDefined() && origField == null)
 	  {
 	    // newly created
 
 	    if (xmlOut.shouldInclude(myField, true))
 	      {
-		xmlOut.indent();
-		xmlOut.startElement("delta");
+		xmlOut.startElementIndent("delta");
 		xmlOut.attribute("state", "field created");
 		xmlOut.indentOut();
-		xmlOut.indent();
 		myField.emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.indent();
+		xmlOut.endElementIndent("delta");
 	      }
 	  }
-	else if (myField == null && origField != null)
+	else if ((myField == null || !myField.isDefined()) && origField != null)
 	  {
 	    // deleted
 
 	    if (xmlOut.shouldInclude(origField, true))
 	      {
-		xmlOut.indent();
-		xmlOut.startElement("delta");
+		xmlOut.startElementIndent("delta");
 		xmlOut.attribute("state", "field deleted");
 		xmlOut.indentOut();
-		xmlOut.indent();
 		origField.emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.indent();
+		xmlOut.endElementIndent("delta");
 	      }
 	  }
-	else
+	else if (myField != null && myField.isDefined() && myField.hasChanged(origField) && xmlOut.shouldInclude(myField))
 	  {
-	    // edited
-
-	    if (xmlOut.shouldInclude(myField))
-	      {
-		myField.emitXMLDelta(xmlOut, origField);
-	      }
+	    // go ahead and indent things to keep it in the same
+	    // column as the other <object> elements
+	    myField.emitXMLDelta(xmlOut, origField);
+	  }
+	else if (myField != null && myField.isDefined() && xmlOut.shouldInclude(myField, false))
+	  {
+	    // not changed, but we're supposed to include it anyway
+	    myField.emitXML(xmlOut);
 	  }
       }
 
