@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     {
       if (debug)
 	{
-	  System.out.println("=-=-=-=-=- Adding ownerPanel");
+	  System.out.println("Adding ownerPanel");
 	}
 
       if (field != null)
@@ -125,7 +125,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  }
       }
 
-    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, 100);
+    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, 100, "Owners", "Owner Groups");
     ss.setCallback(this);
     return ss;
   }
