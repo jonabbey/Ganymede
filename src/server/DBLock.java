@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,7 +61,7 @@ public abstract class DBLock {
    * 
    */
 
-  abstract void establish(Object key);
+  abstract void establish(Object key) throws InterruptedException;
 
   /**
    *
@@ -70,4 +70,24 @@ public abstract class DBLock {
    */ 
 
   abstract void release();
+
+  /**
+   *
+   * Abort this lock;  if any thread is waiting in establish() on this
+   * lock when abort() is called, that thread's call to establish() will
+   * fail with an InterruptedException.
+   *
+   */
+
+  abstract void abort();
+
+  /**
+   *
+   * Returns the key that this lock is established with,
+   * or null if the lock has not been established.
+   *
+   */
+
+  abstract Object getKey();
+
 }
