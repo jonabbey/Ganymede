@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -329,6 +329,7 @@ public class DBLogEvent {
 
     return result;
   }
+
   /**
    *
    * This method writes out this event to a log stream
@@ -421,6 +422,8 @@ public class DBLogEvent {
       {
 	notifyVect = new Vector();
       }
+
+    // examine the list of invid's that are involved in this event
 
     enum = objects.elements();
 
@@ -586,6 +589,12 @@ public class DBLogEvent {
 
     return result.toString();
   }
+
+  /**
+   *
+   * Debug rig.. this will scan a log file and attempt to parse lines out of it
+   *
+   */
 
   static public void main(String argv[])
   {
