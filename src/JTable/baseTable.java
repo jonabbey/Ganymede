@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.28 $ %D%
+  Version: $Revision: 1.29 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.28 $ %D%
+ * @version $Revision: 1.29 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -2261,7 +2261,7 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
     vbar_old = 0,
     colDrag = 0,
     dragRowSave = 0,
-    dragRowSaveY = 0,
+    dragRowSaveY = -1,
     colXOR = -1,
     v_offset = 0,		// y value of the topmost displayed pixel
     h_offset = 0,		// x value of the leftmost displayed pixel
@@ -3100,7 +3100,20 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
 		colDrag = col;
 		dragRowSave = mapClickToRow(vy);
-		dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
+
+		if (dragRowSave + 1 > rt.rows.size())
+		  {
+		    dragRowSaveY = rt.rows.size(); // the 
+
+		    if (dragRowSaveY == 0)
+		      {
+			dragRowSaveY = -1; // we don't want to scroll
+		      }
+		  }
+		else
+		  {
+		    dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
+		  }
 
 		System.err.println("Remembering drag row.. row: " + dragRowSave +
 				   ", topEdge " + dragRowSaveY);
@@ -3313,7 +3326,10 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	// grabbed the bar in will have it's top edge
 	// positioned correctly.
 
-	rt.scrollRowTo(dragRowSave, dragRowSaveY);
+	if (dragRowSaveY != -1)
+	  {
+	    rt.scrollRowTo(dragRowSave, dragRowSaveY);
+	  }
 
 	render();
 	repaint();
