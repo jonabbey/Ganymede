@@ -90,6 +90,11 @@ about it.
 Modified the glogin applet so that it gives a better appearance when
 invoked in a web browser.
 
+9. [SERVER] Upgraded to gnu regexp 1.06
+
+The gnu regexp classes used in the server have been updated to version
+1.06, the 18 November 1998 release.
+
 -------------------- Changes from 0.94 to 0.95 -------------------
 
 RELEASE DATE: January 22, 1999
