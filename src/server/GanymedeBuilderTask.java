@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/01/29 02:32:57 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/02/16 11:32:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -119,6 +119,8 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
     try
       {
+	Ganymede.buildOn();
+
 	try
 	  {
 	    session = new GanymedeSession("builder");
@@ -179,6 +181,8 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
     finally
       {
 	// we need the finally in case our thread is stopped
+	
+	Ganymede.buildOff();
 
 	if (session != null)
 	  {

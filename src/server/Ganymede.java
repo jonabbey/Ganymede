@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2000/02/14 20:44:57 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2000/02/16 11:31:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1118,6 +1118,28 @@ public class Ganymede {
   }
 
   /**
+   * </P>This method is called by the GanymedeBuilderTask base class to
+   * record that the server is processing a build.</P>
+   */
+
+  static void buildOn()
+  {
+    GanymedeServer.building = true;
+    GanymedeServer.sendMessageToRemoteSessions(1, "building");
+  }
+
+  /**
+   * </P>This method is called by the GanymedeBuilderTask base class to
+   * record that the server is through processing a build.</P>
+   */
+
+  static void buildOff()
+  {
+    GanymedeServer.building = false;
+    GanymedeServer.sendMessageToRemoteSessions(1, "idle");
+  }
+
+  /**
    * <p>This method loads properties from the ganymede.properties
    * file.</p>
    *
@@ -1375,7 +1397,7 @@ class dumpTask implements Runnable {
 
     try
       {
-	if (Ganymede.db.journal.clean())
+	if (Ganymede.db.journal.isClean())
 	  {
 	    Ganymede.debug("Deferring dump task - the journal is clean");
 	    return;

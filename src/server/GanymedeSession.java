@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.171 $
-   Last Mod Date: $Date: 2000/02/15 02:59:44 $
+   Version: $Revision: 1.172 $
+   Last Mod Date: $Date: 2000/02/16 11:32:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -125,7 +125,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.171 $ $Date: 2000/02/15 02:59:44 $
+ * @version $Revision: 1.172 $ $Date: 2000/02/16 11:32:01 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -143,6 +143,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   Client client;
+
+  /**
+   * Async partial proxy for sending messages to the client.
+   */
+
+  serverClientProxy clientProxy;
 
   /**
    * if this session is on the GanymedeServer's lSemaphore, this boolean
@@ -592,6 +598,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     this.client = client;
 
+    clientProxy = new serverClientProxy(client);
+
     if (userObject != null)
       {
 	userInvid = userObject.getInvid();
@@ -877,6 +885,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <P>This method is used to send an asynchronous message
+   * to the client.  It is used to update the clients so they
+   * know when a build is being processed.</P>
+   */
+
+  void sendMessage(int type, String message)
+  {
+    if (clientProxy != null)
+      {
+	try
+	  {
+	    clientProxy.sendMessage(type, message);	// async proxy
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+  }
+
+  /**
    * <p>This method is called when the Java RMI system detects that this
    * remote object is no longer referenced by any remote objects.</p>
    *
@@ -997,6 +1025,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    //	Ganymede.debug("User " + username + " logging off");
 
 	    this.client = null;
+
+	    this.clientProxy.shutdown();
 
 	    // logout the client, abort any DBSession transaction going
 
@@ -1835,6 +1865,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized ReturnVal openTransaction(String describe)
   {
     checklogin();
+
+    // the client will perform an openTransaction as soon as it is
+    // ready to talk to the server.  By sending a building message to
+    // the client here, we allow it to set the initial state of the
+    // building/idle icon in the client's display.
+
+    if (GanymedeServer.building)
+      {
+	sendMessage(1, "building");
+      }
 
     if (session.editSet != null)
       {

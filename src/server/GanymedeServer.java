@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 2000/02/15 02:59:44 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 2000/02/16 11:32:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -122,6 +122,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static boolean shutdown = false;
 
   /**
+   * <p>If true, the server is currently executing a builder task.</P>
+   */
+
+  public static boolean building = false;
+
+  /**
    * <p>Our handy, all purpose login semaphore</p>
    */
 
@@ -178,7 +184,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public Session login(Client client) throws RemoteException
   {
-    String clientName;
+    String clientName = null;
+    String clienthost = null;
     String clientPass;
     boolean found = false;
     boolean success = false;
@@ -338,6 +345,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		// Vector.
 
 		GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
+
 		Ganymede.debug(session.username + " logged in");
 
 		Vector objects = new Vector();
@@ -350,8 +358,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  {
 		    objects.addElement(persona.getInvid());
 		  }
-
-		String clienthost;
 
 		try
 		  {
@@ -381,8 +387,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	      }
 	    else
 	      {
-		String clienthost;
-
 		try
 		  {
 		    clienthost = getClientHost();
@@ -391,8 +395,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  {
 		    clienthost = "unknown";
 		  }
-
-		Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
 
 		if (Ganymede.log != null)
 		  {
@@ -419,6 +421,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	if (!success)
 	  {
 	    GanymedeServer.lSemaphore.decrement();
+
+	    // notify the consoles after decrementing the login
+	    // semaphore so the notify won't show the semaphore
+	    // increment
+
+	    Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
 	  }
       }
   }
@@ -484,6 +492,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
 
     return entries;
+  }
+
+  public static void sendMessageToRemoteSessions(int type, String message)
+  {
+    Vector sessionsCopy = (Vector) sessions.clone();
+
+    for (int i = 0; i < sessionsCopy.size(); i++)
+      {
+	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
+	session.sendMessage(type, message);
+      }
   }
 
   /**
