@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -152,6 +152,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
     editable = original.editable;
     removable = original.removable;
+    editInPlace = original.editInPlace;
 
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
