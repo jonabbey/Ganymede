@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -548,7 +548,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	  }
       }
-    else
+    else  // just write everything in this base out
       {
 	out.writeInt(objectHash.size());
 	
@@ -839,7 +839,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  private DBEditObject createHook() throws RemoteException
+  DBEditObject createHook() throws RemoteException
   {
     if (classdef == null)
       {
@@ -1307,6 +1307,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     return objectHook.canBeInactivated();
   }
+
 
   /**
    *
@@ -1795,6 +1796,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   public void setDisplayOrder(int displayOrder)
   {
     this.displayOrder = displayOrder;
+  }
+
+  /**
+   *
+   * Helper method for DBEditObject subclasses
+   *
+   */
+
+  public DBEditObject getObjectHook()
+  {
+    return objectHook;
   }
 
   /**
