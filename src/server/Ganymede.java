@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2000/10/04 10:02:39 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2000/10/06 23:39:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -280,54 +280,12 @@ public class Ganymede {
 
     /* -- */
 
-    // the Ganymede class can be called in a few different modes, in which
-    // case the server will do something other than boot up into normal
-    // operation
-
-    // first, if we see -decode on the command line, do a textual dump of the
-    // schema encoded in the ganymede.db file
-
-    if (ParseArgs.switchExists("decode", argv))
-      {
-	String dbFilename = ParseArgs.getArg("dbfile", argv);
-
-	if (dbFilename == null)
-	  {
-	    System.err.println("Error: missing dbfile parameter for dbfile decode.");
-	    System.exit(1);
-	  }
-	else
-	  {
-	    databaseReport(dbFilename, true);
-	    System.exit(0);
-	  }
-      }
-
     // if they gave us the -doXML sign, make a note that we're going to need
     // to try and dump the contents of ganymede.db to ganymede.db.xml
 
     if (ParseArgs.switchExists("doXML", argv))
       {
 	doXML = true;
-      }
-
-    // second, if we see -permdecode on the command line, do a textual dump of
-    // the permissions objects encoded in the ganymede.db file.
-
-    if (ParseArgs.switchExists("permdecode", argv))
-      {
-	String dbFilename = ParseArgs.getArg("dbfile", argv);
-
-	if (dbFilename == null)
-	  {
-	    System.err.println("Error: missing dbfile parameter for dbfile permdecode.");
-	    System.exit(1);
-	  }
-	else
-	  {
-	    permReport(dbFilename);
-	    System.exit(0);
-	  }
       }
 
     propFilename = ParseArgs.getArg("properties", argv);
@@ -620,120 +578,6 @@ public class Ganymede {
       {
 	debug("Setup and bound server object OK");
       }
-  }
-
-  /**
-   * <p>This method is used to examine a Ganymede database file for the
-   * purposes of doing a schema report on it.</p>
-   */
-
-  public static void databaseReport(String dbFilename, boolean showPerms)
-  {
-    File dataFile;
-
-    /* -- */
-
-    remotelyAccessible = false;
-
-    Ganymede.dbFilename = dbFilename;
-
-    Ganymede.debug = false;
-
-    db = new DBStore();
-
-    dataFile = new File(dbFilename);
-    
-    if (dataFile.exists())
-      {
-	db.load(dbFilename, false, false); // don't try to load journal
-
-	StringWriter outString = new StringWriter();
-	PrintWriter out = new PrintWriter(outString);
-	
-	db.printCategoryTree(out);
-
-	System.out.println(outString);
-
-	if (showPerms)
-	  {
-	    PermissionMatrixDBField ownedPerm = null;
-	    PermissionMatrixDBField defaultPerm = null;
-
-	    DBObjectBase base = db.getObjectBase((short) 2);
-
-	    Enumeration objs = base.objectTable.elements();
-
-	    while (objs.hasMoreElements())
-	      {
-		DBObject permObj = (DBObject) objs.nextElement();
-
-		ownedPerm = (PermissionMatrixDBField) permObj.getField((short) 101);
-		defaultPerm = (PermissionMatrixDBField) permObj.getField((short) 103);
-
-		System.err.println("Role " + permObj + " -- owned bits --\n");
-		ownedPerm.debugdump();
-		System.err.println("Role " + permObj + " -- default bits --\n");
-		defaultPerm.debugdump();
-	      }
-	  }
-
-	return;
-      }
-
-    System.err.println("Couldn't load database " + dbFilename);
-  }
-
-  /**
-   * <p>This method is used to examine a Ganymede database file for the
-   * purposes of doing a schema report on it.</p>
-   */
-
-  public static void permReport(String dbFilename)
-  {
-    File dataFile;
-
-    /* -- */
-
-    remotelyAccessible = false;
-
-    Ganymede.dbFilename = dbFilename;
-
-    Ganymede.debug = false;
-
-    db = new DBStore();
-
-    dataFile = new File(dbFilename);
-    
-    if (dataFile.exists())
-      {
-	db.load(dbFilename, true, false);
-
-	PermissionMatrixDBField ownedPerm = null;
-	PermissionMatrixDBField defaultPerm = null;
-
-	System.err.println("Decoding Role objects");
-
-	DBObjectBase base = db.getObjectBase((short) 2);
-	
-	Enumeration objs = base.objectTable.elements();
-	
-	while (objs.hasMoreElements())
-	  {
-	    DBObject permObj = (DBObject) objs.nextElement();
-	    
-	    ownedPerm = (PermissionMatrixDBField) permObj.getField((short) 101);
-	    defaultPerm = (PermissionMatrixDBField) permObj.getField((short) 103);
-	    
-	    System.err.println("Role " + permObj + " -- owned bits --\n");
-	    ownedPerm.debugdump();
-	    System.err.println("Role " + permObj + " -- default bits --\n");
-	    defaultPerm.debugdump();
-	  }
-
-	return;
-      }
-
-    System.err.println("Couldn't load database " + dbFilename);
   }
 
   /**

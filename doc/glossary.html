@@ -41,8 +41,7 @@
       <ul>
       <li><a href="#runServer">runServer</a></li>
       <li><a href="#stopServer">stopServer</a></li>
-      <li><a href="#decodeDB">decodeDB</a></li>
-      <li><a href="#permdecodeDB">permdecodeDB</a></li>
+      <li><a href="#xmlclient">xmlclient</a></li>
       </ul></li>
 
       <li><a href="#clientfiles">Client Files</a>
@@ -57,7 +56,7 @@
       <li><a href="#ganymede">ganymede</a></li>
       <li><a href="#ganymedeAdmin">ganymedeAdmin</a></li>
       <li><a href="#rpcpass">rpcpass</a></li>
-      <li><a href="#xmlclient">xmlclient</a></li>
+      <li><a href="#xmlclient2">xmlclient</a></li>
       </ul></li>
 
     </ul>
@@ -327,10 +326,6 @@
     <p>Manually deleting the <font color="#ff0000"><code><b>ganymede.db</b></code></font> file
     would be a really bad idea, however.</p>
 
-    <p>You can view the object type definition information encoded in a 
-    <font color="#ff0000"><code><b>ganymede.db</b></code></font> file by using the
-    <a href="#decodeDB">decodeDB</a> command.</p>
-
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
 	<td colspan="1" align="right"><h3><a name="ganymede.schema"><b>ganymede.schema</b></h3></td></tr></table> 
@@ -341,10 +336,6 @@
     which is done in order to distribute pre-configured and empty 
     <font color="#ff0000"><code><b>ganymede.schema</b></code></font> files with schema kits.</p>
     
-    <p>You can view the object type definition information encoded in a 
-    <font color="#ff0000"><code><b>ganymede.schema</b></code></font> file by using the
-    <a href="#decodeDB">decodeDB</a> command.</p>
-
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
 	<td colspan="1" align="right"><h3><a name="journal"><b>journal</b></h3></td></tr></table> 
@@ -510,35 +501,31 @@
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="decodeDB"><b>decodeDB</b></h3></td></tr></table> 
+	<td colspan="1" align="right"><h3><a name="xmlclient"><b>xmlclient</b></h3></td></tr></table> 
 
-    <p><font color="#ff0000"><code><b>decodeDB</b></code></font> is a Bourne shell script located in the
-    server's <code>bin</code> directory. <font color="#ff0000"><code><b>decodeDB</b></code></font>
-    is used for diagnostic and development purposes, to print out a report of the object types
-    and parameters encoded by a <a href="#ganymede.db">ganymede.db</a> or 
-    <a href="#ganymede.schema">ganymede.schema</a> file.</p>
+    <p><font color="#ff0000"><code><b>xmlclient</b></code></font> is a
+    Bourne shell script used to do bulk data loading into the Ganymede
+    server.  It is configured and installed in the client
+    installation's <code>bin</code> directory by the <a
+    href="#installClient">installClient</a> script as well as in the
+    server installation's <code>bin</code> directory by the <a
+    href="#installServer">installServer</a> script.</p>
 
-    <p>Usage:</p>
+    <p>The <font color="#ff0000"><code><b>xmlclient</b></code></font>
+    script runs a Java client which reads a <a
+    href="xml.html">specially formatted</a> XML file and transmits
+    data from it into the Ganymede Server.  The <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> can handle
+    creating, deleting, inactivating and editing objects on the
+    Ganymede server.</p>
 
-    <pre>	decodeDB ../db/ganymede.db</pre>
-
-    <p></p>
-
-    <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="permdecodeDB"><b>permdecodeDB</b></h3></td></tr></table> 
-
-    <p><font color="#ff0000"><code><b>permdecodeDB</b></code></font> is a Bourne shell script located in the
-    server's <code>bin</code> directory. <font color="#ff0000"><code><b>permdecodeDB</b></code></font>
-    is used for diagnostic and development purposes, to print out a summary of
-    all permissions records in all Role objects encoded by a <a href="#ganymede.db">ganymede.db</a> or 
-    <a href="#ganymede.schema">ganymede.schema</a> file.</p>
-
-    <p>Usage:</p>
-
-    <pre>	permdecodeDB ../db/ganymede.db</pre>
-
-    <p></p>
+    <p>At this point, the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> is only
+    useful for doing bulk data operations into the Ganymede server.
+    Ultimately, the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> will provide
+    support for querying the Ganymede server and for initializing the
+    Ganymede server's schema.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -690,7 +677,7 @@
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="xmlclient"><b>xmlclient</b></h3></td></tr></table> 
+	<td colspan="1" align="right"><h3><a name="xmlclient2"><b>xmlclient</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>xmlclient</b></code></font> is a
     Bourne shell script used to do bulk data loading into the Ganymede
@@ -719,7 +706,7 @@
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Fri Sep 15 01:06:57 CDT 2000
+Last modified: Fri Oct  6 18:36:52 CDT 2000
 <!-- hhmts end -->
   </body>
 </html>
