@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.75 $ %D%
+    Version: $Revision: 1.76 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -848,7 +848,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // First we need to rebuild the list of choices
 
-	    Vector choiceHandles = null;
+	    Vector labels = null;
 	    Object key = sf.choicesKey();
 
 	    // if our choices key is null, we're not going to use a cached copy..
@@ -857,9 +857,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    if (key == null)
 	      {
 		QueryResult qr = sf.choices();
+
 		if (qr != null)
 		  {
-		    choiceHandles = qr.getListHandles();
+		    labels = qr.getLabels();
 		  }
 	      }
 	    else
@@ -876,7 +877,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			println("key in there, using cached list");
 		      }
 		      
-		    choiceHandles = gc.cachedLists.getListHandles(key, false);
+		    labels = gc.cachedLists.getLabels(key, false);
 		  }
 		else
 		  {
@@ -892,94 +893,35 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 		    if (choicesV == null)
 		      {
-			choiceHandles = new Vector();
+			labels = new Vector();
 		      }
 		    else
 		      {
 			gc.cachedLists.putList(key, choicesV);
-			choiceHandles = choicesV.getListHandles();
+			labels = choicesV.getLabels();
 		      }
 		  }
 	      }
 
-	    // remove all the current values, add the choices that we
-	    // just got
+	    // reset the combo box.
 
-	    if (cb.getItemCount() > 0)
-	      {
-		cb.removeAllItems();
-	      }
-
-	    // add choices to combo box.. remember that the choices are
-	    // sorted coming out of the object Cache
-	    
-	    for (int i = 0; i < choiceHandles.size(); i++)
-	      {
-		cb.addItem(((listHandle)choiceHandles.elementAt(i)).getLabel());
-	      }
-
-	    // we're assuming here that none is a valid choice.. we shouldn't
-	    // really assume this, should we?
 	    boolean mustChoose = sf.mustChoose();
-	    
-	    if (!mustChoose)
+
+
+	    String currentValue = (String) sf.getValue();
+
+	    if (!mustChoose || currentValue == null)
 	      {
-		if (!comboBoxContains(cb, "<none>"))
-		  {
-		    cb.addItem("<none>");
-		  }
+		labels.addElement("<none>");
 	      }
 
-	    // and select the current value
-	    String o = (String) sf.getValue();
-	    
-	    if (o == null)
+	    if (currentValue == null)
 	      {
-		try
-		  {
-		    if (debug)
-		      {
-			println(" selected is null");
-		      }
-
-		    cb.setSelectedItem("<none>");
-		  }
-		catch (Exception e)
-		  {
-		    // <none> is not in there.
-		    cb.addItem("<none>");
-		    cb.setSelectedItem("<none>");
-		  }
-
-		if (mustChoose)
-		  {
-		    
-		    /*
-		     * Currently, string_fields aren't smart enough to
-		     * tell us whether or not they should allow
-		     * <none>, so we leave it in.  the
-		     * stringComboNoneListener could be used here, if
-		     * the string_fields had some kind of allowNone()
-		     * method.
-		     *
-		    if (debug) 
-		      {
-			println("Adding new stringComboNoneListener"); 
-		      }
-		    
-		    cb.addItemListener(new stringComboNoneListener(cb));
-		    */
-		  }
+		currentValue = "<none>";
 	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println(" setting selected to : " + o);
-		  }
 
-		cb.setSelectedItem(o);
-	      }
+	    cb.setModel(new DefaultComboBoxModel(labels));
+	    cb.setSelectedItem(currentValue);
 
 	    // put us back on as an item listener so we are live for updates
 	    // from the user again
@@ -991,7 +933,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    JInvidChooser chooser = (JInvidChooser) comp;
 	    invid_field invf = (invid_field) field;
-	    listHandle none = new listHandle("<none>", null);
+	    listHandle noneHandle = new listHandle("<none>", null);
 	    boolean mustChoose;
 
 	    /* -- */
@@ -1068,66 +1010,43 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 
-	    if (debug)
-	      {
-		println("Removing all items.");
-	      }
+	    // reset the combo box.
 
-	    if (chooser.getItemCount() > 0)
-	      {
-		chooser.removeAllItems();
-	      }
+	    Invid currentValue = (Invid) invf.getValue();
+	    listHandle currentHandle = null;
+
+	    System.err.println("containerPanel.updateComponent(): updating invid chooser combo box");
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
 	      {
-		if (debug)
-		  {
-		    println("Adding item " + (listHandle)choiceHandles.elementAt(i));
-		  }
+		currentHandle = (listHandle) choiceHandles.elementAt(i);
 
-		chooser.addItem((listHandle)choiceHandles.elementAt(i));
+		if (currentHandle.getObject().equals(currentValue))
+		  {
+		    break;
+		  }
+		else
+		  {
+		    currentHandle = null;
+		  }
 	      }
 
-	    // mustChoose invid_fields don't get a <none>
 	    mustChoose = invf.mustChoose();
 
-	    if (!mustChoose)
+	    if (!mustChoose || (currentHandle == null))
 	      {
-		if (!comboBoxContains(chooser.getCombo(), none))
-		  {
-		    chooser.addItem(none);
-		  }
+		choiceHandles.addElement(noneHandle);
 	      }
 
-	    // If the current value is null, we set the choice to
-	    // <none>.  Otherwise, make sure the listHandle is in
-	    // there, then set the current selection.
+	    System.err.println("containerPanel.updateComponent(): got handles, setting model");
 
-	    Invid o = (Invid) invf.getValue();
-	    
-	    if (o == null)
+	    if (currentHandle == null)
 	      {
-		if (mustChoose) 
-		  {
-		    // If the JInvidChooser is mustChoose, then it
-		    // wouldn't have a none item.  We need to add the
-		    // none item, because nothing is selecting it.
-
-		    chooser.addItem(none);
-		  }
-
-		chooser.setSelectedItem(none);
+		chooser.setVectorContents(choiceHandles, noneHandle);
 	      }
 	    else
 	      {
-		listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
-		// Make sure the listHandle is in there
-		if (!comboBoxContains(chooser.getCombo(), lh))
-		  {
-		    chooser.addItem(lh);
-		  }
-
-		chooser.setSelectedItem(lh);
+		chooser.setVectorContents(choiceHandles, currentHandle);
 	      }
 
 	    // put us back on as an item listener so we are live for updates
