@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/07/23 02:28:31 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/07/23 04:52:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,6 +104,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     boolean success = false;
 
     /* -- */
+
+    Ganymede.debug("GASHBuilderTask builderPhase1 running");
 
     backedup = false;
 
@@ -295,6 +297,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	success = true;
       }
 
+    Ganymede.debug("GASHBuilderTask builderPhase1 completed");
+
     return success;
   }
 
@@ -315,6 +319,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       file;
 
     /* -- */
+
+    Ganymede.debug("GASHBuilderTask builderPhase2 running");
 
     if (buildScript == null)
       {
@@ -357,6 +363,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
       }
 
+    Ganymede.debug("GASHBuilderTask builderPhase2 completed");
+
     return true;
   }
 
@@ -389,9 +397,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	String label;
 	Date labelDate;
 
-	if (lastRunTime != null)
+	if (oldLastRunTime != null)
 	  {
-	    labelDate = lastRunTime;
+	    labelDate = oldLastRunTime;
 	  }
 	else
 	  {
@@ -553,6 +561,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String username;
     String signature;
     String socSecurity;
+    StringBuffer socBuffer = new StringBuffer();
 
     /* -- */
 
@@ -564,7 +573,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (username != null && signature != null && socSecurity != null)
       {
-	result.append(socSecurity);
+	for (int i = 0; i < socSecurity.length(); i++)
+	  {
+	    char c = socSecurity.charAt(i);
+
+	    if (c != '-')
+	      {
+		socBuffer.append(c);
+	      }
+	  }
+
+	result.append(socBuffer.toString());
 	result.append(" ");
 	result.append(signature);
 	result.append("@");
