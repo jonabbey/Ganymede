@@ -161,8 +161,7 @@ By making this relationship non-symmetrical, we gain the ability to
 add or remove objects from an owner group during a transaction without
 having to check out the owner group for exclusive editing.  As such,
 this change will significantly improve concurrency in the Ganymede
-system when many objects are owned by a single owner group.  It will
-also reduce memory loading on the server.
+system when many objects are owned by a single owner group.
 
 This change was made possible by the (now quite old) change described
 in 0.99.8, #17.
