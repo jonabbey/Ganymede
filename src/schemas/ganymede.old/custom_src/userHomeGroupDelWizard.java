@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,20 +41,15 @@ import arlut.csd.JDialog.JDialogBuff;
  * from the user their choice of other group to set as their default (home)
  * group.<br>
  *
+ * <br>See userSchema.java for a list of field definitions used by this wizard.<br>
+ *
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator 
+ * @see arlut.csd.ganymede.custom.userSchema
  */
 
-public class userHomeGroupDelWizard extends GanymediatorWizard {
+public class userHomeGroupDelWizard extends GanymediatorWizard implements userSchema {
   
-  // static field constants.. these should cohere with the field
-  // definitions for the user object type in the Ganymede schema
-
-  static short GROUPLIST=264;
-  static short HOMEGROUP=265;
-  
-  // ---
-
   /**
    * The user-level session context that this wizard is acting in.  This
    * object is used to handle necessary checkpoint/rollback activity by
