@@ -322,7 +322,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
       {
 	try
 	  {
-	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {

@@ -157,9 +157,8 @@ public class LAFMenu extends JMenu implements ActionListener
 	  {
 	    try
 	      {
-		my_parent.setValuePerformed(new JValueObject(this,
-							     "That look and feel is unsupported on this platform.",
-							     JValueObject.ERROR));
+		my_parent.setValuePerformed(new JErrorValueObject(this,
+								  "That look and feel is unsupported on this platform."));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {

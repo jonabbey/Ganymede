@@ -1,8 +1,8 @@
 
 /*
-   JSetValueObject.java
+   JErrorValueObject.java
 
-   Subclass of JValueObject that represents a simple value set operation
+   Subclass of JValueObject that represents an error condition
 
    Created: 25 October 2004
 
@@ -56,29 +56,29 @@ import java.awt.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 JSetValueObject
+                                                               JErrorValueObject
 
 ------------------------------------------------------------------------------*/
 
 /**
  *
- * <p>Subclass of JValueObject that represents a simple value set operation</p>
- *   
+ * <p>Subclass of JValueObject that represents an error condition</p>
+ *
  * @version $Revision$ $Date$ $Name:  $
  * @author Jonathan Abbey
  */
 
-public class JSetValueObject {
+public class JErrorValueObject {
 
   private Component source;
-  private Object value;
+  private String message;
 
   /* -- */
 
-  public JSetValueObject(Component source, Object value)
+  public JErrorValueObject(Component source, String message)
   {
     this.source = source;
-    this.value = value;
+    this.message = message;
   }
 
   /**

@@ -1237,17 +1237,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    if (out == null)
 		      {
-			my_callback.setValuePerformed(new JValueObject(this, 
-								       0,  
-								       JValueObject.ERROR,
-								       "You can't choose stuff for this vector.  Sorry."));
+			my_callback.setValuePerformed(new JErrorValueObject(this,
+									    "You can't choose stuff for this vector.  Sorry."));
 		      }
 		    else
 		      {
-			my_callback.setValuePerformed(new JValueObject(this, 
-								       0,  
-								       JValueObject.ERROR,
-								       "That choice is not appropriate.  Please choose from the list."));
+			my_callback.setValuePerformed(new JErrorValueObject(this, 
+									    "That choice is not appropriate.  Please choose from the list."));
 		      }
 		  }
 		catch (RemoteException rx)
