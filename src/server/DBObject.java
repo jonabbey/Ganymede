@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.31 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.32 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -77,6 +77,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   
   protected DBEditSet editset;	// transaction that this object has been checked out in
 				// care of.
+
+  Invid myInvid = null;
 
   /* -- */
 
@@ -110,6 +112,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     shadowObject = null;
     editset = null;
+
+    myInvid = new Invid(objectBase.type_code, id);
   }
 
   /**
@@ -123,6 +127,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   {
     this(objectBase);
     this.id = id;
+    myInvid = new Invid(objectBase.type_code, id);
   }
 
   /**
@@ -165,6 +170,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     objectBase = eObj.objectBase;
     id = eObj.id;
+    myInvid = eObj.myInvid;
 
     shadowObject = null;
     editset = null;
@@ -200,7 +206,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  public int getID()
+  public final int getID()
   {
     return id;
   }
@@ -213,9 +219,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  public Invid getInvid()
+  public final Invid getInvid()
   {
-    return new Invid(getTypeID(), getID());
+    return myInvid;
   }
 
   /**
@@ -225,7 +231,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  public short getTypeID()
+  public final short getTypeID()
   {
     return objectBase.type_code;
   }
@@ -236,7 +242,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    */
 
-  public DBObjectBase getBase()
+  public final DBObjectBase getBase()
   {
     return objectBase;
   }
@@ -329,6 +335,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
     out.writeInt(id);
+
+    if (fields.size() == 0)
+      {
+	System.err.println("**** Error: writing object with no fields: " + objectBase.getName() + " <" + id + ">");
+      }
+
     out.writeShort(fields.size());
 
     //    System.err.println("emitting fields");
@@ -377,6 +389,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     // get our unique id
 
     id = in.readInt();
+    myInvid = new Invid(objectBase.type_code, id);
 
     // get number of fields
 
@@ -384,7 +397,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     if (debug && tmp_count == 0)
       {
-	System.err.println("DBObject.receive(): tmp_count = 0 reading object " + id);
+	System.err.println("DBObject.receive(): No fields reading object " + id);
       }
 
     if (tmp_count > 0)
@@ -462,7 +475,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 		// because we are just setting up the namespace, not
 		// manipulating it in the context of an editset
 
-		for (int j = 0; j < tmp.size(); i++)
+		for (int j = 0; j < tmp.size(); j++)
 		  {
 		    if (definition.namespace.uniqueHash.containsKey(tmp.key(j)))
 		      {
@@ -703,28 +716,57 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public db_field[] listFields()
+  synchronized public db_field[] listFields(boolean customOnly)
   {
     db_field[] results;
     Enumeration enum;
-    int size;
+    int count = 0;
+    DBField localField;
 
     /* -- */
-    
-    size = fields.size();
-    results = new db_field[size];
 
-    enum = fields.elements();
+    if (customOnly)
+      {
+	enum = fields.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    if (!((DBField) enum.nextElement()).isBuiltIn())
+	      {
+		count++;
+	      }
+	  }
+      }
+    else
+      {
+	count = fields.size();
+      }
+    
+    results = new db_field[count];
 
     // note that a hash doesn't keep the fields in any particular
     // order.. 
 
+    enum = fields.elements();
+
     while (enum.hasMoreElements())
       {
-	results[--size] = (db_field) enum.nextElement();
+	if (customOnly)
+	  {
+	    localField = (DBField) enum.nextElement();
+
+	    if (!localField.isBuiltIn())
+	      {
+		results[--count] = localField;
+	      }
+	  }
+	else
+	  {
+	    results[--count] = (db_field) enum.nextElement();
+	  }
       }
 
-    if (size != 0)
+    if (count != 0)
       {
 	throw new RuntimeException("synchronization error, fields hash modified");
       }
