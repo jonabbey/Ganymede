@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -111,11 +111,11 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
     userQuery = new Query(SchemaConstants.UserBase, root, false);
 
-    Vector results = Ganymede.internalSession.query(userQuery);
+    Vector results = Ganymede.internalSession.internalQuery(userQuery);
 
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	
 	pdbf = (PasswordDBField) obj.getField(SchemaConstants.UserPassword);
 	
@@ -130,11 +130,11 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 	root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
 	userQuery = new Query(SchemaConstants.AdminBase, root, false);
 
-	results = Ganymede.internalSession.query(userQuery);
+	results = Ganymede.internalSession.internalQuery(userQuery);
 
 	for (int i = 0; !found && (i < results.size()); i++)
 	  {
-	    obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	    obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	    
 	    pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
 	    
@@ -184,11 +184,11 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
     userQuery = new Query(SchemaConstants.AdminBase, root, false);
 
-    Vector results = Ganymede.internalSession.query(userQuery);
+    Vector results = Ganymede.internalSession.internalQuery(userQuery);
 
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	    
 	pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
 	    
