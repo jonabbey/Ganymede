@@ -4,17 +4,11 @@
     <title>Ganymede on #SERVERHOST</title>
   </head>
   
-  <body>
-    <h1>Ganymede on #SERVERHOST</h1>
-    
-    <a href="client_plugin.html">client plugin</a>
-    <a href="client_native.html">client native</a>
-
-    <a href="console_plugin.html">console plugin</a>
-    <a href="console_native.html">console native</a>
-
-    <a href="password_plugin.html">password plugin</a>
-    <a href="password_native.html">password native</a>
-
-  </body>
+  <frameset rows="225, *">
+    <frame src="titleframe.html" marginheight="1">
+    <frameset cols="300, *">
+      <frame src="leftframe.html" marginwidth="1" scrolling="no">
+      <frame src="rightframe.html" name="mainwin">
+    </frameset>
+  </frameset>
 </html>
