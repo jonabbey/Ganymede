@@ -199,6 +199,8 @@ $ant = $ENV{GANT};
 
 if (!-f "$rootdir/jars/ganymedeServer.jar") {
   chdir("$rootdir/src");
+
+  print "\n\nBuilding Ganymede software with private SSL key material.\n\n";
   $result = system($ant, "jars");
 
   if ($result != 0) {

@@ -44,11 +44,7 @@ export GROOTDIR
 
 # Find perl (GPERL)
 
-guessperl=`which perl5`
-
- if test ! -r "$guessperl"; then
-  guessperl=`which perl`
- fi
+guessperl=`which perl`> /dev/null 2>&1
 
  if `$guessperl $GROOTDIR/scripts/versiontest.pl > /dev/null 2>&1`; then
 	GPERL=$guessperl
