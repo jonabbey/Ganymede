@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -128,9 +128,6 @@ public class DBObject {
   {
     Enumeration enum, enum2;
     Object key;
-    DBObjectBaseField definition;
-    short type;
-    boolean changed;
     DBField shadowField, origField;
 
     /* -- */
@@ -153,8 +150,6 @@ public class DBObject {
 	  }
 	else
 	  {
-	    changed = false;	   
-
 	    origField = (DBField) fields.get(key);
 	    shadowField = (DBField) shadowObject.fields.get(key);
 
