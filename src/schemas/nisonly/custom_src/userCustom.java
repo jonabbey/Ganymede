@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,22 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
-public class userCustom extends DBEditObject implements SchemaConstants {
+/**
+ *
+ * This class is the custom plug-in to handle the user object type in the
+ * Ganymede server.  It does special validations of operations on the user,
+ * handles inactivation and reactivation logic, and generates Wizards as
+ * needed.<br>
+ *
+ * <br>See the userSchema.java file for a list of field definitions that this
+ * module expects to work with.<br>
+ *
+ * @see arlut.csd.ganymede.custom.userSchema
+ * @see arlut.csd.ganymede.DBEditObject
+ *
+ */
+
+public class userCustom extends DBEditObject implements SchemaConstants, userSchema {
   
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
@@ -35,16 +50,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   // ---
 
   QueryResult groupChoices = null;
-
-  /**
-   *
-   * This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * user's name interposed.
-   *
-   */
 
   /**
    *
@@ -114,7 +119,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
     // need to find a uid for this user
 
-    NumericDBField numField = (NumericDBField) getField((short) 256);
+    NumericDBField numField = (NumericDBField) getField(UID);
 
     if (numField == null)
       {
@@ -162,7 +167,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    if (field.getID() == 271)	// auxiliary volume mappings
+    if (field.getID() == VOLUMES)	// auxiliary volume mappings
       {
 	fieldDef = field.getFieldDef();
 
@@ -276,7 +281,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	// ok, we want to null the password field and set the
 	// removal time to current time + 3 months.
 
-	passfield = (PasswordDBField) getField(SchemaConstants.UserPassword);
+	passfield = (PasswordDBField) getField(userSchema.PASSWORD);
 	retVal = passfield.setCryptPass(null); // we know our schema uses crypted pass'es
 
 	if (retVal != null && !retVal.didSucceed())
@@ -287,7 +292,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	// set the shell to /bin/false
 	
-	stringfield = (StringDBField) getField((short) 263);
+	stringfield = (StringDBField) getField(LOGINSHELL);
 	retVal = stringfield.setValue("/bin/false");
 
 	if (retVal != null && !retVal.didSucceed())
@@ -300,7 +305,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (forward != null)
 	  {
-	    stringfield = (StringDBField) getField((short) 269);
+	    stringfield = (StringDBField) getField(EMAILTARGET);
 	
 	    while (stringfield.size() > 0)
 	      {
@@ -440,7 +445,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (reactivateWizard.password != null && reactivateWizard.password.length() != 0)
 	  {
-	    passfield = (PasswordDBField) getField(SchemaConstants.UserPassword);
+	    passfield = (PasswordDBField) getField(userSchema.PASSWORD);
 	    retVal = passfield.setPlainTextPass(reactivateWizard.password);
 	    
 	    if (retVal != null && !retVal.didSucceed())
@@ -475,7 +480,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (reactivateWizard.shell != null)
 	  {
-	    stringfield = (StringDBField) getField((short) 263);
+	    stringfield = (StringDBField) getField(LOGINSHELL);
 	    retVal = stringfield.setValue(reactivateWizard.shell);
 	    
 	    if (retVal != null && !retVal.didSucceed())
@@ -489,7 +494,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (reactivateWizard.forward != null)
 	  {
-	    stringfield = (StringDBField) getField((short) 269);
+	    stringfield = (StringDBField) getField(EMAILTARGET);
 	
 	    while (stringfield.size() > 0)
 	      {
@@ -539,7 +544,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   public Object obtainChoicesKey(DBField field)
   {
-    if (field.getID() == 265)
+    if (field.getID() == HOMEGROUP)
       {
 	return null;
       }
@@ -552,14 +557,14 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   /**
    *
    * This method provides a hook that a DBEditObject subclass
-   * can use to indicate whether a given field can only
+   * can use to indicate whether a given string field can only
    * choose from a choice provided by obtainChoiceList()
    *
    */
 
   public boolean mustChoose(DBField field)
   {
-    return (field.getID() == 268); // we want to force signature alias choosing
+    return (field.getID() == SIGNATURE); // we want to force signature alias choosing
   }
 
   /**
@@ -580,7 +585,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   {
     switch (field.getID())
       {
-      case 263:			// login shell
+      case LOGINSHELL:			// login shell
 
 	updateShellChoiceList();
 
@@ -591,12 +596,12 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	return shellChoices;
 
-      case 265:			// home group
+      case HOMEGROUP:			// home group
 
 	updateGroupChoiceList();
 	return groupChoices;
 	
-      case 268:			// signature alias
+      case SIGNATURE:			// signature alias
 
 	QueryResult result = new QueryResult();
 
@@ -609,7 +614,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	// signature alias without having the StringDBField for the
 	// signature alias reject the new name.
 
-	String name = (String) ((DBField) getField(SchemaConstants.UserUserName)).getNewValue();
+	String name = (String) ((DBField) getField(USERNAME)).getNewValue();
 
 	if (name != null)
 	  {
@@ -617,7 +622,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	  }
 	else
 	  {
-	    name = (String) ((DBField) getField(SchemaConstants.UserUserName)).getValue();
+	    name = (String) ((DBField) getField(USERNAME)).getValue();
 
 	    if (name != null)
 	      {
@@ -627,7 +632,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	// and any aliases defined
 
-	Vector values = ((DBField) getField((short)267)).getValues();
+	Vector values = ((DBField) getField(ALIASES)).getValues();
 
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -647,7 +652,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
       {
 	groupChoices = new QueryResult();
 	
-	Vector invids = getFieldValuesLocal((short) 264); // groups list
+	Vector invids = getFieldValuesLocal(GROUPLIST); // groups list
 	Invid invid;
 	
 	for (int i = 0; i < invids.size(); i++)
@@ -713,7 +718,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    if (field.getID() == SchemaConstants.UserUserName)
+    if (field.getID() == USERNAME)
       {
 	// if we are being told to clear the user name field, go ahead and
 	// do it.. we assume this is being done by user removal logic,
@@ -727,13 +732,13 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	// signature alias field will need to be rescanned,
 	// but we don't need to do the persona rename stuff.
 
-	sf = (StringDBField) getField(SchemaConstants.UserUserName); // old user name
+	sf = (StringDBField) getField(USERNAME); // old user name
 
 	oldName = (String) sf.getValueLocal();
 
 	if (oldName != null)
 	  {
-	    sf = (StringDBField) getField((short) 268); // signature alias
+	    sf = (StringDBField) getField(SIGNATURE); // signature alias
 
 	    // if the signature alias was the user's name, we'll want
 	    // to continue that.
@@ -744,7 +749,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	      }
 	  }
 
-	inv = (InvidDBField) getField(SchemaConstants.UserAdminPersonae);
+	inv = (InvidDBField) getField(PERSONAE);
 	
 	if (inv == null)
 	  {
@@ -824,7 +829,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
     System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
 
-    if (field.getID() == 264)
+    if (field.getID() == GROUPLIST)
       {
 	switch (operation)
 	  {
@@ -834,7 +839,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	    // rescan the choice list for the home group field
 
 	    result = new ReturnVal(true);
-	    result.addRescanField((short) 265);
+	    result.addRescanField(HOMEGROUP);
 	    groupChoices = null;
 	    return result;
 
@@ -846,12 +851,12 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	    int index = ((Integer) param1).intValue();
 
-	    Vector valueAry = getFieldValuesLocal((short) 264);
+	    Vector valueAry = getFieldValuesLocal(GROUPLIST);
 	    Invid delVal = (Invid) valueAry.elementAt(index);
 
 	    System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
 
-	    if (!delVal.equals(getFieldValueLocal((short) 265)))
+	    if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
 	      {
 		// whew, no big deal.. they are not removing the
 		// home group.  The client will need to rescan,
@@ -861,7 +866,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 				   " is the home group");
 
 		result = new ReturnVal(true);
-		result.addRescanField((short) 265);
+		result.addRescanField(HOMEGROUP);
 		groupChoices = null;
 		return result;
 	      }
@@ -928,10 +933,10 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    if ((field.getID() != SchemaConstants.UserUserName) ||
+    if ((field.getID() != USERNAME) ||
 	(operation != SETVAL))
       {
-	return null;		// by default, we just ok whatever
+	return null;		// by default, we just ok whatever else
       }
 
     if (field.getValue() == null)
