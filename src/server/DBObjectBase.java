@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -889,27 +889,30 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     out.println("<H3>" + object_name + "(" + type_code + ") label: " + getLabelFieldName() + "</H3><p>");
 
-    out.println("<h4>Built-in fields</h4>");
-    out.println("<table border>");
-    out.println("<tr>");
-    out.println("<th>Field Name</th> <th>Field ID</th> <th>Field Type</th>");
-    out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
-    out.println("</tr>");
-
-    enum = fieldHash.elements();
-
-    while (enum.hasMoreElements())
+    if (false)
       {
-	bf = (DBObjectBaseField) enum.nextElement();
-	if (bf.isBuiltIn())
+	out.println("<h4>Built-in fields</h4>");
+	out.println("<table border>");
+	out.println("<tr>");
+	out.println("<th>Field Name</th> <th>Field ID</th> <th>Field Type</th>");
+	out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
+	out.println("</tr>");
+	
+	enum = fieldHash.elements();
+	
+	while (enum.hasMoreElements())
 	  {
-	    out.println("<tr>");
-	    bf.printHTML(out);
-	    out.println("</tr>");
+	    bf = (DBObjectBaseField) enum.nextElement();
+	    if (bf.isBuiltIn())
+	      {
+		out.println("<tr>");
+		bf.printHTML(out);
+		out.println("</tr>");
+	      }
 	  }
+	out.println("</table>");
+	out.println("<br>");
       }
-    out.println("</table>");
-    out.println("<br>");
 
     out.println("<h4>Custom fields</h4>");
 
