@@ -1377,7 +1377,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public synchronized ReturnVal setPlainTextPass(String plaintext, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal, retVal2;
     DBEditObject eObj;
 
     /* -- */
@@ -1407,11 +1407,15 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject) owner).finalizeSetValue(this, null);
+    // we'll still retain our first retVal so that we can return
+    // advisory-only messages that the wizardHook generated, even if
+    // the finalizeSetValue() doesn't generate any.
 
-    if (retVal != null && !retVal.didSucceed())
+    retVal2 = ((DBEditObject) owner).finalizeSetValue(this, null);
+
+    if (retVal2 != null && !retVal2.didSucceed())
       {
-	return retVal;
+	return retVal2;
       }
 
     // reset all hashes to start things off
