@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -413,6 +413,48 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   /**
    *
+   * This static method is used to update the list of connnected users that
+   * appears in any admin consoles attached to the Ganymede server.
+   *
+   */
+
+  public static synchronized void refreshTasks()
+  {
+    Admin temp;
+    Vector scheduleHandles;
+
+    /* -- */
+    
+    if (Ganymede.scheduler == null)
+      {
+	return;
+      }
+    
+    scheduleHandles = Ganymede.scheduler.reportTaskInfo();
+
+    for (int i = 0; i < consoles.size(); i++)
+      {
+	temp = (Admin) consoles.elementAt(i);
+
+	if (temp == null)
+	  continue;
+
+	try
+	  {
+	    temp.changeTasks(scheduleHandles);
+	  }
+	catch (RemoteException ex)
+	  {
+	    Ganymede.debug("Couldn't update task list on an admin console" + ex);
+	    badConsoles.addElement(temp);
+	  }
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   *
    * This is the GanymedeAdmin constructor, used to create a new
    * server-side admin console attachment.
    *
@@ -439,6 +481,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     setState(admin);
     
     refreshUsers();
+    refreshTasks();
   }
 
   /**
@@ -579,6 +622,10 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	temp.forceOff("Server going down");
       }
 
+    // stop any background tasks running
+
+    Ganymede.scheduler.stop();
+
     for (int i = 0; i < consoles.size(); i++)
       {
 	atmp = (Admin) consoles.elementAt(i);
@@ -599,7 +646,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 					       null,
 					       null,
 					       null));
-    
     try
       {
 	Ganymede.log.close();
@@ -770,6 +816,31 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     GanymedeAdmin.setState("Normal Operation");
 
     return;
+  }
+
+  public boolean runTaskNow(String name)
+  {
+    return Ganymede.scheduler.runTaskNow(name);
+  }
+
+  public boolean stopTask(String name)
+  {
+    return Ganymede.scheduler.stopTask(name);
+  }
+
+  public boolean disableTask(String name)
+  {
+    return Ganymede.scheduler.disableTask(name);
+  }
+
+  public boolean enableTask(String name)
+  {
+    return Ganymede.scheduler.enableTask(name);
+  }
+  
+  public boolean rescheduleTask(String name, Date time, int interval)
+  {
+    return false;
   }
 
   /**

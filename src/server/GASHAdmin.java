@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,11 +30,14 @@ import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
 
+import java.io.*;
+
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
 
 import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
+import arlut.csd.Util.*;
 
 import jdj.PackageResources;
 
@@ -83,6 +86,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.err.println("Error: Didn't get server reference.  Exiting now.");
 	System.exit(0);
       }
+
 
     System.err.println("Got Admin");
   }
@@ -172,6 +176,104 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     frame.table.refreshTable();
   }
 
+  public void changeTasks(Vector tasks)
+  {
+    scheduleHandle handle;
+    String intervalString;
+
+    /* -- */
+
+    frame.taskTable.clearCells();
+
+    if (tasks == null)
+      {
+	System.err.println("null tasks");
+      }
+
+    System.err.println("changeTasks: tasks size = " + tasks.size());
+    
+    // Sort entries according to their incep date,
+    // to prevent confusion if new tasks are put into
+    // the server-side hashes, and as they are shuffled
+    // from hash to hash
+
+    (new VecQuickSort(tasks, 
+		      new arlut.csd.Util.Compare() 
+		      {
+			public int compare(Object a, Object b) 
+			  {
+			    scheduleHandle aH, bH;
+			    
+			    aH = (scheduleHandle) a;
+			    bH = (scheduleHandle) b;
+			    
+			    try
+			      {
+				if (aH.incepDate.before(bH.incepDate))
+				  {
+				    return -1;
+				  }
+				else if (aH.incepDate.after(bH.incepDate))
+				  {
+				    return 1;
+				  }
+				else
+				  {
+				    return 0;
+				  }
+			      }
+			    catch (NullPointerException ex)
+			      {
+				System.err.println("null incepDate in sort");
+				return 0;
+			      }
+			  }
+		      }
+		      )).sort();
+
+    // now reload the table with the current stats
+
+    for (int i = 0; i < tasks.size(); i++)
+      {
+	handle = (scheduleHandle) tasks.elementAt(i);
+
+	frame.taskTable.newRow(handle.name);
+	frame.taskTable.setCellText(handle.name, 0, handle.name, false); // task name
+
+	if (handle.isRunning)
+	  {
+	    frame.taskTable.setCellText(handle.name, 1, "Running", false);
+	    frame.taskTable.setCellColor(handle.name, 1, Color.green, false);
+	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	  }
+	else if (handle.suspend)
+	  {
+	    frame.taskTable.setCellText(handle.name, 1, "Suspended", false);
+	    frame.taskTable.setCellColor(handle.name, 1, Color.red, false);
+	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	  }
+	else
+	  {
+	    frame.taskTable.setCellText(handle.name, 1, "Scheduled", false);
+	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
+	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	  }
+
+	frame.taskTable.setCellText(handle.name, 2, handle.startTime.toString(), false);
+
+	if (handle.intervalString == null)
+	  {
+	    System.err.println("null intervalString");
+	  }
+
+	frame.taskTable.setCellText(handle.name, 3, handle.intervalString, false);
+      }
+
+    // And refresh our table
+
+    frame.taskTable.refreshTable();
+  }
+
   public void disconnect() throws RemoteException
   {
     aSession.logout();
@@ -197,6 +299,26 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   void kill(String username) throws RemoteException
   {
     aSession.kill(username);
+  }
+
+  void runTaskNow(String taskName) throws RemoteException
+  {
+    aSession.runTaskNow(taskName);
+  }
+
+  void stopTask(String taskName) throws RemoteException
+  {
+    aSession.stopTask(taskName);
+  }
+
+  void disableTask(String taskName) throws RemoteException
+  {
+    aSession.disableTask(taskName);
+  }
+
+  void enableTask(String taskName) throws RemoteException
+  {
+    aSession.enableTask(taskName);
   }
 
   // ------------------------------------------------------------
@@ -301,6 +423,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   static iAdmin admin = null;
   static boolean WeAreApplet = true;
+  static String debugFilename = null;
 
   /* - */
 
@@ -323,6 +446,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem killUserMI = null;
 
   JPanel topPanel = null;
+
+  JTabbedPane tabPane = null;
 
   StringDialog
     shutdownDialog = null,
@@ -357,12 +482,27 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JTextField locksField = null;
 
   JTextArea statusArea = null;
+
+  // resources for the users connected table
   
   rowTable table = null;
 
   String url = "rmi://www.arlut.utexas.edu/ganymede.server";
   String headers[] = {"User", "System", "Status", "Connect Time", "Last Event"};
   int colWidths[] = {100,100,100,100,100};
+
+  // resources for the task monitor table
+
+  rowTable taskTable = null;
+
+  String taskHeaders[] = {"Task", "Status", "Next Run", "Interval"};
+  int taskColWidths[] = {120,120,120,120};
+
+  JPopupMenu taskPopMenu = null;
+  JMenuItem runNowMI = null;
+  JMenuItem stopTaskMI = null;
+  JMenuItem disableTaskMI = null;
+  JMenuItem enableTaskMI = null;
   
   /* -- */
 
@@ -415,10 +555,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     setJMenuBar(mbar);
 
-    popMenu = new JPopupMenu();
-
-    killUserMI = new JMenuItem("Kill User");
-    popMenu.add(killUserMI);
 
     question = PackageResources.getImageResource(this, "question.gif", getClass());
 
@@ -681,18 +817,54 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     topGBL.setConstraints(statusBox, topGBC);
     getContentPane().add(statusBox);
 
-    // and our bottom user table
+    // bottom area, a tab pane with tables for things
+
+    // create our user table
+
+    popMenu = new JPopupMenu();
+
+    killUserMI = new JMenuItem("Kill User");
+    popMenu.add(killUserMI);
 
     table = new rowTable(colWidths, headers, this, false, popMenu);
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
     tableBox.setBorder(new TitledBorder("Users Connected"));
 
-    // we'll add the table box with the same GridBagConstraints as
-    // the text area had
+    // create background task monitor
 
-    topGBL.setConstraints(tableBox, topGBC);
-    getContentPane().add(tableBox);
+    taskPopMenu = new JPopupMenu();
+
+    runNowMI = new JMenuItem("Run Task Now");
+    stopTaskMI = new JMenuItem("Stop Running Task");
+    disableTaskMI = new JMenuItem("Disable Task");
+    enableTaskMI = new JMenuItem("Enable Task");
+
+    taskPopMenu.add(runNowMI);
+    taskPopMenu.add(stopTaskMI);
+    taskPopMenu.add(disableTaskMI);
+    taskPopMenu.add(enableTaskMI);
+
+    taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu);
+    taskTable.setHeadBackColor(Color.red, false);
+
+    JPanel taskBox = new JPanel(new java.awt.BorderLayout());
+    taskBox.add("Center", taskTable);
+    taskBox.setBorder(new TitledBorder("Task Monitor"));
+
+    // and put them into our tab pane
+
+    tabPane = new JTabbedPane();
+    tabPane.addTab("Users Connected", tableBox);
+    tabPane.addTab("Task Monitor", taskBox);
+
+    // and put the tab pane into our frame with the
+    // same constraints that the text area had
+
+    topGBL.setConstraints(tabPane, topGBC);
+    getContentPane().add(tabPane);
+
+    // pack and load
 
     pack();
     show();
@@ -700,6 +872,18 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     /* RMI initialization stuff. We do this for our iClient object. */
 
     System.setSecurityManager(new RMISecurityManager());
+
+    if (debugFilename != null)
+      {
+	try
+	  {
+	    RemoteServer.setLog(new FileOutputStream(debugFilename));
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("couldn't open RMI debug log: " + ex);
+	  }
+      }
 
     /* Get a reference to the server */
 
@@ -925,42 +1109,85 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   public void rowMenuPerformed(Object key, ActionEvent e)
   {
-
     System.err.println("rowMenuPerformed");
 
     if (e.getSource() == killUserMI)
       {
 	System.err.println("kill " + key + " selected");
-      }
 
-    killVictim = (String) key;
+	killVictim = (String) key;
 
-    killDialog = new StringDialog(this,
-				  "Confirm User Kill",
-				  "Are you sure you want to disconnect user " + key + "?",
-				  "Yes", "No", question);
+	killDialog = new StringDialog(this,
+				      "Confirm User Kill",
+				      "Are you sure you want to disconnect user " + key + "?",
+				      "Yes", "No", question);
 
-    if (killDialog.DialogShow() != null)
-      {
-	System.err.println("Affirmative kill request");
-
-	if (killVictim != null)
+	if (killDialog.DialogShow() != null)
 	  {
-	    try
+	    System.err.println("Affirmative kill request");
+
+	    if (killVictim != null)
 	      {
-		admin.kill(killVictim);
+		try
+		  {
+		    admin.kill(killVictim);
+		  }
+		catch (RemoteException ex)
+		  {
+		    admin.forceDisconnect("Couldn't talk to server" + ex);
+		  }
 	      }
-	    catch (RemoteException ex)
-	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
-	      }
+	    killVictim = null;
 	  }
-	killVictim = null;
+	else
+	  {
+	    System.err.println("Negative kill request");
+	    killVictim = null;
+	  }
       }
-    else
+    else if (e.getSource() == runNowMI)
       {
-	System.err.println("Negative kill request");
-	killVictim = null;
+	try
+	  {
+	    admin.runTaskNow((String) key);
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	  }
+      }
+    else if (e.getSource() == stopTaskMI)
+      {
+	try
+	  {
+	    admin.stopTask((String) key);
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	  }
+      }
+    else if (e.getSource() == disableTaskMI)
+      {
+	try
+	  {
+	    admin.disableTask((String) key);
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	  }
+      }
+    else if (e.getSource() == enableTaskMI)
+      {
+	try
+	  {
+	    admin.enableTask((String) key);
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	  }
       }
   }
 
@@ -993,6 +1220,11 @@ public class GASHAdmin extends JApplet {
 
   public static void main(String[] argv)
   {
+    if (argv.length > 0)
+      {
+	GASHAdminFrame.debugFilename = argv[1];
+      }
+
     frame = new GASHAdminFrame("Ganymede Admin Console", false);
   }
 }

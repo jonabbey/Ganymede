@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,6 +86,8 @@ public class GanymedeScheduler extends Thread {
   Date nextAction = null;
   private Hashtable currentlyScheduled = new Hashtable();
   private Hashtable currentlyRunning = new Hashtable();
+  private Vector taskList = new Vector();	// for reporting to admin consoles
+  private boolean taskListInitialized = false;
   private boolean reportTasks;
 
   /**
@@ -294,6 +296,8 @@ public class GanymedeScheduler extends Thread {
 
 	handle.stop();
 
+	updateTaskInfo(true);
+
 	return true;
       }
   }
@@ -330,6 +334,7 @@ public class GanymedeScheduler extends Thread {
     else
       {
 	handle.disable();
+	updateTaskInfo(true);
 	return true;
       }
   }
@@ -368,6 +373,7 @@ public class GanymedeScheduler extends Thread {
     else
       {
 	handle.enable();
+	updateTaskInfo(true);
 	return true;
       }
   }
@@ -426,12 +432,12 @@ public class GanymedeScheduler extends Thread {
 	if (interval > 0)
 	  {
 	    changed = true;
-	    handle.interval = interval;
+	    handle.setInterval(interval);
 	  }
 
 	if (changed)
 	  {
-	    updateTaskInfo();
+	    updateTaskInfo(true);
 	  }
 
 	return changed;
@@ -595,8 +601,8 @@ public class GanymedeScheduler extends Thread {
 	System.err.println("Ganymede Scheduler: running " + handle.name);
 
 	currentlyRunning.put(handle.name, handle);
-	updateTaskInfo();	// update first, so the console sees it before the task completes
 	handle.runTask();
+	updateTaskInfo(true);
       }
   }
 
@@ -623,6 +629,10 @@ public class GanymedeScheduler extends Thread {
 
 	if (handle.startTime.after(new Date()))
 	  {
+	    scheduleTask(handle);
+	  }
+	else
+	  {
 	    if (handle.reschedule())
 	      {
 		System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
@@ -631,7 +641,7 @@ public class GanymedeScheduler extends Thread {
 	      }
 	  }
 
-	updateTaskInfo();
+	updateTaskInfo(true);
       }
     else
       {
@@ -704,31 +714,47 @@ public class GanymedeScheduler extends Thread {
    *
    */
 
-  private synchronized void updateTaskInfo()
+  private synchronized void updateTaskInfo(boolean updateConsoles)
   {
-    if (reportTasks)
-      {
-	Enumeration enum;
-	Vector handles = new Vector();
+    Enumeration enum;
 
-	/* -- */
+    /* -- */
+
+    if (reportTasks)
+      {    
+	taskList.setSize(0);
 
 	enum = currentlyScheduled.elements();
-
+    
 	while (enum.hasMoreElements())
 	  {
-	    handles.addElement(enum.nextElement());
+	    taskList.addElement(enum.nextElement());
 	  }
     
 	enum = currentlyRunning.elements();
-
+    
 	while (enum.hasMoreElements())
 	  {
-	    handles.addElement(enum.nextElement());
+	    taskList.addElement(enum.nextElement());
 	  }
 
-	GanymedeAdmin.refreshTasks(handles);
+	taskListInitialized = true;
+
+	if (updateConsoles)
+	  {
+	    GanymedeAdmin.refreshTasks();
+	  }
       }
+  }
+
+  synchronized Vector reportTaskInfo()
+  {
+    if (!taskListInitialized)
+      {
+	updateTaskInfo(false);
+      }
+
+    return taskList;
   }
 }
 

@@ -6,7 +6,7 @@
    Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,14 +39,18 @@ public class scheduleHandle implements java.io.Serializable {
 
   // we pass these attributes along to the admin console for it to display
 
-  boolean isRunning = false;
-  boolean suspend = false;
+  boolean isRunning;
+  boolean suspend;
   Date startTime;
-  int interval;			// 0 if this is a one-shot, otherwise, the count in minutes
+  Date incepDate;		// when was this task first registered?  used to present a
+				// consistent list on the client
+
+  String intervalString;
   String name;
 
   // non-serializable, for use on the server only
 
+  transient int interval;			// 0 if this is a one-shot, otherwise, the count in minutes
   transient Runnable task;
   transient Thread thread, monitor;
   transient GanymedeScheduler scheduler = null;
@@ -69,9 +73,12 @@ public class scheduleHandle implements java.io.Serializable {
 
     this.scheduler = scheduler;
     this.startTime = time;
-    this.interval = interval;
     this.task = task;
     this.name = name;
+
+    setInterval(interval);
+
+    incepDate = new Date();
   }
 
   /**
@@ -174,6 +181,8 @@ public class scheduleHandle implements java.io.Serializable {
 
     monitor.stop();
     thread.stop();
+
+    isRunning = false;
   }
 
   /**
@@ -206,6 +215,122 @@ public class scheduleHandle implements java.io.Serializable {
       }
 
     suspend = false;
+  }
+
+  /**
+   *
+   * Server-side method to change the interval for this task
+   *
+   */
+
+  synchronized void setInterval(int interval)
+  {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
+    // set the interval time
+
+    this.interval = interval;
+
+    if (interval == 0)
+      {
+	intervalString = "n/a";
+	return;
+      }
+
+    // ok, we need to calculate a description for how long
+    // between invocations of this task
+
+    StringBuffer buff = new StringBuffer();
+
+    int minutes = 0;
+    int hours = 0;
+    int days = 0;
+    int weeks = 0;
+
+    int temp = interval;
+
+    weeks = temp / 10080;    temp %= 10080;
+    days = temp / 1440;    temp %= 1440;
+    hours = temp / 60;    temp %= 60;
+    minutes = temp;
+
+    if (weeks != 0)
+      {
+	buff.append(String.valueOf(weeks));
+
+	if (weeks > 1)
+	  {
+	    buff.append(" weeks");
+	  }
+	else
+	  {
+	    buff.append(" week");
+	  }
+      }
+
+    if (days != 0)
+      {
+	if (buff.length() != 0)
+	  {
+	    buff.append(", ");
+	  }
+
+	buff.append(String.valueOf(days));
+
+	if (days > 1)
+	  {
+	    buff.append(" days");
+	  }
+	else
+	  {
+	    buff.append(" day");
+	  }
+      }
+
+    if (hours != 0)
+      {
+	if (buff.length() != 0)
+	  {
+	    buff.append(", ");
+	  }
+
+	buff.append(String.valueOf(hours));
+
+	if (hours > 1)
+	  {
+	    buff.append(" hours");
+	  }
+	else
+	  {
+	    buff.append(" hour");
+	  }
+      }
+
+    if (minutes != 0)
+      {
+	if (buff.length() != 0)
+	  {
+	    buff.append(", ");
+	  }
+
+	buff.append(String.valueOf(minutes));
+
+	if (minutes > 1)
+	  {
+	    buff.append(" minutes");
+	  }
+	else
+	  {
+	    buff.append(" minute");
+	  }
+      }
+
+    // and set the string
+
+    intervalString = buff.toString();
   }
 }
 
