@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.157 $
-   Last Mod Date: $Date: 2001/11/05 20:57:51 $
+   Version: $Revision: 1.158 $
+   Last Mod Date: $Date: 2001/11/05 21:59:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.157 $ $Date: 2001/11/05 20:57:51 $ $Name:  $
+ * @version $Revision: 1.158 $ $Date: 2001/11/05 21:59:28 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2070,87 +2070,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	boolean editOnly = !choiceListHasExceptions(field);
 
-	Query myQuery = new Query(baseId, root, editOnly); // filtered by default
-
-	return editset.getSession().getGSession().query(myQuery, this);
-      }
-    
-    //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
-
-    return null;
-  }
-
-  /**
-   * <p>This method provides a hook to allow choice lists for Invid
-   * fields that may have the list of choices returned filtered
-   * by the GanymedeSession's list of owner filters.  This method
-   * is directly called by InvidDBField.choices() if and only if a NON-filtered
-   * choice list is desired.  If a filtered choice list is desired,
-   * InvidDBField.choices() will call the single parameter obtainChoiceList()
-   * method.  Likewise, StringDBField will call the single parameter
-   * obtainChoiceList() method.  This enables users to simply override
-   * the single parameter obtainChoiceList() method, but at the cost
-   * of a failure to function reasonably if a non-filtered choice list
-   * is desired.</p>
-   *
-   * <p>That is, this two parameter version is the best
-   * obtainChoiceList method to override, but if you have old plug-ins
-   * that override the single parameter obtainChoiceList method, it
-   * will generally work, as the client currently wants standard
-   * filtered Invid choice lists in all cases except owner list
-   * choices.</p>
-   *
-   * <p>NOTE: This method does not need to be synchronized.  Making this
-   * synchronized can lead to DBEditObject/DBSession nested monitor
-   * deadlocks.</p>
-   *
-   * @param applyFilter If true, the list of choices provided for the
-   * given field will have owner filters applied to it if it is an
-   * Invid choice list.
-   */
-
-  public QueryResult obtainChoiceList(DBField field, boolean applyFilter)
-  {
-    if (field.isEditable() && (field instanceof InvidDBField) && 
-	!field.isEditInPlace())
-      {
-	DBObjectBaseField fieldDef;
-	short baseId;
-
-	/* -- */
-
-	fieldDef = field.getFieldDef();
-	
-	baseId = fieldDef.getTargetBase();
-
-	if (baseId < 0)
-	  {
-	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
-	    return null;
-	  }
-
-	// and we want to return a list of choices.. can use the regular
-	// query output here
-
-	QueryNode root;
-
-	// if we are pointing to objects of our own type, we don't want ourselves to be
-	// a valid choice by default.. (DBEditObject subclasses can override this, of course)
-
-	if (baseId == getTypeID())
-	  {
-	    root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
-	  }
-	else
-	  {
-	    root = null;
-	  }
-
-	boolean editOnly = !choiceListHasExceptions(field);
-
 	Query myQuery = new Query(baseId, root, editOnly);
 
-	myQuery.setFiltered(applyFilter); // filtered?  maybe not!
+	myQuery.setFiltered(false); // be sure not to filter the query
 
 	return editset.getSession().getGSession().query(myQuery, this);
       }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.248 $
-   Last Mod Date: $Date: 2001/10/31 02:07:15 $
+   Version: $Revision: 1.249 $
+   Last Mod Date: $Date: 2001/11/05 21:59:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.248 $ $Date: 2001/10/31 02:07:15 $
+ * @version $Revision: 1.249 $ $Date: 2001/11/05 21:59:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2868,6 +2868,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (debug)
       {
 	Ganymede.debug("dump(): completed processing, returning buffer");
+      }
+
+    return result;
+  }
+
+  /**
+   * <p>This method applies this GanymedeSession's current owner filter
+   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
+   * with any object handles that are not matched by the filter
+   * stripped.</p>
+   */
+
+  public QueryResult filterQueryResult(QueryResult qr)
+  {
+    QueryResult result = new QueryResult(qr.isForTransport());
+    ObjectHandle handle;
+
+    /* -- */
+
+    Vector handles = qr.getHandles();
+
+    for (int i = 0; i < handles.size(); i++)
+      {
+	handle = (ObjectHandle) handles.elementAt(i);
+
+	Invid invid = handle.getInvid();
+
+	if (invid != null)
+	  {
+	    DBObject obj = session.viewDBObject(invid);
+
+	    if (filterMatch(obj))
+	      {
+		result.addRow(handle);
+	      }
+	  }
       }
 
     return result;

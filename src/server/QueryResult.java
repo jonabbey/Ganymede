@@ -8,8 +8,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/03/07 23:04:05 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2001/11/05 21:59:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -360,6 +360,11 @@ public class QueryResult implements java.io.Serializable {
       }
 
     return ((ObjectHandle) handles.elementAt(row)).getLabel();
+  }
+
+  public boolean isForTransport()
+  {
+    return forTransport;
   }
 
   public int size()
