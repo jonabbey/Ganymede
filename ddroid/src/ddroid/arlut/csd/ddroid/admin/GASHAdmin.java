@@ -272,7 +272,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridheight = 1;
-    gbc.insets = new Insets(1,1,0,0);
 
     if (admin_logo != null)
       {
@@ -303,6 +302,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     labelPanel.add("South", hostLabel);
 
+    gbc.insets = new Insets(1,1,0,0);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;

@@ -314,7 +314,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridheight = 1;
-    gbc.insets = new Insets(1,1,0,0);
 
     loginBox.setLayout(gbl);
 
@@ -344,6 +343,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     labelPanel.add("South", hostLabel);
 
+    gbc.insets = new Insets(1,1,0,0);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
@@ -357,7 +357,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // trap the login/quit buttons, and query these
     // fields when we process the buttons.
 
-    //gbc.insets = new Insets(2,2,2,2);
     gbc.ipady = 4;
 
     JLabel userL = new JLabel("Username:");
@@ -394,7 +393,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(passwd, gbc);
     loginBox.add(passwd);
 
-    //gbc.insets = new Insets(0,0,0,0);
     gbc.ipady = 0;
     
     _quitButton = new JButton("Quit");
