@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.10 $
-# $Date: 2001/01/09 17:27:00 $
+# $Revision: 1.11 $
+# $Date: 2001/01/09 19:04:50 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -96,7 +96,7 @@ foreach $step (@steps) {
       $success = 1;
     }
 
-    if ($step eq "HTMLINSTALL") {
+    if ($step eq "HTMLINSTALL" || $step eq "XMLPATH") {
       $vars{$step} = &canonify($vars{$step});
 
       if ($vars{$step} !~ /^\//) {
@@ -212,7 +212,7 @@ sub install_file{
       s/#SERVERHOST/$vars{"SYSTEMNAME"}/g;
       s/#REGISTRYPORT/$vars{"REGISTRYPORT"}/g;
       s/<#XMLPATH#>/$vars{"XMLPATH"}/g;
-      s/<#PERLEXE#>/$perlloc/g;
+      s/<##PERLEXE##>/$perlloc/g;
       print OUTPUT $_;
   }
 
