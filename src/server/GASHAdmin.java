@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/07/08 04:27:43 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/07/08 05:01:31 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -194,7 +194,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     if (WeAreApplet)
       {
 	loadParameters();
-
       }
 
     getContentPane().setLayout(new BorderLayout());
@@ -439,13 +438,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  }
 	catch (RemoteException rx)
 	  {
-	    System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
+	    new StringDialog(new JFrame(),
+			     "Login error",
+			     "Couldn't log in to the Ganymede server... perhaps it is down?\n\nException: " + 
+			     rx.getMessage(),
+			     "OK", null).DialogShow();
 	  }
 
 	if (admin == null)
 	  {
 	    password.setText("");
 	    System.out.println("Could not get admin.");
+	    return;
 	  }
 
 	username.setText("");
