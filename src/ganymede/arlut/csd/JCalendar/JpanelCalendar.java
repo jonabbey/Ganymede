@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -69,6 +69,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -89,6 +90,7 @@ import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -105,11 +107,24 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
   static final boolean debug = false;
 
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JCalendar.JpanelCalendar");
+
+  /**
+   * <p>Localized DateFormatSymbols for us to use appropriate month
+   * and week day strings.</p>
+   */
+
+  static final DateFormatSymbols symbolTable = new DateFormatSymbols();
+
   static final int leapDays[] = {31,29,31,30,31,30,31,31,30,31,30,31};
   static final int monthDays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-  static final String[] month_names = {"January", "February", "March", "April", 
-				       "May", "June", "July", "August",
-				       "September", "October", "November", "December"};
+  static final String[] month_names = symbolTable.getMonths();
+
   // ---
 
   /**
@@ -259,7 +274,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     pCal = pC;
     
-    closeButton = new JButton("Close");
+    closeButton = new JButton(ts.l("init.closeButton")); // "Close"
     buttonPanel.add(closeButton,"East");
 
     closeButton.addActionListener(this);
@@ -339,7 +354,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbc.insets = new Insets(0,2,0,2);
 
     gbc.gridy = 1;
-    JLabel sun = new JLabel("SUN");
+    JLabel sun = new JLabel(symbolTable.getShortWeekdays()[Calendar.SUNDAY]);
     sun.setFont(todayFont);
     sun.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 0;
@@ -347,42 +362,42 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbl.setConstraints(sun, gbc);
     centerPanel.add(sun);
 
-    JLabel mon = new JLabel("MON");
+    JLabel mon = new JLabel(symbolTable.getShortWeekdays()[Calendar.MONDAY]);
     mon.setFont(todayFont);
     mon.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 1;
     gbl.setConstraints(mon, gbc);
     centerPanel.add(mon);
 
-    JLabel tue = new JLabel("TUE");
+    JLabel tue = new JLabel(symbolTable.getShortWeekdays()[Calendar.TUESDAY]);
     tue.setFont(todayFont);
     tue.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 2;
     gbl.setConstraints(tue, gbc);
     centerPanel.add(tue);
 
-    JLabel wed = new JLabel("WED");
+    JLabel wed = new JLabel(symbolTable.getShortWeekdays()[Calendar.WEDNESDAY]);
     wed.setFont(todayFont);
     wed.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 3;
     gbl.setConstraints(wed, gbc);
     centerPanel.add(wed);
 
-    JLabel thu = new JLabel("THU");
+    JLabel thu = new JLabel(symbolTable.getShortWeekdays()[Calendar.THURSDAY]);
     thu.setFont(todayFont);
     thu.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 4;
     gbl.setConstraints(thu, gbc);
     centerPanel.add(thu);
 
-    JLabel fri = new JLabel("FRI");
+    JLabel fri = new JLabel(symbolTable.getShortWeekdays()[Calendar.FRIDAY]);
     fri.setFont(todayFont);
     fri.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 5;
     gbl.setConstraints(fri, gbc);
     centerPanel.add(fri);
 
-    JLabel sat = new JLabel("SAT");
+    JLabel sat = new JLabel(symbolTable.getShortWeekdays()[Calendar.SATURDAY]);
     sat.setFont(todayFont);
     sat.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 6;
@@ -423,11 +438,13 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
 	if (editable)
 	  {
-	    timePanel.setBorder(new TitledBorder("Please choose a time of day:"));
+	    // "Please choose a time of day:"
+	    timePanel.setBorder(new TitledBorder(ts.l("init.chooseTitle")));
 	  }
 	else
 	  {
-	    timePanel.setBorder(new TitledBorder("Time of day:"));
+	    // "Time of day:"
+	    timePanel.setBorder(new TitledBorder(ts.l("init.displayTitle")));
 	  }
 
 	southPanel.add(timePanel,"Center");
@@ -866,17 +883,17 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	throw new IllegalArgumentException("_field is null");
       }
 
-    if (_field.equals("hour") ) 
+    if (_field.equals(ts.l("timeChanged.hour")) )
       {
 	visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
 	selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
       }
-    else if (_field.equals("min")) 
+    else if (_field.equals(ts.l("timeChanged.min"))) 
       {
 	visibleDate_calendar.set(Calendar.MINUTE,_value);
 	selectedDate_calendar.set(Calendar.MINUTE,_value);
       }
-    else if (_field.equals("sec")) 
+    else if (_field.equals(ts.l("timeChanged.sec"))) 
       {
 	visibleDate_calendar.set(Calendar.SECOND,_value);
 	selectedDate_calendar.set(Calendar.SECOND,_value);
@@ -891,10 +908,12 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
 	  {
 	    // constructing a JErrorDialog causes it to be shown.
-	    
+
+	    // "Date Out Of Range"	    
+	    // "The date you have chosen is out of the acceptable range."
 	    new JErrorDialog(new JFrame(),
-			     "Date Out Of Range",
-			     "The date you have chosen is out of the acceptable range.");
+			     ts.l("timeChanged.dateRangeError"), 
+			     ts.l("timeChanged.dateRangeErrorText"));
 	    
 	    setDate(previousDate);
 	  }
@@ -1058,6 +1077,13 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 
 class JTimePanel extends JPanel implements JsetValueCallback {
 
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JCalendar.JTimePanel");
+
   JpanelCalendar container;
 
   JnumberField _hour = null;
@@ -1113,7 +1139,7 @@ class JTimePanel extends JPanel implements JsetValueCallback {
     p.add(_sec);
     
     JPanel panel = new JPanel(new BorderLayout());
-    panel.add("West", new JLabel("Time:"));
+    panel.add("West", new JLabel(ts.l("init.timeLabel"))); // "Time:"
     panel.add("Center", p);
     
     add(panel);
@@ -1165,15 +1191,15 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
     if (comp == _hour)
       {
-	container.timeChanged("hour",val);
+	container.timeChanged(ts.l("setValuePerformed.hour"),val); // "hour"
       }
     else if (comp == _min)
       {
-	container.timeChanged("min",val);
+	container.timeChanged(ts.l("setValuePerformed.min"),val); // "min"
       }
     else 
       {
-	container.timeChanged("sec",val);
+	container.timeChanged(ts.l("setValuePerformed.sec"),val); // "sec"
       }
 
     return true;
