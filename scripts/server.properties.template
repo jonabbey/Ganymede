@@ -243,14 +243,6 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 ganymede.loghelper=/var/ganymede/bin/logscan.pl
 
 
-# ganymede.schemaDirectory
-#
-# The directory where the schema's schema.properties and
-# custom.jar file are located.
-
-ganymede.schemaDirectory=/server-install/schema
-
-
 # ------------------------------------------------------------
 #
 # NIS/GASH Builder Properties

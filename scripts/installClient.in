@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.11 $
-# $Date: 2000/07/13 20:17:57 $
+# $Revision: 1.12 $
+# $Date: 2000/07/25 00:33:11 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -141,7 +141,7 @@ if (!-d $vars{"CLIENTINSTALL"}) {
   print "Found the client install directory ok\n";
 
   if (-f $vars{"CLIENTINSTALL"}/ganymede.properties) {
-    die "*Error, can't install client into $vars{"CLIENTINSTALL"}.. server installed in this directory.";
+    die "*Error, can't install client into ".$vars{"CLIENTINSTALL"}.".. server installed in this directory.";
   }
 }
 
