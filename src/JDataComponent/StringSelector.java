@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2003/01/31 00:41:52 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2003/01/31 00:49:01 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -97,7 +97,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.50 $ $Date: 2003/01/31 00:41:52 $ $Name:  $
+ * @version $Revision: 1.51 $ $Date: 2003/01/31 00:49:01 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -474,20 +474,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>This method handles updating the item counts in the in and out displays.</p>
-   */
-
-  private void updateTitles()
-  {
-    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
-
-    if (out != null)
-      {
-	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
-      }
-  }
-
-  /**
    * <p>This method attaches popup menus to the in box and out
    * box.</p>
    */
@@ -680,6 +666,43 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>Returns a Vector of {@link arlut.csd.JDataComponent.listHandle listHandle}
+   * objects corresponding to the currently selected members.</p>
+   */
+
+  public Vector getChosenHandles()
+  {
+    return in.getHandles();
+  }
+
+  /**
+   * <p>Returns a Vector of Strings corresponding to the currently
+   * selected members.</p> 
+   */
+
+  public Vector getChosenStrings()
+  {
+    Vector inVector = in.getHandles();
+    Vector result = new Vector();
+
+    if (inVector == null)
+      {
+	return result;
+      }
+
+    for (int i = 0; i < inVector.size(); i++)
+      {
+	listHandle handle = (listHandle) inVector.elementAt(i);
+
+	result.addElement(handle.toString());
+      }
+    
+    return result;
+  }
+
+  // ActionListener methods -------------------------------------------------
+
+  /**
    *
    * This method handles events from the Add and Remove
    * buttons, and from hitting enter/loss of focus in the
@@ -739,11 +762,116 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
   }
 
+  // JsetValueCallback methods -------------------------------------------------
+
+  public boolean setValuePerformed(JValueObject o)
+  {
+    if (o.getSource() == custom)
+      {
+	if (!editable)
+	  {
+	    return false;
+	  }
+
+	addCustom.doClick();
+	return true;
+      }
+    else if (o.getOperationType() == JValueObject.PARAMETER)  // from the popup menu
+      {
+	if (my_callback != null)
+	  {
+	    try
+	      {
+		my_callback.setValuePerformed(new JValueObject(this,
+							     o.getIndex(),
+							     JValueObject.PARAMETER,
+							     o.getValue(),
+							     o.getParameter()));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		System.out.println("could not setValuePerformed from StringSelector: " + rx);
+	      }
+
+	    return true;
+	  }	
+      }
+    else if (o.getSource() == in)
+      {
+	if (!editable)
+	  {
+	    return false;
+	  }
+
+	if (o.getOperationType() == JValueObject.INSERT)
+	  {
+	    remove.doClick();
+	    return true;
+	  }
+	else if (o.getOperationType() == JValueObject.ADD)		// selection
+	  {
+	    if (add != null)
+	      {
+		add.setEnabled(false);
+	      }
+
+	    if (remove != null)
+	      {
+		remove.setEnabled(true);
+	      }
+
+	    if (out != null)
+	      {
+		out.clearSelection();
+	      }
+	    
+	    return true;
+	  }
+      }
+    else if (o.getSource() == out)
+      {
+	if (o.getOperationType() == JValueObject.INSERT)
+	  {
+	    add.doClick();
+	    return true;
+	  }
+	else if (o.getOperationType() == JValueObject.ADD)
+	  {
+	    add.setEnabled(true);
+	    remove.setEnabled(false);
+	    in.clearSelection();
+	    custom.setText("");
+
+	    return true;
+	  }
+      }
+    else
+      {	
+	if (!editable)
+	  {
+	    return false;
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("set value in stringSelector");
+	  }
+	
+	System.out.println("Unknown object generated setValuePerformed in stringSelector.");
+	
+	return false;
+      }
+
+    return false;  // should never really get here.
+  }
+
+  // Private methods ------------------------------------------------------------
+
   /**
    * <p>This method moves one or more selected items from the out list to the in list.</p>
    */
 
-  void addItems()
+  private void addItems()
   {
     boolean ok = false;
     Vector handles;
@@ -847,7 +975,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * <p>This method moves one or more selected items from the in list to the out list.</p>
    */
 
-  void removeItems()
+  private void removeItems()
   {
     Vector handles;
     listHandle handle;
@@ -1217,141 +1345,23 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     parent.validate();
   }
 
-  public boolean setValuePerformed(JValueObject o)
+  /**
+   * <p>This method handles updating the item counts in the in and out displays.</p>
+   */
+
+  private void updateTitles()
   {
-    if (o.getSource() == custom)
+    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
+
+    if (out != null)
       {
-	if (!editable)
-	  {
-	    return false;
-	  }
-
-	addCustom.doClick();
-	return true;
+	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
       }
-    else if (o.getOperationType() == JValueObject.PARAMETER)  // from the popup menu
-      {
-	if (my_callback != null)
-	  {
-	    try
-	      {
-		my_callback.setValuePerformed(new JValueObject(this,
-							     o.getIndex(),
-							     JValueObject.PARAMETER,
-							     o.getValue(),
-							     o.getParameter()));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		System.out.println("could not setValuePerformed from StringSelector: " + rx);
-	      }
-
-	    return true;
-	  }	
-      }
-    else if (o.getSource() == in)
-      {
-	if (!editable)
-	  {
-	    return false;
-	  }
-
-	if (o.getOperationType() == JValueObject.INSERT)
-	  {
-	    remove.doClick();
-	    return true;
-	  }
-	else if (o.getOperationType() == JValueObject.ADD)		// selection
-	  {
-	    if (add != null)
-	      {
-		add.setEnabled(false);
-	      }
-
-	    if (remove != null)
-	      {
-		remove.setEnabled(true);
-	      }
-
-	    if (out != null)
-	      {
-		out.clearSelection();
-	      }
-	    
-	    return true;
-	  }
-      }
-    else if (o.getSource() == out)
-      {
-	if (o.getOperationType() == JValueObject.INSERT)
-	  {
-	    add.doClick();
-	    return true;
-	  }
-	else if (o.getOperationType() == JValueObject.ADD)
-	  {
-	    add.setEnabled(true);
-	    remove.setEnabled(false);
-	    in.clearSelection();
-	    custom.setText("");
-
-	    return true;
-	  }
-      }
-    else
-      {	
-	if (!editable)
-	  {
-	    return false;
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("set value in stringSelector");
-	  }
-	
-	System.out.println("Unknown object generated setValuePerformed in stringSelector.");
-	
-	return false;
-      }
-
-    return false;  // should never really get here.
   }
 
   /**
-   * <p>Returns a Vector of {@link arlut.csd.JDataComponent.listHandle listHandle}
-   * objects corresponding to the currently selected members.</p>
+   * debug rig
    */
-
-  public Vector getChosenHandles()
-  {
-    return in.getHandles();
-  }
-
-  /**
-   * <p>Returns a Vector of Strings corresponding to the currently
-   * selected members.</p> 
-   */
-
-  public Vector getChosenStrings()
-  {
-    Vector inVector = in.getHandles();
-    Vector result = new Vector();
-
-    if (inVector == null)
-      {
-	return result;
-      }
-
-    for (int i = 0; i < inVector.size(); i++)
-      {
-	listHandle handle = (listHandle) inVector.elementAt(i);
-
-	result.addElement(handle.toString());
-      }
-    
-    return result;
-  }
 
   public static void main(String[] args) {
     /*try {
