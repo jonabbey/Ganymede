@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,6 +48,7 @@ public class JIPField extends JentryField {
   // --
 
   String value;
+  boolean allowV6;
 
   /**  Constructors ***/
 
@@ -59,7 +60,8 @@ public class JIPField extends JentryField {
    * @param is_editable true if this JIPField is editable
    */
   public JIPField(JcomponentAttr valueAttr,
-		  boolean is_editable)
+		  boolean is_editable,
+		  boolean allowV6)
   {
     super(DEFAULT_COLS);
     
@@ -69,6 +71,7 @@ public class JIPField extends JentryField {
       }
 
     this.valueAttr = valueAttr;
+    this.allowV6 = allowV6;
     
     //    setText(null);
 
@@ -88,11 +91,12 @@ public class JIPField extends JentryField {
    * colors.
    */
 
-  public JIPField()
+  public JIPField(boolean allowV6)
   {
     this(new JcomponentAttr(null,new Font("Courier",Font.PLAIN,12),
 			    Color.black,Color.white),
-	 true);
+	 true,
+	 allowV6);
   }
 
   /**
@@ -109,9 +113,10 @@ public class JIPField extends JentryField {
 
   public JIPField(JcomponentAttr valueAttr,
 		  boolean is_editable,
-		  JsetValueCallback callback)
+		  JsetValueCallback callback,
+		  boolean allowV6)
   {
-    this(valueAttr,is_editable);
+    this(valueAttr,is_editable, allowV6);
 
     setCallback(callback);
   }
@@ -136,7 +141,7 @@ public class JIPField extends JentryField {
    * @param n position in the JIPField value from which to retrieve character
    */
 
-  public void setValue(Byte[] bytes, boolean v6)
+  public void setValue(Byte[] bytes)
   {
     if (bytes == null)
       {
@@ -144,7 +149,7 @@ public class JIPField extends JentryField {
 	return;
       }
     
-    if (!v6)
+    if (bytes.length == 4)
       {
 	setText(genIPV4string(bytes));
       }
@@ -191,7 +196,14 @@ public class JIPField extends JentryField {
 	      {
 		if (str.indexOf(':') != -1)
 		  {
-		    bytes = genIPV6bytes(str);
+		    if (allowV6)
+		      {
+			bytes = genIPV6bytes(str);
+		      }
+		    else
+		      {
+			throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
+		      }
 		  }
 		else
 		  {
@@ -425,7 +437,7 @@ public class JIPField extends JentryField {
       {
 	if (!isAllowedV4(cAry[i]))
 	  {
-	    throw new IllegalArgumentException("bad char in input: " + input);
+	    throw new IllegalArgumentException("bad char for IPv4 address in input: " + input);
 	  }
 
 	if (cAry[i] == '.')
@@ -576,7 +588,7 @@ public class JIPField extends JentryField {
       {
 	if (!isAllowedV6(cAry[i]))
 	  {
-	    throw new IllegalArgumentException("bad char in input: " + input);
+	    throw new IllegalArgumentException("bad char for IPv6 address in input: " + input);
 	  }
 
 	if (cAry[i] == '.')
