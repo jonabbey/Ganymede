@@ -3,8 +3,28 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.3 $
-# Date: $Date: 1999/01/22 01:51:18 $
+# Version: $Revision: 1.4 $
+# Date: $Date: 1999/01/22 20:35:24 $
+#
+# This script is intended to be used to clean out files
+# used during the build process, in preparation of tar'ing
+# up a ganymede release.
+#
+# I.e., to build ganymede, export ganymede from the CVS
+# archive to get a clean distrib copy, then do
+#
+# ./configure
+# cd src
+# make
+# make kits
+# make jars
+# cd ..
+# ./distribclean
+#
+# this will leave you with a copy of the Ganymede tree with
+# the class and jar files necessary to allow someone to install
+# and run Ganymede directly from a download without having
+# to build the source themselves.
 #
 ############################################################
 

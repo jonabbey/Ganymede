@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.94
-January 21, 1999
+Ganymede Developer Release 0.95
+January 22, 1999
 README.source
 ---------------------------------------------
 
@@ -9,23 +9,30 @@ admin console are held in the top-level jars directory.  If you
 want to build the jars from scratch, here's what you do.
 
 1. Run configure in the top-level directory.  This will create
-and configure all the makefiles and build scripts required to
-build the source.
+   and configure all the makefiles and build scripts required to
+   build the source.
 
 2. cd src
 
 3. Run 'make'.  This will compile the classes for all of the
-source code in the source tree.  Once this completes, you
-can set your CLASSPATH to <install>/src/classes and run
-the ganymede tools.
+   source code in the source tree.  Once this completes, you
+   can set your CLASSPATH to <install>/src/classes and run
+   the ganymede tools.
+
+   You shouldn't see any errors or warnings when you do the initial
+   make of the source tree.
 
 4. Run 'make kits'.  This will compile all of the customization
-code in src/schemas, as well as build the jar files required if
-you are going to install one of the schema kits with installServer.
+   code in src/schemas, as well as build the jar files required if
+   you are going to install one of the schema kits with installServer.
+
+   You will see a few non-critical deprecation warnings during this
+   step.
 
 5. Run 'make jars'.  This will recreate the 4 jar files used by
-installServer and installClient.
+   installServer and installClient.
 
 Once you get past step 3, you can go into any of the src
 subdirectories and run 'rebuild' to re-compile just those .java files
 that have been touched since the last full build.
+

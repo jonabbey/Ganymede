@@ -1,10 +1,10 @@
-Ganymede Developer Release 0.94
-January 21, 1999
+Ganymede Developer Release 0.95
+January 22, 1999
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede developer's release 0.94 requires Swing 1.1 beta 3 or later,
-as it is built to expect the Swing libraries to be in the package
+Ganymede developer's release 0.95 requires Swing 1.1 or later, as it
+is built to expect the Swing libraries to be in the package
 javax.swing, rather than com.sun.java.swing, as it was in prior
 versions.
 
@@ -51,17 +51,16 @@ assume that there won't be any purely implicit group membership
 references in the user's gid field.
 
 5) There are still a number of small gui bugs arising out of the Swing
-libraries, as of Swing 1.1 beta 3.  In particular, the permissions
-editor requires the user to click twice on a checkbox to set or clear
-it.
+libraries, as of Swing 1.1.  In particular, the permissions editor
+requires the user to click twice on a checkbox to set or clear it.
 
 6) Using the JDK 1.2 RC1 plug-in on Win32, the html files in the help,
 'about ganymede', and MOTD will not be properly displayed.  This bug
-has been reported to Sun, and will hopefully be fixed in the official
-1.2 release.
+has been reported to Sun, and will hopefully be fixed in a 1.2.1
+release soon.
 
 Comments welcome. ;-)
 
-ganymede@arlut.utexas.edu for the list, or jonabbey@arlut.utexas.edu
-to comment to us.
+ganymede@arlut.utexas.edu for the list, or
+ganymede_author@arlut.utexas.edu to comment to us.
 
