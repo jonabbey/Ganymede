@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -658,14 +658,21 @@ public class DBStore {
 
     try
       {
+	DBBaseCategory adminCategory = new DBBaseCategory(this, "Admin-Level Objects", rootCategory);
+	rootCategory.addNode(adminCategory, false, false);
+	
 	ns = new DBNameSpace("username", true);
 	nameSpaces.addElement(ns);
+
+	ns = new DBNameSpace("access", true);
+	nameSpaces.addElement(ns);
+
 	b = new DBObjectBase(this);
 	b.object_name = "Admin";
 	b.type_code = getNextBaseID(); // 0
 	b.displayOrder = 0;
 
-	rootCategory.addNode(b, false, false);
+	adminCategory.addNode(b, false, false);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.AdminGroupField;
@@ -736,15 +743,17 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If this administrative account is a user admin, the user account";
-	bf.allowedTarget = 1;
+	bf.allowedTarget = SchemaConstants.UserBase;
 	bf.targetField = 4;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.AdminPrivs;
-	bf.field_type = FieldType.PERMISSIONMATRIX;
+	bf.field_type = FieldType.INVID;
 	bf.field_name = "Privileges";
 	bf.field_order = 8;
+	bf.allowedTarget = SchemaConstants.PermBase;
+	bf.array = true;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
@@ -767,10 +776,47 @@ public class DBStore {
 	setBase(b);
 
 	b = new DBObjectBase(this);
-	b.object_name = "User";
-	b.type_code = getNextBaseID(); // 1
+	b.object_name = "Access Set";
+	b.type_code = getNextBaseID(); // 1 (SchemaConstants.PermBase)
 	b.displayOrder = 1;
-	rootCategory.addNode(b, true, false);
+	adminCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.PermName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Set Name";
+	bf.field_order = 2;
+	bf.loading = true;
+	bf.setNameSpace("access");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "What do we call this access category?";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.PermMatrix;
+	bf.field_type = FieldType.PERMISSIONMATRIX;
+	bf.field_name = "Access Bits";
+	bf.field_order = 3;
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Access bits, by object type";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.PermName);
+
+	setBase(b);
+
+	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
+	rootCategory.addNode(userCategory, false, false);
+
+	b = new DBObjectBase(this);
+	b.object_name = "User";
+	b.type_code = getNextBaseID(); // 2
+	b.displayOrder = 2;
+	userCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserUserName;
