@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,8 +50,9 @@ public interface Session extends Remote {
    *
    * List types of objects stored and manipulated through the Ganymede server.
    *
-   * This method returns an enumeration of Base remote references.
+   * This method returns a vector of Base remote references.
    *
+   * @see arlut.csd.ganymede.Base
    */
 
   Vector      getTypes() throws RemoteException;
