@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2000/09/30 22:50:12 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2000/10/07 06:31:08 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.48 $ %D%
+ * @version $Revision: 1.49 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -682,7 +682,27 @@ public interface Session extends Remote {
    * definition in XML form has been sent to the receiver, or until
    * an exception is caught from the receiver.  The returned ReturnVal
    * indicates the success of the file transmission.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p>
    */
 
   ReturnVal getSchemaXML(FileReceiver receiver) throws RemoteException;
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's entire database in XML format.  The FileReceiver
+   * referenced passed as a parameter to this method will be used to
+   * send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete server data
+   * dump in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p>
+   */
+
+  ReturnVal getDataXML(FileReceiver receiver) throws RemoteException;
 }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.206 $
-   Last Mod Date: $Date: 2000/10/06 03:16:50 $
+   Version: $Revision: 1.207 $
+   Last Mod Date: $Date: 2000/10/07 06:31:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.206 $ $Date: 2000/10/06 03:16:50 $
+ * @version $Revision: 1.207 $ $Date: 2000/10/07 06:31:07 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4675,11 +4675,56 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * definition in XML form has been sent to the receiver, or until
    * an exception is caught from the receiver.  The returned ReturnVal
    * indicates the success of the file transmission.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p>
    */
 
   public ReturnVal getSchemaXML(FileReceiver receiver)
   {
+    return this.sendXML(receiver, false);
+  }
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's entire database in XML format.  The FileReceiver
+   * referenced passed as a parameter to this method will be used to
+   * send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete server data
+   * dump in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p>
+   */
+
+  public ReturnVal getDataXML(FileReceiver receiver)
+  {
+    return this.sendXML(receiver, true);
+  }
+
+  private ReturnVal sendXML(FileReceiver receiver, boolean sendData)
+  {
     checklogin();
+
+    if (!supergashMode)
+      {
+	String message;
+
+	if (sendData)
+	  {
+	    message = "You do not have permission to dump the server's data with the xml client";
+	  }
+	else
+	  {
+	    message = "You do not have permission to dump the server's schema definition with the xml client";
+	  }
+
+	return Ganymede.createErrorDialog("permissions error",
+					  message);
+      }
 
     /* -- */
 
@@ -4693,11 +4738,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// we need to get a thread to dump the XML schema in the
 	// background to our pipe
 
+	final boolean doSendData = sendData;
+
 	Thread dumpThread = new Thread(new Runnable() {
 	  public void run() {
 	    try
 	      {
-		Ganymede.db.dumpXML(outpipe, false);
+		Ganymede.db.dumpXML(outpipe, doSendData);
 	      }
 	    catch (IOException ex)
 	      {
@@ -4707,7 +4754,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		ex.printStackTrace();
 	      }
-	  }}, "XMLSession Schema Dump Thread");
+	  }}, "XMLSession Schema/Data Dump Thread");
 
 	// and set it running
 
