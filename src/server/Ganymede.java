@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2002/06/14 01:24:44 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2002/06/14 01:32:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1259,9 +1259,18 @@ public class Ganymede {
 	success = false;
       }
 
-    if (subjectPrefixProperty == null)
+    // if the subjectPrefixProperty is not defined or if it does not begin and
+    // end with single quote marks, use a default prefix
+
+    if ((subjectPrefixProperty == null) ||
+	(subjectPrefixProperty.charAt(0) != '\'' ||
+	 subjectPrefixProperty.charAt(subjectPrefixProperty.length()-1) != '\''))
       {
 	subjectPrefixProperty = "Ganymede: ";
+      }
+    else
+      {
+	subjectPrefixProperty = subjectPrefixProperty.substring(1, subjectPrefixProperty.length()-1);
       }
 
     if (signatureFileProperty == null)
