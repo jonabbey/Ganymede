@@ -78,7 +78,7 @@ public class TranslationService {
 
   // - Statics
 
-  public static getTranslationService(String resourceName, Locale locale) throws MissingResourceException
+  public static TranslationService getTranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
     return new TranslationService(resourceName, locale);
   }
