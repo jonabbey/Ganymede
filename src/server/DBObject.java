@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2000/12/12 23:47:19 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2001/01/10 18:53:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.108 $ $Date: 2000/12/12 23:47:19 $
+ * @version $Revision: 1.109 $ $Date: 2001/01/10 18:53:38 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1917,7 +1917,7 @@ public class DBObject implements db_object, FieldType, Remote {
        
 	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
 
-	if (!field.isDefined())
+	if (field.definition == null || !field.isDefined())
 	  {
 	    tmpFieldVec.addElement(field);
 	  }

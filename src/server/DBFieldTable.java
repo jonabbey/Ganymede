@@ -7,8 +7,8 @@
    
    Created: 9 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/06/09 04:03:56 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/01/10 18:53:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,7 +63,7 @@ import java.util.*;
  * tuned for use in managing fields in a Ganymede 
  * {@link arlut.csd.ganymede.DBObject DBObject}.</P>
  * 
- * @version $Revision: 1.5 $ %D%, Created: 9 June 1998
+ * @version $Revision: 1.6 $ %D%, Created: 9 June 1998
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -333,18 +333,15 @@ public class DBFieldTable {
     // Makes sure the object is not already in the hashtable.
     
     removeNoSync(value.getID());
-    
-    DBField tab[] = table;
-    short hash = value.getID();
-    short index = (short) ((hash & 0x7FFF) % tab.length);
 
     if (count > threshold) 
       {
 	rehash();
-	putNoSync(value);
-
-	return;
-      } 
+      }
+    
+    DBField tab[] = table;
+    short hash = value.getID();
+    short index = (short) ((hash & 0x7FFF) % tab.length);
 
     // Insert the new entry.
 
@@ -409,17 +406,14 @@ public class DBFieldTable {
 	throw new NullPointerException();
       }
 
-    DBField tab[] = table;
-    short hash = value.getID();
-    short index = (short) ((hash & 0x7FFF) % tab.length);
-
     if (count > threshold) 
       {
 	rehash();
-	putNoSync(value);
-
-	return;
       } 
+
+    DBField tab[] = table;
+    short hash = value.getID();
+    short index = (short) ((hash & 0x7FFF) % tab.length);
 
     // Insert the new entry.
 
@@ -452,6 +446,8 @@ public class DBFieldTable {
 	      {
 		tab[index] = e.next;
 	      }
+
+	    e.next = null;
 
 	    count--;
 
@@ -486,6 +482,8 @@ public class DBFieldTable {
 		tab[index] = e.next;
 	      }
 
+	    e.next = null;
+
 	    count--;
 
 	    return;
@@ -504,11 +502,21 @@ public class DBFieldTable {
   public synchronized void clear() 
   {
     DBField tab[] = table;
+    DBField field, oldField = null;
 
     /* -- */
 
     for (int index = tab.length; --index >= 0; )
       {
+	field = tab[index];
+
+	while (field != null)
+	  {
+	    oldField = field;
+	    field = field.next;
+	    oldField.next = null;
+	  }
+
 	tab[index] = null;
       }
 
