@@ -7,7 +7,7 @@
    can use it wherever.
    
    Created: 7 February 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,7 @@ import arlut.csd.Util.*;
 
 public class objectCache {
 
+  static final boolean debug = false;
   Hashtable idMap = new Hashtable();
 
   /* -- */
@@ -179,6 +180,11 @@ public class objectCache {
 
   public void putList(Object key, QueryResult qr)
   {
+    if (debug)
+      {
+	System.err.println("objectCache: caching key " + key);
+      }
+
     idMap.put(key, new objectList(qr));
   }
 
@@ -198,11 +204,21 @@ public class objectCache {
 	throw new RuntimeException("error, no list found with key " + key);
       }
 
+    if (debug)
+      {
+	System.err.println("objectCache: augmenting key " + key);
+      }
+
     list.augmentListWithNonEditables(qr);
   }
 
   public void putList(Object key, objectList list)
   {
+    if (debug)
+      {
+	System.err.println("objectCache: caching key " + key + " (2)");
+      }
+
     idMap.put(key, list);
   }
 
