@@ -2,7 +2,7 @@
    Ganymede Logo
    
                           Ganymede Installation Guide
-                       Release 1.0.8 - 16 November 2001
+                        Release 1.0.9 - 4 December 2001
                                        
      _________________________________________________________________
                                       
@@ -784,4 +784,4 @@ _9. Configure your web server to support Java Web Start_
    
     Jonathan Abbey
     
-   Last modified: Fri Nov 16 19:39:30 CST 2001
+   Last modified: Tue Dec 4 01:12:28 CST 2001
