@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,14 @@ import java.rmi.registry.*;
 import java.rmi.server.*;
 import java.io.*;
 import java.util.*;
+
+import arlut.csd.JDialog.JDialogBuff;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        Ganymede
+
+------------------------------------------------------------------------------*/
 
 public class Ganymede {
   
@@ -302,6 +310,34 @@ public class Ganymede {
       }
     GanymedeAdmin.setStatus(string);
   }
+
+  /***
+   *
+   * This is a convenience method used by the server to return a
+   * standard error dialog.
+   *
+   */
+
+  static public ReturnVal createErrorDialog(String title, String body)
+  {
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     "OK",
+				     null,
+				     "error.gif"));
+    return retVal;
+  }
+
+  /**
+   *
+   * This method is provided to allow us to hook in creation of new
+   * objects with specified invid's that the server code references.
+   *
+   * It's intended for use during server development as we evolve
+   * the schema.
+   *
+   */
 
   static public void startupHook()
   {
