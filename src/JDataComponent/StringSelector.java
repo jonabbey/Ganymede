@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/11/03 00:10:03 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/11/03 00:15:39 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -94,7 +94,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.22 $ $Date: 1999/11/03 00:10:03 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 1999/11/03 00:15:39 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey 
  */
 
@@ -636,13 +636,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    System.out.println("Could not remove Element: " + chosen.elementAt(i) + ", not in available vector?");
 		  }
-
 	      }
 	  }
 
 	try
 	  {
-	    out.reload(available, false);
+	    out.reload(available, true); // choice lists are always pre-sorted.
 	  }
 	catch (Exception e)
 	  {
