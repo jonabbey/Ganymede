@@ -8,8 +8,8 @@
    
    Created: 13 July 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/07/13 18:38:33 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/07/13 18:43:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.io.*;
  * process and to take care of promptly closing down file handles,
  * etc.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2001/07/13 18:38:33 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2001/07/13 18:43:03 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -74,6 +74,14 @@ public class Execer {
   final static boolean debug = false;
 
   // ---
+
+  /**
+   * <p>This method executes the given command line in an external
+   * process, waits synchronously until the process completes, and
+   * then returns the return value of the external process, closing
+   * all file handles and otherwise generally cleaning up along the
+   * way.</p>
+   */
 
   public static int exec(String commandLine) throws InterruptedException, IOException
   {
