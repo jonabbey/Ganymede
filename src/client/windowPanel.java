@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,7 +13,6 @@
 
 package arlut.csd.ganymede.client;
 
-import tablelayout.*;
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
@@ -385,6 +384,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       num;
 
     /* -- */
+
+    if (results.resultSize() == 0)
+      {
+	gc.showErrorMessage("Query Result",
+			    "No results were found to match your query.");
+	return;
+      }
 
     setStatus("Querying object types");
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
