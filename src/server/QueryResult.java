@@ -8,8 +8,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/04/20 18:21:55 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/11/02 23:43:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,6 +53,7 @@ package arlut.csd.ganymede;
 import java.util.*;
 
 import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,6 +75,33 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
+  public static Compare comparator = new arlut.csd.Util.Compare() 
+    {
+      public int compare(Object o_a, Object o_b) 
+	{
+	  ObjectHandle a, b;
+	  
+	  a = (ObjectHandle) o_a;
+	  b = (ObjectHandle) o_b;
+	  int comp = 0;
+	  
+	  comp = a.getLabel().compareTo(b.getLabel());
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    };
+
   // ---
 
   // for use pre-serialized
@@ -92,6 +120,8 @@ public class QueryResult implements java.io.Serializable {
 
   transient Vector handles = null;
   transient Vector labelList = null;
+
+  transient VecSortInsert inserter;
 
   /* -- */
 
@@ -271,7 +301,7 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * This method is used by arlut.csd.ganymede.client.objectList to
-   * get access to the raw vector of ObjectHandle's post-serialization.<br><br>
+   * get access to the raw and sorted vector of ObjectHandle's post-serialization.<br><br>
    *
    * Note that this method does not clone our handles vector, we'll just
    * assume that whatever the objectList class on the client does to this
@@ -523,7 +553,8 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * Private method to handle building up our datastructure
-   * on the post-serialization side.
+   * on the post-serialization side.  Sorts the handles vector
+   * as it is extracted.
    *
    */
 
@@ -549,6 +580,8 @@ public class QueryResult implements java.io.Serializable {
     // prepare our handle vector
 
     handles = new Vector();
+    
+    inserter = new VecSortInsert(comparator);
 
     // turn our serialized buffer into an array of chars
     // for fast processor
@@ -639,9 +672,9 @@ public class QueryResult implements java.io.Serializable {
 
 	label = tempString.toString();
 
-	handles.addElement(new ObjectHandle(label, invid, 
-					    inactive, expirationSet, 
-					    removalSet, editable));
+	inserter.insert(handles, new ObjectHandle(label, invid,
+						  inactive, expirationSet,
+						  removalSet, editable));
 
 	rows++;
 	index++; // skip newline
