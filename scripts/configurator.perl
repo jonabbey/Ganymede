@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.16 $
-# $Date: 1999/01/18 22:35:38 $
+# $Revision: 1.17 $
+# $Date: 1999/01/19 18:17:19 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -120,30 +120,30 @@ classfiles:
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
 
-schemas:
+schemakits:
 	\@echo "Building schemas"
 	\@echo "Compiling BSD schema kit"
-	\@cd $rootdir/schemas/bsd/custom_src \\
+	\@cd $rootdir/src/schemas/bsd/custom_src \\
 	build \\
 	buildCustomJar
 	\@echo "Compiling GASH schema kit"
-	\@cd $rootdir/schemas/gash/custom_src \\
+	\@cd $rootdir/src/schemas/gash/custom_src \\
 	build \\
 	buildCustomJar
 	\@echo "Compiling GASHARL schema kit"
-	\@cd $rootdir/schemas/gasharl/custom_src \\
+	\@cd $rootdir/src/schemas/gasharl/custom_src \\
 	build \\
 	buildCustomJar
 	\@echo "Compiling LINUX schema kit"
-	\@cd $rootdir/schemas/linux/custom_src \\
+	\@cd $rootdir/src/schemas/linux/custom_src \\
 	build \\
 	buildCustomJar
 	\@echo "Compiling Solaris NIS schema kit"
-	\@cd $rootdir/schemas/nisonly/custom_src \\
+	\@cd $rootdir/src/schemas/nisonly/custom_src \\
 	build \\
 	buildCustomJar
 	\@echo "Compiling NextGeneration schema kit"
-	\@cd $rootdir/schemas/ganymede.old/custom_src \\
+	\@cd $rootdir/src/schemas/ganymede.old/custom_src \\
 	build \\
 	buildCustomJar
 
