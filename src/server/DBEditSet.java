@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -271,7 +271,6 @@ public class DBEditSet {
 	      {
 		obj.rollback(objck.fields);
 		obj.status = objck.status;
-		objck.checkedin = true;
 		found = true;
 	      }
 	  }
@@ -297,7 +296,7 @@ public class DBEditSet {
 	for (int j = 0; !found && j < point.objects.size(); j++)
 	  {
 	    objck = (DBCheckPointObj) point.objects.elementAt(j);
-	    
+
 	    if (obj.getInvid().equals(objck.invid))
 	      {
 		found = true;
@@ -934,7 +933,6 @@ class DBCheckPointObj {
   Invid invid;
   Hashtable fields;
   byte status;
-  boolean checkedin = false;
 
   /* -- */
 
