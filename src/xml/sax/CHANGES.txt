@@ -1,0 +1,126 @@
+Changes in core SAX pre-releases
+--------------------------------
+
+* Changes from 1.0gamma to 1.0 public release:
+
+- allow Parser.parse(...) to throw IOException as well as SAXException;
+  this change does not apply to most handlers (but see the next
+  change)
+
+- allow EntityResolver.resolveEntity to throw IOException as well as
+  SAXException (since this is where the application will create new
+  byte or character streams)
+
+- allow the methods in DTDHandler to throw SAXException, like the
+  methods in DocumentHandler
+
+- note wherever appropriate that system IDs that are URLs must be
+  fully resolved when passed from the parser to the application or
+  vice-versa
+
+- explicitly forbid (rather than allowing) a change of error-reporting
+  locale in the middle of a parse with Parser.setLocale
+
+- clarify that any parser may return "CDATA" for AttributeList.getType
+  if it does not support reporting attribute types
+
+- add setAttributeList and removeAttribute methods to AttributeListImpl
+
+
+* Changes from 1.0beta to 1.0gamma release:
+
+- bug fix: changed parameter to Parser.setLocale to java.util.Locale
+  (a single string is insufficient)
+
+- bug fix: added default constructor to InputSource
+
+- bug fix: remove "extends IOException" from InputSource (it was
+  retained accidentally from an earlier revision)
+
+- bug fix: in the ParserFactory helper class, use
+  "org.xml.sax.parser" instead of "sax.parser" for the system property
+  name
+
+- doc fix: clarify that attributes in AttributeList are zero-indexed
+
+- doc fix: clarify that Parser objects are non-re-entrant but reusable
+
+- doc fix: clarify that the parser should never modify the InputSource
+  provided by the application
+
+- doc fix: clarify that the parser should not deliver the endDocument
+  event until EOF or a non-recoverable error
+
+- moved sample drivers to com.megginson.sax package
+
+
+* Changes from 1998-04-20 to version 1.0beta release:
+
+- everything that used to throw java.lang.Exception now throws
+  SAXException; SAXException can embed any other kind of exception
+
+- use Java-specific InputStream and Reader classes wherever
+  ByteStream and CharacterStream were used before
+
+- removed custom stream classes: ByteStream and CharacterStream in
+  core; and ByteStreamAdapter, CharacterStreamAdapter,
+  InputStreamAdapter, ReaderAdapter, and IOExceptionWrapper in helpers
+
+- added support for specified byte-stream encoding in InputSource
+
+- added helper classes AttributeListImpl and LocatorImpl
+
+- updated much documentation
+
+
+* Changes from 1998-04-18 to 1998-04-20:
+
+- added parse(String systemId) convenience method to Parser
+
+- removed single-character read() method from CharacterStream,
+  ReaderAdapter, and CharacterStreamAdapter
+
+- remove single-byte read() method from ByteStream,
+  InputStreamAdapter, and ByteStreamAdapter
+
+
+* Changes from 1998-04-16 to 1998-04-18:
+
+- added InputSource class to hold a public id, system id, byte stream,
+  and/or character stream 
+
+- added a ByteStream interface, similar to CharacterStream
+
+- modified methods in Parser and EntityResolver to support the new
+  InputSource
+
+- added Java-specific helpers ByteStreamAdapter and InputStreamAdapter
+
+- modified sample Lark and MSXML drivers so that they can support byte
+  streams and character streams (though not very efficiently)
+
+
+* Changes from 1998-04-10 to 1998-04-16:
+
+- stripped "SAX" prefix from all class names except SAXException (and
+  SAXParseException)
+
+- added a new core interface org.xml.sax.CharacterStream
+
+- added a new core class SAXParseException
+
+- added three optional Java-specific classes:
+  org.xml.sax.helpers.ParserFactory,
+  org.xml.sax.helpers.ReaderAdapter, and
+  org.xml.sax.helpers.CharacterStreamAdapter
+
+- reworked EntityResolver to use two methods: resolveSystemId() and
+  openEntity()
+
+- changed parse() methods in Parser interface (byte stream removed,
+  and Reader replaced with CharacterStream)
+
+- changed default behaviour for warnings and recoverable errors in
+  HandlerBase to no-op
+
+- updated much documentation

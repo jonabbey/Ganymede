@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Ganymede build script for XML class tree
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 2000/01/26 04:31:24 $
+#
+############################################################
+
+echo "Compiling XML Classes"
+echo
+
+# Build the OMG SAX Classes
+
+cd sax
+./build
+echo
+
+# Build James Clark's XML Parser
+
+cd ../xp
+./build
+
+echo
+echo "Done Compiling XML Classes"
+echo

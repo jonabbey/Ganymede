@@ -1,0 +1,152 @@
+SAX ROAD MAP
+------------
+
+The SAX Java distribution contains eleven core classes and interfaces
+together with three optional helper classes and five demonstration
+classes, but don't let these overwhelm you: there are only three
+interfaces that SAX parser writers need to implement, and while there
+are five interfaces available for application writers, simple XML
+applications will need only one or two of them.
+
+The SAX classes and interfaces fall into five groups:
+
+- interfaces implemented by the parser: Parser and AttributeList
+  (required), and Locator (optional) 
+
+- interfaces implemented by the application: DocumentHandler,
+  ErrorHandler, DTDHandler, and EntityResolver (all optional:
+  DocumentHandler will the most important one for typical XML
+  applications)
+
+- standard SAX classes: InputSource, SAXException, SAXParseException,
+  HandlerBase (these are all fully implemented by SAX)
+
+- optional Java-specific helper classes in the org.xml.sax.helpers
+  package: ParserFactory, AttributeListImpl, and LocatorImpl (these
+  are all fully implemented by the SAX Java distribution)
+
+- Java demonstration classes in the nul package: SystemIdDemo,
+  ByteStreamDemo, CharacterStreamDemo, and EntityDemo, all of which
+  can be run as Java applications; there is also a DemoHandler class
+  that all four share
+
+
+* Interfaces for Parser Writers (org.xml.sax package)
+
+A SAX-conformant XML parser needs to implement only two or three
+simple interfaces; in fact, it is even possible (and quite common) to
+implement all of these interfaces in a single class (often called
+something like as `SAXDriver') if desired.
+
+- Parser
+
+  This is the main interface to a SAX parser: it allows the user to
+  register handlers for callbacks, to set the locale for error
+  reporting, and to start an XML parse.
+
+- AttributeList
+
+  This simple interface allows users to iterate through an attribute
+  list -- the parser can implement it in the same class as the SAX
+  driver, or implement it in a separate class (it does not need to be
+  persistent).  There is a convenience implementation available in the
+  org.xml.sax.helpers.AttributeListImpl.
+
+- Locator
+
+  This simple interface allows users to find the current location in
+  the XML source document -- the parser can implement it in the same
+  class as the driver, or implement it in a second class (it does not
+  need to be persistent).
+
+
+* Interfaces for Application Writers (org.xml.sax package)
+
+A SAX application may implement any or none of the following
+interfaces, as required (simple XML applications may need only
+DocumentHandler and possibly ErrorHandler).
+
+An application can implement all of these interfaces in a single
+class, if desired.
+
+- DocumentHandler
+
+  This is the interface that applications will probably use the most
+  -- in many cases, it is the only one that they will need to
+  implement.  If an application provides an implementation of this
+  interface, it will receive notification of basic document-related
+  events like the start and end of elements.
+
+- ErrorHandler
+
+  If an application needs to use special error handling, then it must
+  provide an implementation of this interface.
+
+- DTDHandler
+
+  If an application needs to work with notations and unparsed (binary)
+  entities, it must implement this interface to receive notification
+  of the NOTATION and ENTITY declarations.
+
+- EntityResolver
+
+  If an application needs to do redirection of URIs in documents (or
+  other types of custom handling), it must provide an implementation
+  of this interface.
+
+
+* Standard SAX Classes (org.xml.sax package)
+
+SAX consists mostly of interfaces rather than classes, but the
+interfaces refer to two standard exception classes, and a third is
+provided for universal convenience.  
+
+These classes are useful for both parser and application writers.
+
+- InputSource
+
+  This class contains all of the necessary information for a single
+  input source, including a public identifier, system identifier, byte
+  stream, and character stream (as appropriate).  The application must
+  instantiate at least one InputSource for the Parser, and the
+  EntityHandler may instantiate others.
+
+- SAXException
+  
+  This class represents a general SAX exception.
+
+- SAXParseException
+
+  This class represents a SAX exception tied to a specific point in an
+  XML source document.
+
+- HandlerBase
+
+  This class provides default implementations for DocumentHandler,
+  ErrorHandler, DTDHandler, and EntityResolver: parser writers can use
+  this to provide a default implementation when the user does not
+  specify handlers, and application writers can subclass this to
+  simplify handler writing.
+
+
+* Java-Specific Helper Classes (org.xml.sax.helpers package)
+
+These classes are not part of the core SAX distribution, and may not
+be available in SAX implementations in other languages: they are
+provided simply as a convenience for Java programmers.
+
+- ParserFactory
+
+  An application can use the static methods in this class to load SAX
+  parsers dynamically at run time, based on the class name.
+
+- AttributeListImpl
+
+  An application can use this convenience class to make a persistent
+  copy of an AttributeList, or parser can use it to supply a default
+  implementation of AttributeList to the application.
+
+- LocatorImpl
+
+  An application can use this convenience class to make a persistent
+  snapshot of a Locator's values at a specific point in the parse.

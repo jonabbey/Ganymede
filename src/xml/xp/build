@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Ganymede build script for James Clark's XP XML Parser Code
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 2000/01/26 04:31:46 $
+#
+############################################################
+
+# Build James Clark's custom hashtable class
+
+cd util
+./build
+echo
+
+# Build James Clark's XML Parser
+
+# first the Version.java file
+
+cd ../xml
+./build
+
+# then the Tokenizer
+
+echo
+cd tok
+./build
+
+# then the Parser
+
+echo
+cd ../parse
+./build
+
+# then the SAX driver
+
+cd ../sax
+./build
+echo
+
+# and finally the XMLWriter classes
+
+cd ../output
+./build
+echo
