@@ -204,9 +204,9 @@ public class rowTable extends baseTable implements ActionListener {
 		  boolean horizLines,
 		  JPopupMenu menu, boolean allowDeleteColumn)
   {
-    this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("Helvetica", Font.PLAIN, 12),
+	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
 		       Color.black, Color.white, tableAttr.JUST_LEFT),
 	 (tableAttr[]) null,
 	 colWidths, 
@@ -243,9 +243,9 @@ public class rowTable extends baseTable implements ActionListener {
 		  rowSelectCallback callback, 
 		  JPopupMenu menu, boolean allowDeleteColumn)
   {
-    this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("Helvetica", Font.PLAIN, 12),
+	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
 		       Color.black, Color.white, tableAttr.JUST_LEFT),
 	 (tableAttr[]) null,
 	 colWidths, 

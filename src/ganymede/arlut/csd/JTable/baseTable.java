@@ -351,9 +351,9 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   public baseTable(int[] colWidths, String[] headers,
 		   JPopupMenu menu, JPopupMenu headerMenu)
   {
-    this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("Helvetica", Font.PLAIN, 12),
+	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
 			     Color.black, Color.white, tableAttr.JUST_LEFT),
 	 (tableAttr[]) null,
 	 colWidths, 
