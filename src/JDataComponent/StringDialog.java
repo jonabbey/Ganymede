@@ -156,6 +156,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     gbc.insets = new Insets(4,4,4,4);
 
     mainPanel = new JPanel();
+    mainPanel.setBorder(new EtchedBorder());
     mainPanel.setLayout(gbl);
     setContentPane(mainPanel);
 
@@ -236,24 +237,25 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     //
 
     image = Resource.getImage();
-
+    JPanel imagePanel = new JPanel();
 
     if (image != null)
       {
 	imageCanvas = new JLabel(new ImageIcon(image));
-	JPanel imagePanel = new JPanel();
 	imagePanel.add(imageCanvas);
-      
-
-	gbc.gridx = 0;
-	gbc.gridy = 1;
-	gbc.gridwidth = 1;
-	gbc.gridheight = 2;
-	gbl.setConstraints(imagePanel, gbc);
-	mainPanel.add(imagePanel);
+      }
+    else
+      {
+	imagePanel.add(Box.createGlue());
       }
 
-    mainPanel.setBorder(new EtchedBorder());
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 2;
+    gbl.setConstraints(imagePanel, gbc);
+    mainPanel.add(imagePanel);
+
 
     if (debug)
       {

@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,12 +14,14 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.*;
+import java.io.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
 import java.beans.PropertyVetoException;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.preview.*;  // This is for the FileChooser
 import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
 
@@ -27,7 +29,7 @@ import jdj.PackageResources;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
-
+import arlut.csd.JDialog.*;
 
 /**
  * A framePanel is the interal window holding an object.  This class manages the
@@ -89,6 +91,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     // contains all of the containerPanels.  This is used to tell the
     // containerPanels to stop loading.
     containerPanels = new Vector(), 
+
+    // fieldTemplates
+    templates, 
 
     // contains the Integers that have been created.  These Integers
     // are the index number of the panes.
@@ -188,6 +193,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  println("Starting thread in framePanel");
 	}
 
+
+
       // windowPanel wants to know if framePanel is changed
       // Maybe this should be replaced with InternalFrameListener?
       addPropertyChangeListener(getWindowPanel());
@@ -226,6 +233,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  throw new RuntimeException("Could not check if this is ownerbase: " + rx);
 	}
 
+      templates = gc.getTemplateVector(id);
 
       // Add the notes panel
       try
@@ -413,7 +421,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     if (j == null)
       {
-	println("Cancelled");
+	if (debug)
+	  {
+	    println("Cancelled");
+	  }
+
 	return;
       }
 
@@ -422,11 +434,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     int index = pane.getSelectedIndex();
     if (index < 0)
       {
-	println("No pane selected?");
+	if (debug)
+	  {
+	    println("No pane selected?");
+	  }
       }
     else
       {
-	println("Printing " + index);
+	if (debug)
+	  {
+	    println("Printing " + index);
+	  }
 
 	// The thinking here is that some components other than the
 	// scrollpane might be a little bit smarter about what they
@@ -452,6 +470,192 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     page.dispose();
     j.end();
 
+  }
+
+  
+  public void sendMail()
+  {
+    SaveDialog dialog = new SaveDialog(gc, true);
+    boolean showHistory = false;
+    Date startDate = null;
+    String address;
+    StringBuffer body;
+    //Vector choices = new Vector();
+
+    /* -- */
+
+    //choices.addElement("Html");
+    //choices.addElement("Plain text");
+    //choices.addElement("Tab separated");
+    //dialog.setFormatChoices(choices);
+
+    if (!dialog.showDialog())
+      {
+	if (debug)
+	  {
+	    System.out.println("Dialog returned false, returning in sendMail()");
+	  }
+
+	return;
+      }
+
+    System.out.println("Format: " + dialog.getFormat());
+
+    showHistory = dialog.isShowHistory();
+    if (showHistory)
+      {
+	startDate = dialog.getStartDate();
+      }
+
+    address = dialog.getRecipients();
+    if ((address == null) || (address.equals("")))
+      {
+	gc.showErrorMessage("You must specify at least one recipient.");
+	return;
+      }
+    
+    body = encodeObjectToStringBuffer(showHistory, startDate);
+
+    if (debug)
+      {
+	System.out.println("Mailing: \nTo: " + address + "\n\n" + body.toString());
+      }
+
+    try
+      {
+	gc.getSession().sendMail(address, "Ganymede results", body);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("sending mail: " + rx);
+      }
+  }
+
+  public void save()
+  {
+    SaveDialog dialog = new SaveDialog(gc, false);
+    JFileChooser chooser = new JFileChooser();
+    int returnValue;
+    Date startDate = null;
+    boolean showHistory = false;
+    File file;
+
+    FileOutputStream fos = null;
+    PrintWriter writer = null;
+
+    /* -- */
+
+    if (!dialog.showDialog())
+      {
+	if (debug)
+	  {
+	    System.out.println("dialog returned false, returning");
+	  }
+
+	return;
+      }
+
+    gc.setWaitCursor();
+
+    showHistory = dialog.isShowHistory();
+    if (showHistory)
+      {
+	startDate = dialog.getStartDate();
+      }
+
+    chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+    chooser.setDialogTitle("Save window as");
+
+    returnValue = chooser.showDialog(gc, null);
+
+    if (!(returnValue == JFileChooser.APPROVE_OPTION))
+      {
+	return;
+      }
+
+    file = chooser.getSelectedFile();
+    
+    if (file.exists())
+      {
+	StringDialog d = new StringDialog(gc, "Warning", file.getName() + " exists.  Are you sure you want to replace this file?",
+					  "Overwrite", "Cancel", null);
+	Hashtable result = d.DialogShow();
+
+	if (result == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("The file exists, and I am backing out.");
+	      }
+
+	    return;
+	  }
+      }
+
+    try
+      {
+	fos = new FileOutputStream(file);
+        writer = new PrintWriter(fos);
+      }
+    catch (java.io.IOException e)
+      {
+	gc.showErrorMessage("Trouble saving", "Could not open the file.");
+	return;
+      }
+
+    writer.println(encodeObjectToStringBuffer(showHistory, startDate).toString());
+    writer.close();
+
+    gc.setNormalCursor();
+  }
+
+  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, Date startDate)
+  {
+    StringBuffer buffer = new StringBuffer();
+    FieldTemplate template;
+    db_field field;
+
+    // Loop through all the fields, and get their values
+    try
+      {
+	for (int i = 0; i < templates.size();  ++i)
+	  {
+	    template = (FieldTemplate)templates.elementAt(i);
+	    field = object.getField(template.getID());
+
+	    if(!(field == null))
+	      {
+		buffer.append(template.getName() + "\t" + field.getValueString() + System.getProperty("line.separator")); 
+	      }
+	    else
+	      {
+		buffer.append(template.getName() + "\tUndefined" + System.getProperty("line.separator"));
+		if (debug)
+		  {
+		    System.out.println("Field is null: " + template.getName());
+		  }
+	      }
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get field info for encoding: " + rx);
+      }
+
+    if (showHistory)
+      {
+	try
+	  {
+	    buffer.append("\nHistory:\n\n" + gc.getSession().viewObjectHistory(getObjectInvid(), startDate).toString());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("RemoteException getting history: " + rx);
+	  }
+      }
+
+
+    return buffer;
   }
 
   public Image getWaitImage()
@@ -511,9 +715,28 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     JMenuItem printMI = new JMenuItem("Print");
     printMI.addActionListener(this);
 
+    JMenuItem saveMI = null;
+    if (!gc.isApplet())
+      {
+	saveMI = new JMenuItem("Save");
+	saveMI.addActionListener(this);
+      }
+
+    JMenuItem mailMI = new JMenuItem("Mail to...");
+    mailMI.addActionListener(this);
+    
+
     fileM.add(inactivateMI);
     fileM.add(deleteM);
+    fileM.addSeparator();
     fileM.add(printMI);
+
+    if (!gc.isApplet())
+      {
+	fileM.add(saveMI);
+      }
+    fileM.add(mailMI);
+
     fileM.add(refreshMI);
     if (editable)
       {
@@ -526,15 +749,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     //fileM.add(iconifyMI);
     //fileM.add(closeMI);
 
-    JMenuItem queryMI = new JMenuItem("Query");
-    queryMI.addActionListener(this);
     JMenuItem editMI = new JMenuItem("Edit");
     //editMI.setEnabled(!editable);
     //editMI.addActionListener(this);
     
-    //editM.add(queryMI);
     //editM.add(editMI);
-    fileM.add(queryMI);
     fileM.add(editMI);
 
     if (debug)
@@ -878,8 +1097,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Menu item action: " + e.getActionCommand());
       }
     
-    JMenuItem MI = (JMenuItem)e.getSource();
-    
     if (e.getActionCommand().equals("Edit"))
       {
 	if (debug)
@@ -888,6 +1105,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
 
 	gc.editObject(getObjectInvid());
+      }
+    else if (e.getActionCommand().equals("Save"))
+      {
+	if (debug)
+	  {
+	    println("Saving...:");
+	  }
+
+	save();
+      }
+    else if (e.getActionCommand().equals("Mail to..."))
+      {
+	sendMail();
       }
 
     // There is no clone.  If there ever is, this would be useful.  But there isn't
@@ -977,10 +1207,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
 
       }
-    else if (e.getActionCommand().equals("Query"))
-      {
-	println("Not sure what a query should do");
-      }
     else if (e.getActionCommand().equals("Set Expiration Date"))
       {
 	addExpirationDatePanel();
@@ -990,6 +1216,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	addRemovalDatePanel();
 	showTab(removal_date_index);
+      }
+    else
+      {
+	System.err.println("Unknow action event: " + e);
       }
 
   }
