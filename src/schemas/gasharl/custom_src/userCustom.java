@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2001/11/09 21:33:25 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2001/11/14 21:43:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1089,10 +1089,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     StringDBField stringfield;
     PasswordDBField passfield;
     DateDBField date;
+    boolean success = false;
 
     /* -- */
 
-    if (reactivateWizard != null)
+    if (reactivateWizard == null)
+      {
+	return Ganymede.createErrorDialog("userCustom.reactivate() error",
+					  "Error, reactivate() called without a valid user wizard");
+      }
+
+    try
       {
 	// reset the password
 
@@ -1103,7 +1110,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		finalizeReactivate(false);
 		return retVal;
 	      }
 	  }
@@ -1125,7 +1131,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    retVal.setDialog(dialog);
 	    retVal.setCallback(reactivateWizard);
-	
+
 	    return retVal;
 	  }
 
@@ -1138,7 +1144,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		finalizeReactivate(false);
 		return retVal;
 	      }
 	  }
@@ -1155,7 +1160,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    finalizeReactivate(false);
 		    return retVal;
 		  }
 	      }
@@ -1175,11 +1179,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    finalizeReactivate(false);
 	    return retVal;
 	  }
 
 	finalizeReactivate(true);
+	success = true;
 
 	// ok, we succeeded, now we have to tell the client
 	// what to refresh to see the reactivation results
@@ -1192,9 +1196,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	return result;
       }
-
-    return Ganymede.createErrorDialog("userCustom.reactivate() error",
-				      "Error, reactivate() called without a valid user wizard");
+    finally
+      {
+	if (!success)
+	  {
+	    finalizeReactivate(false);
+	  }
+      }
   }
 
   /**
