@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
+import java.text.*;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JTable.*;
@@ -47,7 +48,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   /* -- */
 
-  public gResultTable(windowPanel parent, Session session, Query query, String results) throws RemoteException
+  public gResultTable(windowPanel parent, Session session, Query query, DumpResult results) throws RemoteException
   {
     super();			// JInternalFrame init
 
@@ -88,7 +89,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void refreshQuery()
   {
-    StringBuffer buffer = null;
+    DumpResult buffer = null;
 
     /* -- */
 
@@ -114,70 +115,33 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
 	else
 	  {
-	    loadResults(buffer.toString());
+	    loadResults(buffer);
 	  }
       }
   }
 
-  public void loadResults(String results)
+  public void loadResults(DumpResult results)
   {
     boolean firstTime = true;
     boolean[] used;
     Vector headerVect = new Vector();
     String[] headers;
     int [] colWidths;
-    int index = 0;
-    char[] chars;
-    StringBuffer tempString = new StringBuffer();
     Invid invid;
-    int col;
-    int rows = 0;
+    String tempString = null;
+    Object cellResult;
+    Object data = null;
+    DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
 
     /* -- */
 
-    System.err.println("result size = " + results.length());
-
     parent.parent.setStatus("Loading table");
 
-    chars = results.toCharArray();
-
-    // read in the header definition line
-
-    System.err.println("Reading in header line");
-    
-    while (chars[index] != '\n')
-      {
-	tempString.setLength(0); // truncate the buffer
-
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in header list");
-	      }
-
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
-
-	    tempString.append(chars[index++]);
-	  }
-
-	index++;		// skip past |
-
-	//	System.err.println("Header[" + headerVect.size() + "]: " + tempString.toString());
-
-	headerVect.addElement(tempString.toString());
-      }
-
-    index++;			// skip past \n
-
+    headerVect = results.getHeaders();
     headers = new String[headerVect.size()];
     used = new boolean[headerVect.size()];
+
+    System.err.println("gResultTable: " + headers.length + " headers returned by query");
     
     for (int i = 0; i < headers.length; i++)
       {
@@ -207,79 +171,52 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // now read in all the result lines
 
-    while (index < chars.length)
+    for (int i = 0; i < results.resultSize(); i++)
       {
-	// first read in the Invid
-
-	tempString.setLength(0); // truncate the buffer
-
-	// System.err.println("Parsing row " + rows++);
-
-	while (chars[index] != '|')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-	    
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in row");
-	      }
-	    
-	    tempString.append(chars[index++]);
-	  }
-
-	//	System.err.println("Invid string: " + tempString.toString());
-
-	invid = new Invid(tempString.toString());
-
+	invid = results.getInvid(i);
 	table.newRow(invid);
 
-	index++;		// skip over |
-
-	// now read in the fields
-
-	col = 0;
-
-	while (chars[index] != '\n')
+	for (int j = 0; j < headers.length; j++)
 	  {
-	    tempString.setLength(0); // truncate the buffer
+	    cellResult = results.getResult(i, j);
 
-	    while (chars[index] != '|')
+	    if (cellResult == null)
 	      {
-		// if we have a backslashed character, take the backslashed char
-		// as a literal
-
-		if (chars[index] == '\n')
-		  {
-		    throw new RuntimeException("parse error in header list");
-		  }
-
-		if (chars[index] == '\\')
-		  {
-		    index++;
-		  }
-
-		tempString.append(chars[index++]);
-	      }
-
-	    index++;		// skip |
-
-	    //	    System.err.println("val: " + tempString.toString());
-
-	    if (tempString.toString() == null || tempString.toString().equals(""))
-	      {
-		table.setCellText(invid, col++, "", false);
+		table.setCellText(invid, j, "", false);
 	      }
 	    else
 	      {
-		used[col] = true;
-		table.setCellText(invid, col++, tempString.toString(), false);
-		//		table.setCellText(invid, col++, 
-		//                                arlut.csd.Util.WordWrap.wrap(tempString.toString(), 50), false);
+		if (cellResult instanceof Integer)
+		  {
+		    tempString = cellResult.toString();
+		    data = cellResult;
+		  }
+		else if (cellResult instanceof Date)
+		  {
+		    tempString = format.format(cellResult);
+		    data = cellResult;
+		  }
+		else if (cellResult instanceof String)
+		  {
+		    tempString = (String) cellResult;
+		    data = null;
+		  }
+		else
+		  {
+		    System.err.println("ERROR! Unknown result type in cell " + i + "," + j + ": "+ cellResult);
+		  }
+
+		if (tempString.equals(""))
+		  {
+		    table.setCellText(invid, j, "", false);
+		  }
+		else
+		  {
+		    used[j] = true;
+		    table.setCellText(invid, j, tempString, data, false);
+		  }
 	      }
 	  }
-
-	index++; // skip newline
       }
 
     // we have to do this backwards so that we don't
