@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1228,11 +1228,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * any external actions related to object inactivation when
    * the transaction is committed..
    *
+   * @param interactive If true, the inactivate() logic can present
+   * a wizard to the client to customize the inactivation logic.
+   *
    * @see #commitPhase1()
    * @see #commitPhase2() 
    */
 
-  public ReturnVal inactivate()
+  public ReturnVal inactivate(boolean interactive)
   {
     return null;
   }
@@ -1263,9 +1266,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * getLabel() must be the name of the object prior to any attempts
    * to clear fields which could impact the returned label.
    * 
+   * @param interactive If true, the remove() logic can present
+   * a wizard to the client to customize the inactivation logic.
+   *
    */
 
-  public ReturnVal remove()
+  public ReturnVal remove(boolean interactive)
   {
     return null;
   }
@@ -1468,7 +1474,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	value = field.checkpoint();
 
-	result.put(key, value);
+	if (value != null)
+	  {
+	    result.put(key, value);
+	  }
+	else
+	  {
+	    // hack, hack.. we're using a reference
+	    // to this object to represent a null value
+
+	    result.put(key, this);
+	  }
       }
 
     return result;
@@ -1488,10 +1504,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     while (enum.hasMoreElements())
       {
 	key = enum.nextElement();
-	
+
 	field = (DBField) fields.get(key);
 
-	field.rollback(ckpoint.get(key));
+	value = ckpoint.get(key);
+
+	// again, we use a reference to ourselves as a
+	// hackish way of representing null in the
+	// hashtable
+
+	if (value == this)
+	  {
+	    field.rollback(null);
+	  }
+	else
+	  {
+	    field.rollback(value);
+	  }
       }
   }
 
