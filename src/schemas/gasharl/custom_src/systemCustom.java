@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/11/02 19:15:31 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/11/02 23:42:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -701,19 +701,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("userCustom - updateSystemTypeChoiceList()");
 	      }
 
-	    systemTypes = new QueryResult();
-
 	    Query query = new Query((short) 272, null, false);
 
-	    // internalQuery doesn't care if the query has its filtered bit set
-	    
-	    Vector results = internalSession().internalQuery(query);
-	    
-	    for (int i = 0; i < results.size(); i++)
-	      {
-		systemTypes.addRow(null, results.elementAt(i).toString(), false); // no invid
-	      }
+	    query.setFiltered(false); // don't care if we own the system types
 
+	    // internalQuery doesn't care if the query has its filtered bit set
+
+	    systemTypes = editset.getSession().getGSession().query(query);
+	    
 	    if (systemTypesStamp == null)
 	      {
 		systemTypesStamp = new Date();
