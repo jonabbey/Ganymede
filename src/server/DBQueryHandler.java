@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -160,16 +160,34 @@ public class DBQueryHandler {
 	    switch (n.arrayOp)
 	      {
 	      case n.LENGTHEQ:
-		intval = ((Integer) value).intValue();
+		intval = ((Integer) n.value).intValue();
+
+		if (debug)
+		  {
+		    System.err.println("Comparing vector field size: " + intval + " == " + values.size() + "?");
+		  }
+
 		return (intval == values.size());
 
 	      case n.LENGTHGR:
-		intval = ((Integer) value).intValue();
-		return (intval > values.size());
+		intval = ((Integer) n.value).intValue();
+
+		if (debug)
+		  {
+		    System.err.println("Comparing vector field size: " + values.size() + " > " + intval + "?");
+		  }
+
+		return (values.size() > intval);
 
 	      case n.LENGTHLE:
-		intval = ((Integer) value).intValue();
-		return (intval < values.size());
+		intval = ((Integer) n.value).intValue();
+
+		if (debug)
+		  {
+		    System.err.println("Comparing vector field size: " + values.size() + " < " + intval + "?");
+		  }
+
+		return (values.size() > intval);
 	      }
 
 	    // okay.  Now we check each field type
