@@ -1313,28 +1313,37 @@ public class DBEditSet {
 
   private final void commit_integrateChanges() throws CommitFatalException
   {
-    commit_createLogEvents();
+    Hashtable fieldsTouched = new Hashtable();
+
+    commit_createLogEvents(fieldsTouched);
     commit_persistTransaction();
     commit_logTransaction();
     commit_replaceObjects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
-    commit_updateBases();
+    commit_updateBases(fieldsTouched);
   }
 
   /**
    * <p>This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to
    * objects during the committed transaction.</p>
+   *
+   * <p>While this method is examining each object in the transaction
+   * to determine the diffs, we'll also take the opportunity to track
+   * the identity of all fields in all object bases that have
+   * themselves been touched.  We use the fieldsTouched hashtable for
+   * this purpose, storing identity maps for the DBObjectBaseFields
+   * that were touched.</p>
    */
 
-  private final void commit_createLogEvents()
+  private final void commit_createLogEvents(Hashtable fieldsTouched)
   {
     Enumeration en = objects.elements();
 
     while (en.hasMoreElements())
       {
-	commit_createLogEvent((DBEditObject) en.nextElement());
+	commit_createLogEvent((DBEditObject) en.nextElement(), fieldsTouched);
       }
   }
 
@@ -1342,9 +1351,16 @@ public class DBEditSet {
    * <p>This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to a
    * DBEditObject during the committed transaction.</p>
+   *
+   * <p>While this method is examining each object in the transaction
+   * to determine the diffs, we'll also take the opportunity to track
+   * the identity of all fields in all object bases that have
+   * themselves been touched.  We use the fieldsTouched hashtable for
+   * this purpose, storing identity maps for the DBObjectBaseFields
+   * that were touched.</p>
    */
 
-  private final void commit_createLogEvent(DBEditObject eObj)
+  private final void commit_createLogEvent(DBEditObject eObj, Hashtable fieldsTouched)
   {
     if (Ganymede.log == null)
       {
@@ -1403,7 +1419,7 @@ public class DBEditSet {
 	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
 		    
-	diff = eObj.diff();
+	diff = eObj.diff(fieldsTouched);
 
 	if (diff != null)
 	  {
@@ -1488,9 +1504,16 @@ public class DBEditSet {
 	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
 
-	// For a newly created object, we can just use
-	// getPrintString(), which has the advantage of recording the
-	// contents of any embedded objects
+	// We'll call diff() to update the fieldsTouched hashtable,
+	// but we won't use the string generated, since
+	// getPrintString() does a better job of describing the
+	// contents of embedded objects.  This forced use of diff()
+	// isn't elegant, but as DBField was originally defined, it's
+	// only through the use of the diff strings that we have a
+	// unified way to determine change, and we don't want to have
+	// to re-do that work in all the DBField subclasses.
+
+	eObj.diff(fieldsTouched);
 
 	diff = eObj.getPrintString();
 
@@ -1634,6 +1657,33 @@ public class DBEditSet {
 			      oldVals),
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
+	      }
+
+	    // and calculate the fields that we touched by losing them
+
+	    DBObject origObj = eObj.getOriginal();
+	    Enumeration en = origObj.objectBase.fieldTable.elements();
+
+	    while (en.hasMoreElements())
+	      {
+		DBObjectBaseField fieldDef = (DBObjectBaseField) en.nextElement();
+
+		// we don't care if certain fields change
+
+		if (fieldDef.getID() == SchemaConstants.CreationDateField ||
+		    fieldDef.getID() == SchemaConstants.CreatorField ||
+		    fieldDef.getID() == SchemaConstants.ModificationDateField ||
+		    fieldDef.getID() == SchemaConstants.ModifierField)
+		  {
+		    continue;
+		  }
+
+		DBField origField = (DBField) origObj.getField(fieldDef.getID());
+
+		if (origField != null && origField.isDefined())
+		  {
+		    fieldsTouched.put(fieldDef, fieldDef);
+		  }
 	      }
 	  }
 	else
@@ -1901,7 +1951,7 @@ public class DBEditSet {
    * created, changed, or deleted during this transaction
    */
 
-  private final void commit_updateBases()
+  private final void commit_updateBases(Hashtable fieldsTouched)
   {
     Enumeration en = this.basesModified.keys();
 
@@ -1916,6 +1966,17 @@ public class DBEditSet {
 	// against the new state of objects in this base
 	
 	base.updateIterationSet();
+      }
+
+    // And in addition to updating the time stamps on the object
+    // bases, update the time stamps on each field.
+
+    en = fieldsTouched.keys();
+
+    while (en.hasMoreElements())
+      {
+	DBObjectBaseField fieldDef = (DBObjectBaseField) en.nextElement();
+	fieldDef.updateTimeStamp();
       }
   }
 

@@ -3467,6 +3467,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
   }
 
+
   /**
    * <p>This method is used to generate a String describing the difference
    * between the current state of the DBEditObject and the original
@@ -3480,6 +3481,43 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    */
 
   public synchronized String diff()
+  {
+    return this.diff(null);
+  }
+
+  /**
+   * <p>This method does two things.  First and foremost, it is used
+   * to generate a String describing the difference between the
+   * current state of the DBEditObject and the original object's
+   * state.</p>
+   *
+   * <p>This method can also be used if this object is newly created.. in
+   * this case, it will just return a string containing many 'FieldAdded'
+   * entries.</p>
+   *
+   * <p>The second purpose of this method is to generate entries in
+   * the changedFieldDefs map, listing those DBObjectBaseFields for
+   * which we have observed a value change when comparing this
+   * object's state with its original.  We do this as part of the diff
+   * algorithm because the original DBField definition only provided
+   * one method to compare two fields for differences, and that is the
+   * getDiffString() method.  Since we're calling that here anyway,
+   * recording the definition of fields that we know changed is an
+   * extremely cheap win.  The changedFieldDefs Hashtable is used in
+   * the DBEditSet class to update time stamps in the
+   * DBObjectBaseFields, so that builder tasks can tell whether they
+   * have been run since any of a given field have been changed in a given
+   * DBObjectBase.</p>
+   *
+   * @param changedFieldDefs If not null, this parameter will be a
+   * hashtable that the diff algorithm should insert unity mappings
+   * for each DBObjectBaseField whose value was found to have changed
+   * in this diff.
+   *
+   * @return null if no difference was found
+   */
+
+  public synchronized String diff(Hashtable changedFieldDefs)
   {
     boolean diffFound = false;
     StringBuffer result = new StringBuffer();
@@ -3537,6 +3575,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	if (original == null)
 	  {
 	    origField = null;
+
+	    if (changedFieldDefs != null)
+	      {
+		changedFieldDefs.put(fieldDef, fieldDef);
+	      }
 	  }
 	else
 	  {
@@ -3554,6 +3597,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	if (((origField == null) || !origField.isDefined()) &&
 	    ((currentField != null) && currentField.isDefined()))
 	  {
+	    if (changedFieldDefs != null)
+	      {
+		changedFieldDefs.put(fieldDef, fieldDef);
+	      }
+
 	    added.append("\t");
 	    added.append(fieldDef.getName());
 	    added.append(":");
@@ -3572,6 +3620,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		 ((origField != null) && origField.isDefined()))
 
 	  {
+	    if (changedFieldDefs != null)
+	      {
+		changedFieldDefs.put(fieldDef, fieldDef);
+	      }
+
 	    deleted.append("\t");
 	    deleted.append(fieldDef.getName());
 	    deleted.append(":");
@@ -3592,6 +3645,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (diff != null)
 	      {
+		if (changedFieldDefs != null)
+		  {
+		    changedFieldDefs.put(fieldDef, fieldDef);
+		  }
+
 		changed.append(fieldDef.getName());
 		changed.append("\n");
 		changed.append(diff);

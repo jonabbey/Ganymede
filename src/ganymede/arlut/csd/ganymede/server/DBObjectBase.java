@@ -336,6 +336,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * changed, used by 
    * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTasks} 
    * to determine whether a particular build sequence is necessary.</P>
+   *
+   * <p>See also
+   * {@arlut.csd.ganymede.server.DBObjectBaseField#lastChange} for a
+   * timestamp for the last time that a given field was changed in any
+   * object in the containing object base.  Both the per-DBObjectBase
+   * and per-DBObjectBaseField lastChange variables only track the
+   * last change since the Ganymede server was started.</p>
    */
 
   Date lastChange;

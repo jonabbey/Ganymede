@@ -59,6 +59,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.util.Date;
 import java.util.Enumeration;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -286,6 +287,21 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   Boolean inUseCache = null;
 
   /**
+   * <p>Timestamp for the last time a field of this type was changed
+   * in a transaction, across all {@link
+   * arlut.csd.ganymede.server.DBObject DBObjects} in the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} that contains this
+   * field definition.</p>
+   *
+   * <p>Used to allow subclasses of {@link
+   * arlut.csd.ganymede.server.GanymedeBuilderTask
+   * GanymedeBuilderTask} to decide whether they want to trigger a
+   * particular build or sub-build.</p>
+   */
+
+  Date lastChange;
+
+  /**
    * This field is used to handle field order sorting when
    * we read an old (pre-2.0) ganymede.db file.
    */
@@ -310,6 +326,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     field_code = -1;
     field_type = -1;
     editor = null;
+    lastChange = new Date();
 
     Ganymede.rmi.publishObject(this);
   }
@@ -398,6 +415,28 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     template = original.template;
     this.editor = editor;
+  }
+
+  /**
+   * <P>This method is used to allow objects in this base to notify us
+   * when instances of fields of this kind are changed.  It is called
+   * from the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+   * commit() method.</P>
+   */
+
+  void updateTimeStamp()
+  {
+    lastChange = new Date();
+  }
+
+  /**
+   * <P>Returns a Date object containing the time that any changes were
+   * committed to instances of fields specified by this DBObjectBaseField.</P> 
+   */
+
+  public Date getTimeStamp()
+  {
+    return lastChange;
   }
 
   /**
