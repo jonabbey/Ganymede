@@ -87,7 +87,6 @@ class fieldoption_editor extends JDialog
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_editor");
 
-  /* Temporary hack: hard code the string values for the option field */
   public static String labels[] = {ts.l("global.never"), // "Never"
 				   ts.l("global.changed"), // "When Changed"
 				   ts.l("global.always")}; // "Always"
@@ -203,7 +202,7 @@ class fieldoption_editor extends JDialog
         throw new RuntimeException(ex);
       }
     
-    TreeTableModel model = new FieldOptionModel(rowRootNode);
+    TreeTableModel model = new FieldOptionModel(rowRootNode, this);
     treeTable = new JTreeTable(model);
 
     tree = treeTable.getTree();
@@ -685,10 +684,14 @@ class FieldOptionRow {
 class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
   static protected String[]  cNames =  {"Name", "When to include in build"};
   static protected Class[]  cTypes = {TreeTableModel.class, Integer.class};
+
+  fieldoption_editor foe = null;
   
-  public FieldOptionModel(DefaultMutableTreeNode root)
+  public FieldOptionModel(DefaultMutableTreeNode root, fieldoption_editor foe)
   {
     super(root); 
+
+    this.foe = foe;
   }
   
   //
@@ -782,6 +785,17 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 	if (myRow.isBase()) 
 	  {
             setBaseChildren((DefaultMutableTreeNode)node, newVal);
+
+	    if (newVal == 1)
+	      {
+		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
+		foe.tree.expandPath(path);
+	      }
+	    else
+	      {
+		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
+		foe.tree.collapsePath(path);
+	      }
 	  }
         else
         {
