@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -172,10 +172,14 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     buttonPanel.add(_calendarButton,"West");
 
-    _clearButton = new JButton("Clear");
-    _clearButton.addActionListener(this);
-
-    buttonPanel.add(_clearButton, "Center");
+    // don't need the clear button if it is not editable
+    if (iseditable)
+      {
+	_clearButton = new JButton("Clear");
+	_clearButton.addActionListener(this);
+	
+	buttonPanel.add(_clearButton, "Center");
+      }
 
     add(buttonPanel, "East");
 
