@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -167,7 +167,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     buttonPanel.setLayout(new BorderLayout());
 
     Image img = PackageResources.getImageResource(this, 
-						  "i043.gif", 
+						  "calendar.gif", 
 						  getClass());
 
     _calendarButton = new JButton(new ImageIcon(img));
