@@ -150,6 +150,12 @@ which did exactly the same thing.  Embarassing.  I went through and
 changed all instances of DBObject.getTypeDesc() to
 DBObject.getTypeName() calls, in keeping with the db_object interface.
 
+13. [CLIENT] Added row count indicator to query window
+
+In response a so-simple-it's-brilliant suggestion by David Cummins, I
+have tweaked the Ganymede client to display a count of the rows
+returned in the title bar of the client's query results window.
+
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
 RELEASE DATE: December 9, 2002
