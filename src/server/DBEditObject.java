@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.145 $
-   Last Mod Date: $Date: 2001/01/26 23:06:41 $
+   Version: $Revision: 1.146 $
+   Last Mod Date: $Date: 2001/01/27 02:27:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.145 $ $Date: 2001/01/26 23:06:41 $ $Name:  $
+ * @version $Revision: 1.146 $ $Date: 2001/01/27 02:27:03 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1209,7 +1209,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canRemove(DBSession session, DBObject object)
+  public ReturnVal canRemove(DBSession session, DBObject object)
   {
     // our default behavior is that objects that can be inactivated
     // should not be deleted except by supergash
@@ -1224,7 +1224,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    // hm, not an end-user.. let it go
 	    
-	    return true;
+	    return null;
 	  }
 
 	// only supergash can delete users.. everyone else can only
@@ -1232,13 +1232,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	if (myMaster.isSuperGash())
 	  {
-	    return true;
+	    return null;
 	  }
 
-	return false;
+	return new ReturnVal(false);
       }
     
-    return true;
+    return null;
   }
 
   /**

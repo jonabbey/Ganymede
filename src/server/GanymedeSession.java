@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.222 $
-   Last Mod Date: $Date: 2001/01/12 08:38:06 $
+   Version: $Revision: 1.223 $
+   Last Mod Date: $Date: 2001/01/27 02:27:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.222 $ $Date: 2001/01/12 08:38:06 $
+ * @version $Revision: 1.223 $ $Date: 2001/01/27 02:27:04 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4767,30 +4767,36 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     boolean okToRemove = ((vObj instanceof DBEditObject) && 
 			  ((DBEditObject) vObj).getStatus() != ObjectStatus.EDITING);
 
-    // we call canRemove() here so that adopters can override
-    // canRemove() in DBEditObject subclasses and by-pass this check
-
-    if (!okToRemove && objBase.objectHook.canBeInactivated() && 
-	!isSuperGash() && !objBase.objectHook.canRemove(session, vObj))
+    if (!okToRemove) 
       {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "You do not have permission to remove " + vObj +
-					  ".\n\nOnly supergash-level admins can remove objects of this type," +
-					  "other admins must use inactivate.");
-      }
+	if (!getPerm(vObj).isDeletable())
+	  {
+	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					      "Don't have permission to delete object" +
+					      vObj.getLabel());
+	  }
 
-    if (!okToRemove && !getPerm(vObj).isDeletable())
-      {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Don't have permission to delete object" +
-					  vObj.getLabel());
-      }
+	ReturnVal retVal = objBase.objectHook.canRemove(session, vObj);
 
-    if (!okToRemove && !objBase.objectHook.canRemove(session, vObj))
-      {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Object Manager refused deletion for " + 
-					  vObj.getLabel());
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    if (retVal.getDialog() != null)
+	      {
+		return retVal;
+	      }
+
+	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
+	      {
+		return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+						  "You do not have permission to remove " + vObj +
+						  ".\n\nOnly supergash-level admins can remove objects of this type," +
+						  "other admins must use inactivate.");
+	      }
+	    
+	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					      "Object Manager refused deletion for " + 
+					      vObj.getLabel());
+	  }
       }
 
     setLastEvent("remove_db_object: " + vObj.getLabel());
