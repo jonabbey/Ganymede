@@ -1015,6 +1015,13 @@ directLoader crud in the schema kits.
 
 Fixed bug #13 in bugzilla.
 
+71. [SERVER] Added TaskOptionStrings to Task definition
+
+The built-in object type, 'Task' now supports an optional vector
+string field, which will be used in 1.0 to represesnt builder task
+options for schema kits that support more than one transaction-time
+builder task.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
