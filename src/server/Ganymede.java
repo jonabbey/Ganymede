@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -533,19 +533,20 @@ public class Ganymede {
 
   static private void registerBuilderTasks()
   {
-    QueryResult results = internalSession.queryDispatch(new Query(SchemaConstants.BuilderBase),
-							true, false, null);
     String builderName;
     String builderClass;
-    Vector objects;
+    Vector objects = internalSession.getObjects(SchemaConstants.BuilderBase);
     DBObject object;
     Class classdef;
 
     /* -- */
 
-    if (results != null)
+    if (objects != null)
       {
-	objects = results.getObjects();
+	if (objects.size() == 0)
+	  {
+	    System.err.println("** Empty list of builder tasks found in database!");
+	  }
 
 	for (int i = 0; i < objects.size(); i++)
 	  {
@@ -593,6 +594,10 @@ public class Ganymede {
 		  }
 	      }
 	  }
+      }
+    else
+      {
+	System.err.println("** No builder tasks found in database!");
       }
   }
 
