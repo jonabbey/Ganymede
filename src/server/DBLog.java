@@ -6,7 +6,7 @@
    reports from the system log based on specific criteria.
    
    Created: 31 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,7 +63,7 @@ public class DBLog {
 
     // now we need to initialize our hash of DBObjects so that we can do
     // speedy lookup of event codes without having to synchronize on
-    // the main objectBase hashes during loggingp
+    // the main objectBase hashes during logging
 
     if (debug)
       {
@@ -248,23 +248,8 @@ public class DBLog {
 	for (int j = 0; j < event.objects.size(); j++)
 	  {
 	    Invid inv = (Invid) event.objects.elementAt(j);
-	    found = false;
 
-	    // if we don't already have this invid in our objects
-	    // list, add it.  We don't use Vector.contains() so
-	    // that we can use the equals() method.
-
-	    for (int k = 0; k < objects.size(); k++)
-	      {
-		Invid inv2 = (Invid) objects.elementAt(k);
-
-		if (inv.equals(inv2))
-		  {
-		    found = true;
-		  }
-	      }
-
-	    if (!found)
+	    if (!objects.contains(inv))
 	      {
 		objects.addElement(inv);
 	      }
@@ -362,6 +347,11 @@ public class DBLog {
     String line;
     String transactionID = null;
 
+    boolean afterSinceTime = false;
+    String dateString;
+    long timeCode;
+    Date time;
+
     /* -- */
 
     try
@@ -378,6 +368,33 @@ public class DBLog {
 	    if (line.trim().equals(""))
 	      {
 		continue;
+	      }
+
+	    // check to see if we've gotten to the requested start point
+
+	    if (sinceTime != null && !afterSinceTime)
+	      {
+		dateString = line.substring(0, line.indexOf('|'));
+    
+		try
+		  {
+		    timeCode = new Long(dateString).longValue();
+		  }
+		catch (NumberFormatException ex)
+		  {
+		    throw new IOException("couldn't parse time code");
+		  }
+		
+		time = new Date(timeCode);
+		
+		if (time.before(sinceTime))
+		  {
+		    continue;	// don't even bother parsing the rest of the line
+		  }
+		else
+		  {
+		    afterSinceTime = true;
+		  }
 	      }
 
 	    event = new DBLogEvent(line);
@@ -423,6 +440,10 @@ public class DBLog {
 		  }
 		else if (event.eventClassToken.equals("finishtransaction"))
 		  {
+		    String tmp2 = "---------- End Transaction " + event.time.toString() + ": " + event.adminName + 
+		      " ----------\n\n";
+		    
+		    buffer.append(tmp2);
 		    transactionID = null;
 		  }
 		else if (transactionID != null)
