@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/04/24 06:05:52 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/04/25 19:23:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -127,6 +127,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   public systemCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
+
+    if (getGSession().enableOversight && getGSession().enableWizards)
+      {
+	initializeNets(false);
+      }
   }
 
   /**

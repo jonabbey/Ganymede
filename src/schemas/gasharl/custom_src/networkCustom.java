@@ -6,15 +6,16 @@
    
    Created: 20 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2001/04/06 22:38:23 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/04/25 19:23:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -105,10 +107,35 @@ public class networkCustom extends DBEditObject {
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    if ((fieldid == networkSchema.NETNUMBER) ||
-	(fieldid == networkSchema.NAME))
+    if (fieldid == networkSchema.NAME)
       {
 	return true;
+      }
+
+    // the network number is only required if the allocrange is not
+    // set
+
+    if (fieldid == networkSchema.NETNUMBER)
+      {
+	DBField allocField = (DBField) object.getField(networkSchema.ALLOCRANGE);
+
+	if (allocField == null || !allocField.isDefined())
+	  {
+	    return true;
+	  }
+      }
+
+    // the allocrange is only required if the network number is not
+    // set
+
+    if (fieldid == networkSchema.ALLOCRANGE)
+      {
+	DBField netnumField = (DBField) object.getField(networkSchema.NETNUMBER);
+
+	if (netnumField == null || !netnumField.isDefined())
+	  {
+	    return true;
+	  }
       }
 
     return false;
@@ -187,6 +214,37 @@ public class networkCustom extends DBEditObject {
     return null;		// by default, we just ok whatever
   }
 
+  /**
+   * <p>Hook to allow subclasses to grant ownership privileges to a given
+   * object.  If this method returns true on a given object, the Ganymede
+   * Permissions system will provide access to the object as owned with
+   * whatever permissions apply to objects owned by the persona active
+   * in gSession.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean grantOwnership(GanymedeSession gSession, DBObject object)
+  {
+    // I.P. Network objects have type id of 267
+
+    if (object.getTypeID() != 267)
+      {
+	return false;
+      }
+
+    // we want to grant ownership if the "Public Network" checkbox
+    // is selected
+
+    Boolean value = (Boolean) object.getFieldValueLocal(networkSchema.PUBLICNETWORK);
+
+    if (value == null || !value.booleanValue())
+      {
+	return false;
+      }
+
+    return true;
+  }
 
   /**
    *
