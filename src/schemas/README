@@ -1,8 +1,8 @@
 Ganymede schemas README
 
 $Name:  $
-$Revision: 1.2 $
-$Date: 1999/01/20 18:09:04 $
+$Revision: 1.3 $
+$Date: 1999/01/29 20:18:01 $
 
 Jonathan Abbey, jonabbey@arlut.utexas.edu
 Applied Research Laboratories, The University of Texas at Austin
@@ -85,7 +85,7 @@ gash
 the gasharl schema kit.  It has not been actively maintained for
 awhile, and doesn't support some ARL-specific logic, such as user
 categories and mandatory expiration dates for certain kinds of user
-accounts.
+accounts.  It probably has bugs from lack of recent care.
 	
 
 --
