@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,6 +29,9 @@ import java.awt.Frame;
  * JDialogBuff from the server via RMI, then calls extractDialogRsrc()
  * in order to get a DialogRsrc object.  This object can then be used on
  * the client to construct an dialog box.
+ *
+ * If you don't need to send a dialog definition object across an RMI
+ * link, just construct a DialogRsrc directly.
  *
  */
 
