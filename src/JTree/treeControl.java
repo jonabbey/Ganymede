@@ -27,7 +27,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.1 $ %D%
+  Version: $Revision: 1.2 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import com.sun.java.swing.*;
  * an outline display.  </p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -141,6 +141,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   public treeControl(Font font, Color fgColor, Color bgColor, treeCallback callback,
 		     Image[] images, treeMenu menu)
   {
+    super(false);		// no double buffering for us, we'll do it ourselves
 
     /* Initialize our bounding rectangle.
        This will get filled when the AWT calls our 
@@ -295,13 +296,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     rows.addElement(root);
 
-    // it turns out if we call reShape() and refreshTree() here,
-    // we get an exception thrown because the peer has not been
-    // prepared to allow us to generate our +/- box images.  Might
-    // try uncommenting these for 1.1.1.
-
-    //    reShape();
-    //    refreshTree();
+    reShape();
+    refreshTree();
   }
 
   public void setMinimumWidth(int minWidth)
@@ -1039,7 +1035,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	System.err.println("reShape()");
       }
 
-
     // calculate whether we need scrollbars, add/remove them
       
     adjustScrollbars();
@@ -1303,6 +1298,8 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
   public treeCanvas(treeControl ctrl, Font font, Color fgColor, Color bgColor, Image[] images)
   {
+    super(false);		// no double buffering for us, we'll do it ourselves
+
     this.ctrl = ctrl;
     this.font = font;
     this.fgColor = fgColor;
@@ -1338,8 +1335,6 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     addMouseListener(this);
     addMouseMotionListener(this);
-
-    setDoubleBuffered(false);		// we do the buffering ourselves currently.
 
     ctrl.maxWidth = ctrl.minWidth;
   }
@@ -1455,7 +1450,7 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
       System.err.println("Called render");
     }
 
-    if (getBounds().width == 0 || getBounds().height == 0)
+    if (!isVisible() || getBounds().width == 0 || getBounds().height == 0)
       {
 	return;
       }
@@ -1465,7 +1460,13 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     if (plusBox == null || minusBox == null)
       {
-	buildBoxes();
+	// buildBoxes will return false if our peer isn't
+	// ready for us to create images
+
+	if (!buildBoxes())
+	  {
+	    return;
+	  }
       }
 
     if (backing == null) 
@@ -1782,7 +1783,7 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
   ----------------------------------------------------------*/						    
 
-  void buildBoxes()
+  boolean buildBoxes()
   {
     Graphics g;
     int size = 9;  // the size of our box inside our image
@@ -1795,9 +1796,13 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     plusBox = this.createImage(size+1,size+1);
 
+    // it's possible we're being called before our peer is really
+    // ready for us to create images.. if so, we'll just return
+    // false and we'll try again at a later point
+
     if (plusBox == null)
       {
-	throw new RuntimeException("null plusbox");
+	return false;		
       }
 
     g = plusBox.getGraphics();
@@ -1826,6 +1831,8 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     g.setColor(Color.blue);
     g.drawLine(p1 + 2, midpoint, p2 - 2, midpoint);
+
+    return true;
   }
 
   // mouseListener methods
