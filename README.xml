@@ -20,3 +20,9 @@ yet documented elsewhere.  This is the following:
 Otherwise, if you run xmlclient by itself on the command line, it will
 present the command line options that it supports.
 
+In this distribution there is a sample perl script packaged with the
+Linux schema kit which can process the Linux password, group, and
+shadow files and produce an xml file compatible with the xmlclient
+when using the Linux schema kit.  You may find this script,
+src/schemas/linux/loader/linux2xml.pl, helpful in learning how to
+generate xml content for the Ganymede server.

@@ -1,0 +1,30 @@
+Ganymede Release 1.0 prerelease beta 3
+October 5, 2000
+README.first
+---------------------------------------------
+
+This distribution of Ganymede is an interim code drop released to
+allow people working with Ganymede to use the very latest code from
+our development efforts.  This release, like all of our releases, is
+thought to be the most reliable release we have ever put out.  It is
+certainly faster, more stable, and much more full-featured than the
+0.99.9 release, but it does not yet have all of the features and
+documentation that I want to achieve for 1.0.  
+
+At the present time, I am expecting to release a 1.0 pre-release 1,
+modelled after the current distribution configuration.  Once that is
+out, I intend to rework how Ganymede schema kits are packaged and
+integrated with the Ganymede server, using the new xmlclient to load a
+customized schema definition and data into a vanilla Ganymede server.
+
+This is not yet 1.0 pre-release 1, but it will be coming out soon, and
+your feedback on this code drop will be helpful.  We have bugzilla
+running on the Ganymede web site at http://www.arlut.utexas.edu/gash2,
+and any bugs you find should be reported there, along with a note to
+the Ganymede discussion mailing list at ganymede@arlut.utexas.edu.
+
+It's been almost 5 years, but we're in the home stretch with Ganymede,
+thanks for taking a look.
+
+Jonathan Abbey
+jonabbey@arlut.utexas.edu
