@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -302,7 +302,7 @@ public class DBJournal implements ObjectStatus {
 	      {
 	      case CREATE:
 		
-		obj = new DBObject(base, jFile);
+		obj = new DBObject(base, jFile, true);
 		
 		if (debug)
 		  {
@@ -316,7 +316,7 @@ public class DBJournal implements ObjectStatus {
 
 	      case EDIT:
 
-		obj = new DBObject(base, jFile);
+		obj = new DBObject(base, jFile, true);
 
 		if (!base.objectHash.containsKey(new Integer(obj.id)))
 		  {
@@ -583,14 +583,124 @@ class JournalEntry {
 
   void process(DBStore store)
   {
+    DBField[]
+      fields;
+
+    DBObjectBaseField
+      definition;
+
+    DBObject 
+      badObj;
+
+    DBNameSpaceHandle
+      currentHandle;
+
+    /* -- */
+
     if (obj == null)
       {
 	// delete the object
+	
+	badObj = (DBObject) base.objectHash.get(new Integer(id));
+
+	if (badObj == null)
+	  {
+	    Ganymede.debug("Warning.. journal is instructing us to delete an object not in the database");
+	  }
+	else
+	  {
+	    // Remove the object.  If any of the fields are namespace restricted, see if any of the values
+	    // currently held in such a field are registered in a namespace.  If so, and if the field we're
+	    // deleting is the one currently taking that value's slot in the namespace, remove the value
+	    // from the namespace hash.
+
+	    fields = (DBField[]) badObj.listFields();
+
+	    db_field[] tempFields = obj.listFields();
+	    fields = new DBField[tempFields.length];
+
+	    for (int i = 0; i < fields.length; i++)
+	      {
+		fields[i] = (DBField) tempFields[i];
+		definition = fields[i].getFieldDef();
+
+		if (definition.namespace != null)
+		  {
+		    if (fields[i].isVector())
+		      {
+			for (int j = 0; j < fields[i].size(); i++)
+			  {
+			    currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(fields[i].key(j));
+
+			    if (currentHandle.field == fields[i])
+			      {
+				// this namespace entry is currently pointing to us.. get rid of it.
+
+				definition.namespace.uniqueHash.remove(fields[i].key(j));
+			      }
+			  }
+		      }
+		    else
+		      {
+			currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(fields[i].key());
+
+			if (currentHandle.field == fields[i])
+			  {
+				// this namespace entry is currently pointing to us.. get rid of it.
+			    
+			    definition.namespace.uniqueHash.remove(fields[i].key());
+			  }
+		      }
+		  }
+	      }
+	  }
+
 	base.objectHash.remove(new Integer(id));
       }
     else
       {
 	// put the new object in place
+
+	// First, we need to go through and put these values in the namespace.. note that
+	// we don't bother checking to see if the values are already allocated in the
+	// namespace.. we are assuming that the transaction would not have been written
+	// out to disk with improper namespace management.  We pretty much have to make
+	// this assumption here unless we're going to go to the trouble of doing multiple
+	// passes through the set of changes in this transaction, first unmarking any
+	// values freed by object deletion or changes, then going through and allocating
+	// new values.  We may still wind up doing this. 
+
+	db_field[] tempFields = obj.listFields();
+	fields = new DBField[tempFields.length];
+
+	for (int i = 0; i < fields.length; i++)
+	  {
+	    fields[i] = (DBField) tempFields[i];
+	    definition = fields[i].getFieldDef();
+
+	    if (definition.namespace != null)
+	      {
+		if (fields[i].isVector())
+		  {
+		    // mark the elements in the vector in the namespace
+		    // note that we don't use the namespace mark method here, 
+		    // because we are just setting up the namespace, not
+		    // manipulating it in the context of an editset
+
+		    for (int j = 0; j < fields[i].size(); i++)
+		      {
+			definition.namespace.uniqueHash.put(fields[i].key(j), 
+							    new DBNameSpaceHandle(null, true, fields[i]));
+		      }
+		  }
+		else
+		  {
+		    // mark the scalar value in the namespace
+		    definition.namespace.uniqueHash.put(fields[i].key(), new DBNameSpaceHandle(null, true, fields[i]));
+		  }
+	      }
+	  }
+
 	base.objectHash.put(new Integer(id), obj);
 
 	// keep our base's maxid up to date for
