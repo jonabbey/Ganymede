@@ -425,8 +425,25 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	try
 	  {
-	    // Use foxtrot to set up the framePanel on its own thread,
-	    // while the main GUI thread keeps dispatching GUI events
+	    /*
+	      This is a big opportunity to spin the loading and
+	      creation of the framepanel off of the AWT/Swing Event
+	      Dispatch Thread through the use of Foxtrot, as if we can
+	      synchronously block execution of this thread of
+	      execution on the EDT while still allowing the EDT to
+	      chew through other stuff, we can allow for the refresh
+	      of the GUI while we're getting this internal frame
+	      created.  That still means we won't pop anything up on
+	      screen until the load is completed, but at least we'll
+	      have refresh in the meantime.
+	      
+	      This wouldn't even be feasible, except that we would know that
+	      this framePanel won't be made visible (and hence subject to
+	      heavy Swing threading constraints) until this constructor
+	      returns.
+	      
+	      That's foxtrot.sourceforge.net, yo.
+	    */
 
 	    final Invid localFinalInvid = finalInvid;
 	    final db_object localObject = object;
