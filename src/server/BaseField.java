@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,12 +92,13 @@ public interface BaseField extends Remote {
   public short getMaxLength() throws RemoteException;
   public String getOKChars() throws RemoteException;
   public String getBadChars() throws RemoteException;
-
+  public boolean isMultiLine() throws RemoteException;
 
   public void setMinLength(short val) throws RemoteException;
   public void setMaxLength(short val) throws RemoteException;
   public void setOKChars(String s) throws RemoteException;
   public void setBadChars(String s) throws RemoteException;
+  public void setMultiLine(boolean b) throws RemoteException;
 
   // these two apply to strings, numbers, and IP addresses
 

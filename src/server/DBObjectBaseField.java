@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -73,6 +73,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   String badChars = null;
   DBNameSpace namespace = null;
   boolean caseInsensitive = false;
+  boolean multiLine = false;
 
   // invid attributes
 
@@ -280,6 +281,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    out.writeUTF("");
 	  }
+
+	if ((base.store.major_version >= 1) && (base.store.minor_version >= 9))
+	  {
+	    out.writeBoolean(multiLine); // added at file version 1.9
+	  }
       }
     else if (isNumeric())
       {
@@ -449,6 +455,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (!nameSpaceId.equals(""))
 	  {
 	    setNameSpace(nameSpaceId);
+	  }
+
+	// at file version 1.9, we introduced multiLine
+	
+	if ((base.store.file_major >= 1) && (base.store.file_minor >= 9))
+	  {
+	    multiLine = in.readBoolean();
+	  }
+	else
+	  {
+	    multiLine = false;
 	  }
       }
     else if (isNumeric())
@@ -1339,6 +1356,47 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     badChars = s;
+  }
+
+  /**
+   *
+   * <p>Returns true if this string field is intended to be a multi-line
+   * field.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isMultiLine()
+  {
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    return multiLine;
+  }
+
+  /**
+   *
+   * Sets whether or not this string field should be presented as a
+   * multiline field.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setMultiLine(boolean b)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    multiLine = b;
   }
 
   /**

@@ -6,7 +6,7 @@
    information defining a field.
    
    Created: 5 November 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,6 +58,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   short maxLength = Short.MAX_VALUE;
   String okChars = null;
   String badChars = null;
+  boolean multiLine = false;
 
   // invid attributes
 
@@ -104,6 +105,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 	maxLength = fieldDef.getMaxLength();
 	okChars = fieldDef.getOKChars();
 	badChars = fieldDef.getBadChars();
+	multiLine = fieldDef.isMultiLine();
 	break;
 
       case INVID:
@@ -383,6 +385,18 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   public String getBadChars()
   {
     return badChars;
+  }
+
+  /**
+   *
+   * If this field is a STRING and this field has been configured to
+   * be a multiline string field, this method will return true.
+   * 
+   */
+
+  public boolean isMultiLine()
+  {
+    return multiLine;
   }
 
   /**
