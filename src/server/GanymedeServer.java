@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2002/01/26 05:27:28 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2002/01/28 21:27:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1182,59 +1182,83 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     // ok, we now are left holding a dump lock.  it should be safe to kick
     // everybody off and shut down the server
 
-    // forceOff modifies GanymedeServer.sessions, so we need to copy our list
-    // before we iterate over it.
-
-    tempList = new Vector();
-
-    synchronized (sessions)
-      {
-	for (int i = 0; i < sessions.size(); i++)
-	  {
-	    tempList.addElement(sessions.elementAt(i));
-	  }
-      }
-
-    for (int i = 0; i < tempList.size(); i++)
-      {
-	temp = (GanymedeSession) tempList.elementAt(i);
-
-	temp.forceOff("Server going down");
-      }
-
-    // stop any background tasks running
-
-    Ganymede.scheduler.interrupt();
-
-    // disconnect the admin consoles
-
-    GanymedeAdmin.closeAllConsoles("Server going down now.");
-
-    // log our shutdown and close the log
-
-    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-					       "Server shutdown",
-					       null,
-					       null,
-					       null,
-					       null));
-
-    System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
-
     try
       {
-	Ganymede.log.close();
+	// from this point on, we will go down, no matter what
+	// exceptions might percolate up to this point
+
+	// forceOff modifies GanymedeServer.sessions, so we need to
+	// copy our list before we iterate over it.
+
+	Ganymede.debug("Server going down.. database locked, disconnecting clients");
+
+	tempList = new Vector();
+
+	synchronized (sessions)
+	  {
+	    for (int i = 0; i < sessions.size(); i++)
+	      {
+		tempList.addElement(sessions.elementAt(i));
+	      }
+	  }
+
+	for (int i = 0; i < tempList.size(); i++)
+	  {
+	    temp = (GanymedeSession) tempList.elementAt(i);
+
+	    temp.forceOff("Server going down");
+	  }
+
+	// stop any background tasks running
+
+	Ganymede.debug("Server going down.. interrupting scheduler");
+
+	Ganymede.scheduler.interrupt();
+
+	// disconnect the admin consoles
+
+	Ganymede.debug("Server going down.. disconnecting consoles");
+
+	GanymedeAdmin.closeAllConsoles("Server going down now.");
+
+	// log our shutdown and close the log
+
+	Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+						   "Server shutdown",
+						   null,
+						   null,
+						   null,
+						   null));
+
+	System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
+
+	try
+	  {
+	    Ganymede.log.close(); // this will block until the mail queue drains
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("IO Exception closing log file:" + ex);
+	  }
       }
-    catch (IOException ex)
+    catch (Exception ex)
       {
-	System.err.println("IO Exception closing log file:" + ex);
+	System.err.println("Caught exception during final shutdown:");
+	ex.printStackTrace();
       }
-
-    System.err.println("\nServer shutdown complete.");
-
-    System.exit(0);
-
-    return null;
+    catch (Error ex)
+      {
+	System.err.println("Caught error during final shutdown:");
+	ex.printStackTrace();
+      }
+    finally
+      {
+	System.err.println("\nServer shutdown complete.");
+	
+	System.exit(0);
+	
+	return null;
+      }
   }
 
   /**

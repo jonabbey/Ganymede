@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2002/01/26 20:22:05 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2002/01/28 21:27:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,11 +80,13 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.60 $ $Date: 2002/01/26 20:22:05 $
+ * @version $Revision: 1.61 $ $Date: 2002/01/28 21:27:09 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unreferenced {
+
+  private static final boolean debug = false;
 
   /**
    * Static vector of GanymedeAdmin instances, used to
@@ -146,8 +148,18 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("GanymedeAdmin.closeAllConsoles: waiting for sync");
+      }
+
     synchronized (GanymedeAdmin.consoles)
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeAdmin.closeAllConsoles: got sync");
+	  }
+
 	for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
 	  {
 	    temp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);

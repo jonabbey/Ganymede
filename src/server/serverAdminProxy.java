@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2002/01/28 20:48:51 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2002/01/28 21:27:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,11 +77,13 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.22 $ $Date: 2002/01/28 20:48:51 $
+ * @version $Revision: 1.23 $ $Date: 2002/01/28 21:27:09 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class serverAdminProxy implements Admin, Runnable {
+
+  private static final boolean debug = false;
 
   /**
    * <p>Our background communications thread, which is responsible for
@@ -159,8 +161,18 @@ public class serverAdminProxy implements Admin, Runnable {
 	return;
       }
 
+    if (debug)
+      {
+	System.err.println("serverAdminProxy.shutdown: waiting for sync");
+      }
+
     synchronized (eventBuffer)
       {
+	if (debug)
+	  {
+	    System.err.println("serverAdminProxy.shutdown: in sync");
+	  }
+
 	this.done = true;
 	eventBuffer.notifyAll(); // let the commThread drain and exit
       }
@@ -310,7 +322,7 @@ public class serverAdminProxy implements Admin, Runnable {
 	// if we didn't find an event to append to, go ahead and add a
 	// new CHANGESTATUS log update event to the eventBuffer
 
-	newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, status);
+	newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, new StringBuffer().append(status));
 
 	// queue the log evennt
 
@@ -723,7 +735,7 @@ class adminEvent {
 	break;
 
       case CHANGESTATUS:
-	remoteConsole.changeStatus((String) param);
+	remoteConsole.changeStatus(((StringBuffer) param).toString());
 	break;
 
       case CHANGEADMINS:
