@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -657,6 +657,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namepace here", "Ok", "Cancel");
 
 	dialogResource.addString("Here is a string:");
+	dialogResource.addSeparator();
+	dialogResource.addBoolean("Here is a boolean:");
+
 
 	StringDialog dialog = new StringDialog(dialogResource);
 	dialog.show();
