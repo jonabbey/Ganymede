@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -224,6 +224,7 @@ public class DBEditSet {
 	if (!eObj.commitPhase1())
 	  {
 	    release();
+	    Ganymede.debug("Transaction commit rejected in phase 1");
 	    return false;
 	  }
       }
@@ -256,6 +257,7 @@ public class DBEditSet {
 	// log this condition somehow
 
 	release();
+	Ganymede.debug("IO exception in transaction commit");
 	return false;
       }
 
