@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,6 +54,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   Class classdef;
   short type_code;
   short label_id;		// which field represents our label?
+  String category = "";		// what type of object is this?
 
   // runtime data
 
@@ -108,6 +109,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     classdef = null;
     type_code = 0;
     label_id = -1;
+    category = null;
     fieldHash = new Hashtable();
     objectHash = new Hashtable();
     maxid = 0;
@@ -215,6 +217,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	classname = original.classname;
 	classdef = original.classdef;
 	label_id = original.label_id;
+	category = original.category;
 	type_code = original.type_code;
     
 	// make copies of all the old field definitions
@@ -277,6 +280,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     if ((store.major_version >= 1) && (store.minor_version >= 1))
       {
 	out.writeShort(label_id);	// added at file version 1.1
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 3))
+      {
+	out.writeUTF(category);	// added at file version 1.3
       }
 
     out.writeInt(objectHash.size());
@@ -365,6 +373,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     else
       {
 	label_id = -1;
+      }
+
+    // at file version 1.3, we introduced object base categories's.
+
+    if ((store.file_major >= 1) && (store.file_minor >= 3))
+      {
+	category = in.readUTF();
+      }
+    else
+      {
+	category = "";
       }
 
     // read in the objects belonging to this ObjectBase
@@ -998,6 +1017,42 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
 
     label_id = fieldID;
+  }
+
+  /**
+   *
+   * Get the objectbase category.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public String getCategory()
+  {
+    return category;
+  }
+
+  /**
+   *
+   * Set the objectbase category.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public void setCategory(String category)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    if (category == null)
+      {
+	this.category = "";
+      }
+    else
+      {
+	this.category = category;
+      }
   }
 
   /**

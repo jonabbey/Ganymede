@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 2;
+  static final byte minor_version = 3;
 
   static final boolean debug = true;
 
@@ -56,12 +56,13 @@ public class DBStore {
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
+  Vector categories;		// what kind of object categories do we have?
 
   byte file_major, file_minor;
 
   DBJournal journal = null;
 
-  // debugging into
+  // debugging info
 
   int objectsCheckedOut = 0;
   int locksHeld = 0;
@@ -84,6 +85,7 @@ public class DBStore {
     objectBases = new Hashtable(20); // default 
     lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
+    categories = new Vector();
     schemaEditInProgress = false;
     GanymedeAdmin.setState("Normal Operation");
   }
@@ -106,12 +108,15 @@ public class DBStore {
     DataInputStream in;
 
     DBObjectBase tempBase;
-    short baseCount, namespaceCount;
+    short baseCount, namespaceCount, categoryCount;
     String namespaceID;
     boolean caseInsensitive;
     String file_id;
 
     /* -- */
+
+    nameSpaces.removeAllElements();
+    categories.removeAllElements();
 
     try
       {
@@ -151,6 +156,18 @@ public class DBStore {
 	for (int i = 0; i < namespaceCount; i++)
 	  {
 	    nameSpaces.addElement(new DBNameSpace(in));
+	  }
+
+	// read in the object categories
+
+	if (file_major >= 1 && file_minor >= 3)
+	  {
+	    categoryCount = in.readShort();
+
+	    for (int i = 0; i < categoryCount; i++)
+	      {
+		categories.addElement(in.readUTF());
+	      }
 	  }
 	
 	baseCount = in.readShort();
@@ -266,7 +283,7 @@ public class DBStore {
     FileOutputStream outStream = null;
     DataOutputStream out = null;
     Enumeration basesEnum;
-    short baseCount, namespaceCount;
+    short baseCount, namespaceCount, categoryCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
 
@@ -314,6 +331,18 @@ public class DBStore {
 	  {
 	    ns = (DBNameSpace) nameSpaces.elementAt(i);
 	    ns.emit(out);
+	  }
+
+	if (major_version >= 1 && minor_version >= 3)
+	  {
+	    categoryCount = (short) categories.size();
+
+	    out.writeShort(categoryCount);
+
+	    for (int i = 0; i < categoryCount; i++)
+	      {
+		out.writeUTF((String) categories.elementAt(i));
+	      }
 	  }
 
 	baseCount = (short) objectBases.size();
@@ -495,6 +524,38 @@ public class DBStore {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
+  }
+
+  /**
+   * 
+   * Method to add a new category to the category list.
+   *
+   */
+
+  public synchronized void addCategory(String category)
+  {
+    if (category == null || category.equals(""))
+      {
+	throw new IllegalArgumentException("bad category name");
+      }
+
+    categories.addElement(category);
+  }
+
+  /**
+   * 
+   * Method to delete a category from the category list.
+   *
+   */
+
+  public synchronized void removeCategory(String category)
+  {
+    if (category == null || category.equals(""))
+      {
+	throw new IllegalArgumentException("bad category name");
+      }
+
+    categories.removeElement(category);
   }
 
   /**
