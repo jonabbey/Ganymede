@@ -388,7 +388,7 @@ sub examine_java {
 
       if (!open(PROPS, "< $properties_root/$proppath.properties")) {
 	print "*** Error, couldn't load properties file $properties_root/$proppath.properties ***\n";
-	return;
+	return 1;
       }
 
       $prop_loaded = 1;
@@ -438,6 +438,7 @@ sub examine_java {
 	  print "  Warning, couldn't find optional property for key $key on line $line_number\n";
 	} else {
 	  print "*** Error, couldn't find property for key $key on line $line_number!!! ***\n";
+	  $result = 1;
 	}
       } else {
 
