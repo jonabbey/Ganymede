@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:11 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/03/17 05:31:47 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -158,10 +158,12 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     else if (e.getActionCommand().equals("Set starting date"))
       {
 	// show popup
+
 	if (popupCal == null)
 	  {
-	    popupCal = new JpopUpCalendar(new GregorianCalendar(), this);
+	    popupCal = new JpopUpCalendar(new GregorianCalendar(), this, true);
 	  }
+
 	popupCal.setVisible(true);
       }
   }
