@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,8 @@
 package arlut.csd.ganymede;
 
 import arlut.csd.ganymede.*;
+
+import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -42,7 +44,7 @@ public class Query implements java.io.Serializable {
   short objectType;
   QueryNode root;
   boolean editableOnly;
-  String restrictionList = null;
+  Hashtable permitList = null;
 
   /* -- */
 
@@ -51,7 +53,8 @@ public class Query implements java.io.Serializable {
    *
    * @param objectType numeric object type code to search over
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
-   * @param editableOnly if true, the server will only return objects that the user's session currently has permission to edit
+   * @param editableOnly if true, the server will only return objects that the user's session 
+   * currently has permission to edit
    *
    */
 
@@ -145,15 +148,35 @@ public class Query implements java.io.Serializable {
 
   /**
    *
-   * This method takes a comma separated list of numeric field id's
-   * that should be returned by this query.  If restrictionList is
-   * null, all possible fields will be returned.
+   * This method resets the permitList, allowing
+   * all fields to be returned by default.
    * 
    */
 
-  public setRestrictionList(String restrictionList)
+  public void resetPermitList()
   {
-    this.restrictionList = restrictionList;
+    permitList = null;
+  }
+
+  /**
+   *
+   * This method adds a field identifier to the list of
+   * fields that may be returned.  Once this method
+   * is called with a field identifier, the query will
+   * only return fields that have been explicitly added.
+   *
+   * resetPermitList() may be called to reset the
+   * list to the initial allow-all state.
+   */
+
+  public void addField(short id)
+  {
+    if (permitList == null)
+      {
+	permitList = new Hashtable();
+      }
+
+    permitList.put(new Short(id), this);
   }
 
 }
