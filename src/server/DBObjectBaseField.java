@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -31,11 +31,16 @@ import java.util.*;
 public class DBObjectBaseField {
 
   DBObjectBase base;		// definition for the object type we are part of
+
+  // schema fields
+
   String field_name;		// name of this field
   short field_code;		// id of this field in the current object
   short field_type;		// data type contained herein
   byte visibility;		// visibility code
   String classname;		// name of class to manage user interactions with this field
+  String comment;
+  Class classdef;		// class object containing the code managing dbfields of this type
   boolean array;		// true if this field is an array type
 
   // array attributes
@@ -55,6 +60,7 @@ public class DBObjectBaseField {
   String okChars = null;
   String badChars = null;
   DBNameSpace namespace = null;
+  boolean caseInsensitive = false;
 
   // invid attributes
 
@@ -85,6 +91,7 @@ public class DBObjectBaseField {
     out.writeShort(field_code);
     out.writeShort(field_type);
     out.writeUTF(classname);
+    out.writeUTF(comment);
     out.writeByte(visibility);
     out.writeBoolean(array);
     if (array)
@@ -130,6 +137,22 @@ public class DBObjectBaseField {
     field_code = in.readShort();
     field_type = in.readShort();
     classname = in.readUTF();
+
+    if (classname != null && !classname.equals(""))
+      {
+	try 
+	  {
+	    classdef = Class.forName(classname);
+	  }
+	catch (ClassNotFoundException ex)
+	  {	    
+	    System.err.println("DBObjectBaseField.receive(): class definition could not be found: " + ex);
+	    classdef = null;
+	  }
+      }
+
+    comment = in.readUTF();
+
     visibility = in.readByte();
     array = in.readBoolean();
     if (array)
@@ -161,7 +184,11 @@ public class DBObjectBaseField {
 	okChars = in.readUTF();
 	badChars = in.readUTF();
 	nameSpaceId = in.readUTF();
-	setNameSpace(nameSpaceId);
+	
+	if (!nameSpaceId.equals(""))
+	  {
+	    setNameSpace(nameSpaceId);
+	  }
       }
     else if (isInvid())
       {
@@ -189,6 +216,72 @@ public class DBObjectBaseField {
 
   /**
    *
+   * Returns the name of the class managing instances of this field
+   *
+   */
+
+  public String getClassName()
+  {
+    return classname;
+  }
+
+  void setClassName(String name)
+  {
+    Class newclassdef;
+
+    if (!name.equals(classname))
+      {
+	try 
+	  {
+	    newclassdef = Class.forName(name);
+
+	    // won't get here if name was bad
+
+	    classname = name;	
+	    classdef = newclassdef;
+	  }
+	catch (ClassNotFoundException ex)
+	  {	    
+	    System.err.println("DBObjectBaseField.setClassName(): class definition could not be found: " + ex);
+	  }
+      }
+  }
+
+  /**
+   *
+   * Returns the comment defined in the schema for this field
+   *
+   */
+
+  public String getComment()
+  {
+    return comment;
+  }
+
+  /**
+   *
+   * Sets the comment defined in the schema for this field
+   *
+   */
+
+  public void setComment(String s)
+  {
+    comment = s;
+  }      
+
+  /**
+   *
+   * Returns the Class object managing instances of this field
+   *
+   */
+
+  public Class getClassDef()
+  {
+    return classdef;
+  }
+
+  /**
+   *
    * <p>Returns the field type</p>
    *
    * <p>Where type is one of the following
@@ -200,7 +293,7 @@ public class DBObjectBaseField {
    *   static final short STRING = 3;
    *   static final short INVID = 4;
    *
-   * @see csd.DBStore.DBStore
+   * @see arlut.csd.ganymede.DBStore
    */
 
   public short getType()
@@ -246,16 +339,6 @@ public class DBObjectBaseField {
   }
 
   //
-
-  public String getClassName()
-  {
-    return classname;
-  }
-
-  void setClassName(String name)
-  {
-    classname = name;
-  }
 
   public byte getVisibility()
   {
@@ -580,12 +663,11 @@ public class DBObjectBaseField {
 	      }
 	  }
 
-	// if we didn't find it we've got a new namespace
+	// if we didn't find it, complain.
 
 	if (namespace == null)
 	  {
-	    namespace = new DBNameSpace(nameSpaceId);
-	    base.store.nameSpaces.addElement(namespace);
+	    throw new IllegalArgumentException("Unknown namespace id specified for field");
 	  }
       }
   }
@@ -701,33 +783,47 @@ public class DBObjectBaseField {
 
   // general convenience methods
 
-  public void print(PrintStream out)
+  public String getTypeDesc()
   {
-    out.print(field_name + "(" + field_code + "):");
+    String result;
+
     switch (field_type)
       {
       case DBStore.BOOLEAN:
-	out.print("boolean");
+	result = "boolean";
 	break;
+
       case DBStore.NUMERIC:
-	out.print("numeric");
+	result = "numeric";
 	break;
+
       case DBStore.DATE:
-	out.print("date");
+	result = "date";
 	break;
+
       case DBStore.STRING:
-	out.print("string");
+	result = "string";
 	break;
+
       case DBStore.INVID:
-	out.print("invid");
+	result = "invid";
 	break;
       }
 
     if (array)
       {
-	out.print(" array [" + limit + "]");
+	return result + " array [" + limit + "]";
       }
+    else
+      {
+	return result;
+      }
+  }
 
+  public void print(PrintStream out)
+  {
+    out.print(field_name + "(" + field_code + "):");
+    out.print(getTypeDesc());
     out.println();
   }
 }

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,32 +25,246 @@ import java.util.*;
 
 /**
  *
- * A DBEditObject is a copy of a DBObject that has been exclusively
- * checked out from the main database so that a DBSession can edit the
- * fields of the object.  The DBEditObject class keeps track of the
- * changes made to fields, keeping things properly synchronized with
- * unique field name spaces.<br><br>
+ * DBEditObject is the main base class that is subclassed by individual
+ * application object types to provide editing and management intelligence.
+ * Both static and instance methods are defined in DBEditObject which can
+ * be subclassed to provide object management intelligence.<br><br> 
+ *
+ * A instance of DBEditObject is a copy of a DBObject that has been
+ * exclusively checked out from the main database so that a DBSession
+ * can edit the fields of the object.  The DBEditObject class keeps
+ * track of the changes made to fields, keeping things properly
+ * synchronized with unique field name spaces.<br><br>
  *
  * All DBEditObjects are obtained in the context of a DBEditSet.  When
  * the DBEditSet is committed, the DBEditObject is made to replace the
  * original object from the DBStore.  If the EditSet is aborted, the
  * DBEditObject is dropped.
- *
+ * 
  */
 
 public class DBEditObject extends DBObject {
 
   static boolean debug = true;
 
-  public static void setDebug(boolean val)
+  public final static void setDebug(boolean val)
   {
     debug = val;
   }
 
-  DBObject original;
-  DBEditSet editset; 
+  /* -------------------- Static customization hooks -------------------- */
 
-  /* -- */
+  /**
+   *
+   * Static method to verify overall consistency of
+   * a DBObject.  While default code has not yet been
+   * written for this method, it may need to have its
+   * parameter list modified to include the controlling
+   * DBSession to allow coordination of DBLock and the
+   * the use of DBEditSet.findObject() to get a transaction
+   * consistent view of related objects.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean consistencyCheck(DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
+   * to view a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for viewing to the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canRead(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
+   * to edit a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for editing by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canWrite(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
+   * to inactivate a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for inactivating by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canInactivate(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
+   * to remove a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for removal by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canRemove(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
+   * to create an instance of this object type.  The client's DBSession object
+   * will call the canCreate method in the DBObjectBase for this object type
+   * to determine whether creation is allowed to the user.
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canCreate(DBSession session)
+  {
+    return true;
+  }
+
+  // valid status types
+
+  /**
+   * Status code for an object in the DBStore that has been checked out for editing.
+   */
+  static final byte EDITING = 1;
+
+  /**
+   * Status code for a newly created object.
+   */
+  static final byte CREATING = 2;
+
+  /**
+   * Status code for a previously existing object that is to be deleted
+   */
+  static final byte DELETING = 3;
+
+  /**
+   * Status code for a newly created object that is to be dropped
+   */
+  static final byte DROPPING = 4;
+
+  /* --------------------- Instance fields and methods --------------------- */
+
+  DBObject original;
+  DBEditSet editset;
+  boolean committing;
+
+  byte status;
+  boolean stored;		// true if the object has a version currently
+				// stored in the DBStore
+
+  /**
+   *
+   * Creation constructor, is responsible for creating a new editable
+   * object with all fields defined in the DBObjectBaseField instantiated
+   * but undefined.
+   *
+   * This constructor is not really intended to be overriden in subclasses.
+   * Creation time field value initialization is to be handled by
+   * initializeNewObject().
+   *
+   * @see arlut.csd.ganymede.DBField
+   */
+
+  DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
+  {
+    Enumeration enum;
+    Object key;
+    DBObjectBaseField fieldDef;
+    DBField field, tmp;
+
+    /* -- */
+
+    super(objectBase, invid.getNum());
+
+    original = null;
+    this.editset = editset;
+    committing = false;
+    stored = false;
+    status = CREATING;
+
+    fields = new Hashtable();
+
+    synchronized (objectBase)
+      {
+	enum = objectBase.fieldHash.keys();
+	
+	while (enum.hasMoreElements())
+	  {
+	    key = enum.nextElement();
+	    
+	    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
+		
+	    switch (fieldDef.getType())
+	      {
+	      case DBStore.BOOLEAN:
+		tmp = new BooleanDBField(this, fieldDef);
+		break;
+		    
+	      case DBStore.NUMERIC:
+		tmp = new NumericDBField(this, fieldDef);
+		break;
+		
+	      case DBStore.DATE:
+		tmp = new DateDBField(this, fieldDef);
+		break;
+
+	      case DBStore.STRING:
+		tmp = new StringDBField(this, fieldDef);
+		break;
+		    
+	      case DBStore.INVID:
+		tmp = new InvidDBField(this, fieldDef);
+		break;
+	      }
+
+	    fields.put(key, tmp);
+	  }
+      }    
+  }
+
+  /**
+   *
+   * Check-out constructor, used by DBObject.createShadow()
+   * to pull out an object for editing.
+   *
+   */
 
   DBEditObject(DBObject original, DBEditSet editset)
   {
@@ -64,15 +278,19 @@ public class DBEditObject extends DBObject {
     // do we also want to synchronize on the object base
     // below?
 
+    this.editset = editset;
+    shadowObject = null;
+    committing = false;
+    stored = true;
+    status = EDITING;
+
     synchronized (original)
       {
 	super(original.objectBase);
-	this.editset = editset;
+
 	this.original = original;
 	this.id = original.id;
-	this.tmp_count = 0;
 	this.objectBase = original.objectBase;
-	this.shadowObject = null;
 
 	fields = new Hashtable();
 
@@ -88,6 +306,7 @@ public class DBEditObject extends DBObject {
 	    while (enum.hasMoreElements())
 	      {
 		field = (DBField) enum.nextElement();
+		key = new Short(field.getID());
 
 		switch (field.getType())
 		  {
@@ -120,9 +339,9 @@ public class DBEditObject extends DBObject {
     // now create slots for any fields that are in this object type's
     // DBObjectBase, but which were not present in the original
     
-    synchronized (definition)
+    synchronized (objectBase)
       {
-	enum = definition.fieldHash.keys();
+	enum = objectBase.fieldHash.keys();
 	
 	while (enum.hasMoreElements())
 	  {
@@ -130,7 +349,7 @@ public class DBEditObject extends DBObject {
 	    
 	    if (!fields.containsKey(key))
 	      {
-		fieldDef = (DBObjectBaseField) definition.fieldHash.get(key);
+		fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 		
 		switch (fieldDef.getType())
 		  {
@@ -162,378 +381,464 @@ public class DBEditObject extends DBObject {
   }
 
   /**
-   * DBField's are basically the smallest unit that are managed in
-   * the DBStore's memory structures.  DBField's are generally not changed
-   * once created, because a session / thread may have a reference to 
-   * a field when we are changing this 'shadow' object.  So we simply
-   * replace the existing field in this object with a new one we
-   * created.
    *
-   * @param fieldcode The idcode for the field to be replaced.
-   * @param field The new field value to fill the fieldcode slot.
    *
-   * @see arlut.csd.ganymede.DBField
+   *
    *
    */
-  public boolean setField(short fieldcode, DBField field)
+
+  DBEditSet getSession()
   {
-    DBNameSpace namespace;
-    DBObjectBaseField fieldDef;
-    DBField oldField;
-    Short key;
+    return editset.getSession();
+  }
 
-    /* -- */
+  /**
+   *
+   * Returns a code indicating whether this object
+   * is being created, edited, or deleted.
+   *
+   * @see #CREATING
+   * @see #EDITING
+   * @see #DELETING
+   * @see #DROPPING
+   *
+   */
 
-    // check to see if we already have an instance of this field
+  byte getStatus()
+  {
+    return status;
+  }
 
-    if (fields.containsKey(key))
+  /**
+   *
+   * Sets this object's status code
+   *
+   * @see #CREATING
+   * @see #EDITING
+   * @see #DELETING
+   * @see #DROPPING
+   *
+   */
+
+  synchronized void setStatus(byte new_status)
+  {
+    switch (new_status)
       {
-	oldField = (DBField) fields.get(key);
-
-	if (namespace != null)
-	  {
-	    // make the old values available for the editset.. we should
-	    // always be able to do this
-
-	    if (!oldField.unmark(editset, namespace))
-	      {
-		throw new RuntimeException(editset.session.key +
-					   ": namespace/editset corruption");
-	      }
-         }
+      case CREATING:
+      case EDITING:
+      case DELETING:
+      case DROPPING:
+	status = new_status;
+	break;
       }
 
-    // now need to mark new values
+    throw new RuntimeException("unrecognized status code");
+  }
 
-    if (namespace != null)
-      {
-	if (debug)
-	  {
-	    System.err.println(editset.session.key +
-			       ": DBEditObject.setField(): namespace check on " + 
-			       namespace.name + " for field " + fieldDef.getName());
-	  }
+  /**
+   *
+   * Returns true if the object has ever been stored in the DBStore under the
+   * current invid.
+   *
+   */
 
-	if (!field.mark(editset, namespace))
-	  {
-	    editset.session.setLastError("couldn't set field " + 
-					 fieldDef.getName() +
-					 " due to a namespace conflict");
-	    return false;
-	  }
-	else if (debug)
-	  {
-	    System.err.println(editset.session.key +
-			       ": DBEditObject.setField(): namespace check ok");
-	  }
-      }  
+  boolean isStored()
+  {
+    return stored;
+  }
 
-    // and replace the changed field in our hashtable..
+  /**
+   *
+   * Initialize a newly created DBEditObject.
+   *
+   * When this method is called, the DBEditObject has
+   * been created and all fields defined in the
+   * controlling DBObjectBase have been instantiated
+   * without defined values.<br><br>
+   *
+   * This method is responsible for filling in any default
+   * values that can be calculated from the DBSession
+   * associated with the editset defined in this DBEditObject.<br><br>
+   *
+   * If initialization fails for some reason, initializeNewObject()
+   * will return false.  Right now there is no infrastructure in
+   * Ganymede to allow the transaction to be aborted from
+   * within the DBSession's createDBObject() method.  As a result,
+   * if this method is to fail to properly initialize the object,
+   * it should be able to not leave an impact on the rest of the
+   * DBStore.. in other words, setting InvidField values that
+   * involve symmetry relationships could be problematic. <br><br>
+   *
+   * This method should be overridden in subclasses.
+   *
+   */
 
-    fields.put(new Short(fieldcode), field);
+  public boolean initializeNewObject()
+  {
     return true;
   }
 
   /**
    *
-   * addElement is used to add a value to an array
-   * DBField.  addElement will implicitly clone the
-   * appropriate DBField before modifying it, to maintain
-   * the DBEditObject semantics.<br><br>
+   * This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.<br><br>
    *
-   * If the fieldcode does not correspond to a valid
-   * array field in this object's DBObjectBase, an exception
-   * will be thrown.  This will be a RuntimeException if
-   * the field does not exist, a ClassCastException if the
-   * the field does exist but is not an array field.
-   *
-   * @param fieldcode The idcode for the field to be modified in the editobject.
-   * @param value The element to add to this array.
+   * Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?
+   * 
    */
 
-  public boolean addElement(short fieldcode, Object value)
+  public boolean verifyNewValue(DBField field, Object value)
   {
-    DBNameSpace namespace;
-    DBArrayField field;
-    Short key;
-    DBObjectBaseField fieldDef;
+    return true;
+  }
 
-    /* -- */
+  // ****
+  //
+  // The following methods are here to allow our DBEditObject
+  // to be involved in the processing of a particular 
+  // vector operation on a field in this object.. otherwise
+  // we'd have to subclass our fields for any processing
+  // that would need to be done in response to an operation..
+  //
+  // ****
 
-    key = new Short(fieldcode);
+  /**
+   *
+   * This method allows the DBEditObject to have executive approval
+   * of any vector delete operation, and to take any special actions
+   * in reaction to the delete.. if this method returns true, the
+   * DBField that called us will proceed to make the change to
+   * its vector.  If this method returns false, the DBField
+   * that called us will not make the change, and the field
+   * will be left unchanged.
+   *
+   * The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.
+   *
+   * If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.
+   *
+   */
 
-    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
-
-    if (fieldDef.isString())
-      {
-	namespace = fieldDef.getNameSpace();
-      }
-    else
-      {
-	namespace = null;
-      }
-
-    if (!(fieldDef.isArray() &&
-	  ((fieldDef.isBoolean() && (value instanceof Boolean)) ||
-	   (fieldDef.isNumeric() && (value instanceof Integer)) ||
-	   (fieldDef.isDate() && (value instanceof Date)) ||
-	   (fieldDef.isString() && (value instanceof String)) ||
-	   (fieldDef.isInvid() && (value instanceof Invid)))))
-      {
-	// not an array field, or the field type doesn't match value
-
-	editset.session.setLastError("wrong typed value " +
-				     value + " for " + fieldDef.getName());
-	
-	return false;
-      }
-
-    // if we're a string field, check the value being added for appropriate value
-    
-    if (fieldDef.isString())
-      {
-	String s = (String) value;
-
-	/* - */
-
-	if (s.length() > fieldDef.getMaxLength())
-	  {
-	    editset.session.setLastError("couldn't add " + s + " to field " +
-					 fieldDef.getName() +
-					 ": string too long for field");
-	    return false;
-	  }
-
-	if (s.length() < fieldDef.getMinLength())
-	  {
-	    editset.session.setLastError("couldn't add " + s + " to field " + 
-					 fieldDef.getName() +
-					 ": string too short for field");
-	    return false;
-	  }
-
-	if (fieldDef.getOKChars() != null)
-	  {
-	    String ok = fieldDef.getOKChars();
-
-	    for (int i = 0; i < s.length(); i++)
-	      {
-		if (ok.indexOf(s.charAt(i)) == -1)
-		  {
-		    editset.session.setLastError("string value" + s +
-						 "contains a bad character " +
-						 s.charAt(i));
-		    return false;
-		  }
-	      }
-	  }
-
-	if (fieldDef.getBadChars() != null)
-	  {
-	    String bad = fieldDef.getBadChars();
-
-	    for (int i = 0; i < s.length(); i++)
-	      {
-		if (bad.indexOf(s.charAt(i)) != -1)
-		  {
-		    editset.session.setLastError("string value" + s +
-						 "contains a bad character " + 
-						 s.charAt(i));
-		    return false;
-		  }
-	      }
-	  }
-      }
-
-    if (fieldDef.isInvid())
-      {
-	Invid invid = (Invid) value;
-
-	/* - */
-
-	if (fieldDef.isTargetRestricted() &&
-	    invid.getType() != fieldDef.getAllowedTarget())
-	  {
-	    editset.session.setLastError("couldn't add " + invid + " to field "
-					 + fieldDef.getName() +
-					 ": invid type mismatch");
-	    return false;
-	  }
-      }
-
-    //JON: need to handle symmetry issues here
-
-    if (!fields.containsKey(key))
-      {
-	// do we want to create a new field in this slot for the caller
-	// if no such field currently exists in the object?
-
-	throw new RuntimeException("addElement called on a non-existant or null field");
-      }
-
-    // we'll throw a cast exception here if we weren't called on a vector field
-
-    field = (DBArrayField) fields.get(key);
-
-    // if we have not yet cloned the DBArrayField, do so.  this makes sure that
-    // we don't change the original vector with our add
-
-    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
-      {
-	field = field.duplicate();
-	fields.put(key, field);
-      }
-
-    // add the new element, checking against the proper namespace if
-    // required
-
-    if (namespace != null)
-      {
-	if (!namespace.mark(editset, value, field))
-	  {
-	    editset.session.setLastError("couldn't add  " + value + 
-					 " to field " + fieldDef.getName() +
-					 " due to a namespace conflict");
-	    return false;
-	  }
-      }
-    
-    field.addElement(value);
-
+  public boolean finalizeDeleteElement(DBField field, int index)
+  {
     return true;
   }
 
   /**
    *
-   * removeElement is used to remove a value from an array
-   * DBField.  removeElement will implicitly clone the
-   * appropriate DBField before modifying it, to maintain
-   * the DBEditObject semantics.<br><br>
+   * This method allows the DBEditObject to have executive approval
+   * of any vector add operation, and to take any special actions
+   * in reaction to the add.. if this method returns true, the
+   * DBField that called us will proceed to make the change to
+   * its vector.  If this method returns false, the DBField
+   * that called us will not make the change, and the field
+   * will be left unchanged.
    *
-   * If the fieldcode does not correspond to a valid
-   * array field in this object's DBObjectBase, an exception
-   * will be thrown.  This will be a RuntimeException if
-   * the field does not exist, a ClassCastException if the
-   * the field does exist but is not an array field.
+   * The DBField that called us will take care of all possible
+   * checks on the operation (including vector bounds, etc.),
+   * acceptable values as appropriate (including a call to our
+   * own verifyNewValue() method).  Under normal circumstances,
+   * we won't need to do anything here.
    *
-   * @param fieldcode The idcode for the field to be modified in the editobject.
-   * @param value The element to remove from this array.
+   * If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.
+   * 
    */
 
-  public boolean removeElement(short fieldcode, Object value)
+  public boolean finalizeAddElement(DBField field, Object value)
   {
-    DBArrayField field;
-    DBNameSpace namespace;
-    Short key;
-
-    /* -- */
-
-    key = new Short(fieldcode);
-
-    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(key)).namespace;
-
-    if (!fields.containsKey(key))
-      {
-	throw new RuntimeException("removeElement called on a non-existant or null field");
-      }
-
-    // we'll throw a cast exception here if we weren't called on an vector field
-
-     field = (DBArrayField) fields.get(key);
-
-//     if (!field instanceof DBArrayField)
-//       {
-// 	throw new RuntimeException("deleteElement called on a scalar field code");
-//       }
-
-    // if we have not yet cloned the DBArrayField, do so.  this makes sure that
-    // we don't change the original vector with our remove
-
-    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
-      {
-	field = field.duplicate();
-	fields.put(key, field);
-      }
-
-    // okay, now delete the element, marking the value as free for
-    // reuse in the namespace if appropriate
-
-    if (namespace != null)
-      {
-	if (!namespace.unmark(editset, value))
-	  {
-	    return false;
-	  }
-      }
-    
-    field.removeElement(value);
-
     return true;
   }
 
   /**
    *
-   * removeElementAt is used to remove a specific element from an array
-   * DBField.  removeElementAt will implicitly clone the
-   * appropriate DBField before modifying it, to maintain
-   * the DBEditObject semantics.<br><br>
+   * This method allows the DBEditObject to have executive approval
+   * of any vector set operation, and to take any special actions
+   * in reaction to the set.. if this method returns true, the
+   * DBField that called us will proceed to make the change to
+   * it's vector.  If this method returns false, the DBField
+   * that called us will not make the change, and the field
+   * will be left unchanged.
    *
-   * If the fieldcode does not correspond to a valid
-   * array field in this object's DBObjectBase, an exception
-   * will be thrown.  This will be a RuntimeException if
-   * the field does not exist, a ClassCastException if the
-   * the field does exist but is not an array field.
+   * The DBField that called us will take care of all possible
+   * checks on the operation (including vector bounds, etc.),
+   * acceptable values as appropriate (including a call to our
+   * own verifyNewValue() method.  Under normal circumstances,
+   * we won't need to do anything here.
    *
-   * @param fieldcode The idcode for the field to be modified in the editobject.
-   * @param value The index of the vector element to be removed.
+   * If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.
+   * 
    */
 
-  public boolean removeElementAt(short fieldcode, int index)
+  boolean finalizeSetElement(DBField field, int index, Object value)
   {
-    DBArrayField field;
-    DBNameSpace namespace;
-    Short key;
-
-    /* -- */
-
-    key = new Short(fieldcode);
-
-    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(key)).namespace;
-
-    if (!fields.containsKey(key))
-      {
-	throw new RuntimeException("removeElement called on a non-existant or null field");
-      }
-
-    field = (DBArrayField) fields.get(key);
-
-//     if (!field instanceof DBArrayField)
-//       {
-// 	throw new RuntimeException("deleteElement called on a scalar field code");
-//       }
-
-    // if we have not yet cloned the DBArrayField, do so.  this makes sure that
-    // we don't change the original vector with our remove
-
-    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
-      {
-	field = field.duplicate();
-	fields.put(key, field);
-      }
-
-    // okay, now delete the element, marking the value as free for
-    // reuse in the namespace if appropriate
-
-    if (namespace != null)
-      {
-	if (!namespace.unmark(editset, field.key(index)))
-	  {
-	    return false;
-	  }
-      }
-    
-    field.removeElementAt(index);
-
     return true;
   }
+
+  /**
+   *
+   * This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions
+   * in reaction to the set.. if this method returns true, the
+   * DBField that called us will proceed to make the change to
+   * it's value.  If this method returns false, the DBField
+   * that called us will not make the change, and the field
+   * will be left unchanged.
+   *
+   * The DBField that called us will take care of all possible checks
+   * on the operation (including a call to our own verifyNewValue()
+   * method.  Under normal circumstances, we won't need to do anything
+   * here.
+   *
+   * If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.
+   *  
+   */
+
+  boolean finalizeSetValue(DBField field, Object value)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.
+   *
+   */
+
+  public Vector obtainChoiceList(DBField field)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate whether a given field can only
+   * choose from a choice provided by obtainChoiceList()
+   *
+   */
+
+  public boolean mustChoose(DBField field)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate that a given Date field has a restricted
+   * range of possibilities.
+   *
+   */
+
+  public boolean isDateLimited(DBField field)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method is used to specify the earliest acceptable date
+   * for the specified field.
+   *
+   */
+
+  public Date minDate(DBField field)
+  {
+    return new Date(Long.MIN_VALUE);
+  }
+
+  /**
+   *
+   * This method is used to specify the earliest acceptable date
+   * for the specified field.
+   *
+   */
+
+  public Date maxDate(DBField field)
+  {
+    return new Date(Long.MAX_VALUE);
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate that a given Numeric field has a restricted
+   * range of possibilities.
+   *
+   */
+
+  public boolean isIntLimited(DBField field)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method is used to specify the minimum acceptable value
+   * for the specified field.
+   *
+   */
+
+  public int minInt(DBField field)
+  {
+    return Integer.MIN_VALUE;
+  }
+
+  /**
+   *
+   * This method is used to specify the maximum acceptable value
+   * for the specified field.
+   *
+   */
+
+  public int maxInt(DBField field)
+  {
+    return Integer.MAX_VALUE;
+  }
+
+  /**
+   *
+   * This method handles inactivation logic for this object
+   * type.  DBEditObject's are checked out for editing, the
+   * inactivate() method can then be called on the object
+   * to put the object into inactive mode.  inactivate will
+   * set the object's removal date and fix up any
+   * other state information to reflect the object's
+   * inactive status.<br><br>
+   *
+   * It is up to commitPhase1() and commitPhase2() to handle
+   * any exterior actions related to the object's inactivation.<br><br>
+   *
+   * inactivate() returns true if the internal inactivation bookkeeping was
+   * successful, and false if not.  A false return value will cause
+   * the DBSession to abort the transaction;  this method is not responsible
+   * for undoing an unsuccessful partial inactivation.
+   *
+   * @see #commitPhase1()
+   * @see #commitPhase2()
+   */
+
+  boolean inactivate()
+  {
+    return true;
+  }
+
+  /**
+   *
+   * This method handles Ganymede-internal deletion logic for this object
+   * type.  remove() is responsible for dissolving any invid inter-object
+   * references in particular.<br><br>
+   *
+   * It is up to commitPhase1() and commitPhase2() to handle
+   * any external actions related to object removal.<br><br>
+   *
+   * remove() returns true if the internal removal bookkeeping was
+   * successful, and false if not.  A false return value will 
+   * cause the DBSession to abort the transaction; this method is not
+   * responsible for undoing unsuccessful partial removal bookkeeping.
+   *
+   * @see #commitPhase1()
+   * @see #commitPhase2()
+   */
+
+  boolean remove()
+  {
+    return true;
+  }
+
+  /**
+   *
+   * This method performs verification for the first phase of
+   * the two-phase commit algorithm.  If this object returns
+   * true from commitPhase1() when called during an editSet's
+   * commit() routine, this object CAN NOT refuse commit()
+   * at a subsequent point.  Once commitPhase1() is called,
+   * the object CAN NOT be changed until the transaction
+   * is either fully committed or abandoned. <br><br>
+   *
+   * This method is intended to be subclassed by application
+   * objects that need to include extra-Ganymede processes
+   * in the two-phase commit protocol.  If a particular
+   * subclass of DBEditObject does not need to involve outside
+   * processes in the full two-phase commit protocol, this
+   * method should not be overridden. <br><br>
+   *
+   * If this method is overridden, be sure and set
+   * this.committing to true before doing anything else.  Failure
+   * to set committing to true in this method will cause the
+   * two phase commit mechanism to behave unpredictably.
+   *
+   * @see arlut.csd.ganymede.DBEditSet
+   */
+
+  synchronized boolean commitPhase1()
+  {
+    committing = true;
+    return consistencyCheck(this);
+  }
+
+  /**
+   *
+   * This method returns true if this object has already gone
+   * through phase 1 of the commit process, which requires
+   * the DBEditObject to not accept further changes.
+   *
+   */
+
+  synchronized boolean isCommitting()
+  {
+    return committing;
+  }
+
+  /**
+   *
+   * This method is a hook for subclasses to override to
+   * pass the phase-two commit command to external processes.<br><br>
+   *
+   * For normal usage this method would not be overridden.  For
+   * cases in which change to an object would result in an external
+   * process being initiated whose success or failure would not
+   * affect the successful commit of this DBEditObject in the
+   * Ganymede server, the process invokation should be placed here,
+   * rather than in commitPhase1().
+   *
+   *
+   * @see arlut.csd.ganymede.DBEditSet
+   */
+
+  synchronized void commitPhase2()
+  {
+    return;
+  }
+
+  /**
+   *
+   * This method is a hook for subclasses to do clean up action if the
+   * commit process is not able to go to completion for some reason.
+   * Generally, release() should be responsible for doing cleanup for
+   * processes initiated by commitPhase1().  If commitPhase1() does
+   * not do anything external to Ganymede, release() shouldn't either.
+   * release() should return immediately if isCommitting() is false;
+   * 
+   */
+
+  void release()
+  {
+    return;
+  }
+  
 }

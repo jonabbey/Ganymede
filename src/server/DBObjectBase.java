@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,6 +50,7 @@ public class DBObjectBase {
   String classname;
   Class classdef;
   short type_code;
+  boolean canInactivate;
 
   // runtime data
 
@@ -77,6 +78,7 @@ public class DBObjectBase {
     classname = null;
     classdef = null;
     type_code = 0;
+    canInactivate = false;
     fieldHash = null;
     objectHash = null;
     maxid = 0;
@@ -102,6 +104,7 @@ public class DBObjectBase {
     out.writeUTF(object_name);
     out.writeUTF(classname);
     out.writeShort(type_code);
+    out.writeBoolean(new Boolean(canInactivate));
 
     size = fieldHash.size();
 
@@ -165,6 +168,8 @@ public class DBObjectBase {
 	  }
       }
 
+    canInactivate = in.readBoolean().booleanValue();
+
     type_code = in.readShort();	// read our index for the DBStore's objectbase hash
 
     size = in.readShort();
@@ -217,15 +222,96 @@ public class DBObjectBase {
 
   /**
    *
+   * Factory method to create a new DBEditObject of this
+   * type.  The created DBEditObject will be connected
+   * to the editset, and will not be integrated into the
+   * DBStore until the editset is committed.
+   *
+   */
+
+  synchronized DBEditObject createNewObject(DBEditSet editset)
+  {
+    DBEditObject e_object;
+    Invid invid;
+
+    /* -- */
+
+    invid = new Invid(getTypeID(), getNextID());
+
+    if (classdef == null)
+      {
+	e_object = new DBEditObject(this, invid, editset);
+      }
+    else
+      {
+	Constructor c;
+	Class classArray[];
+	Object parameterArray[];
+
+	classArray = new Class[3];
+
+	classArray[0] = this.getClass();
+	classArray[1] = invid.getClass();
+	classArray[2] = editset.getClass();
+
+	parameterArray = new Object[3];
+
+	parameterArray[0] = this;
+	parameterArray[1] = invid;
+	parameterArray[2] = editset;
+
+	try
+	  {
+	    c = classdef.getDeclaredConstructor(classArray);
+	    e_object = c.newInstance(parameterArray);
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	  }
+	catch (SecurityException ex)
+	  {
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	  }
+	catch (InstantiationException ex)
+	  {
+	  }
+	catch (InvocationTargetException ex)
+	  {
+	  }
+      }
+
+    if (e_object == null)
+      {
+	return null;
+      }
+
+    if (e_object.initializeNewObject())
+      {
+	editSet.addObject(e_object);
+	return e_object;
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  /**
+   *
    * allocate a new object id 
    *
    */
 
-  synchronized int getNextId()
+  synchronized int getNextID()
   {
     if (debug)
       {
-	System.err.println("DBObjectBase.getNextId(): " + object_name + "'s maxid is " + maxid);
+	System.err.println("DBObjectBase.getNextID(): " + object_name + "'s maxid is " + maxid);
       }
     return ++maxid;
   }
@@ -319,6 +405,33 @@ public class DBObjectBase {
 
   /**
    *
+   * Returns true if the current session is permitted to
+   * create an object of this type.
+   *
+   */
+
+  public boolean canCreate(DBSession session)
+  {
+
+    // we're going to want to dispatch to the appropriate
+    // DBEditObject subclasses canCreate() method.
+
+    return false;
+  }
+
+  /**
+   *
+   * Returns true if this object type can be inactivated
+   *
+   */
+
+  public boolean canInactivate()
+  {
+    return canInactivate;
+  }
+
+  /**
+   *
    * Returns the invid type id for this object definition
    *
    */
@@ -334,6 +447,9 @@ public class DBObjectBase {
    * ObjectBase.
    *
    * Returns a vector of DBObjectBaseField objects.
+   *
+   * Question: do we want to return an array of DBFields here instead
+   * of a vector?
    *
    */
 

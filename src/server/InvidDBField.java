@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,7 +59,7 @@ public class InvidDBField extends DBField implements invid_field {
     this.definition = definition;
     
     defined = false;
-    value = false;
+    value = null;
     values = null;
   }
 
@@ -77,7 +77,7 @@ public class InvidDBField extends DBField implements invid_field {
     if (isVector())
       {
 	values = (Vector) field.values.clone();
-	value = false;
+	value = null;
       }
     else
       {
@@ -96,6 +96,11 @@ public class InvidDBField extends DBField implements invid_field {
 
   public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition)
   {
+    if (definition.isArray())
+      {
+	throw new IllegalArgumentException("scalar value constructor called on vector field");
+      }
+
     this.owner = owner;
     this.definition = null;
     this.value = value;
@@ -116,6 +121,11 @@ public class InvidDBField extends DBField implements invid_field {
 
   public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    if (!definition.isArray())
+      {
+	throw new IllegalArgumentException("vector value constructor called on scalar field");
+      }
+
     this.owner = owner;
     this.definition = definition;
     
