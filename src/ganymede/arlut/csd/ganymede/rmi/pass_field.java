@@ -130,25 +130,25 @@ public interface pass_field extends db_field {
   ReturnVal setPlainTextPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted password for this field.
-   * This method will return false if this password field is not
-   * stored crypted.</p>
+   * <p>This method is used to set a pre-crypted password for this
+   * field.  This method will return an error code if this password
+   * field is not stored crypted.</p>
    */
 
   ReturnVal setCryptPass(String text) throws RemoteException;
 
   /**
    * <p>This method is used to set a pre-crypted FreeBSD-style
-   * MD5Crypt password for this field.  This method will return
-   * false if this password field is not stored crypted.</p> 
+   * MD5Crypt password for this field.  This method will return an
+   * error code if this password field is not stored crypted.</p>
    */
 
   ReturnVal setMD5CryptedPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted Apache-style
-   * MD5Crypt password for this field.  This method will return
-   * false if this password field is not stored crypted.</p> 
+   * <p>This method is used to set a pre-crypted Apache-style MD5Crypt
+   * password for this field.  This method will return an error code
+   * if this password field is not stored crypted.</p>
    */
 
   ReturnVal setApacheMD5CryptedPass(String text) throws RemoteException;
@@ -163,6 +163,13 @@ public interface pass_field extends db_field {
 
   ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4) throws RemoteException;
 
+  /**
+   * <p>This method is used to set a pre-crypted SSHA password for
+   * this field.  This method will return an error code if this
+   * password field is not stored in SSHA format.</p>
+   */
+
+  ReturnVal setSSHAPass(String text) throws RemoteException;
 
   /**
    * <p>This method is used to force all known hashes into this password
