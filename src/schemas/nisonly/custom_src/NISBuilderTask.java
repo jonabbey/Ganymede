@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -351,8 +351,12 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     result.append(room);
     result.append(" ");
     result.append(div);
-    result.append(",");
-    result.append(officePhone);
+
+    if (officePhone != null && !officePhone.equals(""))
+      {
+	result.append(",");
+	result.append(officePhone);
+      }
 
     if (homePhone != null && !homePhone.equals(""))
       {
