@@ -1,11 +1,15 @@
 /*
 
-  helpPanel.java
+   helpPanel.java
 
-  A simple panel for showing html help stuff.
+   A simple panel for showing html help stuff.
+   
+   Created: 4 March 1998
+   Version: $Revision: 1.3 $ %D%
+   Module By: Michael Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
 
-  */
-
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -13,6 +17,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Stack;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       helpPanel
+
+------------------------------------------------------------------------------*/
 
 public class helpPanel extends JDialog implements ActionListener{
 
@@ -36,6 +46,8 @@ public class helpPanel extends JDialog implements ActionListener{
   Stack
     history = new Stack();
 
+  /* -- */
+
   public helpPanel(Frame parent)
   {
     super(parent);
@@ -56,6 +68,7 @@ public class helpPanel extends JDialog implements ActionListener{
     try
       {
 	document = new JEditorPane(START);
+	document.setEditable(false);
       }
     catch (java.io.IOException x)
       {
@@ -95,7 +108,6 @@ public class helpPanel extends JDialog implements ActionListener{
     pack();
     setBounds(100,100,450,250);
     setVisible(true);
-
   }
 
   public void goBack()
@@ -110,7 +122,6 @@ public class helpPanel extends JDialog implements ActionListener{
 	System.out.println("loading page: " + newPage);
 	loadPage(newPage, false);
       }
-
   }
 
   public void loadPage(String page)
@@ -123,17 +134,18 @@ public class helpPanel extends JDialog implements ActionListener{
     if (currentPage == page)
       {
 	System.out.println("Can't fool me, Eric!  You are trying to load the page you are on.");
-
       }
     else
       {
 	try
 	  {
 	    document.setPage(page);
-	    if ((currentPage != null) && keepInHistory)
+
+	    if (currentPage != null && keepInHistory)
 	      {
 		history.push(currentPage);
 	      }
+
 	    currentPage = page;
 	  }
 	catch (java.io.IOException e)
@@ -166,7 +178,6 @@ public class helpPanel extends JDialog implements ActionListener{
       {
 	System.out.println("action from unknown source");
       }
-
   }
 
 }
