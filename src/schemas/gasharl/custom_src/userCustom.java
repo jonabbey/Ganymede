@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,7 +43,8 @@ import java.rmi.*;
 
 public class userCustom extends DBEditObject implements SchemaConstants, userSchema {
   
-  static final boolean debug = false;
+  static final boolean debug = true;
+
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
 
@@ -1124,262 +1125,478 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			   field.getName() + ", op= " + operation);
       }
 
-    // if we are changing the list of email aliases, we'll want
-    // to update the list of choices for the signature field.
-
-    if (field.getID() == ALIASES)
+    try
       {
-	result = new ReturnVal(true, true);
-	    
-	result.addRescanField(userSchema.SIGNATURE);
+	// if we are changing the list of email aliases, we'll want
+	// to update the list of choices for the signature field.
 
-	return result;
-      }
-
-    if (field.getID() == GROUPLIST)
-      {
-	switch (operation)
+	if (field.getID() == ALIASES)
 	  {
-	  case ADDELEMENT:
+	    // the second true in the ReturnVal constructor makes the
+	    // Ganymede logic go ahead and complete the operation
+	    // normally, just taking the rescan information as an
+	    // extra to pass back to the client.
 
-	    // ok, no big deal, but we will need to have the client
-	    // rescan the choice list for the home group field
+	    result = new ReturnVal(true, true);	
+	    
+	    result.addRescanField(userSchema.SIGNATURE);
 
-	    result = new ReturnVal(true, true);
-	    result.addRescanField(HOMEGROUP);
-	    groupChoices = null;
 	    return result;
+	  }
 
-	  case DELELEMENT:
-
-	    // ok, this is more of a big deal.. first, see if the value
-	    // being deleted is the home group.  If not, still no big
-	    // deal.
-
-	    int index = ((Integer) param1).intValue();
-
-	    Vector valueAry = getFieldValuesLocal(GROUPLIST);
-	    Invid delVal = (Invid) valueAry.elementAt(index);
-
-	    if (debug)
+	if (field.getID() == GROUPLIST)
+	  {
+	    switch (operation)
 	      {
-		System.err.println("userCustom: deleting group element " + 
-				   gSession.viewObjectLabel(delVal));
-	      }
+	      case ADDELEMENT:
 
-	    if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
-	      {
-		// whew, no big deal.. they are not removing the
-		// home group.  The client will need to rescan,
-		// but no biggie.
-
-		if (debug)
-		  {
-		    System.err.println("userCustom: I don't think " + 
-				       gSession.viewObjectLabel(delVal) + 
-				       " is the home group");
-		  }
+		// ok, no big deal, but we will need to have the client
+		// rescan the choice list for the home group field
 
 		result = new ReturnVal(true, true);
 		result.addRescanField(HOMEGROUP);
 		groupChoices = null;
 		return result;
-	      }
 
-	    if (gSession.isWizardActive() && 
-		gSession.getWizard() instanceof userHomeGroupDelWizard)
-	      {
-		groupWizard = (userHomeGroupDelWizard) gSession.getWizard();
-		
-		if (groupWizard.getState() == groupWizard.DONE)
+	      case DELELEMENT:
+
+		// ok, this is more of a big deal.. first, see if the value
+		// being deleted is the home group.  If not, still no big
+		// deal.
+
+		int index = ((Integer) param1).intValue();
+
+		Vector valueAry = getFieldValuesLocal(GROUPLIST);
+		Invid delVal = (Invid) valueAry.elementAt(index);
+
+		if (debug)
 		  {
-		    // ok, assume the wizard has taken care of getting everything prepped and
-		    // approved for us.  An active wizard has approved the operation
-		
-		    groupWizard.unregister();
-		
-		    return null;
+		    System.err.println("userCustom: deleting group element " + 
+				       gSession.viewObjectLabel(delVal));
 		  }
-		else
+
+		if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
 		  {
-		    if (groupWizard.userObject != this)
+		    // whew, no big deal.. they are not removing the
+		    // home group.  The client will need to rescan,
+		    // but no biggie.
+
+		    if (debug)
 		      {
-			System.err.println("userCustom.wizardHook(): bad object");
+			System.err.println("userCustom: I don't think " + 
+					   gSession.viewObjectLabel(delVal) + 
+					   " is the home group");
 		      }
+
+		    result = new ReturnVal(true, true);
+		    result.addRescanField(HOMEGROUP);
+		    groupChoices = null;
+		    return result;
+		  }
+
+		if (gSession.isWizardActive() && 
+		    gSession.getWizard() instanceof userHomeGroupDelWizard)
+		  {
+		    groupWizard = (userHomeGroupDelWizard) gSession.getWizard();
+		
+		    if (groupWizard.getState() == groupWizard.DONE)
+		      {
+			// ok, assume the wizard has taken care of getting everything prepped and
+			// approved for us.  An active wizard has approved the operation
+		
+			groupWizard.unregister();
+		
+			return null;
+		      }
+		    else
+		      {
+			if (groupWizard.userObject != this)
+			  {
+			    System.err.println("userCustom.wizardHook(): bad object");
+			  }
 		    
-		    if (groupWizard.getState() != groupWizard.DONE)
-		      {
-			System.err.println("userCustom.wizardHook(): bad state: " + 
-					   groupWizard.getState());
+			if (groupWizard.getState() != groupWizard.DONE)
+			  {
+			    System.err.println("userCustom.wizardHook(): bad state: " + 
+					       groupWizard.getState());
+			  }
+
+			groupWizard.unregister();
+
+			return Ganymede.createErrorDialog("User Object Error",
+							  "The client is attempting to do an operation on " +
+							  "a user object with an active wizard.");
 		      }
-
-		    groupWizard.unregister();
-
+		  }
+		else if (gSession.isWizardActive() && 
+			 !(gSession.getWizard() instanceof userHomeGroupDelWizard))
+		  {
 		    return Ganymede.createErrorDialog("User Object Error",
 						      "The client is attempting to do an operation on " +
-						      "a user object with an active wizard.");
+						      "a user object with mismatched active wizard.");
 		  }
+
+		// eek.  they are deleting the home group.  Why Lord, why?!
+
+		try
+		  {
+		    groupWizard = new userHomeGroupDelWizard(this.gSession,
+							     this,
+							     param1);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
+		  }
+
+		// if we get here, the wizard was able to register itself.. go ahead
+		// and return the initial dialog for the wizard.  The ReturnVal code
+		// that wizard.getStartDialog() returns will have the success code
+		// set to false, so whatever triggered us will prematurely exit,
+		// returning the wizard's dialog.
+	    
+		return groupWizard.getStartDialog();
 	      }
-	    else if (gSession.isWizardActive() && 
-		     !(gSession.getWizard() instanceof userHomeGroupDelWizard))
+	  }
+
+	if ((field.getID() != USERNAME) ||
+	    (operation != SETVAL))
+	  {
+	    return null;		// by default, we just ok whatever else
+	  }
+
+	// ok, we're doing a user rename.. check to see if we need to do a
+	// wizard
+    
+	// If this is a newly created user, we won't pester them about setting
+	// or changing the user name field.
+
+	if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
+	  {
+	    result = new ReturnVal(true, true); // have setValue() do the right thing
+
+	    result.addRescanField(userSchema.HOMEDIR);
+	    result.addRescanField(userSchema.ALIASES);
+	    result.addRescanField(userSchema.SIGNATURE);
+	    result.addRescanField(userSchema.VOLUMES);
+	    result.addRescanField(userSchema.EMAILTARGET);
+
+	    return result;
+	  }
+
+	String oldname = (String) field.getValue();
+
+	if (!gSession.enableWizards)
+	  {
+	    return null;		// no wizards if the user is non-interactive.
+	  }
+
+	// Huh!  Wizard time!  We'll check here to see if there is a
+	// registered userRenameWizard in the system taking care of us.
+
+	if (gSession.isWizardActive() && gSession.getWizard() instanceof userRenameWizard)
+	  {
+	    renameWizard = (userRenameWizard) gSession.getWizard();
+
+	    if ((renameWizard.getState() == renameWizard.DONE) &&
+		(renameWizard.field == field) &&
+		(renameWizard.userObject == this) &&
+		(renameWizard.newname == param1))
 	      {
+		// ok, assume the wizard has taken care of getting
+		// everything prepped and approved for us.  An active
+		// wizard has approved the operation
+		
+		renameWizard.unregister();
+
+		// note that we don't have to return the rescan fields
+		// directive here.. the active wizard is what is going to
+		// respond directly to the user, we are presumably just
+		// here because the wizard task-completion code went ahead
+		// and called setValue on the user's name.. we'll trust
+		// that code to return the rescan indicators.
+		
+		return null;
+	      }
+	    else
+	      {
+		if (renameWizard.field != field)
+		  {
+		    System.err.println("userCustom.wizardHook(): bad field");
+		  }
+
+		if (renameWizard.userObject != this)
+		  {
+		    System.err.println("userCustom.wizardHook(): bad object");
+		  }
+
+		if (renameWizard.newname != param1)
+		  {
+		    System.err.println("userCustom.wizardHook(): bad param");
+		  }
+
+		if (renameWizard.getState() != renameWizard.DONE)
+		  {
+		    System.err.println("userCustom.wizardHook(): bad state: " + 
+				       renameWizard.getState());
+		  }
+
+		renameWizard.unregister();
 		return Ganymede.createErrorDialog("User Object Error",
 						  "The client is attempting to do an operation on " +
-						  "a user object with mismatched active wizard.");
+						  "a user object with an active wizard.");
 	      }
+	  }
+	else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userRenameWizard))
+	  {
+	    return Ganymede.createErrorDialog("User Object Error",
+					      "The client is attempting to do an operation on " +
+					      "a user object with mismatched active wizard.");
+	  }
+	else
+	  {
+	    // there's no wizard active, and this operation has to be approved by one.  Go ahead
+	    // and set up the wizard and let the client play with it.
 
-	    // eek.  they are deleting the home group.  Why Lord, why?!
+	    // if we're setting the field to null, don't need to pass it through
+	    // a wizard.. we're probably just deleting this user.
+
+	    if (deleting && (param1 == null))
+	      {
+		return null;
+	      }
 
 	    try
 	      {
-		groupWizard = new userHomeGroupDelWizard(this.gSession,
-							 this,
-							 param1);
+		// Mike Jittlov is the Wizard of Speed and Time
+
+		renameWizard = new userRenameWizard(this.gSession,
+						    this,
+						    field,
+						    (String) param1,
+						    oldname);
 	      }
 	    catch (RemoteException ex)
 	      {
 		throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
 	      }
-
+	
 	    // if we get here, the wizard was able to register itself.. go ahead
 	    // and return the initial dialog for the wizard.  The ReturnVal code
 	    // that wizard.getStartDialog() returns will have the success code
 	    // set to false, so whatever triggered us will prematurely exit,
 	    // returning the wizard's dialog.
-	    
-	    return groupWizard.getStartDialog();
+
+	    return renameWizard.getStartDialog();
 	  }
       }
-
-    if ((field.getID() != USERNAME) ||
-	(operation != SETVAL))
+    finally
       {
-	return null;		// by default, we just ok whatever else
-      }
-
-    // ok, we're doing a user rename.. check to see if we need to do a
-    // wizard
-    
-    // If this is a newly created user, we won't pester them about setting
-    // or changing the user name field.
-
-    if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
-      {
-	result = new ReturnVal(true, true); // have setValue() do the right thing
-
-	result.addRescanField(userSchema.HOMEDIR);
-	result.addRescanField(userSchema.ALIASES);
-	result.addRescanField(userSchema.SIGNATURE);
-	result.addRescanField(userSchema.VOLUMES);
-	result.addRescanField(userSchema.EMAILTARGET);
-
-	return result;
-      }
-
-    String oldname = (String) field.getValue();
-
-    if (!gSession.enableWizards)
-      {
-	return null;		// no wizards if the user is non-interactive.
-      }
-
-    // Huh!  Wizard time!  We'll check here to see if there is a
-    // registered userRenameWizard in the system taking care of us.
-
-    if (gSession.isWizardActive() && gSession.getWizard() instanceof userRenameWizard)
-      {
-	renameWizard = (userRenameWizard) gSession.getWizard();
-
-	if ((renameWizard.getState() == renameWizard.DONE) &&
-	    (renameWizard.field == field) &&
-	    (renameWizard.userObject == this) &&
-	    (renameWizard.newname == param1))
+	if (debug)
 	  {
-	    // ok, assume the wizard has taken care of getting
-	    // everything prepped and approved for us.  An active
-	    // wizard has approved the operation
-		
-	    renameWizard.unregister();
-
-	    // note that we don't have to return the rescan fields
-	    // directive here.. the active wizard is what is going to
-	    // respond directly to the user, we are presumably just
-	    // here because the wizard task-completion code went ahead
-	    // and called setValue on the user's name.. we'll trust
-	    // that code to return the rescan indicators.
-		
-	    return null;
-	  }
-	else
-	  {
-	    if (renameWizard.field != field)
-	      {
-		System.err.println("userCustom.wizardHook(): bad field");
-	      }
-
-	    if (renameWizard.userObject != this)
-	      {
-		System.err.println("userCustom.wizardHook(): bad object");
-	      }
-
-	    if (renameWizard.newname != param1)
-	      {
-		System.err.println("userCustom.wizardHook(): bad param");
-	      }
-
-	    if (renameWizard.getState() != renameWizard.DONE)
-	      {
-		System.err.println("userCustom.wizardHook(): bad state: " + 
-				   renameWizard.getState());
-	      }
-
-	    renameWizard.unregister();
-	    return Ganymede.createErrorDialog("User Object Error",
-					      "The client is attempting to do an operation on " +
-					      "a user object with an active wizard.");
+	    System.err.println("userCustom ** exiting wizardHook");
 	  }
       }
-    else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userRenameWizard))
+  }
+
+  /**
+   *
+   * This method is a hook for subclasses to override to
+   * pass the phase-two commit command to external processes.<br><br>
+   *
+   * For normal usage this method would not be overridden.  For
+   * cases in which change to an object would result in an external
+   * process being initiated whose success or failure would not
+   * affect the successful commit of this DBEditObject in the
+   * Ganymede server, the process invokation should be placed here,
+   * rather than in commitPhase1().<br><br>
+   *
+   * Subclasses that override this method may wish to make this method 
+   * synchronized.
+   *
+   * @see arlut.csd.ganymede.DBEditSet
+   */
+
+  public void commitPhase2()
+  {
+    switch (getStatus())
       {
-	return Ganymede.createErrorDialog("User Object Error",
-					  "The client is attempting to do an operation on " +
-					  "a user object with mismatched active wizard.");
-      }
-    else
-      {
-	// there's no wizard active, and this operation has to be approved by one.  Go ahead
-	// and set up the wizard and let the client play with it.
+      case DROPPING:
+	// the user never really existed.. no external actions required.
+	break;
 
-	// if we're setting the field to null, don't need to pass it through
-	// a wizard.. we're probably just deleting this user.
+      case CREATING:
 
-	if (deleting && (param1 == null))
-	  {
-	    return null;
-	  }
+	// handle creating the user.. creating their home directory, setting
+	// up their mail spool, etc., etc.
 
-	try
-	  {
-	    // Mike Jittlov is the Wizard of Speed and Time
+	createUserExternals();
 
-	    renameWizard = new userRenameWizard(this.gSession,
-						this,
-						field,
-						(String) param1,
-						oldname);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
-	  }
+	break;
+
+      case DELETING:
+	deleteUserExternals();
+	break;
 	
-	// if we get here, the wizard was able to register itself.. go ahead
-	// and return the initial dialog for the wizard.  The ReturnVal code
-	// that wizard.getStartDialog() returns will have the success code
-	// set to false, so whatever triggered us will prematurely exit,
-	// returning the wizard's dialog.
+      case EDITING:
 
-	return renameWizard.getStartDialog();
+	// did the user's name change?
+
+	String name = getLabel();
+	String oldname = original.getLabel();
+
+	if (!name.equals(oldname))
+	  {
+	    handleUserRename();
+	  }
+
+	// did we change home directory volumes?
+
+	Invid volumeId;
+	String volumeName;
+	DBObject mapEntry;
+	Invid mapInvid;
+
+	Vector newEntries = getFieldValuesLocal(userSchema.VOLUMES);
+	Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
+
+	Hashtable newVolumes = new Hashtable(newEntries.size() + 1, 1.0f);
+	Hashtable oldVolumes = new Hashtable(oldEntries.size() + 1, 1.0f);
+
+	Vector addedVolumes = new Vector();
+	Vector deletedVolumes = new Vector();
+
+	for (int i = 0; i < oldEntries.size(); i++)
+	  {
+	    mapInvid = (Invid) oldEntries.elementAt(i);
+	    mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
+
+	    volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
+	    volumeName = gSession.viewObjectLabel(volumeId);
+
+	    oldVolumes.put(volumeId, volumeName);
+	  }
+
+	for (int i = 0; i < newEntries.size(); i++)
+	  {
+	    mapInvid = (Invid) newEntries.elementAt(i);
+	    mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
+
+	    volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
+	    volumeName = gSession.viewObjectLabel(volumeId);
+
+	    newVolumes.put(volumeId, volumeName);
+
+	    if (!oldVolumes.containsKey(volumeId))
+	      {
+		addedVolumes.addElement(volumeName);
+	      }
+	  }
+
+	Enumeration oldValues = oldVolumes.keys();
+
+	while (oldValues.hasMoreElements())
+	  {
+	    Object key = oldValues.nextElement();
+
+	    if (!newVolumes.containsKey(key))
+	      {
+		deletedVolumes.addElement(oldVolumes.get(key));
+	      }
+	  }
+
+	// okay, addedVolumes and deletedVolumes have a list of changes..
+
+	if (addedVolumes.size() != 0 && deletedVolumes.size() != 0)
+	  {
+	    handleUserDirectoryChange(addedVolumes, deletedVolumes);
+	  }
+      }
+
+    return;
+  }
+
+  /**
+   *
+   * This method runs from userCustom's commitPhase2() and runs an external
+   * script that can create the user's home directory, and anything else
+   * that might need doing.
+   *
+   */
+
+  private void createUserExternals()
+  {
+    if (debug)
+      {
+	System.err.println("userCustom: " + getLabel() + ", in createUserExternals().");
+      }
+  }
+
+  /**
+   *
+   * This method runs from userCustom's commitPhase2() and runs an external
+   * script that can do whatever bookkeeping might be desired when a user
+   * is taken out of the passwd/user_info file generated by Ganymede.  This
+   * may include removing the user's mailbox, home directory, and files, or
+   * simply notifying someone that the user is no longer valid.
+   *
+   */
+
+  private void deleteUserExternals()
+  {
+    if (debug)
+      {
+	System.err.println("userCustom: " + getLabel() + ", in deleteUserExternals().");
+      }
+  }
+
+  /**
+   *
+   * This method takes care of executing whatever external code is required
+   * to handle this user being moved from volume to volume
+   *
+   */
+
+  private void handleUserDirectoryChange(Vector addedVolumes, Vector deletedVolumes)
+  {
+    if (debug)
+      {
+	System.err.println("userCustom.handleUserDirectoryChange(): user " + getLabel());
+	
+	if (addedVolumes != null)
+	  {
+	    System.err.print("has been added to");
+
+	    for (int i = 0; i < addedVolumes.size(); i++)
+	      {
+		System.err.print(" ");
+		System.err.print(addedVolumes.elementAt(i));
+	      }
+
+	    System.err.println();
+	  }
+
+	if (addedVolumes != null)
+	  {
+	    System.err.print("has been deleted from");
+
+	    for (int i = 0; i < deletedVolumes.size(); i++)
+	      {
+		System.err.print(" ");
+		System.err.print(deletedVolumes.elementAt(i));
+	      }
+
+	    System.err.println();
+	  }
+      }
+  }
+
+  private void handleUserRename()
+  {
+    if (debug)
+      {
+	System.err.println("userCustom.handleUserRename(): user " + original.getLabel() +
+			   "has been renamed to " + getLabel());
       }
   }
 }
