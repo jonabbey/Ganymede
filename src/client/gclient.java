@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.175 $
-   Last Mod Date: $Date: 2000/10/03 07:07:21 $
+   Version: $Revision: 1.176 $
+   Last Mod Date: $Date: 2000/10/09 06:11:55 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.175 $ $Date: 2000/10/03 07:07:21 $ $Name:  $
+ * @version $Revision: 1.176 $ $Date: 2000/10/09 06:11:55 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/10/03 07:07:21 $";
+  static String release_date = "$Date: 2000/10/09 06:11:55 $";
   static String release_number = null;
 
   // ---
@@ -1071,34 +1071,47 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	personaDialog.updatePassField(currentPersonaString);
       }
 
-    // Check for MOTD
+    // Check for MOTD on another thread
 
-    setStatus("Checking MOTD");
-
-    try
-      {
-	StringBuffer m;
-
-	m = session.getMessageHTML("motd", true);
-
-	if (m != null)
+    Thread motdThread = new Thread(new Runnable() {
+      public void run() {
+	try
 	  {
-	    showMOTD(m.toString(), true);
-	  }
-	else
-	  {
-	    m = session.getMessage("motd", true);
+	    setStatus("Checking MOTD");
 
-	    if (m != null)
+	    StringBuffer m;
+	    boolean html = true;
+
+	    m = session.getMessageHTML("motd", true);
+
+	    if (m == null)
 	      {
-		showMOTD(m.toString(), false);
+		m = session.getMessage("motd", true);
+		html = false;
 	      }
+
+	    // and pop up the motd box back on the main GUI thread
+
+	    // create final locals to bridge the gap into another
+	    // method in the runnable to go on the GUI thread
+
+	    final String textString = m.toString();
+	    final boolean doHTML = html;
+
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		showMOTD(textString, doHTML);
+	      }
+	    });
+	  }
+	catch ( RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get motd: " + rx);
 	  }
       }
-    catch ( RemoteException rx)
-      {
-	throw new RuntimeException("Could not get motd: " + rx);
-      }
+    });
+
+    motdThread.start();
     
     setStatus("Ready.", 0);
   }
