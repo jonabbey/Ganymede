@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -663,6 +663,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     catch (RemoteException rx)
       {
 	throw new IllegalArgumentException("exception: isEditable in editField: " + rx);
+      }
+
+    // if we are in testing and development mode, we want to be able
+    // to edit fields regardless of what the server reports for its
+    // preference
+
+    if (owner.developMode)
+      {
+	isEditable = true;
       }
 
     booleanShowing = false;
