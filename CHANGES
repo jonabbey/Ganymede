@@ -800,6 +800,17 @@ the warning from the RMI rebind process.  The server will now decline
 to start up if another server is answering the phone at the same
 address.
 
+52. [SERVER] Fixed PermissionMatrixDBField loading
+
+The server had a bug that would prevent the database from loading
+if a role had a permission matrix defined with no entries defined
+in it.
+
+53. [INSTALL] Install scripts now check to make sure jars were built
+
+All of the install scripts now double check to make sure the
+jar files were made during the system build.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
