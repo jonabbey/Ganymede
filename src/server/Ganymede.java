@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,7 @@ public class Ganymede {
   public static String logFilename = "db/log";
   public static DBLog log = null;
   public static CategoryTransport catTransport = null;
+  public static Vector builderTasks = new Vector();
   
   /* -- */
 
@@ -235,6 +236,10 @@ public class Ganymede {
     scheduler.addDailyAction(0, 0, new GanymedeExpirationTask(), "Expiration Task");
 
     scheduler.addDailyAction(12, 0, new GanymedeWarningTask(), "Warning Task");
+
+    // and install the builder tasks listed in the database
+
+    registerBuilderTasks();
 
     // and wa-la
 
@@ -435,6 +440,94 @@ public class Ganymede {
 	  {
 	    System.err.println("Ganymede.startupHook() did not succeed");
 	  }
+      }
+  }
+
+  /**
+   *
+   * This method scans the database for valid BuilderTask entries and 
+   * adds them to the builderTasks vector.
+   *
+   *
+   */
+
+  static private void registerBuilderTasks()
+  {
+    QueryResult results = internalSession.queryDispatch(new Query(SchemaConstants.BuilderBase),
+							true, false, null);
+    String builderName;
+    String builderClass;
+    Vector objects;
+    DBObject object;
+    Class classdef;
+
+    /* -- */
+
+    if (results != null)
+      {
+	objects = results.getObjects();
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    if (debug)
+	      {
+		System.err.println("Processing builder task object # " + i);
+	      }
+
+	    object = (DBObject) objects.elementAt(i);
+	    
+	    builderName = (String) object.getFieldValue(SchemaConstants.BuilderTaskName);
+	    builderClass = (String) object.getFieldValue(SchemaConstants.BuilderTaskClass);
+
+	    if (builderName != null && builderClass != null)
+	      {
+		try
+		  {
+		    classdef = Class.forName(builderClass);
+		  }
+		catch (ClassNotFoundException ex)
+		  {
+		    System.err.println("Ganymede.registerBuilderTasks(): class definition could not be found: " + ex);
+		    classdef = null;
+		  }
+		
+		GanymedeBuilderTask task = null;
+
+		try
+		  {
+		    task = (GanymedeBuilderTask) classdef.newInstance(); // using no param constructor
+		  }
+		catch (IllegalAccessException ex)
+		  {
+		    System.err.println("IllegalAccessException " + ex);
+		  }
+		catch (InstantiationException ex)
+		  {
+		    System.err.println("InstantiationException " + ex);
+		  }
+
+		if (task != null)
+		  {
+		    scheduler.addActionOnDemand(task, builderName);
+		    builderTasks.addElement(builderName);
+		  }
+	      }
+	  }
+      }
+  }
+
+  /**
+   * This method scans schedules all registered builder tasks for
+   * execution.  This method will be called when a user commits a
+   * transaction.
+   * 
+   */
+
+  static void runBuilderTasks()
+  {
+    for (int i = 0; i < builderTasks.size(); i++)
+      {
+	scheduler.demandTask((String) builderTasks.elementAt(i));
       }
   }
 }
