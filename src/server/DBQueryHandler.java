@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/11/10 05:04:55 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2001/11/12 19:30:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,7 +75,7 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.26 $ $Date: 2000/11/10 05:04:55 $ $Name:  $
+ * @version $Revision: 1.27 $ $Date: 2001/11/12 19:30:30 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -757,6 +757,11 @@ public class DBQueryHandler {
 	      {
 		System.err.println("DBQueryHandler: trying to build regexp: /" + n.value + "/");
 	      }
+
+	    if (n.value == null || n.value.toString().equals(""))
+	      {
+		return false;
+	      }
 	    
 	    try
 	      {
@@ -805,6 +810,11 @@ public class DBQueryHandler {
 	    if (debug)
 	      {
 		System.err.println("DBQueryHandler: trying to build case-insensitive regexp: /" + n.value + "/");
+	      }
+
+	    if (n.value == null || n.value.toString().equals(""))
+	      {
+		return false;
 	      }
 	    
 	    try
