@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -689,16 +689,12 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	// Wizard check
 	
 	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	if (newRetVal != null)
 	  {
-	    // we're not done.. return the next wizard dialog, or the failure code
-	    
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -922,13 +918,11 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
 
-	if (newRetVal != null && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -1073,13 +1067,11 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
@@ -1196,13 +1188,11 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (newRetVal != null)
 	  {
 	    return newRetVal;
-	  }
-	else
-	  {
-	    retVal = newRetVal;
 	  }
       }
 
