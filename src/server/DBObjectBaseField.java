@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2001/03/21 15:11:31 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2001/03/24 07:42:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -235,6 +235,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   boolean crypted = true;	// UNIX encryption is the default.
   boolean md5crypted = false;	// OpenBSD style md5crypt() is not
+  boolean winHashed = false;	// Windows NT/Samba hashes are not
   boolean storePlaintext = false; // nor is plaintext
 
   // schema editing
@@ -361,6 +362,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     crypted = original.crypted;
     md5crypted = original.md5crypted;
+    winHashed = original.winHashed;
     storePlaintext = original.storePlaintext;
 
     inUseCache = null;
@@ -517,6 +519,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	out.writeBoolean(crypted);
 	out.writeBoolean(md5crypted);
+	out.writeBoolean(winHashed);
 	out.writeBoolean(storePlaintext);
       }
   }
@@ -730,7 +733,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.16 we introduce md5crypted
 
-	if ((base.store.file_major >1) || (base.store.file_minor >= 16))
+	if (((base.store.file_major == 1) && (base.store.file_minor >= 16)) ||
+	    (base.store.file_major > 1))
 	  {
 	    md5crypted = in.readBoolean();
 	  }
@@ -739,7 +743,21 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    md5crypted = false;
 	  }
 
-	if ((base.store.file_major >1) || (base.store.file_minor >= 10))
+	// at 2.1 we introduced winHashed
+
+	if (((base.store.file_major == 2) && (base.store.file_minor >= 1)) || (base.store.file_major > 2))
+	  {
+	    winHashed = in.readBoolean();
+	  }
+	else
+	  {
+	    winHashed = false;
+	  }
+
+	// at 1.10 we introduced storePlaintext
+
+	if (((base.store.file_major == 1) && (base.store.file_minor >= 10)) ||
+	    (base.store.file_major > 1))
 	  {
 	    storePlaintext = in.readBoolean();
 	  }
@@ -1039,6 +1057,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    xmlOut.startElementIndent("md5crypted");
 	    xmlOut.endElement("md5crypted");
+	  }
+
+	if (winHashed)
+	  {
+	    xmlOut.startElementIndent("winHashed");
+	    xmlOut.endElement("winHashed");
 	  }
 
 	if (storePlaintext)
@@ -1634,6 +1658,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     boolean _crypted = false;
     boolean _plaintext = false;
     boolean _md5crypted = false;
+    boolean _winHashed = false;
     ReturnVal retVal;
 
     /* -- */
@@ -1694,6 +1719,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    else if (child.matches("md5crypted"))
 	      {
 		_md5crypted = true;
+	      }
+	    else if (child.matches("winHashed"))
+	      {
+		_winHashed = true;
 	      }
 	    else if (child.matches("plaintext"))
 	      {
@@ -1766,6 +1795,16 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	return Ganymede.createErrorDialog("xml",
 					  "fielddef could not set md5 crypted flag: " + _md5crypted + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setWinHashed(_winHashed);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set windows hashing flag: " + _winHashed + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
       }
@@ -4273,9 +4312,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * <p>This method is used to specify that this password field should
    * store passwords in OpenBSD/FreeBSD/PAM md5crypt() format.  If
    * passwords are stored in md5crypt() format, they will not be kept
-   * in plaintext on disk, regardless of the setting of setPlainText().</p>
+   * in plaintext on disk, unless isPlainText() returns true.</p>
    *
-   * <p>setMD5Crypted() is not mutually exclusive with setCrypted().</p>
+   * <p>setMD5Crypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
@@ -4300,9 +4340,56 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     return null;
   }
 
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the two hashing formats used by Samba/Windows,
+   * the older 14-char LANMAN hash, and the newer md5/Unicode hash
+   * used by Windows NT.  If passwords are stored in the windows
+   * hashing formats, they will not be kept in plaintext on disk,
+   * unless isPlainText() returns true.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public boolean isWinHashed()
+  {
+    return winHashed;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the Samba/Windows hashing formats.</p>
+   *
+   * <p>setWinHashed() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public ReturnVal setWinHashed(boolean b)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    winHashed = b;
+
+    return null;
+  }
+
   /**
    * <p>This method returns true if this is a password field that
-   * will keep a copy of the password in plaintext.</p>
+   * will keep a copy of the password in plaintext in the Ganymede
+   * server's on-disk database.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -4314,15 +4401,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    * <p>This method is used to specify that this password field
-   * should keep a copy of the password in plaintext, in
-   * addition to a UNIX crypted copy.  If crypted is
-   * false, plaintext will be treated as true, whether
-   * or not this is explicitly set by the schema editor.</p>
-   *
-   * <p>If crypted or md5crypted is true, fields of this type will never retain
-   * the plaintext password information on disk.  Plaintext 
-   * password information will only be retained in the on-disk
-   * ganymede.db file if crypted and md5crypted are both false.</p>
+   * should keep a copy of the password in plaintext on disk,
+   * even if other hash methods are in use which could be
+   * used for Ganymede login authentication.  If no hash methods
+   * are enabled for this password field, plaintext will be stored
+   * on disk even if isPlainText() returns false for this field definition.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
@@ -4622,6 +4705,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += " <md5 crypted>";
 	  }
 
+	if (winHashed)
+	  {
+	    result += " <win hashed>";
+	  }
+
 	if (storePlaintext)
 	  {
 	    result += " <plaintext>";
@@ -4829,6 +4917,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (md5crypted)
 	  {
 	    result += " md5crypted";
+	  }
+
+	if (md5crypted)
+	  {
+	    result += " winhashed";
 	  }
 
 	if (storePlaintext)

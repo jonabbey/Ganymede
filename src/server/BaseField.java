@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/03/03 02:04:58 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2001/03/24 07:42:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -627,9 +628,10 @@ public interface BaseField extends Remote {
    * <p>This method is used to specify that this password field should
    * store passwords in OpenBSD/FreeBSD/PAM md5crypt() format.  If
    * passwords are stored in md5crypt() format, they will not be kept
-   * in plaintext on disk, regardless of the setting of setPlainText().</p>
+   * in plaintext on disk, unless isPlainText() returns true.</p>
    *
-   * <p>setMD5Crypted() is not mutually exclusive with setCrypted().</p>
+   * <p>setMD5Crypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
@@ -637,24 +639,45 @@ public interface BaseField extends Remote {
 
   public ReturnVal setMD5Crypted(boolean b) throws RemoteException;
 
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the two hashing formats used by Samba/Windows,
+   * the older 14-char LANMAN hash, and the newer md5/Unicode hash
+   * used by Windows NT.  If passwords are stored in the windows
+   * hashing formats, they will not be kept in plaintext on disk,
+   * unless isPlainText() returns true.</p>
+   */
+
+  public boolean isWinHashed() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the Samba/Windows hashing formats.</p>
+   *
+   * <p>setWinHashed() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
+  public ReturnVal setWinHashed(boolean b) throws RemoteException;
+
   /**
    * <p>This method returns true if this is a password field that
-   * will keep a copy of the password in plaintext.</p>
+   * will keep a copy of the password in plaintext in the Ganymede
+   * server's on-disk database.</p>
    */
 
   public boolean isPlainText() throws RemoteException;
 
   /**
    * <p>This method is used to specify that this password field
-   * should keep a copy of the password in plaintext, in
-   * addition to a UNIX crypted copy.  If crypted is
-   * false, plaintext will be treated as true, whether
-   * or not this is explicitly set by the schema editor.</p>
-   *
-   * <p>If crypted or md5crypted is true, fields of this type will never retain
-   * the plaintext password information on disk.  Plaintext 
-   * password information will only be retained in the on-disk
-   * ganymede.db file if crypted and md5crypted are both false.</p>
+   * should keep a copy of the password in plaintext on disk,
+   * even if other hash methods are in use which could be
+   * used for Ganymede login authentication.  If no hash methods
+   * are enabled for this password field, plaintext will be stored
+   * on disk even if isPlainText() returns false for this field definition.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/11/07 09:20:54 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/03/24 07:42:25 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -71,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2000/11/07 09:20:54 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2001/03/24 07:42:25 $ $Name:  $
  * @author Jonathan Abbey
  */
 

@@ -6,8 +6,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/11/05 00:31:38 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/03/24 07:42:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -42,7 +42,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -102,55 +103,18 @@ public interface pass_field extends db_field {
   boolean crypted() throws RemoteException;
 
   /**
+   * <p>This method is used for authenticating a provided plaintext
+   * password against the stored contents of this password field.  The
+   * password field may have stored the password in plaintext, or in
+   * any of a variety of cryptographic hash formats.  matchPlainText()
+   * will perform whatever operation on the provided plaintext as is
+   * required to determine whether or not it matches with the stored
+   * password data.</p>
    *
-   * Verification method for comparing a plaintext entry with a crypted
-   * value.
-   *
+   * @return true if the given plaintext matches the stored password
    */
 
   boolean matchPlainText(String text) throws RemoteException;
-
-  /**
-   * <p>Verification method for comparing a crypt'ed entry with a crypted
-   * value.  The salts for the stored and submitted values must match
-   * in order for a comparison to be made, else an illegal argument
-   * exception will be thrown.</p>
-   */
-
-  boolean matchCryptText(String text) throws RemoteException;
-
-  /**
-   * <p>Verification method for comparing an OpenBSD-style md5crypt()'ed
-   * entry with a crypted value.  The salts for the stored and
-   * submitted values must match in order for a comparison to be made,
-   * else an illegal argument exception will be thrown.</p>
-   */
-
-  boolean matchMD5CryptText(String text) throws RemoteException;
-
-  /** 
-   * <p>Method to obtain the SALT for a stored crypted password.  If
-   * the client is going to submit a pre-crypted password for
-   * comparison via matchCryptText(), it must be salted by the salt
-   * returned by this method.</p>
-   * 
-   * <p>If the password is not stored in crypt() form, null will be
-   * returned.</p> 
-   */
-
-  String getSalt() throws RemoteException;
-
-  /** 
-   * <p>Method to obtain the SALT for a stored OpenBSD-style
-   * md5crypt()'ed password.  If the client is going to submit a
-   * pre-crypted password for comparison via matchMD5CryptText(), it
-   * must be salted by the salt returned by this method.</p>
-   *
-   * <p>If the password is not stored in md5crypt() form,
-   * null will be returned.</p>
-   */
-
-  String getMD5Salt() throws RemoteException;
 
   /** 
    * <p>This method is used to set the password for this field,
@@ -175,4 +139,14 @@ public interface pass_field extends db_field {
    */
 
   ReturnVal setMD5CryptedPass(String text) throws RemoteException;
+
+  /**
+   * <p>This method is used to set pre-crypted Windows-style password
+   * hashes for this field.  These strings are formatted as used in Samba's
+   * encrypted password files.  This method will return
+   * an error code if this password field is not configured to accept
+   * Windows-hashed password strings.</p> 
+   */
+
+  ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4) throws RemoteException;
 }
