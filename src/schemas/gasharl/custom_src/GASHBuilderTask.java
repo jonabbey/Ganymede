@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -989,31 +989,37 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(":");
     result.append(signature);
 
-    for (int i = 0; i < aliases.size(); i++)
+    if (aliases != null)
       {
-	alias = (String) aliases.elementAt(i);
-
-	if (alias.equals(signature))
+	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    continue;
+	    alias = (String) aliases.elementAt(i);
+	    
+	    if (alias.equals(signature))
+	      {
+		continue;
+	      }
+	    
+	    result.append(", ");
+	    result.append(alias);
 	  }
-
-	result.append(", ");
-	result.append(alias);
       }
 
     result.append(":");
 
-    for (int i = 0; i < addresses.size(); i++)
+    if (addresses != null)
       {
-	if (i > 0)
+	for (int i = 0; i < addresses.size(); i++)
 	  {
-	    result.append(", ");
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+
+	    target = (String) addresses.elementAt(i);
+
+	    result.append(target);
 	  }
-
-	target = (String) addresses.elementAt(i);
-
-	result.append(target);
       }
 
     writer.println(result.toString());
@@ -1060,28 +1066,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(groupname);
     result.append(":");
 
-    for (int i = 0; i < group_targets.size(); i++)
+    if (group_targets != null)
       {
-	if (i > 0)
+	for (int i = 0; i < group_targets.size(); i++)
 	  {
-	    result.append(", ");
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+	    
+	    target = (String) group_targets.elementAt(i);
+	    
+	    result.append(target);
 	  }
-
-	target = (String) group_targets.elementAt(i);
-
-	result.append(target);
       }
 
-    for (int i = 0; i < external_targets.size(); i++)
+    if (external_targets != null)
       {
-	if ((i > 0) || (group_targets.size() > 0))
+	for (int i = 0; i < external_targets.size(); i++)
 	  {
-	    result.append(", ");
+	    if ((i > 0) || (group_targets.size() > 0))
+	      {
+		result.append(", ");
+	      }
+
+	    target = (String) external_targets.elementAt(i);
+
+	    result.append(target);
 	  }
-
-	target = (String) external_targets.elementAt(i);
-
-	result.append(target);
       }
 
     writer.println(result.toString());
