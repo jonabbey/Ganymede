@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2001/06/25 21:18:10 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2001/06/25 21:30:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -367,6 +367,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case ALIASES:
       case SIGNATURE:
       case EMAILTARGET:
+      case PASSWORDCHANGETIME:
 	return false;
       }
     
