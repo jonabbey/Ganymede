@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ import gjt.Box;
 
 *******************************************************************/
 
-public class JdateField extends JBufferedPane implements JsetValueCallback,ActionListener {
+public class JdateField extends JPanel implements JsetValueCallback,ActionListener {
 
   private boolean
     allowCallback = false,

@@ -30,7 +30,7 @@ import arlut.csd.Dialog.*;
  *  The subclasses of this class should be used.
  */
 
-public class JpassField extends JBufferedPane implements ActionListener, JsetValueCallback {
+public class JpassField extends JPanel implements ActionListener, JsetValueCallback {
 
   public static final boolean debug = false;
 

@@ -19,7 +19,7 @@ import java.util.Enumeration;
 import java.lang.String;
 import java.awt.event.*;
 
-public class Jtaskbar extends JBufferedPane implements ActionListener, MouseListener {
+public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
 
   Hashtable buttons;
   JBufferedPane panel;

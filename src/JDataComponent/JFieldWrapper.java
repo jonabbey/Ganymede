@@ -30,7 +30,7 @@ import com.sun.java.swing.*;
 import java.awt.*;
 import gjt.Box;
 
-public class JFieldWrapper extends JBufferedPane {
+public class JFieldWrapper extends JPanel {
 
   JComponent my_field = null;
 
