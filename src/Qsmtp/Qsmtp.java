@@ -561,6 +561,8 @@ public class Qsmtp implements Runnable {
 	    throw new ProtocolException(rstr);
 	  }
 
+	boolean successRcpt = false;
+
 	for (int i = 0; i < to_addresses.size(); i++)
 	  {
 	    sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
@@ -572,9 +574,24 @@ public class Qsmtp implements Runnable {
 
 	    if (!rstr.startsWith("250")) 
 	      {
-		throw new ProtocolException(rstr + " received for address " + 
-					    (String) to_addresses.elementAt(i));
+		// don't throw an exception here.. we're in a loop and
+		// we want to get the mail sent to others.
+
+		System.err.println("Qsmtp.dispatchMessage(): " + rstr + " received for address " +
+				   (String) to_addresses.elementAt(i));
 	      }
+	    else
+	      {
+		successRcpt = true;
+	      }
+	  }
+
+	// if none of our addresses was accepted, just return.  Note
+	// that our finally {} clause will clean up for us.
+
+	if (!successRcpt)
+	  {
+	    return;
 	  }
 
 	send.print("DATA");
