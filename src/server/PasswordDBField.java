@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -297,12 +297,37 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean matchPlainText(String text)
   {
+    String cryptedText;
+
+    /* -- */
+
     if (value == null || text == null)
       {
 	return false;
       }
 
-    return (((String) value).equals(jcrypt.crypt(getSalt(), text)));
+    if (definition.isCrypted())
+      {
+	if (debug)
+	  {
+	    System.err.println("present crypted text == " + value);
+
+	    System.err.println("getSalt() == '" + getSalt() + "'");
+	  }
+
+	cryptedText = jcrypt.crypt(getSalt(), text);
+
+	if (debug)
+	  {
+	    System.err.println("comparison crypted text == " + cryptedText);
+	  }
+
+	return ((String) value).equals(cryptedText);
+      }
+    else
+      {
+	return text.equals(value);
+      }
   }
 
   /**
@@ -344,7 +369,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (definition.isCrypted() && value != null)
       {
-	return ((String) value).substring(2);
+	return ((String) value).substring(0,2);
       }
     else
       {
