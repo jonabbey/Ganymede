@@ -5,8 +5,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/05/25 19:19:57 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2002/10/05 05:37:23 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -436,7 +436,6 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
   public void sendCallback()
   {
-    
     String str;
     // if nothing in the JpasswordField has changed,
     // we don't need to worry about this event.
