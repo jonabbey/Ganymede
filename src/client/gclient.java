@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -76,6 +76,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Session session;
   glogin _myglogin;
 
+  // set up a bunch of borders
+  public EmptyBorder
+    emptyBorder5 = new EmptyBorder(new Insets(5,5,5,5)),
+    emptyBorder10 = new EmptyBorder(new Insets(10,10,10,10));  
+
+  public BevelBorder
+    raisedBorder = new BevelBorder(BevelBorder.RAISED),
+    loweredBorder = new BevelBorder(BevelBorder.LOWERED);
+      
+
+  public CompoundBorder
+    statusBorder = new CompoundBorder(loweredBorder, emptyBorder5);
+
+
   private Hashtable
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
@@ -139,22 +153,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     createMI = null,
     viewMI = null,
     viewAllMI = null,
-    queryMI = null,
-    menubarQueryMI = null;
+    queryMI = null;
 
-  MenuBar 
+
+  JMenuBar 
     menubar;
 
-  MenuItem 
+  JMenuItem 
     logoutMI,
     removeAllMI,
-    rebuildTreeMI;
+    rebuildTreeMI,
+    menubarQueryMI = null;
 
-  MenuItem
+  JMenuItem
     roseMI,
     win95MI;
 
-  Menu 
+  JMenu 
     windowMenu,
     fileMenu,
     LandFMenu,
@@ -166,8 +181,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   WindowBar
     windowBar;
 
-  CompoundBorder
-    statusBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(new Insets(5,5,5,5)));
 
   /* -- */
 
@@ -208,20 +221,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
 
     // Make the menu bar
-    menubar = new MenuBar();    
+    menubar = new JMenuBar();    
 
     // File menu
-    fileMenu = new Menu("File");
+    fileMenu = new JMenu("File");
     //fileMenu.setBackground(ClientColor.menu);
     //fileMenu.setForeground(ClientColor.menuText);
-    logoutMI = new MenuItem("Logout");
+    logoutMI = new JMenuItem("Logout");
     logoutMI.addActionListener(this);
-    removeAllMI = new MenuItem("Remove All Windows");
+    removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
-    rebuildTreeMI = new MenuItem("Rebuild Tree");
+    rebuildTreeMI = new JMenuItem("Rebuild Tree");
     rebuildTreeMI.addActionListener(this);
 
-    menubarQueryMI = new MenuItem("Query");
+    menubarQueryMI = new JMenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
     fileMenu.add(menubarQueryMI);
@@ -232,23 +245,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     fileMenu.add(logoutMI);
 
     // Window list menu
-    windowMenu = new Menu("Windows");
+    windowMenu = new JMenu("Windows");
     //windowMenu.setBackground(ClientColor.menu);
     //windowMenu.setForeground(ClientColor.menuText);
 
     // Look and Feel menu
-    LandFMenu = new Menu("Look");
+    LandFMenu = new JMenu("Look");
     //LandFMenu.setBackground(ClientColor.menu);
     //LandFMenu.setForeground(ClientColor.menuText);
-    roseMI = new MenuItem("Rose");
+    roseMI = new JMenuItem("Rose");
     roseMI.addActionListener(this);
-    win95MI = new MenuItem("Win95");
+    win95MI = new JMenuItem("Win95");
     win95MI.addActionListener(this);
     LandFMenu.add(roseMI);
     LandFMenu.add(win95MI);
 
     // Personae menu
-    PersonaMenu = new Menu("Persona");
+    PersonaMenu = new JMenu("Persona");
     personaListener = new PersonaListener(session, this);
     try
       {
@@ -257,7 +270,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    for (int i = 0; i < personae.size(); i++)
 	      {
-		MenuItem mi = new MenuItem((String)personae.elementAt(i));
+		JMenuItem mi = new JMenuItem((String)personae.elementAt(i));
 		mi.addActionListener(personaListener);
 		PersonaMenu.add(mi);
 	      }
@@ -272,7 +285,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     menubar.add(LandFMenu);
     menubar.add(windowMenu);
     menubar.add(PersonaMenu);
-    this.setMenuBar(menubar);
+    menubar.setBorder(emptyBorder5);
+    menubar.setBackground(ClientColor.menu);
+    menubar.setForeground(ClientColor.menuText);
+
+    JPanel mp = new JPanel(new BorderLayout());
+    mp.add("Center", menubar);
+    mp.setBorder(raisedBorder);
+    mp.setOpaque(true);
+    mp.setBackground(ClientColor.menu);
+    //this.setJMenuBar(menubar);
+    add("North", mp);
 
     // Create menus for the tree
 
