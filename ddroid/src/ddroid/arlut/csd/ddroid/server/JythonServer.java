@@ -130,6 +130,11 @@ class JythonServerProtocol {
 
   public static String doneString = null;
 
+  /**
+   * <p>The session associated with this telnet connection.</p>
+   */
+  public GanymedeSession session;
+  
   private Socket socket;
   private InteractiveConsole interp;
   private StringWriter buffer;
@@ -158,7 +163,6 @@ class JythonServerProtocol {
 
   public void createSession(String personaName)
   {
-    GanymedeSession session;
     try
       {
       	/* Snag the appropriate Admin Persona from the database */
@@ -404,7 +408,15 @@ class JythonServerWorker extends Thread {
         finally
           {
             /* Make sure to register the logout */
-            Ganymede.server.lSemaphore.decrement();
+            try
+              {
+                protocol.session.logout();
+              }
+            catch (Exception e)
+              {
+                /* Move along */
+                Ganymede.stackTrace(e);
+              }
           }
       }
     catch (IOException e)
