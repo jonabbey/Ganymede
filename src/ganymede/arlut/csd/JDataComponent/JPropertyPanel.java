@@ -412,6 +412,13 @@ class JPropertyPanelTM extends AbstractTableModel {
     return editable;
   }
 
+  /**
+   * <p>This method is a custom addition, used to create a new
+   * property row with property name 'key'.  The new row will be
+   * created at the bottom of the JPropertyPanel, and the table will
+   * be notified to update itself.</p>
+   */
+
   public void addRow(String key)
   {
     if (debug)
@@ -426,6 +433,12 @@ class JPropertyPanelTM extends AbstractTableModel {
     int row = rows.size()-1;
     fireTableRowsInserted(row, row);
   }
+
+  /**
+   * <p>This method is a custom addition, used to delete a 
+   * property row by row index.  The table will be notified to
+   * update itself after deleting the row.</p>
+   */
 
   public void deleteRow(int row)
   {
