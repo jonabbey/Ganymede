@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1319,55 +1319,17 @@ class QueryRow implements ItemListener {
 		operandContainer.remove(operand);
 	      }
 
+	    // get a fully expanded (non-editables included) list of objects
+	    // from our parent.
 
-	    if (parent.gc.cachedLists.containsList(Target))
-	      {
-		if (debug)
-		  {
-		    System.out.println("Got it from the cachedLists");
-		  }
-		
-		list = parent.gc.cachedLists.getList(Target);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.out.println("It's not in there, downloading a new one.");
-		  }
-		
-		// need to do a query of the database here
+	    list = parent.gc.getObjectList(Target, true);
 
-		QueryResult qr = null;
-		
-		try
-		  {
-		    qr = parent.gc.session.query(new Query(targetBase, null, false)); // include non-editables
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("Error querying the server for invid choices " + ex.getMessage());
-		  }
-
-		// cache it as a favor to the rest of the client
-		    
-		parent.gc.cachedLists.putList(Target, qr);
-		list = parent.gc.cachedLists.getList(Target);
-	      }
-
-	    choices = list.getListHandles(false); // no inactives
+	    choices = list.getListHandles(false, true); // no inactives, but do want non-editables
 	    choices = parent.gc.sortListHandleVector(choices);
 
 	    operand = invidChooser = new JInvidChooser(choices, null, targetBase);
 
 	    addOperand = true;
-
-	    /*	    for (int i = 0; i < choices.size(); i++)
-		    {
-		    listHandle thisChoice = (listHandle) choices.elementAt(i);
-		    invidChooser.addItem(thisChoice);
-		    }
-	    */
 
 	    invidChooser.setMaximumRowCount(12);
 	    invidChooser.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
