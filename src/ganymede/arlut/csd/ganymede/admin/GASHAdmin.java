@@ -227,7 +227,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     applet = new GASHAdmin();
 
-    JFrame loginFrame = new GASHAdminLoginFrame("Admin console login", applet);
+    // "Admin console login"
+    JFrame loginFrame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
 
     loginFrame.getContentPane().setLayout(new BorderLayout());
     loginFrame.getContentPane().add("Center", applet);
@@ -327,10 +328,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new BorderLayout());
 
-    JLabel label = new JLabel("Ganymede Server on: ");
+    JLabel label = new JLabel(ts.l("createLoginPanel.announce")); // "Ganymede Server on:"
     labelPanel.add("North", label);
 
-    JLabel hostLabel = new JLabel(serverhost + ", port " + registryPortProperty);
+    // {0}, port {1}
+    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.serverPattern", serverhost, new Integer(registryPortProperty)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
@@ -348,7 +350,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     gbc.ipady = 4;
 
-    JLabel ul = new JLabel("Username:");
+    JLabel ul = new JLabel(ts.l("createLoginPanel.username")); // "Username:"
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = 2;
@@ -367,7 +369,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     username.addActionListener(this);
     panel.add(username);
 
-    JLabel pl = new JLabel("Password:");
+    JLabel pl = new JLabel(ts.l("createLoginPanel.password")); // "Password:"
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = 3;
@@ -395,7 +397,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     gbl.setConstraints(buttonPanel, gbc);
     panel.add(buttonPanel);
 
-    loginButton = new JButton("Connecting... " + spinAry[spindex]);
+    loginButton = new JButton(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
     loginButton.setOpaque(true);
     loginButton.setEnabled(true);
     loginButton.addActionListener(this);
@@ -404,7 +406,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (!WeAreApplet)
       {
-	quitButton = new JButton("Quit");
+	quitButton = new JButton(ts.l("createLoginPanel.quitButton"));
 
 	quitButton.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e)
@@ -490,7 +492,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		      {
 			public void run()
 			{
-			  localLoginBox.loginButton.setText("Connecting... " + spinAry[spindex]);
+			  localLoginBox.loginButton.setText(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
 			}
 		      });
 		  }
@@ -516,11 +518,13 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		{
 		  if (!ssl_logo)
 		    {
-		      loginButton.setText("Administrate Server (NO SSL)");
+		      // "Administrate Server (NO SSL)"
+		      loginButton.setText(ts.l("run.adminButtonNoSSL"));
 		    }
 		  else
 		    {
-		      loginButton.setText("Administrate Server");
+		      // "Administrate Server"
+		      loginButton.setText(ts.l("run.adminButtonSSL"));
 		    }
 
 		  username.setEnabled(true);
@@ -535,16 +539,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	else
 	  {
 	    new StringDialog(new JFrame(),
-			     "Login error",
-			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + connectError,
-			     "OK", null,
+			     ts.l("global.loginErrorTitle"), // "Login error"
+			     ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
+			     ts.l("global.loginErrorOKButton"), // "Ok"
+			     null,
 			     getErrorImage()).DialogShow();
 	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
 		public void run()
 		{
-		  loginButton.setText("Connect");
+		  loginButton.setText(ts.l("run.connectButton")); // "Connect"
 		  username.setEnabled(false);
 		  password.setEnabled(false);
 		  
@@ -599,25 +604,27 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	catch (RemoteException rx)
 	  {
 	    new StringDialog(new JFrame(),
-			     "Login error",
-			     "Couldn't log in to the Ganymede server... perhaps it is down?\n\nException: " + 
-			     rx.getMessage(),
-			     "OK", null,
+			     ts.l("global.loginErrorTitle"), // "Login error"
+			     ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
+			     ts.l("global.loginErrorOKButton"), // "Ok"
+			     null,
 			     getErrorImage()).DialogShow();
 
 	    connected.set(false);
 
-	    loginButton.setText("Connecting... " + spinAry[spindex]);
+	    loginButton.setText(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
 	    new Thread(this).start();
 	    return;
 	  }
 	catch (Exception ex)
 	  {
+	    // "Couldn''t log in to the Ganymede Server"
+	    // "Exception caught during login attempt.\n\nThis condition may be due to a software error.\n\nException: {0}"
 	    new StringDialog(new JFrame(),
-			     "Couldn't log in to the Ganymede Server",
-			     "Exception caught during login attempt.\n\n.This condition may be due to a software error.\n\n" +
-			     "Exception: " + ex.getMessage(),
-			     "OK", null, 
+			     ts.l("actionPerformed.loginErrorTitle"),
+			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
+			     ts.l("actionPerformed.loginErrorOKButton"),
+			     null, 
 			     getErrorImage()).DialogShow();
 	    
 	    password.setText("");
@@ -629,7 +636,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	quitButton.setEnabled(false);
 	loginButton.setEnabled(false);
 
-	frame = new GASHAdminFrame("Ganymede Admin Console", applet);
+	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), applet); // "Ganymede Admin Console"
 	
 	// Now that the frame is completely initialized, tie the
 	// GASHAdminDispatch object to the frame, and vice-versa.
