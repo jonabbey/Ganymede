@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -912,7 +912,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 class QueryRow implements ItemListener {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
@@ -1719,7 +1719,7 @@ class QueryRow implements ItemListener {
 
 class OptionsPanel extends JPanel {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
