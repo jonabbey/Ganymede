@@ -21,8 +21,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 15 May 1999
-  Version: $Revision: 1.2 $
-  Last Mod Date: $Date: 2000/01/29 02:29:37 $
+  Version: $Revision: 1.3 $
+  Last Mod Date: $Date: 2000/12/13 18:24:06 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -281,6 +281,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	      {
 		System.err.println("baseTable.render(): couldn't create backing store, returning");
 	      }
+
 	    return;
 	  }
 	bg = backing.getGraphics();
@@ -1422,7 +1423,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	  {
 	    System.err.println("Showing column menu");
 	  }
+
 	col.menu.show(this, x, y);
+
 	return;
       }
 
@@ -1432,7 +1435,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	  {
 	    System.err.println("Showing topLevel menu");
 	  }
+
 	rt.menu.show(this,x,y);
+
 	return;
       }
     

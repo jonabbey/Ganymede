@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 4 June 1996
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module By: Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,8 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 public class tableAttr {
+
+  final static boolean debug = false;
 
   public final static int
     JUST_LEFT = 0,
@@ -60,18 +62,23 @@ public class tableAttr {
   {
     this.c = c;
     this.font = font;
+
     if (c != null)
       {
 	calculateMetrics();
       }
     else
       {
-	System.err.println("Null component c, setting height and baseline to 0");
+	if (debug)
+	  {
+	    System.err.println("Null component c, setting height and baseline to 0");
+	  }
 
 	this.fontMetric = null;
 	height = 0;
 	baseline = 0;
       }
+
     this.fg = fg;
     this.bg = bg;
     this.align = align;
@@ -91,9 +98,12 @@ public class tableAttr {
   {
     if (font == null)
       {
-	System.err.println("font null ptr");
-	System.err.println("Setting baseline and height to 0");
-
+	if (debug)
+	  {
+	    System.err.println("font null ptr");
+	    System.err.println("Setting baseline and height to 0");
+	  }
+	
 	fontMetric = null;
 	baseline = 0;
 	height = 0;
@@ -106,13 +116,18 @@ public class tableAttr {
 	  }
 	catch (NullPointerException ex)
 	  {
-	    System.err.println("font null ptr");
-	    System.err.println("c = " + c);
-	    System.err.println("font = " + font);
+	    if (debug)
+	      {
+		System.err.println("font null ptr");
+		System.err.println("c = " + c);
+		System.err.println("font = " + font);
+	      }
+
 	    baseline=0;
 	    height=0;
 	    return;
 	  }
+
 	baseline = fontMetric.getMaxAscent();
 	height = baseline + fontMetric.getMaxDescent();
       }
