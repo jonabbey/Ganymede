@@ -1,0 +1,314 @@
+<project name="ganymede" default="all" basedir=".">
+
+  <!-- 
+    Project-wide settings. All directories are relative to the project
+    directories.
+  -->
+
+  <property name="src.dir" value="ganymede"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="graphics.dir" value="graphics"/>
+
+  <!-- Build directories -->
+  <property name="build.dir" value="build"/>
+  <property name="build.classes" value="${build.dir}/classes"/>
+  <property name="build.doc" value="${build.dir}/doc"/>
+  <property name="build.lib" value="${build.dir}/lib"/>
+
+  <!-- Dist directories -->
+  <property name="dist.jars" value="../jars"/>
+  <property name="dist.doc" value="../doc/javadoc"/>
+
+  <!-- Global settings -->
+  <property name="debug.flag" value="on"/>
+  <property name="java.lib" value="${java.home}/jre/lib/rt.jar"/>
+
+  <!-- Global properties for javac -->
+  <property name="build.compiler" value="modern"/>
+
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+
+
+  <target name="prepare">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.lib}"/>
+    <mkdir dir="${build.doc}"/>
+    <tstamp/>
+    <echo message="${TSTAMP}"/>
+  </target>
+
+
+
+  <target name="all" depends="main"/>
+
+
+
+  <target name="main" depends="prepare">
+    <mkdir dir="${build.classes}"/>
+    
+    <javac destdir="${build.classes}"
+           debug="${debug.flags}"
+           nowarn="true"
+           deprecation="on">
+           <src path="${src.dir}"/>
+           <classpath refid="classpath"/>
+    </javac>
+
+    <!-- Compile all of our Stub/Skel classes -->
+    <rmic base="${build.classes}">
+      <include name="arlut/csd/ganymede/DBField.class"/>
+      <include name="arlut/csd/ganymede/DBNameSpace.class"/>
+      <include name="arlut/csd/ganymede/DBObject.class"/>
+      <include name="arlut/csd/ganymede/DBObjectBase.class"/>
+      <include name="arlut/csd/ganymede/DBObjectBaseField.class"/>
+      <include name="arlut/csd/ganymede/DBSchemaEdit.class"/>
+      <include name="arlut/csd/ganymede/iAdmin.class"/>
+      <include name="arlut/csd/ganymede/GanymedeAdmin.class"/>
+      <include name="arlut/csd/ganymede/GanymedeServer.class"/>
+      <include name="arlut/csd/ganymede/GanymedeSession.class"/>
+
+      <include name="arlut/csd/ganymede/PermissionMatrixDBField.class"/>
+      <include name="arlut/csd/ganymede/InvidDBField.class"/>
+      <include name="arlut/csd/ganymede/StringDBField.class"/>
+      <include name="arlut/csd/ganymede/BooleanDBField.class"/>
+      <include name="arlut/csd/ganymede/DateDBField.class"/>
+      <include name="arlut/csd/ganymede/NumericDBField.class"/>
+      <include name="arlut/csd/ganymede/PasswordDBField.class"/>
+      <include name="arlut/csd/ganymede/IPDBField.class"/>
+      <include name="arlut/csd/ganymede/FloatDBField.class"/>
+      <include name="arlut/csd/ganymede/GanymediatorWizard.class"/>
+
+      <include name="arlut/csd/ganymede/DBBaseCategory.class"/>
+      <include name="arlut/csd/ganymede/GanymedeXMLSession.class"/>
+      
+      <include name="arlut/csd/ganymede/client/FileReceiverBase.class"/>
+    </rmic>
+  </target>
+
+  <target name="jars" depends="main">
+    <!-- Copy over any jars used in the build -->
+    <copy todir="${build.lib}">
+      <fileset dir="${lib.dir}"/>
+    </copy>
+
+    <!-- Build the client jar file -->
+    <jar jarfile="${build.lib}/ganymede.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/*_Stub.class"/>
+      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ganymede/client/*"/>
+
+      <fileset dir="${build.classes}">
+        <!-- Basic things -->
+        <include name="arlut/csd/ganymede/Base.class"/>
+        <include name="arlut/csd/ganymede/BaseDump.class"/>
+        <include name="arlut/csd/ganymede/BaseField.class"/>
+        <include name="arlut/csd/ganymede/BaseListTransport.class"/>
+        <include name="arlut/csd/ganymede/BaseNode.class"/>
+        <include name="arlut/csd/ganymede/CatTreeNode.class"/>
+        <include name="arlut/csd/ganymede/Category.class"/>
+        <include name="arlut/csd/ganymede/CategoryDump.class"/>
+        <include name="arlut/csd/ganymede/CategoryNode.class"/>
+        <include name="arlut/csd/ganymede/CategoryTransport.class"/>
+        <include name="arlut/csd/ganymede/Client.class"/>
+        <include name="arlut/csd/ganymede/FieldInfo.class"/>
+        <include name="arlut/csd/ganymede/FieldTemplate.class"/>
+        <include name="arlut/csd/ganymede/FieldType.class"/>
+        <include name="arlut/csd/ganymede/Invid.class"/>
+        <include name="arlut/csd/ganymede/NameSpace.class"/>
+        <include name="arlut/csd/ganymede/PermEntry.class"/>
+        <include name="arlut/csd/ganymede/PermMatrix.class"/>
+        <include name="arlut/csd/ganymede/Server.class"/>
+        <include name="arlut/csd/ganymede/Session.class"/>
+        <include name="arlut/csd/ganymede/SpaceNode.class"/>
+        <include name="arlut/csd/ganymede/SchemaConstants.class"/>
+        <include name="arlut/csd/ganymede/XMLSession.class"/>
+
+        <!-- Remote interfaces -->
+        <include name="arlut/csd/ganymede/boolean_field.class"/>
+        <include name="arlut/csd/ganymede/date_field.class"/>
+        <include name="arlut/csd/ganymede/db_field.class"/>
+        <include name="arlut/csd/ganymede/db_object.class"/>
+        <include name="arlut/csd/ganymede/invid_field.class"/>
+        <include name="arlut/csd/ganymede/ip_field.class"/>
+        <include name="arlut/csd/ganymede/num_field.class"/>
+        <include name="arlut/csd/ganymede/float_field.class"/>
+        <include name="arlut/csd/ganymede/pass_field.class"/>
+        <include name="arlut/csd/ganymede/perm_field.class"/>
+        <include name="arlut/csd/ganymede/string_field.class"/>
+        <include name="arlut/csd/ganymede/ClientMessage.class"/>
+        <include name="arlut/csd/ganymede/FileReceiver.class"/>
+
+        <!-- Deserialization stuff -->
+        <include name="arlut/csd/ganymede/adminSession.class"/>
+        <include name="arlut/csd/ganymede/Admin.class"/>
+        <include name="arlut/csd/ganymede/DBBaseCategory.class"/>
+        <include name="arlut/csd/ganymede/DBBaseCategory$*.class"/>
+        <include name="arlut/csd/ganymede/DBObject.class"/>
+        <include name="arlut/csd/ganymede/DBObjectBase.class"/>
+        <include name="arlut/csd/ganymede/DBObjectBase$*.class"/>
+        <include name="arlut/csd/ganymede/GanymedeSession.class"/>
+        <include name="arlut/csd/ganymede/GanymedeSession$*.class"/>
+        <include name="arlut/csd/ganymede/SchemaEdit.class"/>
+
+        <!-- Query stuff -->
+        <include name="arlut/csd/ganymede/DumpResult.class"/>
+        <include name="arlut/csd/ganymede/Query.class"/>
+        <include name="arlut/csd/ganymede/QueryAndNode.class"/>
+        <include name="arlut/csd/ganymede/QueryDataNode.class"/>
+        <include name="arlut/csd/ganymede/QueryNode.class"/>
+        <include name="arlut/csd/ganymede/QueryNotNode.class"/>
+        <include name="arlut/csd/ganymede/QueryOrNode.class"/>
+        <include name="arlut/csd/ganymede/QueryResult.class"/>
+        <include name="arlut/csd/ganymede/QueryResult$*.class"/>
+        <include name="arlut/csd/ganymede/Result.class"/>
+        <include name="arlut/csd/ganymede/ObjectHandle.class"/>
+
+        <!-- Wizard stuff -->
+        <include name="arlut/csd/ganymede/Ganymediator.class"/>
+        <include name="arlut/csd/ganymede/ReturnVal.class"/>
+      </fileset>
+    </jar>
+
+    <!-- Build the server jar file -->
+    <jar jarfile="${build.lib}/ganymedeServer.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+      <fileset dir="${build.classes}" includes="Qsmtp/**/*.class"/>
+      <fileset dir="${build.classes}" includes="jcrypt/**/*.class"/>
+      <fileset dir="${build.classes}" includes="md5/**/*.class"/>
+      
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/ClientBase_Stub.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/FileReceiverBase*.class"/>
+      
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/*.class"/>
+    </jar>
+
+    <!-- Build the admin jar file -->
+    <jar jarfile="${build.lib}/ganymedeAdmin.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/*_Stub.class"/>
+      
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ganymede/admin.jpg"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ganymede/*.gif"/>
+
+      <fileset dir="${build.classes}">
+        <include name="arlut/csd/ganymede/Admin.class"/>
+        <include name="arlut/csd/ganymede/AdminEntry.class"/>
+        <include name="arlut/csd/ganymede/Client.class"/>
+        <include name="arlut/csd/ganymede/GanymedeScheduler.class"/>
+        <include name="arlut/csd/ganymede/Base.class"/>
+        <include name="arlut/csd/ganymede/BaseEditor.class"/>
+        <include name="arlut/csd/ganymede/BaseField.class"/>
+        <include name="arlut/csd/ganymede/BaseFieldEditor.class"/>
+        <include name="arlut/csd/ganymede/BaseNode.class"/>
+        <include name="arlut/csd/ganymede/CatTreeNode.class"/>
+        <include name="arlut/csd/ganymede/Category.class"/>
+        <include name="arlut/csd/ganymede/CategoryEditor.class"/>
+        <include name="arlut/csd/ganymede/CategoryNode.class"/>
+        <include name="arlut/csd/ganymede/NameSpaceEditor.class"/>
+        <include name="arlut/csd/ganymede/FieldNode.class"/>
+        <include name="arlut/csd/ganymede/Invid.class"/>
+        <include name="arlut/csd/ganymede/NameSpace.class"/>
+        <include name="arlut/csd/ganymede/GASHAdmin.class"/>
+        <include name="arlut/csd/ganymede/GASHAdmin$*.class"/>
+        <include name="arlut/csd/ganymede/GASHAdminFrame.class"/>
+        <include name="arlut/csd/ganymede/GASHAdminLoginFrame.class"/>
+        <include name="arlut/csd/ganymede/Server.class"/>
+        <include name="arlut/csd/ganymede/Session.class"/>
+        <include name="arlut/csd/ganymede/SpaceNode.class"/>
+        <include name="arlut/csd/ganymede/ObjectHandle.class"/>
+        <include name="arlut/csd/ganymede/Ganymediator.class"/>
+        <include name="arlut/csd/ganymede/GanymediatorWizard.class"/>
+        <include name="arlut/csd/ganymede/GanymedeConfig.class"/>
+        <include name="arlut/csd/ganymede/adminSession.class"/>
+        <include name="arlut/csd/ganymede/XMLSession.class"/>
+        <include name="arlut/csd/ganymede/SchemaEdit.class"/>
+        <include name="arlut/csd/ganymede/scheduleHandle.class"/>
+        <include name="arlut/csd/ganymede/scheduleHandle$*.class"/>
+        <include name="arlut/csd/ganymede/ReturnVal.class"/>
+        <include name="arlut/csd/ganymede/db_object.class"/>
+        <include name="arlut/csd/ganymede/GASHSchema.class"/>
+        <include name="arlut/csd/ganymede/iAdmin.class"/>
+        <include name="arlut/csd/ganymede/iAdmin$*.class"/>
+        <include name="arlut/csd/ganymede/iAdmin_Skel.class"/>
+        <include name="arlut/csd/ganymede/consoleShutdownDialog.class"/>
+      </fileset>
+    </jar>
+    
+    <!-- Copy over the newly created jars -->
+    <copy todir="${dist.jars}">
+      <fileset dir="${build.lib}"/>
+    </copy>
+  </target>
+
+
+
+  <target name="javadoc" depends="prepare,javadoc_clean">
+    <mkdir dir="${build.doc}"/>
+    <javadoc sourcepath="${src.dir}"
+             packagenames="*"
+             destdir="${build.doc}"
+             author="true"
+             version="true"
+             use="true">
+             <classpath refid="classpath"/>
+    </javadoc>
+
+    <!-- Copy over the newly created docs -->
+    <copy todir="${dist.doc}">
+      <fileset dir="${build.doc}"/>
+    </copy>
+  </target>
+  
+
+  
+  <target name="clean">
+    <delete>
+      <fileset dir="${build.classes}" includes="**/*.class"/>
+      <fileset dir="${build.lib}" includes="ganymede*.jar"/>
+    </delete>
+  </target>
+
+
+  
+  <target name="javadoc_clean">
+    <delete>
+      <fileset dir="${build.doc}" includes="**/*"/>
+    </delete>
+  </target>
+
+
+  
+  <target name="veryclean" depends="javadoc_clean,clean"/>
+
+
+  
+  <target name="total" depends="veryclean,main,jars,javadoc"/>
+  
+</project>

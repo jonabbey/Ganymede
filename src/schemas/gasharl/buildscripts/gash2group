@@ -1,0 +1,115 @@
+#!/usr/bin/perl
+
+#***********************************************************************
+#
+#             ARL:UT Group Administration Shell Package
+#                         September 13, 1994
+#
+#  Copyright 1994. The University of Texas at Austin (UTA).  All rights
+#  reserved.  By using this software the USER indicates that he or she
+#  has read, understood, and will comply with the following:
+#
+#  -UTA hereby grants USER nonexclusive permission to use, copy, and/or
+#  modify this software for internal purposes only.  Any non-internal 
+#  distribution, including commercial sale or license, of this software,
+#  copies of the software, its associated documentation, and/or
+#  modifications of either is strictly prohibited without the prior
+#  consent of UTA.  Title to copyright to this software and its 
+#  associated documentation shall at all times remain with UTA. 
+#  Appropriate copyright notice shall be placed on all software copies,
+#  and a complete copy of this notice shall be included in all copies
+#  of the associated documentation.  No right is granted to use in 
+#  advertising, publicity, or otherwise any trademark, service mark,
+#  or the name of UTA.
+#
+#  -This software and any associated documentation is provided "as is",
+#  and UTA MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+#  INCLUDING THOSE OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+#  PURPOSE, OR THAT USE OF THE SOFTWARE, MODIFICATIONS, OR ASSOCIATED
+#  DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS 
+#  OR OTHER INTELLECTUAL PROPERTY RIGHTS OF A THIRD PARTY.  UTA, the
+#  University of Texas System, its Regents, officers, and employees 
+#  shall not be liable under any circumstances for any direct, indirect,
+#  special, incidental, or consequential damages with respect to any
+#  claim by USER or any third party on account of or arising from the
+#  use, or inability to use, this software or its associated 
+#  documentation, even if UTA has been advised of the possibility of
+#  those damages.
+#
+#***********************************************************************
+
+#
+# Last modified by Pug on 9/14/94.
+#
+# This script will convert a gash group info file into the regular group
+# file used by UNIX and NIS.
+#
+# The format of the gash group info file is:
+#
+# groupname:password:gid:user-list:contract-num:contract-desc
+#
+# where:
+#
+#     groupname      is the name of the group.
+#
+#     gid            is the group's numerical ID within  the  sys-
+#                    tem; it must be unique.
+#
+#     user-list      is a comma-separated list of users allowed in
+#                    the group.
+#
+# The last 2 entries are added at compile time and you must uncomment a
+# line below to get warnings for these.
+#
+#     contract-num   is contract number for this group for accounting
+#
+#     contract-desc  is contract description for this group for accounting
+#
+
+if ($#ARGV != 0) {
+    print "gash2group converts a gash group file to the corrct format for usage by\n UNIX machines through NIS.\n\nUsage:\n\tgash2group {gash_group_info_file}\n";
+    exit;
+}
+
+#
+# Open group file.
+#
+
+open(GROUP, "> group") || die "Can't open group file: $!\n";
+
+#
+# Open group error file.
+#
+
+open(ERRORS, "> group.errors") || die "Can't open group errors file: $!\n";
+
+#
+# Open group warning file.
+#
+
+open(WARNS, "> group.warns") || die "Can't open group warning file: $!\n";
+
+#
+# Parse input file.
+#
+
+while (<>) {
+    if (/^(\S+:\S+:-?\d+:\S*):.+:.+/) {
+	print GROUP $1, "\n";
+    }
+    else {
+	if (/^(\S+:\S+:-?\d+:\S*)/) {
+	    print GROUP $1, "\n";
+# This is the line you have to uncomment if you want the warnings from
+# not having contract information.
+#	    print WARNS "Missing contract information on line: ", $_;
+	}
+	else {
+	    print ERRORS "Incorrect format on line: ", $_;
+	}
+    }
+}
+
+close(GROUP);
+close(ERRORS);
+close(WARNS);
