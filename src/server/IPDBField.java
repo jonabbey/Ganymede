@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/01/27 03:15:42 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/04/11 06:20:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1417,6 +1417,21 @@ public class IPDBField extends DBField implements ip_field {
   private static final boolean isAllowedV6(char ch)
   {
     return !(IPv6allowedChars.indexOf(ch) == -1);
+  }
+
+  public static String genIPString(Byte[] octets)
+  {
+    if (octets == null)
+      {
+	return null;
+      }
+
+    if (octets.length == 4)
+      {
+	return genIPV4string(octets);
+      }
+    
+    return genIPV6string(octets);
   }
 
   /**
