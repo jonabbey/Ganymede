@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -406,6 +406,10 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 
 	    return true;
+	  }
+	else
+	  {
+	    return false;
 	  }
       }
   }
