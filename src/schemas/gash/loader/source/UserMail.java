@@ -6,7 +6,7 @@
    represented in an user's email ref base in the server.
    
    Created: 1 December 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ import java.io.*;
 
 public class UserMail {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // --
 
