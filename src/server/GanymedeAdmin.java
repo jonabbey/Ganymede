@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -681,36 +681,53 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     Ganymede.debug("entering editSchema");
 
+    // synchronize on server so we don't get logins while we're checking
+    // things out
+
+    synchronized (Ganymede.server)
+      {
+	if (GanymedeServer.sessions.size() != 0)
+	  {
+	    Ganymede.debug("Can't edit Schema, users logged in");
+	    return null;
+	  }
+	else if (!Ganymede.db.schemaEditInProgress)
+	  {
+	    Ganymede.db.schemaEditInProgress = true;
+	  }
+	else
+	  {
+	     Ganymede.debug("Can't edit Schema, edit already in progress. ");
+	     return null;
+	  }
+      }
+
+    // okay at this point we've asserted our interest in editing the schema and
+    // ascertained that no one is logged on.  By setting Ganymede.db.schemaEditInProgress
+    // to true, we've preempted anyone else from logging in.  Check out the lock
+    // situation, then go forward.
+
     synchronized (Ganymede.db)
       {
 	Ganymede.debug("entering editSchema synchronization block");
 
-	 if (Ganymede.db.schemaEditInProgress)
-	   {
-	     Ganymede.debug("Can't edit Schema, edit already in progress. ");
-	     return null;
-	   }
+	enum = Ganymede.db.objectBases.elements();
 
-	 Ganymede.debug("Schema edit not in progress");
-
-	 enum = Ganymede.db.objectBases.elements();
-
-	 if (enum != null)
-	   {
-	     while (enum.hasMoreElements())
-	       {
-		 base = (DBObjectBase) enum.nextElement();
-		 if (base.currentLock != null)
-		   {
-		     Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
-		     return null;
-		   }
-	       }
-	   }
+	if (enum != null)
+	  {
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		if (base.currentLock != null)
+		  {
+		    Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
+		    Ganymede.db.schemaEditInProgress = false;
+		    return null;
+		  }
+	      }
+	  }
 
 	 // should be okay
-
-	 Ganymede.db.schemaEditInProgress = true;
 
 	 Ganymede.debug("Ok to create DBSchemaEdit");
 
