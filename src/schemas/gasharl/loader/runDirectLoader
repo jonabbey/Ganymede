@@ -10,7 +10,7 @@
 
 # Where are we running the JVM from?
 
-JAVA=/opt/bin/java
+JAVA=/usr/java1.2/bin/java
 
 # Where are the Ganymede jars installed?
 
@@ -67,4 +67,4 @@ cp $SCHEMAFILE $DB/loader.db
 
 echo "Running loader"
 
-$JAVA -noasyncgc -ms32m -mx256m arlut.csd.ganymede.loader.directLoader $PROPERTIES
+$JAVA -noasyncgc -ms64m -mx256m arlut.csd.ganymede.loader.directLoader $PROPERTIES
