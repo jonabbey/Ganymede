@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2002/11/12 20:25:07 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2003/11/08 01:42:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.116 $ %D%
+ * @version $Revision: 1.117 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1189,7 +1189,7 @@ final public class DBSession {
     if (false)
       {
 	System.err.println("Trying to find top-level object for " + 
-			   object.getTypeDesc() + ":" + 
+			   object.getTypeName() + ":" + 
 			   object.getInvid().toString());
       }
 

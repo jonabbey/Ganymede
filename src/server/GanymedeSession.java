@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.273 $
-   Last Mod Date: $Date: 2003/11/08 01:35:57 $
+   Version: $Revision: 1.274 $
+   Last Mod Date: $Date: 2003/11/08 01:43:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.273 $ $Date: 2003/11/08 01:35:57 $
+ * @version $Revision: 1.274 $ $Date: 2003/11/08 01:43:04 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3824,7 +3824,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	DBObject obj = session.viewDBObject(invid);
 
-	return obj.getTypeDesc() + " " + obj.getLabel();
+	return obj.getTypeName() + " " + obj.getLabel();
       }
     catch (NullPointerException ex)
       {
@@ -4016,7 +4016,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (!obj.isEmbedded())
 	  {
-	    setLastEvent("view " + obj.getTypeDesc() + ":" + obj.getLabel());
+	    setLastEvent("view " + obj.getTypeName() + ":" + obj.getLabel());
 	  }
 
 	// return a copy that knows what GanymedeSession is
@@ -4125,7 +4125,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (!obj.isEmbedded())
 	  {
-	    setLastEvent("edit " + obj.getTypeDesc() + ":" + obj.getLabel());
+	    setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
 	  }
 
 	objref = session.editDBObject(invid);
@@ -4169,7 +4169,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    edit_hostname = editing.gSession.clienthost;
 
 		    return Ganymede.createErrorDialog("Error, object already being edited",
-						      obj.getTypeDesc() + " [" + 
+						      obj.getTypeName() + " [" + 
 						      viewObjectLabel(invid) + " - " + invid + 
 						      "] is already being edited by user " +
 						      edit_username + " on host " + edit_hostname);
@@ -4177,7 +4177,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 
 	    return Ganymede.createErrorDialog("Error checking object out for editing",
-					      "Error checking out " + obj.getTypeDesc() + " [" + 
+					      "Error checking out " + obj.getTypeName() + " [" + 
 					      viewObjectLabel(invid) + " - " + invid + 
 					      "] for editing.\nPerhaps someone else was editing it?");
 	  }
@@ -4185,7 +4185,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     else
       {
 	return Ganymede.createErrorDialog("Permissions Error",
-					  "Permission to edit " + obj.getTypeDesc() + " [" + 
+					  "Permission to edit " + obj.getTypeName() + " [" + 
 					  viewObjectLabel(invid) +
 					  " - " + invid + "] denied.");
       }
@@ -4287,7 +4287,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	newObj = (DBObject) retVal.getObject();
 
-	setLastEvent("create " + newObj.getTypeDesc());
+	setLastEvent("create " + newObj.getTypeName());
 
 	retVal = new ReturnVal(true);
 
@@ -4374,12 +4374,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	newObj = (DBObject) retVal.getObject();
 
-	setLastEvent("create " + newObj.getTypeDesc());
+	setLastEvent("create " + newObj.getTypeName());
 
 	if (randomOwner)
 	  {
 	    retVal = Ganymede.createInfoDialog("Warning, picked an owner group at random",
-					       "Warning: created " + newObj.getTypeDesc() + 
+					       "Warning: created " + newObj.getTypeName() + 
 					       " in owner group " + viewObjectLabel(ownerList.getInvid(0)));
 	  }
 	else
@@ -4519,18 +4519,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (vObj.isInactivated())
       {
 	return Ganymede.createErrorDialog("Server: Can't inactivate an inactive object",
-					  "Error.. can't inactivate " + vObj.getTypeDesc() + " " + 
+					  "Error.. can't inactivate " + vObj.getTypeName() + " " + 
 					  vObj.getLabel() + ", object is already inactivated.");
       }
 
     if (!getPerm(vObj).isDeletable())
       {
 	setLastError("Don't have permission to inactivate " + 
-		     vObj.getTypeDesc() + " " + vObj.getLabel());
+		     vObj.getTypeName() + " " + vObj.getLabel());
 
 	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
 					  "Don't have permission to inactivate " +
-					  vObj.getTypeDesc() + " " + vObj.getLabel());
+					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -4550,7 +4550,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  " is not of a type that may be inactivated");
       }
 
-    setLastEvent("inactivate " + eObj.getTypeDesc() + ":" + eObj.getLabel());
+    setLastEvent("inactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
@@ -4597,7 +4597,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (!vObj.isInactivated())
       {
 	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  vObj.getTypeDesc() + " " + vObj.getLabel() +
+					  vObj.getTypeName() + " " + vObj.getLabel() +
 					  " is not inactivated");
       }
 
@@ -4607,7 +4607,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
 					  "Don't have permission to reactivate " + 
-					  vObj.getTypeDesc() + " " + vObj.getLabel());
+					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -4620,7 +4620,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Couldn't check out this object for reactivation");
       }
 
-    setLastEvent("reactivate " + eObj.getTypeDesc() + ":" + eObj.getLabel());
+    setLastEvent("reactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeReactivate() method does the
     // event logging at transaction commit time
@@ -4705,7 +4705,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					      "You do not have permission to delete " +
-					      vObj.getTypeDesc() + " " +
+					      vObj.getTypeName() + " " +
 					      vObj.getLabel());
 	  }
 
@@ -4721,18 +4721,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
 	      {
 		return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-						  "You do not have permission to remove " + vObj.getTypeDesc() + " " + vObj +
+						  "You do not have permission to remove " + vObj.getTypeName() + " " + vObj +
 						  ".\n\nOnly supergash-level admins can remove objects of this type," +
 						  "other admins must use inactivate.");
 	      }
 	    
 	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					      "Object Manager refused deletion for " + vObj.getTypeDesc() + " " +
+					      "Object Manager refused deletion for " + vObj.getTypeName() + " " +
 					      vObj.getLabel());
 	  }
       }
 
-    setLastEvent("delete " + vObj.getTypeDesc() + ":" + vObj.getLabel());
+    setLastEvent("delete " + vObj.getTypeName() + ":" + vObj.getLabel());
 
     // we do logging of the object deletion in DBEditSet.commit() when
     // the transaction commits

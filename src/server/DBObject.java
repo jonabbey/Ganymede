@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.142 $
-   Last Mod Date: $Date: 2003/03/12 02:53:04 $
+   Version: $Revision: 1.143 $
+   Last Mod Date: $Date: 2003/11/08 01:41:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,7 +152,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.142 $ $Date: 2003/03/12 02:53:04 $
+ * @version $Revision: 1.143 $ $Date: 2003/11/08 01:41:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -719,7 +719,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	if (val == -1)
 	  {
 	    //	    Ganymede.debug("val == -1");
-	    return "<" + getTypeDesc() + ":" + getID() + ">";
+	    return "<" + getTypeName() + ":" + getID() + ">";
 	  }
 	else
 	  {
@@ -738,7 +738,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 		if (!f.isDefined())
 		  {
-		    return "<" + getTypeDesc() + ":" + getID() + ">";
+		    return "<" + getTypeName() + ":" + getID() + ">";
 		  }
 		else
 		  {
@@ -748,7 +748,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	    else
 	      {
 		// Ganymede.debug("Couldn't find field " + val);
-		return "<" + getTypeDesc() + ":" + getID() + ">";
+		return "<" + getTypeName() + ":" + getID() + ">";
 	      }
 	  }
       }
@@ -831,17 +831,6 @@ public class DBObject implements db_object, FieldType, Remote {
   public boolean isEmbedded()
   {
     return objectBase.isEmbedded();
-  }
-
-  /**
-   *
-   * Returns the string of the object's type
-   *
-   */
-
-  public String getTypeDesc()
-  {
-    return objectBase.object_name;
   }
 
   /**

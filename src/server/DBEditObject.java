@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.170 $
-   Last Mod Date: $Date: 2003/05/19 20:15:06 $
+   Version: $Revision: 1.171 $
+   Last Mod Date: $Date: 2003/11/08 01:40:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.170 $ $Date: 2003/05/19 20:15:06 $ $Name:  $
+ * @version $Revision: 1.171 $ $Date: 2003/11/08 01:40:32 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2421,7 +2421,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	    StringBuffer buffer = new StringBuffer();
 
-	    buffer.append(getTypeDesc());
+	    buffer.append(getTypeName());
 	    buffer.append(" ");
 	    buffer.append(getLabel());
 	    buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
@@ -2444,7 +2444,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	    StringBuffer buffer = new StringBuffer();
 
-	    buffer.append(getTypeDesc());
+	    buffer.append(getTypeName());
 	    buffer.append(" ");
 	    buffer.append(getLabel());
 	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.\n\n");
@@ -2529,7 +2529,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	StringBuffer buffer = new StringBuffer();
 
-	buffer.append(getTypeDesc());
+	buffer.append(getTypeName());
 	buffer.append(" ");
 	buffer.append(getLabel());
 	buffer.append(" has been reactivated.\n\n");

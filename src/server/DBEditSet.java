@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2003/11/08 01:34:52 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2003/11/08 01:41:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -362,7 +362,7 @@ public class DBEditSet {
   {
     if (false)
       {
-	System.err.println("DBEditSet adding " + object.getTypeDesc() + " " + object.getLabel());
+	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
       }
 
     // if this transaction is in the middle of commit(), don't let the
@@ -1170,7 +1170,7 @@ public class DBEditSet {
 	StringBuffer errorBuf = new StringBuffer();
 	    
 	errorBuf.append("Error, ");
-	errorBuf.append(eObj.getTypeDesc());
+	errorBuf.append(eObj.getTypeName());
 	errorBuf.append(" object ");
 	errorBuf.append(eObj.getLabel());
 	errorBuf.append(" has not been completely filled out.  The following fields need ");
@@ -1391,8 +1391,8 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("objectchanged",
-			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
 			     "<" +  eObj.getInvid() + "> was modified.\n\n" +
 			     diff,
 			     responsibleInvid, responsibleName,
@@ -1416,7 +1416,7 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("objectchanged",
-			 eObj.getTypeDesc() + " " + eObj.getLabel() +
+			 eObj.getTypeName() + " " + eObj.getLabel() +
 			 ", <" +  eObj.getInvid() + "> was modified.\n\n" +
 			 diff,
 			 responsibleInvid, responsibleName,
@@ -1475,8 +1475,8 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("objectcreated",
-			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
 			     "<" +  eObj.getInvid() + "> was created.\n\n" +
 			     diff,
 			     responsibleInvid, responsibleName,
@@ -1500,7 +1500,7 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("objectcreated",
-			 eObj.getTypeDesc() + " " + eObj.getLabel() +
+			 eObj.getTypeName() + " " + eObj.getLabel() +
 			 ", <" +  eObj.getInvid() + "> was created.\n\n" +
 			 diff,
 			 responsibleInvid, responsibleName,
@@ -1558,8 +1558,8 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("deleteobject",
-			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
 			     "<" +  eObj.getInvid() + "> was deleted.\n\n" +
 			     oldVals + "\n",
 			     responsibleInvid, responsibleName,
@@ -1583,7 +1583,7 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("deleteobject",
-			 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+			 eObj.getTypeName() + " " + eObj.getLabel() + ", <" + 
 			 eObj.getInvid() + "> was deleted.\n\n" +
 			 oldVals + "\n",
 			 responsibleInvid, responsibleName,
@@ -1601,8 +1601,8 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("deleteobject",
-			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
 			     "<" +  eObj.getInvid() + "> was deleted.\n\n",
 			     responsibleInvid, responsibleName,
 			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
@@ -1625,7 +1625,7 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("deleteobject",
-			 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+			 eObj.getTypeName() + " " + eObj.getLabel() + ", <" + 
 			 eObj.getInvid() + "> was deleted.\n\n",
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
