@@ -67,6 +67,7 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -93,6 +94,13 @@ import arlut.csd.ganymede.rmi.adminSession;
 class GASHAdminDispatch implements Runnable {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminDispatch");
 
   private GASHAdminFrame frame = null;
   private Server server = null;	// remote reference
@@ -688,25 +696,29 @@ class GASHAdminDispatch implements Runnable {
 
 	if (handle.isRunning)
 	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Running", false);
+	    // "Running"
+	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
 	    frame.taskTable.setCellColor(handle.name, 1, Color.blue, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else if (handle.suspend)
 	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Suspended", false);
+	    // "Suspended"
+	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
 	    frame.taskTable.setCellColor(handle.name, 1, Color.red, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else if (handle.startTime != null)
 	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Scheduled", false);
+	    // "Scheduled"
+	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
 	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else
 	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Waiting", false);
+	    // "Waiting"
+	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.waitingState"), false);
 	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
@@ -722,7 +734,8 @@ class GASHAdminDispatch implements Runnable {
 	  }
 	else
 	  {
-	    frame.taskTable.setCellText(handle.name, 3, "On Demand", false);
+	    // "On Demand"
+	    frame.taskTable.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
 	  }
 
 	frame.taskTable.setCellText(handle.name, 4, handle.intervalString, false);
@@ -795,7 +808,8 @@ class GASHAdminDispatch implements Runnable {
 
   public void forceDisconnect(String reason)
   {
-    changeStatus("Disconnected: " + reason + "\n");
+    // "Disconnected: {0}\n"
+    changeStatus(ts.l("forceDisconnect.disconnectMessage", reason));
     server = null;
   }
 
@@ -904,8 +918,9 @@ class GASHAdminDispatch implements Runnable {
 
 	// the GASHSchema constructor pops itself up at the end of
 	// initialization
-	
-	return new GASHSchema("Schema Editor", editor, this);
+
+	// "Schema Editor"	
+	return new GASHSchema(ts.l("pullSchema.schemaEditingTitle"), editor, this);
       }
   }
 
