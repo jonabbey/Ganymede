@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1686,6 +1686,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     fieldHash.put(new Short(id), field);
 
+    // go ahead and add this to the sorted fields vector, but we won't
+    // resort.  We'll leave that to
+    // DBObjectBaseField.setDisplayOrder().
+
+    sortedFields.addElement(field);
+
     return field;
   }
 
@@ -1767,6 +1773,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized boolean deleteField(BaseField bF)
   {
+    DBObjectBaseField field = null;
+    short id = -1;
+    Short Id = null;
+
+    /* -- */
+
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("can't call in a non-edit context");
@@ -1774,20 +1786,34 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     try
       {
-	fieldHash.remove(new Short(bF.getID()));
-
-	Ganymede.debug("field definition " + getName() + ":" + bF.getName() + " removed");
-
-	if (bF.getID() == label_id)
-	  {
-	    label_id = -1;
-	  }
+	id = bF.getID();
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("couldn't remove field due to remote error: " + ex);
       }
     
+    Id = new Short(id);
+
+    field = (DBObjectBaseField) fieldHash.get(Id);
+
+    if (field == null)
+      {
+	// no such field.
+
+	return false;
+      }
+
+    fieldHash.remove(Id);
+    sortedFields.removeElement(field);
+
+    Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
+
+    if (id == label_id)
+      {
+	label_id = -1;
+      }
+
     return true;
   }
 
@@ -2157,7 +2183,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return dumperList.size();
   }
 
-  private void sortFields()
+  void sortFields()
   {
     new VecQuickSort(sortedFields, 
 		     new arlut.csd.Util.Compare()
