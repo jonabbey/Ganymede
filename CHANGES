@@ -1055,10 +1055,10 @@ object), the query will never block.  For this reason, it is now safe
 to take advantage of the Ganymede query mechanisms during all stages
 of transaction commit in DBEditObject subclasses.
 
-The main tradeoffs for doing this are a slight increase in memory usage,
-to maintain a second copy of references to all objects in the
-database, and a slight increase in transaction commit time, as the new
-snapshot is constructed.
+The main tradeoffs for doing this are a slight increase in memory
+usage (4 bytes per object in the database), to maintain a second copy
+of references to all objects in the database, and a slight increase in
+transaction commit time, as the new snapshot is constructed.
 
 Another, more subtle trade-off is that support for this level of
 concurrency in the server might be hard to maintain if the Ganymede
@@ -1082,6 +1082,32 @@ rather than
 
 The Ganymede XML loader will continue to recognize the older style
 for backwards compatibility..
+
+76. [SERVER] Memory optimizations
+
+I made a number of optimizations to memory usage in the server, which
+should cut the amount of per-field overhead roughly in half.  Heap
+required for objects in the database has been reduced by at least
+10-20 bytes plus 10 bytes per field in each object.  Fields in the
+database now have only 14 bytes of overhead each, plus whatever
+overhead your Java VM needs to track garbage collection for two
+objects.
+
+To accomplish this, I reduced the number of variables held in the
+DBField class to an absolute minimum and restructured DBObject so it
+uses a simple array with packed hashtable access logic rather than a
+separate hashtable.
+
+Custom DBEditObject subclasses that directly manipulate the old fields
+FieldTable variable will need to be reworked in order to work with the
+new field storage structure.
+
+In addition, the server will now create a lot fewer temporary
+Enumeration objects during runtime, and a lot fewer PermEntry objects,
+both of which will have some impact on reducing memory usage.
+
+Schema edit commits will be faster, but otherwise the overall speed
+of the server will probably not be much changed.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
