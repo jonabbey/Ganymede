@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -668,6 +668,10 @@ public final class InvidDBField extends DBField implements invid_field {
     DBSession
       session = null;
 
+    boolean 
+      anonymous = false,
+      anonymous2 = false;
+
     /* -- */
 
     if (newRemote == null)
@@ -713,9 +717,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	// this field from the target field, else go through the
 	// GanymedeSession layer to have our permissions checked.
 
+	// note that if the GanymedeSession layer has already checked out the
+	// object, session.editDBObject() will return a reference to that
+	// version, and we'll lose our security bypass.. for that reason,
+	// we also use the anonymous variable to instruct dissolve to disregard
+	// write permissions if we have gotten the anonymous OK
+
 	if (session.getObjectHook(oldRemote).anonymousUnlinkOK(targetField))
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(oldRemote);
+	    anonymous = true;
 	  }
 	else
 	  {
@@ -755,10 +766,16 @@ public final class InvidDBField extends DBField implements invid_field {
     // this field to the target field, else go through the
     // GanymedeSession layer to have our permissions checked.
 
-
+    // note that if the GanymedeSession layer has already checked out the
+    // object, session.editDBObject() will return a reference to that
+    // version, and we'll lose our security bypass.. for that reason,
+    // we also use the anonymous2 variable to instruct establish to disregard
+    // write permissions if we have gotten the anonymous OK
+    
     if (session.getObjectHook(newRemote).anonymousLinkOK(targetField))
       {
 	newRef = session.editDBObject(newRemote);
+	anonymous2 = true;
       }
     else
       {
@@ -795,18 +812,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldRefField != null)
       {
-	if (!oldRefField.dissolve(owner.getInvid(), local))
+ 	if (!oldRefField.dissolve(owner.getInvid(), (anonymous||local)))
 	  {
 	    setLastError("couldn't dissolve old field symmetry with " + oldRef);
 	    return false;
 	  }
       }
 	    
-    if (!newRefField.establish(owner.getInvid(), local))
+    if (!newRefField.establish(owner.getInvid(), (anonymous2||local)))
       {
+	// oops!  try to undo what we did.. this probably isn't critical
+	// because something above us will do a rollback, but it's polite.
+
 	if (oldRefField != null)
 	  {
-	    oldRefField.establish(owner.getInvid(), local); // hope this works
+	    oldRefField.establish(owner.getInvid(), (anonymous||local)); // hope this works
 	  }
 	
 	setLastError("couldn't establish field symmetry with " + newRef);
@@ -838,6 +858,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     DBSession
       session = null;
+
+    // debug vars
+
+    boolean anon = false;
 
     /* -- */
 
@@ -872,8 +896,16 @@ public final class InvidDBField extends DBField implements invid_field {
     // this field from the target field, else go through the
     // GanymedeSession layer to have our permissions checked.
 
+    // note that if the GanymedeSession layer has already checked out the
+    // object, session.editDBObject() will return a reference to that
+    // version, and we'll lose our security bypass.. for that reason,
+    // we also use the anon variable to instruct dissolve to disregard
+    // write permissions if we have gotten the anonymous OK
+
     if (session.getObjectHook(remote).anonymousUnlinkOK(targetField))
       {
+	anon= true;		// debug
+
 	oldRef = session.editDBObject(remote);
 
 	if (oldRef == null)
@@ -917,10 +949,28 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new RuntimeException("target field not defined in schema");
       }
 
-    if (!oldRefField.dissolve(owner.getInvid(), local))
+    try
       {
-	setLastError("couldn't dissolve old field symmetry with " + oldRef);
-	return false;
+	if (!oldRefField.dissolve(owner.getInvid(), anon||local))
+	  {
+	    setLastError("couldn't dissolve old field symmetry with " + oldRef);
+	    return false;
+	  }
+      }
+    catch (IllegalArgumentException ex)
+      {
+	System.err.println("hm, couldn't dissolve a reference in " + getName());
+
+	if (anon)
+	  {
+	    System.err.println("Did do an anonymous edit on target");
+	  }
+	else
+	  {
+	    System.err.println("Didn't do an anonymous edit on target");
+	  }
+
+	throw (IllegalArgumentException) ex;
       }
 	
     return true;
