@@ -1064,6 +1064,7 @@ public class DBEditSet {
     try
       {
 	commit_lockBases(); // may block
+	commit_verifyNamespaces();
 	commit_handlePhase1();
 	commit_handlePhase2();
 	commit_integrateChanges();
@@ -1159,6 +1160,57 @@ public class DBEditSet {
     return baseSet;
   }
 
+  /**
+   * <p>If this transaction was carried out by an xml session, we will
+   * have allowed namespace operations (in particular, moving values
+   * from one field in a namespace to another) to be done
+   * out-of-order.  In such cases, we have to verify that the xml
+   * transaction ultimately put things back right.  This method does
+   * that for us, throwing a CommitNonFatalException if we were not
+   * successful.</p>
+   *
+   * <p>Of course, since the xmlclient has no way of interactively
+   * fixing a problem, the CommitNonFatalException winds up causing
+   * the transaction to be aborted by the xmlclient after all.</p>
+   */
+
+  private final void commit_verifyNamespaces() throws CommitNonFatalException
+  {
+    // interactive transactions aren't allowed to get out of sync in
+    // namespace
+
+    if (isInteractive())
+      {
+	return;
+      }
+
+    // we don't synchronize on dbStore.nameSpaces, the nameSpaces
+    // vector should never have elements added or deleted while we are
+    // in the middle of a transaction, since that is only done during
+    // schema editing
+
+    Vector conflicts = null;
+    Vector totalConflicts = null;
+
+    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+      {
+	DBNameSpace space = (DBNameSpace) dbStore.nameSpaces.elementAt(i);
+
+	conflicts = space.verify_noninteractive(this);
+
+	if (conflicts != null)
+	  {
+	    totalConflicts = VectorUtils.union(conflicts, totalConflicts);
+	  }
+      }
+
+    if (totalConflicts != null)
+      {
+	// "Error, namespace conflicts remaining at transaction commit time.  The following values are in namespace conflict: {0}"
+	ReturnVal retVal = Ganymede.createErrorDialog("",ts.l("commit_verifyNamespaces.conflicts", VectorUtils.vectorString(totalConflicts)));
+	throw new CommitNonFatalException(retVal);
+      }
+  }
 
   /**
    * <p>This private helper method for the commit() method handles
