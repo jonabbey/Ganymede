@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.188 $
-   Last Mod Date: $Date: 2000/07/12 04:41:02 $
+   Version: $Revision: 1.189 $
+   Last Mod Date: $Date: 2000/07/12 23:48:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.188 $ $Date: 2000/07/12 04:41:02 $
+ * @version $Revision: 1.189 $ $Date: 2000/07/12 23:48:56 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2888,6 +2888,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Enumeration enum;
     DBObject obj;
     DBLock rLock = null;
+    boolean returnContainingObject = false;
 
     /* -- */
 
@@ -2916,6 +2917,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     else if (query.returnName != null)
       {
 	containingBase = Ganymede.db.getObjectBase(query.returnName); // *sync* DBStore
+      }
+
+    if (query.objectType != query.returnType)
+      {
+	returnContainingObject = true;
       }
 
     if (base == null)
@@ -2965,7 +2971,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // the whole query system is predicated on returning top-level
 	    // objects only, so we have to do it here, too.
 
-	    resultobject = getContainingObj(resultobject);
+	    if (returnContainingObject)
+	      {
+		resultobject = getContainingObj(resultobject);
+	      }
 
 	    addResultRow(resultobject, query, result, internal, perspectiveObject);
 
@@ -3083,7 +3092,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    // if we're matching an embedded, we want to return our
 		    // container.
 
-		    resultobject = getContainingObj(resultobject);
+		    if (returnContainingObject)
+		      {
+			resultobject = getContainingObj(resultobject);
+		      }
 		    
 		    // addResultRow() will do our permissions checking for us
 
@@ -3227,7 +3239,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// the ultimate container of the embedded object to the
 		// result list
 
-		obj = getContainingObj(obj);
+		if (returnContainingObject)
+		  {
+		    obj = getContainingObj(obj);
+		  }
 
 		if (obj == null)
 		  {
@@ -3318,7 +3333,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		      {
 			if (DBQueryHandler.matches(this, query, transaction_object))
 			  {
-			    obj = getContainingObj(transaction_object);
+			    if (returnContainingObject)
+			      {
+				obj = getContainingObj(transaction_object);
+			      }
+			    else
+			      {
+				obj = transaction_object;
+			      }
 
 			    if (obj == null)
 			      {

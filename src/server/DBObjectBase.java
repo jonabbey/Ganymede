@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2000/07/12 04:40:59 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2000/07/12 23:48:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2358,10 +2358,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // we need to make sure any objectHook for this class knows that
     // we are now its objectBase and not the pre-edit DBObjectBase.
 
-    if (objectHook != null)
-      {
-	objectHook.objectBase = this;
-      }
+    this.reloadCustomClass();
+
+    // all objects stored in this object base need to be updated
+    // to point to the edited object base
 
     this.updateBaseRefs();
 
