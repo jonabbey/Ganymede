@@ -362,11 +362,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   private XMLItem categoryTree = null;
 
   /**
-   * <p>We're using this Vector as a super-simple sempahore thingy,
-   * to gate the cleanup() method.</p>
+   * <p>Semaphore to gate the cleanup() method.</p>
    */
 
-  private Vector cleanedup = new Vector();
+  private booleanSemaphore cleanedup = new booleanSemaphore(false);
   
   /* -- */
 
@@ -659,16 +658,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void cleanup()
   {
-    // our ad-hoc semaphore
-
-    synchronized (cleanedup)
+    if (cleanedup.set(true))
       {
-	if (cleanedup.size() != 0)
-	  {
-	    return;
-	  }
-
-	cleanedup.addElement("cleaning");
+	return;
       }
 
     // note, we must not clear errBuf here, as we may cleanup before
@@ -1851,7 +1843,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    // throwing a pipe write exception, don't report this
 		    // exception, as it ultimately came from another thread
 
-		    if (cleanedup.size() > 0)
+		    if (cleanedup.isSet())
 		      {
 			return false;
 		      }
@@ -2326,7 +2318,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    if (cleanedup.size() > 0)
+    if (cleanedup.isSet())
       {
 	return false;
       }
