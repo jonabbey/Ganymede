@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,6 +87,9 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
+	// whoops, looks like our persona name is being changed.. make
+	// sure that it's okay to do that.
+
 	str = (String) value;
 	inv = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
 
@@ -102,11 +105,11 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 		  {
 		    sf = (StringDBField) obj.getField(SchemaConstants.UserUserName);
 		
-		    name = (String) sf.getValue();
+		    name = (String) sf.getNewValue();
 		
 		    if (!str.startsWith(name + ":"))
 		      {
-			session.setLastError("persona names must start with username:");
+			session.setLastError("persona names must start with username:, not " + name);
 			return false;
 		      }
 		  }
