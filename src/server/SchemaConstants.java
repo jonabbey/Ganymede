@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,7 +55,7 @@ public interface SchemaConstants {
   final static short OwnerObjectsOwned = 102; // what objects does this owner set own?
   final static short OwnerMailList = 103; // what email addresses should be notified if objects owned change?
 
-  // the following are fixed object id's
+  // the following is a fixed object id's
 
   final static short OwnerSupergash = 1;
 
@@ -83,6 +83,7 @@ public interface SchemaConstants {
 
   final static short PermDefaultObj = 1;
   final static short PermEndUserObj = 2;
+  final static short PermSelfUserObj = 3;
 
   /* users have a defined set of fields */
 
