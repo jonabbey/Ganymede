@@ -275,12 +275,14 @@ public final class Invid implements java.io.Serializable {
 
 	if (result == null)
 	  {
+	    counter++;
 	    allocator.storeInvid(this);
 	    this.interned = true;
 	    return this;
 	  }
 	else
 	  {
+	    reuseCounter++;
 	    return result;
 	  }
       }
