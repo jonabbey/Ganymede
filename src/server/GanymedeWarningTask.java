@@ -7,7 +7,7 @@
    a whole number of weeks in the future.
    
    Created: 4 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -357,7 +357,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		obj = mySession.session.viewDBObject(invid);
 
-		actionDate = (Date) obj.getFieldValue(SchemaConstants.ExpirationField);
+		actionDate = (Date) obj.getFieldValue(SchemaConstants.RemovalField);
 
 		tempString.append("\n\nRemoval scheduled to take place on or after " + actionDate.toString()); 
 		    
