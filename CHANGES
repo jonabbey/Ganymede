@@ -55,10 +55,10 @@ accounts, passwords included, from a Samba password file.
 
 5. [CLIENT/SERVER] Fixed query filtering in Ganymede client and server
 
-The Ganymede client has for a long time had a 'Filter Query' menu
-option that was intended to allow users in many owner groups
-(including supergash) to set a filter so that only objects owned by a
-given list of owner groups would appear in the tree.
+The Ganymede client has for a long time had a (nonworking) 'Filter
+Query' menu option that was intended to allow users in many owner
+groups (including supergash) to set a filter so that only objects
+owned by a given list of owner groups would appear in the tree.
 
 It works now, but it's a touch inelegant.  Ultimately, the answer to
 overloading in the tree is to force a hierarchical data
