@@ -4,9 +4,16 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/11/04 02:17:06 $
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/11/04 02:25:43 $
+   Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Original C Version:
+   ----------------------------------------------------------------------------
+   "THE BEER-WARE LICENSE" (Revision 42):
+   <phk@login.dknet.dk> wrote this file.  As long as you retain this notice you
+   can do whatever you want with this stuff. If we meet some day, and you think
+   this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
+   ----------------------------------------------------------------------------
 
    -----------------------------------------------------------------------
 	    
@@ -44,6 +51,8 @@
 
 */
 
+import MD5;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                         MD5Crypt
@@ -51,25 +60,33 @@
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>An Invid is an immutable object id (an INVariant ID) in the
- * Ganymede system.  All objects created in the database have a unique
- * and permanent Invid that identify the object's type and identity.  Because
- * of these properties, the Invid can be used as a persistent object pointer
- * type.</P>
+ * <p>This class defines a method,
+ * {@link MD5Crypt#crypt(java.lang.String, java.lang.String) crypt()}, which
+ * takes a password and a salt string and generates an OpenBSD/FreeBSD/Linux-compatible
+ * md5-encoded password entry.</p>
  *
- * <P>Invid's are used extensively in the server to track pointer
- * relationships between objects.  Invid's are also used by the client to identify
- * objects to be viewed, edited, deleted, etc.  Basically whenever any code
- * in Ganymede deals with a reference to an object, it is done through the use
- * of Invid's.</P>
- *
- * @see arlut.csd.ganymede.InvidDBField
- * @see arlut.csd.ganymede.Session
+ * <p>Created: 3 November 1999</p>
+ * <p>Release: $Name:  $</p>
+ * <p>Version: $Revision: 1.2 $</p>
+ * <p>Last Mod Date: $Date: 1999/11/04 02:25:43 $</p>
+ * <p> Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
+ * <p>Original C Version:<pre>
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <phk@login.dknet.dk> wrote this file.  As long as you retain this notice you
+ * can do whatever you want with this stuff. If we meet some day, and you think
+ * this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
+ * ----------------------------------------------------------------------------
+ * </pre></p>
  */
 
-import MD5;
-
 public final class MD5Crypt {
+
+  /**
+   *
+   * Command line test rig.
+   *
+   */
 
   static public void main(String argv[])
   {
@@ -101,6 +118,22 @@ public final class MD5Crypt {
 
     return result.toString();
   }
+
+  /**
+   * <p>This method actually generates a OpenBSD/FreeBSD/Linux PAM compatible
+   * md5-encoded password hash from a plaintext password and a
+   * salt.</p>
+   *
+   * <p>The resulting string will be in the form '$1$&lt;salt&gt;$&lt;hashed mess&gt;</p>
+   *
+   * @param password Plaintext password
+   * @param salt A short string to use to randomize md5.  May start with $1$, which
+   *             will be ignored.  It is explicitly permitted to pass a pre-existing
+   *             MD5Crypt'ed password entry as the salt.  crypt() will strip the salt
+   *             chars out properly.
+   *
+   * @return An OpenBSD/FreeBSD/Linux-compatible md5-hashed password field.
+   */
 
   static final String crypt(String password, String salt)
   {
