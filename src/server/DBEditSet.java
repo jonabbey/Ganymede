@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2002/03/15 02:10:17 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2002/04/03 02:32:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1103,6 +1103,8 @@ public class DBEditSet {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
+	    eObj.release(false);
+
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
 		eObj2 = (DBEditObject) committedObjects.elementAt(i);
