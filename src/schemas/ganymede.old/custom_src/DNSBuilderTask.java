@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to DNS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
 
 import java.util.*;
+import java.io.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -35,6 +36,8 @@ import java.util.*;
 public class DNSBuilderTask extends GanymedeBuilderTask {
 
   private static String path = null;
+  private static String buildScript = null;
+  private static Runtime runtime = null;
 
   // ---
 
@@ -98,7 +101,48 @@ public class DNSBuilderTask extends GanymedeBuilderTask {
 
   public boolean builderPhase2()
   {
-    Ganymede.debug("Need to do DNS build script");
+    File
+      file;
+
+    /* -- */
+
+    if (buildScript == null)
+      {
+	buildScript = path + "dnsbuilder";
+      }
+
+    file = new File(buildScript);
+
+    if (file.exists())
+      {
+	if (runtime == null)
+	  {
+	    runtime = Runtime.getRuntime();
+	  }
+
+	try
+	  {
+	    Process process;
+
+	    /* -- */
+
+	    process = runtime.exec(buildScript);
+
+	    process.waitFor();
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+	  }
+      }
+    else
+      {
+	Ganymede.debug(buildScript + " doesn't exist, not running external DNS build script");
+      }
 
     return true;
   }
