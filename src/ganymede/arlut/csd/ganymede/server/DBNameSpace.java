@@ -735,7 +735,7 @@ public final class DBNameSpace implements NameSpace {
 		    // we'll promote the shadowFieldB association to
 		    // shadowField 'A'.
 
-		    if (handle.getShadowFieldB() != field)
+		    if (handle.getShadowFieldB() != null && handle.getShadowFieldB() != field)
 		      {
 			// we've already speculatively associated
 			// ourselves with this value with another
