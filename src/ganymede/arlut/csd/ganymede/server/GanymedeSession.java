@@ -3685,6 +3685,21 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     /* -- */
 
+    // if the object we're looking at is being deleted or dropped,
+    // we'll consider it an ex-object, and not include it in the query
+    // results.
+
+    if (obj instanceof DBEditObject)
+      {
+	DBEditObject eObj = (DBEditObject) obj;
+
+	if (eObj.getStatus() == ObjectStatus.DELETING ||
+	    eObj.getStatus() == ObjectStatus.DROPPING)
+	  {
+	    return;
+	  }
+      }
+
     if (supergashMode)
       {
 	// we'll report it as editable
