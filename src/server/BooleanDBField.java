@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/02/10 05:33:39 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/03/17 05:32:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -336,7 +336,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     return ((o == null) || (o instanceof Boolean));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
 
@@ -344,15 +344,19 @@ public class BooleanDBField extends DBField implements boolean_field {
 
     if (!isEditable(true))
       {
-	return false;
+	return Ganymede.createErrorDialog("Boolean Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("Boolean Field Error",
+					  "Submitted value " + o + " is not a boolean!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     // have our parent make the final ok on the value

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/01/22 18:05:32 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/03/17 05:32:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -819,8 +819,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (!isEditable(local))	// *sync* possible
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object for field " +
-					   getName());
+	return Ganymede.createErrorDialog("Field Permissions Error",
+					  "don't have permission to change field /  non-editable object for field " +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (isVector())
@@ -833,13 +834,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	return retVal;		// no change
       }
 
-    if (!verifyNewValue(value))
-      {
-	// we need a better way of getting the information up from verifyNewValue, since
-	// conceivably another thread could intercede before we read the error?
+    retVal = verifyNewValue(value);
 
-	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-					  getLastError());
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -1024,7 +1023,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (value == null)
       {
-	return Ganymede.createErrorDialog("Error, bad value",
+	return Ganymede.createErrorDialog("Field Error",
 					  "Null value passed to " + owner.getLabel() + ":" + 
 					  getName() + ".setElement()");
       }
@@ -1100,10 +1099,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    if (!verifyNewValue(value))
+    retVal = verifyNewValue(value);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					  getLastError());
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -1254,10 +1254,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     // verifyNewValue should setLastError for us.
 
-    if (!verifyNewValue(value))
+    retVal = verifyNewValue(value);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					  getLastError());
+	return retVal;
       }
 
     if (size() >= getMaxArraySize())
@@ -1958,7 +1959,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    *
    */
 
-  abstract public boolean verifyNewValue(Object o);
+  abstract public ReturnVal verifyNewValue(Object o);
 
   /**
    *

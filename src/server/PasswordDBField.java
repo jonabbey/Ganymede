@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/01/22 18:05:50 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/03/17 05:32:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -668,10 +668,11 @@ public class PasswordDBField extends DBField implements pass_field {
 
     /* -- */
 
-    if (!verifyNewValue(text))
+    retVal = verifyNewValue(text);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setPlainTextPass()",
-					 "Invalid password value\n" + getLastError());
+	return retVal;
       }
 
     retVal = ((DBEditObject) owner).finalizeSetValue(this, text);
@@ -757,10 +758,11 @@ public class PasswordDBField extends DBField implements pass_field {
 					  "Can't set a pre-crypted value into a plaintext password field");
       }
 
-    if (!verifyNewValue(text))
+    retVal = verifyNewValue(text);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
-					  "Invalid crypted password value\n" + getLastError());
+	return retVal;
       }
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, text);
@@ -798,7 +800,7 @@ public class PasswordDBField extends DBField implements pass_field {
     return ((o == null) || (o instanceof String));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     String s, s2;
@@ -809,20 +811,24 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(true))
       {
-	return false;
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Submitted value " + o + " is not a string!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     if (o == null)
       {
-	return true; // assume we can null out this field
+	return null; // assume we can null out this field
       }
 
     s = (String) o;
@@ -830,25 +836,25 @@ public class PasswordDBField extends DBField implements pass_field {
     if (s.length() > maxSize())
       {
 	// string too long
-	
-	setLastError("string value " + s +
-		     " is too long for field " + 
-		     getName() +
-		     " which has a length limit of " + 
-		     maxSize());
-	return false;
+
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Submitted password" +
+					  " is too long for field " + 
+					  getName() + " in object " +
+					  owner.getLabel() +
+					  ", which has a length limit of " + 
+					  maxSize());
       }
 
     if (s.length() < minSize())
       {
-	// string too short
-	
-	setLastError("string value " + s +
-		     " is too short for field " + 
-		     getName() + 
-		     " which has a minimum length of " + 
-		     minSize());
-	return false;
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Submitted password" +
+					  " is too short for field " + 
+					  getName() + " in object " +
+					  owner.getLabel() +
+					  ", which has a minimum length of " + 
+					  minSize());
       }
     
     if (allowedChars() != null)
@@ -859,10 +865,12 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    if (okChars.indexOf(s.charAt(i)) == -1)
 	      {
-		setLastError("string value" + s +
-			     "contains a bad character " + 
-			     s.charAt(i));
-		return false;
+		return Ganymede.createErrorDialog("Password Field Error",
+						  "Submitted password" +
+						  " contains the unacceptable character '" +
+						  s.charAt(i) + "' for field " +
+						  getName() + " in object " +
+						  owner.getLabel() + ".");
 	      }
 	  }
       }
@@ -875,10 +883,12 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    if (badChars.indexOf(s.charAt(i)) != -1)
 	      {
-		setLastError("string value" + s +
-			     "contains a bad character " + 
-			     s.charAt(i));
-		return false;
+		return Ganymede.createErrorDialog("Password Field Error",
+						  "Submitted password" +
+						  " contains the unacceptable character '" +
+						  s.charAt(i) + "' for field " +
+						  getName() + " in object " +
+						  owner.getLabel() + ".");
 	      }
 	  }
       }

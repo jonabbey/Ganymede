@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:05:59 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/03/17 05:32:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -154,7 +154,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public boolean verifyNewValue(DBField field, Object value)
+  public ReturnVal verifyNewValue(DBField field, Object value)
   {
     // We really don't want the supergash owner group ever
     // having any explicit ownership links.
@@ -162,9 +162,8 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
     if (field.getOwner().getInvid().getNum() == SchemaConstants.OwnerSupergash &&
 	getID() == SchemaConstants.OwnerObjectsOwned)
       {
-	field.setLastError("Can't modify supergash objects owned field");
-	Ganymede.debug("Can't modify supergash objects owned field");
-	return false;
+	return Ganymede.createErrorDialog("Owner Object Error",
+					  "Can't modify supergash objects owned field.");
       }
 
     // we don't want owner groups to ever explicitly list themselves
@@ -177,8 +176,8 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
 	if (testInvid != null && testInvid.equals(field.getOwner().getInvid()))
 	  {
-	    field.setLastError("Can't make an owner group own itself.. this is implicitly true");
-	    return false;
+	    return Ganymede.createErrorDialog("Owner Object Error",
+					      "Can't make an owner group own itself.. this is implicitly true");
 	  }
       }
 

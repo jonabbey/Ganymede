@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/01/22 18:05:51 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/03/17 05:32:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -497,9 +497,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   // we never allow setValue
 
-  public boolean verifyNewValue(Object v)
+  public ReturnVal verifyNewValue(Object v)
   {
-    return false;
+    return Ganymede.createErrorDialog("Permission Matrix Field Error",
+				      "setValue() not allowed on PermissionMatrixDBField.");
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 1999/03/17 03:17:17 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 1999/03/17 05:32:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.102 $ %D%
+ * @version $Revision: 1.103 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -2279,10 +2279,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;		// no change
       }
 
-    if (!verifyNewValue(value, local))
+    retVal = verifyNewValue(value, local);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
-					  "verifyNewValue() reported " + getLastError());
+	return retVal;
       }
 
     // we now know that value is an invid
@@ -2470,10 +2471,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;		// no change
       }
 
-    if (!verifyNewValue(value, local))
+    retVal = verifyNewValue(value, local);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
-					  getLastError());
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -2624,16 +2626,15 @@ public final class InvidDBField extends DBField implements invid_field {
 					  "Field " + getName() + " already contains value " + value);
       }
 
-    if (!verifyNewValue(value, local))
+    retVal = verifyNewValue(value, local);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement() - bad value submitted",
-					  getLastError());
+	return retVal;
       }
 
     if (size() >= getMaxArraySize())
       {
-	setLastError("Field " + getName() + " already at or beyond array size limit");
-
 	return Ganymede.createErrorDialog("InvidDBField.addElement() - vector overflow",
 					  "Field " + getName() +
 					  " already at or beyond array size limit");
@@ -2943,7 +2944,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("Ganymedce.deleteElement()",
+	return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
 					  "don't have permission to change field /  non-editable object " +
 					  getName() + " in object " + owner.getLabel());
       }
@@ -3335,12 +3336,12 @@ public final class InvidDBField extends DBField implements invid_field {
     return ((o == null) || (o instanceof Invid));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     return verifyNewValue(o, false);
   }
 
-  public boolean verifyNewValue(Object o, boolean local)
+  public ReturnVal verifyNewValue(Object o, boolean local)
   {
     DBEditObject eObj;
     Invid inv, inv2;
@@ -3351,28 +3352,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-	setLastError("object/field not editable");
-
-	if (debug)
-	  {
-	    Ganymede.debug("InvidDBField.verifyNewValue(): object/field not editable");
-	  }
-
-	return false;
+	return Ganymede.createErrorDialog("Invid Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-
-	if (debug)
-	  {
-	    Ganymede.debug("InvidDBField.verifyNewValue(): type mismatch");
-	  }
-
-	return false;
+	return Ganymede.createErrorDialog("Invid Field Error",
+					  "Submitted value " + o + " is not an invid!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     inv = (Invid) o;
@@ -3384,20 +3376,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    // the invid points to an object of the wrong type
 
-	    setLastError("invid value " + inv + 
-			 " points to the wrong kind of" +
-			 " object for field " +
-			 getName() +
-			 " which should point to an" +
-			 " object of type " + 
-			 getAllowedTarget());
-
-	    if (debug)
-	      {
-		Ganymede.debug("InvidDBField.verifyNewValue(): invid value points to wrong kind of object");
-	      }
-
-	    return false;
+	    return Ganymede.createErrorDialog("Invid Field Error",
+					      "invid value " + inv + 
+					      " points to the wrong kind of" +
+					      " object for field " +
+					      getName() + " in object " + owner.getLabel() +
+					      " which should point to an" +
+					      " object of type " + 
+					      getAllowedTarget());
 	  }
 
 	if (!local && mustChoose())
@@ -3430,14 +3416,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (!ok)
 	      {
-		setLastError("invid value " + inv + " is not a valid choice");
-
-		if (debug)
-		  {
-		    Ganymede.debug("InvidDBField.verifyNewValue(): invid not a valid choice");
-		  }
-
-		return false;
+		return Ganymede.createErrorDialog("Invid Field Error",
+						  "invid value " + inv + 
+						  " is not a valid choice for field" +
+						  getName() + " in object " + owner.getLabel() +
+						  ".  Serious client error?");
 	      }
 	  }
       }

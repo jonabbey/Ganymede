@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:05:49 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/03/17 05:32:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -334,7 +334,7 @@ public class NumericDBField extends DBField implements num_field {
     return ((o == null) || (o instanceof Integer));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Integer I;
@@ -345,8 +345,10 @@ public class NumericDBField extends DBField implements num_field {
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("Numeric Field Error",
+					  "Submitted value " + o + " is not an integer!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     if (o == null)
@@ -360,14 +362,18 @@ public class NumericDBField extends DBField implements num_field {
       {
 	if (getMinValue() > I.intValue())
 	  {
-	    setLastError("value out of range (underflow)");
-	    return false;
+	    return Ganymede.createErrorDialog("Numeric Field Error",
+					      "Submitted integer  " + I + " is out of range for field " +
+					      getName() + " in object " + owner.getLabel() + 
+					      ".  This field will not accept integers less than " + getMinValue());
 	  }
 
 	if (getMaxValue() < I.intValue())
 	  {
-	    setLastError("value out of range (overflow)");
-	    return false;
+	    return Ganymede.createErrorDialog("Numeric Field Error",
+					      "Submitted integer  " + I + " is out of range for field " +
+					      getName() + " in object " + owner.getLabel() + 
+					      ".  This field will not accept integers greater than " + getMaxValue());
 	  }
       }
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/03/17 03:17:18 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/03/17 05:32:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -765,7 +765,7 @@ public class StringDBField extends DBField implements string_field {
     return ((o == null) || (o instanceof String));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     String s, s2;
@@ -776,15 +776,19 @@ public class StringDBField extends DBField implements string_field {
 
     if (!isEditable(true))
       {
-	return false;
+	return Ganymede.createErrorDialog("String Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("String Field Error",
+					  "Submitted value " + o + " is not a string!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     s = (String) o;
@@ -798,24 +802,25 @@ public class StringDBField extends DBField implements string_field {
       {
 	// string too long
 	
-	setLastError("string value " + s +
-		     " is too long for field " + 
-		     getName() +
-		     " which has a length limit of " + 
-		     maxSize());
-	return false;
+	return Ganymede.createErrorDialog("String Field Error",
+					  "string value " + s +
+					  " is too long for field " + 
+					  getName() + " in object " +
+					  owner.getLabel() +
+					  ", which has a length limit of " + 
+					  maxSize());
       }
 
     if (s.length() < minSize())
       {
 	// string too short
 	
-	setLastError("string value " + s +
-		     " is too short for field " + 
-		     getName() + 
-		     " which has a minimum length of " + 
-		     minSize());
-	return false;
+	return Ganymede.createErrorDialog("String Field Error",
+					  "string value " + s +
+					  " is too short for field " + 
+					  getName() +
+					  " which has a minimum length of " + 
+					  minSize());
       }
     
     if (allowedChars() != null && !allowedChars().equals(""))
@@ -826,10 +831,11 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (okChars.indexOf(s.charAt(i)) == -1)
 	      {
-		setLastError("string value" + s +
-			     "contains a bad character " + 
-			     s.charAt(i));
-		return false;
+		return Ganymede.createErrorDialog("String Field Error",
+						  "string value " + s +
+						  " contains a character '" + 
+						  s.charAt(i) + "' which is not allowed in field " +
+						  getName() + " in object " + owner.getLabel());
 	      }
 	  }
       }
@@ -842,10 +848,11 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (badChars.indexOf(s.charAt(i)) != -1)
 	      {
-		setLastError("string value" + s +
-			     "contains a bad character " + 
-			     s.charAt(i));
-		return false;
+		return Ganymede.createErrorDialog("String Field Error",
+						  "string value " + s +
+						  " contains a character '" + 
+						  s.charAt(i) + "' which is not allowed in field " +
+						  getName() + " in object " + owner.getLabel());
 	      }
 	  }
       }
@@ -867,8 +874,10 @@ public class StringDBField extends DBField implements string_field {
 
 	if (!ok)
 	  {
-	    setLastError("string value " + s + " is not a valid choice");
-	    return false;
+	    return Ganymede.createErrorDialog("String Field Error",
+					      "string value " + s +
+					      " is not a valid choice for field " +
+					      getName() + " in object " + owner.getLabel());
 	  }
       }
 

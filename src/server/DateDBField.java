@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/01/22 18:05:39 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/03/17 05:32:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -353,7 +353,7 @@ public class DateDBField extends DBField implements date_field {
     return ((o == null) || (o instanceof Date));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Date d, d2;
@@ -364,15 +364,19 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	return false;
+	return Ganymede.createErrorDialog("Date Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("Date Field Error",
+					  "Submitted value " + o + " is not a date!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     if (o == null)
@@ -385,12 +389,15 @@ public class DateDBField extends DBField implements date_field {
     if (limited())
       {
 	d2 = minDate();
+
 	if (d2 != null)
 	  {
 	    if (d.before(d2))
 	      {
-		setLastError("Date is out of range (under)");
-		return false;
+		return Ganymede.createErrorDialog("Date Field Error",
+						  "Submitted date  " + d + " is out of range for field " +
+						  getName() + " in object " + owner.getLabel() + 
+						  ".  This field will not accept dates before " + d2);
 	      }
 	  }
 
@@ -399,8 +406,10 @@ public class DateDBField extends DBField implements date_field {
 	  {
 	    if (d.after(d2))
 	      {
-		setLastError("Date is out of range (over)");
-		return false;
+		return Ganymede.createErrorDialog("Date Field Error",
+						  "Submitted date  " + d + " is out of range for field " +
+						  getName() + " in object " + owner.getLabel() + 
+						  ".  This field will not accept dates after " + d2);
 	      }
 	  }
       }

@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/01/22 18:05:47 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/03/17 05:32:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -336,10 +336,11 @@ public class IPDBField extends DBField implements ip_field {
 	  }
       }
 
-    if (!verifyNewValue(bytes))
+    retVal = verifyNewValue(bytes);
+      
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					  "Invalid ip value\n" + getLastError());
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -500,10 +501,11 @@ public class IPDBField extends DBField implements ip_field {
 	bytes = (Byte[]) value;
       }
 
-    if (!verifyNewValue(bytes))
+    retVal = verifyNewValue(bytes);
+      
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.setElement()",
-					  "Improper IP address\n" + getLastError());
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -645,10 +647,11 @@ public class IPDBField extends DBField implements ip_field {
 
     // verifyNewValue should setLastError for us.
 
-    if (!verifyNewValue(bytes))
+    retVal = verifyNewValue(bytes);
+      
+    if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
-					  "Improper IP address\n" + getLastError());
+	return retVal;
       }
 
     if (size() >= getMaxArraySize())
@@ -1187,7 +1190,7 @@ public class IPDBField extends DBField implements ip_field {
 	      (((Byte[]) o).length == 16))));
   }
 
-  public boolean verifyNewValue(Object o)
+  public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Date d, d2;
@@ -1198,15 +1201,19 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!isEditable(true))
       {
-	return false;
+	return Ganymede.createErrorDialog("IP Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	setLastError("type mismatch");
-	return false;
+	return Ganymede.createErrorDialog("IP Field Error",
+					  "Submitted value " + o + " is not a IP address!  Major client error while" +
+					  " trying to edit field " + getName() +
+					  " in object " + owner.getLabel());
       }
 
     // have our parent make the final ok on the value
