@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.5 $
-# Date: $Date: 1999/01/20 18:58:26 $
+# Version: $Revision: 1.6 $
+# Date: $Date: 1999/01/20 19:24:50 $
 #
 ############################################################
 
@@ -36,9 +36,21 @@ ln -s ../arlut/csd/Util arlut/csd/Util
 
 rm -rf arlut/csd/JDataComponent
 mkdir arlut/csd/JDataComponent
-ln -s ../arlut/csd/JDataComponent/listHandle.class arlut/csd/JDataComponent
-ln -s ../arlut/csd/JDialog arlut/csd/JDialog
+
+cd arlut/csd/JDataComponent
+rm -f listHandle.class
+ln -s $CLASSDIR/arlut/csd/JDataComponent/listHandle.class .
+cd ../../..
+
+cd arlut/csd
+rm -f JDialog
+ln -s $CLASSDIR/arlut/csd/JDialog .
+cd ../..
+
+rm -f jcrypt.class
 ln -s ../jcrypt.class .
+
+rm -f Qsmtp.class
 ln -s ../Qsmtp.class .
 
 ./sync_tree
