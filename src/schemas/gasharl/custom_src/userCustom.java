@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2001/06/25 21:30:30 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2001/06/25 21:56:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1424,13 +1424,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	GanymedeSession mySession = this.getGSession();
 
-	// if we are supergash, don't restrict what the date
-	// can be set to.
+	// if we are supergash or we are reacting to a password change
+	// cascade, don't restrict what the date can be set to.
 
 	if (mySession == null || mySession.isSuperGash() || amChangingExpireDate)
 	  {
 	    return super.maxDate(field);
 	  }
+
+	return getMaxPasswordExtension();
       }
 
     return super.maxDate(field);
@@ -1733,6 +1735,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     myCal.add(Calendar.MONTH, 3);
 
     // if the expiration date will fall between Dec 20
+    // and January 10, bump the date forward three
+    // weeks to skip over the year-end holidays
+
+    int month = myCal.get(Calendar.MONTH);
+    int day = myCal.get(Calendar.DATE);
+
+    if ((month == Calendar.DECEMBER && day >= 20) ||
+	(month == Calendar.JANUARY && day < 10))
+      {
+	myCal.add(Calendar.DATE, 21);
+      }
+
+    return myCal.getTime();
+  }
+
+  /**
+   * <p>This method calculates what the maximum time the password
+   * expiration field may be set to by a ganymede admin.</p> */
+
+  private Date getMaxPasswordExtension()
+  {
+    Calendar myCal = new GregorianCalendar();
+    myCal.add(Calendar.DATE, 14);
+
+    // if the maximum expiration date will fall between Dec 20
     // and January 10, bump the date forward three
     // weeks to skip over the year-end holidays
 
