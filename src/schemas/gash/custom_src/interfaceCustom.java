@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,6 +74,109 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
   }
   
+
+  /**
+   *
+   * Hook to allow intelligent generation of labels for DBObjects
+   * of this type.  Subclasses of DBEditObject should override
+   * this method to provide for custom generation of the
+   * object's label type
+   *
+   */
+
+  public String getLabelHook(DBObject object)
+  {
+    DBField field, field2;
+    DBObject ipObj, dnsObj;
+    String result = null;
+    Invid invid;
+
+    /* -- */
+
+    if ((object == null) || (object.getTypeID() != getTypeID()))
+      {
+	return null;
+      }
+
+    field = (DBField) object.getField((short) 257); // get the I.P. records field
+
+    if (field == null)
+      {
+	field = (DBField) object.getField((short) 256); // get the Ethernet address
+	
+	return field.getValueString();
+      }
+
+    invid = (Invid) field.getElement(0); // get the primary I.P. address object
+
+    if (invid == null)
+      {
+	field = (DBField) object.getField((short) 256); // get the Ethernet address
+	
+	return field.getValueString();
+      }
+
+    ipObj = (DBObject) Ganymede.internalSession.view_db_object(invid);
+
+    if (ipObj == null)
+      {
+	field = (DBField) object.getField((short) 256); // get the Ethernet address
+	
+	return field.getValueString();
+      }
+
+    field = (DBField) ipObj.getField((short) 256); // vector of dns records
+
+    if (field == null)
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+	
+	return field.getValueString();
+      }
+
+    invid = (Invid) field.getElement(0); // get the primary dns record
+
+    if (invid == null)
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+	
+	return field.getValueString();
+      }
+
+    dnsObj = (DBObject) Ganymede.internalSession.view_db_object(invid);
+
+    if (dnsObj == null)
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+
+	return result + ":" + field.getValueString();
+      }
+
+    field = (DBField) dnsObj.getField((short) 257);
+
+    if (field == null)
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+	return field.getValueString();
+      }
+    else
+      {
+	result = field.getValueString();
+      }
+
+    if (result == null || result.equals(""))
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+	return field.getValueString();
+      }
+    else
+      {
+	field = (DBField) ipObj.getField((short) 257); // get the i.p. address
+
+	return result + ":" + field.getValueString();
+      }
+  }
+
   /**
    *
    * Hook to have this object create a new embedded object
@@ -86,7 +189,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     DBEditObject newObject;
     DBObjectBase targetBase;
     DBObjectBaseField fieldDef;
-    InvidDBField container;
 
     /* -- */
 
@@ -101,8 +203,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	    // link it in
 
-	    container = (InvidDBField) newObject.getField(SchemaConstants.ContainerField);
-	    container.setValue(getInvid());
+	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
 	    
 	    return newObject.getInvid();
 	  }
