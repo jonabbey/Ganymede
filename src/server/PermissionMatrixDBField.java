@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -373,7 +373,18 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(short baseID, short fieldID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+    PermEntry result;
+
+    /* -- */
+
+    result = (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+
+    if (result == null)
+      {
+	result = (PermEntry) matrix.get(matrixEntry(baseID, "default"));
+      }
+
+    return result;
   }
 
   /**
@@ -401,9 +412,21 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(Base base, BaseField field)
   {
+    PermEntry result;
+
+    /* -- */
+
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID(), field.getID()));
+	result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
+						    field.getID()));
+	if (result == null)
+	  {
+	    result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
+							"default"));
+	  }
+
+	return result;
       }
     catch (RemoteException ex)
       {
@@ -499,6 +522,38 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
+   * Sets the default permission entry to apply to fields under base &lt;baseID&gt;
+   * to PermEntry &lt;entry&gt;<br><br>
+   *
+   * This operation will fail if this permission matrix is not
+   * associated with a currently checked-out-for-editing
+   * PermissionMatrixDBField.
+   *
+   * @see arlut.csd.ganymede.perm_field
+   * @see arlut.csd.ganymede.PermMatrix
+   */
+
+  public void setDefaultFieldsPerm(short baseID, PermEntry entry)
+  {
+    if (isEditable())
+      {
+	matrix.put(matrixEntry(baseID, "default"), entry);
+      }
+    else
+      {
+	throw new IllegalArgumentException("not an editable field");
+      }
+
+    if (debug)
+      {
+	System.err.println("PermissionMatrixDBField: base " + baseID + " set to " + entry);
+      }
+
+    defined = true;
+  }
+
+  /**
+   *
    * Sets the permission entry for this matrix for base &lt;base&gt;,
    * field &lt;field&gt; to PermEntry &lt;entry&gt;<br><br>
    *
@@ -574,6 +629,52 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
 
     defined = true;
+  }
+
+  /**
+   *
+   * Sets the default permission entry to apply to fields under base &lt;base&gt;
+   * to PermEntry &lt;entry&gt;<br><br>
+   *
+   * This operation will fail if this permission matrix is not
+   * associated with a currently checked-out-for-editing
+   * PermissionMatrixDBField.
+   *
+   * @see arlut.csd.ganymede.perm_field
+   * @see arlut.csd.ganymede.PermMatrix
+   */
+
+  public void setDefaultFieldsPerm(Base base, PermEntry entry)
+  {
+    if (isEditable())
+      {
+	try
+	  {
+	    matrix.put(matrixEntry(base.getTypeID(), "default"), entry);
+
+	    if (debug)
+	      {
+		System.err.println("PermissionMatrixDBField: base " +
+				   base.getName() + " set to " + entry);
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+    else
+      {
+	throw new IllegalArgumentException("not an editable field");
+      }
+
+
+    defined = true;
+  }
+
+
+  private String matrixEntry(short baseID, String text)
+  {
+    return (baseID + ":" + text);
   }
 
   private String matrixEntry(short baseID, short fieldID)
