@@ -9,8 +9,8 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.47 $
-  Last Mod Date: $Date: 1999/01/22 18:04:20 $
+  Version: $Revision: 1.48 $
+  Last Mod Date: $Date: 1999/03/25 08:17:08 $
   Release: $Name:  $
 
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
@@ -74,23 +74,25 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * This module provides for a generic vector of objects, and can be
+ * <p>This module provides for a generic vector of objects, and can be
  * used to implement a collection edit in place (composite) objects,
- * each with its own containerPanel.
+ * each with its own containerPanel.</p>
  *
- * Usually this is used to hold a vector of elementWrappers.  Each elementWrapper
+ * <p>Usually this is used to hold a vector of embedded objects wrapped by
+ * elementWrappers.  Each elementWrapper
  * contains a containerPanel, so any kind of object can be displayed.  The vectorPanel
- * handles the creation and deletion of objects in the vector, as well as displays
- * the elementWrappers.
+ * handles the creation and deletion of objects in the vector, as well as displaying
+ * the elementWrappers.</p>
  *
- * Note: addNewElement is very different from the various addElement
+ * <p>Note: addNewElement is very different from the various addElement
  * methods.  addNewElement does all the work involved in creating a
  * new element, like calling create_db_object and instantiating a new
  * elementWrapper.  addElement takes a created element, and adds it
  * into the vectorPanel, incrementing the size and actually adding it
- * to the panel.
+ * to the panel.</p>
  *
  * @see elementWrapper
+ * @see containerPanel
  * 
  */
 
@@ -98,25 +100,39 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   boolean debug = false;
 
+  /**
+   * Vector of GUI components held in this vectorPanel.  This vector contains
+   * the actual GUI components added to this vector, not the elementWrappers.
+   */
+
   Vector
     compVector;
 
   private Boolean
     myFieldIsEditable = null;
-    
 
   String 
     name = null;
 
-  // Hash of components to elementWrappers holding them.
+  /**
+   * Hash mapping GUI components added to this vectorPanel to the
+   * elementWrappers holding them.
+   */
+
   Hashtable
     ewHash;
 
-  // Button used to add a new element to the vector
+  /**
+   * Button used to add a new element to the vector
+   */
+
   JButton
     addB;
 
-  // centerPanel holds all of the elementWrappers in a BoxLayout  
+  /**
+   * centerPanel holds all of the elementWrappers in a BoxLayout  
+   */
+
   JPanel
     centerPanel;
 
@@ -205,6 +221,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     try
       {
 	name = field.getName();
+
 	if (name == null)
 	  {
 	    tb = BorderFactory.createTitledBorder("Untitled Vector");
@@ -229,6 +246,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     // The popup menu appears when the right mouse button is clicked inside the
     // TitledBorder but outside of the elementWrappers.  It basically presents a
     // menu with either "expand" or "close" options.
+
     popupMenu = new JPopupMenu();
     expandLevelMI = new JMenuItem("Expand this level");
     expandLevelMI.addActionListener(this);
@@ -258,9 +276,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     popupMenu.show(this, x, y);
   }
 
-  // This method creates the vector panel.  It creates an IPField of
-  // elementWrapper for each element of the vector.  This method is
-  // only called when the vectorPanel is created.
+  /**
+   * <p>This method creates the vector panel.  It creates an IPField or
+   * elementWrapper for each element of the vector.  This method is
+   * only called when the vectorPanel is created.</p>
+   */
 
   private void createVectorComponents()
   {
@@ -368,10 +388,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       null, false, null);
 		container.frame.containerPanels.addElement(cp);
 		cp.setBorder(wp.lineEmptyBorder);
-		    
-		addElement((i+1) + ". " + object.getLabel(), cp, false, false);
-	      }
 
+		addElement(object.getLabel(), cp, false, false);
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -408,13 +427,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   } 
 
   /**
-   * Add a new element to the vectorPanel
+   * <p>Adds a new element to the vectorPanel</p>
    *
-   * This method constructs the elementWrapper and the component of
+   * <p>This method constructs the elementWrapper and the component of
    * the appropriate type.  This is called when the add button is
    * clicked, but there is no reason why it couldn't be called from
-   * other places if you wanted to add a new element.
-   * 
+   * other places if you wanted to add a new element.</p>
    */
 
   public void addNewElement()
@@ -546,13 +564,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Add a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element gets the default title, will not be expanded, and
-   * will be invalidated.
+   * <p>This element gets the default title, will not be expanded, and
+   * will be invalidated.</p>
    *
    * @param c Component to be added
-   *
    */
 
   public void addElement(Component c)
@@ -561,15 +578,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Add a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element gets the default title, and will not be expanded
-   * immeditately.
+   * <p>This element gets the default title, and will not be expanded
+   * immeditately.</p>
    *
    * @param c Component to be added
    * @param invalidateNow If true, invalidate()/validate() will be called.
    * When adding several components all at once, set this to false.  
-   *
    */
 
   public void addElement(Component c, boolean invalidateNow)
@@ -578,10 +594,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Add a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element will not be expanded, but it will be invalidated
-   * right away.
+   * <p>This element will not be expanded, but it will be invalidated
+   * right away.</p>
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added 
@@ -593,14 +609,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Add a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element be immediately expanded if &lt;expand&gt; is true.
+   * <p>This element be immediately expanded if &lt;expand&gt; is true.</p>
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added 
    * @param expand If true, the element will appear pre-opened
-   *
    */
 
   public void addElement(String title, Component c, boolean expand)
@@ -616,7 +631,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * @param expand If true, the elementWrapper will be expanded immediately after creation
    * @param invalidateNow If true, invalidate()/validate() will be called.
    * When adding several components all at once, set this to false.
-   *
    */
 
   public void addElement(String title, Component c, boolean expand, boolean invalidateNow)
@@ -637,7 +651,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (debug)
       {
-	System.out.println("Index of element: " + compVector.size());
+	System.out.println("Index of element: " + compVector.indexOf(c));
       }
 
     // Make sure the centerPanel has been added.
@@ -649,6 +663,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
 
     elementWrapper ew = new elementWrapper(title, c, this, editable && isFieldEditable());
+
+    ew.setIndex(compVector.indexOf(c));
 
     // Keep track of the elementWrappers in the ewHash.
 
@@ -679,11 +695,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   *
-   * Remove an element from the vector panel.
+   * Removes an element from the vector panel.
    *
    * @param ew Component to be removed.
-   *
    */  
 
   public void deleteElement(elementWrapper ew) 
@@ -709,6 +723,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	gc.handleReturnVal(retVal);
 
+	// handleReturnVal will have called refresh on this
+	// vectorPanel for us, due to the InvidDBField field refresh
+	// information encoded in retVal
+
+	if (debug)
+	  {
+	    System.out.println("Deleting element (after handleReturnVal)");
+	  }
+
 	if ((retVal == null) || (retVal.didSucceed()))
 	  {
 	    compVector.removeElement(ew.getComponent());
@@ -717,6 +740,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    gc.somethingChanged();
 	    invalidate();
 	    container.frame.validate();
+
+	    if (debug)
+	      {
+		System.out.println("Deleting element (after revalidate)");
+	      }
 	  }
 	else
 	  {
@@ -730,17 +758,25 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
+   * <p>Refreshes the vectorPanel.</p>
    *
-   * Refresh the vectorPanel.
-   *
-   * This will refresh every containerPanel and IPField in this vectorPanel.
-   *
+   * <p>This will refresh every containerPanel and IPField in this vectorPanel, and
+   * will add or remove entries as needed to bring this vectorPanel into synchronization
+   * with the field on the server that this vectorPanel is attached to.</p>
    */
 
   public void refresh()
   {
     int size;
-    int i;
+
+    Hashtable serverInvids = new Hashtable();
+    Hashtable localInvids = new Hashtable();
+
+    containerPanel cp = null;
+
+    Invid invid = null;
+
+    boolean needFullRefresh = false;
 
     /* -- */
 
@@ -748,65 +784,133 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	size = my_field.size();
 
-	for (i = 0; i < size; i++)
+	if (my_field instanceof invid_field)
 	  {
-	    Object o = my_field.getElement(i);
+	    // figure out what invids are currently in my_field
+	    // on the server, save them so we can scratch them off
+	    // as we sync this vector panel 
 
-	    if (o instanceof Invid)
+	    Vector serverValues = my_field.getValues();
+
+	    for (int i = 0; i < serverValues.size(); i++)
 	      {
-		containerPanel cp = null;
-		
-		if (i < compVector.size())
-		  {
-		    cp = (containerPanel)compVector.elementAt(i);
-		  }
+		invid = (Invid) serverValues.elementAt(i);
 
-		if (cp != null && cp.getObjectInvid().equals((Invid) o))
+		serverInvids.put(invid, new Integer(i));
+	      }
+
+	    // what invid's are currently in this vector panel?
+
+	    for (int i = 0; i < compVector.size(); i++)
+	      {
+		cp = (containerPanel) compVector.elementAt(i);
+
+		if (cp != null)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Calling cp.updateAll()");
-		      }
+		    invid = cp.getObjectInvid();
+
+		    localInvids.put(invid, invid);
+		  }
+	      }
+
+	    // now, iterate through the invids being displayed, scratching
+	    // them out of serverInvids when we sync each containerPanel
+
+	    int localIndex = 0;
+
+	    while (localInvids.size() > 0)
+	      {
+		cp = (containerPanel) compVector.elementAt(localIndex);
+		invid = cp.getObjectInvid();
+	    
+		if (serverInvids.containsKey(invid))
+		  {
+		    // the server has this invid, go ahead and update
+		    // this containerPanel's status
 
 		    cp.updateAll();
-		    ((elementWrapper)ewHash.get(cp)).checkValidation();
-		    ((elementWrapper)ewHash.get(cp)).refreshTitle();
+
+		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+
+		    ew.setIndex(localIndex);
+		    ew.checkValidation();
+		    ew.refreshTitle();
+
+		    // we've updated this one.. scratch it off the server
+		    // and client list
+
+		    serverInvids.remove(invid);
+		    localInvids.remove(invid);
+
+		    localIndex++;
 		  }
 		else
 		  {
-		    // okay, we've got an invid in this vector, but we don't
-		    // yet have a containerPanel element created to render
-		    // it.
+		    // the server doesn't have this invid anymore, so
+		    // we need to take it out of this vector panel
 
-		    if (debug)
-		      {
-			System.out.println("VectorPanel.refresh(): adding new element.");
-		      }
+		    compVector.removeElement(cp);
+		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+		    centerPanel.remove(ew);
+		    ewHash.remove(cp);
 
-		    ReturnVal rv = editable ? wp.gc.getSession().edit_db_object((Invid)o) :
-		      wp.gc.getSession().view_db_object((Invid)o);
+		    needFullRefresh = true;
+		    localInvids.remove(invid);
+		  }
+	      }
 
-		    rv = wp.gc.handleReturnVal(rv);
+	    // take care of any new embedded objects to be displayed, adding
+	    // them to the end.  Note that we don't care about the ordering
+	    // of the invids in the client's vectorPanel, we just want to make
+	    // sure that we have the right (unordered) set, and that everything
+	    // is up-to-date.
 
+	    Enumeration enum = serverInvids.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		invid = (Invid) enum.nextElement();
+
+		localIndex = ((Integer) serverInvids.get(invid)).intValue();
+
+		if (debug)
+		  {
+		    System.out.println("VectorPanel.refresh(): adding new embedded object: " + invid);
+		  }
+
+		ReturnVal rv = editable ? wp.gc.getSession().edit_db_object(invid) :
+		  wp.gc.getSession().view_db_object(invid);
+
+		rv = wp.gc.handleReturnVal(rv);
+
+		if (rv == null || rv.didSucceed())
+		  {
 		    containerPanel newcp = new containerPanel(rv.getObject(),
-				 			      editable,
-					 		      wp.gc,
-						 	      wp, container.frame,
+							      editable,
+							      wp.gc,
+							      wp, container.frame,
 							      null, false, null);
-
+		    
 		    container.frame.containerPanels.addElement(newcp);
 		    newcp.setBorder(wp.lineEmptyBorder);
 		    
-		    compVector.insertElementAt(newcp, i);
+		    compVector.insertElementAt(newcp, localIndex);
 		    
 		    // the addElement call will take care of most of the niceties of
 		    // getting this containerPanel added.
-
+		    
 		    addElement(newcp);
 		  }
 	      }
-	    else if (o instanceof ip_field)
+	  }
+	else if (my_field instanceof ip_field)
+	  {
+	    // this code hasn't been tested
+
+	    for (int i = 0; i < size; i++)
 	      {
+		Object o = my_field.getElement(i);
+
 		if (i < compVector.size())
 		  {
 		    JIPField ipf = (JIPField) compVector.elementAt(i);
@@ -816,7 +920,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		else
 		  {
 		    ip_field ipfield = (ip_field) my_field;
-
+		    
 		    JIPField ipf = new JIPField(editable,
 						ipfield.v6Allowed());
 		    
@@ -827,18 +931,23 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    addElement(ipf, false);
 		  }
 	      }
-	    else
+
+	    // Now get rid of extra ip field components
+
+	    int fieldCount = compVector.size();
+
+	    // we count down so that we can remove extra fields off of the
+	    // end
+	    
+	    for (int i = fieldCount; i >= size; i--)
 	      {
-		System.err.println("Unknown type in vectorPanel.refresh compVector: " + compVector.elementAt(i));
+		centerPanel.remove((Component)ewHash.get(compVector.elementAt(i)));
+		compVector.removeElementAt(i);
 	      }
 	  }
-
-	// Now get rid of everything after that last i
-
-	for (int j = i; j < compVector.size(); j++)
+	else
 	  {
-	    centerPanel.remove((Component)ewHash.get(compVector.elementAt(i)));
-	    compVector.removeElementAt(i);
+	    System.err.println("Unknown type in vectorPanel.refresh compVector: " + my_field.getClass());
 	  }
       }
     catch (RemoteException rx)
@@ -848,9 +957,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   *
    * This just calls expandAllLevels.. for use in threading this out.
-   *
    */
 
   public void run()
@@ -921,7 +1028,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    *
    * @param recursive If true, it will expand any vector panels inside
    * the containerPanels in this vectorPanel(in another thread, too)
-   *
    */ 
 
   public void expandLevels(boolean recursive)
@@ -954,7 +1060,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    *
    * @param recursive If true, close all vectorPanels inside this
    * vectorPanel.  This one never spawns another thread.
-   *
    */
 
   public void closeLevels(boolean recursive)
@@ -1031,6 +1136,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   /**
    * The elementWrapper talks to us with JValueObjects.
    */
+
   public boolean setValuePerformed(JValueObject v)
   {
     elementWrapper ew = (elementWrapper)v.getSource();
@@ -1120,7 +1226,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
 	
-  /*
+  /**
    * This changes an element after a ValueCallback.
    */
 

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.143 $
-   Last Mod Date: $Date: 1999/03/24 03:28:23 $
+   Version: $Revision: 1.144 $
+   Last Mod Date: $Date: 1999/03/25 08:17:06 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -79,7 +79,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * is run and a user logs in to the server, a single instance of this class
  * is created to handle all client GUI and networking operations for the user.</p>
  *
- * @version $Revision: 1.143 $ $Date: 1999/03/24 03:28:23 $ $Name:  $
+ * @version $Revision: 1.144 $ $Date: 1999/03/25 08:17:06 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -88,7 +88,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public static boolean debug = true;
 
   /**
-   * we're only going to have one gclient at a time per running client
+   * we're only going to have one gclient at a time per running client (singleton pattern).
    */
 
   public static gclient client;
@@ -314,15 +314,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   protected objectCache cachedLists = new objectCache();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s
-   * active in the client.  This vector is used to allow the client to find a
-   * containerPanel when it is told by the server to refresh a particular object and/or
-   * field.</p>
-   */
-
-  private Vector containerPanels = new Vector();
-
-  /**
    * Background processing thread, downloads information on
    * object and field types defined in the server when run.
    */
@@ -375,11 +366,26 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   JButton 
     commit,
     cancel;
+
+  /**
+   * Status field at the bottom of the client.
+   */
   
   final JTextField
     statusLabel = new JTextField();
 
+  /**
+   * The client's GUI tree component.
+   */
+
   treeControl tree;
+
+  /**
+   * The currently selected node from the client's GUI tree.
+   */
+
+  treeNode
+    selectedNode;
 
   // The top lines
 
@@ -400,11 +406,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     ganymede_logo,
     createDialogImage;
 
+  /**
+   * JDesktopPane on the right side of the client's display, contains
+   * the object and query result internal windows that are created
+   * during the client's execution.
+   */
+
   windowPanel
     wp;
-
-  treeNode
-    selectedNode;
 
   //
   // Menu resources
@@ -458,18 +467,29 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   LAFMenu
     LandFMenu;
 
+  /**
+   * Listener to react to persona dialog events
+   */
+
   PersonaListener
     personaListener = null;
 
-  ButtonGroup 
-    personaGroupRB;
+  /**
+   * Query dialog that is displayed when the user chooses to perform
+   * a query on the server.
+   */
 
   querybox
     my_querybox = null;
 
   /**
-   * This thread is used to clear the statusLabel after some interval after
-   * it is set.
+   * <p>This thread is used to clear the statusLabel after some interval after
+   * it is set.</p>
+   *
+   * <p>Whenever the gclient's
+   * {@link arlut.csd.ganymede.gclient.setStatus(java.lang.String,int) setStatus}
+   * method is called, this thread has a countdown timer started, which will
+   * clear the status label if it is not reset by another call to setStatus.</p>
    */
 
   public StatusClearThread statusThread;
@@ -484,11 +504,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /* -- */
 
   /**
-   *
-   * This is the main constructor for the gclient class.. it handles the
+   * <p>This is the main constructor for the gclient class.. it handles the
    * interactions between the user and the server once the user has
-   * logged in.
+   * logged in.</p>
    *
+   * @param s Connection to the server created for us by the glogin applet.
+   * @param g The glogin applet which is creating us.
    */
 
   public gclient(Session s, glogin g)
@@ -668,8 +689,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     LandFMenu.setMnemonic('l');
     LandFMenu.setCallback(this);
 
-
-
     // Help menu
 
     helpMenu = new JMenu("Help");
@@ -685,6 +704,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     //    helpMenu.addSeparator();
 
     // This uses action commands, so you don't need to globally declare these
+
     JMenuItem showAboutMI = new JMenuItem("About Ganymede");
     showAboutMI.setMnemonic('a');
     showAboutMI.addActionListener(this);
@@ -865,32 +885,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     
     toolBar = createToolbar();
 
-    // Below is testing "listening" to toolbar events.
-
-//     toolBar.addComponentListener(new ComponentAdapter() {
-
-//     public void componentHidden(ComponentEvent e) {
-//         System.out.println("componentHidden event from "
-//                        + e.getComponent().getClass().getName());
-//     }
-
-//     public void componentMoved(ComponentEvent e) {
-//         System.out.println("componentMoved event from "
-//                        + e.getComponent().getClass().getName());
-//     }
-
-//     public void componentResized(ComponentEvent e) {
-//         System.out.println("componentResized event from "
-//                        + e.getComponent().getClass().getName());
-//     }
-
-//     public void componentShown(ComponentEvent e) {
-//         System.out.println("componentShown event from "
-//                        + e.getComponent().getClass().getName());
-//     }
- 
-//     });
-
     if (showToolbar)
       {
 	getContentPane().add("North", toolBar);
@@ -913,7 +907,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     cancel.addActionListener(this);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
-
 
     JPanel bottomButtonP = new JPanel(false);
 
@@ -967,6 +960,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	throw new RuntimeException("Could not open transaction: " + rx);
       }
 
+    // Since we're logged in and have a session established, create the
+    // background loader thread to read in object and field type information
+
     loader = new Loader(session, debug);
     loader.start();
 
@@ -974,50 +970,54 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setSize(800, 600);
     show();
 
-
-    //
     // Adjust size of toolbar buttons to that of largest button
     // Must be done after components are displayed. Otherwise, 
     // getWidth & getHeight return 0's.
-    //
 
     // Not sure about status of "uniform buttons" so
     // using toggle to save having to comment out and in.
+
     boolean sameSize = true;
 
-    if (sameSize) { 
+    if (sameSize) 
+      { 
+	int width=0;
+	int height=0;
 
-      int width=0;
-      int height=0;
-
-      // Get width/height for biggest button
+	// Get width/height for biggest button
       
-      for (int i = 0; i<toolBar.getComponentCount(); i++) {
+	for (int i = 0; i<toolBar.getComponentCount(); i++) 
+	  {
+	    JButton b = (JButton)toolBar.getComponent(i);
 	
-	JButton b = (JButton)toolBar.getComponent(i);
-	
-	int temp = b.getWidth();
-	if (temp > width) {
-	  width = temp;
-	}
-	
-	int temp2 = b.getHeight();
-	if (temp2 > height) {
-	  height = temp2;
-	}
-      }
-      
-      Dimension buttonSize = new Dimension(width,height);    
+	    int temp = b.getWidth();
 
-      // Set width/height of all buttons to that of biggest
+	    if (temp > width) 
+	      {
+		width = temp;
+	      }
+	
+	    int temp2 = b.getHeight();
+	  
+	    if (temp2 > height) 
+	      {
+		height = temp2;
+	      }
+	  }
+      
+	Dimension buttonSize = new Dimension(width,height);    
+
+	// Set width/height of all buttons to that of biggest
         
-      for (int j = 0; j<toolBar.getComponentCount(); j++) {
-	JButton b = (JButton)toolBar.getComponent(j);
-       	b.setMaximumSize(buttonSize);
-       	b.setMinimumSize(buttonSize);
-	b.setPreferredSize(buttonSize);
+	for (int j = 0; j<toolBar.getComponentCount(); j++) 
+	  {
+	    JButton b = (JButton)toolBar.getComponent(j);
+
+	    b.setMaximumSize(buttonSize);
+	    b.setMinimumSize(buttonSize);
+	    b.setPreferredSize(buttonSize);
+	  }
       }
-    }
 
     getContentPane().validate();
 
@@ -1025,7 +1025,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if ((personae != null)  && personae.size() > 1)
       {
-	changePersona(); // bring up change persona dialog
+	// changePersona will block until the user does something
+	// with the persona selection dialog
+
+	changePersona();
 	personaDialog.updatePassField(currentPersonaString);
       }
 
@@ -1062,9 +1065,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
   
   /**
-   * Returns a vector of FieldTemplates.
+   * <p>Returns a vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s.</p>
    *
-   * The id number is the base id.
+   * @param id Object type id to retrieve field information for.
    */
 
   public Vector getTemplateVector(short id)
@@ -1117,7 +1120,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Clear out all the client side hashes.
+   * <p>Clears out the client's {@link arlut.csd.ganymede.client.objectCache objectCache},
+   * which holds object labels, and activation status for invid's returned by various
+   * query and {@link arlut.csd.ganymede.db_field db_field} choices() operations.</p>
    */
 
   public void clearCaches()
@@ -1131,10 +1136,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
-   * This method clears out all the cached data structures
-   * refering to bases.  We need to clear these when our
-   * persona changes.
+   * <p>Clears out all the cached data structures refering to bases.  We need to clear these when our
+   * persona changes, as different personas may have a different list of visible bases.</p>
    *
    */
 
@@ -1145,15 +1148,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * This method is used to get a list of objects from the server, in
+   * <p>Gets a list of objects from the server, in
    * a form appropriate for use in constructing a list of nodes in the
-   * tree under an object type (object base) folder.<br><br>
+   * tree under an object type (object base) folder.</p>
    *
-   * This method supports client-side caching.. if the list required
+   * <p>This method supports client-side caching.. if the list required
    * has already been retrieved, the cached list will be returned.  If
    * it hasn't, getObjectList() will get the list from the server and
-   * save a local copy for future requests.
-   * 
+   * save a local copy in an {@link arlut.csd.ganymede.client.objectCache objectCache}
+   * for future requests.</p>
    */
 
   public objectList getObjectList(Short id, boolean showAll)
@@ -1228,62 +1231,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     return objectlist;
   }
 
-//   /**
-//    *
-//    * Update the persona menu so it shows the correct persona as chosen.
-//    *
-//    */
-
-  // Has been moved to PersonaDialog class- will remove below when sure other
-  // stuff works!
-
-
-//   public void updatePersonaMenu()
-//   {
-//     if (debug)
-//       {
-// 	System.out.println("--Updating persona menu");
-//       }
-
-//     personaGroupRB = personaDialog.getButtonGroup();
-//     if (personaGroupRB != null)
-//       {
-// 	Enumeration RButtons = personaGroupRB.getElements();
-	
-// 	while (RButtons.hasMoreElements())
-// 	  {
-// 	    Object next = RButtons.nextElement();
-// 	    if (!(next instanceof JRadioButton)) {
-// 	      break;
-// 	    }
-// 	    else {
-// 	      JRadioButton rb = (JRadioButton)next;
-// 	      if (rb.getActionCommand().equals(currentPersonaString))
-// 		{
-// 		  if (debug)
-// 		    {
-// 		      System.out.println("Calling setState(true)");
-// 		    }
-		  
-// 		  rb.removeActionListener(personaListener);
-// 		  rb.doClick();
-// 		  rb.requestFocus();
-// 		  rb.addActionListener(personaListener);
-// 		  this.personaDialog.updatePassField(currentPersonaString);
-
-// 		  break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
-// 		  // besides, if I do some setState(false)'s, then actions will be performed.
-// 		}
-// 	    }
-// 	  }
-//       }
-//   }
-
   /**
-   *
    * By overriding update(), we can eliminate the annoying flash as
-   * the default update() method clears the frame before rendering
-   * 
+   * the default update() method clears the frame before rendering.
    */
 
   public void update(Graphics g)
@@ -1301,7 +1251,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the error Image.
+   * <p>Loads and returns the error Image for use in client dialogs.</p>
+   * 
+   * <p>Once the image is loaded, it is cached for future calls to getErrorImage().</p>
    */
 
   public final Image getErrorImage()
@@ -1315,7 +1267,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the question Image.
+   * <p>Loads and returns the question-mark Image for use in client dialogs.</p>
+   * 
+   * <p>Once the image is loaded, it is cached for future calls to getQuestionmage().</p>
    */
 
   public final Image getQuestionImage()
@@ -1329,12 +1283,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the base names.
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseNames baseNames}.</p>
    *
    * <p>Checks to see if the baseNames was loaded, and if not, it loads it.
-   * Always use this instead of trying to access baseNames
-   * directly.</p>
-   *
+   * Always use this instead of trying to access baseNames directly.</p>
    */
 
   public final Hashtable getBaseNames()
@@ -1348,12 +1300,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the base list.
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseList baseList}.</p>
    *
    * <p>Checks to see if the baseList was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseList
    * directly.</p>
-   *
    */
 
   public synchronized final Vector getBaseList()
@@ -1367,12 +1318,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the base map.
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseMap baseMap}.</p>
    *
    * <p>Checks to see if the baseMap was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseMap
    * directly.</p>
-   *
    */
 
   public Hashtable getBaseMap()
@@ -1386,12 +1336,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns the base to short.
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseToShort baseToShort}.</p>
    *
    * <p>Checks to see if the basetoShort was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseToShort
    * directly.</p>
-   *
    */
 
   public Hashtable getBaseToShort()
@@ -1405,13 +1354,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Pulls a object handle for an invid out of the
+   * client's cache, if it has been cached.</p>
    *
-   * This method pulls a object handle for an invid out of the
-   * client's cache, if it has been cached.<br><br>
-   *
-   * If no handle for this invid has been cached, this method
-   * will return null.
-   *
+   * <p>If no handle for this invid has been cached, this method
+   * will return null.</p>
    */
 
   public ObjectHandle getObjectHandle(Invid invid, Short type)
@@ -1434,10 +1381,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Change the text in the status bar
+   * <p>Sets text in the status bar, with a 5 second countdown before
+   * the status bar is cleared.</p>
    *
    * @param status The text to display
-   *
    */
 
   public final void setStatus(String status)
@@ -1446,11 +1393,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Change the text in the status bar.
+   * <p>Sets text in the status bar, with a defined countdown before
+   * the status bar is cleared.</p>
    *
    * @param status The text to display
-   * @param timeToLive Number of seconds to wait until clearing the status bar
-   *
+   * @param timeToLive Number of seconds to wait until clearing the status bar.
+   * If zero or negative, the status bar timer will not clear the field until
+   * the status bar is changed by another call to setStatus.
    */
 
   public final synchronized void setStatus(String status, int timeToLive)
@@ -1473,11 +1422,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
-   * Returns the name of the object currently selected in the tree, if
+   * <p>Returns the node of the object currently selected in the tree, if
    * any.  Returns null if there are no nodes selected in the tree, of
-   * if the node selected is not an object node.
-   * 
+   * if the node selected in the tree is not an object node.</p>
    */
 
   public InvidNode getSelectedObjectNode()
@@ -1499,7 +1446,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Get the status line for the window
+   * Get the current text from the client's status field
    */
 
   public String getStatus()
@@ -1508,10 +1455,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
   
   /**
-   * Show the help window.
+   * <p>Show the help window.</p>
    *
-   * This might someday take an argument, which would show a starting page
-   * or some more specific help.
+   * <p>This might someday take an argument, which would show a starting page
+   * or some more specific help.</p>
    */
    
   public void showHelpWindow()
@@ -1527,7 +1474,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Show the About... dialog.
+   * Shows the About... dialog.
    */
 
   public void showAboutMessage()
@@ -1580,6 +1527,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     about.setVisible(true);
   }
 
+  /**
+   * Shows the credits dialog.
+   */
+
   public void showCredits()
   {
     if (credits == null)
@@ -1609,6 +1560,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     credits.setVisible(true);
   }
+
+  /**
+   * Shows the server's message of the day in a dialog.
+   */
 
   public void showMOTD()
   {
@@ -1641,22 +1596,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * This method generates a message-of-the-day dialog.
    *
    * @param message The message to display.  May be multiline.  
    * @param html If true, showMOTD() will display the motd with a html
    * renderer, in Swing 1.1b2 and later.
-   * 
    */
 
   public void showMOTD(String message, boolean html)
   {
     if (motd == null)
-         {
-		motd = new messageDialog(client, "MOTD", null);
-
-	 }
+      {
+	motd = new messageDialog(client, "MOTD", null);
+      }
     
     if (html)
       {
@@ -1668,11 +1620,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     motd.setVisible(true);
-  
   }
 
   /**
-   * Popup a dialog with the default title.
+   * Pops up an error dialog with the default title.
    */
 
   public final void showErrorMessage(String message)
@@ -1681,7 +1632,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Popup an error dialog.
+   * Pops up an error dialog.
    */
 
   public final void showErrorMessage(String title, String message)
@@ -1731,9 +1682,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Set the cursor to the normal cursor(usually a pointer.)
+   * <p>Set the cursor to the normal cursor(usually a pointer.)</p>
    *
-   * This is dependent on the operating system.
+   * <p>This is dependent on the operating system.</p>
    */
 
   public void setNormalCursor()
@@ -1742,15 +1693,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * This indeicates that something in the database was changed, so
-   * canceling this transaction will have consequences.
+   * <p>This indeicates that something in the database was changed, so
+   * cancelling this transaction will have consequences.</p>
    *
    * <p>This should be called whenever the client makes any changes to
    * the database.  That includes creating objects, editting fields of
    * objects, removing objects, renaming, expiring, deleting,
    * inactivating, and so on.  It is very important to call this
    * whenever something might have changed. </p> 
-   *
    */
 
   public final void somethingChanged()
@@ -1760,6 +1710,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setSomethingChanged(true);
   }
 
+  /**
+   * Sets or clears the client's somethingChanged flag.
+   */
   private void setSomethingChanged(boolean state)
   {
     if (debug)
@@ -1781,7 +1734,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * True if we are in an applet context.
+   * True if we are in an applet context, meaning we don't have access
+   * to local files, etc.
    */
 
   public boolean isApplet()
@@ -1790,13 +1744,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
-   * This method takes a ReturnVal object from the server and, if necessary,
+   * <p>This method takes a ReturnVal object from the server and, if necessary,
    * runs through a wizard interaction sequence, possibly displaying several
-   * dialogs before finally returning a final result code.
+   * dialogs before finally returning a final result code.</p>
    *
-   * Use the ReturnVal returned from this function after this function is
-   * called.  Always.
+   * <p>Use the ReturnVal returned from this function after this function is
+   * called to determine the ultimate success or failure of any operation
+   * which returns ReturnVal, because a wizard sequence may determine the
+   * ultimate result.</p>
    */
 
   public ReturnVal handleReturnVal(ReturnVal retVal)
@@ -1966,7 +1921,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 		for (int i = 0; i < fp.containerPanels.size(); i++)
 		  {
-		    containerPanel cp = (containerPanel)fp.containerPanels.elementAt(i);
+		    containerPanel cp = (containerPanel) fp.containerPanels.elementAt(i);
 
 		    if (debug)
 		      {
@@ -2024,7 +1979,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.setBorderPainted(true);
     toolBarTemp.setFloatable(true);
     toolBarTemp.setMargin(insets);
-
 
     JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
     //JButton b = new JButton(new ImageIcon(newToolbarIcon));
@@ -2088,7 +2042,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 //     b.addActionListener(this);
 //     toolBarTemp.add(b);
 
-   if ((personae != null)  && personae.size() > 1)
+    if ((personae != null)  && personae.size() > 1)
       {
 	b = new JButton("Persona", new ImageIcon(personaIcon));  
 	//b = new JButton(new ImageIcon(personaIcon));
@@ -2100,7 +2054,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	b.addActionListener(this);
 	toolBarTemp.add(b);
       }
-
+   
     return toolBarTemp;
   }
 
@@ -2113,11 +2067,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   ///////////////////////////////////////////////////////////////////////////
 
   /**
-   * This clears out the tree.
+   * <p>Clears out the client's tree.</p>
    *
    * <p>All Nodes will be removed, and the Category and BaseNodes will
    * be rebuilt.  No InvidNodes will be added.</P>
-   *
    */
 
   void clearTree()
@@ -2135,11 +2088,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * This method builds the initial data structures for the object
    * selection tree, using the base information in the baseHash
-   * hashtable.
-   * 
+   * hashtable gained from the {@link arlut.csd.ganymede.client.Loader Loader} thread.
    */
 
   void buildTree() throws RemoteException
@@ -2185,6 +2136,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	System.out.println("Done building tree,");
       }
   }
+
+  /**
+   * <p>Recurses down the category tree obtained from the server, loading
+   * the client's tree with category and object folder nodes.</p>
+   */
 
   void recurseDownCategories(CatTreeNode node, Category c) throws RemoteException
   {
@@ -2239,9 +2195,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * Helper method for building tree
-   *
    */
 
   treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode parentNode) throws RemoteException
@@ -2289,10 +2243,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>This method is used to update the list of object nodes under a given
+   * base node in our object selection tree, synchronizing the tree with
+   * the actual objects on the server.</p>
    *
-   * This method is used to update the list of object nodes under a given
-   * base node in our object selection tree.
-   *
+   * @param node Tree node corresponding to the object type being refreshed
+   * in the client's tree.
+   * @param doRefresh If true, causes the tree to update its display.
    */
   
   void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
@@ -2459,14 +2416,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Updates the tree for the nodes that might have changed.</p>
    *
-   * This method updates the tree for the nodes that might have changed.
-   *
-   * This method fixes all the icons, and cleans out the various hashes.  Only call this 
+   * <p>This method fixes all the icons, removing icons that were marked as
+   * to-be-deleted or dropped, and cleans out the various hashes.  Only call this 
    * when commit is clicked.  This replaces refreshTree(boolean committed), because all the
    * refreshing to be done after a cancel is now handled in the cancelTransaction() method
-   * directly.
+   * directly.</p>
    *
+   * <p>This method is precisely analagous in function to
+   * {@link arlut.csd.ganymede.client.gclient.cleanUpAfterCancel() cleanUpAfterCancel()},
+   * except for use after a commit.</p>
    */
 
   void refreshTreeAfterCommit() throws RemoteException
@@ -2551,15 +2511,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * This method scans through the changedHash hashtable and generates
+   * <p>This method scans through the changedHash hashtable and generates
    * queries to the server for all invids that have been touched by
    * the client after transaction commit.  The results from the
-   * queries are used to update the icons in the tree.
+   * queries are used to update the icons in the tree.</p>
+   *
+   * <p>This method is called from
+   * {@link arlut.csd.ganymede.client.gclient.refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
    *
    * @param paramVect Vector of invid's to refresh.
-   * @param afterCommit If true, this method will update the client's
-   * status bar as it progresses.
-   * 
+   * @param afterCommit If true, this method will update the client's status bar as it progresses.
    */
 
   public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
@@ -3111,7 +3072,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	if (ok)
 	  {
-	    //InvidNode node = (InvidNode)invidNodeHash.get(invid);
+	    // InvidNode node = (InvidNode)invidNodeHash.get(invid);
 
 	    // Check out the deleteHash.  If this one is already on there,
 	    // then I don't know what to do.  If it isn't, then add a new
@@ -3350,9 +3311,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
   
   /**
+   * <p>Opens a dialog to let the user choose an object for editing, and 
+   * if cancel is not chosen, the object is opened for editing.</p>
    *
-   * Opens a panel used to choose an object for editing.
-   *
+   * <p>If a node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected object.</p>
    */
 
   void editObjectDialog()
@@ -3392,10 +3355,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Open an object for viewing.
+   * <p>Opens a dialog to let the user choose an object for viewing,
+   * and if cancel is not chosen, the object is opened for viewing.</p>
    *
-   * This displays a window with a chooser for the base and field for the name.
-   *
+   * <p>If a node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected object.</p>
    */
 
   void viewObjectDialog()
@@ -3436,7 +3400,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Offer a selection and the inactivate the object chosen.
+   * <p>Opens a dialog to let the user choose an object for inactivation,
+   * and if cancel is not chosen, the object is opened for inactivation.</p>
+   *
+   * <p>If a node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected object.</p>
    */
 
   void inactivateObjectDialog()
@@ -3467,7 +3435,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Offer a selection and then delete the object chosen.
+   * <p>Opens a dialog to let the user choose an object for deletion,
+   * and if cancel is not chosen, the object is opened for deletion.</p>
+   *
+   * <p>If a node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected object.</p>
    */
 
   void deleteObjectDialog()
@@ -3527,26 +3499,37 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
   }
 
- void changePersona()
-  {
-    // The dialog is modal, and will set itself visible when created.
+  /**
+   * <p>Creates and presents a dialog to let the user change their selected persona.</p>
+   *
+   * <p>gclient's personaListener reacts to events from the persona change
+   * dialog and will react appropriately as needed.  This method doesn't
+   * actually do anything other than display the dialog.</p>
+   *
+   * <p>PersonaDialog is modal, however, so this method will block until the
+   * user makes a choice in the dialog box.</p>
+   */
 
-	personaDialog = new PersonaDialog(client);
-	personaDialog.pack();	// force it to re-center itself.
-	personaDialog.setVisible(true);
+  void changePersona()
+  {
+    personaDialog = new PersonaDialog(client);
+    personaDialog.pack();	// force it to re-center itself.
+    personaDialog.setVisible(true);
   }
 
-PersonaDialog getPersonaDialog()
-    {
-      return personaDialog;
-    }
+  /**
+   * <p>Returns a reference to the most recently created persona dialog.</p>
+   */
+
+  PersonaDialog getPersonaDialog()
+  {
+    return personaDialog;
+  }
 
   /**
+   * <p>Logs out from the client.</p>
    *
-   * Logout from the client.
-   *
-   * This method does not do any checking, it just logs out.
-   *
+   * <p>This method does not do any checking, it just logs out.</p>
    */
 
   void logout()
@@ -3566,9 +3549,9 @@ PersonaDialog getPersonaDialog()
   }
 
   /**
-   * Create a custom query filter.
+   * <p>Create a custom query filter.</p>
    *
-   * The filter is used to limit the output on a query.  This pops up a JFilterDialog.
+   * <p>The filter is used to limit the output on a query.  This pops up a JFilterDialog.</p>
    */
 
   public void chooseFilter()
@@ -3589,9 +3572,9 @@ PersonaDialog getPersonaDialog()
   }
 
   /**
-   * Choose the default owner group for a newly created object.
+   * <p>Chooses the default owner group for a newly created object.</p>
    *
-   * This must be called before Session.create_db_object is called.
+   * <p>This must be called before Session.create_db_object is called.</p>
    *
    * @see defaultOwnerChosen.
    */
@@ -3674,31 +3657,6 @@ PersonaDialog getPersonaDialog()
   }
 
   /**
-   * Inform the gclient that a new container panel is starting.
-   *
-   * <p>The client must know about all container panels that are currently loading,
-   * so it can tell them all to stop if the cancel button is clicked.  This
-   * method should be called by any container panel before it starts the big loop.</p>
-   */
-
-  public synchronized void registerNewContainerPanel(containerPanel cp)
-  {
-    containerPanels.addElement(cp);
-  }
-
-  /**
-   * Inform the gclient that a previously registered containerPanel is now finished loading.
-   *
-   * @see registerNewContainerPanel
-   */
-
-  public synchronized void containerPanelFinished(containerPanel cp)
-  {
-    containerPanels.removeElement(cp);
-    this.notify();
-  }
-
-  /**
    * Check for changes in the database before logging out.
    *
    * This checks to see if anything has been changed.  Basically, if edit panels are
@@ -3740,7 +3698,7 @@ PersonaDialog getPersonaDialog()
   }
 
   /**
-   * Update the note panels in the open windows.
+   * <p>Updates the note panels in the open windows.</p>
    *
    * <p>The note panel doesn't have a listener on the TextArea, so when a transaction is
    * committed, this must be called on each notePanel in order to update the server.</p>
@@ -3805,6 +3763,10 @@ PersonaDialog getPersonaDialog()
     try
       {
 	setWaitCursor();
+
+	// We need to check to see if any notes panels need to
+	// have their text flushed to the server.. 
+
 	updateNotePanels();
 	
 	retVal = session.commitTransaction();
@@ -3816,34 +3778,30 @@ PersonaDialog getPersonaDialog()
 
 	boolean succeeded = (retVal == null) ? true : retVal.didSucceed();
 
+	// if we succeed, we clean up.  If we don't,
+	// retVal.doNormalProcessing can be false, in which case the
+	// serve aborted our transaction utterly.  If
+	// retVal.doNormalProcessing is true, the user can do
+	// something to make the transaction able to complete
+	// successfully.  In this case, handleReturnVal() will have
+	// displayed a dialog telling the user what needs to be done.
+
 	if (succeeded)
 	  {
 	    setStatus("Transaction successfully committed.");
 	    wp.closeEditables();
-
-	    setSomethingChanged(false);
-	    cancel.setEnabled(false);
-	    commit.setEnabled(false);
 	
 	    wp.refreshTableWindows();
-	    ReturnVal rv = session.openTransaction("gclient");
-	    handleReturnVal(rv);
 
-	    if ((rv != null) && (!rv.didSucceed()))
-	      {
-		showErrorMessage("Could not open transaction.");
-	      }
+	    openNewTransaction();
 
 	    //
 	    // This fixes all the icons in the tree
 	    //
 
 	    refreshTreeAfterCommit();
-
 	    setNormalCursor();
 
-	    cachedLists.clearCaches();
-	
 	    wp.resetWindowCount();
 
 	    if (debug)
@@ -3856,11 +3814,12 @@ PersonaDialog getPersonaDialog()
 	    setStatus("Transaction could not successfully commit.");
 
 	    // This is just like a cancel.  Something went wrong, and
-	    // the server cancelled our transaction.  We dont' need to
-	    // call cancelTransaction, however, and we don't need to
-	    // openNewTransaction.
+	    // the server cancelled our transaction.  We don't need to
+	    // call cancelTransaction ourselves.
 
 	    cleanUpAfterCancel();
+	    openNewTransaction();
+
 	    showErrorMessage("Error: commit failed", "Could not commit your changes.");
 	  }
       }
@@ -3889,46 +3848,13 @@ PersonaDialog getPersonaDialog()
 
     /* -- */
 
+    // close all the client windows.. this causes the windows to cancel
+    // their loading activity
+
+    wp.closeAll(true);
+
     try
       {
-	// First we need to tell all the container Panels to stop loading
-
-	for (int i = 0; i < containerPanels.size(); i++)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Shutting down containerPanel");
-	      }
-
-	    containerPanel cp = (containerPanel) containerPanels.elementAt(i);
-	    
-	    cp.stopLoading();
-	  }
-	
-	long startTime = System.currentTimeMillis(); // Only going to wait 10 seconds
-
-	while ((containerPanels.size() > 0) && (System.currentTimeMillis() - startTime < 10000))
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Waiting for containerPanels to shut down.");
-		  }
-
-		this.wait(1000);
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for container panels to stop: " + x);
-	      }
-	  }
-
-	if (debug && (containerPanels.size() > 0))
-	  {
-	    System.out.println("Hmm, containerPanels is still not empty, the timeout must have kicked in.  Oh well.");
-	  }
-	
 	retVal = session.abortTransaction();
 
 	if (retVal != null)
@@ -3969,7 +3895,6 @@ PersonaDialog getPersonaDialog()
 		return;
 	      }
 	  }
-
       }
     catch (RemoteException rx)
       {
@@ -3981,7 +3906,16 @@ PersonaDialog getPersonaDialog()
     openNewTransaction();
   }
 
-  private void cleanUpAfterCancel()
+  /**
+   * <p>Cleans up the tree and gclient's caches.</p>
+   *
+   * <p>This method is precisely analagous in function to
+   * {@link arlut.csd.ganymede.client.gclient.refreshTreeAfterCommit() refreshTreeAfterCommit()},
+   * except for use after a cancel, when nodes marked as deleted are not removed from the tree,
+   * and nodes marked as created are not kept.</p>
+   */
+
+  private synchronized void cleanUpAfterCancel()
   {
     ObjectHandle handle;
     Invid invid;
@@ -3990,14 +3924,6 @@ PersonaDialog getPersonaDialog()
     CacheInfo info;
 
     /* -- */
-
-    // close all of the windows in the client.. we have to do all here
-    // because the cancel may have made some of the things visible in
-    // the client no longer valid.  Also, by always closing all
-    // windows on a cancel, we encourage the user to do more within a
-    // transaction, which is more resource efficient for the server.
-    
-    wp.closeAll(true);
 
     Enumeration dels = deleteHash.keys();
     
@@ -4102,10 +4028,11 @@ PersonaDialog getPersonaDialog()
       }
 
     tree.refresh(); // To catch all the icon changing.
-    setSomethingChanged(false);
-    cancel.setEnabled(false);
-    commit.setEnabled(false);
   }
+
+  /**
+   * Initializes a new transaction on the server
+   */
 
   private void openNewTransaction()
   {
@@ -4125,6 +4052,12 @@ PersonaDialog getPersonaDialog()
       {
 	throw new RuntimeException("Could not open new transaction: " + rx);
       }
+
+    setSomethingChanged(false);
+    cancel.setEnabled(false);
+    commit.setEnabled(false);
+
+    clearCaches();
   }
 
   void toggleToolBar() {
@@ -5094,6 +5027,7 @@ class PersonaListener implements ActionListener {
 	  {
 	    throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
 	  }
+
 	gc.getPersonaDialog().setHidden(true);
       }
     
@@ -5226,7 +5160,7 @@ class CacheInfo {
 ------------------------------------------------------------------------------*/
 
 /**
- * A thread class designed to clear the status label in 
+ * Background thread designed to clear the status label in 
  * {@link arlut.csd.ganymede.client.gclient gclient}
  * some seconds after the setClock() method is called.
  */
@@ -5308,12 +5242,14 @@ class StatusClearThread extends Thread {
   }
 
   /**
-   *
-   * This method resets the clock in the StatusClearThread, such that
+   * <p>This method resets the clock in the StatusClearThread, such that
    * the status label will be cleared in countDown seconds, unless
    * another setClock follows on closely enough to interrupt the
-   * countdown, effectively.
+   * countdown, effectively.</p>
    *
+   * @param countDown seconds to wait before clearing the status field.  If
+   * countDown is zero or negative, the timer will suspend until a later
+   * call to setClock sets a positive countdown.
    */
 
   public synchronized void setClock(int countDown)
@@ -5334,10 +5270,8 @@ class StatusClearThread extends Thread {
   }
 
   /**
-   *
-   * This method causes the run() method to gracefully terminate
-   * without taking any further action.
-   * 
+   * <p>This method causes the run() method to gracefully terminate
+   * without taking any further action.</p>
    */
 
   public synchronized void shutdown()

@@ -8,8 +8,8 @@
    
    Created: 7 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/22 18:04:16 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/03/25 08:17:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,6 +64,17 @@ import arlut.csd.Util.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Implements an information cache for the client.  Client
+ * code can store information about objects on the server here and
+ * can use it wherever.</p>
+ *
+ * <p>objectCache maintains a mapping between hash keys (typically
+ * Short values corresponding to object type ids on the server) and
+ * {@link arlut.csd.ganymede.client.objectList objectList} objects
+ * which track status of objects for that hash key.</p>
+ */
+
 public class objectCache {
 
   static final boolean debug = false;
@@ -88,7 +99,6 @@ public class objectCache {
   /**
    * This method returns true if the specified list contains any
    * non-editable handles.
-   * 
    */
 
   public boolean containsNonEditable(Object key)
@@ -105,7 +115,7 @@ public class objectCache {
 
   /**
    * This method returns a sorted Vector of listHandles for the cache
-   * for <key>.  The vector is essentially a read-out of the current
+   * for &lt;key&gt;.  The vector is essentially a read-out of the current
    * state of the objectList, and will not track any future changes to
    * this objectList.
    *
@@ -121,7 +131,7 @@ public class objectCache {
 
   /**
    * This method returns a sorted Vector of listHandles for the cache
-   * for <key>.  The vector is essentially a read-out of the current
+   * for &lt;key&gt;.  The vector is essentially a read-out of the current
    * state of the objectList, and will not track any future changes to
    * this objectList.
    *
@@ -147,14 +157,12 @@ public class objectCache {
   }
 
   /**
-   *
    * This method returns a sorted Vector of object labels.  The vector
    * is essentially a read-out of the current state of the objectList,
    * and will not track any future changes to this objectList.
    *
    * @param includeInactives if false, the list returned will not
    * include entries for any inactive objects
-   *
    */
 
   public Vector getLabels(Object key, boolean includeInactives)
@@ -163,7 +171,6 @@ public class objectCache {
   }
 
   /**
-   *
    * This method returns a sorted Vector of object labels.  The vector
    * is essentially a read-out of the current state of the objectList,
    * and will not track any future changes to this objectList.
@@ -173,7 +180,6 @@ public class objectCache {
    * 
    * @param includeNonEditables if false, the list returned will not
    * include entries for any non-editable objects
-   *
    */
 
   public Vector getLabels(Object key, boolean includeInactives,
@@ -190,15 +196,13 @@ public class objectCache {
   }
 
   /**
+   * <p>This method retrieves an object handle matching the given
+   * invid from the specified object list.</p>
    *
-   * This method retrieves an object handle matching the given
-   * invid from the specified object list.
-   *
-   * This isn't the fastest operation, but hopefully won't
-   * be too bad.
+   * <p>This isn't the fastest operation, but hopefully won't
+   * be too bad.</p>
    *
    * @return The matching handle, or null if it wasn't found.
-   *
    */
 
   public ObjectHandle getInvidHandle(Object key, Invid invid)
@@ -224,10 +228,8 @@ public class objectCache {
   }
 
   /**
-   *
    * This method is intended to augment an existing list with
    * non-editable object handles.
-   *
    */
 
   public void augmentList(Object key, QueryResult qr)
@@ -266,5 +268,4 @@ public class objectCache {
   {
     idMap.clear();
   }
-
 }

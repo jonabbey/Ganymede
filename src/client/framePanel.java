@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 1999/03/19 19:02:38 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/03/25 08:17:05 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -185,11 +185,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   historyPanel
     history_panel;
 
-  Vector
-    // contains all of the containerPanels.  This is used to tell the
-    // containerPanels to stop loading.
-    containerPanels = new Vector(), 
+  /**
+   * contains all of the containerPanels.  This is used to tell the
+   * containerPanels to stop loading.
+   */
 
+  Vector containerPanels = new Vector();
+
+  Vector
     // fieldTemplates
     templates, 
 

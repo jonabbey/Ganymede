@@ -9,8 +9,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:04:17 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/03/25 08:17:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,11 +66,14 @@ import arlut.csd.Util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is used to keep track of a list of objects from
+ * <p>This class is used to keep track of a list of 
+ * {@link arlut.csd.ganymede.ObjectHandle ObjectHandle} objects from
  * the server, storing various pieces of information about the
  * objects, including their expiration/removal/inactive status,
- * their current state in the client, and more.
+ * their current label, and more.</p>
  *
+ * @version $Revision: 1.11 $ $Date: 1999/03/25 08:17:07 $ $Name:  $
+ * @author Jonathan Abbey
  */
 
 public class objectList {

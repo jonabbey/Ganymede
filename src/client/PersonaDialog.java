@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/03/17 00:21:12 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/25 08:17:03 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -55,7 +55,20 @@ import javax.swing.*;
 import javax.swing.border.*;
 import arlut.csd.JDialog.JCenterDialog;
 
-public class PersonaDialog extends JCenterDialog implements ActionListener{
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   PersonaDialog
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>Persona selection dialog</p>
+ *
+ * @version $Revision: 1.6 $ $Date: 1999/03/25 08:17:03 $ $Name:  $
+ * @author Brian O'Mara
+ */
+
+public class PersonaDialog extends JCenterDialog implements ActionListener {
 
   private final static boolean debug = false;
 
@@ -78,11 +91,13 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
 
   ButtonGroup 
     personaGroupRB;
-  /* -- */
+
   String 
     my_username,
     currentPersonaString,
     newPersona;
+
+  /* -- */
 
   public PersonaDialog(gclient gc)
   {
@@ -93,7 +108,6 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
     this.personaListener = gc.personaListener;
     this.my_username = gc.my_username;
     this.currentPersonaString = gc.currentPersonaString;
-
 
     // Main dialog container
 

@@ -9,8 +9,8 @@
    
    Created: 16 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:04:13 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/03/25 08:17:05 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -99,6 +99,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     editable,
     expanded = false,
     loaded = false;
+
+  int index;
 
   long
     lastClick = 0;  // Used to determine double clicks
@@ -197,6 +199,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     add("North",buttonPanel);
   }
+  
+  public void setIndex(int index)
+  {
+    this.index = index;
+    title.setText((index + 1) + ". " + titleText);
+  }
 
   public Component getComponent() 
   {
@@ -239,9 +247,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	try
 	  {
-	    containerPanel cp = (containerPanel)my_component;
-	    String oldTitle = title.getText();
-	    title.setText(oldTitle.substring(0, oldTitle.indexOf(".")) + ". " + cp.getObject().getLabel());
+	    containerPanel cp = (containerPanel) my_component;
+	    titleText = cp.getObject().getLabel();
+	    title.setText((index + 1) + ". " + titleText);
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
@@ -252,7 +260,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   /**
    *  Expand this element wrapper.
-   *
    */
 
   public void open()

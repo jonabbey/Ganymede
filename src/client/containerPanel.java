@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
     Release: $Name:  $
-    Version: $Revision: 1.95 $
-    Last Mod Date: $Date: 1999/03/24 20:33:26 $
+    Version: $Revision: 1.96 $
+    Last Mod Date: $Date: 1999/03/25 08:17:04 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -155,7 +155,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   /* -- */
 
   /**
-   *
    * Constructor for containerPanel
    *
    * @param object   The object to be displayed
@@ -165,7 +164,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param frame    framePanel holding this containerPanel(although this cp is not necessarily in the "General" tab)
    * @param context An object that can be provided to identify the context in
    * which this containerPanel is being created.
-   *
    */
 
   public containerPanel(db_object    object,
@@ -179,7 +177,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Constructor for containerPanel
    *
    * @param object   The object to be displayed
@@ -204,7 +201,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Main constructor for containerPanel
    *
    * @param object   The object to be displayed
@@ -215,7 +211,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param loadNow  If true, container panel will be loaded immediately
    * @param context An object that can be provided to identify the context in
    * which this containerPanel is being created.
-   *
    */
 
   public containerPanel(db_object object,
@@ -231,7 +226,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * primary constructor for containerPanel
    *
    * @param object   The object to be displayed
@@ -243,7 +237,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param isCreating  
    * @param context An object that can be provided to identify the context in
    * which this containerPanel is being created.
-   *
    */
 
   public containerPanel(db_object object,
@@ -301,13 +294,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * This method downloads all necessary information from the server
    * about the object being viewed or edited.  Typically this is called
    * when the containerPanel is initialized by the containerPanel
    * constructor, but we defer loading when we are placed in a vector
    * panel hierarchy.
-   *
    */
   
   public void load() 
@@ -339,11 +330,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     try
       {
-	// Let the gclient object know about us, so that it can
-	// tell us to stop loading if the user hits cancel
-
-	gc.registerNewContainerPanel(this);
-
 	// if we are a top-level container panel in a general pane
 	// or persona pane, we'll have a progress bar.. we'll want
 	// to update it as we go along loading field information.
@@ -435,7 +421,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (!keepLoading())
 	      {
-		gc.containerPanelFinished(this);
 		break;
 	      }
 
@@ -508,16 +493,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    update(updatesWhileLoading);
 	  }
-
-	gc.containerPanelFinished(this);
       }
   }
 
   /**
-   *
    * This method is reponsible for cleaning up after this
    * containerPanel when it is shut down.
-   * 
    */
 
   public synchronized void unregister()
@@ -538,9 +519,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Helper method to keep the load() method clean.
-   *
    */
 
   private final void setProgressBar(int count)
@@ -552,9 +531,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Helper method to keep the load() method clean.
-   *
    */
 
   private final FieldTemplate findtemplate(short type)
@@ -580,10 +557,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * This is a convenience method for other client classes to access
    * our gclient reference.
-   *
    */
 
   public final gclient getgclient()
@@ -592,9 +567,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /** 
-   *
    * Use this to print stuff out, so we know it is from the containerPanel
    */
+
   private final void println(String s)
   {
     System.out.println("containerPanel: " + s);
@@ -615,9 +590,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Get the invid for the object in this containerPanel.
-   *
    */
 
   public Invid getObjectInvid()
@@ -638,10 +611,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * This method returns true if this containerPanel has already
    * been loaded.
-   *
    */
 
   public boolean isLoaded()
@@ -650,12 +621,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>This method allows the gclient that contains us to set a flag
+   * that will interrupt the load() method.</p>
    *
-   * This method allows the gclient that contains us to set a flag
-   * that will interrupt the load() method.<br><br>
-   *
-   * Note that this method must not be synchronized.
-   *
+   * <p>Note that this method must not be synchronized.</p>
    */
 
   public void stopLoading()
@@ -674,10 +643,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * Goes through all the components and checks to see if they should be visible,
    * and updates their contents.
-   *
    */
 
   public void updateAll()
@@ -719,7 +686,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * This method is used to update a subset of the fields in this
    * containerPanel.
    *
@@ -841,12 +807,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
    * This method updates the contents and visibility status of
    * a component in this containerPanel.
    *
    * @param comp An AWT/Swing component that we need to refresh
-   *
    */
 
   private void updateComponent(Component comp)
@@ -2316,7 +2280,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		println("Stopping containerPanel in the midst of loading a StringSelector");
 	      }
 
-	    gc.containerPanelFinished(this);
 	    return;
 	  }
 
@@ -2406,14 +2369,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	valueHandles = qres.getListHandles();
       }
 
-    if (! keepLoading())
+    if (!keepLoading())
       {
 	if (debug)
 	  {
 	    println("Stopping containerPanel in the midst of loading a StringSelector");
 	  }
 
-	gc.containerPanelFinished(this);
 	return;
       }
 

@@ -5,8 +5,8 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/01/22 18:04:16 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/03/25 08:17:07 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -68,7 +68,20 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-public class notesPanel extends JPanel implements KeyListener{
+/**
+ * Notes panel for use in {@link arlut.csd.ganymede.client.framePanel framePanel}'s
+ * in the client's display.  This panel is only created when a user clicks on
+ * a Notes tab in a viewed or edited object window in the client.  Unlike most
+ * GUI components in the client that are connected to database fields on the server,
+ * the notesPanel doesn't automatically update the server on focus loss.  Instead,
+ * notesPanel currently depends on gclient's 
+ * {@link arlut.csd.ganymede.client.gclient.commitTransaction() commitTransaction()}
+ * method to poll all notesPanels open and active for their contents.  This really
+ * should be changed, as it means that currently an edit object window which is
+ * manually closed will not have its notes field updated on transaction commit.
+ */
+
+public class notesPanel extends JPanel implements KeyListener {
 
   boolean debug = false;
   
@@ -81,77 +94,80 @@ public class notesPanel extends JPanel implements KeyListener{
   string_field
     notes_field;
 
-  public notesPanel(string_field    notes_field,
-		    boolean         editable, 
-		    framePanel      fp)
-    {
-      debug = fp.debug;
+  /*--*/
 
-      if (debug)
-	{
-	  System.out.println("Creating notes panel");
-	}
+  public notesPanel(string_field notes_field, boolean editable, framePanel fp)
+  {
+    debug = fp.debug;
+
+    if (debug)
+      {
+	System.out.println("Creating notes panel");
+      }
       
-      this.fp = fp;
-      this.notes_field = notes_field;
+    this.fp = fp;
+    this.notes_field = notes_field;
 
-      setBorder(fp.wp.emptyBorder5);
-
-      setLayout(new BorderLayout());
+    setBorder(fp.wp.emptyBorder5);
       
-      notesArea = new JTextArea();
-      EmptyBorder eb = fp.wp.emptyBorder5;
-      TitledBorder tb = new TitledBorder("Notes");
-      notesArea.setBorder(new CompoundBorder(tb,eb));
-      notesArea.setEditable(editable);
-      notesArea.addKeyListener(this);
+    setLayout(new BorderLayout());
+    
+    notesArea = new JTextArea();
+    EmptyBorder eb = fp.wp.emptyBorder5;
+    TitledBorder tb = new TitledBorder("Notes");
+    notesArea.setBorder(new CompoundBorder(tb,eb));
+    notesArea.setEditable(editable);
+    notesArea.addKeyListener(this);
+    
+    JScrollPane notesScroll = new JScrollPane(notesArea);
+    add(BorderLayout.CENTER, notesScroll);
+    
+    if (notes_field != null)
+      {
+	try
+	  {
+	    String s = (String)notes_field.getValue();
 
-      JScrollPane notesScroll = new JScrollPane(notesArea);
-      add(BorderLayout.CENTER, notesScroll);
+	    if (s != null)
+	      {
+		notesArea.append(s);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get note text: " + rx);
+	  }
+      }
+  }
 
-      if (notes_field != null)
-	{
-	  try
-	    {
-	      String s = (String)notes_field.getValue();
-	      if (s != null)
-		{
-		  
-		  notesArea.append(s);
-		}
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not get note text: " + rx);
-	    }
-	}
-
-    }
+  /**
+   * Transmit the contents of this notes panel to the server to update
+   * the notes field for the proper database object.
+   */
 
   public void updateNotes()
-    {
-      try
-	{
-	  if (notes_field != null)
-	    {
-	      if (debug)
-		{
-		  System.out.println("Updating notes: " + notesArea.getText().trim());
-		}
+  {
+    try
+      {
+	if (notes_field != null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Updating notes: " + notesArea.getText().trim());
+	      }
 
-	      notes_field.setValue(notesArea.getText().trim());
-	    }
-	  else if (debug)
-	    {
-	      System.out.println("notes_field is null, not updating.");
-	    }
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not set notes field: " + rx);
-	}
-    }
-
+	    notes_field.setValue(notesArea.getText().trim());
+	  }
+	else if (debug)
+	  {
+	    System.out.println("notes_field is null, not updating.");
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not set notes field: " + rx);
+      }
+  }
 
   public void keyPressed(KeyEvent e)
   {
@@ -161,6 +177,4 @@ public class notesPanel extends JPanel implements KeyListener{
   
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e) {}
-
-
 }
