@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -130,7 +130,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   /**
    *
    * Returns the maximum length of an array in this field type
-   *
    *
    */
 
@@ -338,7 +337,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.<br><br>
    *
    * If there is no change in the field, null will be returned.
    * 
@@ -376,7 +375,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   /**
    *
    * Returns true if this field is editable, false
-   * otherwise.
+   * otherwise.<br><br>
    *
    * Note that DBField are only editable if they are
    * contained in a subclass of DBEditObject.
@@ -433,7 +432,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     return true;
   }
-
 
   /**
    *
@@ -543,16 +541,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * This method is used to allow server-side custom code to get access to
    * a proposed new value before it is finalized, used when making a change
    * to this field causes other fields to be changed which need to insure
-   * that this field has an appropriate value first.
+   * that this field has an appropriate value first.<br><br>
    *
-   * This method is not intended to be accessible to the client.
+   * This method is not intended to be accessible to the client.<br><br>
    *
-   * This method does not support virtualized fields.
+   * This method does not support virtualized fields.<br><br>
    *
    * This method will only have a useful value during the
    * course of the containing objects' finalizeSetValue() call.  It
    * is intended that this field will set the new value in setValue(),
-   * call owner.finalizeSetValue(), then clear the newValue.
+   * call owner.finalizeSetValue(), then clear the newValue.<br><br>
    *
    * What, this code a hack?
    *
@@ -560,11 +558,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public Object getNewValue()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
-      }
-
     if (isVector())
       {
 	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
@@ -606,11 +599,11 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Sets the value of this field, if a scalar.
+   * Sets the value of this field, if a scalar.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.<br><br>
    *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
@@ -622,18 +615,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     return setValue(value, false);
   }
 
-
   /**
    *
-   * Sets the value of this field, if a scalar.
+   * Sets the value of this field, if a scalar.<br><br>
    *
    * This method is server-side only, and bypasses
-   * permissions checking.
+   * permissions checking.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.
-   *
    *
    */
 
@@ -644,9 +635,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Sets the value of this field, if a scalar.
+   * Sets the value of this field, if a scalar.<br><br>
    *
-   * This method is server-side only.
+   * This method is server-side only.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -735,7 +726,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 		setLastError("value " + value + " already taken in namespace");
 
 		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-						  "value " + value + " already taken in namespace");
+						  "value " + value +
+						  " already taken in namespace");
 	      }
 	  }
       }
@@ -778,7 +770,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	  }
 
 	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-					  "Custom code rejected set operation for value " + value);
+					  "Custom code rejected set operation for value " + 
+					  value);
       }
   }
 
@@ -798,12 +791,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
+	throw new IllegalArgumentException("permission denied to read this field " + 
+					   getName());
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
       }
 
     return values; // this is ok, since this is being serialized. the client's not
@@ -927,7 +922,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
 
-	if ((newRetVal != null) && !newRetVal.didSucceed())
+	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
 	    return newRetVal;
 	  }
@@ -953,7 +948,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    setLastError("value " + value + " already taken in namespace");
 
 	    return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					      "value " + value + " already taken in namespace");
+					      "value " + value +
+					      " already taken in namespace");
 	  }
       }
 
@@ -982,7 +978,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	  }
 
 	return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					  "Custom code rejected set operatin for value " + value);
+					  "Custom code rejected set operatin for value " + 
+					  value);
       }
   }
 
@@ -1041,7 +1038,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     /* -- */
 
-    if (!isEditable(local))	// *sync*
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
 					   getName());
@@ -1049,7 +1046,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
       }
 
     // verifyNewValue should setLastError for us.
@@ -1062,10 +1060,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (size() >= getMaxArraySize())
       {
-	setLastError("Field " + getName() + " already at or beyond array size limit");
-
 	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					  "Field " + getName() + " already at or beyond array size limit");
+					  "Field " + getName() + 
+					  " already at or beyond array size limit");
       }
 
     eObj = (DBEditObject) owner;
@@ -1095,7 +1092,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    setLastError("value " + value + " already taken in namespace");
 
 	    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					      "value " + value + " already taken in namespace");
+					      "value " + value + 
+					      " already taken in namespace");
 	  }
       }
 
@@ -1297,13 +1295,15 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
       }
 
     if (values.indexOf(value) == -1)
       {
 	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
-					  "Could not delete value " + value + ", not present in field");
+					  "Could not delete value " + value +
+					  ", not present in field");
       }
 
     return deleteElement(values.indexOf(value), local);	// *sync* DBNameSpace possible
@@ -1602,7 +1602,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    * Overridable method to verify that the current
    * DBSession / DBEditSet has permission to write
-   * values into this field.<br><br>
+   * values into this field.
    *
    */
 
@@ -1659,6 +1659,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     permCache = gSession.getPerm(owner, getID()); // *sync* on gSession
+
+    // If we don't specifically have a permission record for this
+    // field, inherit the permissions for our owner
     
     if (permCache == null)
       {
@@ -1668,11 +1671,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /** 
    *
-   * Returns a Vector of the values of the elements in this field,
-   * if a vector.
+   * Returns a Vector of the values of the elements in this field, if
+   * a vector.<br><br>
    *
-   * This is intended to be used within the Ganymede server, it bypasses
-   * the permissions checking that getValues() does.
+   * This is intended to be used within the Ganymede server, it
+   * bypasses the permissions checking that getValues() does.<br><br>
+   *
+   * The server code <b>*must not*</b> make any modifications to the
+   * returned vector as doing such may violate the namespace maintenance
+   * logic.  Always, <b>always</b>, use the addElement(), deleteElement(),
+   * setElement() methods in this class.
    *
    */
 
@@ -1680,16 +1688,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
       }
 
-    return values; // this is ok, since this is being serialized. the client's not
-                   // gaining the ability to add or remove items from this field
+    return values;
   }
 
   /** 
    *
-   * Returns an Object carrying the value held in this field.
+   * Returns an Object carrying the value held in this field.<br><br>
    *
    * This is intended to be used within the Ganymede server, it bypasses
    * the permissions checking that getValues() does.
@@ -1700,7 +1708,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field " + getName());
+	throw new IllegalArgumentException("scalar accessor called on vector field " + 
+					   getName());
       }
 
     return value;
@@ -1720,11 +1729,15 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    * This method is used to basically dump state out of this field
    * so that the DBEditSet checkpoint() code can restore it later
-   * if need be.
+   * if need be.<br><br>
+   *
+   * This method is not synchronized because all operations performed
+   * by this method are either synchronized at a lower level or are
+   * atomic.
    *
    */
 
-  public synchronized Object checkpoint()
+  public Object checkpoint()
   {
     if (isVector())
       {
@@ -1738,7 +1751,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * This method is used to basically force state into this field.
+   * This method is used to basically force state into this field.<br><br>
    *
    * It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
@@ -1750,14 +1763,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new RuntimeException("Invalid rollback on field " + getName() + ", not in an editable context");
+	throw new RuntimeException("Invalid rollback on field " + 
+				   getName() + ", not in an editable context");
       }
 
     if (isVector())
       {
 	if (!(oldval instanceof Vector))
 	  {
-	    throw new RuntimeException("Invalid vector rollback on field " + getName());
+	    throw new RuntimeException("Invalid vector rollback on field " + 
+				       getName());
 	  }
 	else
 	  {
@@ -1768,7 +1783,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	if (!verifyTypeMatch(oldval))
 	  {
-	    throw new RuntimeException("Invalid scalar rollback on field " + getName());
+	    throw new RuntimeException("Invalid scalar rollback on field " + 
+				       getName());
 	  }
 	else
 	  {
