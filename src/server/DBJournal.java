@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -222,6 +222,16 @@ public class DBJournal implements ObjectStatus {
 
     transactionsInJournal = 0;
     GanymedeAdmin.updateTransCount();
+
+    if (Ganymede.log != null)
+      {
+	Ganymede.log.logSystemEvent(new DBLogEvent("journalreset",
+						   "Ganymede Journal Reset",
+						   null,
+						   null,
+						   null,
+						   null));
+      }
   }
 
   /**
