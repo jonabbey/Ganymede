@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -219,6 +219,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.dumpDB();
   }
 
+  void dumpSchema() throws RemoteException
+  {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
+    aSession.dumpSchema();
+  }
+
   void pullSchema() throws RemoteException
   {
     SchemaEdit editor = null;
@@ -280,6 +290,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   Menu controlMenu = null;
   MenuItem quitMI = null;
   MenuItem dumpMI = null;
+  MenuItem dumpSchemaMI = null;
   MenuItem schemaMI = null;
   MenuItem shutdownMI = null;
   MenuItem killAllMI = null;
@@ -342,6 +353,9 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     dumpMI = new MenuItem("Dump Database");
     dumpMI.addActionListener(this);
 
+    dumpSchemaMI = new MenuItem("Dump Schema");
+    dumpSchemaMI.addActionListener(this);
+
     shutdownMI = new MenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
 
@@ -354,10 +368,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     quitMI = new MenuItem("Close Console");
     quitMI.addActionListener(this);
 
-    controlMenu.add(dumpMI);
     controlMenu.add(shutdownMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
+    controlMenu.addSeparator();
+    controlMenu.add(dumpMI);
+    controlMenu.add(dumpSchemaMI);
     controlMenu.addSeparator();
     controlMenu.add(quitMI);
 
@@ -681,6 +697,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     if (!results.get("Account:").equals("supergash"))
       {
 	controlMenu.remove(dumpMI);
+	controlMenu.remove(dumpSchemaMI);
 	controlMenu.remove(shutdownMI);
 	controlMenu.remove(schemaMI);
 	controlMenu.remove(killAllMI);
@@ -739,6 +756,17 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	      }
 	  }
       }
+    else if (event.getSource() == dumpSchemaMI)
+      {
+	try
+	  {
+	    admin.dumpSchema();
+	  }
+	catch (RemoteException e)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server");
+	  }
+      }
     else if (event.getSource() == shutdownMI)
       {
 	if (shutdownDialog.DialogShow() != null)
@@ -761,7 +789,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
 	killAllDLGR = new DialogRsrc(this,
 				     "Are you sure you want to log out all users?", 
-				     "Enter your administrator account name & password",
+				     "Are you sure you want to log out all users?", 
 				     "Hell Yes", "No", question);
     
 	killAllDLG = new StringDialog(killAllDLGR);

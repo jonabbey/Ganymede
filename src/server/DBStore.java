@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -383,7 +383,155 @@ public class DBStore {
 
 	while (basesEnum.hasMoreElements())
 	  {
-	    ((DBObjectBase) basesEnum.nextElement()).emit(out);
+	    ((DBObjectBase) basesEnum.nextElement()).emit(out, true);
+	  } 
+
+	// and dump the schema out in a human readable form
+	
+	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema");
+	textOut = new PrintWriter(textOutStream);
+	//	printBases(textOut);
+	printCategoryTree(textOut);
+      }
+    catch (IOException ex)
+      {
+	System.err.println("DBStore error dumping to " + filename);
+	throw ex;
+      }
+    finally
+      {
+	if (releaseLock)
+	  {
+	    if (lock != null)
+	      {
+		lock.release();
+	      }
+	  }
+
+	if (out != null)
+	  {
+	    out.close();
+	  }
+	   
+	if (outStream != null)
+	  {
+	    outStream.close();
+	  }
+
+	if (textOut != null)
+	  {
+	    textOut.close();
+	  }
+
+	if (textOutStream != null)
+	  {
+	    textOutStream.close();
+	  }
+      }
+
+    if (journal != null)
+      {
+	journal.reset();
+      }
+
+    GanymedeAdmin.updateLastDump(new Date());
+  }
+
+  /**
+   *
+   * Dump the schema to disk
+   *
+   * This method dumps the entire database to disk, minus any actual objects.
+   *
+   * The thread that calls the dump method will be suspended until
+   * there are no threads performing update writes to the in-memory
+   * database.  In practice this will likely never be a long interval.
+   *
+   * @param filename Name of the database file to emit
+   * @param releaseLock boolean.  If releaseLock==false, dump() will not release
+   *                              the dump lock when it is done with the dump.  This
+   *                              is intended to allow for a clean shut down.  For
+   *                              non-terminal dumps, releaseLock should be true.
+   *
+   * @see arlut.csd.ganymede.DBEditSet
+   * @see arlut.csd.ganymede.DBJournal
+   * @see arlut.csd.ganymede.adminSession
+   * 
+   */
+
+  public synchronized void dumpSchema(String filename, boolean releaseLock) throws IOException
+  {
+    File dbFile = null;
+    FileOutputStream outStream = null;
+    DataOutputStream out = null;
+    FileOutputStream textOutStream = null;
+    PrintWriter textOut = null;
+    Enumeration basesEnum;
+    short baseCount, namespaceCount, categoryCount;
+    DBDumpLock lock = null;
+    DBNameSpace ns;
+    DBBaseCategory bc;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("DBStore: Dumping");
+      }
+
+    lock = new DBDumpLock(this);
+
+    try
+      {
+	lock.establish("System");	// wait until we get our lock 
+      }
+    catch (InterruptedException ex)
+      {
+      }
+    
+    // Move the old version of the file to a backup
+    
+    try
+      {
+	dbFile = new File(filename);
+	if (dbFile.isFile())
+	  {
+	    dbFile.renameTo(new File(filename + ".bak"));
+	  }
+
+	// and dump the whole thing
+
+	outStream = new FileOutputStream(filename);
+	out = new DataOutputStream(outStream);
+
+	out.writeUTF(id_string);
+	out.writeByte(major_version);
+	out.writeByte(minor_version);
+
+	namespaceCount = (short) nameSpaces.size();
+
+	out.writeShort(namespaceCount);
+
+	for (int i = 0; i < namespaceCount; i++)
+	  {
+	    ns = (DBNameSpace) nameSpaces.elementAt(i);
+	    ns.emit(out);
+	  }
+
+	if (major_version >= 1 && minor_version >= 3)
+	  {
+	    rootCategory.emit(out);
+	  }
+
+	baseCount = (short) objectBases.size();
+
+	out.writeShort(baseCount);
+	
+	basesEnum = objectBases.elements();
+
+	while (basesEnum.hasMoreElements())
+	  {
+	    ((DBObjectBase) basesEnum.nextElement()).emit(out, false);
 	  } 
 
 	// and dump the schema out in a human readable form
@@ -732,7 +880,7 @@ public class DBStore {
 	bf.field_order = bf.field_code = SchemaConstants.AdminPasswordField;
 	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
-	bf.maxLength = 8;
+	bf.maxLength = 32;
 	bf.removable = false;
 	bf.editable = false;
 	bf.crypted = true;
@@ -863,7 +1011,7 @@ public class DBStore {
 	bf.field_code = SchemaConstants.UserPassword;
 	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
-	bf.maxLength = 8;
+	bf.maxLength = 32;
 	bf.field_order = 3;
 	bf.removable = false;
 	bf.editable = false;

@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -456,6 +456,30 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   /**
    *
+   * Kick all users off of the Ganymede server on behalf of this admin console
+   *
+   */
+
+  public synchronized boolean killAll()
+  {
+    GanymedeSession temp;
+
+    if (!adminName.equals("supergash"))
+      {
+	return false;
+      }
+
+    while (GanymedeServer.sessions.size() != 0)
+      {
+	temp = (GanymedeSession) GanymedeServer.sessions.elementAt(0);
+	temp.forceOff("Admin console booting you off (loser)");
+      }
+
+    return true;
+  }
+
+  /**
+   *
    * Kick a user off of the Ganymede server on behalf of this admin console
    *
    */
@@ -601,6 +625,38 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
       }
 
     Ganymede.debug("Database dumped");
+
+    return true;
+  }
+
+
+  /**
+   *
+   * dump the current db schema of the to disk
+   *
+   */
+
+  public boolean dumpSchema()
+  {
+    if (!adminName.equals("supergash"))
+      {
+	return false;
+      }
+
+    setStatus("Dumping schema");
+
+    try
+      {
+	Ganymede.db.dumpSchema(GanymedeConfig.schemaPath, true); // release the
+				                                 // lock when the dump is complete
+      }
+    catch (IOException ex)
+      {
+	Ganymede.debug("Schema could not be dumped successfully. " + ex);
+	return false;
+      }
+
+    Ganymede.debug("Schema dumped");
 
     return true;
   }

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -264,7 +264,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
   }
 
-  synchronized void emit(DataOutput out) throws IOException
+  synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
   {
     int size;
     Enumeration enum;
@@ -309,13 +309,20 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	out.writeInt(displayOrder);	// added at file version 1.4
       }
 
-    out.writeInt(objectHash.size());
-   
-    baseEnum = objectHash.elements();
-
-    while (baseEnum.hasMoreElements())
+    if (dumpObjects)
       {
-	((DBObject) baseEnum.nextElement()).emit(out);
+	out.writeInt(objectHash.size());
+   
+	baseEnum = objectHash.elements();
+
+	while (baseEnum.hasMoreElements())
+	  {
+	    ((DBObject) baseEnum.nextElement()).emit(out);
+	  }
+      }
+    else
+      {
+	out.writeInt(0);
       }
   }
 
