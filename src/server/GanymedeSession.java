@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.99 $ %D%
+   Version: $Revision: 1.100 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1037,20 +1037,58 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* - */
 
+    Vector tmpInvids;
+    Invid ownerInvidItem;
+
+    /* -- */
+
     if (ownerInvids == null)
       {
 	newObjectOwnerInvids = null;
 	return null;
       }
 
-    if (!supergashMode && !isMemberAll(ownerInvids))
+    tmpInvids = new Vector();
+
+    for (int i = 0; i < ownerInvids.size(); i++)
+      {
+	ownerInvidItem = (Invid) ownerInvids.elementAt(i);
+
+	// this check is actually redundant, as the InvidDBField link logic
+	// would catch such for us, but it makes a nice couplet with the
+	// getNum() check below, so I'll leave it here.
+	
+	if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
+	  {
+	    return Ganymede.createErrorDialog("Error in setDefaultOwner()",
+					      "Error.. ownerInvids contains an invalid invid");
+	  }
+
+	// we don't want to explicitly place the object in
+	// supergash.. all objects are implicitly availble to
+	// supergash, no sense in making a big deal of it.
+
+	// this is also redundant, since DBSession.createDBObject()
+	// will filter this out as well.  Err.. I probably should
+	// have faith in DBSession.createDBObject() and take this
+	// whole loop out, but I'm gonna leave it for now.
+
+	if (ownerInvidItem.getNum() == SchemaConstants.OwnerSupergash)
+	  {
+	    continue;
+	  }
+
+	tmpInvids.addElement(ownerInvidItem);
+      }
+
+    if (!supergashMode && !isMemberAll(tmpInvids))
       {
 	return Ganymede.createErrorDialog("Error in setDefaultOwner()",
 					  "Error.. ownerInvids contains invid that the persona is not a member of.");
       }
     else
       {
-	newObjectOwnerInvids = ownerInvids;
+	newObjectOwnerInvids = tmpInvids;
 	setLastEvent("setDefaultOwner");
 	return null;
       }
@@ -3060,7 +3098,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (ownerList.size() != 1)
 	      {
 		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, no way of knowing what " +
+						  "Can't create new object, no way of knowing which " +
 						  "owner group to place it in");
 	      }
 	  }
@@ -4393,7 +4431,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
-   * This private helper method iterates through the owners
+   * This helper method iterates through the owners
    * vector and checks to see if the current personaInvid is a
    * member of all of the groups through either direct membership
    * or through membership of an owning group.  This method is
@@ -4401,7 +4439,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  private final boolean isMemberAll(Vector owners)
+  public final boolean isMemberAll(Vector owners)
   {
     Invid owner;
     DBObject ownerObj;
@@ -4426,6 +4464,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	found = false;	// yes, but what have you done for me _lately_?
 
 	owner = (Invid) owners.elementAt(i);
+
+	if (owner.getType() != SchemaConstants.OwnerBase)
+	  {
+	    Ganymede.debug("GanymedeSession.isMemberAll(): bad invid passed " + owner.toString());
+	    return false;
+	  }
 
 	ownerObj = session.viewDBObject(owner);
 
