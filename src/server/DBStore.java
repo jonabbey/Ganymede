@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1268,7 +1268,7 @@ public class DBStore {
 	bf.field_name = "Username";
 	bf.minLength = 2;
 	bf.maxLength = 8;
-	bf.badChars = " :";
+	bf.badChars = " :=><|+[]\\/*;:.,?\""; // See p.252, teach yourself WinNT Server 4 in 14 days
 	bf.field_order = 2;
 	bf.loading = true;
 	bf.setNameSpace("username");
