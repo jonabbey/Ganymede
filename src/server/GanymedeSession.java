@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -822,6 +822,74 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     session.openTransaction(describe);
 
     return null;
+  }
+
+  /**
+   *
+   * This method call causes the server to checkpoint the current state
+   * of an open transaction on the server.  At any time thereafter,
+   * the server can be instructed to revert the transaction to the
+   * state at the time of this checkpoint by calling rollback()
+   * with the same key.
+   *
+   * Checkpointing only makes sense in the context of a transaction;
+   * it is an error to call either checkpoint() or rollback() if
+   * the server does not have a transaction open.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public void checkpoint(String key)
+  {
+    if (session.editSet == null)
+      {
+	throw new RuntimeException("checkpoint called in the absence of a transaction");
+      }
+
+    session.editSet.checkpoint(key);
+  }
+
+  /**
+   *
+   * This method call causes the server to roll back the state
+   * of an open transaction on the server.
+   *
+   * Checkpoints are held in a Stack on the server;  it is never
+   * permissible to try to 'rollforward' to a checkpoint that
+   * was itself rolled back.  That is, the following sequence is 
+   * not permissible.
+   *
+   * checkpoint("1");
+   * <changes>
+   * checkpoint("2");
+   * <changes>
+   * rollback("1");
+   * rollback("2");
+   *
+   * At the time that the rollback("1") call is made, the server
+   * forgets everything that has occurred in the transaction since
+   * checkpoint 1.  checkpoint 2 no longer exists, and so the second
+   * rollback call will return false.
+   *
+   * Checkpointing only makes sense in the context of a transaction;
+   * it is an error to call either checkpoint() or rollback() if
+   * the server does not have a transaction open.
+   *
+   * @return true if the rollback could be carried out successfully.
+   * 
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public boolean rollback(String key)
+  {
+    if (session.editSet == null)
+      {
+	throw new RuntimeException("rollback called in the absence of a transaction");
+      }
+
+    return session.editSet.rollback(key);
   }
 
   /**
@@ -1922,6 +1990,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    * Inactivate an object in the database
    *
+   * This method must be called within a transactional context.
+   *
    * Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
    * server for a defined period of time, to allow other network systems
@@ -1936,12 +2006,32 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   
   public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
-    return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-				      "Error.. inactivate_db_object is not yet implemented on the server");
+    DBEditObject eObj;
+    DBLogEvent event;
+
+    /* -- */
+
+    eObj = (DBEditObject) edit_db_object(invid);
+
+    if (eObj == null)
+      {
+	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
+					  "Couldn't check out this object for inactivation");
+      }
+
+    if (!eObj.canBeInactivated() || eObj.canInactivate(session, eObj))
+      {
+	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
+					  "Object " + eObj.getLabel() + " is not of a type that may be inactivated");
+      }
+
+    return session.inactivateDBObject(eObj);
   }
 
   /**
    * Remove an object from the database
+   *
+   * This method must be called within a transactional context.
    *
    * Certain objects cannot be inactivated, but must instead be
    * simply removed on demand.  The active permissions for the client
