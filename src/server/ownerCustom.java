@@ -5,7 +5,7 @@
    This file is a management class for owner-group records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,6 +56,27 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   public ownerCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate whether a given field can only
+   * choose from a choice provided by obtainChoiceList()
+   *
+   */
+
+  public boolean mustChoose(DBField field)
+  {
+    // We don't force a choice on the object owned field, because
+    // it can point to anything.
+    
+    if (field.getID() == SchemaConstants.OwnerObjectsOwned)
+      {
+	return false;
+      }
+
+    return super.mustChoose(field);
   }
 
   /**
