@@ -5,7 +5,7 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -111,8 +111,8 @@ class MessagePanel extends JPanel {
 }
 
 /**
- * Button panel employs a BorderLayout to lay out a Separator in 
- * the north, and a Panel to which Buttons are added in the 
+ * Button panel employs a BorderLayout to lay out a
+ * Panel to which Buttons are added in the 
  * center.<p>
  *
  * Buttons may be added to the panel via two methods:
@@ -129,11 +129,6 @@ class MessagePanel extends JPanel {
  *
  * @version 1.0, Apr 1 1996
  * @author  David Geary
- * @see     MessageDialog
- * @see     QuestionDialog
- * @see     YesNoDialog
- * @see     gjt.test.DialogTest
- * @see     gjt.test.ComponentScrollerTest
  */
 
 class ButtonPanel extends JPanel {
