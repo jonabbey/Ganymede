@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 1 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ import java.util.*;
 
 public class QueryResult implements java.io.Serializable {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // --
 
