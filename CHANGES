@@ -1,11 +1,11 @@
 Ganymede Release 1.0.6
-August 13, 2001
+August 15, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
-RELEASE DATE: August 13, 2001
+RELEASE DATE: August 15, 2001
 
 1. [SERVER, ADMIN CONSOLE] Fixed delayed memory release for schema editing
 
@@ -23,12 +23,17 @@ convert < and > to the XML entity escapes &lt; and &gt;, which could
 cause the server's XML parser to reject password changes that involved
 those characters.
 
-3. [SERVER] Fixed journal processing on server start-up
+3. [SERVER] Fixed several journal processing bugs
 
-The server had a bug that prevented successful startup if the server
-was killed without getting a chance to consolidate the database into a
-new ganymede.db file, and if one of the transactions in the journal
-file involved an deleted object that had one or more
+Yowtch.  Several nasty bugs that were lurking here.  None of these
+bugs caused any problems if the server was shut down cleanly and
+restarted, but if the server was abnormally terminated, the following
+bugs caused problems during transaction recovery on startup.
+
+Firstly, the server had a bug that prevented successful startup if the
+server was killed without getting a chance to consolidate the database
+into a new ganymede.db file, and if one of the transactions in the
+journal file involved an deleted object that had one or more
 namespace-constrained database fields.
 
 This was due to an attempt to use Ganymede.internalSession before that
@@ -37,15 +42,34 @@ DBNameSpaceHandle.getField() method look up objects directly out of
 the DBStore tables without using a GanymedeSession, if needed.
 
 Thanks to Gaurav Bhargava at Villanova University for reporting
-this bug.
+this first bug.
 
-I also fixed a bad bug that caused transaction processing in the
-journal handling code to repeatedly process object records in the
+Secondly, there was a bad bug that caused transaction processing in
+the journal handling code to repeatedly process object records in the
 journal.  The journal processing code was not clearing the entry
 vector at the end of each transaction's processing, which caused the
 server to do a lot of repetitive work and to generate misleading
-warnings about 'objects already deleted' in the object deletion
-case.  Ugh.
+warnings about 'objects already deleted' in the object deletion case.
+Ugh.
+
+Thirdly, there was a bug, subtle in causation but HUMONGOUSLY AWFUL in
+effect, which caused the server to *eat* changed scalar fields when
+processing journal entries.  This bug has been in Ganymede since
+1.0pre1, when I moved field storage in DBObject to a packed hash as a
+memory optimization.  The replaceField() code that edited the packed
+hash to replace fields with the versions noted in the journal
+transaction entries silently failed if it could not find the field it
+was looking for, causing the changed fields to be simply dropped on
+the floor.  That's what I get for recklessly optimizing my data
+structures.
+
+Data loss bugs in Ganymede have been rare, thankfully, but this was an
+ugly one, and it bit me when I was testing the fixes to the first two
+journal bugs.  My apologies if it bit anyone else out there.
+
+The good news is that I've cleaned up the journal loading code a fair
+bit, and that I have significantly improved the debug instrumentation
+in this section of the code.
 
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 
