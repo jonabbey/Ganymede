@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -102,6 +102,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	if (Ganymede.db.schemaEditInProgress)
 	  {
 	    client.forceDisconnect("Schema Edit In Progress");
+	    return null;
+	  }
+
+	if (Ganymede.db.sweepInProgress)
+	  {
+	    client.forceDisconnect("Invid Sweep In Progress");
 	    return null;
 	  }
       }
@@ -220,5 +226,292 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	throw new RuntimeException("GanymedeServer.dump error: " + ex);
       }
+  }
+
+  /**
+   *
+   * This method is used when the Ganymede server module is being
+   * driven by a direct-linked main method.  This method sweeps
+   * through all invid's listed in the (loaded) database, and
+   * removes any invid's that point to objects not in the database.
+   *
+   * @returns true if there were any invalid invids in the database
+   *
+   */
+
+  public synchronized boolean sweepInvids()
+  {
+    Enumeration
+      enum1, enum2, enum3, enum4;
+
+    DBObjectBase
+      base;
+
+    DBObject
+      object;
+
+    DBField
+      field;
+
+    InvidDBField
+      iField;
+
+    Vector
+      removeVector,
+      tempVector;
+
+    Invid
+      invid;
+
+    boolean
+      vectorEmpty = true,
+      swept = false;
+
+    DBSession session = Ganymede.internalSession.session;
+
+    /* -- */
+    
+    synchronized (Ganymede.db)
+      {
+	if (Ganymede.db.schemaEditInProgress ||
+	    Ganymede.db.sweepInProgress)
+	  {
+	    return false;
+	  }
+
+	Ganymede.db.sweepInProgress = true;
+      }
+
+    enum1 = Ganymede.db.objectBases.elements();
+
+    while (enum1.hasMoreElements())
+      {
+	base = (DBObjectBase) enum1.nextElement();
+
+	enum2 = base.objectHash.elements();
+
+	while (enum2.hasMoreElements())
+	  {
+	    object = (DBObject) enum2.nextElement();
+
+	    removeVector = new Vector();
+
+	    enum3 = object.fields.elements();
+
+	    while (enum3.hasMoreElements())
+	      {
+		field = (DBField) enum3.nextElement();
+
+		if (!(field instanceof InvidDBField))
+		  {
+		    continue;
+		  }
+
+		iField = (InvidDBField) field;
+
+		if (iField.isVector())
+		  {
+		    tempVector = iField.values;
+		    vectorEmpty = true;
+
+		    iField.values = new Vector();
+		    
+		    enum4 = tempVector.elements();
+
+		    while (enum4.hasMoreElements())
+		      {
+			invid = (Invid) enum4.nextElement();
+
+			if (session.viewDBObject(invid) != null)
+			  {
+			    iField.values.addElement(invid);
+			    vectorEmpty = false;
+
+			    Ganymede.debug("Removing invid: " + invid + " from object " + 
+					   base.getName() + ":" + object.getLabel());
+			  }
+			else
+			  {
+			    swept = true;
+			  }
+		      }
+
+		    if (vectorEmpty)
+		      {
+			removeVector.addElement(new Short(iField.getID()));
+			iField.defined = false;
+		      }
+		  }
+		else
+		  {
+		    invid = (Invid) iField.value;
+
+		    if (session.viewDBObject(invid) == null)
+		      {
+			swept = true;
+			removeVector.addElement(new Short(iField.getID()));
+			iField.defined = false;
+
+			Ganymede.debug("Removing invid: " + invid + " from object " + 
+				       base.getName() + ":" + object.getLabel());
+		      }
+		  }
+	      }
+
+	    // need to remove undefined fields now
+
+	    for (int i = 0; i < removeVector.size(); i++)
+	      {
+		object.fields.remove(removeVector.elementAt(i));
+	      }
+	  }
+      }
+
+    synchronized (Ganymede.db)
+      {
+	Ganymede.db.sweepInProgress = false;
+      }
+
+    return swept;
+  }
+
+  /**
+   *
+   * This method is used for testing.  This method sweeps 
+   * through all invid's listed in the (loaded) database, and
+   * checks to make sure that they all have valid back pointers.
+   *
+   * Since the backlinks field (SchemaConstants.BackLinksField)
+   * is a general sink for invid's with no homes, we won't explicitly
+   * check to see if an invid in a backlink field has a field pointing
+   * to it in the target object.. we'll just verify the existence of
+   * the object listed.
+   *
+   * @returns true if there were any invids without back-pointers in
+   * the database
+   * 
+   */
+
+  public synchronized boolean checkInvids()
+  {
+    Enumeration
+      enum1, enum2, enum3, enum4;
+
+    DBObjectBase
+      base;
+
+    DBObject
+      object;
+
+    DBField
+      field;
+
+    InvidDBField
+      iField;
+
+    Invid
+      invid;
+
+    boolean
+      ok = true;
+
+    DBSession session = Ganymede.internalSession.session;
+
+    /* -- */
+    
+    synchronized (Ganymede.db)
+      {
+	if (Ganymede.db.schemaEditInProgress ||
+	    Ganymede.db.sweepInProgress)
+	  {
+	    return false;
+	  }
+
+	Ganymede.db.sweepInProgress = true;
+      }
+
+    // loop over the object bases
+
+    enum1 = Ganymede.db.objectBases.elements();
+
+    while (enum1.hasMoreElements())
+      {
+	base = (DBObjectBase) enum1.nextElement();
+
+	// loop over the objects in this base
+
+	Ganymede.debug("Testing invid links for objects of type " + base.getName());
+	
+	enum2 = base.objectHash.elements();
+
+	while (enum2.hasMoreElements())
+	  {
+	    object = (DBObject) enum2.nextElement();
+
+	    Ganymede.debug("Testing invid links for object " + object.getLabel());
+
+	    // loop over the fields in this object	    
+
+	    enum3 = object.fields.elements();
+
+	    while (enum3.hasMoreElements())
+	      {
+		field = (DBField) enum3.nextElement();
+
+		// we only care about invid fields
+
+		if (!(field instanceof InvidDBField))
+		  {
+		    continue;
+		  }
+
+		// 
+
+		if (field.getID() == SchemaConstants.BackLinksField)
+		  {
+		    iField = (InvidDBField) field;
+
+		    if (iField.isVector())
+		      {
+			enum4 = iField.values.elements();
+			
+			while (enum4.hasMoreElements())
+			  {
+			    invid = (Invid) enum4.nextElement();
+
+			    if (session.viewDBObject(invid) == null)
+			      {
+				ok = false;
+
+				Ganymede.debug("*** Backlink field in object " +
+					       base.getName() + ":" + object.getLabel() +
+					       " has an invid pointing to a non-existent object: " + invid);
+			      }
+			  }
+		      }
+		    else
+		      {
+			Ganymede.debug("*** Error, back links field isn't vector???");
+		      }
+		  }
+		else
+		  {
+		    iField = (InvidDBField) field;
+		    
+		    if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+		      {
+			ok = false;
+		      }
+		  }
+	      }
+	  }
+      }
+
+    synchronized (Ganymede.db)
+      {
+	Ganymede.db.sweepInProgress = false;
+      }
+
+    return ok;
   }
 }
