@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -218,25 +218,60 @@ public class directLoader {
 
 	    System.err.println("Using pre-existing gash privilege matrix: " + gashadminPermInvid.toString());
 	  }
-	else
-	  {
-	    System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
 
-	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+	current_obj = (DBEditObject) my_client.session.edit_db_object(gashadminPermInvid);
 
-	    PermEntry defPerm = new PermEntry(true, true, true, true);
+	System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
+
+	// set permissions for objects owned by the GASH administrator
+
+	// note that if we 
+
+	perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+
+	// visible, editable, create, delete
+
+	PermEntry defPerm = new PermEntry(true, true, true, true);
 	
-	    pf.setPerm(SchemaConstants.UserBase, defPerm);
-	    pf.setPerm((short) 257, defPerm); // group privs
-	    pf.setPerm((short) 263, defPerm); // systems privs
-	    pf.setPerm((short) 267, defPerm); // I.P. network
-	    pf.setPerm((short) 268, defPerm); // DNS domain
-	    pf.setPerm((short) 265, defPerm); // System Interface
-	    pf.setPerm((short) 271, defPerm); // Systems Netgroups
-	    pf.setPerm((short) 270, defPerm); // User Netgroups
-	    pf.setPerm((short) 269, defPerm); // room
-	    pf.setPerm((short) 258, defPerm); // shell
-	  }
+	pf.setPerm(SchemaConstants.UserBase, defPerm);
+	pf.setPerm((short) 257, defPerm); // group privs
+	pf.setPerm((short) 263, defPerm); // systems privs
+	pf.setPerm((short) 267, defPerm); // I.P. network
+	pf.setPerm((short) 268, defPerm); // DNS domain
+	pf.setPerm((short) 265, defPerm); // System Interface
+	pf.setPerm((short) 271, defPerm); // Systems Netgroups
+	pf.setPerm((short) 270, defPerm); // User Netgroups
+	pf.setPerm((short) 269, defPerm); // room
+	pf.setPerm((short) 258, defPerm); // shell
+
+	// set default permissions for objects *not* owned by the GASH administrator
+
+	// Here we want to make all rooms, networks, and dns domains
+	// 'editable', but not grant permission to any individual
+	// fields.. this will have the effect of allowing dns domains,
+	// rooms and networks to show up in choice lists, but will not
+	// allow a gash admin to directly edit the objects'
+	// fields.. the custom code for these objects permit anonymous
+	// linking to allow systems and interfaces to be linked in.
+
+	pf = (perm_field) current_obj.getField(SchemaConstants.PermDefaultMatrix);
+
+	// visible, editable, create, delete
+
+	defPerm = new PermEntry(true, true, true, false);
+	PermEntry fieldPerm = new PermEntry(true, false, false, false);
+
+	pf.setPerm((short) 268, defPerm); // DNS domain
+	pf.setDefaultFieldsPerm((short) 268, fieldPerm);
+
+	pf.setPerm((short) 269, defPerm); // room
+	pf.setDefaultFieldsPerm((short) 269, fieldPerm);
+
+	pf.setPerm((short) 276, defPerm); // automounter volume
+	pf.setDefaultFieldsPerm((short) 276, fieldPerm);
+
+	pf.setPerm((short) 267, defPerm); // network
+	pf.setDefaultFieldsPerm((short) 267, fieldPerm);
 
 	// now, the ownerGroups Vector has been loaded for us by the scanOwnerGroups() method.
 	// go ahead and register owner groups for the set of differentiable owner prefixes
