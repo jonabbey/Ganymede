@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/07/21 05:47:07 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/07/22 05:33:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -287,6 +287,44 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return success;
+  }
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * indicate that the given object is interested in receiving notification
+   * when changes involving it occur, and can provide one or more addresses for
+   * such notification to go to.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean hasEmailTarget(DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * return a Vector of Strings comprising a list of addresses to be
+   * notified above and beyond the normal owner group notification when
+   * the given object is changed in a transaction.  Used for letting end-users
+   * be notified of changes to their account, etc.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public Vector getEmailTargets(DBObject object)
+  {
+    Vector x = new Vector();
+
+    /* -- */
+
+    // do a union so that we clone the raw DBField vector, and so that
+    // we handle any null result
+
+    x = VectorUtils.union(x, object.getFieldValuesLocal(userSchema.EMAILTARGET));
+    
+    return x;
   }
 
   /**
