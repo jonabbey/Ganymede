@@ -60,6 +60,7 @@ import java.util.Hashtable;
 import javax.swing.JButton;
 
 import arlut.csd.ganymede.rmi.field_option_field;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -70,6 +71,13 @@ import arlut.csd.ganymede.rmi.field_option_field;
 class fieldoption_button extends JButton implements ActionListener {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_button");
 
   field_option_field field;
   boolean enabled;
@@ -96,11 +104,11 @@ class fieldoption_button extends JButton implements ActionListener {
     {
       if (enabled)
 	{
-	  setText("Edit Field Options");
+	  setText(ts.l("global.edit")); // "Edit Field Options"
 	}
       else
 	{
-	  setText("View Field Options");
+	  setText(ts.l("global.view")); // "View Field Options"
 	}
       
       this.field = field;

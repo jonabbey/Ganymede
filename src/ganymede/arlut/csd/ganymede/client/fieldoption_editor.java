@@ -1,3 +1,60 @@
+/*
+   fieldoption_editor.java
+
+   TreeTable GUI component dialog used by the client to present and edit synchronization
+   options for the new Ganymede 2.0 sync channels.
+
+   --
+
+   Created: 2 February 2005
+
+   Last Mod Date: $Date: 2005-01-14 16:36:46 -0600 (Fri, 14 Jan 2005) $
+   Last Revision Changed: $Rev: 6062 $
+   Last Changed By: $Author: broccol $
+   SVN URL: $HeadURL: http://db1.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/ganymede/arlut/csd/ganymede/client/glogin.java $
+
+   Module By: Deepak Giridharagopal
+
+   -----------------------------------------------------------------------
+	    
+   Ganymede Directory Management System
+ 
+   Copyright (C) 1996-2005
+   The University of Texas at Austin
+
+   Contact information
+
+   Web site: http://www.arlut.utexas.edu/gash2
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
+
+   US Mail:
+
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
+
+   Telephone: (512) 835-3200
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
+*/
+
+
 package arlut.csd.ganymede.client;
 
 import java.awt.*;
@@ -12,6 +69,7 @@ import javax.swing.table.*;
 import javax.swing.border.*;
 
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.*;
 import arlut.csd.ganymede.rmi.*;
 
@@ -22,8 +80,17 @@ import arlut.csd.ganymede.rmi.*;
  **/
 class fieldoption_editor extends JDialog 
 {
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_editor");
+
   /* Temporary hack: hard code the string values for the option field */
-  public static String labels[] = {"Never", "When changed", "Always"};
+  public static String labels[] = {ts.l("global.never"), // "Never"
+				   ts.l("global.changed"), // "When Changed"
+				   ts.l("global.always")}; // "Always"
 
   /* Reference to the background colour of the tree.
    * This is used to make the background of the individual cell renderers
@@ -50,10 +117,10 @@ class fieldoption_editor extends JDialog
   gclient gc;
 
   /* Layout components */
-  JButton OkButton = new JButton ("Ok");
-  JButton CancelButton = new JButton("Cancel");
-  JButton ExpandButton = new JButton ("Expand All");
-  JButton CollapseButton = new JButton("Collapse All");
+  JButton OkButton = new JButton (ts.l("global.okButton")); // "Ok"
+  JButton CancelButton = new JButton(ts.l("global.cancelButton")); // "Cancel"
+  JButton ExpandButton = new JButton (ts.l("global.expandButton")); // "Expand All"
+  JButton CollapseButton = new JButton(ts.l("global.collapseButton")); // "Collapse All"
   JScrollPane edit_pane;
   JTreeTable treeTable;
   JTree tree;
@@ -689,11 +756,11 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 
     int newVal;
 
-    if (((String)value).equals("Never"))
+    if (((String)value).equals(fieldoption_editor.labels[0])) // "Never"
     {
       newVal = 0;
     }
-    else if (((String)value).equals("When changed"))
+    else if (((String)value).equals(fieldoption_editor.labels[1])) // "When Changed"
     {
       newVal = 1;
     }
@@ -882,9 +949,9 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
     {
       boolean selected = ((JCheckBox)this.delegate).isSelected();
       if (selected)
-        return "When changed";
+        return fieldoption_editor.labels[1]; // "When Changed"
       else
-        return "Never";
+        return fieldoption_editor.labels[0]; // "Never"
     }
     else
     {
