@@ -353,20 +353,32 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 		catch (Exception e)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Could not remove Element: " + chosen.elementAt(i) + ", not in available vector?");
-		      }
+		    System.out.println("Could not remove Element: " + chosen.elementAt(i) + ", not in available vector?");
 		  }
 
 	      }
 	  }
 
-	out.reload(available, false);
+	try
+	  {
+	    out.reload(available, false);
+	  }
+	catch (Exception e)
+	  {
+	    throw new RuntimeException("Got an exception in out.reload: " + e);
+	  }
       }
 
-    in.reload(chosen, false);
+    try
+      {
+	in.reload(chosen, false);
+      }
+    catch (Exception e)
+      {
+	throw new RuntimeException("Got an exception in in.reload: " + e);
+      }
     
+    System.out.println("Done updating.");
 
   }
 
@@ -792,6 +804,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   // this actuall does the inserting
+  //
 
   void putItemIn(listHandle item)
   {
@@ -817,7 +830,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding handle");
 	  }
 
-	in.addItem(item);
+	// We only want to put it in if it's not already there.
+	// Sometimes this happens in Ganymede if we update a field
+	// before we are changing.  It happens like this: the "add"
+	// button is clicked.  Then the return value decides to update
+	// this field, which loads the value in the in box.  Then it
+	// returns true, and then the value is already in there.  So
+	// if we add it again, we get two of them.  Got it?
+
+	if (! in.containsItem(item))
+	  {
+	    in.addItem(item);
+	  }
 
 	if (debug)
 	  {
@@ -848,7 +872,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in.removeItem(item);
 
-    if (out != null)
+    // If the item is already in there, don't add it.
+    if ((out != null)  &&  (! out.containsItem(item)))
       {
 	out.addItem(item);
       }
