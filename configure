@@ -26,7 +26,7 @@ guessperl=`which perl5`
   guessperl=`which perl`
  fi
 
-echo "Where is perl installed? [$guessperl] \c" 
+echo "Where is perl5 installed? [$guessperl] \c" 
 
 read userperl
 
@@ -37,6 +37,7 @@ if  test ! -z "$userperl"; then
 	GPERL=$guessperl
 fi
 
+# echo $GPERL
 export GPERL
 
 # Find java
@@ -48,13 +49,13 @@ echo "What is the location of the directory where java is installed? [$guessjava
 
 read userjava
 
-if  [ ! -z $userjava ] 
-    then
+if  test ! -z "$userjava"; then
 	GJAVA=$userjava
     else
 	GJAVA=$guessjava
 fi
 
+# echo $GJAVA
 export GJAVA
 
 $GPERL $GROOTDIR/scripts/configurator.perl
