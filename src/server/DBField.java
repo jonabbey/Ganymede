@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1404,6 +1404,104 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
+   * This method returns a fieldDeltaRec object listing the changes
+   * between this field's state and that of the prior oldField state.
+   *
+   */
+
+  public fieldDeltaRec getVectorDiff(DBField oldField)
+  {
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
+    if (oldField == null)
+      {
+	throw new IllegalArgumentException("can't compare fields.. oldField is null");
+      }
+
+    if ((oldField.getID() != getID()) ||
+	(oldField.getObjTypeID() != getObjTypeID()))
+      {
+	throw new IllegalArgumentException("can't compare fields.. incompatible fields");
+      }
+
+    /* - */
+
+    fieldDeltaRec deltaRec = new fieldDeltaRec(getID());
+    Vector oldValues = oldField.values;
+    Vector newValues = values;
+    Object compareValue;
+
+    // make hashes of our before and after state so that we
+    // can do the add/delete calculations in a linear order.
+
+    Hashtable oldHash = new Hashtable(oldValues.size() + 1, 1.0f);
+
+    for (int i = 0; i < oldValues.size(); i++)
+      {
+	compareValue = oldValues.elementAt(i);
+
+	if (compareValue instanceof Byte[])
+	  {
+	    compareValue = new IPwrap((Byte[]) compareValue);
+	  }
+
+	oldHash.put(compareValue, compareValue);
+      }
+
+    Hashtable newHash = new Hashtable(newValues.size()+1, 1.0f);
+
+    for (int i = 0; i < newValues.size(); i++)
+      {
+	compareValue = newValues.elementAt(i);
+
+	if (compareValue instanceof Byte[])
+	  {
+	    compareValue = new IPwrap((Byte[]) compareValue);
+	  }
+
+	newHash.put(compareValue, compareValue);
+      }
+
+    // and do the compare
+
+    for (int i = 0; i < oldValues.size(); i++)
+      {
+	compareValue = oldValues.elementAt(i);
+	
+	if (compareValue instanceof Byte[])
+	  {
+	    compareValue = new IPwrap((Byte[]) compareValue);
+	  }
+
+	if (!newHash.containsKey(compareValue))
+	  {
+	    deltaRec.delValue(compareValue);
+	  }
+      }
+
+    for (int i = 0; i < newValues.size(); i++)
+      {
+	compareValue = newValues.elementAt(i);
+
+	if (compareValue instanceof Byte[])
+	  {
+	    compareValue = new IPwrap((Byte[]) compareValue);
+	  }
+	    
+	if (!oldHash.containsKey(compareValue))
+	  {
+	    deltaRec.addValue(compareValue);
+	  }
+      }
+
+    return deltaRec;
+  }
+
+  /**
+   *
    * Package-domain method to set the owner of this field.
    *
    * Used by the DBObject copy constructor.
@@ -1914,3 +2012,4 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
   }
 }
+
