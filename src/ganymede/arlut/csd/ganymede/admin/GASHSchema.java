@@ -1547,7 +1547,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     /*
       let's ditch the fucking RMI references in the tree's nodes,
-      please
+      please.  i'm tired of the schema editor keeping memory pinned
+      in the Ganymede server.
     */
 
     this.tree.destroyTree();

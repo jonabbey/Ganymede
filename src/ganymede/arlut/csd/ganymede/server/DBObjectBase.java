@@ -1592,7 +1592,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    catch (ClassNotFoundException ex)
 	      {
 		// it might seem like we would emit this message a lot
-		// of a class file wasn't in our custom.jar file, but
+		// if a class file wasn't in our custom.jar file, but
 		// in fact createHook only gets called once
 		// usually.. even if we can't find the class, we'll
 		// pass back a default DBEditObject
@@ -2273,6 +2273,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  // "Internal RemoteException in setClassInfo: {0}"
 					  ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
       }
+
+    // if the objectHook returned the default DBEditObject class even
+    // though we asked for something different, we'll need to complain
 
     if (objectHook.getClass().getName().equals("arlut.csd.ganymede.server.DBEditObject") &&
 	!classname.equals("arlut.csd.ganymede.server.DBEditObject"))
