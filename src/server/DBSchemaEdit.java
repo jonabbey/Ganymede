@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -124,7 +124,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
 	    oldNameSpaces.addElement(ns);
 	  }
-
       } // end synchronized (store)
   }
 
@@ -837,8 +836,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	store.schemaEditInProgress = false;
 
 	GanymedeAdmin.setState("Normal Operation");
-
-	store.notifyAll();
       }
 
     locked = false;
@@ -1057,8 +1054,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// unlock the server
 	
 	store.schemaEditInProgress = false;
-
-	store.notifyAll();
       }
 
     Ganymede.debug("DBSchemaEdit: released");
