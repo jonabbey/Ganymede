@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -543,12 +543,12 @@ final public class DBSession {
     switch (eObj.getStatus())
       {
       case DBEditObject.CREATING:
-	editSet.checkpoint(key);
+	checkpoint(key);
 	eObj.setStatus(DBEditObject.DROPPING);
 	break;
 
       case DBEditObject.EDITING:
-	editSet.checkpoint(key);
+	checkpoint(key);
 	eObj.setStatus(DBEditObject.DELETING);
 	break;
 
@@ -568,7 +568,7 @@ final public class DBSession {
 	  {
 	    // oops, irredeemable failure.  rollback.
 
-	    editSet.rollback(key);
+	    rollback(key);
 	    return retVal;
 	  }
 	else
@@ -590,7 +590,7 @@ final public class DBSession {
 	  {
 	    // oops, irredeemable failure.  rollback.
 		
-	    editSet.rollback(key);
+	    rollback(key);
 	    return retVal2;
 	  }
       }
@@ -636,7 +636,7 @@ final public class DBSession {
 					  "Error.. can't inactivate an object that has already been inactivated or deleted");
       }
 
-    editSet.checkpoint(key);
+    checkpoint(key);
 
     System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
 
@@ -652,7 +652,7 @@ final public class DBSession {
 
 	    System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
 
-	    editSet.rollback(key);
+	    rollback(key);
 	  }
 
 	// otherwise, we've got a wizard that the client will deal with.
@@ -703,7 +703,7 @@ final public class DBSession {
 					  "If you need to undo an object deletion, cancel your transaction.");
       }
 
-    editSet.checkpoint(key);
+    checkpoint(key);
 
     System.err.println("DBSession.reactivateDBObject(): Calling eObj.reactivate()");
 
@@ -719,7 +719,7 @@ final public class DBSession {
 
 	    System.err.println("DBSession.reactivateDBObject(): object refused reactivation, rolling back");
 
-	    editSet.rollback(key);
+	    rollback(key);
 	  }
       }
     else
@@ -730,6 +730,40 @@ final public class DBSession {
       }
 
     return retVal;
+  }
+
+  /**
+   *
+   * Convenience pass-through method
+   * 
+   * @see arlut.csd.ganymede.DBEditSet.checkpoint()
+   *
+   */
+
+  public final void checkpoint(String name)
+  {
+    if (editSet != null)
+      {
+	editSet.checkpoint(name);
+      }
+  }
+
+  /**
+   *
+   * Convenience pass-through method
+   * 
+   * @see arlut.csd.ganymede.DBEditSet.rollback()
+   *
+   */
+
+  public final boolean rollback(String name)
+  {
+    if (editSet != null)
+      {
+	return editSet.rollback(name);
+      }
+
+    return false;
   }
 
   /**
