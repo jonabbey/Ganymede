@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -994,7 +994,17 @@ class QueryRow implements ItemListener {
 
     // ok, refresh fieldChoice
 
-    fieldChoice.removeAllItems();
+    if (fieldChoice.getItemCount() > 0)
+      {
+	try
+	  {
+	    fieldChoice.removeAllItems();
+	  }
+	catch (IndexOutOfBoundsException e)
+	  {
+	    System.out.println("IndexOfOutBounds: " + e);
+	  }
+      }
 
     // we want to be able to allow the user to search on fields in
     // embedded objects
