@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -192,11 +192,21 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void shutdown() throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
     aSession.shutdown();
   }
 
   void dumpDB() throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
     aSession.dumpDB();
   }
 
@@ -653,6 +663,13 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     
     loginDialog = new StringDialog(loginResrc);
     Hashtable results = loginDialog.DialogShow();
+
+    if (!results.get("Account:").equals("supergash"))
+      {
+	controlMenu.remove(dumpMI);
+	controlMenu.remove(shutdownMI);
+	controlMenu.remove(schemaMI);
+      }
 
     try
       {

@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   /* --- */
 
+  private String adminName, adminPass;
   Admin admin;
   
   /* -- */
@@ -420,11 +421,13 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public GanymedeAdmin(Admin admin) throws RemoteException
+  public GanymedeAdmin(Admin admin, String adminName, String adminPass) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
     this.admin = admin;
+    this.adminName = adminName;
+    this.adminPass = adminPass;
 
     consoles.addElement(admin);
 
@@ -460,6 +463,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   public synchronized boolean kill(String user)
   {
     GanymedeSession temp;
+
+    if (!adminName.equals("supergash"))
+      {
+	return false;
+      }
 
     for (int i = 0; i < GanymedeServer.sessions.size(); i++)
       {
@@ -505,6 +513,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     Vector tempList;
 
     /* -- */
+
+    if (!adminName.equals("supergash"))
+      {
+	return false;
+      }
 
     setStatus("Server going down.. performing final dump");
 
@@ -569,6 +582,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   public boolean dumpDB()
   {
+    if (!adminName.equals("supergash"))
+      {
+	return false;
+      }
+
     setStatus("Dumping database");
 
     try
@@ -599,6 +617,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     DBObjectBase base;
 
     /* -- */
+
+    if (!adminName.equals("supergash"))
+      {
+	return null;
+      }
 
     Ganymede.debug("entering editSchema");
 

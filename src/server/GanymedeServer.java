@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -203,7 +203,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 	throw new RemoteException("Bad Admin Account / Password"); // do we have to throw remote here?
       }
 
-    adminSession aSession = new GanymedeAdmin(admin);
+    adminSession aSession = new GanymedeAdmin(admin, clientName, clientPass);
     Ganymede.debug("Admin console attached for admin " + clientName + " " + new Date());
     return aSession;
   }
