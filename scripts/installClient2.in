@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.4 $
-# $Date: 1999/01/21 17:20:11 $
+# $Revision: 1.5 $
+# $Date: 1999/01/21 17:24:59 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -123,9 +123,9 @@ if (!-e $vars{"JAVAHOME"}."/java") {
 
   if ($teststring =~ /\"1\.1\./) {
 
-      $teststring =~ /(\"[^\"]*\")/;
+      $teststring =~ /\"([^\"]*)\"/;
 
-      die "*Error, ".$vars{"JAVAHOME"}."/java is version $1.\nWe need 1.2 or greater for this install script.*\n\nAborting..";
+      die "Error, ".$vars{"JAVAHOME"}."/java is version $1.\nWe need 1.2 or greater for this install script.\n\nAborting..";
   }
 
   print "Found the java command ok\n";
