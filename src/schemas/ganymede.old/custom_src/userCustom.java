@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1005,20 +1005,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		return null;	// ok, whatever.. no rescan
 	      }
 	    
-	    boolean showem = enabling.booleanValue();
+	    result = new ReturnVal(true);
 	    
-	    ReturnVal retVal = new ReturnVal(true);
+	    result.addRescanField(userSchema.UNIXENABLED);
+	    result.addRescanField(userSchema.UID);
+	    result.addRescanField(userSchema.LOGINSHELL);
+	    result.addRescanField(userSchema.HOMEGROUP);
+	    result.addRescanField(userSchema.GROUPLIST);
+	    result.addRescanField(userSchema.NETGROUPS);
+	    result.addRescanField(userSchema.HOMEDIR);
+	    result.addRescanField(userSchema.VOLUMES);
 	    
-	    retVal.addRescanField(userSchema.UNIXENABLED);
-	    retVal.addRescanField(userSchema.UID);
-	    retVal.addRescanField(userSchema.LOGINSHELL);
-	    retVal.addRescanField(userSchema.HOMEGROUP);
-	    retVal.addRescanField(userSchema.GROUPLIST);
-	    retVal.addRescanField(userSchema.NETGROUPS);
-	    retVal.addRescanField(userSchema.HOMEDIR);
-	    retVal.addRescanField(userSchema.VOLUMES);
-	    
-	    return retVal;
+	    return result;
 	  }
       }
 
@@ -1163,6 +1161,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // approved for us.  An active wizard has approved the operation
 		
 	    renameWizard.unregister();
+
+	    // note that we don't have to return the rescan fields
+	    // directive here.. the active wizard is what is going to
+	    // respond directly to the user, we are presumably just
+	    // here because the wizard task-completion code went ahead
+	    // and called setValue on the user's name.. we'll trust
+	    // that code to return the rescan indicators.
 		
 	    return null;
 	  }
