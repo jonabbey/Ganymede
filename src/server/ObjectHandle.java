@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,6 @@ public class ObjectHandle {
   String label;
   Invid invid;
   boolean inactive, expirationSet, removalSet;
-  boolean creating, editing, deleting;
 
   listHandle lHandle = null;
 
@@ -46,7 +45,6 @@ public class ObjectHandle {
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
 
-    creating = editing = deleting = false;
   }
 
   public final String getLabel()
@@ -100,34 +98,19 @@ public class ObjectHandle {
     return removalSet;
   }
 
-  public final boolean isCreating()
+  public void setExpirationSet(boolean expirationSet)
   {
-    return creating;
+    this.expirationSet = expirationSet;
   }
 
-  public final boolean isEditing()
+  public void setInactive(boolean isInactive)
   {
-    return editing;
+    this.inactive = isInactive;
   }
 
-  public final boolean isDeleting()
+  public void setRemovalSet(boolean removalSet)
   {
-    return deleting;
-  }
-
-  public final void setCreating(boolean b)
-  {
-    creating = b;
-  }
-
-  public final void setEditing(boolean b)
-  {
-    editing = b;
-  }
-
-  public final void setDeleting(boolean b)
-  {
-    deleting = b;
+    this.removalSet = removalSet;
   }
 
   /**
