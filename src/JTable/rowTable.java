@@ -21,12 +21,14 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.13 $ %D%
+  Version: $Revision: 1.14 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
 */
 package arlut.csd.JTable;
+
+import arlut.csd.Util.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -45,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.13 $ %D% 
+ * @version $Revision: 1.14 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -58,6 +60,11 @@ public class rowTable extends baseTable implements ActionListener {
 
   rowSelectCallback
     callback;
+
+  PopupMenu rowMenu;
+  MenuItem SortByMI;
+  MenuItem RevSortByMI;
+  MenuItem DeleteColMI;
 
   /**
    * This is the base constructor for rowTable, which allows
@@ -99,8 +106,25 @@ public class rowTable extends baseTable implements ActionListener {
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill,
-	  menu);
+	  headers, horizLines, vertLines, vertFill, hVertFill, 
+	  menu, null);
+    
+    rowMenu = new PopupMenu();
+    SortByMI = new MenuItem("Sort By This Column");
+    RevSortByMI = new MenuItem("Reverse Sort By This Column");
+    DeleteColMI = new MenuItem("Delete This Column");
+
+    rowMenu.add(SortByMI);
+    rowMenu.add(RevSortByMI);
+    rowMenu.add(DeleteColMI);
+
+    SortByMI.addActionListener(this);
+    RevSortByMI.addActionListener(this);
+    DeleteColMI.addActionListener(this);
+    
+    canvas.add(rowMenu);
+
+    this.headerMenu = rowMenu;
 
     this.callback = callback;
 
@@ -532,6 +556,26 @@ public class rowTable extends baseTable implements ActionListener {
 	return;
       }
 
+    if (menuRow == -1)
+      {
+	if (e.getSource() == DeleteColMI)
+	  {
+	    this.deleteColumn(menuCol, false);
+	    refreshTable();
+	    return;
+	  }
+
+	if (e.getSource() == SortByMI)
+	  {
+	    resort(menuCol, true);
+	  }
+
+	if (e.getSource() == RevSortByMI)
+	  {
+	    resort(menuCol, false);
+	  }
+      }
+
     for (int i = 0; i < crossref.size(); i++)
       {
 	if (((rowHandle) crossref.elementAt(i)).rownum == menuRow)
@@ -552,6 +596,122 @@ public class rowTable extends baseTable implements ActionListener {
     menuRow = -1;
     menuCol = -1;
 
+  }
+
+  public void resort(int column, boolean forward)
+  {
+    new rowSorter(rows, forward, this, column).sort();
+    refreshTable();
+  }
+
+}
+
+/* from Fundamentals of Data Structures in Pascal, 
+        Ellis Horowitz and Sartaj Sahni,
+	Second Edition, p.339
+	Computer Science Press, Inc.
+	Rockville, Maryland
+	ISBN 0-88175-165-0 */
+
+class rowSorter {
+
+  Vector objects;
+  boolean forward;
+  rowTable parent;
+  int column;
+
+  /* -- */
+
+  public rowSorter(Vector objects, boolean forward, rowTable parent, int column)
+  {
+    this.objects = objects;
+    this.forward = forward;
+    this.parent = parent;
+    this.column = column;
+  }
+
+  int compareRows(int i, int j)
+  {
+    if (forward)
+      {
+	return ((tableRow)parent.rows.elementAt(i)).elementAt(column).text.compareTo(((tableRow)parent.rows.elementAt(j)).elementAt(column).text);
+      }
+    else
+      {
+	return ((tableRow)parent.rows.elementAt(j)).elementAt(column).text.compareTo(((tableRow)parent.rows.elementAt(i)).elementAt(column).text);
+      }
+  }
+
+  void quick(int first, int last)
+  {
+    int 
+      i,
+      j,
+      tmpInt;
+
+    Object
+      k, 
+      tmp;
+
+    if (first<last)
+      {
+	i = first; j = last+1; k = objects.elementAt(first);
+	do
+	  {
+	    do
+	      {
+		i++;
+	      } while ((i <= last) && compareRows(i,first) < 0);
+
+	    do
+	      {
+		j--;
+	      } while ((j >= first) && compareRows(j,first) > 0);
+
+	    if (i < j)
+	      {
+		tmp=objects.elementAt(j);
+		objects.setElementAt(objects.elementAt(i), j);
+		objects.setElementAt(tmp, i);
+
+		tmp=parent.crossref.elementAt(j);
+		parent.crossref.setElementAt(parent.crossref.elementAt(i), j);
+		parent.crossref.setElementAt(tmp, i);
+
+		tmpInt = ((rowHandle) parent.crossref.elementAt(j)).rownum;
+		((rowHandle) parent.crossref.elementAt(j)).rownum = ((rowHandle) parent.crossref.elementAt(i)).rownum;
+		((rowHandle) parent.crossref.elementAt(i)).rownum = tmpInt;
+
+		// don't need to change the hash.. the row to rowHandle mapping is
+		// still good.
+	      }
+	  } while (j > i);
+
+	tmp = objects.elementAt(first);
+	objects.setElementAt(objects.elementAt(j), first);
+	objects.setElementAt(tmp, j);
+
+	tmp=parent.crossref.elementAt(first);
+	parent.crossref.setElementAt(parent.crossref.elementAt(j), first);
+	parent.crossref.setElementAt(tmp, j);
+
+	tmpInt = ((rowHandle) parent.crossref.elementAt(first)).rownum;
+	((rowHandle) parent.crossref.elementAt(first)).rownum = ((rowHandle) parent.crossref.elementAt(j)).rownum;
+	((rowHandle) parent.crossref.elementAt(j)).rownum = tmpInt;
+
+	quick(first, j-1);
+	quick(j+1, last);
+      }
+  }
+
+  public void sort()
+  {
+    if (objects.size() < 2)
+      {
+	return;
+      }
+    
+    quick(0, objects.size()-1);
   }
 
 }
