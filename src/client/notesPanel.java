@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -29,10 +30,10 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 
 
-public class notesPanel extends JPanel{
+public class notesPanel extends JPanel implements KeyListener{
 
-  final static boolean debug = false;
-
+  boolean debug = false;
+  
   int 
     row = 0;
 
@@ -60,10 +61,16 @@ public class notesPanel extends JPanel{
   GridBagConstraints
     gbc;
 
-  public notesPanel(string_field notes_field, string_field creator_field, 
-		    date_field creation_date_field, string_field modifier_field,
-		    date_field modification_date_field, boolean editable, framePanel fp)
+  public notesPanel(string_field    notes_field,
+		    string_field    creator_field, 
+		    date_field      creation_date_field,
+		    string_field    modifier_field,
+		    date_field      modification_date_field,
+		    boolean         editable, 
+		    framePanel      fp)
     {
+      debug = fp.debug;
+
       if (debug)
 	{
 	  System.out.println("Creating notes panel");
@@ -174,6 +181,8 @@ public class notesPanel extends JPanel{
       EmptyBorder eb = fp.wp.emptyBorder5;
       TitledBorder tb = new TitledBorder("Notes");
       notesArea.setBorder(new CompoundBorder(tb,eb));
+      notesArea.setEditable(editable);
+      notesArea.addKeyListener(this);
 
       gbc.weighty = 1.0;
       gbc.weightx = 0.0;
@@ -212,7 +221,16 @@ public class notesPanel extends JPanel{
 	{
 	  if (notes_field != null)
 	    {
+	      if (debug)
+		{
+		  System.out.println("Updating notes: " + notesArea.getText().trim());
+		}
+
 	      notes_field.setValue(notesArea.getText().trim());
+	    }
+	  else if (debug)
+	    {
+	      System.out.println("notes_field is null, not updating.");
 	    }
 	}
       catch (RemoteException rx)
@@ -243,6 +261,15 @@ public class notesPanel extends JPanel{
     row++;
 
   }
+
+  public void keyPressed(KeyEvent e)
+  {
+    fp.gc.somethingChanged();
+    notesArea.removeKeyListener(this);
+  }
+  
+  public void keyReleased(KeyEvent e) {}
+  public void keyTyped(KeyEvent e) {}
 
 
 }

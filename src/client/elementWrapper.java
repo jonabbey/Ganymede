@@ -170,12 +170,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
    */
   public void open()
   {
-    vp.wp.getgclient().setWaitCursor();
-
     if (! loaded)
       {
-	setStatus("Loading container panel, you are just gonna have to wait.");
+	setStatus("Loading vector element.");
 	((containerPanel)my_component).load();
+	setStatus("Finished.");
 	add("Center", my_component);
 	loaded = true;
       }
@@ -188,7 +187,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     expand.setToolTipText("Expand this element");
     expanded = true;
 
-    vp.wp.getgclient().setNormalCursor();
   }
 
   /**
@@ -196,12 +194,10 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
    */
   public void close()
   {
-    vp.wp.getgclient().setWaitCursor();
     my_component.setVisible(false);	
     expand.setIcon(vp.wp.closeIcon);
     expand.setToolTipText("Collapse this element");
     expanded = false;
-    vp.wp.getgclient().setNormalCursor();
   }
 
   /**

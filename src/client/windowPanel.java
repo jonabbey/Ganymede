@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -497,18 +497,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     while (windows.hasMoreElements())
       {
 	w = (JInternalFrame)windowList.get(windows.nextElement());
-	  
-	// This seems backwards, but only non-editable windows are closable.
-	// So if isClosable is false, then it is editable, and we should
-	// close it.
 
-	if (w.isClosable())
+	if (w instanceof framePanel)
 	  {
-	    //This is a view window
-	  }
-	else
-	  {
-	    editables.addElement(w);
+	    if (((framePanel)w).isEditable())
+	      {
+		editables.addElement(w);
+	      }
 	  }
       }
   
