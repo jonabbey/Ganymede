@@ -6,7 +6,7 @@
    BSD passwd, master.passwd, and group files.
    
    Created: 30 July 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -328,7 +328,28 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
     else
       {
 	group = getObject(groupInvid);
-	gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
+
+	if (group == null)
+	  {
+	    System.err.println("BSDBuilder.writeUserLine(): couldn't get reference to home group");
+
+	    gid = -1;
+	  }
+	else
+	  {
+	    Integer gidInt = (Integer) group.getFieldValueLocal(groupSchema.GID);
+
+	    if (gidInt == null)
+	      {
+		System.err.println("BSDBuilder.writeUserLine(): couldn't get gid value");
+
+		gid = -1;
+	      }
+	    else
+	      {
+		gid = gidInt.intValue();
+	      }
+	  }
       }
 
     name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
@@ -349,7 +370,12 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
     result.append(":");
     result.append(Integer.toString(gid));
     result.append(":");
-    result.append(classification);
+
+    if (classification != null && !classification.equals(""))
+      {
+	result.append(classification);
+      }
+
     result.append(":0:0:");
     result.append(name);
 
@@ -419,7 +445,16 @@ public class BSDBuilderTask extends GanymedeBuilderTask {
     // currently in the Ganymede schema, group passwords aren't in passfields.
 
     pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
-    gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
+
+    Integer gidInt = (Integer) object.getFieldValueLocal(groupSchema.GID);
+
+    if (gidInt == null)
+      {
+	System.err.println("Error, couldn't find gid for group " + groupname);
+	return;
+      }
+
+    gid = gidInt.intValue();
     
     // we currently don't explicitly record the home group.. just take the first group
     // that the user is in.
