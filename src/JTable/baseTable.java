@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.20 $ %D%
+  Version: $Revision: 1.21 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.20 $ %D%
+ * @version $Revision: 1.21 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -2082,6 +2082,45 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	reShape();
       }
   }
+
+  /**
+   *
+   * This method is used to adjust the vertical scrollbar (if present)
+   * such that row <rowIndex> has its topEdge at y
+   *
+   */
+
+  synchronized void scrollRowTo(int rowIndex, int y)
+  {
+    tableRow row;
+    int currenty;
+    int currentVbar;
+
+    /* -- */
+
+    if (!vbar_visible)
+      {
+	return;
+      }
+    
+    row = (tableRow) rows.elementAt(rowIndex);
+
+    currentVbar = vbar.getValue();
+    currenty = row.getTopEdge() - currentVbar;
+
+    System.err.println("scrollRowTo: row " + row + " is currently at " + currenty);
+    
+    // ok, currenty is where the row's top edge is now.
+    // we want it to be at y, so we adjust the vbar's value.
+
+    System.err.println("vbar is currently at " + currentVbar);
+
+    int newval = currentVbar + currenty - y;
+
+    System.err.println("setting vbar to " + newval);
+
+    vbar.setValue(newval);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -2114,6 +2153,8 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     hbar_old = 0, 
     vbar_old = 0,
     colDrag = 0,
+    dragRowSave = 0,
+    dragRowSaveVY = 0,
     colXOR = -1,
     v_offset = 0,		// y value of the topmost displayed pixel
     h_offset = 0,		// x value of the leftmost displayed pixel
@@ -2465,7 +2506,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
 
-	for (int i = first_row; i <= last_row; i++)
+	for (int i = first_row; i < last_row; i++)
 	  {
 	    row = (tableRow) rt.rows.elementAt(i);
 
@@ -2547,7 +2588,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	for (int i = first_row; i <= last_row; i++)
 	  {
-	    if (i > rt.rows.size())
+	    if (i >= rt.rows.size())
 	      {
 		if (rt.hVertFill)
 		  {
@@ -2915,6 +2956,11 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 		// pole.. we'll drag it
 
 		colDrag = col;
+		dragRowSave = mapClickToRow(vy);
+		dragRowSaveVY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
+
+		System.err.println("Remembering drag row.. row: " + dragRowSave +
+				   ", topEdge " + dragRowSaveVY);
 	      }
 	    else if ((vx >= (colLoc + colgrab)) &&
 		     (vx <= (((Integer) rt.colPos.elementAt(col+1)).intValue() - colgrab)))
@@ -3101,6 +3147,8 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	rt.calcCols();	// update colPos[] based on origColWidths[]
 
+	// we want to wrap the columns fore and aft.
+
 	tableRow tr;
 	tableCell cl;
 	tableCol 
@@ -3117,6 +3165,12 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	  }
 
 	rt.reCalcRowPos(0);
+
+	// now scroll the table so that the row the user
+	// grabbed the bar in will have it's top edge
+	// positioned correctly.
+
+	rt.scrollRowTo(dragRowSave, dragRowSaveVY);
 
 	render();
 	repaint();
