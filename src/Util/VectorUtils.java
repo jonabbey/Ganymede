@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2002/01/14 22:27:24 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2002/01/23 20:05:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -124,6 +124,10 @@ public class VectorUtils {
       }
     else
       {
+	// If we have a big enough set of elements to union, use a
+	// temporary hashtable so that we have better scalability for
+	// item lookup.
+
 	Hashtable workSet = new Hashtable();
 	Vector result = new Vector();
 	Enumeration enum;
