@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -288,7 +288,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  
 	    if (defaultBase != null)
 	      {
-		baseChoice.select(defaultBase.getName());
+		baseChoice.setSelectedItem(defaultBase.getName());
 		this.baseName = defaultBase.getName();
 	      }
 	    else 
@@ -1045,7 +1045,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     byte opValue;
     Component[] tempAry;
 
-    Choice 
+    JComboBox
       tempChoice1,
       tempChoice2,
       tempChoice3;
@@ -1071,13 +1071,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
        
     tempAry = (Component[]) this.Rows.elementAt(0); // This is the first row in the Vector
 
-    tempChoice1 = (Choice) tempAry[1];
+    tempChoice1 = (JComboBox) tempAry[1];
     fieldName = (String) tempChoice1.getSelectedItem();
 
-    tempChoice2 = (Choice) tempAry[3];
+    tempChoice2 = (JComboBox) tempAry[3];
     notValue = (String) tempChoice2.getSelectedItem();
 
-    tempChoice3 =  (Choice) tempAry[5];
+    tempChoice3 =  (JComboBox) tempAry[5];
     operator = (String)tempChoice3.getSelectedItem();
     
     Object tempObj = tempAry[7];
@@ -1311,13 +1311,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      {
 		tempAry = (Component[]) this.Rows.elementAt(i);
 
-		tempChoice1 = (Choice) tempAry[1];
+		tempChoice1 = (JComboBox) tempAry[1];
 		fieldName = (String) tempChoice1.getSelectedItem();
 
-		tempChoice2 = (Choice) tempAry[3];
+		tempChoice2 = (JComboBox) tempAry[3];
 		notValue = (String) tempChoice2.getSelectedItem();
 
-		tempChoice3 =  (Choice) tempAry[5];
+		tempChoice3 =  (JComboBox) tempAry[5];
 		operator = (String) tempChoice3.getSelectedItem();
 	 
 		if (tempObj instanceof JTextField)
@@ -1915,7 +1915,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	
 	else 
 	  {
-	    Choice tempChoice = (Choice) tempRow[1];
+	    JComboBox tempChoice = (JComboBox) tempRow[1];
 	    String myField = (String) tempChoice.getSelectedItem();
 	    tempRow[3].setVisible(false);
 	    tempRow[3] = getIsNot(myField);
@@ -2354,6 +2354,22 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       
       // return null;  // If this happens it's bad.
     }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                         qChoice
+
+------------------------------------------------------------------------------*/
+
+class qChoice extends JComboBox {
+  
+  int qRow; // keeps track of which row the choice menu is located in
+  
+  public int getRow()
+  {
+    return qRow;
+  }
 }
 
 /*------------------------------------------------------------------------------
