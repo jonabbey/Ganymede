@@ -5,8 +5,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/07/15 01:06:04 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/05/25 19:19:57 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -418,7 +418,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
    * @param e the FocusEvent that needs to be process
    */
 
-  public synchronized void processFocusEvent(FocusEvent e)
+  public void processFocusEvent(FocusEvent e)
   {
     super.processFocusEvent(e);
 
