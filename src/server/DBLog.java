@@ -6,7 +6,7 @@
    reports from the system log based on specific criteria.
    
    Created: 31 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -206,7 +206,7 @@ public class DBLog {
 	  {
 	    // bombs away!
 
-	    mailer.sendmsg("jonabbey@arlut.utexas.edu", 
+	    mailer.sendmsg(Ganymede.returnaddrProperty,
 			   emailList,
 			   "Ganymede: " + ((title == null) ? type.name : title),
 			   message);
@@ -304,7 +304,7 @@ public class DBLog {
 	  {
 	    // bombs away!
 
-	    mailer.sendmsg("jonabbey@arlut.utexas.edu", 
+	    mailer.sendmsg(Ganymede.returnaddrProperty,
 			   emailList,
 			   "Ganymede: " + type.name,
 			   message);
@@ -413,7 +413,7 @@ public class DBLog {
 
 	try
 	  {
-	    mailer.sendmsg("jonabbey@arlut.utexas.edu", 
+	    mailer.sendmsg(Ganymede.returnaddrProperty,
 			   mailout.addresses,
 			   "Ganymede: transaction notification",
 			   description);
