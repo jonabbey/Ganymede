@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/08/01 18:35:17 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2001/08/01 18:51:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -69,9 +69,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   static QueryResult systemTypes = new QueryResult(); 
   static Date systemTypesStamp = null;
-
-  static QueryResult osChoices = new QueryResult();
-  static Date osChoicesStamp = null;
 
   // ---
 
@@ -598,46 +595,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
   }
 
-  void updateOSChoicesList()
-  {
-    synchronized (osChoices)
-      {
-	DBObjectBase base = Ganymede.db.getObjectBase("OS Choice");
-
-	// just go ahead and throw the null pointer if we didn't get our base.
-
-	if (osChoicesStamp == null || osChoicesStamp.before(base.getTimeStamp()))
-	  {
-	    if (debug)
-	      {
-		System.err.println("userCustom - updateShellChoiceList()");
-	      }
-
-	    osChoices = new QueryResult();
-
-	    Query query = new Query("OS Choice", null, false);
-
-	    // internalQuery doesn't care if the query has its filtered bit set
-	    
-	    Vector results = internalSession().internalQuery(query);
-	
-	    for (int i = 0; i < results.size(); i++)
-	      {
-		osChoices.addRow(null, results.elementAt(i).toString(), false); // no invid
-	      }
-
-	    if (osChoicesStamp == null)
-	      {
-		osChoicesStamp = new Date();
-	      }
-	    else
-	      {
-		osChoicesStamp.setTime(System.currentTimeMillis());
-	      }
-	  }
-      }
-  }
-
   /**
    * <p>Allocates a free I.P. address for the given network object.  This
    * is done using the {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}
@@ -896,12 +853,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     if (field.getID() == systemSchema.VOLUMES)
       {
 	return null;		// no choices for volumes
-      }
-
-    if (field.getID() == systemSchema.OS)
-      {
-	updateOSChoicesList();
-	return osChoices;
       }
 
     if (field.getID() == systemSchema.SYSTEMTYPE)
