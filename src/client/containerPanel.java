@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.67 $ %D%
+    Version: $Revision: 1.68 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -713,6 +713,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    ((JstringField)comp).setText((String)field.getValue());
 	  }
+	else if (comp instanceof JstringArea)
+	  {
+	    ((JstringArea)comp).setText((String)field.getValue());
+	  }
 	else if (comp instanceof JdateField)
 	  {
 	    // we don't need to worry about turning off callbacks
@@ -1229,8 +1233,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	chosen = res.getListHandles();
       }
 
-    ss.update(available, chosen);
-
+    try
+      {
+	ss.update(available, chosen);
+      }
+    catch (Exception e)
+      {
+	System.out.println("Caught exception updating StringSelector: " + e);
+      }
   }
 
   /**
@@ -1326,7 +1336,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if ((v.getSource() instanceof JstringField) ||
 	    (v.getSource() instanceof JnumberField) ||
 	    (v.getSource() instanceof JIPField) ||
-	    (v.getSource() instanceof JdateField))
+	    (v.getSource() instanceof JdateField) ||
+	    (v.getSource() instanceof JstringArea))
 	  {
 	    db_field field = (db_field) objectHash.get(v.getSource());
 
@@ -1999,12 +2010,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     gbc.gridx = 1;
     gbc.weightx = 1.0;
-    gbl.setConstraints(comp, gbc);
-    add(comp);
+    
+    if (comp instanceof JstringArea)
+      {
+	JScrollPane sp = new JScrollPane(comp);
+	gbl.setConstraints(sp, gbc);
+	add(sp);
 
-    setRowVisible(comp, visible);
+	setRowVisible(sp, visible);
+      }
+    else
+      {
+	gbl.setConstraints(comp, gbc);
+	add(comp);
+	
+	setRowVisible(comp, visible);
+      }
   }
-
   /**
    *
    * This private method toggles the visibility of a field component
@@ -2669,12 +2691,39 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	    	    
       }
+    else if (fieldTemplate.isMultiLine())
+      {
+	// This gets a JstringArea
+	JstringArea sa = new JstringArea(6, 40);
+	sa.setEditable(fieldInfo.isEditable());		
+	sa.setAllowedChars(fieldTemplate.getOKChars());
+	sa.setDisallowedChars(fieldTemplate.getBadChars());
+	sa.setCallback(this);
+	
+	objectHash.put(sa, field);
+	shortToComponentHash.put(new Short(fieldInfo.getID()), sa);
+			      
+	sa.setText((String)fieldInfo.getValue());
+	    			
+	if (editable && fieldInfo.isEditable())
+	  {
+	    sa.setCallback(this);
+	  }
+
+	sa.setEditable(editable && fieldInfo.isEditable());
+
+	sa.setToolTipText(fieldTemplate.getComment());
+
+	addRow( sa, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+      }
     else
       {
 	// It's not a choice
-      
-	sf = new JstringField(20,
-			      field.maxSize(),
+
+	int maxLength = fieldTemplate.getMaxLength();
+
+	sf = new JstringField(40 > maxLength ? maxLength + 1 : 40,
+			      maxLength,
 			      editable && fieldInfo.isEditable(),
 			      false,
 			      fieldTemplate.getOKChars(),
@@ -2728,8 +2777,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	sf = new JstringField(20,
-			      field.maxSize(),
+	int maxLength = fieldTemplate.getMaxLength();
+	sf = new JstringField(40 > maxLength ? maxLength + 1 : 40,
+			      maxLength,
 			      true,
 			      false,
 			      null,
@@ -2790,7 +2840,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     nf.setEditable(editable && fieldInfo.isEditable());
-    nf.setColumns(20);
+    nf.setColumns(40);
     
     nf.setToolTipText(fieldTemplate.getComment());
     
