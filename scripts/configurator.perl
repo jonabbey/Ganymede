@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.21 $
-# $Date: 1999/01/20 00:33:14 $
+# $Revision: 1.22 $
+# $Date: 1999/01/20 01:14:21 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -211,7 +211,7 @@ sub write_syncjars {
 
     while (<SYNCIN>){
 	s/\/opt\/bin\/perl5/$perlname/;
-	s/\<\#CLASSDIR\#\>/$rootdir/src/classes/;
+	s/\<\#CLASSDIR\#\>/$rootdir\/src\/classes/;
 	print SYNCOUT $_;
     }
 
