@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2002/03/02 01:35:01 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2002/10/05 05:46:51 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.133 $ $Date: 2002/03/02 01:35:01 $ $Name:  $
+ * @version $Revision: 1.134 $ $Date: 2002/10/05 05:46:51 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2919,7 +2919,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (editable && fieldInfo.isEditable())
       {
-	JpassField pf = new JpassField(gc, true, 10, 8, editable && fieldInfo.isEditable());
+	JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
 	objectHash.put(pf, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), pf);
 			
