@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2000/09/30 21:52:51 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2000/09/30 22:50:12 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.47 $ %D%
+ * @version $Revision: 1.48 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -324,121 +324,6 @@ public interface Session extends Remote {
    */
 
   ReturnVal   openTransaction(String description, boolean interactive) throws RemoteException;
-
-  /**
-   * <p>This method call causes the server to checkpoint the current
-   * state of an open transaction on the server.  At any time between
-   * the checkpoint() call and a concluding
-   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()} or
-   * {@link arlut.csd.ganymede.GanymedeSession#abortTransaction() abortTransaction()}
-   * thereafter, the server can be instructed to
-   * revert the transaction to the state at the time of this
-   * checkpoint by calling 
-   * {@link arlut.csd.ganymede.GanymedeSession#rollback(java.lang.String) rollback()}
-   * with the same key.</p>
-   *
-   * <p>Checkpointing only makes sense in the context of a transaction;
-   * it is an error to call either checkpoint() or rollback() if
-   * the server does not have a transaction open.</p>
-   *
-   * <p>Further, checkpointing is essentially a serialized
-   * mechanism.. multiple threads may not have checkpoints open on a
-   * transaction simultaneously.  If another thread (either a
-   * server-local thread, or a remote client manipulating a db_object
-   * or db_field reference in a way that would necessitate
-   * checkpointing) has a checkpoint active on this session's transaction,
-   * the checkpoint() call will block until the earlier thread clears
-   * the checkpoint.</p>
-   *
-   * <p>Because RMI does not guarantee that subsequent calls from the
-   * client will map into the same server thread, a remote RMI client
-   * should not depend on being able to nest checkpoints.  There is
-   * no restriction on having the same thread perform a rollback or
-   * popCheckpoint, however, so single-depth checkpointing can reliably
-   * be done from a remote client.</p>
-   *
-   * <p>Attempting to nest checkpoints can cause deadlock, as follows:</p>
-   *
-   * <pre>
-   * checkpoint("1");
-   * &lt;changes&gt;
-   * checkpoint("2");
-   * &lt;changes&gt;
-   * rollback("2");
-   * rollback("1");
-   * </pre>
-   *
-   * <p>In this case, the checkpoint("2") call will likely block until such
-   * time as the rollback("1") call is made or the transaction itself is
-   * committed or aborted, which may never happen because the client itself
-   * is blocked on the checkpoint("2") call.</p>
-   *
-   * <p>This restriction does not apply for a single thread in server
-   * side code, which can reliably make subsequent checkpoint() calls
-   * on the same thread.</p>
-   */
-
-  void        checkpoint(String key) throws RemoteException;
-
-
-  /**
-   * <p>This method call causes the server to remove a named
-   * checkpoint on the current state of an open transaction on the
-   * server, thereby removing the ability to rollback the transaction
-   * to the point at which it was checkpointed.</p>
-   *
-   * <p>Because the server serializes checkpointing by thread, it is
-   * essential to perform a popCheckpoint() on a checkpoint established
-   * by a remote client as soon as it is determined that the checkpoint
-   * is no longer needed.<p>
-   *
-   * <p>Like checkpointing, popCheckpoint() only makes sense in the
-   * context of a transaction; it is an error to call popCheckpoint()
-   * if the server does not have a transaction open.</p> 
-   */
-
-  void        popCheckpoint(String key) throws RemoteException;
-
-  /**
-   * <p>This method call causes the server to roll back the state
-   * of an open transaction on the server to the point at which
-   * a named checkpoint was established.</p>
-   *
-   * <p>Checkpoints are held in a Stack on the server;  it is never
-   * permissible to try to 'rollforward' to a checkpoint that
-   * was itself rolled back.  That is, the following sequence is 
-   * not logically permissible.</p>
-   *
-   * <pre>
-   * checkpoint("1");
-   * &lt;changes&gt;
-   * checkpoint("2");
-   * &lt;changes&gt;
-   * rollback("1");
-   * rollback("2");
-   * </pre>
-   *
-   * <p>At the time that the rollback("1") call is made, the server
-   * forgets everything that has occurred in the transaction since
-   * checkpoint 1.  checkpoint 2 no longer exists, and so the second
-   * rollback call will return false.</p>
-   *
-   * <p>As mentioned in the {@link
-   * arlut.csd.ganymede.GanymedeSession#checkpoint(java.lang.String)
-   * checkpoint()} javadoc, stacked checkpoints will generally not
-   * work for remote clients, even if the checkpoint and rollback
-   * ordering is done properly.</p>
-   *
-   * <p>rollback only makes sense in the context of a transaction; it
-   * is an error to call rollback() if the server does not have a
-   * transaction open.</p>
-   *
-   * @return true if the rollback could be carried out successfully.
-   * 
-   * @see arlut.csd.ganymede.Session 
-   */
-
-  boolean     rollback(String key) throws RemoteException;
 
   /**
    * <p>This method causes all changes made by the client to be 'locked in'
