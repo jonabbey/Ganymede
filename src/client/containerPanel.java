@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.58 $ %D%
+    Version: $Revision: 1.59 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2472,7 +2472,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    throw new RuntimeException("Could not check to see if field was mustChoose.");
 	  }
 
-	combo.setEditable(mustChoose); 
+	combo.setEditable(!mustChoose); 
 
 	if (currentChoice == null)
 	  {
@@ -2482,23 +2482,26 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }	  
 	    combo.addItem("<none>");
 	    combo.setSelectedItem("<none>");
-	    if (mustChoose)
+
+
+	    /*
+	     * Currently, string_fields aren't smart enough to
+	     * tell us whether or not they should allow
+	     * <none>, so we leave it in.  the
+	     * stringComboNoneListener could be used here, if
+	     * the string_fields had some kind of allowNone()
+	     * method.
+	     *
+	     if (mustChoose)
 	      {
-		/*
-		 * Currently, string_fields aren't smart enough to
-		 * tell us whether or not they should allow
-		 * <none>, so we leave it in.  the
-		 * stringComboNoneListener could be used here, if
-		 * the string_fields had some kind of allowNone()
-		 * method.
-		 *
-		combo.addItemListener(new stringComboNoneListener(combo));
-		if (debug)
-		  {
-		    System.out.println("Adding new stringComboNoneListener");
-		  }
-		*/
+	        combo.addItemListener(new stringComboNoneListener(combo));
+	        if (debug)
+	          {
+	            System.out.println("Adding new stringComboNoneListener");
+	          }
 	      }
+	    */
+	    
 	  }
 	else
 	  {
@@ -2897,7 +2900,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
 	combo.setMaximumRowCount(12);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-	combo.setEditable(false); // This should be true
+	combo.setEditable(false);
 	combo.setVisible(true);
 
 	if (currentChoice != null)
