@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/01/08 03:29:01 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/03/22 06:24:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -58,6 +59,9 @@ import MD5Crypt;
 import jcrypt;
 
 import arlut.csd.JDialog.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -414,6 +418,41 @@ public class PasswordDBField extends DBField implements pass_field {
 	    md5CryptPass = null;
 	  }
       }
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+    xmlOut.startElement("password");
+    
+    if (uncryptedPass != null && md5CryptPass == null && cryptedPass == null)
+      {
+	xmlOut.attribute("plaintext", uncryptedPass);
+      }
+    else
+      {
+	if (cryptedPass != null)
+	  {
+	    xmlOut.attribute("crypt", cryptedPass);
+	  }
+	
+	if (md5CryptPass != null)
+	  {
+	    xmlOut.attribute("md5crypt", cryptedPass);
+	  }
+      }
+
+    xmlOut.endElement("password");
+    xmlOut.endElement(this.getName());
   }
 
   /**

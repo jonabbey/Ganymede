@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/02/22 07:21:22 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/03/22 06:24:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -223,11 +223,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     if (caseInsensitive)
       {
-	xmlOut.attribute("case-sensitive", "0");
+	xmlOut.attribute("case-sensitive", "false");
       }
     else
       {
-	xmlOut.attribute("case-sensitive", "1");
+	xmlOut.attribute("case-sensitive", "true");
       }
 
     xmlOut.endElement("namespace");

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/01/08 03:28:57 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/03/22 06:24:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -52,7 +53,12 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.rmi.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -75,6 +81,9 @@ import java.rmi.*;
  */
 
 public class DateDBField extends DBField implements date_field {
+
+  static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
+						     java.util.Locale.US);
 
   /**
    * <P>Receive constructor.  Used to create a DateDBField from a
@@ -161,6 +170,30 @@ public class DateDBField extends DBField implements date_field {
   void receive(DataInput in) throws IOException
   {
     value = new Date(in.readLong());
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+
+    emitDateXML(xmlOut, value());
+
+    xmlOut.endElement(this.getName());
+  }
+
+  public void emitDateXML(XMLWriter xmlOut, Date value) throws IOException
+  {
+    xmlOut.startElement("date");
+    xmlOut.attribute("val", formatter.format(value));
+    xmlOut.attribute("timecode", java.lang.Long.toString(value.getTime()));
+    xmlOut.endElement("date");
   }
 
   // ****

@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/06/24 00:56:26 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/03/22 06:24:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -344,6 +344,33 @@ public class PermEntry implements java.io.Serializable {
     if (delete)
       {
 	result.append("delete ");
+      }
+
+    return result.toString();
+  }
+
+  public String getXMLCode()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (visible)
+      {
+	result.append("V");
+      }
+
+    if (editable)
+      {
+	result.append("E");
+      }
+
+    if (create)
+      {
+	result.append("C");
+      }
+
+    if (delete)
+      {
+	result.append("D");
       }
 
     return result.toString();

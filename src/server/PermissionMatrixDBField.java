@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2000/03/16 06:29:53 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/03/22 06:24:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -55,6 +56,9 @@ import java.util.*;
 import java.rmi.*;
 
 import arlut.csd.JDialog.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -346,64 +350,13 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    *
    * This method does a dump to System.err of the permission
-   * contents held in matrix.
+   * contents held in PermissionMatrixDBField me.
    *
    */
 
   public void debugdump(PermissionMatrixDBField me)
   {
-    Enumeration enum;
-    String key;
-    PermEntry entry;
-    short basenum;
-    String basename;
-    Hashtable baseHash = new Hashtable();
-    Vector vec;
-
-    /* -- */
-
-    System.err.println("PermMatrix DebugDump");
-
-    enum = me.matrix.keys();
-
-    while (enum.hasMoreElements())
-      {
-	key = (String) enum.nextElement();
-
-	entry = (PermEntry) me.matrix.get(key);
-
-	basename = decodeBaseName(key);
-
-	if (baseHash.containsKey(basename))
-	  {
-	    vec = (Vector) baseHash.get(basename);
-	  }
-	else
-	  {
-	    vec = new Vector();
-	    baseHash.put(basename, vec);
-	  }
-
-	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
-      }
-
-    enum = baseHash.keys();
-
-    while (enum.hasMoreElements())
-      {
-	key = (String) enum.nextElement();
-
-	//	System.err.println("\nBase - " + key + "\n");
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
-	  {
-	    System.err.println(me.toString() + " " + key + ":" + vec.elementAt(i));
-	  }
-
-	System.err.println();
-      }
+    debugdump(me.matrix);
   }
 
   public static void debugdump(PermMatrix matrix)
@@ -420,58 +373,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   private static void debugdump(Hashtable matrix)
   {
-    Enumeration enum;
-    String key;
-    PermEntry entry;
-    short basenum;
-    String basename;
-    Hashtable baseHash = new Hashtable();
-    Vector vec;
-
-    /* -- */
-
-    System.err.println("PermMatrix DebugDump");
-
-    enum = matrix.keys();
-
-    while (enum.hasMoreElements())
-      {
-	key = (String) enum.nextElement();
-
-	entry = (PermEntry) matrix.get(key);
-
-	basename = decodeBaseName(key);
-
-	if (baseHash.containsKey(basename))
-	  {
-	    vec = (Vector) baseHash.get(basename);
-	  }
-	else
-	  {
-	    vec = new Vector();
-	    baseHash.put(basename, vec);
-	  }
-
-	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
-      }
-
-    enum = baseHash.keys();
-
-    while (enum.hasMoreElements())
-      {
-	key = (String) enum.nextElement();
-
-	//	System.err.println("\nBase - " + key + "\n");
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
-	  {
-	    System.err.println(key + ":" + vec.elementAt(i));
-	  }
-
-	System.err.println();
-      }
+    System.err.println(debugdecode(matrix));
   }
 
   /**
@@ -485,7 +387,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     Enumeration enum;
     String key;
     PermEntry entry;
-    short basenum;
     String basename;
     Hashtable baseHash = new Hashtable();
     Vector vec;
@@ -871,6 +772,110 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
 
     defined = true;
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    Enumeration enum, enum2;
+    String key;
+    PermEntry entry;
+    String basename;
+    Hashtable baseHash = new Hashtable();
+    Hashtable innerTable;
+
+    /* -- */
+
+    // build up a hashtable structure so we get all the permission
+    // entries grouped by base.
+
+    enum = matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	entry = (PermEntry) matrix.get(key);
+
+	basename = decodeBaseName(key);
+
+	if (baseHash.containsKey(basename))
+	  {
+	    innerTable = (Hashtable) baseHash.get(basename);
+	  }
+	else
+	  {
+	    innerTable = new Hashtable();
+	    baseHash.put(basename, innerTable);
+	  }
+
+	innerTable.put(decodeFieldName(key), entry);
+      }
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+
+    indentLevel++;
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement("permissions");
+
+    indentLevel++;
+
+    enum = baseHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	innerTable = (Hashtable) baseHash.get(key);
+	entry = (PermEntry) innerTable.get("[base]");
+
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement(key);
+
+	if (entry != null)
+	  {
+	    xmlOut.attribute("perm", entry.getXMLCode());
+	  }
+
+	indentLevel++;
+
+	enum2 = innerTable.keys();
+
+	while (enum2.hasMoreElements())
+	  {
+	    String fieldKey = (String) enum2.nextElement();
+
+	    if (fieldKey.equals("[base]"))
+	      {
+		continue;	// we've already wrote perms for the base
+	      }
+
+	    PermEntry fieldEntry = (PermEntry) innerTable.get(fieldKey);
+
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement(fieldKey);
+	    xmlOut.attribute("perm", fieldEntry.getXMLCode());
+	    xmlOut.endElement(fieldKey);
+	  }
+
+	xmlOut.endElement(key);
+	indentLevel--;
+      }
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement("permissions");
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement(this.getName());
   }
 
   public synchronized String getValueString()

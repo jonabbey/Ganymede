@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/01/08 03:29:01 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/03/22 06:24:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -53,6 +54,9 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -159,6 +163,29 @@ public class NumericDBField extends DBField implements num_field {
     value = new Integer(in.readInt());
   }
 
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+    emitIntXML(xmlOut, value());
+    xmlOut.endElement(this.getName());
+  }
+
+  public void emitIntXML(XMLWriter xmlOut, int value) throws IOException
+  {
+    xmlOut.startElement("int");
+    xmlOut.attribute("val", java.lang.Integer.toString(value));
+    xmlOut.endElement("int");
+  }
+
   // ****
   //
   // type-specific accessor methods
@@ -177,6 +204,8 @@ public class NumericDBField extends DBField implements num_field {
 
   public int value(int index)
   {
+    // numeric can't be a vector field
+
     throw new IllegalArgumentException("vector accessor called on scalar field");
   }
 

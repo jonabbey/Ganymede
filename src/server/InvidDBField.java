@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2000/03/16 06:29:52 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2000/03/22 06:24:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,6 +58,9 @@ import java.rmi.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.VectorUtils;
 
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     InvidDBField
@@ -87,7 +90,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.123 $ %D%
+ * @version $Revision: 1.124 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -409,6 +412,109 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	value = new Invid(in.readShort(), in.readInt());
       }
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+
+    if (!isVector())
+      {
+	emitInvidXML(xmlOut, value());
+      }
+    else
+      {
+	Vector values = getVectVal();
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel+1);
+	    emitInvidXML(xmlOut, (Invid) values.elementAt(i));
+	  }
+
+	XMLUtils.indent(xmlOut, indentLevel);
+      }
+
+    xmlOut.endElement(this.getName());
+  }
+
+  /**
+   * <P>This method writes out an Invid in XML form to a Ganymede
+   * XML data dump stream.</P>
+   *
+   * <P>Whenever Ganymede writes out an Invid to an XML data dump, it
+   * uses an &lt;invid&gt; element with two attributes, type and
+   * id.  type is the name of the object type that the invid points
+   * to, and id is an identifying label for the target object.</P>
+   *
+   * <P>When it can, emitInvidXML() will use a human-readable label
+   * for the id attribute.  This can only be done, however, in those
+   * cases where the object in question has a designated label field
+   * and in which that label field is guaranteed to have a
+   * unique value through the use of a DBNameSpace.  If emitInvidXML()
+   * cannot guarantee that the label will be unique, it will write
+   * out a label based on the target object's type-specific object
+   * number, with a '#' prefix.</P>
+   *
+   * <P>All id's attributes written out by emitInvidXML() will be
+   * written with a '#' prefix to indicate that the id reference
+   * is local to the file being written out.  That is, when emitInvidXML()
+   * writes an invid to an XMLWriter stream, it puts an # at the start
+   * of the id attribute to indicate that the reference is to another
+   * object defined in the XML stream.  If external code (such as a Perl
+   * script) wants to indicate a link to an object pre-existing in
+   * the server that will be reading the XML file, it will leave out
+   * the # prefix, and the server will attempt to find the id reference
+   * (either numeric or unique label) in its pre-existing database.</P>
+   */
+
+  public void emitInvidXML(XMLWriter xmlOut, Invid invid) throws IOException
+  {
+    String type;
+    String label;
+    DBObject target;
+    DBField targetField;
+
+    /* -- */
+
+    target = Ganymede.internalSession.getSession().viewDBObject(invid);
+
+    if (target == null)
+      {
+	System.err.println("InvidDBField.emitInvidXML(): " + this.toString() + 
+			   " has an invalid invid: " + invid + ", not writing it to XML.");
+	return;
+      }
+
+    type = target.getTypeName();
+
+    // if the object that we are targetting has a label field which is
+    // handled by a namespace, we can use the object's name with a #
+    // as a temporary label.  Otherwise, we'll have to use the object
+    // number as a temporary label.
+
+    targetField = (DBField) target.getLabelField();
+
+    if (targetField != null && targetField.getNameSpace() != null)
+      {
+	label = "#" + Ganymede.internalSession.viewObjectLabel(invid);
+      }
+    else
+      {
+	label = "#" + invid.getNum();
+      }
+    
+    xmlOut.startElement("invid");
+    xmlOut.attribute("type", type);
+    xmlOut.attribute("id", label);
+    xmlOut.endElement("invid");
   }
 
   // ****

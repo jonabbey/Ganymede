@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.178 $
-   Last Mod Date: $Date: 2000/03/16 06:29:51 $
+   Version: $Revision: 1.179 $
+   Last Mod Date: $Date: 2000/03/22 06:24:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.178 $ $Date: 2000/03/16 06:29:51 $
+ * @version $Revision: 1.179 $ $Date: 2000/03/22 06:24:11 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2344,60 +2344,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This is a method to allow code in the server to quickly and
-   * safely get a full list of objects in an object base.
-   *
-   * @return a Vector of DBObject references.
-   * 
-   */
-
-  public Vector getObjects(short baseid)
-  {
-    Vector bases = new Vector();
-    Vector results = new Vector();
-    DBLock readLock = null;
-    DBObjectBase base;
-    Enumeration enum;
-
-    /* -- */
-
-    checklogin();
-
-    base = Ganymede.db.getObjectBase(baseid);
-    bases.addElement(base);
-
-    try
-      {
-	readLock = session.openReadLock(bases);
-      }
-    catch (InterruptedException ex)
-      {
-      }
-
-    if (readLock == null || !readLock.isLocked())
-      {
-	return null;
-      }
-
-    try
-      {
-	enum = base.objectTable.elements();
-	
-	while (enum.hasMoreElements() && readLock.isLocked())
-	  {
-	    results.addElement(enum.nextElement());
-	  }
-      }
-    finally
-      {
-	session.releaseLock(readLock);
-      }
-
-    return results;
-  }
-
-  /**
    * <p>This method allows the client to get a status update on a
    * specific list of invids.</p>
    *
@@ -4441,6 +4387,61 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     
     return null;
+  }
+
+  /**
+   * <P>This is a method to allow code in the server to quickly and
+   * safely get a full list of objects in an object base.</P>
+   *
+   * <P>This is only a server-side method.  getObjects() does
+   * not do anything to check access permissions.</P>
+   *
+   * @return a Vector of DBObject references.
+   */
+
+  public Vector getObjects(short baseid)
+  {
+    Vector bases = new Vector();
+    Vector results = new Vector();
+    DBLock readLock = null;
+    DBObjectBase base;
+    Enumeration enum;
+
+    /* -- */
+
+    checklogin();
+
+    base = Ganymede.db.getObjectBase(baseid);
+    bases.addElement(base);
+
+    try
+      {
+	readLock = session.openReadLock(bases);
+      }
+    catch (InterruptedException ex)
+      {
+      }
+
+    if (readLock == null || !readLock.isLocked())
+      {
+	return null;
+      }
+
+    try
+      {
+	enum = base.objectTable.elements();
+	
+	while (enum.hasMoreElements() && readLock.isLocked())
+	  {
+	    results.addElement(enum.nextElement());
+	  }
+      }
+    finally
+      {
+	session.releaseLock(readLock);
+      }
+
+    return results;
   }
 
   /**

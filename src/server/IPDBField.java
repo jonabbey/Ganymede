@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/01/08 03:29:00 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/03/22 06:24:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -55,6 +56,9 @@ import java.util.*;
 import java.rmi.*;
 
 import arlut.csd.JDialog.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -272,6 +276,53 @@ public class IPDBField extends DBField implements ip_field {
 
 	value = element;
       }
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+
+    if (!isVector())
+      {
+	emitIPXML(xmlOut, value());
+      }
+    else
+      {
+	Vector values = getVectVal();
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel+1);
+	    emitIPXML(xmlOut, (Byte[]) values.elementAt(i));
+	  }
+	
+	XMLUtils.indent(xmlOut, indentLevel);
+      }
+
+    xmlOut.endElement(this.getName());
+  }
+
+  public void emitIPXML(XMLWriter xmlOut, Byte[] value) throws IOException
+  {
+    xmlOut.startElement("ip");
+
+    if (value.length==16)
+      {
+	xmlOut.attribute("val", genIPV6string(value));
+      }
+    else
+      {
+	xmlOut.attribute("val", genIPV4string(value));
+      }
+
+    xmlOut.endElement("ip");
   }
 
   /**

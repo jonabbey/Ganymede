@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2000/02/29 09:35:09 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/03/22 06:24:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,9 @@ import java.rmi.server.*;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.VectorUtils;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
@@ -303,6 +306,13 @@ public abstract class DBField implements Remote, db_field {
    */
 
   abstract void receive(DataInput in) throws IOException;
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  abstract void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException;
 
   /**
    * <P>Returns true if obj is a field with the same value(s) as

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2000/03/16 06:36:52 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2000/03/22 06:24:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.111 $ %D%
+ * @version $Revision: 1.112 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1021,7 +1021,7 @@ public class DBStore {
    * <p>Load the database, in XML form, from disk.</p>
    *
    * <p>This method loads both the database type definition and database
-   * contents from a single disk file.</p>
+   * contents from a single XML file.</p>
    *
    * @param filename Name of the database file
    * @param reallyLoad if true, we'll actually fully load the database.

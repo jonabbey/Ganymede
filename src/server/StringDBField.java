@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/02/10 04:35:41 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/03/22 06:24:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -54,6 +55,9 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import gnu.regexp.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -237,6 +241,44 @@ public class StringDBField extends DBField implements string_field {
       {
 	value = in.readUTF().intern();
       }
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+
+    if (!isVector())
+      {
+	emitStringXML(xmlOut, value());
+      }
+    else
+      {
+	Vector values = getVectVal();
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel+1);
+	    emitStringXML(xmlOut, (String) values.elementAt(i));
+	  }
+
+	XMLUtils.indent(xmlOut, indentLevel);
+      }
+
+    xmlOut.endElement(this.getName());
+  }
+
+  public void emitStringXML(XMLWriter xmlOut, String value) throws IOException
+  {
+    xmlOut.startElement("string");
+    xmlOut.attribute("val", value);
+    xmlOut.endElement("string");
   }
 
   // ****

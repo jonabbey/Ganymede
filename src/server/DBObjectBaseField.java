@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2000/03/15 03:32:25 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2000/03/22 06:24:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1075,6 +1075,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     XMLItem item, nextItem;
     Integer field_codeInt;
+    boolean typeRead = false;
 
     /* -- */
 
@@ -1127,6 +1128,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 	else if (item.matches("typedef"))
 	  {
+	    if (typeRead)
+	      {
+		throw new IllegalArgumentException("redundant type definition for this field");
+	      }
+
 	    if (item.getAttrStr("type") == null)
 	      {
 		throw new IllegalArgumentException("typedef tag does not contain type attribute: " + 
@@ -1174,6 +1180,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		throw new IllegalArgumentException("typedef tag does not contain type attribute: " +
 						   item);
 	      }
+
+	    typeRead = true;
 
 	    item = reader.getNextItem(true);
 
@@ -1253,7 +1261,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 		    if (nameSpaceId != null && !nameSpaceId.equals(""))
 		      {
-			setNameSpace(nameSpaceId);
+			ReturnVal retVal = setNameSpace(nameSpaceId);
+
+			if (retVal != null && !retVal.didSucceed())
+			  {
+			    System.err.println("DBObjectBaseField.receiveXML(): namespace definition for " +
+					       nameSpaceId + " not found.");
+			  }
 		      }
 		  }
 		else if (item.matches("targetobject") && isInvid())

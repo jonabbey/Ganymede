@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2000/03/08 22:43:58 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2000/03/22 06:24:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,8 +57,8 @@ import java.rmi.*;
 import java.rmi.server.*;
 import java.lang.reflect.*;
 import arlut.csd.Util.*;
-
 import arlut.csd.JDialog.*;
+import com.jclark.xml.output.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -136,7 +136,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.90 $ $Date: 2000/03/08 22:43:58 $
+ * @version $Revision: 1.91 $ $Date: 2000/03/22 06:24:08 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1104,6 +1104,52 @@ public class DBObject implements db_object, FieldType, Remote {
 			       definition.getName());
 	  }
       }
+  }
+
+  /**
+   * <p>This method is used when this object is being dumped.  It is
+   * mated with receiveXML().</p> 
+   */
+
+  synchronized public void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    boolean useObjLabel = false;
+    String label;
+
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+    
+    xmlOut.startElement("object");
+    xmlOut.attribute("type", getTypeName());
+
+    DBField labelField = (DBField) getLabelField();
+
+    if (labelField != null && labelField.getNameSpace() != null)
+      {
+	label = "#" + getLabel();
+      }
+    else
+      {
+	label = "#" + getID();
+      }
+
+    xmlOut.attribute("id", label);
+
+    indentLevel++;
+
+    Vector fieldVec = getFieldVector(false);
+
+    for (int i = 0; i < fieldVec.size(); i++)
+      {
+	DBField field = (DBField) fieldVec.elementAt(i);
+
+	field.emitXML(xmlOut, indentLevel);
+      }
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement("object");
   }
 
   /**

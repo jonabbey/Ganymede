@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/01/08 03:28:57 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/22 06:24:10 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -53,6 +54,9 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -159,6 +163,29 @@ public class FloatDBField extends DBField implements float_field {
     value = new Double(in.readDouble());
   }
 
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement(this.getName());
+    emitDoubleXML(xmlOut, value());
+    xmlOut.endElement(this.getName());
+  }
+
+  public void emitDoubleXML(XMLWriter xmlOut, double value) throws IOException
+  {
+    xmlOut.startElement("float");
+    xmlOut.attribute("val", java.lang.Double.toString(value));
+    xmlOut.endElement("float");
+  }
+
   // ****
   //
   // type-specific accessor methods
@@ -177,6 +204,8 @@ public class FloatDBField extends DBField implements float_field {
 
   public double value(int index)
   {
+    // float can't be a vector field
+
     throw new IllegalArgumentException("vector accessor called on scalar field");
   }
 
