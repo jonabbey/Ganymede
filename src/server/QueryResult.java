@@ -1,13 +1,13 @@
 /*
 
-   DumpResult.java
+   QueryResult.java
 
-   This class is a serializable dump result object, which conveys
-   results from a dump operation along with methods that can be
-   used to extract the results  out of the dump.
+   This class is a serializable object-list result object, which
+   conveys results from a query/list operation along with methods that
+   can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,6 +22,14 @@ import java.util.*;
                                                                      QueryResult
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ *  This class is a serializable object-list result object, which
+ *  conveys results from a query/list operation along with methods that
+ *  can be used to extract the results out of the query/list.
+ *
+ */
 
 public class QueryResult implements java.io.Serializable {
 
@@ -48,7 +56,7 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * This method is used to add an object's information to
-   * the dumpResult's serializable buffer.  It is intended
+   * the QueryResult's serializable buffer.  It is intended
    * to be called on the server.  
    *
    */
@@ -66,7 +74,7 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * This method is used to add an object's information to
-   * the dumpResult's serializable buffer.  It is intended
+   * the QueryResult's serializable buffer.  It is intended
    * to be called on the server.  
    *
    */
