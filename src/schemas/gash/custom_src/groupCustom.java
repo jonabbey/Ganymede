@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -204,6 +204,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     ReturnVal retVal = null;
     groupInactivateWizard wiz;
 
+    /* -- */
 
     if (fromWizard)
       {
@@ -242,10 +243,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	else
 	  {
 	    finalizeInactivate(false);
-	    return new ReturnVal(false);;
+	    return new ReturnVal(false);
 	  }
-
-
       }
     else
       {
