@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -217,17 +217,23 @@ public class Ganymede {
 
     cal.add(Calendar.MINUTE, 5);
 
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR),
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY),
 				cal.get(Calendar.MINUTE),
 				1440, 
 				new gcTask(), "Garbage Collection Task");
 
     cal.add(Calendar.MINUTE, 10);
 
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR),
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY),
 				cal.get(Calendar.MINUTE),
 				120, 
 				new dumpTask(), "Database Dumper Task");
+
+    //    scheduler.addActionOnDemand(new sampleTask("Demand Test"), "Demand Test");
+    
+    scheduler.addDailyAction(0, 0, new GanymedeExpirationTask(), "Expiration Task");
+
+    scheduler.addDailyAction(12, 0, new GanymedeWarningTask(), "Warning Task");
 
     // and wa-la
 
