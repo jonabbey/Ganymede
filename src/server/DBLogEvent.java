@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,7 +62,7 @@ public class DBLogEvent {
    *
    */
 
-  StringBuffer multibuffer;
+  SharedStringBuffer multibuffer;
 
   /* -- */
 
@@ -96,7 +96,7 @@ public class DBLogEvent {
    * @param objects A vector of invids of objects involved in this event.
    * @param notifyList A vector of Strings listing email addresses to send notification
    * of this event to.
-   * @param multibuffer A StringBuffer that this event can use to avoid an extra object create.
+   * @param multibuffer A SharedStringBuffer that this event can use to avoid an extra object create.
    * If you provide a StringBuffer here, be aware that this object may use it both when this
    * object is being constructed, and by the writeEvent() method.  The code that uses this
    * DBLogEvent may do whatever it likes with the buffer between method calls to this DBLogEvent,
@@ -108,7 +108,7 @@ public class DBLogEvent {
   public DBLogEvent(String eventClassToken, String description,
 		    Invid admin, String adminName,
 		    Vector objects, Vector notifyList,
-		    StringBuffer multibuffer)
+		    SharedStringBuffer multibuffer)
   {
     this.eventClassToken = eventClassToken;
     this.description = description;
@@ -119,7 +119,7 @@ public class DBLogEvent {
 
     if (this.multibuffer == null)
       {
-	multibuffer = this.multibuffer = new StringBuffer();
+	multibuffer = this.multibuffer = new SharedStringBuffer();
       }
     else
       {
@@ -167,17 +167,17 @@ public class DBLogEvent {
    * Constructor to construct a DBLogEvent from a log file line.
    *
    * @param line A line from the Ganymede log file
-   * @param multibuffer A StringBuffer that this event can use to avoid an extra object create
+   * @param multibuffer A SharedStringBuffer that this event can use to avoid an extra object create
    *
    */
 
-  public DBLogEvent(String line, StringBuffer multibuffer) throws IOException
+  public DBLogEvent(String line, SharedStringBuffer multibuffer) throws IOException
   {
     this.multibuffer = multibuffer;
 
     if (this.multibuffer == null)
       {
-	multibuffer = this.multibuffer = new StringBuffer();
+	multibuffer = this.multibuffer = new SharedStringBuffer();
       }
 
     loadLine(line);
@@ -185,8 +185,14 @@ public class DBLogEvent {
 
   /**
    *
-   * This method sets the fields for this DBLogEvent from a logfile line
+   * This method sets the fields for this DBLogEvent from a logfile line.<br><br>
    *
+   * Note that this method is designed to reuse as many of this
+   * DBLogEvent's fields as possible, so if external code keeps
+   * references to this.time or this.objects or this.notifyVect, that
+   * code should either not call loadLine(), or should make its own
+   * copies of those objects.
+   *  
    */
 
   public void loadLine(String line) throws IOException
@@ -222,7 +228,14 @@ public class DBLogEvent {
 	throw new IOException("couldn't parse time code");
       }
     
-    this.time = new Date(timeCode);
+    if (this.time == null)
+      {
+	this.time = new Date(timeCode);
+      }
+    else
+      {
+	this.time.setTime(timeCode);
+      }
     
     j = i+1;
     i = scanSep(cary, j);	// find next |, skip human readable date
@@ -243,6 +256,8 @@ public class DBLogEvent {
       }
     else
       {
+	// we have to be sure to do this.
+
 	this.admin = null;
       }
 
@@ -259,7 +274,10 @@ public class DBLogEvent {
     j = i+1;
     i = scanSep(cary, j);
 
-    this.objects = readObjectVect(cary, j);
+    // read the object invid list.. re-use this.objects if it already
+    // exists
+
+    this.objects = readObjectVect(cary, j, this.objects);
 
     j = i+1;
     i = scanSep(cary, j);
@@ -269,7 +287,10 @@ public class DBLogEvent {
     j = i+1;
     i = scanSep(cary, j);
 
-    this.notifyVect = readNotifyVect(cary, j);
+    // read the email address list.. re-use this.notifyVect if it
+    // already exists
+
+    this.notifyVect = readNotifyVect(cary, j, this.notifyVect);
 
     if (notifyVect != null)
       {
@@ -358,14 +379,27 @@ public class DBLogEvent {
    *
    * This method reads a vector of invid's from a log file line
    *
+   * @param line The character array containing the Invid's to be extracted
+   * @param startIndex Where to start scanning the Invid's from in the line
+   * @param result The vector to place the results in, or null if this
+   * method should create its own result vector.
+   *
    */
 
-  private Vector readObjectVect(char[] line, int startIndex)
+  private Vector readObjectVect(char[] line, int startIndex, Vector result)
   {
-    Vector result = new Vector();
     int i;
 
     /* -- */
+
+    if (result == null)
+      {
+	result = new Vector();
+      }
+    else
+      {
+	result.removeAllElements();
+      }
 
     multibuffer.setLength(0);
 
@@ -412,14 +446,27 @@ public class DBLogEvent {
    *
    * This method reads a vector of email addresses from a log file line
    *
+   * @param line The character array containing the addresses's to be extracted
+   * @param startIndex Where to start scanning the addresses's from in the line
+   * @param result The vector to place the results in, or null if this
+   * method should create its own result vector.
+   *
    */
 
-  private Vector readNotifyVect(char[] line, int startIndex)
+  private Vector readNotifyVect(char[] line, int startIndex, Vector result)
   {
-    Vector result = new Vector();
     int i;
 
     /* -- */
+
+    if (result == null)
+      {
+	result = new Vector();
+      }
+    else
+      {
+	result.removeAllElements();
+      }
 
     multibuffer.setLength(0);
 
@@ -689,7 +736,9 @@ public class DBLogEvent {
 
   private final void writeStr(PrintWriter logWriter, String in)
   {
-    logWriter.print(escapeStr(in));
+    escapeStr(in);
+
+    logWriter.write(multibuffer.getValue(), 0, multibuffer.length());
   }
 
   /**
@@ -699,7 +748,7 @@ public class DBLogEvent {
    *
    */
 
-  private final String escapeStr(String in)
+  private final SharedStringBuffer escapeStr(String in)
   {
     char[] ary = in.toCharArray();
 
@@ -725,18 +774,7 @@ public class DBLogEvent {
 	  }
       }
 
-    // grr.. wish we didn't have to dupe Strings here.. if we could
-    // only get access to StringBuffer.getValue(), we'd be able to
-    // reuse a single memory buffer in the StringBuffer, which is okay
-    // since we know we are properly synchronized and that the char[]
-    // array we'd get would be used and then immediately forgotten.
-
-    // Unfortunately, we'd have to use our own variant of StringBuffer
-    // to achieve that efficiency, and this code is (probably) not
-    // critical path enough to worry about that.  Let's just hope the
-    // garbage collector is nice and efficient.
-
-    return multibuffer.toString();
+    return multibuffer;
   }
 
   /**
