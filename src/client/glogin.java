@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,11 +31,11 @@ import jdj.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.ganymede.*;
 
-/**
- *
- *
- *
- */
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                          glogin
+
+------------------------------------------------------------------------------*/
 
 public class glogin extends JApplet implements Runnable {
 
@@ -136,6 +136,8 @@ public class glogin extends JApplet implements Runnable {
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridheight = 1;
     gbc.insets = new Insets(1,1,0,0);
+
+    appletContentPane = getContentPane();
 
     appletContentPane.setLayout(gbl);
 
