@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -40,7 +40,6 @@ public class JstringField extends JentryField {
   private int size = DEFAULT_SIZE;
 
   private String value = null;
-  private String old_value = null;
   private String allowedChars = null;
   private String disallowedChars = null;
 
@@ -184,11 +183,9 @@ public class JstringField extends JentryField {
 	      }
 	  }
 
-	old_value = value;
-	
-	value = new String(str);
-	
-	super.setText(str);
+	super.setText(str); 
+
+	value = str;
 	
 	changed = true;
       }
@@ -202,14 +199,7 @@ public class JstringField extends JentryField {
 
   public String getValue() 
   {
-    if (value == null)
-      {
-	return value;
-      }
-    else
-      {
-	return new String(value);
-      }
+    return value;
   }
 
   /**
@@ -233,7 +223,7 @@ public class JstringField extends JentryField {
   {
      if (s != null)
        {
- 	this.allowedChars = new String(s);
+ 	this.allowedChars = s;
        }
      else 
        {
@@ -360,6 +350,10 @@ public class JstringField extends JentryField {
 
   public void processFocusEvent(FocusEvent e)
   {
+    String str;
+
+    /* -- */
+
     super.processFocusEvent(e);
 
     if (debug)
@@ -372,14 +366,24 @@ public class JstringField extends JentryField {
 	// if nothing in the JstringField has changed,
 	// we don't need to worry about this event.
 
-	value = new String(getText());
+	str = getText();
 
-	if (old_value != null)
+	if (value != null)
 	  {
-	    changed = !value.equals(old_value);
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: old value != null");
+	      }
+
+	    changed = !value.equals(str);
 	  }
 	else
 	  {
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: old value == null");
+	      }
+
 	    changed = true;
 	  }
 
@@ -389,6 +393,7 @@ public class JstringField extends JentryField {
 	      {
 		System.err.println("JstringField.processFocusEvent: no change, ignoring");
 	      }
+
 	    return;
 	  }
 	
@@ -402,7 +407,8 @@ public class JstringField extends JentryField {
 		  {
 		    System.err.println("JstringField.processFocusEvent: making callback");
 		  }
-		b = my_parent.setValuePerformed(new JValueObject(this,value));
+
+		b = my_parent.setValuePerformed(new JValueObject(this, str));
 	      }
 	    catch (RemoteException re)
 	      {
@@ -413,12 +419,27 @@ public class JstringField extends JentryField {
 		if (debug)
 		  {
 		    System.err.println("JstringField.processFocusEvent: setValue rejected");
+
+		    if (value == null)
+		      {
+			System.err.println("JstringField.processFocusEvent: resetting to empty string");
+		      }
+		    else
+		      {
+			System.err.println("JstringField.processFocusEvent: resetting to " + value);
+		      }
 		  }
-		value = old_value;
 		
-		setText(value);
-		
-		changed = true;
+		if (value == null)
+		  {
+		    super.setText("");
+		  }
+		else
+		  {
+		    super.setText(value);
+		  }
+
+		changed = false;
 	      }
 	    else 
 	      {
@@ -426,13 +447,12 @@ public class JstringField extends JentryField {
 		  {
 		    System.err.println("JstringField.processFocusEvent: setValue accepted");
 		  }
-		old_value = value;
+
+		value = str;
 		
-		changed = false;
+		changed = true;
 	      }
 	  }
-
       }
-
   }
 }
