@@ -6,8 +6,8 @@
    
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/04/28 08:19:49 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/04/28 09:32:41 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -438,7 +438,7 @@ public class PasswordClient implements ClientListener {
     
     int registryPortProperty = 1099;
 
-    String registryPort = System.getProperty("ganymede.registryPort");
+    String registryPort = props.getProperty("ganymede.registryPort");
 
     if (registryPort != null)
       {

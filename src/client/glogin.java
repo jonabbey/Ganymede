@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/04/28 08:19:48 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/04/28 09:32:27 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.55 $ $Date: 1999/04/28 08:19:48 $ $Name:  $
+ * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -243,7 +243,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	// get the registry port number
 
-	String registryPort = System.getProperty("ganymede.registryPort");
+	String registryPort = ganymedeProperties.getProperty("ganymede.registryPort");
 
 	if (registryPort != null)
 	  {
@@ -317,6 +317,21 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	if (serverhost == null || serverhost.equals(""))
 	  {
 	    throw new RuntimeException("Trouble:  Couldn't get ganymede.serverhost PARAM");
+	  }
+
+	String registryPort = getParameter("ganymede.registryPort");
+
+	if (registryPort != null)
+	  {
+	    try
+	      {
+		registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	      }
+	    catch (NumberFormatException ex)
+	      {
+		System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+				   registryPort);
+	      }
 	  }
       }
 
@@ -784,7 +799,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.55 $ $Date: 1999/04/28 08:19:48 $ $Name:  $
+ * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -869,7 +884,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.55 $ $Date: 1999/04/28 08:19:48 $ $Name:  $
+ * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
  * @author Jonathan Abbey
  */
 

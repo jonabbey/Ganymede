@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 1999/04/28 08:19:58 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/04/28 09:33:01 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1355,6 +1355,21 @@ public class GASHAdmin extends JApplet implements ActionListener {
   {
     serverhost = getParameter("ganymede.serverhost");
 
+    String registryPort = getParameter("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
+    
     WeAreApplet = true;
 
     if (serverhost == null)
@@ -1364,7 +1379,7 @@ public class GASHAdmin extends JApplet implements ActionListener {
       }
     else
       {
-	url = "rmi://" + serverhost + "/ganymede.server";
+	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
 
     rootname = getParameter("ganymede.rootname");
@@ -1630,7 +1645,7 @@ public class GASHAdmin extends JApplet implements ActionListener {
 
     // get the registry port number
 
-    String registryPort = System.getProperty("ganymede.registryPort");
+    String registryPort = props.getProperty("ganymede.registryPort");
 
     if (registryPort != null)
       {

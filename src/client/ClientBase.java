@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/03/30 20:14:02 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/04/28 09:32:27 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.9 $ $Date: 1999/03/30 20:14:02 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -143,10 +143,10 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 	
 	if (debug)
 	  {
-	    System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	    System.err.println("RMI: Couldn't bind to server url " + serverURL + "\n" + ex );
 	  }
 	
-	sendErrorMessage("RMI: Couldn't bind to server object\n" + ex );
+	sendErrorMessage("RMI: Couldn't bind to server url " + serverURL + "\n" + ex );
       }
     catch (java.rmi.UnknownHostException ex)
       {

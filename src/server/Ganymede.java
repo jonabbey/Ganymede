@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 1999/04/28 08:19:58 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 1999/04/28 09:33:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -333,7 +333,7 @@ public class Ganymede {
 
 	debug("Binding GanymedeServer in RMI Registry");
 
-	Naming.rebind("ganymede.server", server);
+	Naming.rebind("rmi://localhost:" + registryPortProperty + "/ganymede.server", server);
       }
     catch (Exception ex)
       {
