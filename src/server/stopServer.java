@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/06/17 00:29:19 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/06/28 03:29:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,6 +70,7 @@ import arlut.csd.Util.ParseArgs;
 
 public class stopServer {
 
+  public static final boolean debug = false;
   public static String serverHostProperty = null;
   public static String rootname = null;
   public static String defaultrootpassProperty = null;
@@ -237,7 +238,7 @@ public class stopServer {
 	rootname = "supergash";
       }
 
-    if (defaultrootpassProperty == null)
+    if (debug && defaultrootpassProperty == null)
       {
 	System.err.println("Couldn't get the default rootname password property");
       }
