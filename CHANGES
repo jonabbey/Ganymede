@@ -1,7 +1,135 @@
-Ganymede Release 0.99.7
-October 13, 1999
+Ganymede Release 0.99.8
+November ??, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.7 to 0.99.8 -------------------
+
+RELEASE DATE: November ?? , 1999
+
+1. [SERVER] Included regexp info in schema html dump
+
+The html/text schema dump facilities in DBObjectBaseField.java now
+include regexp information for string fields, if defined.
+
+2. [SERVER, CLIENT] Made it possible to do a more limited log search
+
+Previously, the history panel in the client's "show history" function
+showed the complete transaction in which the object was modified.
+There is now support for showing only changes directly affecting the
+object in question.
+
+Added a new version of viewObjectHistory to the Session RMI interface.
+
+Added explanatory tool tips to the show history buttons in the
+client's history panel.
+
+Cleaned up the historyPanel generally.
+
+3. [CLIENT] Cleaned up object report mail/save dialog
+
+The Ganymede client allows the user to mail and/or save a status
+summary for single objects in the Ganymede database (from the File
+menu in the object view/edit window), but the dialog that came up was
+really lousy, and hadn't been touched for over a year.  I restructured
+the dialog and made it more usable.
+
+4. [SERVER] Made server start-up less fragile
+
+A user here got a ganymede.db file into a state where a field had a
+namespace listed, but that namespace wasn't declared in the .db file.
+The server was not able to recover from this because the
+DBObjectBaseField class was throwing an illegal argument exception.
+
+I modified DBObjectBaseField so that a warning message is displayed
+instead.
+
+Hopefully I'll be able to find how the system got into that state and
+prevent it, but the server can deal with that inconsistency now.
+
+5. [SERVER] Improved Qsmtp mail-out code
+
+Previously, the Qsmtp mailer code would abort sending a message if any
+of the recipients were rejected by the mailhost.  Now the Qsmtp code
+will go ahead and complete the message if any of the recipient
+addresses were accepted.
+
+This was causing the 'bad login' mail for an invalid user login
+attempt not to be sent.
+
+6. [CLIENT] Made rpcpass exit cleanly
+
+The rpcpass client (used in conjunction with the Linux NISkit's
+rpc.yppasswdd to pass NIS password changes into Ganymede) wasn't
+properly terminating after execution a transaction in Ganymede,
+resulting in lots of lingering rpcpass processes hanging around.
+
+This is a result of the JVM's policy of not closing down an
+application until all of its non-daemon threads terminate.  Since the
+rpcpass code is an RMI server, this never happened.  I added a
+System.exit(0) to take care of this.
+
+7. [SCHEMA] Minor fix to the nisonly schema
+
+Fixed the nisonly schema's userCustom.java's fieldRequired() method to
+not attempt to call isInactivated() on the non-value-containing
+objectHook instance of userCustom.java.
+
+John Knutson here at ARL was developing a schema based on the nisonly
+schema kit, and it turns out that I haven't done much in the way of
+upkeep on that schema kit for awhile now.
+
+8. [SERVER] Made GanymedeBuilderTask.backupFiles handle an empty dir ok
+
+The backupFiles() method in the GanymedeBuilderTask class is intended
+to produce a zip archive of all files in the out directory when a
+builder task is run.  Unfortunately, it caused an exception to be
+thrown if there are no files in the out directory, as is the case the
+very first time the builder task is run after installing Ganymede.
+
+This has been fixed.  Thanks to John Knutson for reporting this.
+
+9. [SCHEMA] Fixes to the gasharl schema
+
+a) The server used to throw an exception if an admin created a user
+and hit 'commit' without filling in the home group field, because
+some of the custom logic was being 
+
+10. [CLIENT] Miscellaneous Client Improvements and Fixes
+
+a) You can now right-click on a row in the query result table and
+inactivate or delete objects shown, rather than having to do a query
+to find the object you want to delete and then use the tree to find
+and delete it.
+
+b) Related to this change, the 'are you sure you want to delete this'
+dialog will now appear whenever an object is deleted, whether from
+the delete object dialog, the table, or the tree (which used to
+not prompt for verification).  The object deletion verification dialog
+is now more friendly and descriptive.
+
+c) The client now resets its 'default owner chosen' flag when the user
+changes personae.
+
+d) The GUI component for scalar invid fields has been very
+significantly revised to make it possible to enter a choice by using
+the keyboard instead of having to mouse through a possibly huge list.
+This was done using a custom JComboBox editing component that monitors
+keystrokes to do 'choice completion' during the course of text
+editing.  I'm sort of pushing the Swing JComboBox to the limit here..
+hopefully with Kestrel/1.3 Swing will be more useful for real world
+stuff.
+
+e) Reworked StringSelector to put the add box on the left, and to
+enable typed choice completion if the only valid choices are listed
+
+11. [SERVER] Implemented support for object cloning
+
+Security changes to DBField.setValue(), etc., for cloning values
+
+Added DBField.copyFieldTo()
+
+changes to DBEditObject
 
 -------------------- Changes from 0.99.6 to 0.99.7 -------------------
 
