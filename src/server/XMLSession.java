@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/09/17 10:04:37 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/09/05 21:09:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,6 +65,13 @@ import arlut.csd.Util.*;
 ------------------------------------------------------------------------------*/
 
 public interface XMLSession extends java.rmi.Remote {
+
+  /**
+   * <p>This method returns a remote reference to the underlying
+   * GanymedeSession in use on the server.</p>
+   */
+
+  Session getSession() throws RemoteException;
 
   /**
    * <p>This method is called repeatedly by the XML client in order to

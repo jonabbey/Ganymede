@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2003/09/05 20:25:51 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2003/09/05 21:09:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,7 @@ package arlut.csd.ganymede;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.rmi.Remote;
 
 import arlut.csd.JDialog.*;
 
@@ -251,6 +252,19 @@ public class ReturnVal implements java.io.Serializable {
   public XMLSession getXMLSession()
   {
     return (XMLSession) remoteObjectRef;
+  }
+
+  /** 
+   * <p>This method is used to get a remote {@link
+   * arlut.csd.ganymede.adminSession adminSession} reference that the
+   * server wants to return to the admin console.  Used to return the
+   * results of a remote admin console connect attempt.  May be null
+   * if the connect attempt failed.</p>
+   */
+
+  public adminSession getAdminSession()
+  {
+    return (adminSession) remoteObjectRef;
   }
 
   /**
@@ -782,6 +796,19 @@ public class ReturnVal implements java.io.Serializable {
    */
 
   public void setXMLSession(XMLSession session)
+  {
+    this.remoteObjectRef = session;
+  }
+
+  /** 
+   * <p>This method is used to set a {@link
+   * arlut.csd.ganymede.adminSession adminSession} reference that the
+   * admin console can retrieve from us at console connect time.</p>
+   *
+   * <p>For use on the server-side.</p> 
+   */
+
+  public void setAdminSession(adminSession session)
   {
     this.remoteObjectRef = session;
   }

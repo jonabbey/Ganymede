@@ -10,8 +10,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2003/03/11 20:27:45 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2003/09/05 21:09:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,74 +62,55 @@ public interface Server extends Remote {
   /** 
    * <p>Client login method.  Establishes a {@link
    * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
-   * server for the client, and returns a {@link
-   * arlut.csd.ganymede.Session Session} remote reference to the
-   * client.  The GanymedeSession object contains all of the server's
-   * knowledge about a given client's status., and is tracked by
-   * the GanymedeServer object for statistics and for the admin
-   * console's monitoring support.</P>
-   */
-
-  public Session login(Client client) throws RemoteException;
-
-  /** 
-   * <p>Client login method.  Establishes a {@link
-   * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
-   * server for the client, and returns a {@link
-   * arlut.csd.ganymede.Session Session} remote reference to the
-   * client.  The GanymedeSession object contains all of the server's
-   * knowledge about a given client's status., and is tracked by
-   * the GanymedeServer object for statistics and for the admin
-   * console's monitoring support.</P>
+   * server for the client, and returns a serializable {@link
+   * arlut.csd.ganymede.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.Session Session} remote reference
+   * for the client to use, if login was successful.</p>
    *
-   * <p>The username and password parameters are optional.. if these
-   * parameters are null, the Ganymede Server will query the Client
-   * remote interface for this information.</p>
+   * <p>If login is not successful, the ReturnVal object will encode
+   * a failure condition, along with a dialog explaining the problem.</p>
+   *
+   * <p>The GanymedeSession object contains all of the server's
+   * knowledge about a given client's status., and is tracked by
+   * the GanymedeServer object for statistics and for the admin
+   * console's monitoring support.</P>
    */
 
-  public Session login(Client client, String username, String password) throws RemoteException;
+  public ReturnVal login(String username, String password) throws RemoteException;
 
   /** 
    * <p>XML Client login method.  Establishes a {@link
    * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
-   * in the server for the client, and returns a {@link
-   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
-   * XML client.  The GanymedeXMLSession object in turn contains a
+   * in the server for the client, and returns a serializable {@link
+   * arlut.csd.ganymede.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.XMLSession XMLSession} remote reference
+   * for the client to use, if login was successful.</p>
+   *
+   * <p>If login is not successful, the ReturnVal object will encode
+   * a failure condition, along with a dialog explaining the problem.</p>
+   *
+   * <p>The GanymedeXMLSession object in turn contains a
    * GanymedeSession object, which contains all of the server's
    * knowledge about a given client's status., and is tracked by the
    * GanymedeServer object for statistics and for the admin console's
    * monitoring support.</P>
    */
   
-  public XMLSession xmlLogin(Client client) throws RemoteException;
-
-  /** 
-   * <p>XML Client login method.  Establishes a {@link
-   * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
-   * in the server for the client, and returns a {@link
-   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
-   * XML client.  The GanymedeXMLSession object in turn contains a
-   * GanymedeSession object, which contains all of the server's
-   * knowledge about a given client's status., and is tracked by the
-   * GanymedeServer object for statistics and for the admin console's
-   * monitoring support.</P>
-   *
-   * <p>The username and password parameters are optional.. if these
-   * parameters are null, the Ganymede Server will query the Client
-   * remote interface for this information.</p>
-   */
-  
-  public XMLSession xmlLogin(Client client, String username, String password) throws RemoteException;
+  public ReturnVal xmlLogin(String username, String password) throws RemoteException;
 
   /**
    * <p>This method is used to process a Ganymede admin console
-   * attachment.  The Ganymede Server will use the Admin remote
-   * interface to get authentication information from the admin
-   * console/stopServer code, since there's little point to an admin
-   * console that can't support a callback.</p>
+   * attachment.  The returned {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * object will contain an {@link arlut.csd.ganymede.adminSession adminSession}
+   * remote reference, accessible with the
+   *{@link arlut.csd.ganymede.ReturnVal#getAdminSession() getAdminSession()}
+   * method if the admin connect was successful.</p>
+   *
+   * <p>If the admin console connect was not successful, the reason why it failed
+   * will be encoded in a dialog definition contained in ReturnVal.</p>
    */
 
-  adminSession admin(Admin admin) throws RemoteException;
+  public ReturnVal admin(String username, String password) throws RemoteException;
 
   /**
    * <p>Simple RMI test method.. this method is here so that the

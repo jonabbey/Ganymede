@@ -9,15 +9,15 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2003/02/10 22:20:38 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2003/09/05 21:09:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -81,7 +81,7 @@ import arlut.csd.Util.VectorUtils;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.62 $ $Date: 2003/02/10 22:20:38 $
+ * @version $Revision: 1.63 $ $Date: 2003/09/05 21:09:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

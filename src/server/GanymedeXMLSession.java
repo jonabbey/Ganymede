@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2003/03/12 02:53:05 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2003/09/05 21:09:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -371,6 +371,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
+   * <p>This method returns a remote reference to the underlying
+   * GanymedeSession in use on the server.</p>
+   *
+   * @see arlut.csd.ganymede.XMLSession
+   */
+
+  public Session getSession()
+  {
+    return session;
+  }
+
+  /**
    * <p>This method is called repeatedly by the XML client in order to
    * send the next packet of XML data to the server.  If the server
    * has detected any errors in the already-received XML stream,
@@ -380,6 +392,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * return a null value, indicating success.  The xmlSubmit() method
    * will only block if the server has filled up its internal buffers
    * and must wait to digest more of the already submitted XML.</p> 
+   *
+   * @see arlut.csd.ganymede.XMLSession
    */
 
   public ReturnVal xmlSubmit(byte[] bytes) throws NotLoggedInException
@@ -453,6 +467,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * 
    * <p>This method is synchronized to cause it to block until the
    * background parser completes.</p>
+   *
+   * @see arlut.csd.ganymede.XMLSession
    */
 
   public synchronized ReturnVal xmlEnd()

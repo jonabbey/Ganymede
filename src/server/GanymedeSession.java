@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.268 $
-   Last Mod Date: $Date: 2003/09/05 00:51:23 $
+   Version: $Revision: 1.269 $
+   Last Mod Date: $Date: 2003/09/05 21:09:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.JDialog.*;
  * <P>User-level session object in the Ganymede server.  Each client
  * that logs in to the Ganymede server through the {@link
  * arlut.csd.ganymede.GanymedeServer GanymedeServer} {@link
- * arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client)
+ * arlut.csd.ganymede.GanymedeServer#login(java.lang.String, java.lang.String)
  * login()} method gets a GanymedeSession object, which oversees that
  * client's interactions with the server.  The client talks to its
  * GanymedeSession object through the {@link
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.268 $ $Date: 2003/09/05 00:51:23 $
+ * @version $Revision: 1.269 $ $Date: 2003/09/05 21:09:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -140,18 +140,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   // ---
 
   /**
-   *
-   * Remote reference to our client
-   *
-   */
-
-  Client client;
-
-  /**
    * Async responder for sending async messages to the client.
    */
 
-  serverClientAsyncResponder asyncPort = null;
+  private serverClientAsyncResponder asyncPort = null;
 
   /**
    * if this session is on the GanymedeServer's lSemaphore, this boolean
@@ -160,7 +152,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   boolean semaphoreLocked = false;
 
-  // client status tracking
+  /**
+   * If this flag is true, we're being used by a remote client
+   */
+
+  private boolean remoteClient = false;
 
   /**
    * If true, the user is currently logged in.
@@ -175,13 +171,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   boolean timedout = false;
-
-  /**
-   * A flag to let the forceOff() logic know that another thread has
-   * already tried to knock off the user.
-   */
-
-  private booleanSemaphore forcingSemaphore = new booleanSemaphore(false);
 
   /**
    * A flag indicating whether the client has supergash priviliges.  We
@@ -567,7 +556,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // construct our DBSession
 
     loggedInSemaphore.set(true);
-    client = null;
     username = sessionLabel;
     clienthost = sessionLabel;
     session = new DBSession(Ganymede.db, this, sessionLabel);
@@ -593,16 +581,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * selectPersona to gain admin privileges.  The server may allow users to
    * login directly with an admin persona (supergash, say), if so configured.</p>
    *
-   * @param client Remote object exported by the client, provides id callbacks
+   * @param loginName The name for the user logging in
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona 
+   * @param exportObjects If true, we'll export any viewed or edited objects for
+   * direct RMI access.  We don't need to do this is we're being driven by a server-side
+   * {@link arlut.csd.ganymede.GanymedeXMLSession}, for instance.
+   * @param clientIsRemote If true, we're being driven remotely, either by a direct
+   * Ganymede client or by a remotely operated GanymedeXMLSession.  We'll set up an
+   * {@link arlut.csd.ganymede.serverClientAsyncResponder serverClientAsyncResponder},
+   * AKA an asyncPort, for the remote client to poll for async notifications.
    *
-   * @see arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client)
+   * @see arlut.csd.ganymede.GanymedeServer#login(java.lang.String, java.lang.String)
    */
   
-  public GanymedeSession(Client client, String loginName, 
-			 DBObject userObject, DBObject personaObject,
-			 boolean exportObjects) throws RemoteException
+  public GanymedeSession(String loginName, DBObject userObject, 
+			 DBObject personaObject, boolean exportObjects,
+			 boolean clientIsRemote) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -613,19 +608,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     semaphoreLocked = true;
 
+    // record whether we're being driven remotely
+
+    this.remoteClient = clientIsRemote;
+
     // record whether we should export our objects
 
     this.remotelyAccessible = exportObjects;
 
-    // record information about the client that we'll need
-    // to have while the client is connected to us.
-    
-    this.client = client;
-
-    if (client != null)
-      {
-	asyncPort = new serverClientAsyncResponder();
-      }
+    asyncPort = new serverClientAsyncResponder();
 
     if (userObject != null)
       {
@@ -865,7 +856,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   void timeCheck()
   {
-    if (client == null)
+    if (!remoteClient)
       {
 	return;			// server-local session, we won't time it out
       }
@@ -937,87 +928,46 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   void forceOff(String reason)
   {
-    final GanymedeSession me = this;
-    final String myReason = reason;
-    final Client myClient = this.client;
-
-    /* -- */
-
-    if (!loggedInSemaphore.isSet() || forcingSemaphore.set(true))
+    if (loggedInSemaphore.isSet())
       {
-	return;
-      }
+	// Construct a vector of invid's to place in the log entry we
+	// are about to create.  This lets us search the log easily.
 
-    Ganymede.debug("Forcing " + username + " off for " + reason);
-
-    // spawn a new thread to try to kill off this client.. that way,
-    // if we have to wait in logout or if the RMI call blocks
-    // indefinitely, we won't block or lock
-    // GanymedeServer.clearIdleSessions(), or the like.
-
-    Thread forceThread = new Thread(new Runnable() {
-      public void run() {
-
-	// let's sync to make sure that we don't let things get
-	// confused if the user attempts to log out at precisely the
-	// same moment that we are trying to force him off
-
-	// the logout() method synchronizes on GanymedeSession during
-	// its operations, so we have to be careful about a nested
-	// monitor deadlock.  It is safe here because there is no
-	// place that synchronizes first on this GanymedeSession and
-	// then on forceLock.  If forceOff was called from a section
-	// synchronized on this GanymedeSession, we could have a problem,
-	// though.
-
-	synchronized (loggedInSemaphore)
-	  {
-	    if (loggedInSemaphore.isSet())
-	      {
-		// Construct a vector of invid's to place in the log entry we
-		// are about to create.  This lets us search the log easily.
-
-		Vector objects = new Vector();
+	Vector objects = new Vector();
 	    
-		if (userInvid != null)
-		  {
-		    objects.addElement(userInvid);
-		  }
-		
-		if (personaInvid != null)
-		  {
-		    objects.addElement(personaInvid);
-		  }
-		
-		if (Ganymede.log != null)
-		  {
-		    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-							       "Abnormal termination for username: " + username + "\n" +
-							       myReason,
-							       userInvid,
-							       username,
-							       objects,
-							       null));
-		  }
-	
-		me.logout(true);		// keep logout from logging a normal logout
-	      }
-	  }
-
-	if (myClient != null)
+	if (userInvid != null)
 	  {
-	    try
-	      {
-		myClient.forceDisconnect(myReason);
-	      }
-	    catch (RemoteException e)
-	      {
-		// ok, they're already gone.. (?)
-	      }
+	    objects.addElement(userInvid);
 	  }
-      }}, "Ganymede Client Disconnector Thread");
+		
+	if (personaInvid != null)
+	  {
+	    objects.addElement(personaInvid);
+	  }
+		
+	if (Ganymede.log != null)
+	  {
+	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+						       "Abnormal termination for username: " + username + "\n" +
+						       reason,
+						       userInvid,
+						       username,
+						       objects,
+						       null));
+	  }
 
-    forceThread.start();
+	Ganymede.debug("Forcing " + username + " off for " + reason);
+
+	try
+	  {
+	    asyncPort.shutdown(reason);
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+
+	logout(true);		// keep logout from logging a normal logout
+      }
   }
 
   /**
@@ -1121,7 +1071,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	try
 	  {
-	    if (client == null)
+	    if (!remoteClient)
 	      {
 		// We don't need to update GanymedeServer's lists for internal sessions
 
@@ -1130,8 +1080,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 
 	    //	Ganymede.debug("User " + username + " logging off");
-
-	    this.client = null;
 
 	    this.asyncPort.shutdown();
 	    this.asyncPort = null;

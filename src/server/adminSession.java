@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2002/01/26 20:05:52 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2003/09/05 21:09:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.20 $ %D%
+ * @version $Revision: 1.21 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -90,6 +90,20 @@ public interface adminSession extends Remote {
    */
 
   void        refreshMe() throws RemoteException;
+
+  /**
+   * <p>This method is used to allow the admin console to retrieve a remote reference to
+   * a {@link arlut.csd.ganymede.serverAdminAsyncResponder}, which will allow
+   * the admin console to poll the server for asynchronous messages from the server.</p>
+   *
+   * <p>This is used to allow the server to send admin notifications
+   * to the console, even if the console is behind a network or
+   * personal system firewall.  The serverAdminAsyncResponder blocks
+   * while there is no message to send, and the console will poll for
+   * new messages.</p>
+   */
+
+  AdminAsyncResponder getAsyncPort() throws RemoteException;
 
   /**
    * <p>This method is called by admin console code to force

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2003/03/12 02:53:05 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2003/09/05 21:09:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -192,134 +192,60 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     return true;
   }
 
-
   /** 
    * <p>Client login method.  Establishes a {@link
    * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
-   * server for the client, and returns a {@link
-   * arlut.csd.ganymede.Session Session} remote reference to the
-   * client.  The GanymedeSession object contains all of the server's
-   * knowledge about a given client's status., and is tracked by
-   * the GanymedeServer object for statistics and for the admin
-   * console's monitoring support.</P>
-   * 
-   * @see arlut.csd.ganymede.Server 
-   */
-
-  public Session login(Client client) throws RemoteException
-  {
-    return this.login(client, null, null);
-  }
-
-  /** 
-   * <p>Client login method.  Establishes a {@link
-   * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
-   * server for the client, and returns a {@link
-   * arlut.csd.ganymede.Session Session} remote reference to the
-   * client.  The GanymedeSession object contains all of the server's
+   * server for the client, and returns a serializable {@link
+   * arlut.csd.ganymede.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.Session Session} remote reference
+   * for the client to use, if login was successful.</p>
+   *
+   * <p>If login is not successful, the ReturnVal object will encode
+   * a failure condition, along with a dialog explaining the problem.</p>
+   *
+   * <p>The GanymedeSession object contains all of the server's
    * knowledge about a given client's status., and is tracked by
    * the GanymedeServer object for statistics and for the admin
    * console's monitoring support.</P>
    *
-   * <p>The username and password parameters are optional.. if these
-   * parameters are null, the Ganymede Server will query the Client
-   * remote interface for this information.</p>
-   * 
    * @see arlut.csd.ganymede.Server 
    */
 
-  public Session login(Client client, String username, String password) throws RemoteException
+  public ReturnVal login(String username, String password) throws RemoteException
   {
-    String clientName;
-    String clientPass;
-
-    /* -- */
-
-    if (username != null)
-      {
-	clientName = username;
-      }
-    else
-      {
-	clientName = client.getName();
-      }
-
-    if (password != null)
-      {
-	clientPass = password;
-      }
-    else
-      {
-	clientPass = client.getPassword();
-      }
-
-    return processLogin(clientName, clientPass, client, Ganymede.remotelyAccessible);
+    return processLogin(username, password, Ganymede.remotelyAccessible, true);
   }
 
   /** 
    * <p>XML Client login method.  Establishes a {@link
    * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
-   * in the server for the client, and returns a {@link
-   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
-   * XML client.  The GanymedeXMLSession object in turn contains a
-   * GanymedeSession object, which contains all of the server's
-   * knowledge about a given client's status., and is tracked by the
-   * GanymedeServer object for statistics and for the admin console's
-   * monitoring support.</P>
-   * 
-   * @see arlut.csd.ganymede.Server 
-   */
-
-  public XMLSession xmlLogin(Client client) throws RemoteException
-  {
-    return this.xmlLogin(client, null, null);
-  }
-
-  /** 
-   * <p>XML Client login method.  Establishes a {@link
-   * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
-   * in the server for the client, and returns a {@link
-   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
-   * XML client.  The GanymedeXMLSession object in turn contains a
+   * in the server for the client, and returns a serializable {@link
+   * arlut.csd.ganymede.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.XMLSession XMLSession} remote reference
+   * for the client to use, if login was successful.</p>
+   *
+   * <p>If login is not successful, the ReturnVal object will encode
+   * a failure condition, along with a dialog explaining the problem.</p>
+   *
+   * <p>The GanymedeXMLSession object in turn contains a
    * GanymedeSession object, which contains all of the server's
    * knowledge about a given client's status., and is tracked by the
    * GanymedeServer object for statistics and for the admin console's
    * monitoring support.</P>
    *
-   * <p>The username and password parameters are optional.. if these
-   * parameters are null, the Ganymede Server will query the Client
-   * remote interface for this information.</p>
-   * 
    * @see arlut.csd.ganymede.Server 
    */
 
-  public XMLSession xmlLogin(Client client, String username, String password) throws RemoteException
+  public ReturnVal xmlLogin(String username, String password) throws RemoteException
   {
-    String clientName = null;
-    String clientPass;
+    ReturnVal retVal = processLogin(username, password, false, true);
 
-    /* -- */
-
-
-    if (username != null)
+    if (!retVal.didSucceed())
       {
-	clientName = username;
-      }
-    else
-      {
-	clientName = client.getName();
+	return retVal;
       }
 
-    if (password != null)
-      {
-	clientPass = password;
-      }
-    else
-      {
-	clientPass = client.getPassword();
-      }
-
-    GanymedeSession mySession = processLogin(clientName, clientPass, client, false);
+    GanymedeSession mySession = (GanymedeSession) retVal.getSession();
 
     if (mySession == null)
       {
@@ -342,9 +268,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
       }
 
-    // and return the remote reference
+    // replace our remote Session reference with the XMLSession
+    // reference, and pass it to the client.. they can query the
+    // XMLSession for the Session reference if they need to.
 
-    return xSession;
+    retVal.setXMLSession(xSession);
+    return retVal;
   }
 
   /**
@@ -353,15 +282,14 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    *
    * @param clientName The user/persona name to be logged in
    * @param clientPass The password (in plaintext) to authenticate with
-   * @param client If we're using the interactive client, the processLogin() method
-   * will use the client reference to send a disconnect message explaining the
-   * login refusal
    * @param directSession If true, the GanymedeSession returned will export objects
    * created or referenced by the GanymedeSession for direct RMI access
+   * @param clientIsRemote If true, the GanymedeSession will set up for remote access,
+   * with user timeouts and the like.
    */
 
-  private GanymedeSession processLogin(String clientName, String clientPass, 
-				       Client client, boolean directSession) throws RemoteException
+  private ReturnVal processLogin(String clientName, String clientPass, 
+				 boolean directSession, boolean clientIsRemote) throws RemoteException
   {
     String clienthost = null;
     boolean found = false;
@@ -381,21 +309,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    if (error.equals("shutdown"))
 	      {
-		if (client != null)
-		  {
-		    client.forceDisconnect("The server is currently waiting to shut down.  No logins will be " +
-					   "accepted until the server has restarted.");
-		  }
+		return Ganymede.createErrorDialog("No logins allowed",
+						  "The server is currently waiting to shut down.  No logins will be " +
+						  "accepted until the server has restarted.");
 	      }
 	    else
 	      {
-		if (client != null)
-		  {
-		    client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
-		  }
+		return Ganymede.createErrorDialog("No logins allowed",
+						  "Can't login to the Ganymede server.. semaphore disabled: " + error);
 	      }
-
-	    return null;
 	  }
       }
     catch (InterruptedException ex)
@@ -543,8 +465,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		// registerActiveUser() on us, as well as directly
 		// adding itself to our sessions Vector.
 
-		GanymedeSession session = new GanymedeSession(client, clientName, user, persona,
-							      directSession);
+		GanymedeSession session = new GanymedeSession(clientName,
+							      user, persona, 
+							      directSession, clientIsRemote);
 
 		Ganymede.debug(session.username + " logged in from " + session.clienthost);
 
@@ -574,7 +497,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		success = true;
 
-		return session;
+		ReturnVal retVal = new ReturnVal(true);
+		retVal.setSession(session);
+
+		return retVal;
 	      }
 	    else
 	      {
@@ -613,7 +539,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 							       recipients));
 		  }
 
-		return null;
+		return Ganymede.createErrorDialog("Bad login attempt",
+						  "Bad username or password, login rejected.");
 	      }
 	  }
       }
@@ -988,19 +915,18 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   }
 
   /**
-   * <P>This public remotely accessible method is called by the Ganymede admin console and/or
-   * the Ganymede stopServer script to establish a new admin console connection
-   * to the server.  Establishes an GanymedeAdmin object in the server.</P>
+   * <P>This public remotely accessible method is called by the
+   * Ganymede admin console and/or the Ganymede stopServer script to
+   * establish a new admin console connection to the server.
+   * Establishes an GanymedeAdmin object in the server.</P>
    *
    * <P>Adds &lt;admin&gt; as a monitoring admin console.</P>
    *
    * @see arlut.csd.ganymede.Server
    */
 
-  public synchronized adminSession admin(Admin admin) throws RemoteException
+  public synchronized ReturnVal admin(String clientName, String clientPass) throws RemoteException
   {
-    String clientName;
-    String clientPass;
     boolean fullprivs = false;
     boolean found = false;
     Query userQuery;
@@ -1016,11 +942,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (error != null)
       {
-	throw new RuntimeException("Can't connect admin console to server.. semaphore disabled: " + error);
+	return Ganymede.createErrorDialog("Admin Console Connect Failure",
+					  "Can't connect admin console to server.. semaphore disabled: " + error);
       }
-
-    clientName = admin.getName();
-    clientPass = admin.getPassword();
 
     // we want to match against either the persona name field or
     // the new persona label field.  This lets us work with old
@@ -1127,7 +1051,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     // creating a new GanymedeAdmin can block if we are currently
     // looping over the connected consoles.
 
-    adminSession aSession = new GanymedeAdmin(admin, fullprivs, clientName, clienthost);
+    adminSession aSession = new GanymedeAdmin(fullprivs, clientName, clienthost);
 
     // now Ganymede.debug() will write to the newly attached console,
     // even though we haven't returned the admin session to the admin
@@ -1147,7 +1071,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 						   null));
       }
 
-    return aSession;
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setAdminSession(aSession);
+
+    return retVal;
   }
 
   /**
