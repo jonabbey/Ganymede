@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 1999/06/18 22:43:17 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 1999/06/25 01:47:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -102,7 +102,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.109 $ $Date: 1999/06/18 22:43:17 $ $Name:  $
+ * @version $Revision: 1.110 $ $Date: 1999/06/25 01:47:47 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -685,12 +685,108 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
+   * <p>This version of anonymousLinkOK takes additional parameters
+   * to allow an object type to decide that it does or does not want
+   * to allow a link based on what field of what object wants to link
+   * to it.</P>
+   *
+   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
+   * method are chained together, so that the customizer can choose
+   * which level of detail he is interested in.
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField}'s
+   * {@link arlut.csd.ganymede.InvidDBField#bind(arlut.csd.ganymede.Invid,arlut.csd.ganymede.Invid,boolean) bind()}
+   * method calls this version.  This version calls the three parameter
+   * version, which calls the two parameter version, which returns
+   * false by default.  Customizers can implement any of the three
+   * versions, but unless you maintain the version chaining yourself,
+   * there's no point to implementing more than one of them.</P>
+   *
+   * <P>Note that the {@link
+   * arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</P>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
+   * @param sourceObject The object on the other side of the proposed link
+   * @param sourceFieldID  The field on the other side of the proposed link
+   * @param gsession Who is trying to do this linking?  */
+
+  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
+				 DBObject sourceObject, short sourceFieldID,
+				 GanymedeSession gsession)
+  {
+    // by default, dispatch to the more generic approval method
+    
+    return anonymousLinkOK(targetObject, targetFieldID, gsession);
+  }
+
+  /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * rescind a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source 
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
+   * the target.</p>
+   *
+   * <p>This version of anonymousUnlinkOK takes additional parameters
+   * to allow an object type to decide that it does or does not want
+   * to allow a link to be rescinded based on what field of what
+   * object wants to unlink from it.</P>
+   *
+   * <p>By default, the 3 variants of the DBEditObject anonymousUnlinkOK() 
+   * method are chained together, so that the customizer can choose
+   * which level of detail he is interested in.
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField}'s
+   * {@link arlut.csd.ganymede.InvidDBField#unbind(arlut.csd.ganymede.Invid,boolean) unbind()}
+   * method calls this version.  This version calls the three parameter
+   * version, which calls the two parameter version, which returns
+   * true by default.  Customizers can implement any of the three
+   * versions, but unless you maintain the version chaining yourself,
+   * there's no point to implementing more than one of them.</P>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param targetObject The object that the link is removed from
+   * @param targetFieldID The field that the link is removed from
+   * @param sourceObject The object on the other side of the existing link
+   * @param sourceFieldID The object on the other side of the existing link
+   * @param gsession Who is trying to do this unlinking?  
+   */
+
+  public boolean anonymousUnlinkOK(DBObject targetObject, short targetFieldID,
+				   DBObject sourceObject, short sourceFieldID,
+				   GanymedeSession gsession)
+  {
+    // by default, dispatch to the more generic approval method
+    
+    return anonymousUnlinkOK(targetObject, targetFieldID, gsession);
+  }
+
+  /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source 
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
+   * the target.</p>
+   *
+   * <P>See {@link *
+   * arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
+   * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
+   * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousLinkOK() method chaining.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param object The object that the link is to be created in
    * @param fieldID The field that the link is to be created in
-   * @param gsession Who is trying to do this linking?
-   */
+   * @param gsession Who is trying to do this linking?  */
 
   public boolean anonymousLinkOK(DBObject object, short fieldID, GanymedeSession gsession)
   {
@@ -704,6 +800,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * user only has editing access for the source 
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
+   *
+   * <p>By default, the server always allows anonymous unlinking.
+   * Overriding this method is only required when you want to DISallow
+   * such unlinking.</p>
+   *
+   * <P>See {@link *
+   * arlut.csd.ganymede.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.DBObject,short,
+   * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
+   * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousUnlinkOK() method chaining.</P>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
@@ -725,6 +831,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
+   * <P>See {@link *
+   * arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
+   * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
+   * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousLinkOK() method chaining.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param object The object that the link is to be created in
@@ -743,6 +855,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
+   *
+   * <p>By default, the server always allows anonymous unlinking.
+   * Overriding this method is only required when you want to DISallow
+   * such unlinking.</p>
+   *
+   * <P>See {@link *
+   * arlut.csd.ganymede.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.DBObject,short,
+   * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
+   * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousUnlinkOK() method chaining.</P>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
@@ -1660,7 +1782,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
 
-    return targetBase.getObjectHook().anonymousLinkOK(this, targetField, this.gSession);
+    return targetBase.getObjectHook().anonymousLinkOK(null, targetField,
+						      this, field.getID(), 
+						      this.gSession);
   }
 
   /**
@@ -2108,12 +2232,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			  {
 			    session = editset.getSession();
 			    
-			    if (session != null)
-			      {
-				session.setLastError("DBEditObject disapproved of deleting element from field " + 
-						     field.getName());
-			      }
-			    
 			    editset.rollback("del" + label); // *sync*
 			    
 			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
@@ -2152,12 +2270,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		      {
 			session = editset.getSession();
 		    
-			if (session != null)
-			  {
-			    session.setLastError("DBEditObject could not clear field " + 
-						 field.getName());
-			  }
-
 			editset.rollback("del" + label); // *sync*
 
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
@@ -2200,12 +2312,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    if (retVal != null && !retVal.didSucceed())
 		      {
 			session = editset.getSession();
-		    
-			if (session != null)
-			  {
-			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
-						 field.getName());
-			  }
 
 			editset.rollback("del" + label); // *sync*
 
@@ -2231,12 +2337,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    session = editset.getSession();
-		    
-		    if (session != null)
-		      {
-			session.setLastError("DBEditObject could not clear field " + 
-					     field.getName());
-		      }
 
 		    editset.rollback("del" + label); // *sync*
 

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 1999/06/24 00:56:24 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 1999/06/25 01:47:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.138 $ %D%
+ * @version $Revision: 1.139 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2974,8 +2974,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This private method takes care of adding an object to a query
-   * result, checking permissions and what-not as needed.
+   * <P>This private method takes care of adding an object to a query
+   * result, checking permissions and what-not as needed.</P>
+   *
+   * <P>This method is not synchronized for performance reasons, but
+   * is only to be called from methods synchronized on this
+   * GanymedeSession.</P> 
    */
 
   private final void addResultRow(DBObject obj, Query query, 
@@ -3098,10 +3102,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method is intended as a lightweight way of returning the
+   * <P>This method is intended as a lightweight way of returning the
    * current label of the specified invid.  No locking is done,
    * and the label returned will be viewed through the context
-   * of the current transaction, if any.
+   * of the current transaction, if any.</P>
    *
    * @see arlut.csd.ganymede.Session
    */ 
@@ -3128,8 +3132,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <P>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -3379,7 +3383,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (obj == null)
       {
 	return Ganymede.createErrorDialog("Object not found",
-					  "Error, object [" + invid + "] does not appear to exist.  Couldn't edit it.");
+					  "Error, object [" + invid +
+					  "] does not appear to exist.  Couldn't edit it.");
       }
 
     // we always want to check permissions, even if the object has
@@ -4126,72 +4131,60 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * by that group, and determines the appropriate permission
    * bits for the field in the object.</P>
    *
-   * <P>This method duplicates the logic of
-   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm(object)}
-   * internally for efficiency.  This method is called quite
-   * a lot in the server.</P>
+   * <P>This method duplicates the logic of {@link
+   * arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject)
+   * getPerm(object)} internally for efficiency.  This method is
+   * called <B>quite</B> a lot in the server.</P> 
    */
 
   final public PermEntry getPerm(DBObject object, short fieldId)
   {
-    // permissions that apply if we own the object
+    // reference to which PermMatrix we use to look up permissions..
+    // that for objects we own, or that for objects we don't.
 
-    PermEntry ownedObjPerm = PermEntry.noPerms;
-    PermEntry ownedFieldPerm = PermEntry.noPerms;
+    PermMatrix applicablePerms = null;
 
-    // permissions that apply by default
+    // reference to custom pseudostatic DBEditObject handler
+    // registered with the object's type, if any
 
-    PermEntry defaultFieldPerm = null;
-    PermEntry defaultObjPerm = null;
+    DBEditObject objectHook;
 
-    // object permissions resulting from DBEditObject subclass customization
+    // object permissions resulting from DBEditObject subclass
+    // customization
 
     PermEntry overrideObjPerm = null;
     PermEntry expandObjPerm = null;
 
-    // field permissions resulting from DBEditObject subclass customization
+    // field permissions resulting from DBEditObject subclass
+    // customization
 
     PermEntry overrideFieldPerm = null;
     PermEntry expandFieldPerm = null;
 
     // and our results
 
-    PermEntry finalObjPerm = null;
-    PermEntry finalFieldPerm = null;
+    PermEntry objectPerm = null;
+    PermEntry fieldPerm = null;
 
     /* -- */
-
-    if (object == null)
-      {
-	return null;		// Garbage-in, Garbage-out
-      }
 
     if (supergashMode)
       {
 	return PermEntry.fullPerms;
       }
 
-    // get a handy reference to the pseudostatic DBEditObject handler
+    objectHook = object.getBase().getObjectHook();
 
-    DBEditObject objectHook = object.getBase().getObjectHook();
-
-    // does this object type have an override for this field?
+    // check for permissions overrides or expansions from the object's
+    // custom plug-in class.. all of these objectHook calls will
+    // return null if there is no customization
 
     overrideFieldPerm = objectHook.permOverride(this, object, fieldId);
 
     if (overrideFieldPerm == null)
       {
-	// no override.. do we have an expansion?
-	
 	expandFieldPerm = objectHook.permExpand(this, object, fieldId);
       }
-
-    // we need to get the object permission so that we can inherit
-    // permisisons when not specified for the field.. we do this here
-    // rather than just calling GanymedeSession.getPerm() to avoid the
-    // overhead of checking for a persona match twice.
-
-    // does this object type have an override?
 
     overrideObjPerm = objectHook.permOverride(this, object);
 
@@ -4204,138 +4197,61 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     updatePerms(false);		// *sync*
 
-    // ---------------------------------------------------------------
-    //
-    // Determine the object and field permissions that we are granted by way
-    // of the default permissions for this session
-    //
-    // ---------------------------------------------------------------
-
-    // first get the permissions that apply to the object type from
-    // our roles' default bits
-
-    defaultObjPerm = defaultPerms.getPerm(object.getTypeID());
-
-    if (defaultObjPerm == null)
-      {
-	defaultObjPerm = PermEntry.noPerms;
-      }
-
-    // now get the field's permissions
-
-    defaultFieldPerm = defaultPerms.getPerm(object.getTypeID(), fieldId);
-
-    // if we have no default record for this field, inherit the default
-    // permission for the object type
-
-    // NOTE!  We don't set the defaultFieldPerm to overrideObjPerm or
-    // union in expandObjPerm, because we are only interested here in
-    // permissions obtained without any sort of ownership or
-    // customization logic
-
-    if (defaultFieldPerm == null)
-      {
-	defaultFieldPerm = defaultObjPerm;
-      }
-
-    if (permsdebug)
-      {
-	System.err.println("GanymedeSession.getPerm(obj,field): default field perm for object " + 
-			   object + ", field = " + object.getFieldName(fieldId) +
-			   " is =" +
-			   defaultFieldPerm);
-      }
-
-    // ---------------------------------------------------------------
-    //
-    // Determine the object and field permissions that we are granted
-    // by way of the owned object permissions for this session, if
-    // applicable
-    //
-    // ---------------------------------------------------------------
-
-    // find the top-level object if we were passed an embedded object..
-    // this is because embedded object ownership is determined by the
-    // top-level object
+    // embedded object ownership is determined by the top-level object
     
     DBObject containingObj = getContainingObj(object);
-
-    // Check to see if we are an end-user viewing/editing our user
-    // object, an object for which we are granted ownership by a
-    // custom plug-in, or an object we own through our owner groups.
 
     if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
 	objectHook.grantOwnership(this, object) || 
 	objectHook.grantOwnership(this, containingObj) ||
 	personaMatch(containingObj))
       {
-	// use the owned objects personaPerms to get this permission
-
-	// if we weren't forced to use a perm override, look up
-	// permissions for this object using the normal ownership/role
-	// logic
-
-	ownedObjPerm = personaPerms.getPerm(object.getTypeID());
-
-	if (ownedObjPerm == null)
-	  {
-	    ownedObjPerm = PermEntry.noPerms;
-	  }
-
-	ownedFieldPerm = personaPerms.getPerm(object.getTypeID(), fieldId);
-
-	if (ownedFieldPerm == null)
-	  {
-	    ownedFieldPerm = ownedObjPerm;
-	  }
-
-	if (permsdebug)
-	  {
-	    System.err.println("GanymedeSession.getPerm(obj,field): owned field perm for object " + 
-			       object + ", field = " + object.getFieldName(fieldId) +
-			       " is =" +
-			       ownedFieldPerm);
-	  }
-
+	applicablePerms = personaPerms;	// superset of defaultPerms
+      }
+    else
+      {
+	applicablePerms = defaultPerms;
       }
 
     if (overrideObjPerm != null)
       {
-	finalObjPerm = overrideObjPerm;
+	objectPerm = overrideObjPerm;
       }
     else
       {
-	finalObjPerm = ownedObjPerm.union(defaultObjPerm).union(expandObjPerm);
+	objectPerm = applicablePerms.getPerm(object.getTypeID());
+
+	if (objectPerm == null)
+	  {
+	    objectPerm = PermEntry.noPerms;
+	  }
+	
+	objectPerm = objectPerm.union(expandObjPerm);
       }
-    
-    // we want to return the more restrictive permissions of the 
-    // object's permissions and the field's permissions.. we can
-    // never look at a field in an object we can't look at.
     
     if (overrideFieldPerm != null)
       {
-	if (permsdebug)
-	  {
-	    System.err.println("GanymedeSession.getPerm(obj,field): we are treating object " + 
-			       object + ", field = " + object.getFieldName(fieldId) +
-			       " as override, perm =" +
-			       overrideFieldPerm.intersection(finalObjPerm));
-	  }
-
-	return overrideFieldPerm.intersection(finalObjPerm);	
+	return overrideFieldPerm.intersection(objectPerm);	
       }
-    else
+    
+    fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
+
+    // if we don't have an explicit permissions entry for the field,
+    // return the effective one for the object.. this default
+    // permissions inheritance will apply for the built-in field
+    // types, which do not have permissions set by the Ganymede
+    // client's permissions editor code.
+    
+    if (fieldPerm == null)
       {
-	if (permsdebug)
-	  {
-	    System.err.println("GanymedeSession.getPerm(obj,field): result for object " + 
-			       object + ", field = " + object.getFieldName(fieldId) +
-			       " is =" +
-			       ownedFieldPerm.union(defaultFieldPerm).union(expandFieldPerm).intersection(finalObjPerm));
-	  }
-
-	return ownedFieldPerm.union(defaultFieldPerm).union(expandFieldPerm).intersection(finalObjPerm);
+	return objectPerm;
       }
+
+    // we want to return the more restrictive permissions of the
+    // object's permissions and the field's permissions.. we can never
+    // look at a field in an object we can't look at.
+    
+    return fieldPerm.union(expandFieldPerm).intersection(objectPerm);
   }
 
   /**
@@ -4497,6 +4413,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * matrix that applies to all objects owned by the active persona for this
    * user.</P>
    *
+   * <P>This method is synchronized, and a whole lot of operations in the server
+   * need to pass through here to ensure that the effective permissions for this
+   * session haven't changed.  This method is designed to return very quickly
+   * if permissions have not changed and forceUpdate is false.</P>
+   *
    * @param forceUpdate If false, updatePerms() will do nothing if the Ganymede
    * permissions database has not been changed since updatePerms() was last
    * called in this GanymedeSession.
@@ -4510,6 +4431,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (forceUpdate)
       {
+	// clear our time stamp to force an update further on
+
 	personaTimeStamp = null;
       }
 
@@ -4518,7 +4441,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	permBase = Ganymede.db.getObjectBase(SchemaConstants.RoleBase);
       }
 
-    // first, make sure we have a copy of defaultObj
+    // first, make sure we have a copy of our default role DBObject.. permTimeStamp
+    // is used to track this.
 
     if (permTimeStamp == null || !permTimeStamp.before(permBase.lastChange))
       {
@@ -4533,6 +4457,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
+		// we're loading the database with a bulk-loader
+		// linked to the server code.  Don't bother with
+		// permissions
+
 		supergashMode = true;
 		return;
 	      }
@@ -4555,6 +4483,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
       }
 
+    // here's where we break out if nothing needs to be updated.. note that we
+    // are testing personaTimeStamp here, not permTimeStamp.
+ 
     if (personaTimeStamp != null && personaTimeStamp.after(personaBase.lastChange))
       {
 	return;

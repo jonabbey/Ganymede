@@ -7,8 +7,8 @@
    
    Created: 3 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/06/24 00:56:26 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/06/25 01:47:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,11 +134,19 @@ public class PermMatrix implements java.io.Serializable {
     return union(new PermMatrix(orig));	// this will cause a redundant copy, but who cares?
   }
 
-  /**
-   * <P>This method combines this PermMatrix with that
-   * of orig.  The returned PermMatrix will allow
-   * any access either of the source PermMatrices
-   * would.</P>
+  /** 
+   * <P>This method combines this PermMatrix with that of orig.  The
+   * returned PermMatrix will allow any access either of the source
+   * PermMatrices would.</P>
+   *
+   * <P>Note that unlike all the other methods in PermMatrix, we are
+   * handling inheritance of default permissions for an object base
+   * into fields which do not have permissions specified.  We have
+   * to take this into account here in order to do a proper union.</P>
+   *
+   * <P>As a consequence, this union() method is more complex than
+   * you might expect.  That complexity really is needed.. don't
+   * mess with this unless you really, really know what you're doing.</P>
    */
 
   public synchronized PermMatrix union(PermMatrix orig)

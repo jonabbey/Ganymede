@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 1999/06/15 02:48:27 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 1999/06/25 01:47:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.106 $ %D%
+ * @version $Revision: 1.107 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -958,6 +958,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	anonymous = session.getObjectHook(oldRemote).anonymousUnlinkOK(remobj,
 								       targetField, 
+								       this.getOwner(),
+								       this.getID(),
 								       session.getGSession());
 
 	// if we're already editing it, just go with that.
@@ -1060,6 +1062,8 @@ public final class InvidDBField extends DBField implements invid_field {
     
     anonymous = session.getObjectHook(newRemote).anonymousLinkOK(remobj,
 								 targetField, 
+								 this.getOwner(),
+								 this.getID(),
 								 session.getGSession());
     // if we're already editing it, just go with that.
 
@@ -1078,8 +1082,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRef == null)
       {
 	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
-					  "Your operation could not succeed because field " + getName() +
-					  " could not be linked to " + newRemote.toString() + 
+					  "Your operation could not succeed because " + this.toString() +
+					  " could not be linked to " + remobj.toString() + 
 					  ".  This could be due to a lack of permissions.");
       }
 
@@ -1313,6 +1317,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     anonymous = session.getObjectHook(remote).anonymousUnlinkOK(remobj,
 								targetField, 
+								this.getOwner(),
+								this.getID(),
 								session.getGSession());
 
     // if we're already editing it, just go with that.
@@ -1421,20 +1427,18 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   *
-   * This method is used to unlink a backlink field from the specified remote
+   * <P>This method is used to unlink a backlink field from the specified remote
    * invid across all Invid fields defined in the remote object corresponding
-   * to remote.
+   * to remote.</P>
    *
-   * <b>This method is private, and is not to be called by any code outside
-   * of this class.</b>
+   * <P><b>This method is private, and is not to be called by any code outside
+   * of this class.</b></P>
    *
    * @param remote An invid for an object to be checked out and unlinked
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
-   *
    */
 
   private final ReturnVal unbindAll(Invid remote, boolean local)
@@ -1559,7 +1563,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	fieldsToUnbind.addElement(new Short(tmpField.getID()));
 
-	if (!session.getObjectHook(remote).anonymousUnlinkOK(remobj, tmpField.getID(), session.getGSession()))
+	if (!session.getObjectHook(remote).anonymousUnlinkOK(remobj, tmpField.getID(), 
+							     this.getOwner(), this.getID(),
+							     session.getGSession()))
 	  {
 	    skipPermsOK = false;
 	  }
@@ -1603,6 +1609,8 @@ public final class InvidDBField extends DBField implements invid_field {
     
 	anon = session.getObjectHook(remote).anonymousUnlinkOK(remobj, 
 							       targetField, 
+							       this.getOwner(),
+							       this.getID(),
 							       session.getGSession());
 	try
 	  {
