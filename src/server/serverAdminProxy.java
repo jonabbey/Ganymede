@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/02/02 19:39:55 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/02/02 19:43:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.11 $ $Date: 2000/02/02 19:39:55 $
+ * @version $Revision: 1.12 $ $Date: 2000/02/02 19:43:05 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -476,19 +476,15 @@ public class serverAdminProxy implements Admin, Runnable {
   }
 
   /**
-   * <p>private helper method in serverAdminProxy, used to add an event to
-   * the proxy's event buffer.  If the buffer already contains an event
-   * of the same type as newEvent, the old event will be replaced with
-   * the new, and the admin console will never be notified of the old
-   * event's contents.</p>
+   * <p>private helper method in serverAdminProxy, used to add an
+   * event to the proxy's event buffer.  If the buffer already
+   * contains an event of the same type as newEvent, the old event's
+   * contents will be replaced with the new, and the admin console
+   * will never be notified of the old event's contents.</p>
    */
 
   private void replaceEvent(adminEvent newEvent) throws RemoteException
   {
-    adminEvent oldEvent;
-
-    /* -- */
-    
     if (done)
       {
 	// we have to throw a remote exception, since that's what
