@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -423,10 +423,13 @@ public class DBStore {
 
 	    // and dump the schema out in a human readable form
 	
-	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
-	    textOut = new PrintWriter(textOutStream);
-
-	    printCategoryTreeHTML(textOut);
+	    if (Ganymede.htmlProperty != null)
+	      {
+		textOutStream = new FileOutputStream(Ganymede.htmlProperty);
+		textOut = new PrintWriter(textOutStream);
+		
+		printCategoryTreeHTML(textOut);
+	      }
 	  }
 	catch (IOException ex)
 	  {
