@@ -15,6 +15,23 @@ editor, so editing namespaces in the schema editor was broken in 0.96.
 
 Thanks to frederick.j.dickey@boeing.com for reporting this.
 
+2. [DOCUMENTATION] Fixes to the customization guide
+
+The DBEditObject customization guide has lots of references to javadoc
+pages, but the method links weren't properly constructed for use with
+the 1.2 javadoc output format.  You should now be able to click on
+method names in the customization guide and be taken directly to the
+method docs.
+
+Brought the guide's content up to date with recent changes to
+DBEditObject.
+
+3. [SERVER] Amended journal loading code for production mode
+
+The journal loading code in the Ganymede server now simply complains
+politely to stderr if the journal is truncated inappropriately, rather
+than throwing an IOException.
+
 -------------------- Changes from 0.95 to 0.96 -------------------
 
 RELEASE DATE: January 29, 1999
