@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.70 $ %D%
+   Version: $Revision: 1.71 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1904,11 +1904,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    *
-   * Clear the editing flag.  This disables the DBObjectBase
-   * set methods on this ObjectBase and all dependent field
-   * definitions.  This method also updates the FieldTemplate
-   * for each field.
-   *
+   * Clear the editing flag.  This disables the DBObjectBase set
+   * methods on this ObjectBase and all dependent field definitions.
+   * This method also updates the FieldTemplate for each field and 
+   * resorts the field index.
+   * 
    */
   
   synchronized void clearEditor(DBSchemaEdit editor)
@@ -1935,6 +1935,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	fieldDef.editor = null;
 	fieldDef.template = new FieldTemplate(fieldDef);
       }
+
+    // the fields may have been re-ordered.. make sure our
+    // sortedFields field is still in order.
+
+    sortFields();
 
     original = null;
   }
