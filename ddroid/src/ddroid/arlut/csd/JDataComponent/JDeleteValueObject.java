@@ -1,25 +1,17 @@
-
 /*
-   JValueObject.java
+   JDeleteValueObject.java
 
-   Base class for a new hierarchy of classes used to pass
-   callback data in the arlut.csd.JDataComponent package.
+   Subclass of JValueObject that represents the deletion of an item
+   item in a JstringListBox or the like.
 
-   Formerly, this class was an all-in-one class that tried to encode a
-   bunch of different operations, with a mess of different
-   constructors and interpretations of parameters.
-
-   Now this class will serve as a base class, and all of the actual
-   data transport will be done by operation-specific subclasses.
-
-   Created: 28 Feb 1997
+   Created: 25 October 2004
 
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
-   Module By: Navin Manohar
+   Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
@@ -64,65 +56,86 @@ import java.awt.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                    JValueObject
+                                                              JDeleteValueObject
 
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>Subclass of JValueObject that represents the deletion of an item
+ * item in a JstringListBox or the like.</p>
  *
- * <p>A client-side message object used to pass status updates from
- * GUI components in the arlut.csd.JDataComponent package to their
- * containers.  JValueObject supports passing information about
- * scalar and vector value change operations, as well as pop-up
- * menus and error messages.</p>
- *
- * <p>Base class for a new hierarchy of classes used to pass
- * callback data in the arlut.csd.JDataComponent package.</p>
- *
- * <p>Formerly, this class was an all-in-one class that tried to encode a
- * bunch of different operations, with a mess of different
- * constructors and interpretations of parameters.</p>
- *
- * <p>Now this class will serve as a base class, and all of the actual
- * data transport will be done by operation-specific subclasses.</p>
- *
- * <p>Note that we came up with this message type before Sun introduced
- * the 1.1 AWT event model.  Great minds... ;-)</p>
- *   
  * @version $Revision$ $Date$ $Name:  $
- * @author Navin Manohar 
+ * @author Jonathan Abbey
  */
 
-public abstract class JValueObject {
+public class JDeleteValueObject extends JValueObject {
+
+  private Component source;
+  private Object value = null;
+
+  /* -- */
+
+  public JDeleteValueObject(Component source, Object value)
+  {
+    this.source = source;
+    this.value = value;
+  }
 
   /**
    * Returns the arlut.csd.JDataComponent GUI component that originated this message.
    */
 
-  public abstract Component getSource();
+  public Component getSource()
+  {
+    return source;
+  }
 
   /**
    * Returns an auxiliary value.  Used for passing information about pop-up menu items, but may
    * be used for different purposes if needed.
    */
 
-  public abstract Object getParameter();
+  public Object getParameter() 
+  {
+    return null;
+  }
 
   /**
    * Returns the index of an item operated on in a vector component.
    */
 
-  public abstract int getIndex();
+  public int getIndex() 
+  {
+    return -1;
+  }
 
   /**
    * Returns the index of an item operated on in a vector component.
    */
 
-  public abstract int getIndex2();
+  public int getIndex2() 
+  {
+    return -1;
+  }
 
   /**
    * Returns the value of the object being affected by this message.
    */
 
-  public abstract Object getValue();
+  public Object getValue() 
+  {
+    return value;
+  }
+
+  /**
+   *
+   * Method to get a human-readable description of the event carried
+   * by this object
+   * 
+   */
+
+  public String toString()
+  {
+    return source.toString() +  " delete(" + String.valueOf(value) + ")";
+  }
 }
