@@ -30,8 +30,8 @@ about hanging disconnect threads clogging up the server.
 2. [SERVER, ADMIN CONSOLE] Added support for memory status tracking
 
 The server and admin console now collaborate to display the amount of
-memory free and the total amount of memory size of the server, to be
-updated once a minute by a new Memory Status Updater task.
+free memory and the total amount of memory taken up by the server, to
+be updated once a minute by a new Memory Status Updater task.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
