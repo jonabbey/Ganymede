@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2001/06/29 07:58:43 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2001/06/29 21:26:11 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2155,8 +2155,8 @@ class OptionsPanel extends JPanel {
 					  new Vector(), 
 					  builtInPanel,
 					  true,
-					  "In",
-					  "Out");
+					  "Members",
+					  "Available" );
 
     builtInSelector.update(builtInItems_Vect, false, new Vector(), false);
 
@@ -2164,8 +2164,8 @@ class OptionsPanel extends JPanel {
 					 customItems_Vect, 
 					 customPanel,
 					 true,
-					 "In",
-					 "Out");
+					 "Members",
+					 "Available" );
 
     customSelector.update(new Vector(), false, customItems_Vect, false);
 
