@@ -1,7 +1,54 @@
-Ganymede Release 1.0.10
-April 2, 2002
+Ganymede Release 1.0.11
+? ?, 2002
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.10 to 1.0.11 -------------------
+
+RELEASE DATE: ? ?, 2002
+
+1. [SERVER] Put safety interlock in DBEditSet.addNewObject()
+
+The DBEditSet class had a vulnerability that could conceivably cause
+transaction corruption if an adopter wrote custom code that attempted
+to pull new objects in to the transaction in a custom DBEditObject
+classes commitPhase2() method.
+
+Now addNewObject() will throw a RuntimeException() if someone attempts
+to pull new objects into a transaction during the transaction's
+commit() process, causing the transaction to cleanly abort.
+
+2. [CLIENT] Made the Ganymede login applet show the server name
+
+Added information on the login box about the location of the Ganymede
+server that the client has bound to.
+
+3. [SERVER] Added new ganymede.subjectprefix property to the server.properties file
+
+The server now supports a new server property, entitled
+'ganymede.subjectprefix'.  If this property is set to a string that
+begins and ends with single quotation marks, the text included between
+the single quote marks will be used as the identifying subject prefix
+for email sent by the Ganymede server.  If no such server property is
+defined, the server will use 'Ganymede: ' as the subject prefix.
+
+4. [SERVER] Fixed GanymedeSession addResultRow(), internalQuery() to honor editableOnly query filtering
+
+The query logic in GanymedeSession has always been grotesquely over
+complicated, and it turns out that there has been a significant error
+in the addResultRow() method, which was neglecting to filter out
+non-editable objects from queries that specifically request that
+non-editable objects be filtered, in the case that
+GanymedeSession.internalQuery() was used to execute the query.  In
+addition, the addResultRow() logic in the old non-supergash,
+non-internal case was confused and confusing, so I cleaned that up a
+bit as well.
+
+I have swept through my code looking for instances of internalQuery()
+usage, and I have made sure that all queries supplied to
+internalQuery() in non-supergash sessions explicitly turn off the
+editableOnly restriction.  This involved some changes in the
+schemas/gasharl/custom_src code.
 
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 

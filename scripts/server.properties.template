@@ -60,6 +60,25 @@ ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 ganymede.htmldump=/home/broccol/public_html/gash2/design/schema.html
 
 
+# ganymede.subjectprefix
+#
+# A single-quote delimited string that is prepended to the subject line
+# of any mail this instance of Ganymede sends out.  The single quotation
+# marks are stripped by the server, and will not appear in the subject line.
+#
+# Examples:
+# 'Ganymede: '
+# '[SysAdmin] '
+# & etc.  Note that the trailing spaces are necessary if you want the
+# subjectprefix to be visually separated from the message-specific subject
+# text.
+#
+# If the subjectprefix is undefined, or if it does not start and end
+# with single quotation marks, a default subjectprefix will be used.
+
+ganymede.subjectprefix='Ganymede: '
+
+
 # ganymede.signaturefile
 #
 # The filename for a signature file to append to mail messages sent out
