@@ -1767,6 +1767,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     XMLItem item;
     boolean committedTransaction = false;
+    int count = 0;
 
     /* -- */
 
@@ -1814,7 +1815,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    return false;
 		  }
 
-		System.err.print(".");
+		if (count == 9)
+		  {
+		    System.err.print(".");
+		    count = 0;
+		  }
+		else
+		  {
+		    count++;
+		  }
 
 		String mode = objectRecord.getMode();
 	    
