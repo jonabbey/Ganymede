@@ -14,11 +14,11 @@ JAVA=/opt/bin/java
 
 # Where are the Ganymede jars installed?
 
-JARPATH=/home/broccol/gash2/classes
+JARPATH=/home/broccol/ganymede/work/ganymede/jars
 
 # Where is the loader tree?
 
-LOADERDIR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gasharl/loader
+LOADERDIR=/home/broccol/ganymede/work/ganymede/src/schemas/gasharl/loader
 
 # Where are the classes for the loader?
 
