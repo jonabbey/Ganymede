@@ -1,5 +1,5 @@
-Ganymede Developer Release 1.0pre1 beta 2
-September 15, 2000
+Ganymede Release 1.0 prerelease 1
+January 30, 2001
 README.source
 ---------------------------------------------
 
@@ -21,14 +21,7 @@ want to rebuild the jars from scratch, here's what you do.
 
    You shouldn't see any errors or warnings during the make.
 
-4. Run 'make kits'.  This will compile all of the customization
-   code in src/schemas, as well as build the jar files required if
-   you are going to install one of the schema kits with installServer.
-
-   You may see a few non-critical deprecation warnings during this
-   step.
-
-5. Run 'make jars'.  This will recreate the 4 jar files used by
+4. Run 'make jars'.  This will recreate the 4 jar files used by
    the installation scripts.
 
 Once you get past step 3, you can go into any of the src

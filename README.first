@@ -1,12 +1,12 @@
-Ganymede Release 1.0 prerelease beta 5
-December 18, 2000
+Ganymede Release 1.0 prerelease 1
+January 30, 2001
 README.first
 ---------------------------------------------
 
-This distribution of Ganymede is being put out to gather feedback
-before putting out an official Ganymede 1.0p1.  All that I expect to
-do before 1.0p1 is to gather feedback and to buff up the documentation
-a bit with a deployment guide.
+This release includes just about everything that I hope to achieve for
+Ganymede 1.0, with the exception of about 6 weeks of testing by other
+folks out in the wide world, and yet still more work on the
+documentation by yours truly.
 
 There have been a number of fairly deep changes in this distribution,
 relative to 1.0p1b4, and all others prior.  The manner in which schema

@@ -1,5 +1,5 @@
-Ganymede Release 1.0 prerelease beta 5
-December 18, 2000
+Ganymede Release 1.0 prerelease 1
+January 30, 2001
 README
 ---------------------------------------------
 
@@ -17,30 +17,17 @@ This release includes:
   A full-featured Ganymede client, providing a convenient
   Explorer-like interface to all operations supported by the server.
 
-  A full-featured Administration Console, which can be used to monitor
+  A GUI Administration Console, which can be used to monitor
   the server's operations, and to modify the design of the database
   held in the server.
 
-  Sample database configurations, including both the database
-  definition file and custom plug-in classes to match.
-
   Comprehensive documentation on all classes and methods comprising
   the server and the primary client.
-
-  Source code for all custom classes, and for an example password
-  client that can talk directly to the Ganymede server.
 
   Source code for the core module of any Ganymede client.
 
   Templates for running the admin console and primary client off of
   a Java-enabled web browser.
-
-  A Java program to load data from NIS maps and/or GASH files into
-  the Ganymede server.
-
-  Build scripts that can take NIS and DNS information from the
-  Ganymede server and propagate the information into NIS maps or
-  DNS tables when the GASH schema is used.
 
   Full source code for everything.
 
