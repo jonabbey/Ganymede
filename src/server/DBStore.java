@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.139 $
-   Last Mod Date: $Date: 2001/01/11 23:35:57 $
+   Version: $Revision: 1.140 $
+   Last Mod Date: $Date: 2001/01/27 03:42:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.139 $ %D%
+ * @version $Revision: 1.140 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -495,6 +495,19 @@ public final class DBStore {
 
 		    System.err.println("\nError, couldn't load entire journal.. " +
 				       "final transaction in journal not processed.\n");
+		  }
+
+		// update the DBObjectBase iterationSets, since the journal
+		// loading bypasses the transaction mechanism where this is
+		// normally done
+
+		Enumeration enum = objectBases.elements();
+
+		while (enum.hasMoreElements())
+		  {
+		    DBObjectBase base = (DBObjectBase) enum.nextElement();
+
+		    base.updateIterationSet();
 		  }
 
 		// go ahead and consolidate the journal into the DBStore
