@@ -18,7 +18,7 @@
 
   <property name="src.dir" value="ddroid"/>
   <property name="lib.dir" value="lib"/>
-  <property name="graphics.dir" value="graphics"/>
+  <property name="resources.dir" value="resources"/>
 
   <!-- Build directories -->
   <property name="build.dir" value="build"/>
@@ -140,10 +140,10 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
 
-      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/client/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/client/*"/>
     </jar>
 
     <!-- Build the server jar file -->
@@ -179,9 +179,9 @@ refresh the jar files.
 
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
       
-      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/admin.jpg"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/*.gif"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/admin.jpg"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/*.gif"/>
     </jar>
     
     <!-- Copy over the newly created jars -->
