@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.95 $ %D%
+   Version: $Revision: 1.96 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.95 $ %D%
+ * @version $Revision: 1.96 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -911,6 +911,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * is required to be defined at commit time for a given object.<br><br>
    *
    * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.<br><br>
    *
    * <b>*PSEUDOSTATIC*</b>
    *
