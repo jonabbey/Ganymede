@@ -190,11 +190,11 @@ one instance this logic flaw resulted in changes made to permission
 matrices by editing Role objects not taking effect until the server
 was stopped and restarted.
 
-I've audited all of the server code to insure that there are no
-remaining attempted dependencies on post-serialization initialization
-of transient fields.
+I've fixed this, and audited all of the server code to insure that
+there are no remaining attempted dependencies on post-serialization
+initialization of transient fields.
 
-15. [SERVER XML] Fixed missing attribute error reporting in XML logic
+15. [SERVER XML] Fixed missing attribute error reporting in XML parser
 
 The Ganymede server's XML parsing code is designed to report
 to the xmlclient a record of the last 30 XML elements parsed prior
@@ -204,8 +204,15 @@ say).  Unfortunately, the class that represents XML entities
 had a bug in it's toString() method that caused every other attribute
 to be skipped over when regenerating a string representation.
 
-This was a small bug, but made it maddeningly difficult to track
+This was a small bug, but could make it maddeningly difficult to track
 down syntax errors in XML files created for use with Ganymede.
+
+16. [CLIENT] Tweaked the Ganymede client's GUI
+
+I have tweaked a number of aspects of the Ganymede client's GUI to
+make using the Ganymede client a bit more convenient, mostly in the
+way of reducing the default length of fields in the object
+viewing and editing windows.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
