@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -338,7 +338,7 @@ public class JstringField extends JentryField implements KeyListener{
 	System.out.println("JstringField.isAllowed()");
       }
 
-    if ((getText() != null) && (getText().length() >= size))
+    if ((getText() != null) && (getText().length() > size))
       {
 	if (debug)
 	  {
@@ -352,7 +352,13 @@ public class JstringField extends JentryField implements KeyListener{
       {
 	if (disallowedChars.indexOf(ch) != -1)
 	  {
+	    if (debug)
+	      {
+		System.out.println("Disallowing char: " + ch + " because it is in string: " + disallowedChars);
+	      }
+
 	    return false;
+	    
 	  }
       }
     
