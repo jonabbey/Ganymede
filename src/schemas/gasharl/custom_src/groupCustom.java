@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2001/09/24 21:43:04 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2001/09/25 01:44:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ import java.rmi.*;
 
 public class groupCustom extends DBEditObject implements SchemaConstants, groupSchema {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
   static final boolean debug2 = false;
 
   /**
