@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.76 $ %D%
+   Version: $Revision: 1.77 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1683,7 +1683,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    checkpoint = !eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight;
 
     if (checkpoint)
       {
@@ -1862,7 +1862,7 @@ public final class InvidDBField extends DBField implements invid_field {
     oldRemote = (Invid) values.elementAt(index);
     newRemote = (Invid) value;
 
-    checkpoint = !eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight;
 
     if (checkpoint)
       {
@@ -2001,7 +2001,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    checkpoint = !eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight;
 
     if (checkpoint)
       {
@@ -2297,7 +2297,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
       }
 
-    checkpoint = !eObj.getGSession().enableOversight;
+    checkpoint = eObj.getGSession().enableOversight;
 
     if (checkpoint)
       {
