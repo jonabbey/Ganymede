@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -304,6 +304,18 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   }
 
   // ----------------------------------------------------------------------
+
+  /**
+   *
+   * Returns the Base we are a part of.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public Base getBase()
+  {
+    return base;
+  }
 
   /**
    *
