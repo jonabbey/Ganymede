@@ -291,7 +291,7 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
-		value = owner.xSession.reader.getFollowingString(openElement, true);
+		value = owner.xSession.reader.getFollowingString(openElement, false);
 
 		if (value != null)
 		  {
