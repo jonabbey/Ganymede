@@ -1341,11 +1341,7 @@ public class GanymedeServer implements Server {
    * This method is triggered from the admin console when the user
    * runs an 'Invid Sweep'.  It is designed to scan through the
    * Ganymede datastore's reference fields and clean out any
-   * references found that point to non-existent objects. when the
-   * Ganymede server module is being driven by a direct-linked main
-   * method.  This method sweeps through all invid's listed in the
-   * (loaded) database, and removes any invid's that point to objects
-   * not in the database.
+   * references found that point to non-existent objects.
    *
    * @return true if there were any invalid invids in the database
    *
