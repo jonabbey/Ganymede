@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2001/06/29 07:58:42 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2001/06/29 21:28:00 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.37 $ $Date: 2001/06/29 07:58:42 $ $Name:  $
+ * @version $Revision: 1.38 $ $Date: 2001/06/29 21:28:00 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -118,9 +118,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel = new JPanel(),
     outPanel = new JPanel();
 
-  JLabel
-    inTitle = new JLabel(),
-    outTitle = new JLabel();
+  JButton
+    inTitle = new JButton(),
+    outTitle = new JButton();
 
   String
     org_in,
@@ -358,7 +358,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setLayout(new BorderLayout());
 
     inPanel.add("Center", new JScrollPane(in));
-    inTitle.setText(org_in.concat(" : " + inVector.size()));
+    inTitle.setText( org_in.concat(" : " + inVector.size()) );
+    inTitle.setHorizontalAlignment( SwingConstants.LEFT );
+    inTitle.setMargin( new Insets(0,0,0,0) );
+    inTitle.addActionListener( new SelectAllListener( in, out ) );
+
     inPanel.add("North", inTitle);
 
     if (editable)
@@ -432,9 +436,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 
-	    outTitle.setText(org_out.concat(" : " + outVector.size()));
+	    outTitle.setText( org_out.concat(" : " + outVector.size()) );
 	  }
       }
+
+    outTitle.setHorizontalAlignment( SwingConstants.LEFT );
+    outTitle.setMargin( new Insets(0,0,0,0) );
 
     // JstringListBox does the sorting
 
@@ -447,6 +454,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.addActionListener(this);
 
 	out = new JstringListBox();
+	outTitle.addActionListener( new SelectAllListener( out, in ) );
 	out.registerPopupMenu(outPopup);
 	out.load(outVector, rowWidth, true, null);
 	out.setCallback(this);
@@ -1457,5 +1465,71 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     
     return result;
   }
-}
 
+  public static void main(String[] args) {
+    /*try {
+      UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+    } 
+    catch (Exception e) { }*/
+
+    JFrame frame = new JFrame("SwingApplication");
+
+    Vector v1 = new Vector();
+    Vector v2 = new Vector();
+    for ( int i=0; i < 10; i++ )
+      {
+	v1.addElement( Integer.toString( i ) );
+	v2.addElement( Integer.toString( 20-i ) );
+      }
+
+    StringSelector ss = new StringSelector( v1,
+					    v2, 
+					    frame, 
+					    true, 
+					    true, 
+					    true);
+	
+    frame.getContentPane().add(ss, BorderLayout.CENTER);
+
+    frame.addWindowListener(new WindowAdapter() 
+    {
+      public void windowClosing(WindowEvent e) 
+      {
+        System.exit(0);
+      }
+    });
+    
+    frame.pack();
+    frame.setVisible(true);
+  }
+
+  class SelectAllListener
+    implements ActionListener
+  {
+    JstringListBox 
+      thisBox,
+      otherBox;
+
+    public SelectAllListener( JstringListBox thisB, JstringListBox otherB ) 
+    {
+      thisBox = thisB;
+      otherBox = otherB;
+    }
+
+    public void actionPerformed( ActionEvent e )
+    {
+      /* Hilight all of the items in this list */
+      if (thisBox != null)
+	{
+	  thisBox.setSelectionInterval( 0, thisBox.getModel().getSize()-1 );
+	}
+
+      /* De-select all of the items in the companion list */
+      if (otherBox != null )
+	{
+	  otherBox.clearSelection();
+	}
+    }
+  }
+
+}
