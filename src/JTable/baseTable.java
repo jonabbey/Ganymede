@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.26 $ %D%
+  Version: $Revision: 1.27 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.26 $ %D%
+ * @version $Revision: 1.27 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -93,7 +93,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     row_baseline,
     vLineThickness = 1,
     hHeadLineThickness = 1,
-    hRowLineThickness = 0;
+    hRowLineThickness = 0,
+    rowsToShow = -1;
 
   float
     scalefact;
@@ -141,6 +142,9 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   int 
     menuRow = -1,
     menuCol = -1;		// holds the row, col of the last popup launch
+
+  int 
+    selectedRow = -1;
 
   /* -- */
 
@@ -766,6 +770,17 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   // -------------------- table attribute methods
 
   /**
+   *
+   * This method sets the number of rows that the table will display.
+   * If x == -1, as many rows as possible will be displayed.
+   *
+   */
+
+  public void setRowsVisible(int x)
+  {
+    rowsToShow = x;
+  }
+  /**
    * Sets the tableAttr for the table
    *
    * @param attr the tableAttr to assign to table, must be non-null,
@@ -1095,6 +1110,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
       {
 	selectCell(i, y);
       }
+
+    selectedRow = y;
   }
 
   /**
@@ -1107,6 +1124,11 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     for (int i = 0; i < cols.size(); i++)
       {
 	unSelectCell(i, y);
+      }
+
+    if (selectedRow == y)
+      {
+	selectedRow = -1;
       }
   }
 
@@ -3458,6 +3480,12 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
 			     rt.displayRegionFirstLine() +
 			     5 * (rt.row_height + rt.hRowLineThickness));
+      }
+    else if (rt.rowsToShow != -1)
+      {
+	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
+			     rt.displayRegionFirstLine() +
+			     rt.rowsToShow * (rt.row_height + rt.hRowLineThickness));
       }
     else
       {
