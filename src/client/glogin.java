@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,7 +44,9 @@ public class glogin extends JApplet implements Runnable {
 
   public static String 
     properties_file = null,
-    server_url = null;
+    serverhost = null,
+    server_url = null,
+    helpBase = null;
 
   public static Properties ganymedeProperties = null;
 
@@ -153,14 +155,12 @@ public class glogin extends JApplet implements Runnable {
 
     if (ganymedeProperties != null)
       {
-
-	server_url = ganymedeProperties.getProperty("ganymede.serverhost");
-
+	serverhost = ganymedeProperties.getProperty("ganymede.serverhost");
       }
 
-    if ((server_url == null) || (server_url.equals("")))
+    if ((serverhost == null) || (serverhost.equals("")))
       {
-	throw new RuntimeException("Trouble:  the server url specified in " + properties_file + " does not contain any information.");
+	throw new RuntimeException("Trouble:  couldn't load server host from " + properties_file);
       }
 
     my_glogin.getContentPane().setLayout(new BorderLayout());
@@ -200,14 +200,15 @@ public class glogin extends JApplet implements Runnable {
     if (WeAreApplet)
       {
 	my_frame = new JFrame();
-	server_url = getParameter("ganymede.serverhost");
-	if ((server_url == null) || (server_url.equals("")))
+	serverhost = getParameter("ganymede.serverhost");
+
+	if (serverhost == null || serverhost.equals(""))
 	  {
-	    throw new RuntimeException("Trouble:  the server url specified in " + properties_file + " does not contain any information.");
+	    throw new RuntimeException("Trouble:  Couldn't get ganymede.serverhost PARAM");
 	  }
       }
 
-    server_url = "rmi://" + server_url + "/ganymede.server";
+    server_url = "rmi://" + serverhost + "/ganymede.server";
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
@@ -454,12 +455,12 @@ public class glogin extends JApplet implements Runnable {
     }
 }  
 
-
 /**
  *
  *
  *
  */
+
 class LoginHandler implements ActionListener {
 
   protected glogin my_glogin;
@@ -562,18 +563,29 @@ class LoginHandler implements ActionListener {
       }
   }
 
-  public void startSession(Session s) 
+  public void startSession(Session session)
   {
-    if (s == null)
+    if (session == null)
       {
 	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");;
       }
 
-    Session _session = s;
+    // try to get the URL for the help document tree
 
-    my_glogin.g_client = new gclient(_session,my_glogin);
+    try
+      {
+	glogin.helpBase = session.getHelpBase();
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("Couldn't get help base from server: remote exception: " + ex.getMessage());
+	glogin.helpBase = null;
+      }
+
+    my_glogin.g_client = new gclient(session,my_glogin);
 
     my_glogin.passwd.setText("");
+
     /* At this point, all the login matters have been handled and we have
        a Session object in our hands.  We now instantiate the main client
        that will be used to interact with the Ganymede server.*/
