@@ -9,7 +9,7 @@
    But you should extend this, or it doesn't make much sense.
    
    Created: ? April 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,7 @@
 package arlut.csd.JDataComponent;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.event.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -161,4 +162,9 @@ public class JPanelCombo extends JPanel {
     combo.setSelectedItem(o);
   }
 
+  public void setVectorContents(Vector vect, Object selected)
+  {
+    combo.setModel(new csdComboBoxModel(vect, selected));
+  }
 }
+
