@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/11/02 22:39:08 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/03/27 07:30:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 package arlut.csd.ganymede;
@@ -67,7 +68,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.17 $ %D%
+ * @version $Revision: 1.18 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -89,6 +90,16 @@ public interface adminSession extends Remote {
    */
 
   void        refreshMe() throws RemoteException;
+
+  /**
+   * <p>This method is called by admin console code to force
+   * a complete rebuild of all external builds.  This means that
+   * all databases will have their last modification timestamp
+   * cleared and all builder tasks will be scheduled for immediate
+   * execution.</p>
+   */
+
+  void        forceBuild() throws RemoteException;
 
   /**
    * Kick a user off of the Ganymede server on behalf of this admin console

@@ -8,15 +8,15 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2001/01/25 02:16:18 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2001/03/27 07:30:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -141,6 +142,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
   Vector optionsCache = null;
 
   /**
+   * <p>If this flag is true, baseChanged() will always return true,
+   * as a way of forcing consideration of all databases that might
+   * be examined by GanymedeBuilderTask subclasses.</p>
+   */
+
+  private boolean forceAllBases;
+
+  /**
    * <p>Must be protected so subclasses in a different package can
    * set this.</p>
    */
@@ -157,6 +166,17 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   public final void run()
   {
+    this.run(null);
+  }
+
+  /**
+   * <P>This method is the main entry point for the GanymedeBuilderTask.  It
+   * is responsible for setting up the environment for a builder task to
+   * operate under, and for actually invoking the builder method.</P>
+   */
+    
+  public final void run(Object options[])
+  {
     String label = null;
     Thread currentThread = java.lang.Thread.currentThread();
     boolean
@@ -166,6 +186,25 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     /* -- */
 
+    if (options == null)
+      {
+	this.forceAllBases = false;
+      }
+    else
+      {
+	for (int i = 0; i < options.length; i++)
+	  {
+	    if (options[i] instanceof String)
+	      {
+		String x = (String) options[i];
+
+		if (x.equals("forcebuild"))
+		  {
+		    this.forceAllBases = true;
+		  }
+	      }
+	  }
+      }
 
     try
       {
@@ -322,9 +361,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		lock = null;
 	      }
 	  }
-
+	
 	// and again, just in case
-
+	
 	optionsCache = null;
       }
   }
@@ -339,7 +378,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   protected final boolean baseChanged(short baseid)
   {
-    if (oldLastRunTime == null)
+    if (forceAllBases || (oldLastRunTime == null))
       {
 	return true;
       }

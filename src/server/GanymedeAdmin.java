@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2001/02/08 22:52:13 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2001/03/27 07:30:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -79,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.50 $ $Date: 2001/02/08 22:52:13 $
+ * @version $Revision: 1.51 $ $Date: 2001/03/27 07:30:30 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -711,6 +712,19 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     refreshUsers();
     refreshTasks();
+  }
+
+  /**
+   * <p>This method is called by admin console code to force
+   * a complete rebuild of all external builds.  This means that
+   * all databases will have their last modification timestamp
+   * cleared and all builder tasks will be scheduled for immediate
+   * execution.</p>
+   */
+
+  public void forceBuild()
+  {
+    Ganymede.forceBuilderTasks();
   }
 
   /**

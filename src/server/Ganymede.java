@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 2001/03/21 15:11:33 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 2001/03/27 07:30:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -966,6 +966,26 @@ public class Ganymede {
 	for (int i = 0; i < builderTasks.size(); i++)
 	  {
 	    scheduler.demandTask((String) builderTasks.elementAt(i));
+	  }
+      }
+  }
+
+  /**
+   * This method schedules all registered builder tasks for
+   * execution, with an option set that will cause all builder tasks
+   * to consider object bases as changed since the last build, thus
+   * triggering a full external rebuild.
+   */
+
+  static void forceBuilderTasks()
+  {
+    String[] options = {"forcebuild"};
+
+    synchronized (builderTasks)
+      {
+	for (int i = 0; i < builderTasks.size(); i++)
+	  {
+	    scheduler.demandTask((String) builderTasks.elementAt(i), options);
 	  }
       }
   }

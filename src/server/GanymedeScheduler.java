@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2001/03/01 03:10:54 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2001/03/27 07:30:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -621,7 +622,24 @@ public class GanymedeScheduler extends Thread {
    *         or currently running lists.
    */
 
-  public synchronized boolean demandTask(String name)
+  public boolean demandTask(String name)
+  {
+    return demandTask(name, null);
+  }
+
+  /**
+   * <P>This method is provided to allow the server to request that a task
+   * listed as being registered 'on-demand' be run as soon as possible.</P>
+   *
+   * <P>If the task is currently running, it will be flagged to run again
+   * as soon as the current run completes.  This is intended to support
+   * the need for the server to be able to do back-to-back nis/dns builds.</P>
+   *
+   * @return false if the task name could not be found on the on-demand
+   *         or currently running lists.
+   */
+
+  public synchronized boolean demandTask(String name, Object options[])
   {
     if (!currentlyRunning.containsKey(name) &&
 	!onDemand.containsKey(name))
@@ -637,7 +655,7 @@ public class GanymedeScheduler extends Thread {
 	    // currently running.. tell it to reschedule itself when
 	    // it finishes
 
-	    handle.runOnCompletion();
+	    handle.runOnCompletion(options);
 	    updateTaskInfo(true);
 	    return true;
 	  }
@@ -648,6 +666,8 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    return false;
 	  }
+
+	handle.setOptions(options);
 
 	runTask(handle);
 

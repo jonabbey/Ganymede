@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2001/03/01 03:10:54 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2001/03/27 07:30:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -138,6 +139,12 @@ public class scheduleHandle implements java.io.Serializable {
   //
 
   /**
+   * Any options that we need to pass to the task?
+   */
+
+  transient Object options[];
+
+  /**
    * 0 if this is a one-shot, otherwise, the count in minutes
    */
 
@@ -215,6 +222,22 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
+   * <p>This method is used to set an options array for the next run
+   * of the task associated with this handle, if that task is a GanymedeBuilderTask.</p>
+   *
+   * <p>If the task associated with this handle is not a GanymedeBuilderTask,
+   * the options will be ignored.  Since setOptions() is synchronized, options
+   * may only be set at a time when runTask() is not busy issuing the
+   * task in the background.  runTask() clears the options set, so setOptions()
+   * only affects the next launching of the task.</p>
+   */
+
+  synchronized void setOptions(Object _options[])
+  {
+    this.options = _options;
+  }
+
+  /**
    * <P>Runs this task in a background thread.  A second background thread
    * is created to handle a {@link arlut.csd.ganymede.taskMonitor taskMonitor}
    * to wait and report when the task completes.</P>
@@ -245,8 +268,32 @@ public class scheduleHandle implements java.io.Serializable {
 
     rerun = false;
 
-    thread = new Thread(task, name);
-    thread.start();
+    // grab options for this run
+
+    if (options == null || (!(task instanceof GanymedeBuilderTask)))
+      {
+	thread = new Thread(task, name);
+	thread.start();
+      }
+    else
+      {
+	// we're running a GanymedeBuilderTask with options set
+
+	final Object _options[] = options;
+	final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
+
+	thread = new Thread(new Runnable() {
+	  public void run() {
+	    _task.run(_options);
+	  }
+	}, name);
+
+	thread.start();
+	
+	// clear options
+	
+	this.options = null;
+      }
 
     isRunning = true;
 
@@ -334,12 +381,26 @@ public class scheduleHandle implements java.io.Serializable {
    * GanymedeScheduler} while they are already running.</P>
    */
 
-  synchronized void runOnCompletion()
+  void runOnCompletion()
+  {
+    this.runOnCompletion(null);
+  }
+
+  /**
+   * <P>Server-side method to request that this task be re-run after
+   * its current completion.  Intended for on-demand tasks that are
+   * requested by the {@link arlut.csd.ganymede.GanymedeScheduler
+   * GanymedeScheduler} while they are already running.</P>
+   */
+
+  synchronized void runOnCompletion(Object _options[])
   {
     if (scheduler == null)
       {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
+
+    this.options = _options;
 
     rerun = true;
   }

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2001/02/09 03:30:32 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2001/03/27 07:30:29 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -44,7 +44,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede;
@@ -635,6 +637,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   JMenuBar mbar = null;
   JMenu controlMenu = null;
+  JMenuItem forceBuildMI = null;
   JMenuItem quitMI = null;
   JMenuItem dumpMI = null;
   JMenuItem killAllMI = null;
@@ -743,12 +746,16 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     schemaMI = new JMenuItem("Edit Schema");
     schemaMI.addActionListener(this);
 
+    forceBuildMI = new JMenuItem("Force Build");
+    forceBuildMI.addActionListener(this);
+
     quitMI = new JMenuItem("Close Console");
     quitMI.addActionListener(this);
 
-    controlMenu.add(shutdownMI);
+    controlMenu.add(forceBuildMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
+    controlMenu.add(shutdownMI);
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
     controlMenu.addSeparator();
@@ -1151,7 +1158,18 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   public void actionPerformed(ActionEvent event)
   {
-    if (event.getSource() == quitMI)
+    if (event.getSource() == forceBuildMI)
+      {
+	try
+	  {
+	    admin.forceBuild();
+	  }
+	catch (RemoteException ex)
+	  {
+	    exceptionHandler(ex);
+	  }
+      }
+    else if (event.getSource() == quitMI)
       {
 	if (debug)
 	  {
@@ -1181,9 +1199,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      {
 		admin.dumpDB();
 	      }
-	    catch (RemoteException e)
+	    catch (RemoteException ex)
 	      {
-		admin.forceDisconnect("Couldn't talk to server");
+		exceptionHandler(ex);
 	      }
 	  }
       }
@@ -1208,7 +1226,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      }
 	    catch (RemoteException ex)
 	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
+		exceptionHandler(ex);
 	      }
 	  }
       }
@@ -1233,7 +1251,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      }
 	    catch (RemoteException ex)
 	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
+		exceptionHandler(ex);
 	      }
 	  }
       }
@@ -1257,7 +1275,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      }
 	    catch (RemoteException ex)
 	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
+		exceptionHandler(ex);
 	      }
 	  }
       }
@@ -1281,7 +1299,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      }
 	    catch (RemoteException ex)
 	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
+		exceptionHandler(ex);
 	      }
 	  }
       }
@@ -1349,7 +1367,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    exceptionHandler(ex);
 	  }
       }
     else if (event.getSource() == schemaMI)
@@ -1360,9 +1378,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  {
 	    admin.pullSchema();
 	  }
-	catch (RemoteException e)
+	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server");
+	    exceptionHandler(ex);
 	  }
       }
     else if (event.getSource() == clearLogButton)
@@ -1419,7 +1437,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 		  }
 		catch (RemoteException ex)
 		  {
-		    admin.forceDisconnect("Couldn't talk to server" + ex);
+		    exceptionHandler(ex);
 		  }
 	      }
 	    killVictim = null;
@@ -1441,7 +1459,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    exceptionHandler(ex);
 	  }
       }
     else if (e.getSource() == stopTaskMI)
@@ -1452,7 +1470,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    exceptionHandler(ex);
 	  }
       }
     else if (e.getSource() == disableTaskMI)
@@ -1463,7 +1481,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    exceptionHandler(ex);
 	  }
       }
     else if (e.getSource() == enableTaskMI)
@@ -1474,7 +1492,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    exceptionHandler(ex);
 	  }
       }
   }
@@ -1495,6 +1513,23 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
 	
     super.processWindowEvent(e);
+  }
+
+  private void exceptionHandler(Throwable ex)
+  {
+    admin.changeStatus("******************** " +
+		       "Error occurred while communicating with the server " +
+		       "********************\n");
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    ex.printStackTrace(writer);
+    writer.close();
+
+    admin.changeStatus(stringTarget.toString());
+
+    admin.changeStatus("****************************************" +
+		       "****************************************\n");
   }
 }
 
@@ -2093,6 +2128,19 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	ie.printStackTrace();
       }
+  }
+
+  /**
+   * <p>This method is called by admin console code to force
+   * a complete rebuild of all external builds.  This means that
+   * all databases will have their last modification timestamp
+   * cleared and all builder tasks will be scheduled for immediate
+   * execution.</p>
+   */
+
+  public void forceBuild() throws RemoteException
+  {
+    aSession.forceBuild();
   }
 
   public void disconnect() throws RemoteException
