@@ -6,8 +6,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2002/10/05 05:38:24 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2002/10/05 07:45:16 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.out.println("isAllowed in JentryField");
+	System.err.println("isAllowed in JentryField");
       }
 
     return true;
@@ -181,7 +181,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.out.println("JentryField: focusLost");
+	System.err.println("JentryField: focusLost");
       }
 
     sendCallback();
@@ -191,7 +191,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.out.println("focusGained");
+	System.err.println("focusGained");
       }
   }
 
@@ -202,8 +202,18 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 
   public void actionPerformed(ActionEvent e)
   {
+    if (debug)
+      {
+	System.err.println("enter hit");
+      }
+
     if (notifier != null && sendCallback() >= 0)
       {
+	if (debug)
+	  {
+	    System.err.println("enter approved");
+	  }
+
 	notifier.actionPerformed(e);	
       }
   }

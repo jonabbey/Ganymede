@@ -4,8 +4,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2002/10/05 07:26:45 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/10/05 07:45:16 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -93,10 +93,10 @@ public class JnumberField extends JentryField {
    * @param maxsize the maximum limit on the range of values
    */ 
   public JnumberField(int columns,
-		     boolean iseditable,
-		     boolean islimited,
-		     int minsize,
-		     int maxsize)
+		      boolean iseditable,
+		      boolean islimited,
+		      int minsize,
+		      int maxsize)
   {
     super(columns);
     
@@ -107,7 +107,7 @@ public class JnumberField extends JentryField {
 	maxSize = maxsize;
 	minSize = minsize;
       }
-
+    
     setEditable(iseditable);  // will this JnumberField be editable or not?
   }
 
@@ -240,7 +240,7 @@ public class JnumberField extends JentryField {
 	  {
 	    if (num.intValue() > maxSize || num.intValue() < minSize)
 	      {
-		System.out.println("Invalid Parameter: number out of range");
+		System.err.println("Invalid Parameter: number out of range");
 		return;
 	      }
 	  }
@@ -377,7 +377,7 @@ public class JnumberField extends JentryField {
 	  {
 	    if (debug)
 	      {
-		System.out.println("The field was not changed.");
+		System.err.println("The field was not changed.");
 	      }
 
 	    return 0;
@@ -410,7 +410,7 @@ public class JnumberField extends JentryField {
 
 	    if (debug)
 	      {
-		System.out.println("Sending callback");
+		System.err.println("Sending callback");
 	      }
 
 	    success = false;
@@ -471,7 +471,7 @@ public class JnumberField extends JentryField {
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
-	    System.out.println("Could not send an error callback.");
+	    System.err.println("Could not send an error callback.");
 	  }
       }
   }
