@@ -446,9 +446,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      {
 		public Object run() throws Exception
 		{
-		  framePanel foxFP = new framePanel(localFinalInvid, localObject, localEditable, localWindowPanel, localIsNewlyCreated);
-		  localWindowPanel.setWindowTitle(foxFP, localTitle);
-		  return foxFP;
+		  try
+		    {
+		      framePanel foxFP = new framePanel(localFinalInvid, localObject, localEditable, localWindowPanel, localIsNewlyCreated);
+		      localWindowPanel.setWindowTitle(foxFP, localTitle);
+		      return foxFP;
+		    }
+		  catch (Throwable ex)
+		    {
+		      gc.processException(ex);
+		    }
 		}
 	      }
 						    );
