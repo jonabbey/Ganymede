@@ -1,6 +1,15 @@
 #!/bin/sh
 #
 # Ganymede stopServer Script
+#
+# Arguments: 
+#
+# stopServer [-delay]
+#
+# if -delay is provided on the command line, the stopServer script
+# will do a deferred shutdown on the server.  This means that the
+# server will not allow new users to log on, and will shut down
+# as soon as all active users have logged out.
 # 
 ############################
 
