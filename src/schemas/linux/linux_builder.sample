@@ -1,0 +1,103 @@
+#!/usr/bin/perl -w
+#
+# Sample linux_builder script
+#
+# This script is run when Ganymede commits transactions and
+# runs the LinuxBuilderTask, after LinuxBuilderTask has written
+# out new copies of passwd and group to <serverdir>/db/out.
+############################################################
+
+# These variables must be defined
+
+$outdir = "/usr/local/depot/ganymede_server/db/out";
+$homeprefix = "/home/";
+
+#
+
+if (! -e $outdir) {
+  die "Couldn't change to $outdir.  You need to configure linux_builder.";
+} else {
+  chdir $outdir;
+}
+
+print "Updating files in /etc\n";
+
+$success = 0;
+
+if (-f "passwd") {
+  system("mv /etc/passwd /etc/passwd.old");
+  system("cat < passwd > /etc/passwd");
+  print "Updated /etc/passwd.\n";
+  $success = 1;
+} else {
+  print "** Error, could not find passwd\n";
+  print "** Not updating passwd\n";
+}
+
+if (-f "group") {
+  system("mv /etc/group /etc/group.old");
+  system("cat < group > /etc/group");
+  print "Updated /etc/group.\n";
+  $success = 1;
+} else {
+  print "** Error, could not find group\n";
+  print "** Not updating group.\n";
+}
+
+if ($success) {
+  print "Files in /etc updated.\n";
+} else {
+  print "No files in /etc updated.\n";
+}
+
+# Now we need to see if any users have been created or destroyed.
+
+if (-f "passwd") {
+
+  open INPUT, "</etc/passwd.old" || die "Couldn't open /etc/passwd.old";
+
+  while (<INPUT>) {
+    @fields = split /:/;
+    $name = $fields[0];
+    $homedir = $fields[5];
+    
+    $old{$name} = $homedir;
+  }
+
+  close INPUT;
+
+  open INPUT, "</etc/passwd" || die "Couldn't open /etc/passwd";
+
+  while (<INPUT>) {
+    @fields = split /:/;
+    $name = $fields[0];
+    $userid = $fields[2];
+    $groupid = $fields[3];
+    $homedir = $fields[5];
+    
+    if (!exists $old{$name}) {
+      print "Need to create homedir for user $name\n";
+
+      if ($homedir eq $homeprefix . $name) {
+	system("mkdir $homedir");
+	system("chmod 700 $homedir");
+	system("cp /etc/skel/.??* $homedir");
+	system("chown -R $userid.$groupid $homedir");
+      } else {
+	print "Warning.  User $name's home directory is $homedir, not ".$homeprefix.$name.".\n";
+	print "Did not create home directory for $name.\n";
+      }
+    }
+
+    $new{$name} = $homedir;
+  }
+
+  close INPUT;
+  
+  foreach $user (keys %old) {
+    
+    if (!exists $new{$name}) {
+      print "User deleted: $user\n";
+    }
+  }
+}
