@@ -1171,6 +1171,11 @@ public class Ganymede {
 
     scheduler.addActionOnDemand(new gcTask(),
 				ts.l("registerTasks.gc_task"));
+
+    // likewise the GanymedeValidationTask
+
+    scheduler.addActionOnDemand(new GanymedeValidationTask(),
+				ts.l("registerTasks.validation_task"));
   }
 
   static void registerBuilderTask(String taskName)
