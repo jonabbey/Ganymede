@@ -1,6 +1,6 @@
 /*
 
-   TranslationServices.java
+   TranslationService.java
 
    This is a resource used for loading resources.
    
@@ -58,7 +58,7 @@ import java.text.MessageFormat;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                             TranslationServices
+                                                             TranslationService
 
 ------------------------------------------------------------------------------*/
 
@@ -72,7 +72,14 @@ import java.text.MessageFormat;
  */
 
 
-public class TranslationServices {
+public class TranslationService {
+
+  public static getTranslationService(String resourceName, Locale locale) throws MissingResourceException
+  {
+    return new TranslationService(resourceName, locale);
+  }
+
+  // ---
 
   ResourceBundle bundle = null;
   Locale ourLocale = null;
@@ -83,7 +90,7 @@ public class TranslationServices {
 
   /* -- */
 
-  public TranslationServices(String resourceName, Locale locale) throws MissingResourceException
+  private TranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
     if (locale != null)
       {
