@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 1999/10/07 21:04:07 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 1999/10/08 00:12:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1037,6 +1037,13 @@ public class Ganymede {
       {
 	System.err.println("** No tasks found in database!");
       }
+
+    // register background time-out task
+
+    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
+				1,
+				new timeOutTask(),
+				"Idle Timer");
   }
 
   static void registerBuilderTask(String taskName)
@@ -1418,4 +1425,29 @@ class gcTask implements Runnable {
      System.gc();
      Ganymede.debug("Garbage collection task finished");
    }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     timeOutTask
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>Runnable class to do a periodic sweep of idle users.  Registered with
+ * the {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} by
+ * {@link arlut.csd.ganymede.Ganymede#registerTasks() registerTasks()}, to
+ * run every minute.</p>
+ */
+
+class timeOutTask implements Runnable {
+
+  public timeOutTask()
+  {
+  }
+
+  public void run()
+  {
+    Ganymede.server.clearIdleSessions();
+  }
 }

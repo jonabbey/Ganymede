@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.152 $
-   Last Mod Date: $Date: 1999/10/07 21:04:08 $
+   Version: $Revision: 1.153 $
+   Last Mod Date: $Date: 1999/10/08 00:12:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.152 $ %D%
+ * @version $Revision: 1.153 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -149,6 +149,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   boolean forced_off = false;
   boolean supergashMode = false;
   boolean beforeversupergash = false; // Be Forever Yamamoto
+
+  /**
+   * A count of how many objects this session has currently checked out.
+   */
+
   int objectsCheckedOut = 0;
 
   /**
@@ -179,6 +184,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   Date connecttime;
 
+  /** 
+   * The time of the user's last top-level operation.. Used to
+   * provide guidance on time-outs.  Updated whenever checklogin()
+   * is called.
+   */
+
+  Date lastActionTime = new Date();
+
   /**
    * <p>The name that the user is connected to the server under.. this
    * may be &lt;username&gt;2, &lt;username&gt;3, etc., if the user is
@@ -187,8 +200,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * <p>username should never be null.  If a client logs in directly
    * to a persona, username will be that personaname plus an optional
-   * session id.</p>
-   */
+   * session id.</p> */
 
   String username;
 
@@ -612,9 +624,46 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method is called by a background thread on the server, and 
+   * knocks this user off if they are a remote user who has been inactive
+   * for a long time.</p>
+   *
+   * <p>Note that this method is not synchronized, to avoid
+   * nested-monitor deadlock by the timeOutTask between a
+   * GanymedeSession object and the GanymedeServer object.</p>
+   */
+
+  void timeCheck()
+  {
+    if (client == null)
+      {
+	return;			// server-local session
+      }
+
+    long millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
+
+    int minutesIdle = (int) (millisIdle / 60000);
+
+    if (minutesIdle > 15 && objectsCheckedOut == 0)
+      {
+	forceOff("You have been idle for over 15 minutes with no transactions in progress. " +
+		 "You are being disconnected as a security precaution.");
+      }
+    else if (minutesIdle > 20)
+      {
+	forceOff("You have been idle for over 20 minutes.  You are being disconnected as a " +
+		 "security precaution.");
+      }
+  }
+
+  /**
    * <P>If the server decides this person needs to get off (if the user
    * times out, is forced off by an admin, or if the server is going
    * down), it will call this method to knock them off.</P>
+   *
+   * <p>Note that this method is not synchronized, to avoid the possibility
+   * of deadlocking the admin console in the case of a deadlocked 
+   * GanymedeSession.</p>
    */
 
   void forceOff(String reason)
@@ -5406,5 +5455,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	throw new IllegalArgumentException("not logged in");
       }
+
+    lastActionTime.setTime(System.currentTimeMillis());
   }
 }

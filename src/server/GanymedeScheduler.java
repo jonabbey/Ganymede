@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/07/23 03:13:12 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/10/08 00:12:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -912,7 +912,7 @@ public class GanymedeScheduler extends Thread {
   {
     if (currentlyRunning.remove(handle.name) != null)
       {
-	if (logStuff)
+	if (logStuff && !handle.name.equals("Idle Timer"))
 	  {
 	    System.err.println("Ganymede Scheduler: " + handle.name + " completed");
 	  }
@@ -931,7 +931,7 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    if (handle.reschedule())
 	      {
-		if (logStuff)
+		if (logStuff && !handle.name.equals("Idle Timer"))
 		  {
 		    System.err.println("Ganymede Scheduler: rescheduling task " + 
 				       handle.name + " for " + handle.startTime);

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 1999/10/07 17:37:12 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 1999/10/08 00:12:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -344,6 +344,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 
 	return null;
+      }
+  }
+
+  /**
+   * This method is called by the {@link arlut.csd.ganymede.timeOutTask timeOutTask}
+   * scheduled task, and forces an idle time check on any users logged in.
+   */
+
+  public synchronized void clearIdleSessions()
+  {
+    for (int i = 0; i < sessions.size(); i++)
+      {
+	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+	session.timeCheck();
       }
   }
 
