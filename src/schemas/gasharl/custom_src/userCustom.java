@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2000/10/05 18:59:12 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2001/01/23 06:41:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1671,6 +1671,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		return result;
 
 	      case DELELEMENT:
+
+		if (deleting)
+		  {
+		    return null;
+		  }
 
 		// ok, this is more of a big deal.. first, see if the value
 		// being deleted is the home group.  If not, still no big
