@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2001/07/27 06:13:27 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2001/10/11 23:26:36 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.71 $ $Date: 2001/07/27 06:13:27 $ $Name:  $
+ * @version $Revision: 1.72 $ $Date: 2001/10/11 23:26:36 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -325,8 +325,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * be treated specially when closing this window.
    */
 
-  public framePanel(db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
+  public framePanel(Invid invid, db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
   {
+    this.invid = invid;
     this.wp = winP;
     this.server_object = object;
     this.editable = editable;
@@ -411,7 +412,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     try
       {
 	// windowPanel wants to know if framePanel is changed
-	// Maybe this should be replaced with InternalFrameListener?
 
 	addInternalFrameListener(getWindowPanel());
     
@@ -440,7 +440,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 	try
 	  {
-	    id = getObject().getTypeID();
+	    id = getObjectInvid().getType();
 
 	    if (id == SchemaConstants.OwnerBase)
 	      {
@@ -822,7 +822,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 						  Date startDate)
   {
     StringBuffer buffer = new StringBuffer();
-    FieldTemplate template;
     db_field field;
 
     try
@@ -949,7 +948,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Creating general panel");
       }
     
-    containerPanel cp = new containerPanel(getObject(), editable, wp.gc, wp, 
+    containerPanel cp = new containerPanel(getObject(), getObjectInvid(), editable, wp.gc, wp, 
 					   this, progressBar, false, isCreating, null);
     cp.load();
     cp.setBorder(wp.emptyBorder10);
@@ -981,7 +980,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     expiration_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    exp_date_panel = new datePanel(exp_field, "Expiration date", expiration_Editable, this);
+    exp_date_panel = new datePanel(exp_field, gc.getFieldTemplate(getObjectInvid().getType(), SchemaConstants.ExpirationField),
+				   "Expiration date", 
+				   expiration_Editable, 
+				   this);
+
     expiration_date.setViewportView(exp_date_panel);
     
     createdList.addElement(new Integer(expiration_date_index));
@@ -1027,7 +1030,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     removal_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    rem_date_panel = new datePanel(rem_field, "Removal date", removal_Editable, this);
+    rem_date_panel = new datePanel(rem_field, 
+				   gc.getFieldTemplate(getObjectInvid().getType(), SchemaConstants.RemovalField),
+				   "Removal date", removal_Editable, this);
     removal_date.setViewportView(rem_date_panel);
 	  
     createdList.addElement(new Integer(removal_date_index));

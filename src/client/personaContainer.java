@@ -5,8 +5,8 @@
    a panel for handling User's personae.
    
    Created: 15 January 1999
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/06/21 18:36:14 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/10/11 23:26:37 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ class personaContainer extends JScrollPane implements Runnable{
 	    pp.middle.repaint();
 	  }
 	
-	containerPanel cp = new containerPanel(object,
+	containerPanel cp = new containerPanel(object, invid,
 					       editable,
 					       pp.fp.getgclient(), 
 					       pp.fp.getWindowPanel(), 

@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2001/10/11 22:21:48 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2001/10/11 23:26:36 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.128 $ $Date: 2001/10/11 22:21:48 $ $Name:  $
+ * @version $Revision: 1.129 $ $Date: 2001/10/11 23:26:36 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -287,13 +287,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
 
   public containerPanel(db_object    object,
+			Invid        invid,
 			boolean      editable, 
 			gclient      gc,
 			windowPanel  window,
 			framePanel   frame,
 			Object context)
   {
-    this(object, editable, gc, window, frame, null, true, context);
+    this(object, invid, editable, gc, window, frame, null, true, context);
   }
 
   /** 
@@ -317,6 +318,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
 
   public containerPanel(db_object object, 
+			Invid invid,
 			boolean editable, 
 			gclient gc, 
 			windowPanel window, 
@@ -324,7 +326,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			JProgressBar progressBar,
 			Object context)
   {
-    this(object, editable, gc, window, frame, progressBar, true, context);
+    this(object, invid, editable, gc, window, frame, progressBar, true, context);
   }
 
   /**
@@ -346,6 +348,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
 
   public containerPanel(db_object object,
+			Invid invid,
 			boolean editable,
 			gclient gc,
 			windowPanel window,
@@ -354,7 +357,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			boolean loadNow,
 			Object context)
   {
-    this(object, editable, gc, window, frame, progressBar, loadNow, false, context);
+    this(object, invid, editable, gc, window, frame, progressBar, loadNow, false, context);
   }
 
   /**
@@ -378,6 +381,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
 
   public containerPanel(db_object object,
+			Invid invid,
 			boolean editable,
 			gclient gc,
 			windowPanel window,
@@ -405,6 +409,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     this.winP = window;
     this.object = object;
+    this.invid = invid;
     this.editable = editable;
     this.frame = frame;
     this.progressBar = progressBar;
@@ -485,14 +490,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    println("Getting list of fields");
 	  }
     
-	try
-	  {
-	    type = object.getTypeID();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get the object's type id: " + rx);
-	  }
+	type = invid.getType();
 
 	setProgressBar(1);
 
@@ -2639,7 +2637,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), 
+    vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(), 
 				     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
     objectHash.put(vp, field);
@@ -2937,7 +2935,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    pf.setToolTipText(comment);
 	  }
 	  
-	addRow(pf, templates.indexOf(fieldTemplate), field.getName(), field.isVisible());
+	addRow(pf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), field.isVisible());
       }
     else
       {

@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2001/07/14 01:50:42 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2001/10/11 23:26:37 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -83,7 +83,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.76 $ $Date: 2001/07/14 01:50:42 $ $Name:  $
+ * @version $Revision: 1.77 $ $Date: 2001/10/11 23:26:37 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -245,34 +245,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   /**
    *
-   * Create a new view-only window in this windowPanel.
-   *
-   * @param object an individual object from the server to show
-   * in this window
-   *
-   */
-
-  public void addWindow(db_object object)
-  {
-    this.addWindow(object, false, null);
-  }
-
-  /**
-   *
-   * Create a new window in this windowPanel.
-   *
-   * @param object an individual object from the server to show
-   * in this window
-   * @param editable If true, the new window will be editable
-   */
-
-  public void addWindow(db_object object, boolean editable)
-  {
-    this.addWindow(object, editable, null);
-  }
-
-  /**
-   *
    * Create a new editable or view-only window in this windowPanel.
    *
    * @param object an individual object from the server to show
@@ -281,9 +253,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param objectType Used for the title of the new window
    */
 
-  public void addWindow(db_object object, boolean editable, String objectType)
+  public void addWindow(Invid invid, db_object object, boolean editable, String objectType)
   {
-    this.addWindow(object, editable, objectType, false);
+    this.addWindow(invid, object, editable, objectType, false);
   }
 
   /**
@@ -297,7 +269,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param isNewlyCreated if true, this window will be a 'create object' window.
    */
 
-  public void addWindow(db_object object, boolean editable, String objectType, boolean isNewlyCreated)
+  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated)
   {
     String temp, title;
 
@@ -382,7 +354,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    if (objectType == null)
 	      {
-		objectType = object.getTypeName();
+		objectType = gc.getObjectType(invid);
 	      }
 
 	    if (isNewlyCreated)
@@ -423,7 +395,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    title = temp + num++;
 	  }
 
-	framePanel w = new framePanel(object, editable, this, title, isNewlyCreated);
+	framePanel w = new framePanel(invid, object, editable, this, title, isNewlyCreated);
 	w.setOpaque(true);
     
 	windowList.put(title, w);

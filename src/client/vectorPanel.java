@@ -8,8 +8,8 @@
    or edit in place (composite) objects.
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/03/29 05:33:58 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/10/11 23:26:37 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
@@ -97,7 +97,7 @@ import javax.swing.border.*;
  * @see arlut.csd.ganymede.invid_field
  * @see arlut.csd.ganymede.ip_field
  * 
- * @version $Revision: 1.52 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
+ * @version $Revision: 1.53 $ $Date: 2001/10/11 23:26:37 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -203,6 +203,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   boolean 
     isCreating;
 
+  FieldTemplate
+    template;
+
   /* -- */
   
   /**
@@ -216,12 +219,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    *
    */
 
-  public vectorPanel(db_field field, windowPanel parent, 
+  public vectorPanel(db_field field, FieldTemplate template, windowPanel parent, 
 		     boolean editable, boolean isEditInPlace, 
 		     containerPanel container, boolean isCreating)
   {
-    my_field = field;
-    
+    this.my_field = field;
+    this.template = template;
     this.editable = editable;
     this.isEditInPlace = isEditInPlace;
     this.wp = parent;
@@ -253,22 +256,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     EmptyBorder eb = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
     TitledBorder tb;
 
-    try
-      {
-	name = field.getName();
+    name = template.getName();
 
-	if (name == null)
-	  {
-	    tb = BorderFactory.createTitledBorder("Untitled Vector");
-	  }
-	else
-	  {
-	    tb = BorderFactory.createTitledBorder(name + ": Vector");
-	  }
-      }
-    catch (RemoteException ex)
+    if (name == null)
       {
-	tb = BorderFactory.createTitledBorder("Vector -- unknown field name");
+	tb = BorderFactory.createTitledBorder("Untitled Vector");
+      }
+    else
+      {
+	tb = BorderFactory.createTitledBorder(name + ": Vector");
       }
 
     CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
@@ -412,6 +408,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		// load the containerPanel if the user actually opens it.
 
 		containerPanel cp = new containerPanel(object,
+						       inv,
 						       editable,
 						       gc,
 						       wp, container.frame,
@@ -524,7 +521,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		// and use one of the default-valued containerPanel constructors that
 		// will immediately load the new containerPanel.
 
-		containerPanel cp = new containerPanel(object,
+		containerPanel cp = new containerPanel(object, invid,
 						       isFieldEditable() && editable,
 						       gc,
 						       wp, 
@@ -971,7 +968,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  {
 		    // create the new containerPanel.. don't pre-load it..
 
-		    containerPanel newcp = new containerPanel(((db_object) rv.getObject()),
+		    containerPanel newcp = new containerPanel(((db_object) rv.getObject()), invid,
 							      editable,
 							      gc,
 							      wp, container.frame,

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.190 $
-   Last Mod Date: $Date: 2001/07/26 17:33:10 $
+   Version: $Revision: 1.191 $
+   Last Mod Date: $Date: 2001/10/11 23:26:36 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.190 $ $Date: 2001/07/26 17:33:10 $ $Name:  $
+ * @version $Revision: 1.191 $ $Date: 2001/10/11 23:26:36 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/07/26 17:33:10 $";
+  static String release_date = "$Date: 2001/10/11 23:26:36 $";
   static String release_number = null;
 
   /**
@@ -1169,6 +1169,29 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public Vector getTemplateVector(short id)
   {
     return loader.getTemplateVector(new Short(id));
+  }
+
+  /**
+   * <p>Returns a {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * based on the short type id for the containing object and the
+   * short field id for the field.</p>
+   */
+
+  public FieldTemplate getFieldTemplate(short objType, short fieldId)
+  {
+    Vector vect = loader.getTemplateVector(new Short(objType));
+
+    for (int i = 0; i < vect.size(); i++)
+      {
+	FieldTemplate template = (FieldTemplate) vect.elementAt(i);
+
+	if (template.getID() == fieldId)
+	  {
+	    return template;
+	  }
+      }
+
+    return null;
   }
 
   /**
@@ -2906,7 +2929,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    return;
 	  }
 
-	wp.addWindow(o, true, objectType);
+	wp.addWindow(invid, o, true, objectType);
 
 	InvidNode node = null;
 
@@ -2988,7 +3011,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
        
-	wp.addWindow(obj, true, null, true);
+	wp.addWindow(invid, obj, true, null, true);
 
 	Short typeShort = new Short(invid.getType());
     
@@ -3101,7 +3124,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
        
-	wp.addWindow(obj, true, null, true);
+	wp.addWindow(invid, obj, true, null, true);
 
 	Short typeShort = new Short(type);
     
@@ -3193,7 +3216,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    return;
 	  }
 
-	wp.addWindow(object, false, objectType);
+	wp.addWindow(invid, object, false, objectType);
       }
     catch (RemoteException rx)
       {

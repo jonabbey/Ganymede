@@ -93,16 +93,30 @@ field in another object.
 
 This occurred in a bit of custom code in the GASHARL schema kit where
 unlinking a remote object in a given context resulted in the object
-being deleted.  The client showed the unlinked object as a valid
-choice to be added back into the link field, and the object was then
-allowed to be added back in, even though the object was marked for
-deletion when the transaction committed.
+being deleted by the custom server-side code.  The client, however,
+showed the unlinked object as a valid choice to be added back into the
+link field.  If the user tried to put the (now deleted) object back
+into the field, the link was made, even though the object was marked
+for deletion when the transaction committed.
 
 This resulted in an Invid field containing an Invid pointer to an
 object which no longer existed, which is a bug.
 
 The server's InvidDBField logic is now smart enough to forbid linking
 to an object which has been marked for deletion by the transaction.
+
+This was a very obscure integrity violation vulnerability.  The server
+and client have always cooperated in other ways to prevent this
+condition from arising.  It was only due to some odd custom coding
+in the GASHARL schema kit that this vulnerability was revealed.
+
+7. [CLIENT] Optimized out redundant network calls in the GUI client
+
+The Ganymede GUI client has been optimized to remove a great many
+redundant RMI calls.  The client can now display objects from the
+server with only about half the RMI calls that the client made
+previously.  This will speed up the client and reduce loading on the
+server.
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 

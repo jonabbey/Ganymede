@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/07/14 01:47:18 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/10/11 23:26:36 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -88,9 +88,11 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   JpanelCalendar
     cal;
 
-
   JButton
     clear;
+
+  FieldTemplate
+    template;
 
   /**
    *
@@ -131,12 +133,13 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
   /* -- */
 
-  public datePanel(date_field field, String label, boolean editable, framePanel fp)
+  public datePanel(date_field field, FieldTemplate template, String label, boolean editable, framePanel fp)
   {
     this.editable = editable;
     this.field = field;
     this.label = label;
     this.fp = fp;
+    this.template = template;
 
     gc = fp.wp.gc;
 
@@ -194,7 +197,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	topLabel = new JLabel();
 	topLabel.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
 
-	this.name = field.getName();
+	this.name = template.getName();
 
 	if ((field != null) && (field.getValue() != null))
 	  {
@@ -237,7 +240,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       {
 	if (field != null)
 	  {
-	    this.name = field.getName();
+	    this.name = template.getName();
 
 	    Date d = (Date) field.getValue();
 
@@ -401,7 +404,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     try
       {
 	Date date = ((Date)field.getValue());
-	int type = field.getType();
+	int type = template.getType();
 	Invid invid = fp.getObjectInvid();
 
 	if (debug)
