@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,6 +78,7 @@ public class ReturnVal implements java.io.Serializable {
 
   boolean success;
   byte status;
+  Invid newObjectInvid = null;
   private StringBuffer rescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
@@ -122,6 +123,23 @@ public class ReturnVal implements java.io.Serializable {
   public byte getObjectStatus()
   {
     return status;
+  }
+
+  /**
+   *
+   * This method is used to get an Invid that the server
+   * wants to return to the client.  Used particularly
+   * for invid_field.createNewEmbedded().  Return null
+   * if no Invid was set.
+   *
+   * @see arlut.csd.ganymede.invid_field
+   * @see arlut.csd.ganymede.InvidDBField
+   *
+   */
+
+  public Invid getInvid()
+  {
+    return newObjectInvid;
   }
 
   /**
@@ -419,4 +437,17 @@ public class ReturnVal implements java.io.Serializable {
     this.dialog = dialog;
   }
 
+  /**
+   *
+   * This method is used to set an Invid that the client
+   * can retrieve from us in those cases where a method
+   * on the server really does need to return an Invid
+   * _and_ a return val.
+   *
+   */
+
+  public void setInvid(Invid invid)
+  {
+    this.newObjectInvid = invid;
+  }
 }
