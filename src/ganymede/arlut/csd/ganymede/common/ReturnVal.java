@@ -564,6 +564,80 @@ public class ReturnVal implements java.io.Serializable {
     return original;
   }
 
+  public String toString()
+  {
+    String result = "ReturnVal [";
+
+    /* -- */
+
+    if (dialog != null)
+      {
+	result = result + "\"" + dialog.getText() + "\"";
+      }
+    else
+      {
+	result = result + "\"\"";
+      }
+
+    if (didSucceed())
+      {
+	result = result + ", success";
+      }
+    else
+      {
+	result = result + ", failure";
+      }
+
+    if (doNormalProcessing)
+      {
+	result = result + ", normal";
+      }
+    else
+      {
+	result = result + ", abnormal";
+      }
+
+    if (newObjectInvid != null)
+      {
+	result = result + ", invid set";
+      }
+    else
+      {
+	result = result + ", invid not set";
+      }
+
+    if (remoteObjectRef != null)
+      {
+	result = result + ", remote obj set";
+      }
+    else
+      {
+	result = result + ", remote obj not set";
+      }
+
+    if (callback != null)
+      {
+	result = result + ", callback set";
+      }
+    else
+      {
+	result = result + ", callback not set";
+      }
+
+    if (rescanList != null)
+      {
+	result = result + ", rescan set";
+      }
+    else
+      {
+	result = result + ", rescan not set";
+      }
+
+    result = result + "]";
+
+    return result;
+  }
+
   // ---------------------------------------------------------------------------
   // server side operations
   // ---------------------------------------------------------------------------
