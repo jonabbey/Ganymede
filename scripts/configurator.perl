@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.43 $
-# $Date: 2000/02/16 11:29:27 $
+# $Revision: 1.44 $
+# $Date: 2000/02/17 20:05:34 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -412,16 +412,16 @@ removelastslash($swingdir);
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the three pieces.
 
-@configs=("$rootdir/src/xml/sax/config.sh", "OMG XML SAX Parser Classes", "$classdir",
-	  "$rootdir/src/xml/xp/util/config.sh", "James Clark XP XML Parser Utility Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/config.sh", "James Clark XP XML Parser", "$classdir",
-	  "$rootdir/src/xml/xp/xml/parse/config.sh", "James Clark XP XML Parser Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/parse/base/config.sh", "James Clark XP XML Parser Base Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/parse/io/config.sh", "James Clark XP XML Parser IO Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/parse/awt/config.sh", "James Clark XP XML Parser AWT Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/output/config.sh", "James Clark XP XML Writer Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/tok/config.sh", "James Clark XP XML Parser Tokenizer Classes", "$classdir",
-	  "$rootdir/src/xml/xp/xml/sax/config.sh", "James Clark XP XML Parser SAX Driver Classes", "$classdir",
+@configs=("$rootdir/src/xml/sax", "OMG XML SAX Parser Classes", "$classdir",
+	  "$rootdir/src/xml/xp/util", "James Clark XP XML Parser Utility Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml", "James Clark XP XML Parser", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse", "James Clark XP XML Parser Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/base", "James Clark XP XML Parser Base Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/io", "James Clark XP XML Parser IO Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/awt", "James Clark XP XML Parser AWT Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/output", "James Clark XP XML Writer Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/tok", "James Clark XP XML Parser Tokenizer Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/sax", "James Clark XP XML Parser SAX Driver Classes", "$classdir",
 	  "$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
 	  "$rootdir/src/md5", "md5 Classes", "$classdir",
