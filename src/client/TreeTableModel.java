@@ -1,5 +1,5 @@
 /*
- * $Id: TreeTableModel.java,v 1.1 1998/12/15 13:44:19 omara Exp $
+ * $Id: TreeTableModel.java,v 1.2 1999/01/22 21:30:19 omara Exp $
  *
  * Copyright 1997, 1998 by Sun Microsystems, Inc.,
  * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
@@ -10,7 +10,20 @@
  * shall not disclose such Confidential Information and shall use
  * it only in accordance with the terms of the license agreement
  * you entered into with Sun.
+ * 
+ * The Swing Connection has given permission for the following code
+ * to be freely used, modified and redistributed. However, since it
+ * is example code, Sun does not support it and warns that it has not 
+ * been as rigorously tested as Sun's product code.
+ *
+ * For further details, see The Swing Connection's Copyright Notice and 
+ * Disclaimer at http://java.sun.com/products/jfc/tsc/page_2/page_2.html
+ *
+ * The articles upon which the TreeTable idea is based are located at 
+ * http://java.sun.com/products/jfc/tsc/tech_topics/tech_topics.html
  */
+
+
 package arlut.csd.ganymede.client;
 
 import javax.swing.tree.TreeModel;
@@ -23,7 +36,7 @@ import javax.swing.tree.TreeModel;
  * the TreeTableModel can return a value for each of the columns and 
  * set that value if isCellEditable() returns true. 
  *
- * @version $Revision: 1.1 $ $Date: 1998/12/15 13:44:19 $
+ * @version $Revision: 1.2 $ $Date: 1999/01/22 21:30:19 $
  *
  * @author Philip Milne 
  * @author Scott Violet
