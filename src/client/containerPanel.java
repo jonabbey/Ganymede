@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.80 $ %D%
+    Version: $Revision: 1.81 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -226,7 +226,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     /* -- */
 
     this.gc = gc;
-    debug = gc.debug;
+
+    if (!debug)
+      {
+	debug = gc.debug;
+      }
 
     if (object == null)
       {
@@ -2281,6 +2285,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     QueryResult qres = field.encodedValues();
+
     if (qres != null)
       {
 	valueHandles = qres.getListHandles();
@@ -2405,9 +2410,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	println("Creating StringSelector");
       }
-    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable && fieldInfo.isEditable(), 
+
+    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, 
+					   editable && fieldInfo.isEditable(), 
 					   true, true, 
-					   ((choiceHandles != null) && (editable && fieldInfo.isEditable())) ? 115 : 230, //twice as wide if not editable 
+					   ((choiceHandles != null) && 
+					    (editable && fieldInfo.isEditable())) ? 115 : 230,
 					   "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)
@@ -2422,7 +2430,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     addRow( ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
-
 
   private final void setStatus(String s)
   {
