@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2000/10/29 09:09:45 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2000/10/29 09:23:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1053,7 +1053,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     Integer field_codeInt;
     boolean typeRead = false;
     ReturnVal retVal = null;
-    boolean vectorSet = false;
 
     /* -- */
 
@@ -1105,7 +1104,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (item.matches("classname"))
 	  {
-	    setClassName(item.getAttrStr("name"));
+	    retVal = setClassName(item.getAttrStr("name"));
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set class name: \n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
 	  }
 	else if (item.matches("comment"))
 	  {
@@ -1246,16 +1253,18 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      }
 	    else
 	      {
-		throw new IllegalArgumentException("typedef tag does not contain type attribute: " +
-						   item);
+		return Ganymede.createErrorDialog("xml",
+						  "typedef tag does not contain type attribute: " +
+						  item + "\nin fielddef tree: \n" + root.getTreeString());
 	      }
 
 	    typeRead = true;
 	  }
 	else
 	  {
-	    System.err.println("DBObjectBaseField.receiveXML(): unrecognized XML item inside fielddef: " +
-			       item);
+	    return Ganymede.createErrorDialog("xml",
+					      "unrecognized XML item: " +
+					      item + "\nin fielddef tree: \n" + root.getTreeString());
 	  }
       }
 
