@@ -1,3 +1,13 @@
+/*
+   Stylesheet for Ganymede documentation
+
+   Jonathan Abbey, jonabbey@arlut.utexas.edu
+
+   $Rev$
+   $Date$
+   $Author$
+*/
+
 @media all {
  body { background: white; }
  h1 { font-family: Arial, Helvetica; }
