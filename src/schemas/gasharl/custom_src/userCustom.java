@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2001/07/18 02:41:25 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2001/08/31 03:14:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -100,6 +100,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   static String deleteFilename = null;
   static File deleteHandler = null;
 
+  static int file_identifier = 0;
+
+  public static synchronized int getNextAuthIdent()
+  {
+    if (file_identifier == Integer.MAX_VALUE)
+      {
+	file_identifier = 0;
+      }
+    else
+      {
+	file_identifier++;
+      }
+
+    return file_identifier;
+  }
+
+  public static File getNextFileName()
+  {
+    return new File("/tmp/ganymede_ext_validate_" + getNextAuthIdent());
+  }
 
   // ---
 
@@ -2194,7 +2214,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					  "I need to know the username before I can set the password");
       }
 
-    String validatorCommand = validatorName + " " + username;
+    File resultFile = userCustom.getNextFileName();
+
+    String validatorCommand = validatorName + " " + username + " " + resultFile.getPath();
 
     File file = new File(validatorName);
 
@@ -2216,12 +2238,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (process.exitValue() != 0)
 	      {
-		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		resultString = in.readLine();
-		in.close();
-
-		return Ganymede.createErrorDialog("Password Rejected",
-						  resultString);
+		try
+		  {
+		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
+		    resultString = in.readLine();
+		    in.close();
+		    
+		    return Ganymede.createErrorDialog("Password Rejected",
+						      resultString);
+		  }
+		catch (FileNotFoundException ex)
+		  {
+		    ex.printStackTrace();
+		  }
 	      }
 	  }
 	catch (IOException ex)
@@ -2259,7 +2288,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					  "I need to know the username before I can save the password");
       }
 
-    String saverCommand = saverName + " " + username;
+    File resultFile = userCustom.getNextFileName();
+
+    String saverCommand = saverName + " " + username + " " + resultFile.getPath();
 
     File file = new File(saverName);
 
@@ -2281,12 +2312,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (process.exitValue() != 0)
 	      {
-		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		resultString = in.readLine();
-		in.close();
-
-		return Ganymede.createErrorDialog("Password History Not Saved",
-						  resultString);
+		try
+		  {
+		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
+		    resultString = in.readLine();
+		    in.close();
+		    
+		    return Ganymede.createErrorDialog("Password History Not Saved",
+						      resultString);
+		  }
+		catch (FileNotFoundException ex)
+		  {
+		    ex.printStackTrace();
+		  }
 	      }
 	  }
 	catch (IOException ex)
