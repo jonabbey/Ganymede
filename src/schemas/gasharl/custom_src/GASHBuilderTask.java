@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/10/09 07:33:02 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/10/09 08:12:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1318,17 +1318,36 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (aliases != null)
       {
+	// we don't include the username in the list of aliases,
+	// but the build/gash stuff requires that it be included
+	// in aliases_info
+
+	boolean appendComma = false;
+
+	if (!signature.equals(username))
+	  {
+	    result.append(", ");
+	    result.append(username);
+
+	    appendComma = true;
+	  }
+
 	for (int i = 0; i < aliases.size(); i++)
 	  {
+	    if (appendComma)
+	      {
+		result.append(", ");
+	      }
+
 	    alias = (String) aliases.elementAt(i);
 	    
 	    if (alias.equals(signature))
 	      {
 		continue;
 	      }
-	    
-	    result.append(", ");
+
 	    result.append(alias);
+	    appendComma = true;
 	  }
       }
 
