@@ -57,6 +57,7 @@ import arlut.csd.ganymede.server.Ganymede;
 import java.io.*;
 import java.net.*;
 import java.rmi.server.*;
+import java.util.HashMap;
 import java.security.KeyStore;
 import javax.net.ssl.*;
 
@@ -74,8 +75,20 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private static int counter = 0;
   private static final boolean socketDebug = false;
   private static final boolean mrShouty = false;
+  private static final RMISSLClientListener listener = null;
 
   private transient SSLSocketFactory sf;
+
+  /**
+   * <P>This static method is used to register an optional listener on
+   * the Ganymede client, to receive notification when an RMI SSL
+   * socket is opened.</P>
+   */
+
+  public static void setSSLClientListener(RMISSLClientListener listener)
+  {
+    RMISSLClientSocketFactory.listener = listener;
+  }
 
   /* -- */
 
