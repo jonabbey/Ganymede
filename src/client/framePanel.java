@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,8 +20,8 @@ import java.rmi.*;
 import java.util.*;
 import java.beans.PropertyVetoException;
 
+
 import com.sun.java.swing.*;
-import com.sun.java.swing.preview.*;  // This is for the FileChooser
 import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
 
@@ -111,6 +111,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     modifier_field;
 
   invid_field 
+    persona_field,
     objects_owned_field;
 
   boolean 
@@ -244,9 +245,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    }
 	  else if (id == SchemaConstants.UserBase)
 	    {
-	      personae = new JPanel(false);
-	      pane.addTab("Personae", null, personae);
-	      personae_index = current++;
+
+	      persona_field = (invid_field)object.getField(SchemaConstants.UserAdminPersonae);
+	     
+	      // If the field is null, then that means that the aren't
+	      // any personas, and this is jsut a view window, so we
+	      // don't need the panel at all
+	      if (persona_field != null)
+		{
+
+		  personae = new JPanel(false);
+		  pane.addTab("Personae", null, personae);
+		  personae_index = current++;
+		}
 	    }
 	}
       catch (RemoteException rx)
@@ -319,7 +330,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       // Need to add the menubar at the end, so the user doesn't get
       // into the menu items before the tabbed pane is all set up
       JMenuBar mb = createMenuBar(editable);
-      setMenuBar(mb);
+      setJMenuBar(mb);
 
       pane.invalidate();
       validate();
@@ -1010,16 +1021,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
 
       invid_field p = null;
-      try
-	{
-	  p = (invid_field)object.getField(SchemaConstants.UserAdminPersonae);
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get persona field: " + rx);
-	}
+
+      
       personae.setLayout(new BorderLayout());
-      personae.add("Center", new personaPanel(p, editable, this));
+      personae.add("Center", new personaPanel(persona_field, editable, this));
       createdList.addElement(new Integer(personae_index));
       
       personae.invalidate();
