@@ -211,6 +211,16 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	System.err.println("StringDialog: adding objects");
       }
 
+    // We have to make the panel, even if it is empty.  This is
+    // because we have to add space to to it for the stupid activator.
+    panel = new JInsetPanel();
+    table = new TableLayout(false);
+    panel.setLayout(table);
+    table.rowSpacing(10);
+    
+    dataPanel.add("Center", panel); 
+
+
     // add stuff to panel here
 
     if (objects != null)
@@ -229,12 +239,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		System.out.println("objects.size() > 0"); 
 	      }
 
-	    panel = new JInsetPanel();
-	    table = new TableLayout(false);
-	    panel.setLayout(table);
-	    table.rowSpacing(10);
-	      
-	    dataPanel.add("Center", panel); 
 	      
 	    for (int i = 0; i < numberOfObjects; ++i) 
 	      {
@@ -551,8 +555,8 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	System.out.println("Parent frame is null.");
       }
 
-    
-    addSpace(panel, 10, components.size() + 1);
+    // Add some blank space so the yellow box can eat it up.
+    addSpace(panel, 10, (components == null) ? 1 : components.size() + 1);
 
   }
 
