@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2000/12/07 23:03:24 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2000/12/15 23:23:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -282,9 +282,8 @@ public class Ganymede {
     if (propFilename == null)
       {
 	System.err.println("Error: invalid command line parameters");
- 	System.err.print("Usage: java Ganymede [-decode dbfile=<dbfilename> [-showall]] [-resetadmin] ");
-	System.err.print("[-developschema] ");
-	System.err.println("properties=<property file> [debug=<rmi debug file>]");
+ 	System.err.print("Usage: java arlut.csd.ganymede.Ganymede");
+	System.err.println(" properties=<property file> [-resetadmin] [debug=<rmi debug file>]");
 	return;
       }
 

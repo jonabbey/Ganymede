@@ -31,10 +31,10 @@ _0. Overview_
    
    A schema kit contains all the pieces needed to turn the raw Ganymede
    engine into a custom-tailored database system shaped to fit a
-   particular application. A schema kit defines the kinds of data to held
-   in the Ganymede server's database, custom logic to provide intelligent
-   management of data in the database, and external scripts that take the
-   data from the Ganymede server and integrate it into your network.
+   particular application. A schema kit defines the kinds of data to be
+   held in the Ganymede server's database, custom logic to provide
+   intelligent management of that data, and external scripts that take
+   the data from the Ganymede server and integrate it into your network.
    Assuming that you don't want to try and develop your own database
    definition from scratch, you'll want to download a pre-built schema
    kit for use with your Ganymede server.
@@ -47,7 +47,7 @@ _0. Overview_
    download a schema kit.
    
    This document will cover the installation of Ganymede from start to
-   finish, using the 1.0 version of the newly developed userKit as an
+   finish, using the 1.0 version of our newly developed userKit as an
    example. Any other schema kits that are developed will have some
    differences, but will likely be installed and used in similar ways.
    
@@ -65,14 +65,14 @@ _1. Requirements_
    
    If you will be running the Ganymede clients on UNIX under the X Window
    System, any version of the Java Runtime Environment (JRE) 1.1 or
-   better should work, although you will need to download and install the
-   Swing GUI libraries from Sun to make them work if you are not running
-   Java 1.2 or later. Java 1.3 will provide the best performance and
-   fewest bugs in the Swing libraries. If you will happen to be using an
-   X Window environment with less than 8 bit color, however, you will
-   have to stick with Java 1.1.7 or Java 1.1.8 in order to run the
-   clients. Java 1.1.7 or 1.1.8 will also likely have better graphical
-   performance if you are using remote X Window displays.
+   better should work, but you will need to download and install the
+   Swing GUI libraries from Sun to make anything less than Java 1.2 work.
+   Java 1.3 will provide the best performance and fewest bugs in the
+   Swing libraries. If you will happen to be using an X Window
+   environment with less than 8 bit color, however, you will have to
+   stick with Java 1.1.7 or Java 1.1.8 in order to run the clients. Java
+   1.1.7 or 1.1.8 will also likely have better graphical performance if
+   you are using remote X Window displays.
    
    To run the Ganymede clients in a web browser on a desktop PC running
    some version of Windows 95/98/NT/2000/ME/etc., you will want to
@@ -91,21 +91,33 @@ _1. Requirements_
    95, Windows NT, MacOS 9, OS/2, FreeBSD, AIX, HP/UX, and others.
    
    In addition to Java, you will need /bin/sh and Perl 5.003 (or later)
-   to run any of the Ganymede installation scripts. The Ganymede
-   distribution, server and clients, is designed to be unpacked and
-   installed on a UNIX system with support for symbolic links. There is
-   no installer for putting the Ganymede clients on a Windows or
-   Macintosh system. Instead, you install the clients on the UNIX system
-   and then use a web server to publish the clients to your network.
+   to run the Ganymede installation scripts. The Ganymede distribution,
+   server and client, is designed to be unpacked and installed on a UNIX
+   system with support for symbolic links. There is no installer provided
+   for Windows or Macintosh. Instead, you have to install the clients on
+   the UNIX system and then use a web server to publish the clients to
+   your network.
    
    By default, Java's security model will not allow a downloaded applet
    to establish a network connection to any system other than the one it
    was downloaded from, so you will need to install Apache or another web
-   server on the same machine you will be running the Ganymede server.
-   Ganymede will not work through most firewall configurations, but you
-   should plan on not running the Ganymede server on the same machine as
-   your existing web server, for reasons of performance, convenience, and
-   security.
+   server on the same machine on which you will be running the Ganymede
+   server. You should probably go ahead and install the Ganymede server
+   and Apache on a dedicated machine rather than installing the Ganymede
+   server on your existing web server machine, if you are worried about
+   performance.
+   
+   Note that Ganymede will not work through most firewall configurations,
+   as the RMI protocol involves communications on a number of high port
+   numbers that are chosen and assigned at runtime. In addition, as
+   mentioned in the FAQ, Ganymede 1.0 does not encrypt its client/server
+   communications. This is something that we are planning on adding for
+   Ganymede 1.1, which will require Java 1.2 or 1.3 to run everything.
+   For now, however, you should plan on keeping Ganymede safely behind a
+   firewall. We have had success at running the Ganymede client on both
+   the Cisco and Nortel VPN's. If you find yourself in that situation,
+   send mail to the Ganymede mailing list at ganymede@arlut.utexas.edu
+   and ask for the details.
    
 _2. Configuring the Distribution for Your Site_
 
@@ -133,14 +145,14 @@ _2. Configuring the Distribution for Your Site_
    sets up scripts that can be used to compile the Ganymede sources.
    Generally speaking, you should not need to do this, as everything is
    precompiled in the _jars_ directory, but if you want to hack on the
-   Ganymede server or clients, you will be able to do so. See the
-   README.source file in the top-level distribution directory for
+   Ganymede server or clients, configure sets everything up so you can.
+   See the README.source file in the top-level distribution directory for
    information on building the source tree if you want to investigate the
    source code.
    
 _3. Installing the Server_
 
-   Installing the Ganymede server is the first thing to be done after you
+   Installing the Ganymede server is the next thing to be done after you
    have unpacked and configured the distribution. You should plan on
    installing the Ganymede server on a system that has Java and Perl
    installed, and which has a web server available to provide downloads
@@ -168,6 +180,14 @@ _3. Installing the Server_
           so you will have to pick a location. You can use either
           absolute or relative directory names here.
           
+          Note that when you install the server, the installServer script
+          customizes the server installation with the paths where you
+          have installed the server. If you ever decide to move the
+          server in your filesystem, you will need to create a symlink at
+          the old location to allow the old paths to resolve properly, or
+          you will need to go through the various scripts and files and
+          make sure that any reference to the old path has been updated.
+          
    _What is the name of the system that the server will run on?_
           This information is used by the stopServer and xmlclient
           clients that are installed into the server tree. This may be an
@@ -178,11 +198,11 @@ _3. Installing the Server_
    _What port should the RMI registry supporting Ganymede run on?_
           The RMI registry is a network lookup service that is used by
           the Ganymede clients to establish communications with the
-          Ganymede server. If you are running certain other Java
-          services, you may already have an RMI registry running, in
-          which case you should pick another port number to run the
-          Ganymede registry on. You may want to use 1100, 1101, or
-          another non-used tcp port.
+          Ganymede server. By default, port number 1099 is used. If you
+          are running certain other Java services, you may already have
+          an RMI registry running, in which case you should pick another
+          port number to run the Ganymede registry on. You may want to
+          use 1100, 1101, or another non-used tcp port.
           
    _What mailhost should Ganymede use to send out diagnostic mail?_
           The Ganymede server is able to send out email in response to a
@@ -201,16 +221,17 @@ _3. Installing the Server_
           replies bounce.
           
    _What name do you want the Ganymede superuser account to have?_
-          The default is probably okay here.
+          The default 'supergash' name is probably okay here, but you can
+          change it if you want.
           
    _What password do you want the superuser account to have?_
           This password provides complete access to the Ganymede server's
           database, and is necessary for a variety of system operations.
           
    _What name do you want the Ganymede monitor account to have?_
-          The monitor account has no privileges to do anything at all in
-          the server, but can be used to attach the Ganymede admin
-          console and to view the server's activity log.
+          The monitor account has no privileges to do anything at all to
+          other than to login with the Ganymede admin console and view
+          the server's activity log.
           
    _What password do you want the monitor account to have?_
           This password provides the right to watch the server's
@@ -237,8 +258,8 @@ _3. Installing the Server_
        
    The _db/_ directory contains:
    
-     * The ganymede.db file, which contains all data and schema
-       information held by the Ganymede server.
+     * The ganymede.db file, which contains all data objects and schema
+       definitions held by the Ganymede server.
      * A running journal file that records all transactions made by the
        server so that the server can fully recover if it ever crashes or
        if the system running it goes down.
@@ -268,12 +289,11 @@ _4. Installing A Schema Kit_
    requirements.
    
    When you download and unpack a schema kit, you should find
-   documentation that will walk you through the installation process, but
-   essentially it comes down to running a _installKit_ script which will
-   ask you where you installed your server and where Java is.
-   
-   Once you answer the questions, _installKit_ will create a _schema_
-   directory under your server directory. This directory should include:
+   documentation that will walk you through the installation process.
+   Essentially it comes down to running a _installKit_ script, which.
+   will ask you where you installed your server and where Java is, and
+   will then create a _schema_ directory under your server directory.
+   This directory should include:
    
      * a _custom.jar_ file that includes the Java classes added to your
        server by the schema kit
@@ -322,7 +342,7 @@ _5. Running the Ganymede Server_
    if you are running sh or bash.
    
    In either case, you want to capture all stdout and stderr output from
-   the server into a log file. The Ganymede server will write out status
+   the server into a log file. The Ganymede server will print out status
    and error messages as it runs, and you really want to capture this
    information.
    
@@ -351,21 +371,23 @@ _5. Running the Ganymede Server_
    'ganymede.defaultrootpass' property from the ganymede.properties file
    if you don't want to leave your Ganymede 'root' password lying around
    in plaintext, but if you ever forget the password, you'll want to keep
-   the -resetadmin parameter option in mind.
+   the -resetadmin parameter option in mind. You should not remove the
+   ganymede.defaultrootpass property until the server has successfully
+   started up and created its ganymede.db file, however.
    
    If the debug=xxx parameter is used, the Ganymede server will log all
    network calls made by clients to a debug log file of your choice. This
-   will degrade performance somewhat, but it will provide an invaluable
-   trace and exception log if the server ever hangs or crashes. Unless
-   you know you will never need to worry about the possibility of
-   exceptions in the server, I'd recommend you leave the debug=xxx
-   parameter as you find it. The _installServer_ script will install the
-   runServer script with the debug option set to generate a _debug.log_
-   file in your server's top-level directory. This is just what you want,
-   again, unless you know you don't.
+   may degrade performance very slightly, but it will provide an
+   invaluable trace and exception log if the server ever hangs or
+   crashes. Unless you know you will never need to worry about the
+   possibility of exceptions in the server, I'd recommend you leave the
+   debug=xxx parameter as you find it. The _installServer_ script will
+   install the runServer script with the debug option set to generate a
+   _debug.log_ file in your server's top-level directory. This is just
+   what you want, unless you know that it isn't.
    
    While the server is running, you should see two separate Java
-   processes running.. one for the rmiregistry, and one for the Ganymede
+   processes running, one for the rmiregistry, and one for the Ganymede
    server. If you are running the Ganymede server on a Linux system, you
    may see what looks like a very large number of Java processes running.
    This is perfectly normal. In current versions of Linux, the ps and top
@@ -379,26 +401,25 @@ _5. Running the Ganymede Server_
    below), or by using the stopServer script in the server's _bin/_
    directory. Either one will transmit to the server a shutdown message,
    which will result in the server kicking any active users off the
-   system, consolidating its database to disk, and finally a clean
-   shutdown. Note that the Ganymede server is designed to recover
-   smoothly on restart if it was killed or if the system crashed or was
-   rebooted at any point during its execution, but the server might take
-   a bit longer to restart in such cases.
+   system, consolidating its database to disk, and finally shutting down.
+   The Ganymede server is designed to recover smoothly on restart if it
+   is killed or if the system crashes or is rebooted at any point during
+   its execution, but the server might spend a bit of time on clean up
+   work on start up in such cases.
    
-   Shutting down the server won't automatically stop the rmiregistry, so
-   you will have to do a bit of manual cleanup to get rid of the
-   rmiregistry process if it bothers you to have it running. If you leave
-   the rmiregistry running on the port number you chose, the Ganymede
-   server will re-attach to it when you restart the server, but you'll
-   see an exception message when the server starts back up, as the
-   runServer tries and fails to start a new rmiregistry process on the
-   same port.
+   Shutting down the server won't automatically stop the rmiregistry
+   process, so you will have to do a bit of manual cleanup to get rid of
+   it if it bothers you to leave it running. Otherwise, the Ganymede
+   server will re-attach to the rmiregistry when you restart the server,
+   but you'll see an exception message when the server starts back up, as
+   the runServer tries and fails to start a new rmiregistry process on
+   the same port.
    
    If you know that you don't want to start the server back up again, it
-   is perfectly fine to go ahead and use kill to kill off the rmiregistry
-   process. Just be careful you've got the one on the right port, or else
-   you might cause problems for any other Java services that are running
-   on your system.
+   is perfectly fine to go ahead and use the Unix kill command to kill
+   off the rmiregistry process. Just be careful you've got the one on the
+   right port, or else you might cause problems for any other Java
+   services that are running on your system.
    
 _6. Loading Data Into the Server_
 
@@ -427,7 +448,8 @@ _6. Loading Data Into the Server_
    with Ganymede 1.0. If you are not using that schema kit, you'll have
    to improvise along the same lines.
    
-   If you look in your server's _schema/_ directory, you will see a
+   If you look in the _schema/_ directory that the schema kit's
+   _installKit_ script placed in your server directory, you will see a
    _loader.pl_ script and a _schema.xml_ file. The _loader.pl_ script is
    designed to take the database definition information contained in the
    _schema.xml_ file and combine it with your data to create a _data.xml_
@@ -442,18 +464,19 @@ _6. Loading Data Into the Server_
    
    For now, we'll just assume that _loader.pl_ has produced a _data.xml_
    file that is formatted according to the Ganymede XML File Format
-   Guide. Now all you need to do is pop up one directory and run
+   Guide. Now all you need to do is cd to your server's top-level
+   directory and run
    
       server% bin/xmlclient schema/data.xml
 
-   This will cause the xmlclient to log into the server and upload both a
-   database schema definition and your data to the server. xmlclient will
-   produce some output while it runs, but it is designed for speed over
-   interactivity, and so it may go quiet for long periods of time while
-   it waits for the server to chew through the XML that it has submitted.
-   If you like, you can run the Ganymede admin console before starting
-   xmlclient and actually watch as the xmlclient talks to the server and
-   creates all your objects in the database.
+   This will cause the xmlclient to log into the server and upload both
+   the schema kit's schema definition and your data to the server.
+   xmlclient will produce some output while it runs, but it is designed
+   for speed over interactivity, and so it may go quiet for long periods
+   of time while it waits for the server to chew through the XML that it
+   has submitted. If you like, you can run the Ganymede admin console
+   before starting xmlclient and actually watch as the xmlclient talks to
+   the server and creates all your objects in the database.
    
    If all goes well, you should expect to see a bunch of messages about
    it editing the server's schema and then creating a bunch of objects
@@ -574,4 +597,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Thu Dec 14 22:59:48 CST 2000
+   Last modified: Fri Dec 15 17:22:16 CST 2000
