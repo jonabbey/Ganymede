@@ -115,6 +115,7 @@ import arlut.csd.ganymede.rmi.ip_field;
 import arlut.csd.ganymede.rmi.pass_field;
 import arlut.csd.ganymede.rmi.perm_field;
 import arlut.csd.ganymede.rmi.string_field;
+import arlut.csd.ganymede.rmi.field_option_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -2201,6 +2202,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  case FieldType.PERMISSIONMATRIX:
 	    addPermissionField(field, fieldInfo, fieldTemplate);
 	    break;
+
+          case FieldType.FIELDOPTIONS:
+            addFieldOptionsField(field, fieldInfo, fieldTemplate);
+            break;
 		      
 	  case FieldType.INVID:
 	    addInvidField((invid_field)field, fieldInfo, fieldTemplate);
@@ -3109,6 +3114,45 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     contentsPanel.addFillRow(fieldTemplate.getName(), cb, 1);
     contentsPanel.setRowVisible(cb, fieldInfo.isVisible());
   }
+
+  /**
+   * <p>private helper method to instantiate a field options field in this
+   * container panel</p>
+   *
+   * @param field Remote reference to database field to be associated with a gui component
+   * @param fieldInfo Downloaded value and status information for this field
+   * @param fieldTemplate Downloaded static field type information for this field
+   */
+
+  private void addFieldOptionsField(db_field field, FieldInfo fieldInfo,
+				    FieldTemplate fieldTemplate) throws RemoteException
+  {
+    if (debug)
+      {
+	println("Adding field options matrix");
+      }
+
+    // note that the field options editor does its own callbacks to
+    // the server, albeit using our transaction / session.
+
+    fieldoption_button fob = new fieldoption_button((field_option_field) field,
+				     editable && fieldInfo.isEditable(),
+				     gc,
+				     fieldTemplate.getName());
+
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	fob.setToolTipText(comment);
+      }
+
+    associateFieldId(fieldInfo, fob);
+
+    contentsPanel.addRow(fieldTemplate.getName(), fob);
+    contentsPanel.setRowVisible(fob, fieldInfo.isVisible());
+  }
+
 
   /**
    * <p>private helper method to instantiate a permission matrix field in this
