@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.14 $
-# Date: $Date: 1999/08/05 22:06:46 $
+# Version: $Revision: 1.15 $
+# Date: $Date: 1999/11/05 21:06:35 $
 #
 ############################################################
 
@@ -75,6 +75,9 @@ ln -s ../MD5OutputStream.class .
 
 rm -f MD5State.class
 ln -s ../MD5State.class .
+
+rm -f MD5Crypt.class
+ln -s ../MD5Crypt.class .
 
 ./sync_tree
 ./sync_tree.gnu
