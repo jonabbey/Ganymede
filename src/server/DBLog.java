@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/06/15 16:34:57 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/07/30 03:42:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -698,7 +698,11 @@ public class DBLog {
 	returnAddr = adminPersonaCustom.convertAdminInvidToString(admin, 
 								  gSession.getSession());
       }
-    else
+
+    // if there was no email address registered for the admin persona,
+    // use the return address listed in the ganymede.properties file
+
+    if (returnAddr == null)
       {
 	returnAddr = Ganymede.returnaddrProperty;
       }
