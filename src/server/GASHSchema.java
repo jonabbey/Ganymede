@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.Tree.*;
 
 ------------------------------------------------------------------------------*/
 
-public class GASHSchema extends Frame implements treeCallback, ActionListener {
+public class GASHSchema extends Frame implements treeCallback, treeDragDropCallback, ActionListener {
 
   SchemaEdit 
     editor;
@@ -202,6 +202,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, SystemColor.window, this, images,
 			   null);
+    tree.setDrag(this, tree.DRAG_LINE);
 
     PopupMenu objectMenu = new PopupMenu();
     createObjectMI = new MenuItem("Create Object Type");
@@ -694,12 +695,11 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
-    if (! otherNode)
+    if (!otherNode)
       {
 	card.show(attribCardPane, "empty");
       }
-	// attribCardPane.show(emptyPane);
-	//    attribCardPane.select(emptyPane);
+
     System.out.println("node " + node.getText() + " unselected");
   }
 
@@ -739,8 +739,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	String newNameSpace = null;
 	Boolean insensitive = null;
 	
-
 	//Now check the hash
+
 	if (results == null)
 	  {
 	    System.out.println("null hashtable, no action taken");
@@ -815,6 +815,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	
 	boolean Insensitive = false;
 	String name = null;
+
 	for (int i = 0; i < spaces.length ; i++ )
 	  {
 	    try
@@ -851,9 +852,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	treeNode tNode = (treeNode)node;
 		
 	deleteNameDialog.setVisible(true);
-	
       }
-
     else if (event.getSource() == deleteObjectMI)
       {
 	BaseNode bNode = (BaseNode) node;
@@ -965,7 +964,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   public void actionPerformed(ActionEvent event)
   {
-        System.out.println("event: " + event);
+    System.out.println("event: " + event);
 
     if (event.getSource() == okButton)
       {
@@ -1029,6 +1028,61 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	System.err.println("Unknown Action Performed in GASHSchema");
       }
   }
+
+  /**
+   *
+   *
+   * @see arlut.csd.Tree.treeDragDropCallback
+   */
+
+  public boolean startDrag(treeNode dragNode)
+  {
+    return (dragNode instanceof FieldNode);
+  }
+
+  /**
+   *
+   *
+   * @see arlut.csd.Tree.treeDragDropCallback
+   */
+
+  public boolean iconDragOver(treeNode dragNode, treeNode targetNode)
+  {
+    return false;
+  }
+
+  /**
+   *
+   *
+   * @see arlut.csd.Tree.treeDragDropCallback
+   */
+
+  public void iconDragDrop(treeNode dragNode, treeNode targetNode)
+  {
+  }
+
+  /**
+   *
+   *
+   * @see arlut.csd.Tree.treeDragDropCallback
+   */
+
+  public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
+  {
+    return true;
+  }
+
+  /**
+   *
+   *
+   * @see arlut.csd.Tree.treeDragDropCallback
+   */
+
+  public void dragLineRelease(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
+  {
+  }
+
+
 }
 
 /*------------------------------------------------------------------------------
@@ -1125,114 +1179,129 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener,
       }
   }
 
-  public void refreshLabelChoice()
-    {
-      labelC.removeAll();
-      Vector fields = null;
-      if (base == null)
-	{
-	  System.out.println("base is null, not refreshing labelC");
-	}
-      else
-	{
-	  try
-	    {
-	      fields = base.getFields();
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new IllegalArgumentException("exception getting fields: " + rx);
-	    }
-	  
-	  
-	  labelC.add("<none>");
-	  BaseField currentField;
-	  String labelField = null;
-	  if (fields == null)
-	    {
-	      System.out.println("No fields to add");
-	    }
-	  else
-	    {
-	      for (int i = 0; i < fields.size() ; i++)
-		{
-		  currentField = (BaseField)fields.elementAt(i);
-		  if (currentField != null)
-		    {
-		      try
-			{
-			  if (currentField.isString() || currentField.isNumeric())
-			    {
-			      labelC.add(currentField.getName());
-			    }
-			}
-		      catch (RemoteException rx)
-			{
-			  throw new IllegalArgumentException("exception getting field name: " + rx);
-			}
-		    }
-		  
-		}
-	      try
-		{
-		  labelField = base.getLabelFieldName();
-		}
-	      catch (RemoteException rx)
-		{
-		  throw new IllegalArgumentException("Exception getting base label: " + rx);
-		}
-	      if (labelField == null)
-		{
-		  System.out.println("selecting <none>");
-		  labelC.select("<none>");
-		}
-	      else
-		{
-		  try
-		    {
-		      System.out.println("selecting label: " + labelField);
-		      labelC.select(labelField);
-		    }
-		  catch (NullPointerException ex)
-		    {
-		      System.out.println("Attempted to set label to field not in choice, setting it to <none>");
-		      labelC.select("<none>");
-		      
-		    }
-		}
-		
-	    }
-	}
-    }
+  /**
+   *
+   * This method is an internal helper method to update the label choice displayed
+   * in the base editor.
+   *
+   */
+
+  void refreshLabelChoice()
+  {
+    Vector fields = null;
+    BaseField currentField;
+    String labelField = null;
+
+    /* -- */
+
+    labelC.removeAll();
+
+    if (base == null)
+      {
+	System.out.println("base is null, not refreshing labelC");
+	return;
+      }
+
+    try
+      {
+	fields = base.getFields();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("exception getting fields: " + rx);
+      }
+    
+    labelC.add("<none>");
+    
+    if (fields == null)
+      {
+	System.out.println("No fields to add");
+	return;
+      }
+
+    for (int i = 0; i < fields.size() ; i++)
+      {
+	currentField = (BaseField) fields.elementAt(i);
+
+	if (currentField != null)
+	  {
+	    try
+	      {
+		if (currentField.isString() || currentField.isNumeric())
+		  {
+		    labelC.add(currentField.getName());
+		  }
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("exception getting field name: " + rx);
+	      }
+	  }
+      }
+
+    try
+      {
+	labelField = base.getLabelFieldName();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Exception getting base label: " + rx);
+      }
+
+    if (labelField == null)
+      {
+	System.out.println("selecting <none>");
+	labelC.select("<none>");
+      }
+    else
+      {
+	try
+	  {
+	    System.out.println("selecting label: " + labelField);
+	    labelC.select(labelField);
+	  }
+	catch (NullPointerException ex)
+	  {
+	    System.out.println("Attempted to set label to field not in choice, setting it to <none>");
+	    labelC.select("<none>");
+	  }
+      }
+  }
 
   public void itemStateChanged(ItemEvent e)
-    {
-      System.out.println("itemStateChanged");
-      String label = null;
+  {
+    String label = null;
 
-      if (e.getItemSelectable() == labelC)
-	{
-	  try
-	    {
-	      label = labelC.getSelectedItem();
-	      System.out.println("setting label to " + label);
-	      if ((label == null) || (label.equals("<none>")))
-		{
-		  System.out.println("Setting label field to null");
-		  base.setLabelField(null);
-		}
-	      else
-		{
-		  System.out.println("Setting label field to " + label);
-		  base.setLabelField(label);
-		}
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new IllegalArgumentException("exception setting label field: " + rx);
-	    }
-	}
-    }
+    /* -- */
+
+    System.out.println("itemStateChanged");
+
+    if (e.getItemSelectable() == labelC)
+      {
+	try
+	  {
+	    label = labelC.getSelectedItem();
+
+	    System.out.println("setting label to " + label);
+
+	    if ((label == null) || (label.equals("<none>")))
+	      {
+		System.out.println("Setting label field to null");
+		base.setLabelField(null);
+	      }
+	    else
+	      {
+		System.out.println("Setting label field to " + label);
+		base.setLabelField(label);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("exception setting label field: " + rx);
+	  }
+      }
+  }
+
   public boolean setValuePerformed(ValueObject v)
   {
     Component source;
@@ -1289,7 +1358,6 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener,
     parent.add("1 " + row + " lhwHW", comp);
 
   }
-
 
 }
 
@@ -1356,6 +1424,14 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     dateShowing,
     stringShowing,
     referenceShowing;
+
+  /* -- */
+
+  /**
+   *
+   * Constructor
+   *
+   */
 
   BaseFieldEditor(GASHSchema owner)
   {
@@ -1497,23 +1573,18 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   void addRow(Panel parent, Component comp,  String label, int row, boolean visible)
   {
     Label l = new Label(label);
+
     rowHash.put(comp, l);
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhwHW", comp);
 
-    if (visible)
-      {
-	setRowVisible(comp, true);
-      }
-    else
-      {
-	setRowVisible(comp, false);
-      }
+    setRowVisible(comp, visible);
   }
 
   void setRowVisible(Component comp, boolean b)
   {
     Component c = (Component) rowHash.get(comp);
+
     if (c == null)
       {
 	return;
@@ -1530,6 +1601,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     setRowVisible(maxArrayN, vectorCF.getState());
 
     // Now check the nameC choice stuff
+
     setRowVisible(labeledCF, booleanShowing);
 
     if (booleanShowing)
@@ -1576,50 +1648,50 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   }
 
   void refreshNamespaceChoice()
-    {
-      NameSpace[] nameSpaces = null;
-      
-      namespaceC.removeAll();
+   {
+     NameSpace[] nameSpaces = null;
 
-      SchemaEdit test = owner.getSchemaEdit();
+     /* -- */
+      
+     namespaceC.removeAll();
 
-      if (test == null)
-	{	
-	  System.err.println("owner.editor is null");
-	}
-      
-      try
-	{
-	  nameSpaces = owner.getSchemaEdit().getNameSpaces();
-	}
-      catch (RemoteException rx)
-	{
-	  System.err.println("RemoteException getting namespaces: " + rx);
-	}
-      
-      namespaceC.addItem("<none>");      
+     SchemaEdit test = owner.getSchemaEdit();
 
-      if ( (nameSpaces.length == 0) || (nameSpaces == null) )
-	{
-	  System.err.println("No other namespaces to add");
-	  
-	}
-      else
-	{
-	  for (int i=0 ; i < nameSpaces.length ; i++)
-	    {
-	      try
-		{
-		  namespaceC.addItem(nameSpaces[i].getName());
-		}
-	      catch (RemoteException rx)
-		{
-		  System.err.println("RemoteException getting namespace: " + rx);
-		}    
-	    }
-	}
+     if (test == null)
+       {	
+	 System.err.println("owner.editor is null");
+       }
+     
+     try
+       {
+	 nameSpaces = owner.getSchemaEdit().getNameSpaces();
+       }
+     catch (RemoteException rx)
+       {
+	 System.err.println("RemoteException getting namespaces: " + rx);
+       }
       
-    }
+     namespaceC.addItem("<none>");      
+
+     if ( (nameSpaces.length == 0) || (nameSpaces == null) )
+       {
+	 System.err.println("No other namespaces to add");
+       }
+     else
+       {
+	 for (int i=0 ; i < nameSpaces.length ; i++)
+	   {
+	     try
+	       {
+		 namespaceC.addItem(nameSpaces[i].getName());
+	       }
+	     catch (RemoteException rx)
+	       {
+		 System.err.println("RemoteException getting namespace: " + rx);
+	       }    
+	   }
+       }
+   }
 
   /**
    *
@@ -1629,34 +1701,36 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
    */
     
   void refreshTargetChoice()
-    {
-      Base[] baseList;
+  {
+    Base[] baseList;
 
-      targetC.removeAll();
+    /* -- */
 
-      try
-	{
-	  baseList = owner.getSchemaEdit().getBases();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new IllegalArgumentException("Exception getting Bases: " + rx);
-	}
+    targetC.removeAll();
 
-      targetC.addItem("<any>");
+    try
+      {
+	baseList = owner.getSchemaEdit().getBases();
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("Exception getting Bases: " + rx);
+      }
 
-      for (int i = 0 ; i < baseList.length ; i++)
-	{
-	  try
-	    {
-	      targetC.addItem(baseList[i].getName());
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new IllegalArgumentException("Exception getting bases name: " + rx);
-	    }
-	}
-    }
+    targetC.addItem("<any>");
+
+    for (int i = 0 ; i < baseList.length ; i++)
+      {
+	try
+	  {
+	    targetC.addItem(baseList[i].getName());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("Exception getting bases name: " + rx);
+	  }
+      }
+  }
 
   /**
    *
@@ -1801,9 +1875,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 
-  // edit the given field
+  /**
+   *
+   * Edit the given field.  This method prepares the BaseFieldEditor
+   * for display, initializing all items in the BaseFieldEditor panel
+   * with the contents of fieldDef.
+   *
+   */
 
-  public void editField(BaseField fieldDef)
+  void editField(BaseField fieldDef)
   {
     System.err.println("in FieldEditor.editField()");
 
@@ -1975,12 +2055,24 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 
+  /**
+   *
+   * Reinitialize the BaseFieldEditor with the current field.
+   *
+   */
+
   public void refreshFieldEdit()
   {
     this.editField(fieldDef);
   }
 
-  // for string and numeric fields
+  /**
+   * 
+   * For string and numeric fields
+   *
+   * @see arlut.csd.DataComponent.setValueCallback
+   *
+   */
 
   public boolean setValuePerformed(ValueObject v)
   {
@@ -2064,7 +2156,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 
-  // for choice fields
+  /**
+   *
+   * For choice fields
+   *
+   */
 
   public void itemStateChanged(ItemEvent e)
   {
@@ -2085,9 +2181,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	System.out.println("  item= " + item);
 	
 	if (!item.equals("Numeric") && !item.equals("String"))
-	  //Now it can't be a label
 	  {
-	    //So was it a label before?
+	    // Now it can't be a label.. was it a label before?
+
 	    try
 	      {
 		currentBase = fieldDef.getBase();
@@ -2101,6 +2197,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		currentLabel = currentBase.getLabelFieldName();
+		System.out.println("currentLabel= " + currentLabel);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2110,21 +2207,20 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		currentFieldName = fieldDef.getName();
+		System.out.println("currentFieldName= " + currentFieldName);
 	      }
 	    catch (RemoteException rx)
 	      {
 		throw new IllegalArgumentException("exception getting field name: " + rx);
 	      }
 
-	    System.out.println("fieldname= " + currentFieldName);
-	    System.out.println("  label= " + currentLabel);
-	    
 	    if ((currentFieldName != null) && currentLabel.equals(currentFieldName))
 	      {
 		System.out.println("problem: changing the label");
+
 		try
 		  {
-		    currentBase.setLabelField((String)null);
+		    currentBase.setLabelField(null); // we're making this field unacceptable as a label
 		  }
 		catch (RemoteException rx)
 		  {
@@ -2136,8 +2232,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		System.out.println("not the label, don't worry");
 	      }
 	  }
-	changeTypeChoice(item);
-	refreshFieldEdit();
+
+	changeTypeChoice(item);	// switch the visible rows to fit the new type
+	refreshFieldEdit();	// and refresh
       }
     else if (e.getItemSelectable() == namespaceC)
       {
