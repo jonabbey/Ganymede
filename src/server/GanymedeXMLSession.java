@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/11/01 00:57:49 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/11/02 02:16:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -480,6 +480,54 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     deletedObjects.setSize(0);
     deletedObjects = null;
 
+    if (spacesToAdd != null)
+      {
+	spacesToAdd.setSize(0);
+	spacesToAdd = null;
+      }
+
+    if (spacesToRemove != null)
+      {
+	spacesToRemove.setSize(0);
+	spacesToRemove = null;
+      }
+
+    if (spacesToEdit != null)
+      {
+	spacesToEdit.setSize(0);
+	spacesToEdit = null;
+      }
+
+    if (basesToAdd != null)
+      {
+	basesToAdd.setSize(0);
+	basesToAdd = null;
+      }
+
+    if (basesToRemove != null)
+      {
+	basesToRemove.setSize(0);
+	basesToRemove = null;
+      }
+
+    if (basesToEdit != null)
+      {
+	basesToEdit.setSize(0);
+	basesToEdit = null;
+      }
+
+    if (namespaceTree != null)
+      {
+	namespaceTree.dissolve();
+	namespaceTree = null;
+      }
+
+    if (categoryTree != null)
+      {
+	categoryTree.dissolve();
+	categoryTree = null;
+      }
+ 
     if (session != null && session.logged_in)
       {
 	session.logout();
@@ -643,77 +691,67 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
   {
-    if (!session.isSuperGash())
-      {
-	err.println("Skipping <ganyschema> element.. not logged in with supergash privileges");
-
-	XMLItem item = getNextItem();
-	
-	while (!item.matchesClose("ganyschema") && !(item instanceof XMLEndDocument))
-	  {
-	    item = getNextItem();
-	  }
-
-	return false;
-      }
-
-    XMLItem schemaTree = reader.getNextTree(ganySchemaItem);
-
-    // getNextTree will throw back an XMLError or XMLEndDocument if
-    // such is encountered while scanning in the tree's subitems
-
-    if ((schemaTree instanceof XMLError) ||
-	(schemaTree instanceof XMLEndDocument))
-      {
-	err.println(schemaTree.toString());
-	return false;
-      }
-
-    // try to get a schema editing context
-
-    editor = editSchema();
-
-    if (editor == null)
-      {
-	err.println("Couldn't edit the schema.. other users logged in?");
-	return false;
-      }
-
-    // do the thing
-
-    boolean success = true;
+    boolean _success = false;
+    XMLItem _schemaTree = reader.getNextTree(ganySchemaItem);
 
     try
       {
-	XMLItem schemaChildren[] = schemaTree.getChildren();
-
-	if (schemaChildren == null)
-	  {
-	    success = true;	// no editing to be done
-	    return success;
-	  }
-
 	// okay, from this point forward, we're going to assume
 	// failure unless/until we get to the end of the editing
 	// process.  The finally clause for this try block will use
 	// the success variable to decide whether to commit or abort
 	// the schema edit.
 
-	success = false;
+	if ((_schemaTree instanceof XMLError) ||
+	    (_schemaTree instanceof XMLEndDocument))
+	  {
+	    err.println(_schemaTree.toString());
+	    return false;
+	  }
+
+	if (!session.isSuperGash())
+	  {
+	    err.println("Skipping <ganyschema> element.. not logged in with supergash privileges");
+	    return false;
+	  }
+
+	// getNextTree will throw back an XMLError or XMLEndDocument if
+	// such is encountered while scanning in the tree's subitems
+	
+	// try to get a schema editing context
+
+	editor = editSchema();
+
+	if (editor == null)
+	  {
+	    err.println("Couldn't edit the schema.. other users logged in?");
+	    return false;
+	  }
+
+	// do the thing
+
+	XMLItem _schemaChildren[] = _schemaTree.getChildren();
+
+	if (_schemaChildren == null)
+	  {
+	    _success = true;	// no editing to be done
+	    return true;
+	  }
 
 	// if schemaChildren was not null, XMLReader will guarantee
 	// that it has at least one element
 	
-	int nextchild = 0;
+	int _nextchild = 0;
 
-	if (schemaChildren[nextchild].matches("namespaces"))
+	if (_schemaChildren[_nextchild].matches("namespaces"))
 	  {
-	    namespaceTree = schemaChildren[nextchild++];
+	    namespaceTree = _schemaChildren[_nextchild++];
 	  }
 
-	if (schemaChildren.length > nextchild && schemaChildren[nextchild].matches("object_type_definitions"))
+	if (_schemaChildren.length > _nextchild &&
+	    _schemaChildren[_nextchild].matches("object_type_definitions"))
 	  {
-	    XMLItem _otdItem = schemaChildren[nextchild];
+	    XMLItem _otdItem = _schemaChildren[_nextchild];
 
 	    if (_otdItem.getChildren() == null || _otdItem.getChildren().length != 1)
 	      {
@@ -726,6 +764,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	else
 	  {
 	    err.println("Couldn't find <object_type_definitions>");
+	    return false;
 	  }
 
 	// 1.  calculate what name spaces need to be created, edited, or removed
@@ -744,23 +783,22 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	for (int i = 0; i < spacesToAdd.size(); i++)
 	  {
-	    XMLItem space = (XMLItem) spacesToAdd.elementAt(i);
+	    XMLItem _space = (XMLItem) spacesToAdd.elementAt(i);
 
-	    String name = space.getAttrStr("name");
-	    boolean sensitive = space.getAttrBoolean("case-sensitive");
+	    String _name = _space.getAttrStr("name");
+	    boolean _sensitive = _space.getAttrBoolean("case-sensitive");
 
-	    if (name == null || name.equals(""))
+	    if (_name == null || _name.equals(""))
 	      {
-		err.println("Error, namespace item " + space + " has no name.");
+		err.println("Error, namespace item " + _space + " has no name.");
 		return false;
 	      }
 
-	    NameSpace aNewSpace = editor.createNewNameSpace(space.getAttrStr("name"), 
-							    space.getAttrBoolean("case-sensitive"));
+	    NameSpace _aNewSpace = editor.createNewNameSpace(_name,_sensitive);
 
-	    if (aNewSpace == null)
+	    if (_aNewSpace == null)
 	      {
-		err.println("Couldn't create a new namespace for item " + space);
+		err.println("Couldn't create a new namespace for item " + _space);
 		return false;
 	      }
 	  }
@@ -778,9 +816,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	for (int i = 0; i < basesToRemove.size(); i++)
 	  {
-	    String basename = (String) basesToRemove.elementAt(i);
+	    String _basename = (String) basesToRemove.elementAt(i);
 
-	    if (!handleReturnVal(editor.deleteBase(basename)))
+	    if (!handleReturnVal(editor.deleteBase(_basename)))
 	      {
 		return false;
 	      }
@@ -811,6 +849,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 									false,
 									_id.shortValue());
 
+	    // if we failed to create the base, we'll have an
+	    // exception thrown.. our finally clause and higher level
+	    // catches will handle it
+
 	    // don't yet try to resolve invid links, since we haven't
 	    // done a pass through basesToEdit to fix up fields yet
 
@@ -827,15 +869,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    XMLItem _entry = (XMLItem) basesToEdit.elementAt(i);
 	    Integer _id = _entry.getAttrInt("id");
 
-	    // create the new base, with the requested id.  we'll
-	    // specify that the object base is not an embedded one,
-	    // since DBObjectBase.setXML() can change that if need be.
-
 	    DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
 
 	    if (_oldBase == null)
 	      {
-		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		err.println("Error, couldn't find DBObjectBase for " +
+			    _entry.getTreeString() + " in pass 1");
 		return false;
 	      }
 
@@ -850,8 +889,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 
 	// now that we have completed our first pass through fields in
-	// basesToAdd and basesToEdit, go through both lists and
-	// finish fixing up invid links.
+	// basesToAdd and basesToEdit, where we created and/or renamed
+	// fields, so now we can go back through both lists and finish
+	// fixing up invid links.
 
 	for (int i = 0; i < basesToAdd.size(); i++)
 	  {
@@ -862,7 +902,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (_oldBase == null)
 	      {
-		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		err.println("Error, couldn't find DBObjectBase for " +
+			    _entry.getTreeString() + " in pass 2");
 		return false;
 	      }
 
@@ -881,7 +922,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (_oldBase == null)
 	      {
-		err.println("Error, couldn't find DBObjectBase for " + _entry.getTreeString());
+		err.println("Error, couldn't find DBObjectBase for " +
+			    _entry.getTreeString() + " in pass 3");
 		return false;
 	      }
 
@@ -910,20 +952,35 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      }
 	  }
 
-	// 10. Woohoo, Martha, I is a-coming home!
+	// 10. Need to flip case sensitivity on namespaces that
+	// need it
 
-	success = true;
+	for (int i = 0; i < spacesToEdit.size(); i++)
+	  {
+	    XMLItem _entry = (XMLItem) spacesToEdit.elementAt(i);
+	    String _name = _entry.getAttrStr("name");
+	    boolean _val = _entry.getAttrBoolean("case-sensitive");
+
+	    NameSpace _space = editor.getNameSpace(_name);
+
+	    _space.setInsensitive(!_val);
+	  }
+
+	// 11. Woohoo, Martha, I is a-coming home!
+
+	_success = true;
       }
     finally
       {
 	// break apart the XML item tree for gc
 
-	schemaTree.dissolve();
+	ganySchemaItem.dissolve();
+	_schemaTree.dissolve();
 
 	// either of these will clear the semaphore lock
 	// created by editSchema() above
 
-	if (success)
+	if (_success)
 	  {
 	    editor.commit();
 	    return true;
@@ -944,64 +1001,66 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     try
       {
-	NameSpace[] list = editor.getNameSpaces();
+	NameSpace[] _list = editor.getNameSpaces();
 
-	Vector current = new Vector(list.length);
+	Vector _current = new Vector(_list.length);
 
-	for (int i = 0; i < list.length; i++)
+	for (int i = 0; i < _list.length; i++)
 	  {
 	    // theoretically possible RemoteException here, due to remote interface
 
-	    current.addElement(list[i].getName()); 
+	    _current.addElement(_list[i].getName()); 
 	  }
 
-	XMLItem XNamespaces[] = namespaceTree.getChildren();
+	XMLItem _XNamespaces[] = namespaceTree.getChildren();
 
-	Vector newSpaces = new Vector(XNamespaces.length);
-	Hashtable entries = new Hashtable(XNamespaces.length);
+	Vector _newSpaces = new Vector(_XNamespaces.length);
+	Hashtable _entries = new Hashtable(_XNamespaces.length);
 
-	for (int i = 0; i < XNamespaces.length; i++)
+	for (int i = 0; i < _XNamespaces.length; i++)
 	  {
-	    if (!XNamespaces[i].matches("namespace"))
+	    if (!_XNamespaces[i].matches("namespace"))
 	      {
-		err.println("unrecognized element: " + XNamespaces[i] + " when expecting <namespace>");
+		err.println("unrecognized element: " + _XNamespaces[i] +
+			    " when expecting <namespace>");
 		return false;
 	      }
 	    
-	    String name = XNamespaces[i].getName(); // ditto remote
+	    String _name = _XNamespaces[i].getAttrStr("name"); // ditto remote
 
-	    newSpaces.addElement(name);
-
-	    if (entries.containsKey(name))
+	    if (_entries.containsKey(_name))
 	      {
-		err.println("Error, found duplicate <namespace> name '" + name + "'");
+		err.println("Error, found duplicate <namespace> name '" + _name + "'");
 		return false;
 	      }
 
-	    entries.put(name, XNamespaces[i]);
+	    _entries.put(_name, _XNamespaces[i]);
+	    _newSpaces.addElement(_name);
 	  }
 
 	// for spacesToRemove, we just keep the names for the missing
 	// name spaces
 
-	Vector spacesToRemove = VectorUtils.difference(current, newSpaces);
+	spacesToRemove = VectorUtils.difference(_current, _newSpaces);
 
-	// for spacesToAdd and spacesToEdit, we need to first names
-	// that are new or that were already in our current namespaces
-	// list, then look up and save the appropriate XMLItem nodes
-	// in the spacesToAdd and spacesToEdit global Vectors.
+	// for spacesToAdd and spacesToEdit, we need to first identify
+	// names that are new or that were already in our current
+	// namespaces list, then look up and save the appropriate
+	// XMLItem nodes in the spacesToAdd and spacesToEdit global
+	// Vectors.
 
-	Vector additions = VectorUtils.difference(newSpaces, current);
-	Vector possibleEdits = VectorUtils.intersection(newSpaces, current);
+	Vector _additions = VectorUtils.difference(_newSpaces, _current);
 
 	spacesToAdd = new Vector();
 
-	for (int i = 0; i < additions.size(); i++)
+	for (int i = 0; i < _additions.size(); i++)
 	  {
-	    XMLItem entry = (XMLItem) entries.get(additions.elementAt(i));
+	    XMLItem _entry = (XMLItem) _entries.get(_additions.elementAt(i));
 
-	    spacesToAdd.addElement(entry);
+	    spacesToAdd.addElement(_entry);
 	  }
+
+	Vector _possibleEdits = VectorUtils.intersection(_newSpaces, _current);
 
 	spacesToEdit = new Vector();
 
@@ -1011,20 +1070,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// can vary in a namespace other than its name, we'll go ahead
 	// and filter out no-changes here.
 
-	for (int i = 0; i < possibleEdits.size(); i++)
+	for (int i = 0; i < _possibleEdits.size(); i++)
 	  {
-	    boolean newSensitive;
-	    boolean oldSensitive;
+	    XMLItem _entry = (XMLItem) _entries.get(_possibleEdits.elementAt(i));
+	    NameSpace _oldEntry = editor.getNameSpace((String) _possibleEdits.elementAt(i));
 
-	    XMLItem entry = (XMLItem) entries.get(possibleEdits.elementAt(i));
-	    NameSpace oldEntry = editor.getNameSpace((String) possibleEdits.elementAt(i));
+	    // yes, ==, not !=.. note that the _oldEntry check is for
+	    // insensitivity, not sensitivity.
 
-	    newSensitive = entry.getAttrBoolean("case-sensitive");
-	    oldSensitive = oldEntry.isCaseInsensitive();
-
-	    if (newSensitive != oldSensitive)
+	    if (_entry.getAttrBoolean("case-sensitive") == _oldEntry.isCaseInsensitive())
 	      {
-		spacesToEdit.addElement(entry);
+		spacesToEdit.addElement(_entry);
 	      }
 	  }
       }

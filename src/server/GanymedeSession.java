@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.210 $
-   Last Mod Date: $Date: 2000/10/11 19:59:48 $
+   Version: $Revision: 1.211 $
+   Last Mod Date: $Date: 2000/11/02 02:16:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.210 $ $Date: 2000/10/11 19:59:48 $
+ * @version $Revision: 1.211 $ $Date: 2000/11/02 02:16:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -393,8 +393,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   PermMatrix personaPerms;
 
   /**
-   * <p>This variable stores the permission bits that are applicable to generic
-   * objects not specifically owned by this persona.</p>
+   * <p>This variable stores the permission bits that are applicable
+   * to generic objects not specifically owned by this persona.</p>
    *
    * <p>Each permission object in the Ganymede database includes
    * permissions as apply to objects owned by the persona and as apply
@@ -5211,6 +5211,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public PermEntry getPerm(DBObject object, short fieldId)
   {
+    // if this is true, the object was considered to be owned.
+
+    boolean objectIsOwned = false;
+
     // reference to which PermMatrix we use to look up permissions..
     // that for objects we own, or that for objects we don't.
 
@@ -5288,6 +5292,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") choosing persona perms");
 	  }
 
+	objectIsOwned = true;
+
 	applicablePerms = personaPerms;	// superset of defaultPerms
       }
     else
@@ -5344,6 +5350,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (permsdebug)
 	  {
 	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") returning object perms");
+	  }
+
+	// if we are returning permissions for the owner list field
+	// and the object in question has not been granted owner ship
+	// privileges, make sure that we don't allow editing of the
+	// owner list field, which could be used to make the object
+	// owned, and thus gain privileges
+
+	if (!objectIsOwned && (fieldId == SchemaConstants.OwnerListField))
+	  {
+	    return objectPerm.intersection(PermEntry.viewPerms);
 	  }
 
 	return objectPerm;
