@@ -57,10 +57,10 @@ Things you will need:
 
   Versions of Swing before Swing 1.1 will NOT work, as Ganymede is now
   built to use the javax version of the Swing libraries.  Probably 
-  the best thing to do is to install the latest JDK 1.2 package, which
+  the best thing to do is to install the latest JDK 1.3 package, which
   includes an up-to-date Swing.  Most of the client testing on the
   current release has been performed with JDK 1.1.8 on Solaris and
-  JDK 1.2 on Windows.
+  JDK 1.3 on Windows.
 
   The Ganymede client in version 0.99.9 has been tested running on Kestrel,
   the new JDK 1.3 beta on Windows.  Neither the server nor the admin
@@ -78,7 +78,8 @@ Things you will need:
 
   If you want to run the Ganymede client or admin console on a Win32
   machine, download the latest version of the Java Runtime Environment
-  (1.2.2 at this writing) from http://java.sun.com/products/jdk/1.2/jre/.
+  (1.3.0 at this writing) from
+  http://java.sun.com/j2se/1.3/jre/download-windows.html.
   
 --
 

@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-April ??, 2000
+May ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: April ??
+RELEASE DATE: May ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -497,6 +497,27 @@ I've now modified DBField.addElements() and InvidDBField.addElements()
 so that they are able to handle partial copies, and so that the
 DBField.copyFieldTo() method takes advantage of this to make object
 cloning more robust.
+
+33. [SERVER] Made the server less picky about setting owner groups ahead of time
+
+The Ganymede server now allows non-interactive clients (clients that
+have turned wizards off) to create objects without having previously
+selected one or more owner groups to be the default owners for newly
+created groups.
+
+This was only an issue if the user that was creating objects belonged
+to more than one owner group, such as supergash.
+
+Now, if supergash creates objects through a non-interactive client,
+the objects will be created with null (supergash) ownership.  If a
+non-supergash user that belongs to multiple owner groups creates
+objects through a non-interactive client, the objects will be owned by
+the first owner group found by the server.
+
+All of this was done to simplify things for XML bulk loading.  See the
+next item for details.
+
+34. [CLIENT] Added a fabulous new XML client
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
