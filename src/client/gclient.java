@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.193 $
-   Last Mod Date: $Date: 2001/10/31 01:36:51 $
+   Version: $Revision: 1.194 $
+   Last Mod Date: $Date: 2001/10/31 01:46:13 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.193 $ $Date: 2001/10/31 01:36:51 $ $Name:  $
+ * @version $Revision: 1.194 $ $Date: 2001/10/31 01:46:13 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/10/31 01:36:51 $";
+  static String release_date = "$Date: 2001/10/31 01:46:13 $";
   static String release_number = null;
 
   /**
@@ -3814,13 +3814,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
   }
 
+  /**
+   * <p>This method is called by the {@link
+   * arlut.csd.ganymede.client.JFilterDialog JFilterDialog} class when
+   * the owner list filter is changed, to refresh the tree's display
+   * of all object lists loaded into the client so that only those
+   * objects matching the owner list filter are visible.</p>
+   */
+
   public void updateTree()
   {
     updateAfterFilterChange(tree.getRoot());
     tree.refresh();
   }
 
-  public void updateAfterFilterChange(treeNode node)
+  /**
+   * <p>This method updates all category and base nodes at or under
+   * the given node, and all category and base nodes that are nextSiblings
+   * to the given node.</p>
+   */
+
+  private void updateAfterFilterChange(treeNode node)
   {
     if (node == null)
       {
