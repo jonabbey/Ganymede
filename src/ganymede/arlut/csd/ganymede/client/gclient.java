@@ -428,6 +428,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   Image
     errorImage = null,
     questionImage = null,
+    infoImage = null,
     search,
     queryIcon,
     cloneIcon,
@@ -1406,6 +1407,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Loads and returns the neutral 'Info' Image for use in client dialogs.</p>
+   * 
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getInfoImage().</p>
+   */
+
+  public final Image getInfoImage()
+  {
+    if (infoImage == null)
+      {
+	infoImage = PackageResources.getImageResource(this, "ok.gif", getClass());
+      }
+    
+    return infoImage;
+  }
+
+  /**
    * <p>Returns a hash mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their title.</p>
    *
@@ -1949,13 +1967,31 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 				     if (x.didRequestReport())
 				       {
+					 boolean success = false;
+
 					 try
 					   {
 					     session.reportClientBug("GUI Client", Message);
+					     success = true;
 					   }
 					 catch (Throwable ex)
 					   {
 					     // ignore
+					   }
+
+					 if (success)
+					   {
+					     new JErrorDialog(gc,
+							      "Exception Reported",
+							      "This possible error condition has been reported to the Ganymede server.\n\nThank you!",
+							      getInfoImage()); // implicit show
+					   }
+					 else
+					   {
+					     new JErrorDialog(gc,
+							      "Failure Reporting Exception",
+							      "This error condition could not be reported successfully to the server.  Perhaps the server or your network has gone down?",
+							      getErrorImage()); // implicit show
 					   }
 				       }
 				   }
