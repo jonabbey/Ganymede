@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -589,7 +589,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     
     for (int i = 0; i < spaces.length ; i++)
       {
-	System.out.println("Times through loop: " + i);
 	try 
 	  {
 	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
@@ -1052,23 +1051,24 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
     base = null;
     this.owner = owner;
 
-    editPanel = new Panel();
-    editPanel.setLayout(new ColumnLayout());
+    editPanel = new InsetPanel(10, 10, 10, 10);
+    editPanel.setLayout(new TableLayout(false));
     
     ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white);
 
     typeN = new numberField(20, ca, false, false, 0, 0);
     typeN.setCallback(this);
-    editPanel.add(new FieldWrapper("Object Type ID:", typeN));
+    addRow(editPanel, typeN, "ObjectType ID:", 0);
+
 
     nameS = new stringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
-    editPanel.add(new FieldWrapper("Object Type:", nameS));
+    addRow(editPanel, nameS, "Object Type:", 1);
 
     classS = new stringField(20, 100, ca, true, false, null, null);
     classS.setCallback(this);
-    editPanel.add(new FieldWrapper("Class name:", classS));
+    addRow(editPanel, classS, "Class name:", 2);
 
     add(editPanel);
     //    doLayout();
@@ -1143,7 +1143,20 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 	owner.objectsRefresh();
       }
   }
+
+  void addRow(Panel parent, Component comp,  String label, int row)
+  {
+    Label l = new Label(label);
+    
+    parent.add("0 " + row + " lhwHW", l);
+    parent.add("1 " + row + " lhwHW", comp);
+
+  }
+
+
 }
+
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1520,7 +1533,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   void refreshFieldChoice()
   {
-    String target, type;
+    String target;
+    short type;
     Base targetBase;
     BaseField bf;
     Vector fields = null;
@@ -1567,7 +1581,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
 	    try
 	      {
-		type = bf.getTypeDesc();
+		type = bf.getType();
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1576,7 +1590,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
 	    System.out.println("checking type: " + type);
 
-	    if (type.equalsIgnoreCase("invid"))
+	    if (type == FieldType.INVID)
 	      {
 		try
 		  {
@@ -1587,10 +1601,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		  {
 		    throw new IllegalArgumentException("Exception getting base field name " + rx);
 		  }
-	      }
-	    else
-	      {
-		System.out.println("Skipping " + type);
 	      }
 	  }
       }
@@ -1923,7 +1933,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   {
     String item = null;
     Base newBase = null;
-    String oldBaseName;
+    String oldBaseName = null;
     short baseID;
     Base oldBase;
 
@@ -1966,7 +1976,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  {
 	    baseID = fieldDef.getTargetBase();
 	    oldBase = owner.getSchemaEdit().getBase(baseID);
-	    oldBaseName = oldBase.getName();
+	    if (oldBase != null)
+	      {
+		oldBaseName = oldBase.getName();
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -2011,8 +2024,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		    // target field to avoid accidental confusion if our
 		    // new target base has a valid target field with the
 		    // same id code as our old target field.
-
-		    if (!oldBaseName.equals(item))
+		    
+		    if ((oldBaseName != null) && !oldBaseName.equals(item))
 		      {
 			fieldDef.setTargetField(null);
 		      }
@@ -2025,6 +2038,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  }
 
 	refreshFieldEdit();
+	checkVisibility();
       }
     else if (e.getItemSelectable() == fieldC)
       {
@@ -2089,10 +2103,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 class NameSpaceEditor extends ScrollPane implements ActionListener {
   
   stringField nameS;
+  List spaceL;
   Checkbox caseCB;
   Panel namePanel;
   componentAttr ca;
   GASHSchema owner;
+  String currentNameSpaceLabel = null;
   
   /* -- */
 
@@ -2106,7 +2122,7 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 
       this.owner = owner;
 
-      namePanel = new Panel();
+      namePanel = new InsetPanel(10,10,10,10);
       namePanel.setLayout(new TableLayout(false));
 
       ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
@@ -2117,9 +2133,12 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
       
       caseCB = new Checkbox();
       caseCB.setEnabled(false);
-      
       addRow(namePanel, caseCB, "Case insensitive:", 1);
 
+      spaceL = new List(5);
+      //spaceL.setEnabled(false);
+      addRow(namePanel, spaceL, "Fields in this space:", 2);
+            
       add(namePanel);
     }
   public void editNameSpace(NameSpace space)
@@ -2128,6 +2147,8 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 	{
 	  nameS.setText(space.getName());
 	  caseCB.setState(space.isCaseInsensitive());
+	  currentNameSpaceLabel = space.getName();
+	  refreshSpaceList();
 	}
       catch (RemoteException rx)
 	{
@@ -2139,6 +2160,94 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
   public void actionPerformed(ActionEvent e)
     {
       System.out.println("action Performed in NameSpaceEditor");
+    }
+
+  public void refreshSpaceList()
+    {
+      spaceL.removeAll();
+      SchemaEdit se = owner.getSchemaEdit();
+      Base[] bases = null;
+      try
+	{
+	  bases = se.getBases();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new IllegalArgumentException("Exception: can't get bases: " + rx);
+	}
+      Vector fields = null;
+      BaseField currentField = null;
+      String thisBase = null;
+      String thisField = null;
+      String thisSpace = null;
+      if ((bases == null) || (currentNameSpaceLabel == null))
+	{
+	  System.out.println("bases or currentNameSpaceLabel is null");
+	}
+      else
+	{
+	  System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
+	  
+	  for (int i = 0; i < bases.length; i++)
+	    {
+	      try
+		{
+		  thisBase = bases[i].getName();
+		  fields = bases[i].getFields();
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new IllegalArgumentException("exception getting fields: " + rx);
+		}
+	      if (fields == null)
+		{
+		  System.out.println("fields == null");
+		}
+	      else
+		{
+		  for (int j = 0; j < fields.size(); j++)
+		    {
+		      try 
+			{
+			  currentField = (BaseField)fields.elementAt(j);
+			  if (currentField.isString())
+			    {
+			      thisSpace = currentField.getNameSpaceLabel();
+			      if (thisSpace == null)
+				{
+				  System.out.println("thisSpace == null");
+				}
+			      else
+				{
+				  System.out.println("thisSpace == " + thisSpace);
+				}
+			      if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
+				{
+				  System.out.println("Adding to spaceL: " + thisBase + ":" + currentField.getName());;
+				  spaceL.addItem(thisBase + ":" + currentField.getName());
+				  
+
+				}
+			      
+			    }
+
+
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new IllegalArgumentException("Exception generating spaceL: " + rx);
+			}
+		    }
+
+
+		}
+	      
+
+
+
+	    }
+
+	}
     }
 
   void addRow(Panel parent, Component comp,  String label, int row)
