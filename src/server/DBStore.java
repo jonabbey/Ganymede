@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1770,8 +1770,70 @@ public class DBStore {
 
     // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleDefaultMatrix);
 
+    createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
+    createSysEventObj(session, "adminconnect", "Admin Console Attached", "Admin Console Attached", false);
+    createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", "Admin Console Disconnected", false);
+    createSysEventObj(session, "badpass", "Failed login attempt", "Bad username and/or password", true);
+    createSysEventObj(session, "deleteobject", "Object Deleted", "This object has been deleted.", true);
+    createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
+    createSysEventObj(session, "expirationwarn", "Expiration Warning", "This object is going to expire soon.", false);
+    createSysEventObj(session, "expirenotify", "Expiration Notification", "This object has been expired.", false);
+    createSysEventObj(session, "finishtransaction", "transaction end", null, false);
+    createSysEventObj(session, "goodlogin", "Successful login", null, false);
+    createSysEventObj(session, "inactivateobject", "Object Inactivation", "This object has been inactivated", true);
+    createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
+    createSysEventObj(session, "normallogout", "Normal Logout", null, false);
+    createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
+    createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
+    createSysEventObj(session, "reactivateobject", "Object Reactivation", "This object has been reactivated", true);
+    createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
+    createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
+    createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
+    createSysEventObj(session, "shutdown", "Server shutdown", "The Ganymede server was cleanly shut down", false);
+    createSysEventObj(session, "starttransaction", "transaction start", null, false);
+
     session.commitTransaction();
     gSession.logout();
+  }
+
+  private void createSysEventObj(DBSession session, 
+				 String token, String name, String description,
+				 boolean ccAdmin)
+				 
+  {
+    DBEditObject eO;
+    ReturnVal retVal;
+
+    eO = (DBEditObject) session.createDBObject(SchemaConstants.EventBase, null);
+
+    if (eO == null)
+      {
+	throw new RuntimeException("Error, could not create system event object " + token);
+      }
+
+    retVal = eO.setFieldValueLocal(SchemaConstants.EventToken, token);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	throw new RuntimeException("Error, could not set token for system event object " + token);
+      }
+
+    retVal = eO.setFieldValueLocal(SchemaConstants.EventName, name);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	throw new RuntimeException("Error, could not set name for system event object " + token);
+      }
+
+    if (description != null)
+      {
+	retVal = eO.setFieldValueLocal(SchemaConstants.EventDescription, description);
+	
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    throw new RuntimeException("Error, could not set description system event object " + token);
+	  }
+      }
   }
 
   /*
