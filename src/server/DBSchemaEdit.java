@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/03/09 20:15:56 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/03/15 22:55:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,38 +68,68 @@ import java.io.*;
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
 
-  private final static boolean debug = false;
+  private final static boolean debug = true;
 
   // ---
 
-  boolean developMode = false;	// CAUTION!! Should be false unless the schema elements
-				// that the Ganymede server's
-				// internal logic depends on
-				// are being deliberately
-				// altered!
+  /**
+   * CAUTION!! Should be false unless the schema elements that the
+   * Ganymede server's internal logic depends on are being
+   * deliberately altered!
+   */
 
-  private boolean locked;	// if true, this DBSchemaEdit object has already been
-				// committed or aborted
+  boolean developMode = false;
 
-  DBStore store;		// the DBStore object whose DBObjectBases are being edited
+  /**
+   * if true, this DBSchemaEdit object has already been
+   * committed or aborted
+   */
 
-  Hashtable newBases;		// this holds a copy of the DBObjectBase objects comprising
-				// the DBStore's database.  All changes made during Base editing
-				// are performed on the copies held in this hashtable.. if the
-				// DBSchemaEdit session is aborted, newBases is thrown away.
-				// If the DBSchemaEdit session is confirmed, newBases replaces
-				// store.db.objectBases.
+  private boolean locked;
 
-  short maxId;			// id of the highest DBObjectBase object in newBases
+  /**
+   * the DBStore object whose DBObjectBases are being edited
+   */
 
-  Vector oldNameSpaces;		// this holds the original vector of namespace objects extant
-				// at the time the DBSchemaEdit editing session is established.
+  DBStore store;		
 
-  DBBaseCategory rootCategory;	// root node of the working DBBaseCategory tree.. if the
-				// DBSchemaEdit session is committed, this DBBaseCategory tree
-				// will replace store.rootCategory.
+  /**
+   * this holds a copy of the DBObjectBase objects comprising
+   * the DBStore's database.  All changes made during Base editing
+   * are performed on the copies held in this hashtable.. if the
+   * DBSchemaEdit session is aborted, newBases is thrown away.
+   * If the DBSchemaEdit session is confirmed, newBases replaces
+   * store.db.objectBases.
+   */
 
-  Admin console;		// remote client handle
+  Hashtable newBases;		
+
+  /**
+   * id of the highest DBObjectBase object in newBases
+   */
+
+  short maxId;
+
+  /**
+   * this holds the original vector of namespace objects extant
+   * at the time the DBSchemaEdit editing session is established.
+   */
+
+  Vector oldNameSpaces;
+
+  /**
+   * root node of the working DBBaseCategory tree.. if the
+   * DBSchemaEdit session is committed, this DBBaseCategory tree
+   * will replace store.rootCategory.
+   */
+
+  DBBaseCategory rootCategory;	
+
+  /**
+   * remote client handle
+   */
+
+  Admin console;		
 
   /* -- */
 
@@ -1065,7 +1095,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    
 	    if (fieldDef.isBuiltIn())
 	      {
-		if (debug)
+		if (false)
 		  {
 		    Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): deleting field " + 
 				   fieldDef.getName() + " in " + base.getName());
@@ -1082,7 +1112,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 		base.deleteField(fieldDef);
 
-		if (debug)
+		if (false)
 		  {
 		    Ganymede.debug("*** after delete:");
 		    
@@ -1096,7 +1126,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 		    Ganymede.debug("*** that's it:");
 		  }
 	      }
-	    else if (debug)
+	    else if (false)
 	      {
 		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): not deleting field " + fieldDef.getName() +
 			       " in " + base.getName());
@@ -1113,7 +1143,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    // make sure that the base doesn't already have a field with
 	    // the same name
 
-	    if (debug)
+	    if (false)
 	      {
 		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): adding back built-in " + j +
 			       ", " + fieldDef.getName());
