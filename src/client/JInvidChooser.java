@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import java.util.Vector;
 
 public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   JMenuItem
     view,
