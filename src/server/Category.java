@@ -5,7 +5,7 @@
    Remote interface to a DBBaseCategory object.
    
    Created: 11 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,6 +98,18 @@ public interface Category extends Remote {
    */
 
   public void addNode(CategoryNode node, boolean resort, boolean adjustNodes) throws RemoteException;
+
+  /**
+   *
+   * This method can be used to move a Category from another Category to this Category,
+   * or to move a Category around within this Category.
+   *
+   * @param catPath the fully specified path of the node to be moved
+   * @param displayOrder where to place this node within this category.
+   *
+   */
+
+  public void moveCategoryNode(String catPath, int displayOrder) throws RemoteException;
 
   /**
    *
