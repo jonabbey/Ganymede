@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede Developer Release 4 - Server Overview 30 July 1998</title>
+    <title>Ganymede Release 0.96 - Server Overview 29 January 1999</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
-    <h1>Ganymede Developer Release 4 - Server Overview 30 July 1998</h1>
+    <h1>Ganymede Release 0.96 - Server Overview 29 January 1999</h1>
     <hr>
 
     <p>The Ganymede server is the heart of the Ganymede system.  The
@@ -96,7 +96,7 @@
         
     <h2>Permissions and ownership management</h2>
 
-    <p>See <a href="privs.html">the permissions document</a> for a discussion of the Ganymede
+    <p>See <a href="permissions/privs.html">the permissions document</a> for a discussion of the Ganymede
     permissions and ownership model.</p>
 
     <h2>Schema editing</h2>
@@ -119,7 +119,7 @@
     <h2>Scheduled Tasks and External Actions</h2>
 
     <p>The Ganymede server has a built-in cron-like facility for scheduling various tasks.  
-       As of developer release 3, there is not any way for a Ganymede adopter to load additional
+       As of release 0.96, there is not any way for a Ganymede adopter to load additional
        periodic tasks, but it is possible to submit tasks to be run when transactions are
        committed to the object store.  These transactional commit-time tasks emit source files
        and run scripts on the computer hosting the server to propagate changes to the NIS and
@@ -146,6 +146,12 @@
             be expired or removed within the next month in week increments.  If it finds any,
             it will send out email to the owner(s) of the objects, advising them that the objects
             are scheduled for deletion.</p>
+     </li>
+     <li><p>Database Consistency Check</p>
+
+         <p>Upon demand, Ganymede scans through the database looking for objects that do not
+            have all of their required fields defined, sending a report to the admin console
+            and to the server's stderr.</p>
      </li>
     </ul>
         
