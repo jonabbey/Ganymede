@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2001/07/06 06:36:24 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2001/07/13 21:51:33 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2205,8 +2205,24 @@ class OptionsPanel extends JPanel {
 
     /* -- */
 
-    fieldsToReturn.addAll( builtInSelector.getChosenStrings() );
-    fieldsToReturn.addAll( customSelector.getChosenStrings() );
+    // the Vector.addAll() methods are not present in JDK 1.1, which
+    // we are still supporting in the client, so we revert to manual
+    // field addition here.
+
+    Vector vectA = builtInSelector.getChosenStrings();
+    Vector vectB = customSelector.getChosenStrings();
+
+    for (int i = 0; i < vectA.size(); i++)
+      {
+	fieldsToReturn.addElement(vectA.elementAt(i));
+      }
+
+    for (int i = 0; i < vectB.size(); i++)
+      {
+	fieldsToReturn.addElement(vectB.elementAt(i));
+      }
+
+    // if we are returning all fields, we can use null to indicate that
 
     if ( fieldsToReturn.size() == (numBuiltInChoices + numCustomChoices) ) 
 	fieldsToReturn = null; 
