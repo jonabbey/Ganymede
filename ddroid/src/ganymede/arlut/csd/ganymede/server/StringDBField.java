@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -60,11 +60,11 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,18 +74,18 @@ import arlut.csd.ddroid.rmi.string_field;
 
 /**
  * <P>StringDBField is a subclass of DBField for the storage and handling of string
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to StringDBFields through the
- * {@link arlut.csd.ddroid.rmi.string_field string_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to StringDBFields through the
+ * {@link arlut.csd.ganymede.rmi.string_field string_field} RMI interface.</P> 
  */
 
 public class StringDBField extends DBField implements string_field {
 
   /**
    * <P>Receive constructor.  Used to create a StringDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -100,10 +100,10 @@ public class StringDBField extends DBField implements string_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -338,10 +338,10 @@ public class StringDBField extends DBField implements string_field {
    *
    * <P>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
-   * {@link arlut.csd.ddroid.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ddroid.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
    * method.</P>
    *
    * <P>If this method checked permissions and the getPerm() method
@@ -578,7 +578,7 @@ public class StringDBField extends DBField implements string_field {
    * <P>Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.</P>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public synchronized boolean isDefined()
@@ -618,7 +618,7 @@ public class StringDBField extends DBField implements string_field {
    * Returns the maximum acceptable string length
    * for this field.
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    *
    */
 
@@ -632,7 +632,7 @@ public class StringDBField extends DBField implements string_field {
    * Returns the minimum acceptable string length
    * for this field.
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    *
    */
 
@@ -646,7 +646,7 @@ public class StringDBField extends DBField implements string_field {
    * Returns true if the client should echo characters
    * entered into the string field.
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    *
    */
   
@@ -660,7 +660,7 @@ public class StringDBField extends DBField implements string_field {
    * Returns true if this field has a list of recommended
    * options for choices from the choices() method.
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    *
    */
 
@@ -682,7 +682,7 @@ public class StringDBField extends DBField implements string_field {
    * for this string field are in the
    * vector returned by choices().
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    *
    */
 
@@ -717,11 +717,11 @@ public class StringDBField extends DBField implements string_field {
   /**
    * <P>Returns a list of recommended and/or mandatory choices 
    * for this field.  This list is dynamically generated by
-   * subclasses of {@link arlut.csd.ddroid.server.DBEditObject DBEditObject};
+   * subclasses of {@link arlut.csd.ganymede.server.DBEditObject DBEditObject};
    * this method should not need
    * to be overridden.</P>
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    */
 
   public QueryResult choices() throws NotLoggedInException
@@ -762,7 +762,7 @@ public class StringDBField extends DBField implements string_field {
    * characters not listed in disallowedChars() are allowable by
    * default.</P>
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    */
 
   public String allowedChars()
@@ -776,7 +776,7 @@ public class StringDBField extends DBField implements string_field {
    * it should be interpreted as meaning that no characters
    * are specifically disallowed.</P>
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    */
 
   public String disallowedChars()
@@ -788,7 +788,7 @@ public class StringDBField extends DBField implements string_field {
    * <P>Convenience method to identify if a particular
    * character is acceptable in this field.</P>
    *
-   * @see arlut.csd.ddroid.rmi.string_field
+   * @see arlut.csd.ganymede.rmi.string_field
    */
 
   public boolean allowed(char c)

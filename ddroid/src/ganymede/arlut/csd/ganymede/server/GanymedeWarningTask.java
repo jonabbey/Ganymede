@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;
@@ -60,13 +60,13 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryAndNode;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryAndNode;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -75,8 +75,8 @@ import arlut.csd.ddroid.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid server task, for use with the {@link
- * arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * <p>This is a Ganymede server task, for use with the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  * 
  * <p>The standard GanymedeWarningTask class scans through all objects
  * in the database and mails out warnings for those objects that are
@@ -85,16 +85,16 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * following 24 hours.  The email messages sent are based on the
  * server's Object Events configuration settings, and will also be
  * sent to the list of email addresses returned by the {@link
- * arlut.csd.ddroid.server.DBEditObject#getEmailTargets(arlut.csd.ddroid.server.DBObject)
+ * arlut.csd.ganymede.server.DBEditObject#getEmailTargets(arlut.csd.ganymede.server.DBObject)
  * getEmailTargets()} customization method in each object's {@link
- * arlut.csd.ddroid.server.DBEditObject DBEditObject} customization class,
+ * arlut.csd.ganymede.server.DBEditObject DBEditObject} customization class,
  * if any such is defined.</p>
  *
  * <p>GanymedeWarningTask must not be run more than once a day by the
  * GanymedeScheduler, or else users and admins may receive redundant warnings.</p>
  *
  * <p>The GanymedeWarningTask is paired with the
- * standard {@link arlut.csd.ddroid.server.GanymedeExpirationTask GanymedeExpirationTask} task,
+ * standard {@link arlut.csd.ganymede.server.GanymedeExpirationTask GanymedeExpirationTask} task,
  * which handles the actual expiration and removal of database objects.</p>
  */
 
@@ -536,13 +536,13 @@ public class GanymedeWarningTask implements Runnable {
 
     tempString.append("\n\nObject expiration typically means that the object in question is ");
     tempString.append("to be rendered unusable, but the object will not be immediately removed from ");
-    tempString.append("the Directory Droid database.  Objects that have expired will typically be scheduled for removal from the ");
-    tempString.append("Directory Droid database after a delay period.\n\n");
+    tempString.append("the Ganymede database.  Objects that have expired will typically be scheduled for removal from the ");
+    tempString.append("Ganymede database after a delay period.\n\n");
     tempString.append("Depending on the type of object, the object may be made usable again by ");
-    tempString.append("a Directory Droid administrator taking the appropriate action prior to the object's ");
+    tempString.append("a Ganymede administrator taking the appropriate action prior to the object's ");
     tempString.append("formal removal.\n\n");
-    tempString.append("As with all Directory Droid messages, if you have questions about this action, please ");
-    tempString.append("contact your Directory Droid management team.");
+    tempString.append("As with all Ganymede messages, if you have questions about this action, please ");
+    tempString.append("contact your Ganymede management team.");
 
     return tempString.toString();
   }

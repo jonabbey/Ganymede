@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -64,13 +64,13 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.DDPermissionsException;
-import arlut.csd.ddroid.common.FieldInfo;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
@@ -80,60 +80,60 @@ import arlut.csd.ddroid.rmi.db_field;
 
 /**
  * <P>This abstract base class encapsulates the basic logic for fields in the
- * Directory Droid {@link arlut.csd.ddroid.server.DBStore DBStore},
+ * Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore},
  * including permissions and unique value handling.</P>
  *
  * <P>DBFields are the actual carriers of field value in the Ganymede
- * server.  Each {@link arlut.csd.ddroid.server.DBObject DBObject} holds a
+ * server.  Each {@link arlut.csd.ganymede.server.DBObject DBObject} holds a
  * set of DBFields in an array.  Each DBField is associated with a {@link
- * arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField} field
- * definition (see {@link arlut.csd.ddroid.server.DBField#getFieldDef()
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} field
+ * definition (see {@link arlut.csd.ganymede.server.DBField#getFieldDef()
  * getFieldDef()}) by way of its owner's type and it's own field code,
  * which defines the type of the field as well as various generic and
  * type-specific attributes for the field.  The DBObjectBaseField
- * information is created and edited with the Directory Droid schema
+ * information is created and edited with the Ganymede schema
  * editor.</P>
  *
  * <P>DBField is an abstract class.  There is a different subclass of DBField
- * for each kind of data that can be held in the Directory Droid server, as follows:</P>
+ * for each kind of data that can be held in the Ganymede server, as follows:</P>
  *
  * <UL>
- * <LI>{@link arlut.csd.ddroid.server.StringDBField StringDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.BooleanDBField BooleanDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.NumericDBField NumericDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.FloatDBField FloatDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.DateDBField DateDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.InvidDBField InvidDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.IPDBField IPDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.PasswordDBField PasswordDBField}</LI>
- * <LI>{@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.BooleanDBField BooleanDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.NumericDBField NumericDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.FloatDBField FloatDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.InvidDBField InvidDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.IPDBField IPDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.PasswordDBField PasswordDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}</LI>
  * </UL>
  *
  * <P>Each DBField subclass is responsible for writing itself to disk
  * on command with the {@link
- * arlut.csd.ddroid.server.DBField#emit(java.io.DataOutput) emit()} method,
+ * arlut.csd.ganymede.server.DBField#emit(java.io.DataOutput) emit()} method,
  * and reading its state in with the {@link
- * arlut.csd.ddroid.server.DBField#receive(java.io.DataInput, arlut.csd.ddroid.server.DBObjectBaseField) receive()}
+ * arlut.csd.ganymede.server.DBField#receive(java.io.DataInput, arlut.csd.ganymede.server.DBObjectBaseField) receive()}
  * method.  Each DBField subclass may also have extensive special
  * logic to handle special operations on fields of the appropriate
  * type.  For instance, the InvidDBField class has lots and lots of
  * logic for handling the bi-directional object linking that the
  * server depends on for its object handling.  Mostly the DBField
  * subclasses provide customization that modifies how things like
- * {@link arlut.csd.ddroid.server.DBField#setValue(java.lang.Object)
- * setValue()} and {@link arlut.csd.ddroid.server.DBField#getValue()
+ * {@link arlut.csd.ganymede.server.DBField#setValue(java.lang.Object)
+ * setValue()} and {@link arlut.csd.ganymede.server.DBField#getValue()
  * getValue()} work, but PasswordDBField and PermissionMatrixDBField
  * don't fit with the standard generic value-container model, and
  * contain their own methods for manipulating and accessing data held
- * in the Directory Droid database. Most DBField subclasses only allow a
+ * in the Ganymede database. Most DBField subclasses only allow a
  * single value to be held, but StringDBField, InvidDBField, and
  * IPDBField support vectors of values.</P>
  *
- * <P>The Directory Droid client can directly access fields in RMI-published
- * objects using the {@link arlut.csd.ddroid.rmi.db_field db_field} RMI
+ * <P>The Ganymede client can directly access fields in RMI-published
+ * objects using the {@link arlut.csd.ganymede.rmi.db_field db_field} RMI
  * interface.  Each concrete subclass of DBField has its own special
  * RMI interface which provides special methods for the client.
- * Adding a new data type to the Directory Droid server will involve creating
+ * Adding a new data type to the Ganymede server will involve creating
  * a new DBField subclass, as well as a new RMI interface for any
  * special field methods.  All client code would also need to be
  * modified to be aware of the new field type.  DBObjectBaseField,
@@ -147,7 +147,7 @@ import arlut.csd.ddroid.rmi.db_field;
  * <P>Note that while DBField was designed to be subclassed, it should only be
  * necessary for adding a new data type to the server.  All other likely 
  * customizations you'd want to do are handled by
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} customization methods.  Most
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} customization methods.  Most
  * DBField methods at some point call methods on the DBObject/DBEditObject
  * that contains it.  All methods that cause changes to fields call out to
  * finalizeXXX() and/or wizardHook() methods in DBEditObject.  Consult the
@@ -156,9 +156,9 @@ import arlut.csd.ddroid.rmi.db_field;
  * <P>An important note about synchronization: it is possible to encounter a
  * condition called a <b>nested monitor deadlock</b>, where a synchronized
  * method on a field can block trying to enter a synchronized method on
- * a {@link arlut.csd.ddroid.server.DBSession DBSession}, 
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}, or 
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} object that is itself blocked
+ * a {@link arlut.csd.ganymede.server.DBSession DBSession}, 
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}, or 
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} object that is itself blocked
  * on another thread trying to call a synchronized method on the same field.</P>
  *
  * <P>To avoid this condition, no field methods that call synchronized methods on
@@ -169,10 +169,10 @@ public abstract class DBField implements Remote, db_field {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBField");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBField");
 
   // ---
 
@@ -307,8 +307,8 @@ public abstract class DBField implements Remote, db_field {
    * fields to the ganymede.db file and to the journal file.</P>
    *
    * <P>This method only writes out the value contents of this field.
-   * The {@link arlut.csd.ddroid.server.DBObject DBObject}
-   * {@link arlut.csd.ddroid.server.DBObject#emit(java.io.DataOutput) emit()}
+   * The {@link arlut.csd.ganymede.server.DBObject DBObject}
+   * {@link arlut.csd.ganymede.server.DBObject#emit(java.io.DataOutput) emit()}
    * method is responsible for writing out the field identifier information
    * ahead of the field's contents.</P>
    */
@@ -472,7 +472,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns a handy field description packet for this field,
    * containing the static field elements for this field..
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final FieldTemplate getFieldTemplate()
@@ -484,7 +484,7 @@ public abstract class DBField implements Remote, db_field {
    *
    * Returns a handy field description packet for this field.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final FieldInfo getFieldInfo()
@@ -496,7 +496,7 @@ public abstract class DBField implements Remote, db_field {
    *
    * Returns the schema name for this field.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final String getName()
@@ -519,7 +519,7 @@ public abstract class DBField implements Remote, db_field {
    *
    * Returns the field # for this field.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final short getID()
@@ -543,7 +543,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns the description of this field from the
    * schema.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final String getComment()
@@ -556,7 +556,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns the description of this field's type from
    * the schema.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final String getTypeDesc()
@@ -569,7 +569,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns the type code for this field from the
    * schema.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -584,10 +584,10 @@ public abstract class DBField implements Remote, db_field {
    *
    * <P>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
-   * {@link arlut.csd.ddroid.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ddroid.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
    * method.</P>
    *
    * <P>If this method checked permissions and the getPerm() method
@@ -601,9 +601,9 @@ public abstract class DBField implements Remote, db_field {
   /**
    * <P>Returns a String representing a reversible encoding of the
    * value of this field.  Each field type will have its own encoding,
-   * suitable for embedding in a {@link arlut.csd.ddroid.common.DumpResult DumpResult}.</P>
+   * suitable for embedding in a {@link arlut.csd.ganymede.common.DumpResult DumpResult}.</P>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   abstract public String getEncodingString();
@@ -625,7 +625,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -701,7 +701,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns true if this field is a vector, false
    * otherwise.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final boolean isVector()
@@ -715,9 +715,9 @@ public abstract class DBField implements Remote, db_field {
    *
    * <P>Note that DBField are only editable if they are
    * contained in a subclass of
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}.</P>
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}.</P>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final boolean isEditable()
@@ -731,7 +731,7 @@ public abstract class DBField implements Remote, db_field {
    *
    * <P>Note that DBField are only editable if they are
    * contained in a subclass of
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}.</P>
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}.</P>
    *
    * <P>Server-side method only</P>
    *
@@ -785,7 +785,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns true if this field should be displayed in the
    * current client context.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final boolean isVisible()
@@ -882,7 +882,7 @@ public abstract class DBField implements Remote, db_field {
    * Returns the value of this field, if a scalar.  An IllegalArgumentException
    * will be thrown if this field is a vector.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -913,8 +913,8 @@ public abstract class DBField implements Remote, db_field {
    * rescan information passed back.  This includes most wizard
    * setValue calls.</P>
    *
-   * @see arlut.csd.ddroid.server.DBSession
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.server.DBSession
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal setValue(Object value)
@@ -1135,7 +1135,7 @@ public abstract class DBField implements Remote, db_field {
    * the serialization process will protect us from the client being
    * able to mess with our contents.</b></p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public Vector getValues() throws DDPermissionsException
@@ -1160,7 +1160,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>Returns the value of an element of this field,
    * if a vector.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -1213,8 +1213,8 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful setElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ddroid.server.DBSession
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.server.DBSession
+   * @see arlut.csd.ganymede.rmi.db_field
    */
   
   public final ReturnVal setElement(int index, Object value) throws DDPermissionsException
@@ -1249,7 +1249,7 @@ public abstract class DBField implements Remote, db_field {
    * success or failure, and may optionally
    * pass back a dialog.</p>
    *
-   * @see arlut.csd.ddroid.server.DBSession
+   * @see arlut.csd.ganymede.server.DBSession
    *
    */
   
@@ -1451,7 +1451,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful addElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal addElement(Object value) throws DDPermissionsException
@@ -1636,7 +1636,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful addElements will
    * encode an order to rescan this field.</p> 
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal addElements(Vector values) throws DDPermissionsException
@@ -2000,7 +2000,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElement(int index) throws DDPermissionsException
@@ -2140,7 +2140,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElement(Object value) throws DDPermissionsException
@@ -2236,7 +2236,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful deleteAllElements will
    * encode an order to rescan this field.</p> 
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public ReturnVal deleteAllElements() throws DDPermissionsException
@@ -2259,7 +2259,7 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful deleteElements will
    * encode an order to rescan this field.</p> 
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElements(Vector values) throws DDPermissionsException
@@ -2466,7 +2466,7 @@ public abstract class DBField implements Remote, db_field {
    *
    * @param value The value to look for in this field
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final boolean containsElement(Object value) throws DDPermissionsException
@@ -2523,7 +2523,7 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
-   * Returns a {@link arlut.csd.ddroid.server.fieldDeltaRec fieldDeltaRec} 
+   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec} 
    * object listing the changes between this field's state and that
    * of the prior oldField state.
    */
@@ -2838,8 +2838,8 @@ public abstract class DBField implements Remote, db_field {
 
   /** 
    * <P>Overridable method to verify that the current {@link
-   * arlut.csd.ddroid.server.DBSession DBSession} / {@link
-   * arlut.csd.ddroid.server.DBEditSet DBEditSet} has permission to read
+   * arlut.csd.ganymede.server.DBSession DBSession} / {@link
+   * arlut.csd.ganymede.server.DBEditSet DBEditSet} has permission to read
    * values from this field.</P>
    */
 
@@ -2862,8 +2862,8 @@ public abstract class DBField implements Remote, db_field {
 
   /** 
    * <P>Overridable method to verify that the current {@link
-   * arlut.csd.ddroid.server.DBSession DBSession} / {@link
-   * arlut.csd.ddroid.server.DBEditSet DBEditSet} has permission to read
+   * arlut.csd.ganymede.server.DBSession DBSession} / {@link
+   * arlut.csd.ganymede.server.DBEditSet DBEditSet} has permission to read
    * values from this field.</P>
    *
    * <p>This version of verifyReadPermission() is intended to be used
@@ -2944,7 +2944,7 @@ public abstract class DBField implements Remote, db_field {
    * <P>Returns a Vector of the values of the elements in this field, if
    * a vector.</P>
    *
-   * <P>This is intended to be used within the Directory Droid server, it
+   * <P>This is intended to be used within the Ganymede server, it
    * bypasses the permissions checking that getValues() does.</P>
    *
    * <P>The server code <b>*must not*</b> make any modifications to the
@@ -2972,7 +2972,7 @@ public abstract class DBField implements Remote, db_field {
   /** 
    * <P>Returns an Object carrying the value held in this field.</P>
    *
-   * <P>This is intended to be used within the Directory Droid server, it bypasses
+   * <P>This is intended to be used within the Ganymede server, it bypasses
    * the permissions checking that getValues() does.</P>
    */
 
@@ -2999,16 +2999,16 @@ public abstract class DBField implements Remote, db_field {
 
   /**
    * <P>This method is used to basically dump state out of this field
-   * so that the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}
-   * {@link arlut.csd.ddroid.server.DBEditSet#checkpoint(java.lang.String) checkpoint()}
+   * so that the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String) checkpoint()}
    * code can restore it later if need be.</P>
    *
    * <P>This method is not synchronized because all operations performed
    * by this method are either synchronized at a lower level or are
    * atomic.</P>
    *
-   * <P>Called by {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}'s
-   * {@link arlut.csd.ddroid.server.DBEditObject#checkpoint() checkpoint()}
+   * <P>Called by {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}'s
+   * {@link arlut.csd.ganymede.server.DBEditObject#checkpoint() checkpoint()}
    * method.</P>
    */
 
@@ -3034,15 +3034,15 @@ public abstract class DBField implements Remote, db_field {
    * setValue() will typically do.</P>
    *
    * <P>In particular, it is not necessary to subclass this method for
-   * use with {@link arlut.csd.ddroid.server.InvidDBField InvidDBField}, since
-   * the {@link arlut.csd.ddroid.server.DBEditSet#rollback(java.lang.String) rollback()}
+   * use with {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}, since
+   * the {@link arlut.csd.ganymede.server.DBEditSet#rollback(java.lang.String) rollback()}
    * method will always rollback all objects in the transaction at the same
    * time.  It is not necessary to have the InvidDBField subclass handle
    * binding/unbinding during rollback, since all objects which could conceivably 
    * be involved in a link will also have their own states rolled back.</P>
    *
-   * <P>Called by {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}'s
-   * {@link arlut.csd.ddroid.server.DBEditObject#rollback(java.util.Hashtable) rollback()}
+   * <P>Called by {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}'s
+   * {@link arlut.csd.ganymede.server.DBEditObject#rollback(java.util.Hashtable) rollback()}
    * method.</P>
    */
 
@@ -3092,7 +3092,7 @@ public abstract class DBField implements Remote, db_field {
 
   /**
    * <P>This method takes the result of an operation on this field
-   * and wraps it with a {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * and wraps it with a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * that encodes an instruction to the client to rescan
    * this field.  This isn't normally necessary for most client
    * operations, but it is necessary for the case in which wizards
@@ -3148,7 +3148,7 @@ public abstract class DBField implements Remote, db_field {
   /**
    * <p>Handy utility method for reporting namespace conflict.  This
    * method will work to identify the object and field which is in conflict,
-   * and will return an appropriate {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * and will return an appropriate {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * with an appropriate error dialog.</p>
    */
 
@@ -3184,22 +3184,22 @@ public abstract class DBField implements Remote, db_field {
   /**
    * <p>
    * This method is for use primarily within a Jython context and accessed by
-   * calling ".val" on a {@link arlut.csd.ddroid.server.DBField DBField} object,
+   * calling ".val" on a {@link arlut.csd.ganymede.server.DBField DBField} object,
    * but it can theoretically be used in Java code in lieu of calling
-   * {@link arlut.csd.ddroid.server.DBField.getValue getValue} or
-   * {@link arlut.csd.ddroid.server.DBField.getValues getValues} (but <b>there
+   * {@link arlut.csd.ganymede.server.DBField.getValue getValue} or
+   * {@link arlut.csd.ganymede.server.DBField.getValues getValues} (but <b>there
    * are some subtle differences </b>!).
    * </p>
    * <p>
    * This method will return this field's value, be it vector or scalar.
-   * However, when it encounters an {@link arlut.csd.ddroid.common.Invid Invid}
+   * However, when it encounters an {@link arlut.csd.ganymede.common.Invid Invid}
    * object (either as the value proper or as a member of this fields value
    * vector), it will instead return the
-   * {@link arlut.csd.ddroid.server.DBObject DBObject} that the Invid points to.
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} that the Invid points to.
    * </p>
    * 
    * @return This field's value. This can take the form of scalar types,
-   *         {@link arlut.csd.ddroid.server.DBObject DBObjects}, or a
+   *         {@link arlut.csd.ganymede.server.DBObject DBObjects}, or a
    *         {@link java.util.Vector Vector}containing either.
    */
   public Object getVal()

@@ -15,7 +15,7 @@ Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
 -----------------------------------------------------------------------
       
-Directory Droid Directory Management System
+Ganymede Directory Management System
 
 Copyright (C) 1996-2004
 The University of Texas at Austin
@@ -50,7 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA
 
 */
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 /**
  * This is currently used when there is a problem instantiating a custom DBEditObject

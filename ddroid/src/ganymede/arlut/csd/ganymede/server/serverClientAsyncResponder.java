@@ -24,7 +24,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -61,12 +61,12 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.clientAsyncMessage;
-import arlut.csd.ddroid.rmi.ClientAsyncResponder;
+import arlut.csd.ganymede.common.clientAsyncMessage;
+import arlut.csd.ganymede.rmi.ClientAsyncResponder;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -87,7 +87,7 @@ import arlut.csd.ddroid.rmi.ClientAsyncResponder;
  * notification to the client, even if the client is running behind a
  * system-level firewall.</p>
  *
- * @see arlut.csd.ddroid.common.clientAsyncMessage
+ * @see arlut.csd.ganymede.common.clientAsyncMessage
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -96,7 +96,7 @@ import arlut.csd.ddroid.rmi.ClientAsyncResponder;
 public class serverClientAsyncResponder implements ClientAsyncResponder {
 
   /**
-   * <p>Our queue of {@link arlut.csd.ddroid.common.clientAsyncMessage clientAsyncMessage} objects.</p>
+   * <p>Our queue of {@link arlut.csd.ganymede.common.clientAsyncMessage clientAsyncMessage} objects.</p>
    */
 
   private final clientAsyncMessage[] eventBuffer;

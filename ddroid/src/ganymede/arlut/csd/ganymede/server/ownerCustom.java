@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,15 +50,15 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,8 +69,8 @@ import arlut.csd.ddroid.common.SchemaConstants;
 public class ownerCustom extends DBEditObject implements SchemaConstants {
 
   /**
-   * <P>This method takes an {@link arlut.csd.ddroid.common.Invid Invid} for
-   * an Owner Group {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * <P>This method takes an {@link arlut.csd.ganymede.common.Invid Invid} for
+   * an Owner Group {@link arlut.csd.ganymede.server.DBObject DBObject}
    * and returns a Vector of Strings containing the list
    * of email addresses for that owner group.</P>
    */

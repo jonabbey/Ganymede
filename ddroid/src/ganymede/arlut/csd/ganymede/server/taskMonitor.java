@@ -2,7 +2,7 @@
 
    taskMonitor.java
 
-   Helper class used to notify the Directory Droid scheduler when a background
+   Helper class used to notify the Ganymede scheduler when a background
    task has completed.
    
    Created: 3 February 1998
@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,9 +51,9 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
-import arlut.csd.ddroid.common.scheduleHandle;
+import arlut.csd.ganymede.common.scheduleHandle;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -62,11 +62,11 @@ import arlut.csd.ddroid.common.scheduleHandle;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>{@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}
+ * <P>{@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
  * helper class used to notify the scheduler when a background task
  * has completed.</P>
  *
- * @see arlut.csd.ddroid.common.scheduleHandle
+ * @see arlut.csd.ganymede.common.scheduleHandle
  */
 
 public class taskMonitor implements Runnable {

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -64,25 +64,25 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DBReadLock is a class used in the Directory Droid server to represent a read lock on
- * one or more {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects.  A
+ * <P>DBReadLock is a class used in the Ganymede server to represent a read lock on
+ * one or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  A
  * DBReadLock is used in the
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} class to guarantee
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class to guarantee
  * that all query operations go from start to finish without any changes being made
  * along the way.</P>
  *
  * <P>While a DBReadLock is established on a DBObjectBase, no changes may be made
- * to that base.  The {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}'s
- * {@link arlut.csd.ddroid.server.DBWriteLock#establish(java.lang.Object) establish()}
+ * to that base.  The {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}'s
+ * {@link arlut.csd.ganymede.server.DBWriteLock#establish(java.lang.Object) establish()}
  * method will suspend until all read locks on a base are cleared.  As soon as
  * a thread attempts to establish a DBWriteLock on a base, no more DBReadLocks
  * will be established on that base until the DBWriteLock is cleared, but any
  * DBReadLocks already established will persist until released, whereupon the
  * DBWriteLock will establish.</P>
  *
- * <P>See {@link arlut.csd.ddroid.server.DBLock DBLock},
- * {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}, and
- * {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLock} for details.</P>
+ * <P>See {@link arlut.csd.ganymede.server.DBLock DBLock},
+ * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, and
+ * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</P>
  */
 
 public class DBReadLock extends DBLock {
@@ -311,8 +311,8 @@ public class DBReadLock extends DBLock {
   /**
    * <P>Relinquish the lock on bases held by this lock object.</P>
    *
-   * <P>Should be called by {@link arlut.csd.ddroid.server.DBSession DBSession}'s
-   * {@link arlut.csd.ddroid.server.DBSession#releaseLock(arlut.csd.ddroid.server.DBLock) releaseLock()}
+   * <P>Should be called by {@link arlut.csd.ganymede.server.DBSession DBSession}'s
+   * {@link arlut.csd.ganymede.server.DBSession#releaseLock(arlut.csd.ganymede.server.DBLock) releaseLock()}
    * method.</P>
    *
    * <P>Note that this method is designed to be able to be called from
@@ -401,7 +401,7 @@ public class DBReadLock extends DBLock {
    * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects.  If
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
    * establish(), establish() will throw an InterruptedException.</P>
    *
@@ -413,8 +413,8 @@ public class DBReadLock extends DBLock {
    * in another thread will remove the lock, but a thread that is using
    * the lock to iterate over a list will explicitly need to check to
    * see if its lock was pulled.  
-   *{@link arlut.csd.ddroid.server.GanymedeSession#queryDispatch(arlut.csd.ddroid.common.Query,boolean,boolean,arlut.csd.ddroid.server.DBLock,arlut.csd.ddroid.server.DBEditObject) queryDispatch()} 
-   * and {@link arlut.csd.ddroid.server.GanymedeSession#getObjects(short) getObjects()}
+   *{@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,boolean,boolean,arlut.csd.ganymede.server.DBLock,arlut.csd.ganymede.server.DBEditObject) queryDispatch()} 
+   * and {@link arlut.csd.ganymede.server.GanymedeSession#getObjects(short) getObjects()}
    * both do this properly, so it is generally safe to abort read locks in the
    * GanymedeServer as needed.</P>
    */

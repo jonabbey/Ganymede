@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,17 +51,17 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Date;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -70,18 +70,18 @@ import arlut.csd.ddroid.rmi.db_field;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <p>DBSession is the Directory Droid server's
- * {@link arlut.csd.ddroid.server.DBStore DBStore}-level session class.  Each
- * client or server process that interacts with the Directory Droid database
+ * <p>DBSession is the Ganymede server's
+ * {@link arlut.csd.ganymede.server.DBStore DBStore}-level session class.  Each
+ * client or server process that interacts with the Ganymede database
  * must eventually do so through a DBSession object.  Clients and
  * server processes generally interact directly with a
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}, by way of
- * the {@link arlut.csd.ddroid.rmi.Session Session} interface on the
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}, by way of
+ * the {@link arlut.csd.ganymede.rmi.Session Session} interface on the
  * part of the client.  The GanymedeSession talks to the DBSession class
  * to actually interact with the database.</P>
  *
  * <p>Most particularly, DBSession handles transactions and namespace
- * logic for the Directory Droid server, as well as providing the actual
+ * logic for the Ganymede server, as well as providing the actual
  * check-out/create/ check-in methods that GanymedeSession calls. 
  * GanymedeSession tends to have the more high-level
  * application/permissions logic, while DBSession is more concerned
@@ -92,13 +92,13 @@ import arlut.csd.ddroid.rmi.db_field;
  * GanymedeSession.</p>
  *
  * <P>The DBSession contains code and logic to actually manipulate the
- * Directory Droid database (the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase},
- * {@link arlut.csd.ddroid.server.DBObject DBObject}, and
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} objects held
+ * Ganymede database (the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase},
+ * {@link arlut.csd.ganymede.server.DBObject DBObject}, and
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} objects held
  * in the DBStore).  The DBSession class connects to the extensive 
- * transaction logic implemented in the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}
+ * transaction logic implemented in the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
  * class, as well as the database locking handled by the
- * {@link arlut.csd.ddroid.server.DBLock DBLock} class.</P>
+ * {@link arlut.csd.ganymede.server.DBLock DBLock} class.</P>
  * 
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -114,17 +114,17 @@ final public class DBSession {
   }
 
   /**
-   * <p>TranslationService object for handling string localization in the Directory Droid
+   * <p>TranslationService object for handling string localization in the Ganymede
    * server.</p>
    */
 
-  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBSession");
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBSession");
 
   // ---
 
   /**
    * <P>User-level session reference.  As mentioned above, 
-   * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} has the
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} has the
    * user-level permissions handling, while DBSession has the database
    * handling.</P>
    */
@@ -132,7 +132,7 @@ final public class DBSession {
   GanymedeSession GSession;
 
   /**
-   * <P>Root object of the Directory Droid database system.</P>
+   * <P>Root object of the Ganymede database system.</P>
    */
 
   DBStore store;
@@ -152,7 +152,7 @@ final public class DBSession {
   /**
    * <P>Optional string identifying this session in logging, etc.</P>
    *
-   * <P>Used by {@link arlut.csd.ddroid.server.DBSession#getID() getID()}.
+   * <P>Used by {@link arlut.csd.ganymede.server.DBSession#getID() getID()}.
    */
 
   String id = null;
@@ -178,7 +178,7 @@ final public class DBSession {
    * <p>This constructor is intended to be called by the DBStore login() method.</p>
    *
    * @param store The DBStore database this session belongs to.
-   * @param GSession The Directory Droid session associated with this DBSession
+   * @param GSession The Ganymede session associated with this DBSession
    * @param key An identifying key with meaning to whatever code is using arlut.csd.ganymede
    *
    */
@@ -218,7 +218,7 @@ final public class DBSession {
 
   /**
    * <P>This method is provided so that custom
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} subclasses
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclasses
    * can get access to methods on our DBStore.</P>
    */
 
@@ -238,14 +238,14 @@ final public class DBSession {
    * sessions.</P>
    *
    * <P>The created object will be given an object id.
-   * The {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} can 
+   * The {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} can 
    * be queried to determine its invid.</P>
    *
    * <P>The created DBEditObject will have its fields initialized
-   * by the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
-   * {@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook}
+   * by the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
    * custom DBEditObject's
-   * {@link arlut.csd.ddroid.server.DBEditObject#initializeNewObject() initializeNewObject()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#initializeNewObject() initializeNewObject()}
    * method.</P>
    *
    * <P>This method will return null if the object could
@@ -253,12 +253,12 @@ final public class DBSession {
    *
    * @param object_type Type of the object to be created
    * @param chosenSlot Invid to create the new object with.
-   * normally only used in internal Directory Droid code in conjunction with
+   * normally only used in internal Ganymede code in conjunction with
    * the addition of new kinds of built-in objects during development
    * @param owners Vector of invids for owner group objects to make initial
    * owners for the newly created object
    *
-   * @see arlut.csd.ddroid.server.DBStore
+   * @see arlut.csd.ganymede.server.DBStore
    */
 
   public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, Vector owners)
@@ -501,19 +501,19 @@ final public class DBSession {
    * sessions.</P>
    *
    * <P>The created object will be given an object id.
-   * The {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * The {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * can be queried to determine its invid.</P>
    *
    * <P>The created DBEditObject will have its fields initialized
-   * by the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
-   * {@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook}
+   * by the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
    * custom DBEditObject's
-   * {@link arlut.csd.ddroid.server.DBEditObject#initializeNewObject() initializeNewObject()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#initializeNewObject() initializeNewObject()}
    * method.</P>
    *
    * <P>This method returns a ReturnVal object to convey the
    * result of the creation.  Call the 
-   * {@link arlut.csd.ddroid.common.ReturnVal#getObject() getObject()} method on
+   * {@link arlut.csd.ganymede.common.ReturnVal#getObject() getObject()} method on
    * the returned ReturnVal in order to get the created DBEditObject.  Note
    * that the ReturnVal.getObject() method is intended to support passing
    * a remote db_object reference to the client, so on the server, it is
@@ -522,7 +522,7 @@ final public class DBSession {
    *
    * @param object_type Type of the object to be created
    *
-   * @see arlut.csd.ddroid.server.DBStore
+   * @see arlut.csd.ganymede.server.DBStore
    */
 
   public ReturnVal createDBObject(short object_type, Vector owners)
@@ -544,7 +544,7 @@ final public class DBSession {
    *
    * @return null if the object could not be found for editing
    *
-   * @see arlut.csd.ddroid.server.DBObjectBase 
+   * @see arlut.csd.ganymede.server.DBObjectBase 
    */
 
   public DBEditObject editDBObject(Invid invid)
@@ -566,10 +566,10 @@ final public class DBSession {
    * that case.</P>
    *
    * <P>This method doesn't do permission checking.. that is performed at the
-   * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} level.</P>
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} level.</P>
    *
    * @param baseID The short id number of the
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} containing the object to
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} containing the object to
    * be edited.
    *
    * @param objectID The int id number of the object to be edited within the specified
@@ -616,7 +616,7 @@ final public class DBSession {
 
   /**
    * <P>Get a reference to a read-only copy of an object in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
@@ -627,8 +627,8 @@ final public class DBSession {
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid) 
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
    * view_db_object()} method to get the object.</P>
    *
    * @param invid The invariant id of the object to be viewed.
@@ -644,7 +644,7 @@ final public class DBSession {
 
   /**
    * <P>Get a reference to a read-only copy of an object in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
@@ -655,8 +655,8 @@ final public class DBSession {
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid) 
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
    * view_db_object()} method to get the object.</P>
    *
    * @param invid The invariant id of the object to be viewed.
@@ -669,7 +669,7 @@ final public class DBSession {
 
   /**
    * <P>Get a reference to a read-only copy of an object in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
@@ -680,8 +680,8 @@ final public class DBSession {
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid) 
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
    * view_db_object()} method to get the object.</P>
    *
    * @param baseID The short id number of the DBObjectBase containing the object to
@@ -698,7 +698,7 @@ final public class DBSession {
 
   /**
    * <P>Get a reference to a read-only copy of an object in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>If this session has a transaction currently open, this method will return
    * the checked out shadow of invid, if it has been checked out by this
@@ -709,8 +709,8 @@ final public class DBSession {
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
-   * object's fields be protected, use {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid) 
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
    * view_db_object()} method to get the object.</P>
    *
    * @param baseID The short id number of the DBObjectBase containing the object to
@@ -817,7 +817,7 @@ final public class DBSession {
    *
    * <P>This method method can only be called in the context of an open
    * transaction.  This method will check an object out of the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}
    * and add it to the editset's deletion list.  When the transaction
    * is committed, the object has its remove() method called to do
    * cleanup, and the editSet nulls the object's slot in the DBStore.
@@ -868,18 +868,18 @@ final public class DBSession {
    *
    * <P>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the
-   * only way to obtain a {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}),
+   * only way to obtain a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}),
    * no other locking is
    * required. This method will take an object out of the
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}, do
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}, do
    * whatever immediate removal logic is required, and mark it as
    * deleted in the transaction.  When the transaction is committed,
    * the object will be expunged from the database.</P>
    *
    * <P>Note that this method does not check to see whether permission
    * has been obtained to delete the object.. that's done in
-   * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#remove_db_object(arlut.csd.ddroid.common.Invid) remove_db_object()}
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#remove_db_object(arlut.csd.ganymede.common.Invid) remove_db_object()}
    * method.</P>
    *
    * @param eObj An object checked out in the current transaction to be deleted
@@ -993,15 +993,15 @@ final public class DBSession {
    *
    * <p>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the only
-   * way to obtain a {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}),
+   * way to obtain a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}),
    * no other locking is required. This method
-   * will take an object out of the {@link arlut.csd.ddroid.server.DBStore DBStore}
+   * will take an object out of the {@link arlut.csd.ganymede.server.DBStore DBStore}
    * and proceed to do whatever is
    * necessary to cause that object to be 'inactivated'.</p>
    *
    * <p>Note that this method does not check to see whether permission
    * has been obtained to inactivate the object.. that's done in
-   * {@link arlut.csd.ddroid.server.GanymedeSession#inactivate_db_object(arlut.csd.ddroid.common.Invid) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#inactivate_db_object(arlut.csd.ganymede.common.Invid) 
    * GanymedeSession.inactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be inactivated
@@ -1088,15 +1088,15 @@ final public class DBSession {
    *
    * <p>This method method can only be called in the context of an open
    * transaction. Because the object must be checked out (which is the only
-   * way to obtain a {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}),
+   * way to obtain a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}),
    * no other locking is required. This method
-   * will take an object out of the {@link arlut.csd.ddroid.server.DBStore DBStore}
+   * will take an object out of the {@link arlut.csd.ganymede.server.DBStore DBStore}
    * and proceed to do whatever is
    * necessary to cause that object to be 'inactivated'.</p>
    *
    * <p>Note that this method does not specifically check to see whether permission
    * has been obtained to reactivate the object.. that's done in
-   * {@link arlut.csd.ddroid.server.GanymedeSession#reactivate_db_object(arlut.csd.ddroid.common.Invid) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#reactivate_db_object(arlut.csd.ganymede.common.Invid) 
    * GanymedeSession.reactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be reactivated
@@ -1321,7 +1321,7 @@ final public class DBSession {
    * as the interleaving of checkpoints by multiple threads would lead
    * to trouble.</p>
    * 
-   * @see arlut.csd.ddroid.server.DBEditSet#checkpoint(java.lang.String) 
+   * @see arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String) 
    */
 
   public final void checkpoint(String name)
@@ -1332,7 +1332,7 @@ final public class DBSession {
   /**
    * <p>Convenience pass-through method</p>
    * 
-   * @see arlut.csd.ddroid.server.DBEditSet#popCheckpoint(java.lang.String)
+   * @see arlut.csd.ganymede.server.DBEditSet#popCheckpoint(java.lang.String)
    */
 
   public final boolean popCheckpoint(String name)
@@ -1349,7 +1349,7 @@ final public class DBSession {
   /**
    * <p>Convenience pass-through method</p>
    *
-   * @see arlut.csd.ddroid.server.DBEditSet#rollback(java.lang.String)
+   * @see arlut.csd.ganymede.server.DBEditSet#rollback(java.lang.String)
    */
 
   public final boolean rollback(String name)
@@ -1368,11 +1368,11 @@ final public class DBSession {
   }
 
   /**
-   * <p>Establishes a read lock for the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}s
+   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}s
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the read lock 
-   * can be established.  If any of the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases}
+   * can be established.  If any of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
    * in the bases vector have transactions
    * currently committing, the establishment of the read lock will be suspended
    * until all such transactions are committed.</p>
@@ -1390,7 +1390,7 @@ final public class DBSession {
 
   /**
    * <P>openReadLock establishes a read lock for the entire
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>The thread calling this method will block until the read lock 
    * can be established.  If transactions on the database are
@@ -1409,7 +1409,7 @@ final public class DBSession {
   }
 
   /**
-   * <p>Establishes a write lock for the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}s
+   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}s
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the write lock
@@ -1460,7 +1460,7 @@ final public class DBSession {
   /**
    * <P>openTransaction establishes a transaction context for this session.
    * When this method returns, the session can call editDBObject() and 
-   * createDBObject() to obtain {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}s.
+   * createDBObject() to obtain {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}s.
    * Methods can then be called
    * on the DBEditObjects to make changes to the database.  These changes
    * are actually performed when and if commitTransaction() is called.</P>
@@ -1469,7 +1469,7 @@ final public class DBSession {
    * stored in the modification history for objects modified by this
    * transaction.
    *
-   * @see arlut.csd.ddroid.server.DBEditObject
+   * @see arlut.csd.ganymede.server.DBEditObject
    */ 
 
   public void openTransaction(String describe)
@@ -1480,7 +1480,7 @@ final public class DBSession {
   /**
    * <P>openTransaction establishes a transaction context for this session.
    * When this method returns, the session can call editDBObject() and 
-   * createDBObject() to obtain {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}s.
+   * createDBObject() to obtain {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}s.
    * Methods can then be called
    * on the DBEditObjects to make changes to the database.  These changes
    * are actually performed when and if commitTransaction() is called.</P>
@@ -1497,7 +1497,7 @@ final public class DBSession {
    * result in the transaction refusing to commit when commitTransaction()
    * is attempted.  This mode is intended for batch operations.
    *
-   * @see arlut.csd.ddroid.server.DBEditObject 
+   * @see arlut.csd.ganymede.server.DBEditObject 
    */
 
   public synchronized void openTransaction(String describe, boolean interactive)
@@ -1515,7 +1515,7 @@ final public class DBSession {
    * a current transaction to be performed.  Appropriate portions of the
    * database are locked, changes are made to the in-memory image of
    * the database, and a description of the changes is placed in the
-   * {@link arlut.csd.ddroid.server.DBStore DBStore} journal file.  Event
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} journal file.  Event
    * logging / mail notification may take place.</P>
    *
    * <P>The session must not hold any locks when commitTransaction is
@@ -1527,7 +1527,7 @@ final public class DBSession {
    * @return null if the transaction was committed successfully,
    *         a non-null ReturnVal if there was a commit failure.
    *
-   * @see arlut.csd.ddroid.server.DBEditObject
+   * @see arlut.csd.ganymede.server.DBEditObject
    */
 
   public synchronized ReturnVal commitTransaction()
@@ -1603,11 +1603,11 @@ final public class DBSession {
   }
 
   /**
-   * <P>abortTransaction causes all {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}s
+   * <P>abortTransaction causes all {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}s
    * that were pulled during
    * the course of the session's transaction to be released without affecting
    * the state of the database.  Any changes made to
-   * {@link arlut.csd.ddroid.server.DBObject DBObject}s pulled for editing
+   * {@link arlut.csd.ganymede.server.DBObject DBObject}s pulled for editing
    * by this session during this transaction are abandoned.  Any objects created
    * or destroyed by this session during this transaction are abandoned / unaffected
    * by the actions during the transaction.</P>
@@ -1620,7 +1620,7 @@ final public class DBSession {
    * @return null if the transaction was committed successfully,
    *         a non-null ReturnVal if there was a commit failure.
    *
-   * @see arlut.csd.ddroid.server.DBEditObject 
+   * @see arlut.csd.ganymede.server.DBEditObject 
    */
 
   public synchronized ReturnVal abortTransaction()
@@ -1709,7 +1709,7 @@ final public class DBSession {
   }
 
   /**
-   * <P>This method returns a handle to the Directory Droid Session
+   * <P>This method returns a handle to the Ganymede Session
    * that owns this DBSession.</P>
    */
 

@@ -2,7 +2,7 @@
 
    memoryStatusTask.java
 
-   This task is executed by the Directory Droid scheduler periodically
+   This task is executed by the Ganymede scheduler periodically
    to update the server's memory statistics on any attached
    administration consoles.
 
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Date;
 
@@ -69,11 +69,11 @@ import arlut.csd.Util.TranslationService;
 /**
  * <p>Runnable class to update the memory status fields in the admin
  * console.  Registered with the {@link
- * arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} by {@link
- * arlut.csd.ddroid.server.Ganymede#registerTasks() registerTasks()}, to
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} by {@link
+ * arlut.csd.ganymede.server.Ganymede#registerTasks() registerTasks()}, to
  * run every minute.</p> 
  *
- * <p>This task implements {@link arlut.csd.ddroid.server.silentTask silentTask}
+ * <p>This task implements {@link arlut.csd.ganymede.server.silentTask silentTask}
  * in order to signal the GanymedeScheduler not to print anything to the console
  * when the task is run.</p>
  */
@@ -93,7 +93,7 @@ class memoryStatusTask implements Runnable, silentTask {
    * statistics will be logged to Ganymede's standard error
    * log.  This period value is counted in terms of the number
    * of runs of the memoryStatusTask.  By default, memoryStatusTask
-   * is run once a minute from the Directory Droid scheduler, so the
+   * is run once a minute from the Ganymede scheduler, so the
    * period count is minutes.</p>
    */
 
@@ -113,7 +113,7 @@ class memoryStatusTask implements Runnable, silentTask {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.memoryStatusTask");
+	ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.memoryStatusTask");
       }
   }
 

@@ -22,7 +22,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -59,7 +59,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -81,13 +81,13 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.ParseArgs;
 import arlut.csd.Util.TranslationService;
-import arlut.csd.ddroid.common.BaseListTransport;
-import arlut.csd.ddroid.common.CategoryTransport;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ganymede.common.BaseListTransport;
+import arlut.csd.ganymede.common.CategoryTransport;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Server;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -101,45 +101,45 @@ import arlut.csd.ddroid.rmi.Server;
  * instantiated, but instead provides a bunch of static variables and
  * convenience methods in addition to the main() start method.</p>
  *
- * <p>When started, the Directory Droid server creates a 
- * {@link arlut.csd.ddroid.server.DBStore DBStore} object, which in turn
- * creates and loads a set of {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+ * <p>When started, the Ganymede server creates a 
+ * {@link arlut.csd.ganymede.server.DBStore DBStore} object, which in turn
+ * creates and loads a set of {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
  * objects, one for each type of object held in the ganymede.db file.  Each
- * DBObjectBase contains {@link arlut.csd.ddroid.server.DBObject DBObject}
- * objects which hold the {@link arlut.csd.ddroid.server.DBField DBField}'s
+ * DBObjectBase contains {@link arlut.csd.ganymede.server.DBObject DBObject}
+ * objects which hold the {@link arlut.csd.ganymede.server.DBField DBField}'s
  * which ultimately hold the actual data from the database.</p>
  *
  * <p>The ganymede.db file may define a number of task classes that are to
  * be run by the server at defined times.  The server's main() method starts
- * a background {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}
+ * a background {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
  * thread to handle background tasks.</p>
  *
  * <p>When the database has been loaded from disk, the main() method
- * creates a {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer}
- * object.  GanymedeServer implements the {@link arlut.csd.ddroid.rmi.Server
+ * creates a {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}
+ * object.  GanymedeServer implements the {@link arlut.csd.ganymede.rmi.Server
  * Server} RMI remote interface, and is published in the RMI registry.</p>
  *
  * <p>Clients and admin consoles may then connect to the published GanymedeServer
  * object via RMI to establish a connection to the server.</p>
  *
- * <p>The GanymedeServer's {@link arlut.csd.ddroid.server.GanymedeServer#login(arlut.csd.ganymede.Client) login}
- * method is used to create a {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+ * <p>The GanymedeServer's {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login}
+ * method is used to create a {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
  * object to manage permissions and communications with an individual client.  The
  * client communicates with the GanymedeSession object through the 
- * {@link arlut.csd.ddroid.rmi.Session Session} RMI remote interface.</p>
+ * {@link arlut.csd.ganymede.rmi.Session Session} RMI remote interface.</p>
  *
  * <p>While the GanymedeServer's login method is used to handle client connections,
  * the GanymedeServer's
- * {@link arlut.csd.ddroid.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin}
- * method is used to create a {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} object
+ * {@link arlut.csd.ganymede.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin}
+ * method is used to create a {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
  * to handle the admin console's communications with the server.  The admin
  * console communicates with the GanymedeAdmin object through the  
- * {@link arlut.csd.ddroid.rmi.adminSession adminSession} RMI remote interface.</p>
+ * {@link arlut.csd.ganymede.rmi.adminSession adminSession} RMI remote interface.</p>
  *
  * <p>Most of the server's database logic is handled by the DBStore object
- * and its related classes ({@link arlut.csd.ddroid.server.DBObject DBObject},
- * {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}, {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace},
- * and {@link arlut.csd.ddroid.server.DBJournal DBJournal}).</p>
+ * and its related classes ({@link arlut.csd.ganymede.server.DBObject DBObject},
+ * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}, {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace},
+ * and {@link arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
  *
  * <p>All client permissions and communications are handled by the GanymedeSession class.</p> 
  */
@@ -184,7 +184,7 @@ public class Ganymede {
   public static String debugFilename = null;
 
   /**
-   * <p>If true, {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+   * <p>If true, {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * will export any objects being viewed, edited, or created before
    * returning it to the client.  This will be false during direct
    * loading, which should double load speed.</p>
@@ -210,7 +210,7 @@ public class Ganymede {
   public static GanymedeServer server;
 
   /**
-   * <p>A number of operations in the Directory Droid server require 'root' 
+   * <p>A number of operations in the Ganymede server require 'root' 
    * access to the database.  This GanymedeSession object is provided
    * for system database operations.</p>
    */
@@ -231,14 +231,14 @@ public class Ganymede {
 
   /**
    *
-   * The Directory Droid object store.
+   * The Ganymede object store.
    * 
    */
 
   public static DBStore db;
 
   /**
-   * <p>This object provides access to the Directory Droid log file, providing
+   * <p>This object provides access to the Ganymede log file, providing
    * logging, email, and search services.</p>
    */
 
@@ -249,7 +249,7 @@ public class Ganymede {
    * object.  Initialized the first time a user logs on to the server,
    * and re-initialized when the schema is edited.  This object is
    * provided to clients when they call 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getCategoryTree() GanymedeSession.getCategoryTree()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getCategoryTree() GanymedeSession.getCategoryTree()}.</p>
    */
 
   public static CategoryTransport catTransport = null;
@@ -258,13 +258,13 @@ public class Ganymede {
    * <p>A cached reference to a master base list serialization object.
    * Initialized on server start up and re-initialized when the schema
    * is edited.  This object is provided to clients when they call
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getBaseList() GanymedeSession.getBaseList()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getBaseList() GanymedeSession.getBaseList()}.</p>
    */
 
   public static BaseListTransport baseTransport = null;
 
   /**
-   * <p>A vector of {@link arlut.csd.ddroid.server.GanymedeBuilderTask GanymedeBuilderTask}
+   * <p>A vector of {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTask}
    * objects initialized on database load.</p>
    */
 
@@ -308,7 +308,7 @@ public class Ganymede {
    * <p>This flag is true if the server was started with no
    * pre-existing ganymede.db file.  This will be true when the server
    * code is run from a schema kit's runDirectLoader script.  If true,
-   * the {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+   * the {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * class will not worry about not finding the default permissions
    * role in the database.</p> 
    */
@@ -334,7 +334,7 @@ public class Ganymede {
 
   /**
    *
-   * The Directory Droid server start point.
+   * The Ganymede server start point.
    *
    */
 
@@ -346,7 +346,7 @@ public class Ganymede {
 
     /* -- */
 
-    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.Ganymede");
+    ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
         
     /* If the "usedirectory" option is set, then use the supplied directory name 
      * as the base path to the properties file (which is assumed to be 
@@ -533,7 +533,7 @@ public class Ganymede {
     // Java 2 makes it a real pain to change out security
     // managers.. since we don't need to do classfile transfer from
     // the client (since all clients should use
-    // arlut.csd.ddroid.client.ClientBase), we just don't bother
+    // arlut.csd.ganymede.client.ClientBase), we just don't bother
     // with it.
 
     if (false)
@@ -689,7 +689,7 @@ public class Ganymede {
 	debug(ts.l("main.info_binding_registry"));
 
 	// we use rebind so that we can bind successfully if the rmi
-	// registry is still running from a previous Directory Droid server
+	// registry is still running from a previous Ganymede server
 	// session.
 
 	String hostname = null;
@@ -844,9 +844,9 @@ public class Ganymede {
   }
 
   /**
-   * <p>This is a convenience method to allow arbitrary Directory
-   * Droid code to generate a stack trace on the server's log and
-   * admin consoles.</p>
+   * <p>This is a convenience method to allow arbitrary Ganymede code
+   * to generate a stack trace on the server's log and admin
+   * consoles.</p>
    */
 
   static public void logAssert(String string)
@@ -958,7 +958,7 @@ public class Ganymede {
 	  {
 	    System.out.println(ts.l("startupHook.resetting"));
 
-	    internalSession.openTransaction("Directory Droid startupHook");
+	    internalSession.openTransaction("Ganymede startupHook");
 
 	    e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
 
@@ -1161,7 +1161,7 @@ public class Ganymede {
    * file.</p>
    *
    * <p>This method is public so that loader code linked with the
-   * Directory Droid server code can initialize the properties without
+   * Ganymede server code can initialize the properties without
    * going through Ganymede.main().</p>
    */
 

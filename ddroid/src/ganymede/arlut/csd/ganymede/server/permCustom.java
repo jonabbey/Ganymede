@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,12 +50,12 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -125,7 +125,7 @@ public class permCustom extends DBEditObject implements SchemaConstants {
    *
    * There are a few specific instances of SchemaConstants.PermBase
    * that don't properly need the list of admin personae, as their
-   * object invids are hard-coded into the Directory Droid security system, and
+   * object invids are hard-coded into the Ganymede security system, and
    * their permission matrices are automatically consulted in certain
    * situations.  In order to support this, we're going to want to have
    * a DBEditObject subclass for managing permission objects.  In that

@@ -1,6 +1,6 @@
 // $ANTLR 2.7.4: "query.g" -> "QueryLexer.java"$
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.InputStream;
 import antlr.TokenStreamException;

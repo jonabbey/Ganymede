@@ -7,7 +7,7 @@ SVN URL: $HeadURL$
 
 --------------------------------------------------------------------------------
 
-This directory contains the Directory Droid server code.
+This directory contains the Ganymede server code.
 
 The Ganymede.java class is the starting point for the server, and
 contains the main() entry point.  The Ganymede class swiftly creates
@@ -20,9 +20,9 @@ point, the server is ready to handle logins.
 When logins occur, the GanymedeServer will create (and expose through
 RMI) a GanymedeSession object for the user.  The client can then make
 RMI calls to the GanymedeSession (using the Session interface defined
-in the arlut.csd.ddroid.rmi package) to do queries, edit objects,
+in the arlut.csd.ganymede.rmi package) to do queries, edit objects,
 commit transactions, and so on.  GanymedeSession actually holds most
-of the logic in the Directory Droid server.
+of the logic in the Ganymede server.
 
 Jonathan Abbey
 7 May 2004

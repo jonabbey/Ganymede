@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -56,7 +56,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Hashtable;
@@ -67,12 +67,12 @@ import org.xml.sax.SAXException;
 import arlut.csd.Util.XMLElement;
 import arlut.csd.Util.XMLEndDocument;
 import arlut.csd.Util.XMLItem;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -83,7 +83,7 @@ import arlut.csd.ddroid.rmi.db_object;
 /**
  * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for
- * {@link arlut.csd.ddroid.server.GanymedeXMLSession GanymedeXMLSession}.</p>
+ * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -147,7 +147,7 @@ public class xmlobject {
   int num = -1;
 
   /**
-   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ddroid.server.xmlfield xmlfield}
+   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.server.xmlfield xmlfield}
    * names to xmlfield objects.</p>
    */
 
@@ -296,7 +296,7 @@ public class xmlobject {
    * <p>This method causes this object to be created on
    * the server.</p>
    *
-   * <p>This method uses the standard {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * return semantics.</p>
    */
 
@@ -342,7 +342,7 @@ public class xmlobject {
    * <p>This method causes this object to be checked out for editing
    * on the server.</p>
    *
-   * <p>This method uses the standard {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * return semantics.</p> */
 
   public ReturnVal editOnServer(Session session) throws NotLoggedInException
@@ -394,7 +394,7 @@ public class xmlobject {
 
   /**
    * <p>This method uploads non-Invid field information contained in
-   * this object up to the Directory Droid server.</p>
+   * this object up to the Ganymede server.</p>
    *
    * <p>This method skips any Invid fields, which will need to be resolved
    * in a second pass.</p> 

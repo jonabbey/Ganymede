@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.lang.reflect.Constructor;
 import java.util.Calendar;
@@ -61,10 +61,10 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.DDPermissionsException;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.common.scheduleHandle;
+import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.common.scheduleHandle;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,17 +73,17 @@ import arlut.csd.ddroid.common.scheduleHandle;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Background task scheduler for the Directory Droid server.  It is similar in
+ * <P>Background task scheduler for the Ganymede server.  It is similar in
  * function and behavior to the UNIX cron facility, but is designed
  * to run arbitrary Java Runnable objects in separate threads within the server.</P>
  *
- * <P>The Directory Droid server's 
- * {@link arlut.csd.ddroid.server.Ganymede#main(java.lang.String[]) main()} routine
+ * <P>The Ganymede server's 
+ * {@link arlut.csd.ganymede.server.Ganymede#main(java.lang.String[]) main()} routine
  * creates a GanymedeScheduler at server start time.  Once created, the
  * server's GanymedeScheduler runs as an asynchronous thread, sleeping until
  * a task is scheduled to be run.  GanymedeScheduler is designed to operate
  * in a multi-threaded fashion, with a background task executing the 
- * {@link arlut.csd.ddroid.server.GanymedeScheduler#run() run()} method spending
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler#run() run()} method spending
  * most of its time waiting for something to happen, and various scheduling
  * methods being called interactively to change the behavior of the run() method's
  * on-going execution. (I.e., to schedule new tasks or to change task scheduling)</P>
@@ -94,14 +94,14 @@ import arlut.csd.ddroid.common.scheduleHandle;
  * same name.</P>
  *
  * <P>GanymedeScheduler is closely bound to the 
- * {@link arlut.csd.ddroid.common.scheduleHandle scheduleHandle} and
- * {@link arlut.csd.ddroid.server.taskMonitor taskMonitor} classes.  Together, these
+ * {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle} and
+ * {@link arlut.csd.ganymede.server.taskMonitor taskMonitor} classes.  Together, these
  * three classes form a robust and flexible task scheduling system.</P>
  *
- * <P>The GanymedeScheduler supports updating the Directory Droid admin console's
+ * <P>The GanymedeScheduler supports updating the Ganymede admin console's
  * task monitor display by way of the {@link arlut.csd.ganymede.Admin Admin} 
- * interface.  Likewise, the Directory Droid server's admin console interface,
- * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} supports several
+ * interface.  Likewise, the Ganymede server's admin console interface,
+ * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} supports several
  * remote methods that the admin console can call to affect GanymedeScheduler.</P>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
@@ -182,14 +182,14 @@ public class GanymedeScheduler extends Thread {
 
   public GanymedeScheduler(boolean reportTasks)
   {
-    super("Directory Droid Scheduler Thread");
+    super("Ganymede Scheduler Thread");
     this.reportTasks = reportTasks;
   }
 
   /**
    * <P>This method is used to register a task
-   * {@link arlut.csd.ddroid.server.DBObject DBObject} record from
-   * the Directory Droid database in this
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} record from
+   * the Ganymede database in this
    * scheduler, loading the named Runnable class via the Java
    * class loader and scheduling the Runnable for execution according
    * to the parameters specified in the task object.</P>
@@ -234,7 +234,7 @@ public class GanymedeScheduler extends Thread {
     
     try
       {
-	c = classdef.getConstructor(new Class[] {arlut.csd.ddroid.common.Invid.class});
+	c = classdef.getConstructor(new Class[] {arlut.csd.ganymede.common.Invid.class});
       }
     catch (NoSuchMethodException ex)
       {
@@ -279,7 +279,7 @@ public class GanymedeScheduler extends Thread {
       }
 
     // if we're not doing a periodic task, just add the task to our
-    // demand queue and let the Directory Droid initialization code take
+    // demand queue and let the Ganymede initialization code take
     // care of associating the task with the transaction commit
     // process.
 
@@ -435,7 +435,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	Ganymede.debug("Directory Droid Scheduler: Scheduled task " + name + " for execution at " + time);
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
       }
   }
 
@@ -494,7 +494,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	Ganymede.debug("Directory Droid Scheduler: Scheduled task " + name + " for daily execution at " + time);
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
       }
   }
 
@@ -541,7 +541,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	Ganymede.debug("Directory Droid Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
 	Ganymede.debug("                    Task will repeat every " + intervalMinutes + " minutes");
       }
   }
@@ -551,7 +551,7 @@ public class GanymedeScheduler extends Thread {
    * rescheduled with different parameters, or simply removed.</P>
    *
    * <P>Note that this method will not prevent the scheduler's
-   * {@link arlut.csd.ddroid.server.GanymedeScheduler#run() run()} method from
+   * {@link arlut.csd.ganymede.server.GanymedeScheduler#run() run()} method from
    * briefly waking up unnecessarily if the named task was the next scheduled to be
    * executed.  Easier to have the run() method check to see if any
    * tasks actually need to be run than to try and persuade the run()
@@ -812,10 +812,10 @@ public class GanymedeScheduler extends Thread {
    * <P>The basic logic is to wait until the next action is due to run,
    * move the task from our scheduled list to our running list, and
    * run it.  Other synchronized methods such as
-   * {@link arlut.csd.ddroid.server.GanymedeScheduler#runTask(arlut.csd.ddroid.common.scheduleHandle) runTask()},
-   * {@link arlut.csd.ddroid.server.GanymedeScheduler#scheduleTask(arlut.csd.ddroid.common.scheduleHandle) scheduleTask()},
+   * {@link arlut.csd.ganymede.server.GanymedeScheduler#runTask(arlut.csd.ganymede.common.scheduleHandle) runTask()},
+   * {@link arlut.csd.ganymede.server.GanymedeScheduler#scheduleTask(arlut.csd.ganymede.common.scheduleHandle) scheduleTask()},
    * and
-   * {@link arlut.csd.ddroid.server.GanymedeScheduler#notifyCompletion(arlut.csd.ddroid.common.scheduleHandle) notifyCompletion()},
+   * {@link arlut.csd.ganymede.server.GanymedeScheduler#notifyCompletion(arlut.csd.ganymede.common.scheduleHandle) notifyCompletion()},
    * may be called while this method is waiting for something to
    * happen.  These methods modify the data structures that run()
    * uses to determine its scheduling needs.</P>
@@ -832,7 +832,7 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff)
 	  {
-	    Ganymede.debug("Directory Droid Scheduler: scheduling task started");
+	    Ganymede.debug("Ganymede Scheduler: scheduling task started");
 	  }
 	
 	while (true)
@@ -959,7 +959,7 @@ public class GanymedeScheduler extends Thread {
 	      }
 	    catch (Throwable ex)
 	      {
-		System.err.println("Directory Droid scheduler caught exception");
+		System.err.println("Ganymede scheduler caught exception");
 		System.err.println(Ganymede.stackTrace(ex));
 
 		try
@@ -981,14 +981,14 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff)
 	  {
-	    Ganymede.debug("Directory Droid Scheduler going down");
+	    Ganymede.debug("Ganymede Scheduler going down");
 	  }
 
 	cleanUp();		// send interrupts to all running tasks
 
 	if (logStuff)
 	  {
-	    Ganymede.debug("Directory Droid Scheduler exited");
+	    Ganymede.debug("Ganymede Scheduler exited");
 	  }
       }
   }
@@ -1005,7 +1005,7 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff && !(handle.task instanceof silentTask))
 	  {
-	    Ganymede.debug("Directory Droid Scheduler: running " + handle.name);
+	    Ganymede.debug("Ganymede Scheduler: running " + handle.name);
 	  }
 
 	currentlyRunning.put(handle.name, handle);
@@ -1016,7 +1016,7 @@ public class GanymedeScheduler extends Thread {
 
   /**
    * <P>This method is used by instances of
-   * {@link arlut.csd.ddroid.common.scheduleHandle scheduleHandle} to let the
+   * {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle} to let the
    * GanymedeScheduler thread know when their tasks have run to
    * completion.  This method is responsible for rescheduling
    * the task if it is a periodic task.</P>
@@ -1028,7 +1028,7 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff && !(handle.task instanceof silentTask))
 	  {
-	    Ganymede.debug("Directory Droid Scheduler: " + handle.name + " completed");
+	    Ganymede.debug("Ganymede Scheduler: " + handle.name + " completed");
 	  }
 
 	// we need to check to see if the task was ordinarily scheduled to
@@ -1047,7 +1047,7 @@ public class GanymedeScheduler extends Thread {
 	      {
 		if (logStuff && !(handle.task instanceof silentTask))
 		  {
-		    Ganymede.debug("Directory Droid Scheduler: rescheduling task " + 
+		    Ganymede.debug("Ganymede Scheduler: rescheduling task " + 
 				   handle.name + " for " + handle.startTime);
 		  }
 		
@@ -1068,7 +1068,7 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-	Ganymede.debug("Directory Droid Scheduler: confusion! Couldn't find task " + 
+	Ganymede.debug("Ganymede Scheduler: confusion! Couldn't find task " + 
 		       handle.name + " on the runnng list");
       }
   }
@@ -1087,7 +1087,7 @@ public class GanymedeScheduler extends Thread {
 
     if (debug)
       {
-	System.err.println("Directory Droid Scheduler: scheduled task " + handle.name + 
+	System.err.println("Ganymede Scheduler: scheduled task " + handle.name + 
 			   " for initial execution at " + handle.startTime);
       }
 
@@ -1106,7 +1106,7 @@ public class GanymedeScheduler extends Thread {
 
     // notice that we use notify() rather than notifyAll() for efficiency..
     // if for some unforseeable reason someone decides that something else
-    // in Directory Droid besides the GanymedeScheduler run() method just *has*
+    // in Ganymede besides the GanymedeScheduler run() method just *has*
     // to wait() on this object, this will need to be changed.
   }
 
@@ -1141,7 +1141,7 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * <P>This method is used to report to the Directory Droid server (and thence
+   * <P>This method is used to report to the Ganymede server (and thence
    * the admin console(s) the status of background tasks scheduled
    * and/or running.</P>
    */
@@ -1185,7 +1185,7 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * <P>Returns a Vector of {@link arlut.csd.ddroid.common.scheduleHandle scheduleHandle}
+   * <P>Returns a Vector of {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle}
    * objects suitable for reporting to the admin console.</P>
    */
 
@@ -1212,7 +1212,7 @@ public class GanymedeScheduler extends Thread {
 
 /**
  * <P>This class is used to produce test task objects for the {@link
- * arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} class.  It
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} class.  It
  * print a message when it is run, then waits one second before returning.</P>
  */
 

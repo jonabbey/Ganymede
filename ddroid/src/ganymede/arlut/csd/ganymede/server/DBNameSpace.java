@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
 
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -60,8 +60,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.rmi.NameSpace;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.rmi.NameSpace;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -71,36 +71,36 @@ import arlut.csd.ddroid.rmi.NameSpace;
 
 /**
  * <p>DBNameSpaces are the objects used to manage unique value
- * tracking in {@link arlut.csd.ddroid.server.DBField DBFields} that are
+ * tracking in {@link arlut.csd.ganymede.server.DBField DBFields} that are
  * unique value constrained.  DBNameSpace is smart enough to
  * coordinate unique value allocation and management during object
  * editing across concurrent transactions.</p>
  *
- * <p>In general, transactions in Directory Droid are not able to affect each other
+ * <p>In general, transactions in Ganymede are not able to affect each other
  * at all, save through the acquisition of exclusive editing locks on
  * invidivual objects, and through the atomic acquisition of values
  * for unique value constrained DBFields.  Once a transaction allocates
- * a unique value using either the {@link arlut.csd.ddroid.server.DBNameSpace#mark(arlut.csd.ddroid.server.DBEditSet,java.lang.Object,arlut.csd.ddroid.server.DBField) mark()},
- * {@link arlut.csd.ddroid.server.DBNameSpace#unmark(arlut.csd.ddroid.server.DBEditSet,java.lang.Object) unmark()},
- * or {@link arlut.csd.ddroid.server.DBNameSpace#reserve(arlut.csd.ddroid.server.DBEditSet,java.lang.Object) reserve()}
+ * a unique value using either the {@link arlut.csd.ganymede.server.DBNameSpace#mark(arlut.csd.ganymede.server.DBEditSet,java.lang.Object,arlut.csd.ganymede.server.DBField) mark()},
+ * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) unmark()},
+ * or {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) reserve()}
  * methods, no other transaction can allocate that value, until the first transaction
- * calls the {@link arlut.csd.ddroid.server.DBNameSpace#commit(arlut.csd.ddroid.server.DBEditSet) commit()},
- * {@link arlut.csd.ddroid.server.DBNameSpace#abort(arlut.csd.ddroid.server.DBEditSet) abort()},
- * or {@link arlut.csd.ddroid.server.DBNameSpace#rollback(arlut.csd.ddroid.server.DBEditSet,java.lang.String) rollback()}
+ * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet) commit()},
+ * {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet) abort()},
+ * or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,java.lang.String) rollback()}
  * methods.</p>
  *
  * <p>In order to perform this unique value management, DBNameSpace maintains
- * a private Hashtable, {@link arlut.csd.ddroid.server.DBNameSpace#uniqueHash uniqueHash},
- * that associates the allocated vales in the namespace with {@link arlut.csd.ddroid.server.DBNameSpaceHandle DBNameSpaceHandle}
+ * a private Hashtable, {@link arlut.csd.ganymede.server.DBNameSpace#uniqueHash uniqueHash},
+ * that associates the allocated vales in the namespace with {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
  * objects which track the transaction that is manipulating the value, if any, as well
  * as the DBField object in the database that is checked in with that value.  The
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} query logic takes
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} query logic takes
  * advantage of this to do optimized, hashed look-ups of values for unique value
  * constrained fields to locate objects in the database rather than having to iterate
  * over all objects of a given type to find a particular match.</p>
  *
  * <p>DBNameSpaces may be defined in the server's schema editor to be either case sensitive
- * or case insensitive.  The DBNameSpace class uses the {@link arlut.csd.ddroid.server.GHashtable GHashtable}
+ * or case insensitive.  The DBNameSpace class uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
  * class to handle the representational issues in the unique value hash for this, as well as
  * for things like IP address representation.</p>
  */
@@ -131,7 +131,7 @@ public final class DBNameSpace implements NameSpace {
   /**
    * <p>Hashtable mapping values allocated (permanently, for objects checked in to the database, or
    * temporarily, for objects being manipulated by active transactions) in this namespace to
-   * {@link arlut.csd.ddroid.server.DBNameSpaceHandle DBNameSpaceHandle} objects that track
+   * {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle} objects that track
    * the current status of the values.</p>
    */
 
@@ -150,7 +150,7 @@ public final class DBNameSpace implements NameSpace {
   private Hashtable saveHash = null;
 
   /**
-   * <p>Hashtable mapping {@link arlut.csd.ddroid.server.DBEditSet
+   * <p>Hashtable mapping {@link arlut.csd.ganymede.server.DBEditSet
    * DBEditSet's} currently active modifying values in this namespace
    * to {@link arlut.csd.ganymede.DBNameSpaceTransaction
    * DBNameSpaceTransaction} objects.</p>
@@ -240,7 +240,7 @@ public final class DBNameSpace implements NameSpace {
    *
    * Returns the name of this namespace.
    *
-   * @see arlut.csd.ddroid.rmi.NameSpace
+   * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
   public String getName()
@@ -253,7 +253,7 @@ public final class DBNameSpace implements NameSpace {
    * Sets the name of this namespace.  Returns false
    * if the name is already taken by another namespace
    *
-   * @see arlut.csd.ddroid.rmi.NameSpace
+   * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
   public boolean setName(String newName)
@@ -270,7 +270,7 @@ public final class DBNameSpace implements NameSpace {
    * Returns true if case is to be disregarded in comparing
    * entries in namespace managed fields.
    *
-   * @see arlut.csd.ddroid.rmi.NameSpace
+   * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
   public boolean isCaseInsensitive()
@@ -283,7 +283,7 @@ public final class DBNameSpace implements NameSpace {
    * Turns case sensitivity on/off.  If b is true, case will be
    * disregarded in comparing entries in namespace managed fields.
    *
-   * @see arlut.csd.ddroid.rmi.NameSpace 
+   * @see arlut.csd.ganymede.rmi.NameSpace 
    */
 
   public void setInsensitive(boolean b)
@@ -347,12 +347,12 @@ public final class DBNameSpace implements NameSpace {
 
   /**
    * <p>Publicly accessible function used to associate the given
-   * {@link arlut.csd.ddroid.server.DBNameSpaceHandle DBNameSpaceHandle}
+   * {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
    * with a value in this namespace in a non-transactional fashion.</p>
    *
-   * <p>Used by the {@link arlut.csd.ddroid.server.DBObject DBObject}
-   * receive() method and the {@link arlut.csd.ddroid.server.DBJournal
-   * DBJournal}'s {@link arlut.csd.ddroid.server.JournalEntry JournalEntry}
+   * <p>Used by the {@link arlut.csd.ganymede.server.DBObject DBObject}
+   * receive() method and the {@link arlut.csd.ganymede.server.DBJournal
+   * DBJournal}'s {@link arlut.csd.ganymede.server.JournalEntry JournalEntry}
    * class' process() method to build up the namespace during server
    * start-up.</p>
    */
@@ -366,8 +366,8 @@ public final class DBNameSpace implements NameSpace {
    * <p>Publicly accessible function used to clear the given
    * value from this namespace in a non-transactional fashion.</p>
    *
-   * <p>Used by {@link arlut.csd.ddroid.server.DBJournal DBJournal}'s
-   * {@link arlut.csd.ddroid.server.JournalEntry JournalEntry} class'
+   * <p>Used by {@link arlut.csd.ganymede.server.DBJournal DBJournal}'s
+   * {@link arlut.csd.ganymede.server.JournalEntry JournalEntry} class'
    * process() method to rectify the namespace during server
    * start-up.</p>
    */
@@ -1450,8 +1450,8 @@ public final class DBNameSpace implements NameSpace {
 
 /**
  * <P>This class holds information associated with an active transaction (a
- * {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}) in care of a 
- * {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace}.</p>
+ * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}) in care of a 
+ * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}.</p>
  */
 
 class DBNameSpaceTransaction {

@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.rmi.NoSuchObjectException;
@@ -65,10 +65,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.RMISSLClientSocketFactory;
-import arlut.csd.ddroid.common.RMISSLServerSocketFactory;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ganymede.common.RMISSLClientSocketFactory;
+import arlut.csd.ganymede.common.RMISSLServerSocketFactory;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.adminSession;
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
@@ -98,8 +98,8 @@ public class GanymedeRMIManager {
    * through a firewall.</p>
    *
    * <p>If useSSL is true, all objects exported by this GanymedeRMIManager
-   * will be using the arlut.csd.ddroid.common.RMISSLServerSocketFactory
-   * and arlut.csd.ddroid.common.RMISSLClientSocketFactory socket
+   * will be using the arlut.csd.ganymede.common.RMISSLServerSocketFactory
+   * and arlut.csd.ganymede.common.RMISSLClientSocketFactory socket
    * factories.</p>
    */
 

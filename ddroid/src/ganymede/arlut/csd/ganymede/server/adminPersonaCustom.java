@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,20 +50,20 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -413,7 +413,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
    * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ddroid.server.DBEditObject#commitPhase1() commitPhase1()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
    * to verify the readiness of this object for commit.  The
    * DBObject passed to this method will be a DBEditObject,
    * complete with that object's GanymedeSession reference

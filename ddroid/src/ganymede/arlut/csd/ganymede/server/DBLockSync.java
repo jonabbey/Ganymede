@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -68,10 +68,10 @@ import java.util.Vector;
  * interlock coordination.  All global data required for coordinating
  * lock activity is stored here.</P>
  *
- * <p>Note that much code in the various {@link arlut.csd.ddroid.server.DBLock}
+ * <p>Note that much code in the various {@link arlut.csd.ganymede.server.DBLock}
  * subclasses, and in the rest of the Ganymede server, establishes external
  * synchronization on the DBLockSync object referenced in
- * {@link arlut.csd.ddroid.server.DBStore#lockSync DBStore.lockSync}, so certain
+ * {@link arlut.csd.ganymede.server.DBStore#lockSync DBStore.lockSync}, so certain
  * methods in this class which do not appear synchronized may in fact be
  * dependent on external synchronization.</p>
  */
@@ -79,7 +79,7 @@ import java.util.Vector;
 public class DBLockSync {
 
   /** 
-   * <P>Identifier keys for current {@link arlut.csd.ddroid.server.DBLock
+   * <P>Identifier keys for current {@link arlut.csd.ganymede.server.DBLock
    * DBLocks}.</P>
    *
    * <P>This hash is used by the establish() method in various DBLock
@@ -94,8 +94,8 @@ public class DBLockSync {
   private Hashtable lockHash;
 
   /**
-   * A count of how many {@link arlut.csd.ddroid.server.DBLock DBLocks} are
-   * established on {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases}
+   * A count of how many {@link arlut.csd.ganymede.server.DBLock DBLocks} are
+   * established on {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
    * in this DBStore.
    */
 

@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -48,11 +48,11 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Hashtable;
 
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -62,7 +62,7 @@ import arlut.csd.ddroid.common.Invid;
 
 /**
  * <p>DBCheckPointObj holds a snapshot of an object's state at a moment
- * in time.  It is used by the {@link arlut.csd.ddroid.server.DBCheckPoint DBCheckPoint}
+ * in time.  It is used by the {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint}
  * class to record the state of the fields in an object.</p>
  */
 

@@ -26,7 +26,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -62,7 +62,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -73,8 +73,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Ganymediator;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Ganymediator;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -91,26 +91,26 @@ import arlut.csd.ddroid.rmi.Ganymediator;
  * server.  A remote handle to the newly instantiated
  * GanymediatorWizard is returned to the client, which presents a
  * matching dialog to the user, retrieves input, and calls the {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#respond(java.util.Hashtable)
+ * arlut.csd.ganymede.server.GanymediatorWizard#respond(java.util.Hashtable)
  * respond()} method.  The respond() method takes the input from the
  * user and considers whether it has enough information to perform the
  * initially requested action.  If not, it will update its internal
  * state to keep track of where it is with respect to the user, and
- * will return another {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+ * will return another {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
  * which requests the client present another dialog and call back this
  * GanymediatorWizard to continue along the process.</p>
  *
  * <p>After a GanymediatorWizard is constructed, the respond() method
  * will first call processDialog0().  processDialog0() can generate a
  * return value using the {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#continueOn(java.lang.String,
+ * arlut.csd.ganymede.server.GanymediatorWizard#continueOn(java.lang.String,
  * java.lang.String, java.lang.String, java.lang.String,
  * java.lang.String) continueOn()} method to return a dialog that will
  * ask the user for more information, or it can use the {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#fail(java.lang.String,
+ * arlut.csd.ganymede.server.GanymediatorWizard#fail(java.lang.String,
  * java.lang.String, java.lang.String, java.lang.String,
  * java.lang.String) fail()} or {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#success(java.lang.String,
+ * arlut.csd.ganymede.server.GanymediatorWizard#success(java.lang.String,
  * java.lang.String, java.lang.String, java.lang.String,
  * java.lang.String) success()} to return a dialog with an encoded
  * success or failure indication, or it can return null to indicate
@@ -119,9 +119,9 @@ import arlut.csd.ddroid.rmi.Ganymediator;
  * dialog will be forwarded to processDialog1().</p>
  *
  * <p>For processDialog1() and after, the wizard can use the
- * {@link arlut.csd.ddroid.server.GanymediatorWizard#getKeys() getKeys()}
+ * {@link arlut.csd.ganymede.server.GanymediatorWizard#getKeys() getKeys()}
  * method to get an enumeration of labeled values passed back from
- * the client, and {@link arlut.csd.ddroid.server.GanymediatorWizard#getParam(java.lang.Object) getParam()}
+ * the client, and {@link arlut.csd.ganymede.server.GanymediatorWizard#getParam(java.lang.Object) getParam()}
  * to get the value for a specific key.  Based on values passed back from
  * the client, processDialog1() can decide to continue the interaction,
  * or to return a dialog indicating success or failure, or a silent
@@ -130,23 +130,23 @@ import arlut.csd.ddroid.rmi.Ganymediator;
  * <p>Typically, a continueOn() will cause the wizard system to
  * proceed to the next highest processDialogXX() method.  If a wizard
  * needs to skip to a specific step, it can use the {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#setNextState(int)
+ * arlut.csd.ganymede.server.GanymediatorWizard#setNextState(int)
  * setNextState()} method to set the number for the next processDialog
  * method before returning a continueOn() result.</p>
  *
  * <p>If at any time after processDialog0() the user hits cancel on
  * a dialog, the GanymediatorWizard respond() mechanism will call
- * the wizard's {@link arlut.csd.ddroid.server.GanymediatorWizard#cancel() cancel()}
+ * the wizard's {@link arlut.csd.ganymede.server.GanymediatorWizard#cancel() cancel()}
  * method to retrieve a final dialog for the user.</p>
  *
  * <p>A wizard may only have 99 steps, from processDialog0() to
  * processDialog98().</p>
  *
- * <p>The {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+ * <p>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
  * class keeps track of the client's active wizard.  It is an error
  * for there to be more than one wizard active at a time for a given
  * client.  respond() is responsible for calling {@link
- * arlut.csd.ddroid.server.GanymediatorWizard#unregister unregister()} when
+ * arlut.csd.ganymede.server.GanymediatorWizard#unregister unregister()} when
  * a wizard is through talking to the client.</p>
  *
  * <p>Server-side code that is meant to return a ReturnVal object
@@ -159,8 +159,8 @@ import arlut.csd.ddroid.rmi.Ganymediator;
  * point on, the client will communicate back to the wizard as
  * required to iterate through the processDialog steps.</p>
  *
- * @see arlut.csd.ddroid.common.ReturnVal
- * @see arlut.csd.ddroid.rmi.Ganymediator
+ * @see arlut.csd.ganymede.common.ReturnVal
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
@@ -228,8 +228,8 @@ public abstract class GanymediatorWizard implements Ganymediator {
    * client.  If returnHash is null, this corresponds to the user hitting
    * cancel on such a dialog.
    *
-   * @see arlut.csd.ddroid.rmi.Ganymediator
-   * @see arlut.csd.ddroid.common.ReturnVal
+   * @see arlut.csd.ganymede.rmi.Ganymediator
+   * @see arlut.csd.ganymede.common.ReturnVal
    * */
 
   public ReturnVal respond(Hashtable returnHash)
@@ -448,7 +448,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
       }
     catch (NoSuchMethodException ex)
       {
-	return Ganymede.createErrorDialog("Directory Droid Wizard Error",
+	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Couldn't find processDialog" + state);
       }
 
@@ -466,14 +466,14 @@ public abstract class GanymediatorWizard implements Ganymediator {
 	original.printStackTrace(new PrintWriter(stringTarget));
 
 	unregister();
-	return Ganymede.createErrorDialog("Directory Droid Wizard Error",
+	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Invocation error in state " + 
 					  state + "\n\n" + stringTarget.toString());
       }
     catch (IllegalAccessException ex)
       {
 	unregister();
-	return Ganymede.createErrorDialog("Directory Droid Wizard Error",
+	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Illegal Access error in state " + state +
 					  "\n" + ex.getMessage());
       }

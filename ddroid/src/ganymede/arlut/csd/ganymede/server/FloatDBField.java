@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,15 +52,15 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.float_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.float_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,20 +69,20 @@ import arlut.csd.ddroid.rmi.float_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>FloatDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
+ * <P>FloatDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
  * for the storage and handling of float
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to FloatDBFields through the
- * {@link arlut.csd.ddroid.rmi.float_field float_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to FloatDBFields through the
+ * {@link arlut.csd.ganymede.rmi.float_field float_field} RMI interface.</P> 
  */
 
 public class FloatDBField extends DBField implements float_field {
 
   /**
    * <P>Receive constructor.  Used to create a FloatDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -97,10 +97,10 @@ public class FloatDBField extends DBField implements float_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -291,7 +291,7 @@ public class FloatDBField extends DBField implements float_field {
    * Returns true if this field has max/min
    * limitations.
    *
-   * @see arlut.csd.ddroid.rmi.float_field
+   * @see arlut.csd.ganymede.rmi.float_field
    *
    */
 
@@ -316,7 +316,7 @@ public class FloatDBField extends DBField implements float_field {
    * Returns the minimum acceptable value for this field if this field
    * has max/min limitations.  
    *
-   * @see arlut.csd.ddroid.rmi.float_field
+   * @see arlut.csd.ganymede.rmi.float_field
    * 
    */
 
@@ -341,7 +341,7 @@ public class FloatDBField extends DBField implements float_field {
    * Returns the maximum acceptable value for this field if this field
    * has max/min limitations.
    *
-   * @see arlut.csd.ddroid.rmi.float_field
+   * @see arlut.csd.ganymede.rmi.float_field
    * 
    */
 

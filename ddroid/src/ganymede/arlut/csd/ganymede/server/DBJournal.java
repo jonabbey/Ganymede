@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataOutput;
 import java.io.EOFException;
@@ -62,8 +62,8 @@ import java.util.Date;
 import java.util.Vector;
 
 import arlut.csd.Util.StringUtils;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,7 +73,7 @@ import arlut.csd.ddroid.rmi.db_field;
 
 /**
  * <P>The DBJournal class is used to provide journalling of changes to the
- * {@link arlut.csd.ddroid.server.DBStore DBStore}
+ * {@link arlut.csd.ganymede.server.DBStore DBStore}
  * during operations.  The Journal file will contain a complete list of all
  * changes made since the last dump of the complete DBStore.  The Journal file
  * is composed of a header block followed by a number of transactions.</P>
@@ -87,11 +87,11 @@ import arlut.csd.ddroid.rmi.db_field;
  * <P>Generally, if the DBStore was shut down correctly, the entire memory
  * structure of the DBStore will be cleanly dumped out and the Journal will
  * be removed.  The Journal is intended to insure that the DBStore remains
- * transaction consistent if the server running Directory Droid crashes during
+ * transaction consistent if the server running Ganymede crashes during
  * runtime.</P>
  *
- * <P>See the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet} class for
- * more information on Directory Droid transactions.</P>
+ * <P>See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
+ * more information on Ganymede transactions.</P>
  */
 
 public class DBJournal implements ObjectStatus {
@@ -279,7 +279,7 @@ public class DBJournal implements ObjectStatus {
     if (Ganymede.log != null)
       {
 	Ganymede.log.logSystemEvent(new DBLogEvent("journalreset",
-						   "Directory Droid Journal Reset",
+						   "Ganymede Journal Reset",
 						   null,
 						   null,
 						   null,
@@ -705,7 +705,7 @@ public class DBJournal implements ObjectStatus {
 
 /**
  * <P>This class holds data corresponding to a modification record for a single
- * object in the server's {@link arlut.csd.ddroid.server.DBJournal DBJournal} class.</P>
+ * object in the server's {@link arlut.csd.ganymede.server.DBJournal DBJournal} class.</P>
  */
 
 class JournalEntry {

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.io.StreamTokenizer;
@@ -62,13 +62,13 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.CategoryNode;
-import arlut.csd.ddroid.rmi.NameSpace;
-import arlut.csd.ddroid.rmi.SchemaEdit;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.CategoryNode;
+import arlut.csd.ganymede.rmi.NameSpace;
+import arlut.csd.ganymede.rmi.SchemaEdit;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,27 +78,27 @@ import arlut.csd.ddroid.rmi.SchemaEdit;
 
 /**
  * <P>Server-side schema editing class.  This class implements the
- * {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} remote interface to support
+ * {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface to support
  * schema editing by the admin console.</P>  
  *
  * <P>Only one DBSchemaEdit object may be active in the server at a time;  only
  * one admin console can edit the server's schema at a time.  While the server's
  * schema is being edited, no users may be logged on to
  * the system. An admin console puts the server into schema-editing mode by calling the
- * {@link arlut.csd.ddroid.server.GanymedeAdmin#editSchema editSchema()} method on
- * a server-side {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} object.</P>
+ * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
+ * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object.</P>
  *
  * <P>When the DBSchemaEdit object is created, it makes copies of all of the
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} type definition objects
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} type definition objects
  * in the server.  The admin console can then talk to those DBObjectBase objects
- * remotely by way of the {@link arlut.csd.ddroid.rmi.Base Base} remote interface,
+ * remotely by way of the {@link arlut.csd.ganymede.rmi.Base Base} remote interface,
  * accessing data fields, reordering the type tree visible in the client, and
  * so forth.</P>
  *
  * <P>When the user has made the desired changes, the 
- * {@link arlut.csd.ddroid.server.DBSchemaEdit#commit() commit()} method is called,
+ * {@link arlut.csd.ganymede.server.DBSchemaEdit#commit() commit()} method is called,
  * which replaces the set of DBObjectBase objects held in the server's
- * {@link arlut.csd.ddroid.server.DBStore DBStore} with the modified set that was
+ * {@link arlut.csd.ganymede.server.DBStore DBStore} with the modified set that was
  * created and modified by DBSchemaEdit.</P>
  *
  * <P>The schema editing code in the server currently has only a
@@ -111,7 +111,7 @@ import arlut.csd.ddroid.rmi.SchemaEdit;
  * data.</P>
  *
  * <P>The schema editing system is really the most fragile
- * thing in the Directory Droid server.  It generally works, but it is not as robust
+ * thing in the Ganymede server.  It generally works, but it is not as robust
  * as it ought to be.  It's always a good idea to make a backup copy of your
  * ganymede.db file before going in and editing your database schema.</P> 
  */
@@ -166,7 +166,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   /**
    * <P>Constructor.  This constructor should only be called in
    * a critical section synchronized on the primary 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore} object.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} object.</P>
    */
 
   public DBSchemaEdit() throws RemoteException
@@ -231,7 +231,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   /**
    * <P>Returns the root category node from the server</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public Category getRootCategory()
@@ -328,7 +328,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * for embedding in other objects.  If false, getBases() will only show bases
    * that are not to be embedded.
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized Base[] getBases(boolean embedded)
@@ -406,7 +406,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   /**
    * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized Base[] getBases()
@@ -429,10 +429,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ddroid.rmi.Base Base} reference to match the id, or
+   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the id, or
    * null if no match.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public Base getBase(short id)
@@ -441,10 +441,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ddroid.rmi.Base Base} reference to match the baseName,
+   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the baseName,
    * or null if no match.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized Base getBase(String baseName)
@@ -469,12 +469,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   /** 
    * <P>This method creates a new {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} object and returns
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
    * itself.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit 
+   * @see arlut.csd.ganymede.rmi.SchemaEdit 
    */
 
   public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
@@ -512,7 +512,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   /** 
    * <P>This method creates a new {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} object and returns
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
    * itself.</P>
@@ -616,11 +616,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   /**
    * <P>This method deletes a {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase}, removing it from the
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}, removing it from the
    * Schema Editor's working set of bases.  The removal won't
    * take place for real unless the SchemaEdit is committed.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public ReturnVal deleteBase(String baseName) throws RemoteException
@@ -678,9 +678,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   /**
    * <P>This method returns an array of defined 
-   * {@link arlut.csd.ddroid.rmi.NameSpace NameSpace} objects.</P>
+   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized NameSpace[] getNameSpaces()
@@ -708,11 +708,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>This method returns a {@link arlut.csd.ddroid.rmi.NameSpace NameSpace} by matching name,
+   * <P>This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
    * or null if no match is found.</P>
    *
-   * @see arlut.csd.ddroid.rmi.NameSpace
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.NameSpace
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized NameSpace getNameSpace(String name)
@@ -748,12 +748,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>This method creates a new {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} 
+   * <P>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
    * and generally make a nuisance of itself.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized NameSpace createNewNameSpace(String name, boolean caseInsensitive)
@@ -786,10 +786,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   /**
    * <P>This method deletes a
-   *  {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} object, returning true if
+   *  {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object, returning true if
    * the deletion could be carried out, false otherwise.</P>
    *
-   * @see arlut.csd.ddroid.rmi.SchemaEdit
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized ReturnVal deleteNameSpace(String name)

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.util.Date;
@@ -63,10 +63,10 @@ import java.util.Vector;
 import arlut.csd.Util.NamedStack;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,15 +78,15 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * <p>DBEditSet is the basic transactional unit.  All changes to the
  * database during normal operations are made in the context of a
  * DBEditSet, which may then be committed or rolled back as an atomic
- * operation.  Each {@link arlut.csd.ddroid.server.DBSession DBSession} will
+ * operation.  Each {@link arlut.csd.ganymede.server.DBSession DBSession} will
  * have at most one DBEditSet transaction object active at any time.</p>
  *
  * <p>A DBEditSet tracks several things for the server, including instances of
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}'s that were created
- * or checked-out from the {@link arlut.csd.ddroid.server.DBStore DBStore},
- * {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} values that were reserved
- * during the course of the transaction, and {@link arlut.csd.ddroid.server.DBLogEvent DBLogEvent}
- * objects to be recorded in the {@link arlut.csd.ddroid.server.DBLog DBLog} and/or
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}'s that were created
+ * or checked-out from the {@link arlut.csd.ganymede.server.DBStore DBStore},
+ * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} values that were reserved
+ * during the course of the transaction, and {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}
+ * objects to be recorded in the {@link arlut.csd.ganymede.server.DBLog DBLog} and/or
  * mailed out to various interested parties when the transaction is committed.</p>
  *
  * <p>DBEditSet's transaction logic is based on a two-phase commit
@@ -94,34 +94,34 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * given an initial opportunity to approve or reject the transaction's
  * commit before the DBEditSet commit method goes back and 'locks-in'
  * the changes.  DBEditObjects are able to initiate changes external
- * to the Directory Droid database in their
- * {@link arlut.csd.ddroid.server.DBEditObject#commitPhase2() commitPhase2()}
+ * to the Ganymede database in their
+ * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase2() commitPhase2()}
  * methods, if needed.</p>
  *
- * <p>When a DBEditSet is committed, a {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}
- * is established on all {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}'s
+ * <p>When a DBEditSet is committed, a {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}
+ * is established on all {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
  * involved in the transaction.  All objects checked out by that transaction
  * are then updated in the DBStore, and a summary of changes is recorded to the
- * DBStore {@link arlut.csd.ddroid.server.DBJournal DBJournal}.  The database as
+ * DBStore {@link arlut.csd.ganymede.server.DBJournal DBJournal}.  The database as
  * a whole will not be dumped to disk unless and until the
  * {@link arlut.csd.ganymede.dumpTask dumpTask} is run, or until the server
  * undergoes a formal shutdown.</p>
  *
- * <p>Typically, the {@link arlut.csd.ddroid.server.DBEditSet#commit() commit()}
+ * <p>Typically, the {@link arlut.csd.ganymede.server.DBEditSet#commit() commit()}
  * method is called by the
- * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction(boolean) GanymedeSession.commitTransaction()}
+ * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction(boolean) GanymedeSession.commitTransaction()}
  * method, which will induce the server to schedule any commit-time build
- * tasks registered with the {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * tasks registered with the {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  *
  * <p>If a DBEditSet commit() operation fails catastrophically, or if
- * {@link arlut.csd.ddroid.server.DBEditSet#abort() abort()} is called,
+ * {@link arlut.csd.ganymede.server.DBEditSet#abort() abort()} is called,
  * all DBEditObjects created or checked out during the course of the
  * transaction will be discarded, all DBNameSpace values allocated will
  * be relinquished, and any logging information for the abandoned transaction
  * will be forgotten.</p>
  *
  * <p>As if all that wasn't enough, the DBEditSet class also maintains a stack
- * of {@link arlut.csd.ddroid.server.DBCheckPoint DBCheckPoint} objects to enable
+ * of {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint} objects to enable
  * users to set checkpoints during the course of a transaction.  These objects
  * are basically a snapshot of the transaction's state at the moment of the
  * checkpoint, and are used to rollback the transaction to a known state if
@@ -140,29 +140,29 @@ public class DBEditSet {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBEditSet");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBEditSet");
 
   /**
    * <p>A hashtable mapping Invids to {@link
-   * arlut.csd.ddroid.server.DBEditObject DBEditObject}s checked out in
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject}s checked out in
    * care of this transaction.</p>
    */
 
   private Hashtable objects = null;
 
   /**
-   * <p>A list of {@link arlut.csd.ddroid.server.DBLogEvent DBLogEvent}'s
-   * to be written to the Directory Droid logfile and/or mailed out when
+   * <p>A list of {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}'s
+   * to be written to the Ganymede logfile and/or mailed out when
    * this transaction commits.</p>
    */
 
   private Vector logEvents = null;
 
   /**
-   * <p>A record of the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}'s
+   * <p>A record of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
    * touched by this transaction.  These DBObjectBase's will be locked
    * when this transaction is committed.</p>
    *
@@ -193,7 +193,7 @@ public class DBEditSet {
   String description;
 
   /**
-   * A stack of {@link arlut.csd.ddroid.server.DBCheckPoint DBCheckPoint} objects
+   * A stack of {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint} objects
    * to keep track of check points performed during the course of this transaction.
    */
 
@@ -213,7 +213,7 @@ public class DBEditSet {
   /**
    * The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
-   * {@link arlut.csd.ddroid.server.DBEditSet#releaseWriteLock() releaseWriteLock()}
+   * {@link arlut.csd.ganymede.server.DBEditSet#releaseWriteLock() releaseWriteLock()}
    * method, but wLock should really never be non-null outside of the
    * context of the commit() call.  */
 
@@ -370,7 +370,7 @@ public class DBEditSet {
    * <p>Method to associate a DBEditObject with this transaction.</p>
    *
    * <p>This method is called by the createDBObject and editDBObject
-   * methods in {@link arlut.csd.ddroid.server.DBSession DBSession}.</p>
+   * methods in {@link arlut.csd.ganymede.server.DBSession DBSession}.</p>
    *
    * @param object The newly created DBEditObject.
    */
@@ -418,7 +418,7 @@ public class DBEditSet {
   /**
    * <p>This method is used to register a log event with this transaction.
    * If the transaction successfully commits, the provided log event
-   * will be recorded in the Directory Droid log file and mail notification will
+   * will be recorded in the Ganymede log file and mail notification will
    * be sent out if appropriate.</p>
    *
    * @param eventClassToken a short string specifying a DBObject record describing
@@ -444,7 +444,7 @@ public class DBEditSet {
   /**
    * <p>This method is used to register a log event with this transaction.
    * If the transaction successfully commits, the provided log event
-   * will be recorded in the Directory Droid log file and mail notification will
+   * will be recorded in the Ganymede log file and mail notification will
    * be sent out if appropriate.</p>
    *
    * @param event A pre-formed log event to register with this transaction.
@@ -944,9 +944,9 @@ public class DBEditSet {
    * source of the failure, the transaction may be left open for a
    * subsequent transaction commit or release.</p>
    *
-   * <p>The returned {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * <p>The returned {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * will have doNormalProcessing set to false if the transaction was
-   * completely aborted.  Both {@link arlut.csd.ddroid.server.DBSession
+   * completely aborted.  Both {@link arlut.csd.ganymede.server.DBSession
    * DBSession} and the client should take a false doNormalProcessing
    * boolean as an indicator that the transaction was simply wiped out
    * and a new transaction should be opened for subsequent activity.
@@ -1923,8 +1923,8 @@ public class DBEditSet {
    * <p>This method is executed towards the end of a transaction commit,
    * and compares the current state of this object with its original state,
    * and makes the appropriate changes to the
-   * {@link arlut.csd.ddroid.server.DBStore#backPointers backPointers} hash in
-   * the server's {@link arlut.csd.ddroid.server.DBStore DBStore} object.</p>
+   * {@link arlut.csd.ganymede.server.DBStore#backPointers backPointers} hash in
+   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore} object.</p>
    *
    * <p>The purpose of this is to support the decoupling of an object
    * from its backlinks, so that objects can be asymmetrically linked

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -80,18 +80,18 @@ import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
-import arlut.csd.ddroid.common.DDPermissionsException;
-import arlut.csd.ddroid.common.FieldInfo;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -101,44 +101,44 @@ import arlut.csd.ddroid.rmi.db_object;
 
 /**
  * <p>Class to hold a typed, read-only database object as represented
- * in the Directory Droid {@link arlut.csd.ddroid.server.DBStore DBStore}
+ * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}
  * database.  DBObjects can be exported via RMI for remote access by
  * remote clients. Clients directly access instances of DBObject for
  * viewing or editing in the form of a {@link
- * arlut.csd.ddroid.rmi.db_object db_object} RMI interface type passed
+ * arlut.csd.ganymede.rmi.db_object db_object} RMI interface type passed
  * as return value in calls made on the {@link
- * arlut.csd.ddroid.rmi.Session Session} remote interface.</p>
+ * arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
  *
  * <p>A DBObject is identified by a unique identifier called an {@link
- * arlut.csd.ddroid.common.Invid Invid} and contains a set of {@link
- * arlut.csd.ddroid.server.DBField DBField} objects which hold the actual
+ * arlut.csd.ganymede.common.Invid Invid} and contains a set of {@link
+ * arlut.csd.ganymede.server.DBField DBField} objects which hold the actual
  * data values held in the object.  The client typically interacts
  * with the fields held in this object directly using the {@link
- * arlut.csd.ddroid.rmi.db_field db_field} remote interface which is
+ * arlut.csd.ganymede.rmi.db_field db_field} remote interface which is
  * returned by the DBObject getField methods.  DBObject is not
  * directly involved in the client's interaction with the DBFields,
  * although the DBFields will call methods on the owning DBObject to
  * consult about permissions and the like.  Clients that call the
  * GanymedeSession's {@link
- * arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid)
+ * arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
  * view_db_object()} method to view a DBObject actually interact with
  * a copy of the DBObject created by the view_db_object() method to
  * enforce appropriate read permissions.</p>
  *
  * <p>A plain DBObject is not editable;  all value-changing calls to DBFields contained
  * in a plain DBObject will reject any change requests.  In order to edit a DBObject,
- * a client must get access to a {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+ * a client must get access to a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
  * object derived from the DBObject.  This is typically done by calling
- * {@link arlut.csd.ddroid.rmi.Session#edit_db_object(arlut.csd.ddroid.common.Invid) edit_db_object}
- * on the server's {@link arlut.csd.ddroid.rmi.Session Session} remote interface.</p>
+ * {@link arlut.csd.ganymede.rmi.Session#edit_db_object(arlut.csd.ganymede.common.Invid) edit_db_object}
+ * on the server's {@link arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
  *
  * <p>The DBStore contains a single read-only DBObject in its database for each Invid.
  * In order to change a DBObject, that DBObject must have its 
- * {@link arlut.csd.ddroid.server.DBObject#createShadow(arlut.csd.ddroid.server.DBEditSet) createShadow}
+ * {@link arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet) createShadow}
  * method called.  This is a synchronized method which attaches a new DBEditObject
  * to the DBObject.  Only one DBEditObject can be created from a single DBObject at
  * a time, and it must be created in the context of a
- * {@link arlut.csd.ddroid.server.DBEditSet DBEditSet} transaction object.  Once the DBEditObject
+ * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} transaction object.  Once the DBEditObject
  * is created, that transaction has exclusive right to make changes to the DBEditObject.  When
  * the transaction is committed, a new DBObject is created from the values held in the
  * DBEditObject.  That DBObject is then placed back into the DBStore, replacing the
@@ -148,14 +148,14 @@ import arlut.csd.ddroid.rmi.db_object;
  *
  * <p>Actually, the above picture is a bit too simple.  The server's DBStore object does
  * not directly contain DBObjects, but instead contains
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects, which define a type
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, which define a type
  * of DBObject, and contain all DBObjects of that type in turn.  The DBObjectBase
  * is responsible for making sure that each DBObject has its own unique Invid based
  * on the DBObjectBase's type id and a unique number for the individual DBObject.</p>
  * 
  * <p>In terms of type definition, the DBObjectBase object acts as a template for
  * objects of the type.  Each DBObjectBase contains a set of
- * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField} objects which
+ * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} objects which
  * define the names and types of DBFields that a DBObject of that type is
  * meant to store.</p>
  *
@@ -167,12 +167,12 @@ import arlut.csd.ddroid.rmi.db_object;
  * operations.</p>
  *
  * <p>All DBObjects have a certain number of DBFields pre-defined, including an
- * {@link arlut.csd.ddroid.server.InvidDBField InvidDBField} listing the owner groups
- * that this DBObject belongs to, a number of {@link arlut.csd.ddroid.server.StringDBField StringDBField}s
+ * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} listing the owner groups
+ * that this DBObject belongs to, a number of {@link arlut.csd.ganymede.server.StringDBField StringDBField}s
  * that contain information about the last admin to modify this DBObject,
- * {@link arlut.csd.ddroid.server.DateDBField DateDBField}s recording the creation and
+ * {@link arlut.csd.ganymede.server.DateDBField DateDBField}s recording the creation and
  * last modification dates of this object, and so on.  See 
- * {@link arlut.csd.ddroid.common.SchemaConstants SchemaConstants} for details on the
+ * {@link arlut.csd.ganymede.common.SchemaConstants SchemaConstants} for details on the
  * built-in field types.</p>
  *
  * <p>DBObject has had its synchronization revised so that only the createShadow,
@@ -195,10 +195,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBObject");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBObject");
 
   // ---
 
@@ -221,7 +221,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * Our fields, hashed into an array
    *
-   * @see arlut.csd.ddroid.server.DBField
+   * @see arlut.csd.ganymede.server.DBField
    *
    */
 
@@ -247,7 +247,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * if this object is being viewed by a particular
-   * Directory Droid Session, we record that here.
+   * Ganymede Session, we record that here.
    */
 
   protected GanymedeSession gSession;
@@ -345,8 +345,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @param eObj The shadow object to copy into the new DBObject
    *
-   * @see arlut.csd.ddroid.server.DBEditSet#commit()
-   * @see arlut.csd.ddroid.server.DBEditSet#release()
+   * @see arlut.csd.ganymede.server.DBEditSet#commit()
+   * @see arlut.csd.ganymede.server.DBEditSet#release()
    */
   
   DBObject(DBEditObject eObj)
@@ -403,7 +403,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		
 		// Making a copy here rather than saving a ref to the
 		// exported field makes a *huge* difference in overall
-		// memory usage on the Directory Droid server.
+		// memory usage on the Ganymede server.
 		
 		saveField(field.getCopy(this));	// safe since we started with an empty fieldAry
 	      }
@@ -601,7 +601,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * Returns the numeric id of the object in the objectBase
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final int getID()
@@ -614,7 +614,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * Returns the invid of this object
    * for the db_object remote interface
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final Invid getInvid()
@@ -626,7 +626,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * Returns the numeric id of the object's objectBase
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final short getTypeID()
@@ -638,7 +638,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * Returns the name of the object's objectBase
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final String getTypeName()
@@ -761,10 +761,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <P>Returns the primary label of this object.. calls
-   * {@link arlut.csd.ddroid.server.DBEditObject#getLabelHook(arlut.csd.ddroid.server.DBObject) getLabelHook()}
-   * on the {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} serving
-   * as the {@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook} for
-   * this object's {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
+   * on the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} serving
+   * as the {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook} for
+   * this object's {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * to get the label for this object.</P>
    *
    * <P>If the objectHook customization object doesn't define a getLabelHook()
@@ -778,7 +778,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * and getValueString() are both synchronized on subcomponents of DBObject,
    * so this method should be adequately safe as written.</P>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public String getLabel()
@@ -906,7 +906,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * Returns true if this object is an embedded type.
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    *
    */
 
@@ -920,8 +920,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * to disk.  emit() dumps an object in its entirety to the
    * given out stream.</p>
    *
-   * @param out A {@link arlut.csd.ddroid.server.DBJournal DBJournal} or
-   * {@link arlut.csd.ddroid.server.DBStore DBStore} writing stream.
+   * @param out A {@link arlut.csd.ganymede.server.DBJournal DBJournal} or
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} writing stream.
    */
 
   void emit(DataOutput out) throws IOException
@@ -972,7 +972,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>The receive() method is part of the process of loading the
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}
    * from disk.  receive() reads an object from the given in stream and
    * instantiates it into the DBStore.</p>
    *
@@ -1305,7 +1305,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @param editset The transaction owning this object's shadow.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet#release()
+   * @see arlut.csd.ganymede.server.DBEditSet#release()
    *
    */
 
@@ -1338,7 +1338,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Get read-only Vector of DBFieldInfo objects for the custom
    * DBFields contained in this object, in display order.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public Vector getFieldInfoVector()
@@ -1409,7 +1409,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * DBField with the same field id has not previously been stored, so
    * it should only be used when the DBObject's fieldAry is in a known
    * state.  Otherwise, {@link
-   * arlut.csd.ddroid.server.DBObject#clearField(short) clearField()}
+   * arlut.csd.ganymede.server.DBObject#clearField(short) clearField()}
    * should be called before calling saveField(), so that duplicate
    * field id's are not accidentally introduced into the DBObject's
    * fieldAry.</p>
@@ -1697,7 +1697,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @param id The field code for the desired field of this object.
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    *
    */
 
@@ -1711,7 +1711,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @param fieldname The fieldname for the desired field of this object
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final db_field getField(String fieldname)
@@ -1786,7 +1786,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Get complete list of DBFields contained in this object.
    * The list returned will appear in unsorted order.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public db_field[] listFields()
@@ -1824,7 +1824,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Returns true if inactivate() is a valid operation on
    * checked-out objects of this type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public boolean canInactivate()
@@ -1836,7 +1836,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Returns true if this object has been inactivated and is
    * pending deletion.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public boolean isInactivated()
@@ -1851,7 +1851,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method can be overridden in DBEditObject subclasses to do a
    * more refined validity check if desired.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public boolean isValid()
@@ -1861,7 +1861,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>This method scans through all fields defined in the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * for this object type and determines if all required fields have
    * been filled in.  If everything is ok, this method will return
    * null.  If any required fields are found not to have been filled
@@ -1870,7 +1870,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * <p>This method is used by the transaction commit logic to ensure a
    * consistent transaction. If server-local code has called
-   * {@link arlut.csd.ddroid.server.GanymedeSession#enableOversight(boolean) GanymedeSession.enableOversight(false)}
+   * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean) GanymedeSession.enableOversight(false)}
    * this method will not be called at transaction commit time.</p>
    */
 
@@ -1941,7 +1941,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Returns the date that this object is to go through final removal
    * if it has been inactivated.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public Date getRemovalDate()
@@ -1959,7 +1959,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * <p>Returns true if this object has an expiration date set.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public boolean willExpire()
@@ -1970,7 +1970,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * <p>Returns true if this object has a removal date set.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public boolean willBeRemoved()
@@ -1982,7 +1982,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Returns the date that this object is to be automatically
    * inactivated if it has an expiration date set.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public Date getExpirationDate()
@@ -2022,7 +2022,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public ReturnVal setFieldValue(short fieldID, Object value)
@@ -2041,7 +2041,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public Object getFieldValue(short fieldID) throws DDPermissionsException
@@ -2123,7 +2123,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_object
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public Vector getFieldValues(short fieldID) throws DDPermissionsException
@@ -2267,7 +2267,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method is used to correct this object's base pointers
    * when the base changes.  This happens when the schema is
    * edited.. this method is called on all objects under a {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} to make the object
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} to make the object
    * point to the new version of the DBObjectBase.  This method also
    * takes care of cleaning out any fields that have become undefined
    * due to a change in the schema for the field, as in a change from
@@ -2441,8 +2441,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * has no entries for this object at all.</p>
    *
    * <p>During the commit process of a normal transaction, the
-   * {@link arlut.csd.ddroid.server.DBEditSet#syncObjBackPointers(arlut.csd.ddroid.server.DBEditObject) syncObjBackPointers()}
-   * method in the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet} class handles these
+   * {@link arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject) syncObjBackPointers()}
+   * method in the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles these
    * updates.</p>
    */
 
@@ -2484,8 +2484,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * being replaced with an updated version from the journal.</p>
    *
    * <p>During the commit process of a normal transaction, the
-   * {@link arlut.csd.ddroid.server.DBEditSet#syncObjBackPointers(arlut.csd.ddroid.server.DBEditObject) syncObjBackPointers()}
-   * method in the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet} class handles these
+   * {@link arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject) syncObjBackPointers()}
+   * method in the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles these
    * updates.</p>
    */
 
@@ -2548,7 +2548,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * their contents.</p>
    * 
    * <p>This method calls
-   * {@link arlut.csd.ddroid.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
+   * {@link arlut.csd.ganymede.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
    * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
    */
 
@@ -2571,7 +2571,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * JDK.</p>
    * 
    * <p>This method calls
-   * {@link arlut.csd.ddroid.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
+   * {@link arlut.csd.ganymede.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
    * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
    */
 
@@ -2596,7 +2596,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * programmatic operations.</p>
    *
    * <p>This method is called by
-   * {@link arlut.csd.ddroid.server.DBObject#getSummaryDescription() getSummaryDescription}.</p>
+   * {@link arlut.csd.ganymede.server.DBObject#getSummaryDescription() getSummaryDescription}.</p>
    *
    * @param buffer The StringBuffer to append this object's description to
    * @param prefix Used for recursive calls on embedded objects, this prefix will

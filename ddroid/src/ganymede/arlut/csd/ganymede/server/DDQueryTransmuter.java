@@ -2,10 +2,10 @@
 
    DDQueryTransmuter.java
 
-   This is the textual query processor for the Directory Droid server.
+   This is the textual query processor for the Ganymede server.
    It takes a string query, applies an ANTLR grammar to it, and
    generates a traditional Ganymede-style
-   arlut.csd.ddroid.common.Query out of it.
+   arlut.csd.ganymede.common.Query out of it.
    
    Created: 31 August 2004
    Last Mod Date: $Date$
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,20 +54,20 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
-import arlut.csd.ddroid.common.DDParseException;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryAndNode;
-import arlut.csd.ddroid.common.QueryDeRefNode;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.QueryOrNode;
+import arlut.csd.ganymede.common.DDParseException;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryAndNode;
+import arlut.csd.ganymede.common.QueryDeRefNode;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.QueryOrNode;
 
 import arlut.csd.Util.StringUtils;
 
@@ -93,11 +93,11 @@ import java.util.HashMap;
 
 /**
  * <p>This class processes textual queries using an ANTLR-generated parser, and
- * generates an old, Ganymede-style arlut.csd.ddroid.common.Query, with attendant
- * arlut.csd.ddroid.common.QueryNode tree.</p>
+ * generates an old, Ganymede-style arlut.csd.ganymede.common.Query, with attendant
+ * arlut.csd.ganymede.common.QueryNode tree.</p>
  *
- * @see {@link arlut.csd.ddroid.common.QueryNode QueryNode}
- * @see {@link arlut.csd.ddroid.common.Query Query}
+ * @see {@link arlut.csd.ganymede.common.QueryNode QueryNode}
+ * @see {@link arlut.csd.ganymede.common.Query Query}
  *
  * @version $Id$
  * @author Deepak Giridharagopal, deepak@arlut.utexas.edu

@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -56,7 +56,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.text.DateFormat;
@@ -76,14 +76,14 @@ import arlut.csd.Util.XMLElement;
 import arlut.csd.Util.XMLEndDocument;
 import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLUtils;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.pass_field;
-import arlut.csd.ddroid.rmi.perm_field;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.pass_field;
+import arlut.csd.ganymede.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -94,7 +94,7 @@ import arlut.csd.ddroid.rmi.perm_field;
 /**
  * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for
- * {@link arlut.csd.ddroid.client.xmlclient xmlclient}.  This
+ * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.  This
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
@@ -815,7 +815,7 @@ public class xmlfield implements FieldType {
     if (result2 != null && result1 != null)
       {
 	// test to see if the two time stamps are within a second or
-	// so of each other.. the Directory Droid client doesn't always
+	// so of each other.. the Ganymede client doesn't always
 	// round times to the nearest second when setting times
 	// in date fields, but the time string in 'val', if present,
 	// will only have second resolution
@@ -921,15 +921,15 @@ public class xmlfield implements FieldType {
    * <p>This method is responsible for propagating this field's data
    * values to the server.</p>
    *
-   * <p>Returns a {@link arlut.csd.ddroid.common.ReturnVal ReturnVal}
+   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
    * indicating the result of the server
    * operation.  This result may be null on success, or it may
    * be an encoded success or failure message in the normal
-   * arlut.csd.ddroid.common.ReturnVal way.</p>
+   * arlut.csd.ganymede.common.ReturnVal way.</p>
    *
    * <p>This method will throw an exception if the xmlobject that
    * contains this xmlfield has not established a remote
-   * {@link arlut.csd.ddroid.rmi.db_object db_object} reference to
+   * {@link arlut.csd.ganymede.rmi.db_object db_object} reference to
    * the server through which the editing can be performed.</p>
    */
 
@@ -1612,7 +1612,7 @@ public class xmlfield implements FieldType {
 }
 
 /**
- * <p>This class is used by the Directory Droid XML client to represent
+ * <p>This class is used by the Ganymede XML client to represent
  * an invid object reference field value.  This field value
  * may or may not be fully resolved to an actual invid on the
  * server, depending on what stage of processing the XML
@@ -1633,7 +1633,7 @@ class xInvid {
 
   /**
    * <p>The id string for this xInvid from the XML file.  Will
-   * be used to resolve this xInvid to an actual {@link arlut.csd.ddroid.common.Invid Invid}
+   * be used to resolve this xInvid to an actual {@link arlut.csd.ganymede.common.Invid Invid}
    * on the server, if set.</p>
    *
    * <p>In the XML file, this field is taken from the id attribute.</p>
@@ -1768,7 +1768,7 @@ class xInvid {
 }
 
 /**
- * <p>This class is used by the Directory Droid XML client to represent
+ * <p>This class is used by the Ganymede XML client to represent
  * a password field value.</p>
  *
  * <p>This class has five separate value fields, for the
@@ -1889,7 +1889,7 @@ class xPassword {
 
 
 /**
- * <p>This class is used by the Directory Droid XML client to represent
+ * <p>This class is used by the Ganymede XML client to represent
  * a permission field value.</p>
  *
  * <p>xPerm are slightly recursive, in that a top-level xPerm
@@ -1928,7 +1928,7 @@ class xPerm {
   /**
    * <p>xPerm constructor.  When the constructor is called, the
    * xPerm reads the next item from the xmlclient's 
-   * {@link arlut.csd.ddroid.client.xmlclient#getNextItem() getNextItem()}
+   * {@link arlut.csd.ganymede.client.xmlclient#getNextItem() getNextItem()}
    * method and uses it to initialize the xPerm.</p>
    *
    * <p>If objectType is true, the xPerm constructor assumes that

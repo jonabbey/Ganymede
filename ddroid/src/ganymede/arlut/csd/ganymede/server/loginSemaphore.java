@@ -4,7 +4,7 @@
    loginSemaphore.java
 
    This class provides a handy counting semaphore used to arbitrate user
-   login access to the Directory Droid server.
+   login access to the Ganymede server.
 
    Created: 26 January 2000
    Last Mod Date: $Date$
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 
 /*------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ package arlut.csd.ddroid.server;
 
 /**
  * <P>This class provides a handy counting semaphore used to arbitrate user
- * login access to the {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer}.
+ * login access to the {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}.
  * The server uses a single loginSemaphore to safely handle schema edits
  * and server shutdowns.</P>
  */
@@ -96,7 +96,7 @@ public final class loginSemaphore {
    * <p>disables logins</p>
    *
    * <p>This method turns off user logins in Ganymede.  A piece of code in the
-   * Directory Droid server can call disable() on this object to signal that no further
+   * Ganymede server can call disable() on this object to signal that no further
    * logins or schema edits should be allowed.</p>
    *
    * @param message An explanation of why logins are being disabled.

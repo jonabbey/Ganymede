@@ -4,7 +4,7 @@
 
    GanymedeAdmin is the server-side implementation of the adminSession
    interface;  GanymedeAdmin provides the means by which privileged users
-   can carry out privileged operations on the Directory Droid server, including
+   can carry out privileged operations on the Ganymede server, including
    status monitoring and administrative activities.
    
    Created: 17 January 1997
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -64,10 +64,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.AdminAsyncResponder;
-import arlut.csd.ddroid.rmi.SchemaEdit;
-import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.AdminAsyncResponder;
+import arlut.csd.ganymede.rmi.SchemaEdit;
+import arlut.csd.ganymede.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -77,13 +77,13 @@ import arlut.csd.ddroid.rmi.adminSession;
 
 /**
  * <p>GanymedeAdmin is the server-side implementation of the
- * {@link arlut.csd.ddroid.rmi.adminSession adminSession}
+ * {@link arlut.csd.ganymede.rmi.adminSession adminSession}
  * interface;  GanymedeAdmin provides the means by which privileged users
- * can carry out privileged operations on the Directory Droid server, including
+ * can carry out privileged operations on the Ganymede server, including
  * status monitoring and administrative activities.</p>
  *
  * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
- * GanymedeAdmin implements {@link arlut.csd.ddroid.rmi.adminSession adminSession},
+ * GanymedeAdmin implements {@link arlut.csd.ganymede.rmi.adminSession adminSession},
  * providing a hook for the admin console to talk to.  On the other,
  * GanymedeAdmin contains a lot of static fields and methods which the
  * server code uses to communicate information to any admin consoles
@@ -108,7 +108,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * Static vector of GanymedeAdmin instances for which
    * remote exceptions were caught in the static
    * update methods.  Used by
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin#detachBadConsoles() detachBadConsoles()}
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin#detachBadConsoles() detachBadConsoles()}
    * to remove consoles that we were not able to communicate with.
    */
 
@@ -121,7 +121,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   private static String state;
 
   /**
-   * Timestamp that the Directory Droid server last consolidated its journal
+   * Timestamp that the Ganymede server last consolidated its journal
    * file and dumped its database to disk.
    */
 
@@ -190,7 +190,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   /**
    * <p>This static method is used to send debug log info to
    * the consoles.  It is used by
-   * {@link arlut.csd.ddroid.server.Ganymede#debug(java.lang.String) Ganymede.debug()}
+   * {@link arlut.csd.ganymede.server.Ganymede#debug(java.lang.String) Ganymede.debug()}
    * to append information to the console logs.</p>
    */
 
@@ -651,7 +651,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * form of a callback.</p>
    *
    * <P>This constructor is called from
-   * {@link arlut.csd.ddroid.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()},
+   * {@link arlut.csd.ganymede.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()},
    * which is responsible for authenticating the name and password before
    * calling this constructor.</P>
    */
@@ -817,7 +817,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * object</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    *
    * <p>No server-side code should call this method from a thread that
@@ -836,7 +836,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * object</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    *
    * <p>No server-side code should call this method from a thread that
@@ -889,7 +889,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>This method is used to allow the admin console to retrieve a remote reference to
-   * a {@link arlut.csd.ddroid.server.serverAdminAsyncResponder}, which will allow
+   * a {@link arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will allow
    * the admin console to poll the server for asynchronous messages from the server.</p>
    *
    * <p>This is used to allow the server to send admin notifications
@@ -913,12 +913,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <P>This method lets the admin console explicitly request a
    * refresh.  Upon being called, the server will call several methods
    * on the admin console's {@link
-   * arlut.csd.ddroid.server.serverAdminAsyncResponder
+   * arlut.csd.ganymede.server.serverAdminAsyncResponder
    * serverAdminAsyncResponder} interface to pass current status
    * information to the console.</P>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -945,7 +945,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * execution.</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -965,11 +965,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>Kick all users off of the Directory Droid server on behalf of this
+   * <p>Kick all users off of the Ganymede server on behalf of this
    * admin console</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -987,11 +987,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>Kick a user off of the Directory Droid server on behalf of this admin
+   * <p>Kick a user off of the Ganymede server on behalf of this admin
    * console</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1019,7 +1019,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * out.  No new users will be allowed to login.
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1050,7 +1050,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <P>dump the current state of the db to disk</P>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1084,11 +1084,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>run a long-running verification suite on the Directory Droid server
+   * <p>run a long-running verification suite on the Ganymede server
    * database's invid links</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1120,12 +1120,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>run a long-running verification and repair operation on the Ganymede
    * server's invid database links</p>   
    *
-   * <p>Removes any invid pointers in the Directory Droid database whose
+   * <p>Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
    * unless there is a bug some place in the server.</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1153,7 +1153,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * their containers</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1185,7 +1185,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>Removes any embedded objects which do not have containers.</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1201,14 +1201,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>Causes a pre-registered task in the Directory Droid server
+   * <p>Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
    * will have no effect if the task is currently running.</p>
    *
    * @param name The name of the task to run
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1231,7 +1231,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>Causes a running task to be interrupted as soon as possible.
-   * Directory Droid tasks need to be specifically written to be able
+   * Ganymede tasks need to be specifically written to be able
    * to respond to interruption, so it is not guaranteed that the
    * task named will always be able to safely or immediately respond
    * to a stopTask() command.</p>
@@ -1239,7 +1239,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * @param name The name of the task to interrupt
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1262,14 +1262,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>Causes a registered task to be made ineligible for execution
-   * until {@link arlut.csd.ddroid.server.GanymedeAdmin#enableTask(java.lang.String) enableTask()}
+   * until {@link arlut.csd.ganymede.server.GanymedeAdmin#enableTask(java.lang.String) enableTask()}
    * is called.  This method will not stop a task that is currently
    * running.</p>
    *
    * @param name The name of the task to disable
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1292,13 +1292,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>Causes a task that was temporarily disabled by
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin#disableTask(java.lang.String) disableTask()}
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin#disableTask(java.lang.String) disableTask()}
    * to be available for execution again.</p>
    *
    * @param name The name of the task to enable
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 
@@ -1322,17 +1322,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   /**
    * <p>Lock the server to prevent client logins and edit the server
    * schema.  This method will return a {@link
-   * arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} remote reference to the
+   * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to the
    * admin console, which will present a graphical schema editor using
    * this remote reference.  The server will remain locked until the
    * admin console commits or cancels the schema editing session,
    * either through affirmative action or through the death of the
    * admin console or the network connection.  The {@link
-   * arlut.csd.ddroid.server.DBSchemaEdit DBSchemaEdit} class on the server
+   * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the server
    * coordinates everything.</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} remote interface,
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    */
 

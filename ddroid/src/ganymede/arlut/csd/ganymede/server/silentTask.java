@@ -4,7 +4,7 @@
 
    This is a simple labeling interface used to indicate to the
    GanymedeScheduler that tasks implementing this interface don't need
-   to have their execution be announced to the Directory Droid server's
+   to have their execution be announced to the Ganymede server's
    stdout.
 
    Created: 8 February 2001
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 
 /*------------------------------------------------------------------------------
@@ -65,9 +65,9 @@ package arlut.csd.ddroid.server;
 
 /**
  * <p>This is a simple labeling interface used to indicate to the
- * {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} that
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} that
  * tasks implementing this interface don't need to have their
- * execution be announced to the Directory Droid server's stdout.</p>
+ * execution be announced to the Ganymede server's stdout.</p>
  */
 
 public interface silentTask {

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,13 +52,13 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -68,14 +68,14 @@ import arlut.csd.ddroid.common.Invid;
 
 /**
  * <p>The DBDeletionManager class is used to handle deletion locking
- * in the Directory Droid {@link arlut.csd.ddroid.server.DBStore DBStore}.</p>
+ * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
  */
 
 public class DBDeletionManager {
 
   /**
-   * <p>A hashtable mapping {@link arlut.csd.ddroid.server.DBSession
-   * DBSession} objects to a Vector of {@link arlut.csd.ddroid.common.Invid
+   * <p>A hashtable mapping {@link arlut.csd.ganymede.server.DBSession
+   * DBSession} objects to a Vector of {@link arlut.csd.ganymede.common.Invid
    * Invid} objects.</p>
    *
    * <p>DBSession will appear as keys in this hash when those
@@ -87,8 +87,8 @@ public class DBDeletionManager {
   private static Hashtable sessions = new Hashtable();
 
   /**
-   * <p>A hashtable mapping {@link arlut.csd.ddroid.common.Invid Invid}
-   * objects to a Vector of {@link arlut.csd.ddroid.server.DBSession
+   * <p>A hashtable mapping {@link arlut.csd.ganymede.common.Invid Invid}
+   * objects to a Vector of {@link arlut.csd.ganymede.server.DBSession
    * DBSession} objects.</p>
    *
    * <p>Invids will appear as keys in this hash when the DBObjects

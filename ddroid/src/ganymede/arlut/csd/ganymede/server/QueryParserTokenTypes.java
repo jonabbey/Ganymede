@@ -1,6 +1,6 @@
 // $ANTLR 2.7.4: "query.g" -> "QueryParser.java"$
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 public interface QueryParserTokenTypes {
 	int EOF = 1;

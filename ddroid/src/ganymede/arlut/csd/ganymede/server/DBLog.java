@@ -18,7 +18,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -55,7 +55,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -67,11 +67,11 @@ import java.util.Vector;
 
 import Qsmtp.Qsmtp;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -84,12 +84,12 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * reports from the system log based on specific criteria.  The DBLog class
  * is responsible for logging events to an on-disk file, for emailing
  * notification of events to users, admins, and other interested parties,
- * and for scanning through a Directory Droid log file for events pertaining to
+ * and for scanning through a Ganymede log file for events pertaining to
  * a designated object invid.</p>
  *
  * <p>Most of the methods in this class must be synchronized, both to keep the
  * logfile itself orderly, and to allow the various log-processing methods
- * in {@link arlut.csd.ddroid.server.DBLogEvent DBLogEvent} to re-use the
+ * in {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent} to re-use the
  * 'multibuffer' StringBuffer.</p>
  */
 
@@ -183,13 +183,13 @@ public class DBLog {
   /* -- */
 
   /**
-   * <p>Constructor for a Directory Droid log object.</p>
+   * <p>Constructor for a Ganymede log object.</p>
    *
    * @param filename Filename for an on-disk log file.  Must point to a valid file
    * @param mailFilename Filename for an optional mail events log file.  May be null or empty if
    * no disk-logging of advisory email events is desired.
    * @param gSession GanymedeSession reference used to allow DBLog code to do queries
-   * on the Directory Droid database
+   * on the Ganymede database
    * @param suppressEmail A boolean that indicates whether we should switch off the sending of
    * emails
    */
@@ -1507,7 +1507,7 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ddroid.common.Invid Invid}'s
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
    * representing objects touched
    * during a transaction, and returns a Vector of email addresses that
    * should be notified of operations affecting the objects in the
@@ -1529,7 +1529,7 @@ public class DBLog {
 
   
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ddroid.common.Invid Invid}'s
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
    * representing objects touched
    * during a transaction, and returns a Vector of email addresses that
    * should be notified of operations affecting the objects in the
@@ -1542,7 +1542,7 @@ public class DBLog {
   }
   
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ddroid.common.Invid Invid}'s
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
    * representing objects touched
    * during a transaction, and returns a Vector of email addresses that
    * should be notified of operations affecting the objects in the
@@ -1744,7 +1744,7 @@ public class DBLog {
 
 /**
  * <P>This class is used to store system event information derived from
- * the Directory Droid database.</P>
+ * the Ganymede database.</P>
  */
 
 class systemEventType {
@@ -1858,7 +1858,7 @@ class systemEventType {
 
 /**
  * <P>This class is used to store object event information derived from
- * the Directory Droid database for the {@link arlut.csd.ddroid.server.DBLog DBLog} class.</P>
+ * the Ganymede database for the {@link arlut.csd.ganymede.server.DBLog DBLog} class.</P>
  */
 
 class objectEventType {
@@ -1981,7 +1981,7 @@ class objectEventType {
 
 /**
  * <P>This class is used to store event information derived from the Ganymede
- * database for the {@link arlut.csd.ddroid.server.DBLog DBLog} class.</P>
+ * database for the {@link arlut.csd.ganymede.server.DBLog DBLog} class.</P>
  */
 
 class MailOut {

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -64,8 +64,8 @@ import java.util.Vector;
 
 /**
  * <p>DBLocks arbitrate access to {@link
- * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects in the
- * Directory Droid server's {@link arlut.csd.ddroid.server.DBStore DBStore}.
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in the
+ * Ganymede server's {@link arlut.csd.ganymede.server.DBStore DBStore}.
  * Threads wishing to read from, dump, or update object bases in the
  * DBStore must be in possession of an established DBLock.  The
  * general scheme is that any number of readers and/or dumpers can
@@ -85,21 +85,21 @@ import java.util.Vector;
  * methods of the concrete DBLock subclasses.</P>
  *
  * <P>As mentioned above, all DBLock's are issued in the context of
- * one or more {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+ * one or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
  * objects.  The DBObjectBases are actually the things being locked.
  * To maintain multi-threaded safety of the lock system across
  * multiple DBObjectBases, the DBLock {@link
- * arlut.csd.ddroid.server.DBLock#establish(java.lang.Object) establish()}
- * and {@link arlut.csd.ddroid.server.DBLock#release() release()} methods
- * (as implemented in {@link arlut.csd.ddroid.server.DBReadLock
- * DBReadLock}, {@link arlut.csd.ddroid.server.DBReadLock DBWriteLock}, and
- * {@link arlut.csd.ddroid.server.DBReadLock DBDumpLock}) are all
+ * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object) establish()}
+ * and {@link arlut.csd.ganymede.server.DBLock#release() release()} methods
+ * (as implemented in {@link arlut.csd.ganymede.server.DBReadLock
+ * DBReadLock}, {@link arlut.csd.ganymede.server.DBReadLock DBWriteLock}, and
+ * {@link arlut.csd.ganymede.server.DBReadLock DBDumpLock}) are all
  * synchronized on the Ganymede's DBStore object.  This
  * synchronization is critical for the proper functioning of the
  * DBLock system.</P>
  * 
  * <p>There is currently no support for handling timeouts, and locks can persist
- * indefinitely.  However, the {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+ * indefinitely.  However, the {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
  * class will detect a client that has died, and will properly clean up any
  * locks held by the user.</p> 
  */
@@ -108,10 +108,10 @@ public abstract class DBLock {
 
   /**
    * <P>All DBLock's have an identifier key, which is used to
-   * identify the lock in the {@link arlut.csd.ddroid.server.DBStore DBStore}'s
-   * {@link arlut.csd.ddroid.server.DBLockSync DBLockSync} object.  The
+   * identify the lock in the {@link arlut.csd.ganymede.server.DBStore DBStore}'s
+   * {@link arlut.csd.ganymede.server.DBLockSync DBLockSync} object.  The
    * establish() methods in the DBLock subclasses consult the DBStore.lockSync
-   * to make sure that no {@link arlut.csd.ddroid.server.DBSession DBSession}
+   * to make sure that no {@link arlut.csd.ganymede.server.DBSession DBSession}
    * ever possesses more than one write lock,
    * to prevent deadlocks from occuring in the server.</P>
    */
@@ -121,7 +121,7 @@ public abstract class DBLock {
   /**
    * <P>All DBLock's establish() and release() methods synchronize
    * their critical sections on the DBLockSync object held in the
-   * Directory Droid server's DBStore object in order to guarantee that all
+   * Ganymede server's DBStore object in order to guarantee that all
    * lock negotiations are thread-safe.</P>
    */
 
@@ -129,7 +129,7 @@ public abstract class DBLock {
 
   /**
    * <P>In order to prevent deadlocks, each individual lock must be established on
-   * all applicable {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases} at the
+   * all applicable {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the
    * time the lock is initially established.  baseSet is the Vector of DBObjectBases
    * that this DBLock is/will be locked on.</P>
    */
@@ -176,7 +176,7 @@ public abstract class DBLock {
 
   /**
    * Returns true if the lock has the given
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * locked.
    */
 
@@ -203,7 +203,7 @@ public abstract class DBLock {
 
   /**
    * Returns true if the lock has all of the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * objects in the provided Vector locked.
    */
 
@@ -217,7 +217,7 @@ public abstract class DBLock {
 
   /**
    * Returns true if the lock has any of the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * objects in the provided Vector locked.
    */
 
@@ -231,14 +231,14 @@ public abstract class DBLock {
 
   /**
    * <P>This method waits until the lock can be established.  The
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases} locked
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} locked
    * are specified in the constructor of the implementation subclass
-   * ({@link arlut.csd.ddroid.server.DBReadLock DBReadLock},
-   * {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}, or
-   * {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLock}).</P>
+   * ({@link arlut.csd.ganymede.server.DBReadLock DBReadLock},
+   * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, or
+   * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}).</P>
    *
    * <P>A thread that calls establish() will be suspended (waiting
-   * on the server's {@link arlut.csd.ddroid.server.DBStore DBStore} until 
+   * on the server's {@link arlut.csd.ganymede.server.DBStore DBStore} until 
    * all DBObjectBases listed in the DBLock's constructor are available
    * to be locked.  At that point, the thread blocking on establish()
    * will wake up possessing a lock on the requested DBObjectBases.</P>
@@ -247,7 +247,7 @@ public abstract class DBLock {
    * admin console may reject a client whose thread is blocking on
    * establish(), for instance, or the server may be shut down.  In
    * those cases, another thread may call the DBLock's
-   * {@link arlut.csd.ddroid.server.DBLock#abort() abort()} method, in
+   * {@link arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
    * which case
    * establish() will throw an InterruptedException, and the lock will
    * not be established.</P>

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,11 +51,11 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ganymede.common.DumpResult;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -65,7 +65,7 @@ import arlut.csd.ddroid.common.DumpResult;
 
 /**
  * <p>The DumpResultBuilder is a server-side factory tool used to
- * generate the serializable {@link arlut.csd.ddroid.common.DumpResult
+ * generate the serializable {@link arlut.csd.ganymede.common.DumpResult
  * DumpResult} object used to pass data dump results to the client.</p>
  */
 
@@ -147,7 +147,7 @@ public class DumpResultBuilder {
   }
 
   /**
-   * <p>Returns the {@link arlut.csd.ddroid.common.DumpResult DumpResult} object
+   * <p>Returns the {@link arlut.csd.ganymede.common.DumpResult DumpResult} object
    * created by this DumpResultBuilder.</p>
    */
 

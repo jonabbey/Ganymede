@@ -2,9 +2,9 @@
 
    GanymedeServer.java
 
-   The GanymedeServer object is created by Directory Droid at start-up time
+   The GanymedeServer object is created by Ganymede at start-up time
    and published to the net for client logins via RMI.  As such,
-   the GanymedeServer object is the first Directory Droid code that a client
+   the GanymedeServer object is the first Ganymede code that a client
    will directly interact with.
    
    Created: 17 January 1997
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,19 +70,19 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryAndNode;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.QueryOrNode;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryAndNode;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.QueryOrNode;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,16 +92,16 @@ import arlut.csd.ddroid.rmi.adminSession;
 
 /**
  * <p>The GanymedeServer object is created by the
- * {@link arlut.csd.ganymede.Directory Droid Directory Droid class} at start-up time
+ * {@link arlut.csd.ganymede.Ganymede Ganymede class} at start-up time
  * and published to the net for client logins via RMI.  As such,
- * the GanymedeServer object is the first Directory Droid code that a client
+ * the GanymedeServer object is the first Ganymede code that a client
  * will directly interact with.</p>
  */
 
 public class GanymedeServer implements Server {
 
   /**
-   * <P>Singleton server object.  A running Directory Droid Server will have one
+   * <P>Singleton server object.  A running Ganymede Server will have one
    * instance of GanymedeServer active and bound into the RMI registry,
    * and this field will point to it.</P>
    */
@@ -109,14 +109,14 @@ public class GanymedeServer implements Server {
   static GanymedeServer server = null;
 
   /**
-   * <P>Vector of {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
-   * objects for users that are logged into the Directory Droid server remotely.</P>
+   * <P>Vector of {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
+   * objects for users that are logged into the Ganymede server remotely.</P>
    *
    * <P>Note that there may be GanymedeSession objects active that are
    * not listed in this sessions Vector; GanymedeSession objects used for
    * server-side internal operations are not counted here.  This Vector is
    * primarily used to keep track of things for the admin console code in
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}.</P>
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</P>
    */
 
   static private Vector sessions = new Vector();
@@ -163,7 +163,7 @@ public class GanymedeServer implements Server {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
   static TranslationService ts = null;
@@ -195,7 +195,7 @@ public class GanymedeServer implements Server {
 
   public GanymedeServer() throws RemoteException
   {
-    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeServer");
+    ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeServer");
  
     if (server == null)
       {
@@ -216,7 +216,7 @@ public class GanymedeServer implements Server {
 
   /**
    * <p>Simple RMI ping test method.. this method is here so that the
-   * {@link arlut.csd.ddroid.client.ClientBase ClientBase} class can
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class can
    * test to see whether it has truly gotten a valid RMI reference to
    * the server.</p>
    */
@@ -228,10 +228,10 @@ public class GanymedeServer implements Server {
 
   /** 
    * <p>Client login method.  Establishes a {@link
-   * arlut.csd.ddroid.server.GanymedeSession GanymedeSession} object in the
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} object in the
    * server for the client, and returns a serializable {@link
-   * arlut.csd.ddroid.common.ReturnVal ReturnVal} object which will contain
-   * a {@link arlut.csd.ddroid.rmi.Session Session} remote reference
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.rmi.Session Session} remote reference
    * for the client to use, if login was successful.</p>
    *
    * <p>If login is not successful, the ReturnVal object will encode
@@ -242,7 +242,7 @@ public class GanymedeServer implements Server {
    * the GanymedeServer object for statistics and for the admin
    * console's monitoring support.</P>
    *
-   * @see arlut.csd.ddroid.rmi.Server 
+   * @see arlut.csd.ganymede.rmi.Server 
    */
 
   public ReturnVal login(String username, String password) throws RemoteException
@@ -252,10 +252,10 @@ public class GanymedeServer implements Server {
 
   /** 
    * <p>XML Client login method.  Establishes a {@link
-   * arlut.csd.ddroid.server.GanymedeXMLSession GanymedeXMLSession} object
+   * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession} object
    * in the server for the client, and returns a serializable {@link
-   * arlut.csd.ddroid.common.ReturnVal ReturnVal} object which will contain
-   * a {@link arlut.csd.ddroid.rmi.XMLSession XMLSession} remote reference
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} object which will contain
+   * a {@link arlut.csd.ganymede.rmi.XMLSession XMLSession} remote reference
    * for the client to use, if login was successful.</p>
    *
    * <p>If login is not successful, the ReturnVal object will encode
@@ -267,7 +267,7 @@ public class GanymedeServer implements Server {
    * GanymedeServer object for statistics and for the admin console's
    * monitoring support.</P>
    *
-   * @see arlut.csd.ddroid.rmi.Server 
+   * @see arlut.csd.ganymede.rmi.Server 
    */
 
   public ReturnVal xmlLogin(String username, String password) throws RemoteException
@@ -614,12 +614,12 @@ public class GanymedeServer implements Server {
 
   /**
    * <P>This method is called to add a remote user's
-   * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object to the GanymedeServer's static
-   * {@link arlut.csd.ddroid.server.GanymedeServer#sessions sessions}
+   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
-   * Directory Droid admin console.</P>
+   * Ganymede admin console.</P>
    */
 
   public static void addRemoteUser(GanymedeSession session)
@@ -629,12 +629,12 @@ public class GanymedeServer implements Server {
 
   /**
    * <P>This method is called to remove a remote user's
-   * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object from the GanymedeServer's static
-   * {@link arlut.csd.ddroid.server.GanymedeServer#sessions sessions}
+   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
-   * Directory Droid admin console.</P>
+   * Ganymede admin console.</P>
    */
 
   public static void removeRemoteUser(GanymedeSession session)
@@ -644,7 +644,7 @@ public class GanymedeServer implements Server {
 
   /**
    * <P>This method is used by the
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
    * refreshUsers() method to get a summary of the state of the
    * remotely connected users.</P>
    */
@@ -675,7 +675,7 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>Used by the Directory Droid server to transmit build status notifications
+   * <p>Used by the Ganymede server to transmit build status notifications
    * to connected clients.</p>
    */
 
@@ -726,7 +726,7 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the admin console via the {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}
+   * This method is called by the admin console via the {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
    * class to kick a specific user off of the server.
    */
 
@@ -825,8 +825,8 @@ public class GanymedeServer implements Server {
 
   /** 
    * <P>This method retrieves a message from a specified directory in
-   * the Directory Droid installation and passes it back as a StringBuffer.
-   * Used by the Directory Droid server to pass motd information to the
+   * the Ganymede installation and passes it back as a StringBuffer.
+   * Used by the Ganymede server to pass motd information to the
    * client.</P>
    *
    * @param key A text key indicating the file to be retrieved, minus
@@ -942,13 +942,13 @@ public class GanymedeServer implements Server {
 
   /**
    * <P>This public remotely accessible method is called by the
-   * Directory Droid admin console and/or the Directory Droid stopServer script to
+   * Ganymede admin console and/or the Ganymede stopServer script to
    * establish a new admin console connection to the server.
    * Establishes an GanymedeAdmin object in the server.</P>
    *
    * <P>Adds &lt;admin&gt; as a monitoring admin console.</P>
    *
-   * @see arlut.csd.ddroid.rmi.Server
+   * @see arlut.csd.ganymede.rmi.Server
    */
 
   public synchronized ReturnVal admin(String clientName, String clientPass) throws RemoteException
@@ -1132,7 +1132,7 @@ public class GanymedeServer implements Server {
   
   /**
    * <p>This method is used by the
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin#shutdown(boolean) shutdown()}
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean) shutdown()}
    * method to put the server into 'shutdown soon' mode.</p>
    */
 
@@ -1355,7 +1355,7 @@ public class GanymedeServer implements Server {
 
   /**
    *
-   * This method is used when the Directory Droid server module is being
+   * This method is used when the Ganymede server module is being
    * driven by a direct-linked main method.  This method sweeps
    * through all invid's listed in the (loaded) database, and
    * removes any invid's that point to objects not in the database.

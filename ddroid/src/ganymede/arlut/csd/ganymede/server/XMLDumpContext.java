@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 
@@ -74,7 +74,7 @@ import com.jclark.xml.output.XMLWriter;
 public class XMLDumpContext {
 
   /**
-   * <P>If true, the Directory Droid server thread using this
+   * <P>If true, the Ganymede server thread using this
    * XMLDumpContext will include plaintext passwords
    * to the emitted XML file whenever possible</P>
    */
@@ -82,7 +82,7 @@ public class XMLDumpContext {
   boolean dumpPlaintextPasswords;
 
   /**
-   * <P>If true, the Directory Droid server thread using this
+   * <P>If true, the Ganymede server thread using this
    * XMLDumpContext will include the four standard
    * history fields for each object in the emitted XML
    * file.</P>
@@ -184,7 +184,7 @@ public class XMLDumpContext {
    * <P>Returns true if this XMLDumpContext is configured to dump
    * plaintext password information to disk when a password field
    * has enough information in crypt() or md5Crypt() form that the
-   * Directory Droid server would be able to load and authenticate against
+   * Ganymede server would be able to load and authenticate against
    * a non-plaintext version of the password.</P>
    */
 

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -84,13 +84,13 @@ import java.util.Vector;
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.zipIt;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.CategoryNode;
 
 import com.jclark.xml.output.UTF8XMLWriter;
 
@@ -101,44 +101,44 @@ import com.jclark.xml.output.UTF8XMLWriter;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBStore is the main Directory Droid database class. DBStore is responsible for
- * actually handling the Directory Droid database, and manages
+ * <p>DBStore is the main Ganymede database class. DBStore is responsible for
+ * actually handling the Ganymede database, and manages
  * database loads and dumps, locking (in conjunction with 
- * {@link arlut.csd.ddroid.server.DBSession DBSession} and
- * {@link arlut.csd.ddroid.server.DBLock DBLock}), 
- * the {@link arlut.csd.ddroid.server.DBJournal journal}, and schema dumping.</p>
+ * {@link arlut.csd.ganymede.server.DBSession DBSession} and
+ * {@link arlut.csd.ganymede.server.DBLock DBLock}), 
+ * the {@link arlut.csd.ganymede.server.DBJournal journal}, and schema dumping.</p>
  *
  * <P>The DBStore class holds the server's namespace and schema
  * dictionaries, in the form of a collection of
- * {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace} and {@link
- * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects.  Each
+ * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} and {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  Each
  * DBObjectBase contains schema information for an object type,
  * including field definitions for all fields that may be stored in
  * objects of that type.</P>
  *
  * <p>In addition to holding schema information, each DBObjectBase
- * contains an {@link arlut.csd.ddroid.common.Invid Invid}-keyed hash of
- * {@link arlut.csd.ddroid.server.DBObject DBObject}'s of that type in
+ * contains an {@link arlut.csd.ganymede.common.Invid Invid}-keyed hash of
+ * {@link arlut.csd.ganymede.server.DBObject DBObject}'s of that type in
  * memory after the database loading is complete at start-up.  Changes
- * made to the DBStore are done in {@link arlut.csd.ddroid.server.DBEditSet
+ * made to the DBStore are done in {@link arlut.csd.ganymede.server.DBEditSet
  * transactional contexts} using DBSession, which is responsible for
  * initiating journal changes when individual transactions are
- * committed to the database.  Periodically, the Directory Droid server's
- * {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} task
+ * committed to the database.  Periodically, the Ganymede server's
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} task
  * engine will schedule a full {@link
- * arlut.csd.ddroid.server.DBStore#dump(java.lang.String,boolean,boolean)
+ * arlut.csd.ganymede.server.DBStore#dump(java.lang.String,boolean,boolean)
  * dump} to consolidate the journal and update the on-disk database
  * file.  The server will also do a dump when the server's admin
- * console {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}
+ * console {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
  * interface initiates a server shutdown.</p>
  *
  * <p>DBStore was originally written with the intent of being able to serve as
  * a stand-alone in-process transactional object storage system, but in practice, DBStore
- * is now thoroughly integrated with the rest of the Directory Droid server, and particularly
- * with {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}.  Various
- * component classes ({@link arlut.csd.ddroid.server.DBSession DBSession},
- * {@link arlut.csd.ddroid.server.DBObject DBObject}, and
- * {@link arlut.csd.ddroid.server.DBField DBField}), assume that there is usually
+ * is now thoroughly integrated with the rest of the Ganymede server, and particularly
+ * with {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.  Various
+ * component classes ({@link arlut.csd.ganymede.server.DBSession DBSession},
+ * {@link arlut.csd.ganymede.server.DBObject DBObject}, and
+ * {@link arlut.csd.ganymede.server.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
  * @version $Id$
@@ -195,10 +195,10 @@ public final class DBStore implements JythonMap {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBStore");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
 
   /**
    * <p>Convenience function to find and return objects from the database
@@ -259,7 +259,7 @@ public final class DBStore implements JythonMap {
   Hashtable objectBases;
 
   /** 
-   * <p>hash mapping {@link arlut.csd.ddroid.common.Invid Invid}'s to Hashtables
+   * <p>hash mapping {@link arlut.csd.ganymede.common.Invid Invid}'s to Hashtables
    * of Invid's.  Used to record the set of Invids that point to a
    * given Invid.</p>
    *
@@ -270,14 +270,14 @@ public final class DBStore implements JythonMap {
   Hashtable backPointers;
 
   /** 
-   * A collection of {@link arlut.csd.ddroid.server.DBNameSpace
+   * A collection of {@link arlut.csd.ganymede.server.DBNameSpace
    * DBNameSpaces} registered in this DBStore.  
    */
 
   Vector nameSpaces;
 
   /** 
-   * if true, {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * if true, {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * set methods will be enabled 
    */
 
@@ -436,7 +436,7 @@ public final class DBStore implements JythonMap {
    * contents from a single disk file.</p>
    *
    * @param filename Name of the database file
-   * @see arlut.csd.ddroid.server.DBJournal
+   * @see arlut.csd.ganymede.server.DBJournal
    */
 
   public void load(String filename)
@@ -453,7 +453,7 @@ public final class DBStore implements JythonMap {
    * @param filename Name of the database file
    * @param loadJournal if true, process and consolidate the journal
    * on loading.
-   * @see arlut.csd.ddroid.server.DBJournal
+   * @see arlut.csd.ganymede.server.DBJournal
    */
 
   public synchronized void load(String filename, boolean loadJournal)
@@ -513,7 +513,7 @@ public final class DBStore implements JythonMap {
 
 	if (file_major == major_version && file_minor > minor_version)
 	  {
-	    System.err.println("*** Error, this ganymede.db file is too new for this version of the Directory Droid server.");
+	    System.err.println("*** Error, this ganymede.db file is too new for this version of the Ganymede server.");
 	    System.err.println("*** There may be errors in loading the data.");
 	  }
 
@@ -706,8 +706,8 @@ public final class DBStore implements JythonMap {
    *                  ganymede.db file in an 'old' directory under the location where
    *                  ganymede.db is held.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
-   * @see arlut.csd.ddroid.server.DBJournal
+   * @see arlut.csd.ganymede.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBJournal
    */
 
   public synchronized void dump(String filename, boolean releaseLock,
@@ -846,7 +846,7 @@ public final class DBStore implements JythonMap {
 	// and move ganymede.db.new to ganymede.db.. note that we do
 	// have a very slight vulnerability here if we are interrupted
 	// between the above rename and this one.  If this happens,
-	// the Directory Droid manager will have to manually move
+	// the Ganymede manager will have to manually move
 	// ganymede.db.new to ganymede.db before starting the server.
 
 	// In all other circumstances, the server will be able to come
@@ -958,13 +958,13 @@ public final class DBStore implements JythonMap {
    * written
    *
    * @param dumpDataObjects If true, the emitted file will include
-   * the objects in the Directory Droid database.
+   * the objects in the Ganymede database.
    *
    * @param dumpSchema If true, the emitted file will include the
    * schema definition
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
-   * @see arlut.csd.ddroid.server.DBJournal
+   * @see arlut.csd.ganymede.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBJournal
    */
 
   public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema) throws IOException
@@ -1000,13 +1000,13 @@ public final class DBStore implements JythonMap {
    * written
    *
    * @param dumpDataObjects If true, the emitted file will include
-   * the objects in the Directory Droid database.
+   * the objects in the Ganymede database.
    *
    * @param dumpSchema If true, the emitted file will include the
    * schema definition
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
-   * @see arlut.csd.ddroid.server.DBJournal
+   * @see arlut.csd.ganymede.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBJournal
    */
 
   public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema) throws IOException
@@ -1171,15 +1171,15 @@ public final class DBStore implements JythonMap {
   /** 
    * <p>Dumps an HTML representation of this database's category
    * hierarchy, starting at the root 
-   * {@link arlut.csd.ddroid.server.DBBaseCategory DBBaseCategory}.</p>
+   * {@link arlut.csd.ganymede.server.DBBaseCategory DBBaseCategory}.</p>
    *
    * @param out PrintStream to print to 
    */
 
   public synchronized void printCategoryTreeHTML(PrintWriter out)
   {
-    out.println("<HTML><HEAD><TITLE>Directory Droid Schema Dump -- " + new Date() + "</TITLE></HEAD>");
-    out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Directory Droid Schema Dump -- " + new Date() + "</H1>");
+    out.println("<HTML><HEAD><TITLE>Ganymede Schema Dump -- " + new Date() + "</TITLE></HEAD>");
+    out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Ganymede Schema Dump -- " + new Date() + "</H1>");
     out.println("<HR>");
 
     rootCategory.printHTML(out);
@@ -1192,7 +1192,7 @@ public final class DBStore implements JythonMap {
   /** 
    * <p>Dumps a text representation of this database's category
    * hierarchy, starting at the root 
-   * {@link arlut.csd.ddroid.server.DBBaseCategory DBBaseCategory}.</p>
+   * {@link arlut.csd.ganymede.server.DBBaseCategory DBBaseCategory}.</p>
    *
    * @param out PrintStream to print to 
    */
@@ -1251,7 +1251,7 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Returns a vector of {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases} currently
+   * Returns a vector of {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
    * defined in this DBStore.
    */
 
@@ -1476,13 +1476,13 @@ public final class DBStore implements JythonMap {
   /**
    * <p>Initialization method for a newly created DBStore.. this
    * method creates a new Schema from scratch, defining the
-   * mandatory Directory Droid object types, registering their customization
+   * mandatory Ganymede object types, registering their customization
    * classes, defining fields, and all the rest.</p>
    *
    * <p>Note that we don't go through a 
-   * {@link arlut.csd.ddroid.server.DBSchemaEdit DBSchemaEdit}
-   * here, we just initialize the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}/
-   * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField} structures
+   * {@link arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit}
+   * here, we just initialize the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}/
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} structures
    * manually.</p>
    */
 
@@ -1526,7 +1526,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Owner Group";
-	b.classname = "arlut.csd.ddroid.server.ownerCustom";
+	b.classname = "arlut.csd.ganymede.server.ownerCustom";
 	b.type_code = (short) SchemaConstants.OwnerBase; // 0
 
 	permCategory.addNodeAfter(b, null);
@@ -1591,7 +1591,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Admin Persona";
-	b.classname = "arlut.csd.ddroid.server.adminPersonaCustom";
+	b.classname = "arlut.csd.ganymede.server.adminPersonaCustom";
 	b.type_code = (short) SchemaConstants.PersonaBase; // 1
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1690,7 +1690,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Role";
-	b.classname = "arlut.csd.ddroid.server.permCustom";
+	b.classname = "arlut.csd.ganymede.server.permCustom";
 	b.type_code = (short) SchemaConstants.RoleBase; // 2
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1753,7 +1753,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "System Event";
-	b.classname = "arlut.csd.ddroid.server.eventCustom";
+	b.classname = "arlut.csd.ganymede.server.eventCustom";
 	b.type_code = (short) SchemaConstants.EventBase;  
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1766,7 +1766,7 @@ public final class DBStore implements JythonMap {
 	bf.loading = true;
 	bf.setNameSpace("eventtoken");
 	bf.loading = false;
-	bf.comment = "Single-word token to identify this event type in Directory Droid source code";
+	bf.comment = "Single-word token to identify this event type in Ganymede source code";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1828,7 +1828,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Object Event";
-	b.classname = "arlut.csd.ddroid.server.objectEventCustom";
+	b.classname = "arlut.csd.ganymede.server.objectEventCustom";
 	b.type_code = (short) SchemaConstants.ObjectEventBase;  
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -1841,7 +1841,7 @@ public final class DBStore implements JythonMap {
 	bf.loading = true;
 	bf.setNameSpace("eventtoken");
 	bf.loading = false;
-	bf.comment = "Single-word token to identify this event type in Directory Droid source code";
+	bf.comment = "Single-word token to identify this event type in Ganymede source code";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1926,7 +1926,7 @@ public final class DBStore implements JythonMap {
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
-	bf.comment = "User name for an individual privileged to log into Directory Droid and/or the network";
+	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1936,7 +1936,7 @@ public final class DBStore implements JythonMap {
 	bf.maxLength = 32;
 	bf.crypted = true;
 	bf.isCrypted();
-	bf.comment = "Password for an individual privileged to log into Directory Droid and/or the network";
+	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1957,7 +1957,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Task";
-	b.classname = "arlut.csd.ddroid.server.taskCustom";
+	b.classname = "arlut.csd.ganymede.server.taskCustom";
 	b.type_code = (short) SchemaConstants.TaskBase; // 5
 
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -2311,10 +2311,10 @@ public final class DBStore implements JythonMap {
 
 	createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
 
-	createSysEventObj(session, "restart", "Server Restarted", "The Directory Droid server was restarted", false);
+	createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
 
 	createSysEventObj(session, "shutdown", "Server shutdown", 
-			  "The Directory Droid server was cleanly shut down", false);
+			  "The Ganymede server was cleanly shut down", false);
 
 	// Create the start transaction oBject.  This object is
 	// consulted by the DBLog class to guide how mail should be
@@ -2333,7 +2333,7 @@ public final class DBStore implements JythonMap {
 						"This system event object is consulted to determine whether " +
 						"mail should be sent\nout when a transaction is committed.\n\n" +
 						"If the 'Event Mail' checkbox is set to false, no transaction log " +
-						"mail will be sent\nfrom the Directory Droid server, ever.\n\nIf the " +
+						"mail will be sent\nfrom the Ganymede server, ever.\n\nIf the " +
 						"'Cc: Admin' checkbox is set to true, the admin who committed the " +
 						"transaction will receive a copy of the transaction log.\n\n" +
 						"If the 'Cc: Owner Groups' checkbox is set to true, the members of " +

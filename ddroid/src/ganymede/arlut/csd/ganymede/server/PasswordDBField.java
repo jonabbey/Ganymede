@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -63,8 +63,8 @@ import jcrypt.jcrypt;
 import md5.MD5Crypt;
 import arlut.csd.crypto.SSHA;
 import arlut.csd.crypto.smbencrypt;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.pass_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.pass_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,16 +73,16 @@ import arlut.csd.ddroid.rmi.pass_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>PasswordDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
+ * <P>PasswordDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
  * for the storage and handling of password
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to PasswordDBFields through the
- * {@link arlut.csd.ddroid.rmi.pass_field pass_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to PasswordDBFields through the
+ * {@link arlut.csd.ganymede.rmi.pass_field pass_field} RMI interface.</P> 
  *
  * <p>This class differs a bit from most subclasses of {@link
- * arlut.csd.ddroid.server.DBField DBField} in that the normal setValue()/getValue()
+ * arlut.csd.ganymede.server.DBField DBField} in that the normal setValue()/getValue()
  * methods are non-functional.  Instead, there are special methods used to set or
  * access password information in crypted and non-crypted forms.</p>
  *
@@ -91,13 +91,13 @@ import arlut.csd.ddroid.rmi.pass_field;
  *
  * <p>There are no methods provided to allow remote access to password
  * information..  server-side code must locally access the {@link
- * arlut.csd.ddroid.server.PasswordDBField#getUNIXCryptText()
+ * arlut.csd.ganymede.server.PasswordDBField#getUNIXCryptText()
  * getUNIXCryptText()} and {@link
- * arlut.csd.ddroid.server.PasswordDBField#getPlainText() getPlainText()}
+ * arlut.csd.ganymede.server.PasswordDBField#getPlainText() getPlainText()}
  * methods to get access to the password information.  Generally, even
  * in that case, only crypted password information will be available.
  * If this password field was configured to store encrypted passwords
- * by way of its {@link arlut.csd.ddroid.server.DBObjectBaseField
+ * by way of its {@link arlut.csd.ganymede.server.DBObjectBaseField
  * DBObjectBaseField}, this password field will never emit() the
  * plaintext to disk.  Instead, the crypt()'ed password information
  * will be retained for user authentication.  The plaintext of the
@@ -109,8 +109,8 @@ import arlut.csd.ddroid.rmi.pass_field;
  * need to be able to provide the plaintext of a stored password
  * for replication to a system with an incompatible hash format.</P>
  *
- * @see arlut.csd.ddroid.rmi.BaseField#setCrypted(boolean)
- * @see arlut.csd.ddroid.rmi.BaseField#setPlainText(boolean)
+ * @see arlut.csd.ganymede.rmi.BaseField#setCrypted(boolean)
+ * @see arlut.csd.ganymede.rmi.BaseField#setPlainText(boolean)
  */
 
 public class PasswordDBField extends DBField implements pass_field {
@@ -147,7 +147,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * another hash format available to validate, unless this field has
    * been specifically configured to always save plaintext to disk in
    * the schema editor.  See {@link
-   * arlut.csd.ddroid.server.DBObjectBaseField#isPlainText()} for more
+   * arlut.csd.ganymede.server.DBObjectBaseField#isPlainText()} for more
    * detail.</p>
    */
 
@@ -213,9 +213,9 @@ public class PasswordDBField extends DBField implements pass_field {
   /** 
    * <p>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the {@link
-   * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} definition
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
    * indicates that a given field may be present, but for which no
-   * value has been stored in the {@link arlut.csd.ddroid.server.DBStore
+   * value has been stored in the {@link arlut.csd.ganymede.server.DBStore
    * DBStore}.</p>
    *
    * <p>Used to provide the client a template for 'creating' this
@@ -252,7 +252,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.</p>
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public boolean isDefined()
@@ -352,7 +352,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * into the field will occur.</p>
    *
    * <p>NOTE: this method is mainly used in cloning objects, and
-   * {@link arlut.csd.ddroid.server.DBEditObject#cloneFromObject(arlut.csd.ddroid.server.DBSession, arlut.csd.ddroid.server.DBObject, boolean) cloneFromObject}
+   * {@link arlut.csd.ganymede.server.DBEditObject#cloneFromObject(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, boolean) cloneFromObject}
    * doesn't allow cloning of password fields by default.</p>
    *
    * @param target The DBField to copy this field's contents to.
@@ -757,7 +757,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * <p>Standard {@link arlut.csd.ddroid.rmi.db_field db_field} method
+   * <p>Standard {@link arlut.csd.ganymede.rmi.db_field db_field} method
    * to retrieve the value of this field.  Because we are holding sensitive
    * password information, this method always returns null.. we don't want
    * to make password values available to the client under any circumstances.
@@ -771,7 +771,7 @@ public class PasswordDBField extends DBField implements pass_field {
   /** 
    * <p>Returns an Object carrying the value held in this field.</p>
    *
-   * <p>This is intended to be used within the Directory Droid server, it bypasses
+   * <p>This is intended to be used within the Ganymede server, it bypasses
    * the permissions checking that getValues() does.</p>
    *
    * <p>Note that this method will always return null, as you need to use
@@ -796,10 +796,10 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * <P>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
-   * {@link arlut.csd.ddroid.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ddroid.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
    * method.</P>
    *
    * <P>If this method checked permissions and the getPerm() method
@@ -913,7 +913,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Returns the maximum acceptable string length
    * for this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public int maxSize()
@@ -925,7 +925,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Returns the minimum acceptable string length
    * for this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public int minSize()
@@ -939,7 +939,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * characters not listed in disallowedChars() are allowable by
    * default.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public String allowedChars()
@@ -953,7 +953,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * it should be interpreted as meaning that no characters
    * are specifically disallowed.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public String disallowedChars()
@@ -965,7 +965,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Convenience method to identify if a particular
    * character is acceptable in this field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public boolean allowed(char c)
@@ -986,7 +986,7 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    * <p>Returns true if the password stored in this field is hash-crypted.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public boolean crypted()
@@ -1005,7 +1005,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @return true if the given plaintext matches the stored password
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public synchronized boolean matchPlainText(String plaintext)
@@ -1361,7 +1361,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * crypting it in various ways if this password field is stored
    * crypted.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public synchronized ReturnVal setPlainTextPass(String plaintext)
@@ -1444,7 +1444,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Because the UNIX crypt() hashing is not reversible, any MD5 and plain text
    * password information stored in this field will be lost.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public ReturnVal setCryptPass(String text)
@@ -1527,7 +1527,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * MD5Crypt password for this field.  This method will return
    * false if this password field is not stored crypted.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public ReturnVal setMD5CryptedPass(String text)
@@ -1613,7 +1613,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * MD5Crypt password for this field.  This method will return
    * false if this password field is not stored crypted.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public ReturnVal setApacheMD5CryptedPass(String text)
@@ -1699,7 +1699,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * MD5Crypt password for this field.  This method will return
    * false if this password field is not stored crypted.</p>
    *
-   * @see arlut.csd.ddroid.rmi.pass_field
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4)
@@ -1784,7 +1784,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    * <p>This method is used to force all known hashes into this password
-   * field.  Directory Droid does no verifications to insure that all of these
+   * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
    * these hashes are null or empty string, those hashes will be cleared.</p>
    *
@@ -1792,7 +1792,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * if any.</p>
    *
    * <p>If this password field is not configured to support any of the
-   * various hash formats in the Directory Droid schema, an error will be returned.</p>
+   * various hash formats in the Ganymede schema, an error will be returned.</p>
    */
 
   public ReturnVal setAllHashes(String crypt,

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -62,8 +62,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.ip_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.ip_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -72,19 +72,19 @@ import arlut.csd.ddroid.rmi.ip_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>IPDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
+ * <P>IPDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
  * for the storage and handling of IPv4/IPv6 address
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to IPDBFields through the
- * {@link arlut.csd.ddroid.rmi.ip_field ip_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to IPDBFields through the
+ * {@link arlut.csd.ganymede.rmi.ip_field ip_field} RMI interface.</P> 
  *
- * <P>Note that wherever Directory Droid manipulates IP addresses, it does so
+ * <P>Note that wherever Ganymede manipulates IP addresses, it does so
  * in terms of unsigned byte arrays.  Since Java does not provide an
- * unsigned byte type, Directory Droid uses the {@link
- * arlut.csd.ddroid.server.IPDBField#s2u(byte) s2u()} and {@link
- * arlut.csd.ddroid.server.IPDBField#u2s(int) u2s()} static methods defined
+ * unsigned byte type, Ganymede uses the {@link
+ * arlut.csd.ganymede.server.IPDBField#s2u(byte) s2u()} and {@link
+ * arlut.csd.ganymede.server.IPDBField#u2s(int) u2s()} static methods defined
  * in this class to convert from the signed Java byte to the Ganymede
  * 0-255 IP octet range.</P>
  */
@@ -99,7 +99,7 @@ public class IPDBField extends DBField implements ip_field {
 
   /**
    * <P>Receive constructor.  Used to create a IPDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -114,10 +114,10 @@ public class IPDBField extends DBField implements ip_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -435,12 +435,12 @@ public class IPDBField extends DBField implements ip_field {
   /**
    * <P>Sets the value of this field, if a scalar.</P>
    *
-   * <P>The {@link arlut.csd.ddroid.common.ReturnVal ReturnVal} object returned encodes
+   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
    *
    * <P>Note that IPDBField needs its own setValue() method
-   * (rather than using {@link arlut.csd.ddroid.server.DBField#setValue(java.lang.Object, boolean)
+   * (rather than using {@link arlut.csd.ganymede.server.DBField#setValue(java.lang.Object, boolean)
    * DBField.setValue()}
    * because it needs to be able to accept either a Byte[] array or
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
@@ -601,12 +601,12 @@ public class IPDBField extends DBField implements ip_field {
   /**
    * <P>Sets the value of this field, if a vector.</P>
    *
-   * <P>The {@link arlut.csd.ddroid.common.ReturnVal ReturnVal} object returned encodes
+   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
    *
    * <P>Note that IPDBField needs its own setElement() method
-   * (rather than using {@link arlut.csd.ddroid.server.DBField#setElement(int, java.lang.Object, boolean)
+   * (rather than using {@link arlut.csd.ganymede.server.DBField#setElement(int, java.lang.Object, boolean)
    * DBField.setElement()}
    * because it needs to be able to accept either a Byte[] array or
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
@@ -756,12 +756,12 @@ public class IPDBField extends DBField implements ip_field {
   /**
    * <P>Adds an element to the end of this field, if a vector.</P>
    *
-   * <P>The {@link arlut.csd.ddroid.common.ReturnVal ReturnVal} object returned encodes
+   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
    *
    * <P>Note that IPDBField needs its own addElement() method
-   * (rather than using {@link arlut.csd.ddroid.server.DBField#addElement(java.lang.Object, boolean)
+   * (rather than using {@link arlut.csd.ganymede.server.DBField#addElement(java.lang.Object, boolean)
    * DBField.addElement()}
    * because it needs to be able to accept either a Byte[] array or
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
@@ -1218,7 +1218,7 @@ public class IPDBField extends DBField implements ip_field {
    * address.  If no value has been set for this field, false is
    * returned.
    *
-   * @see arlut.csd.ddroid.rmi.ip_field
+   * @see arlut.csd.ganymede.rmi.ip_field
    *
    */
 
@@ -1249,7 +1249,7 @@ public class IPDBField extends DBField implements ip_field {
    *
    * @param index Array index for the value to be checked
    *
-   * @see arlut.csd.ddroid.rmi.ip_field
+   * @see arlut.csd.ganymede.rmi.ip_field
    * 
    */
 
@@ -1277,7 +1277,7 @@ public class IPDBField extends DBField implements ip_field {
    * Returns true if the value stored in this IP field is an IPV6 address.  If
    * this field has no value set, this method will return false by default.
    *
-   * @see arlut.csd.ddroid.rmi.ip_field
+   * @see arlut.csd.ganymede.rmi.ip_field
    *
    */
 
@@ -1308,7 +1308,7 @@ public class IPDBField extends DBField implements ip_field {
    *
    * @param index Array index for the value to be checked
    *
-   * @see arlut.csd.ddroid.rmi.ip_field
+   * @see arlut.csd.ganymede.rmi.ip_field
    * 
    */
 
@@ -1447,7 +1447,7 @@ public class IPDBField extends DBField implements ip_field {
   /**
    *
    * This method takes an IPv4 string in standard format
-   * and generates an array of 4 bytes that the Directory Droid server
+   * and generates an array of 4 bytes that the Ganymede server
    * can accept.
    *
    */
@@ -1573,7 +1573,7 @@ public class IPDBField extends DBField implements ip_field {
    *
    * This method takes an IPv6 string in any of the standard RFC 1884
    * formats or a standard IPv4 string and generates an array of 16
-   * bytes that the Directory Droid server can accept as an IPv6 address.
+   * bytes that the Ganymede server can accept as an IPv6 address.
    * 
    */
 

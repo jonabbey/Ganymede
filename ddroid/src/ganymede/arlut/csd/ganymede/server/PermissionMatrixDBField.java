@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -62,13 +62,13 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.PermMatrix;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.BaseField;
-import arlut.csd.ddroid.rmi.perm_field;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.PermMatrix;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.BaseField;
+import arlut.csd.ganymede.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,30 +78,30 @@ import arlut.csd.ddroid.rmi.perm_field;
 
 /** 
  * <P>PermissionMatrixDBField is a subclass of {@link
- * arlut.csd.ddroid.server.DBField DBField} for the storage and handling of
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and handling of
  * permission matrix fields (used only in the Role
- * {@link arlut.csd.ddroid.server.DBObject DBObjects}) in the
- * {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * {@link arlut.csd.ganymede.server.DBObject DBObjects}) in the
+ * {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to PermissionMatrixDBFields through the
- * {@link arlut.csd.ddroid.rmi.perm_field perm_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to PermissionMatrixDBFields through the
+ * {@link arlut.csd.ganymede.rmi.perm_field perm_field} RMI interface.</P> 
  *
  * <P>This class differs a bit from most subclasses of {@link
- * arlut.csd.ddroid.server.DBField DBField} in that the normal setValue()/getValue()
+ * arlut.csd.ganymede.server.DBField DBField} in that the normal setValue()/getValue()
  * methods are non-functional.  Instead, there are special methods used to set or
  * access permission information from the specially coded Hashtable held by
  * a PermissionMatrixDBField.  This Hashtable maps strings encoded by the
- * {@link arlut.csd.ddroid.server.PermissionMatrixDBField#matrixEntry(short, short)
- * matrixEntry()} methods to {@link arlut.csd.ddroid.common.PermEntry PermEntry}
+ * {@link arlut.csd.ganymede.server.PermissionMatrixDBField#matrixEntry(short, short)
+ * matrixEntry()} methods to {@link arlut.csd.ganymede.common.PermEntry PermEntry}
  * objects, which hold create, edit, view, and delete bits.</P>
  *
  * <P>PermissionMatrixDBField's methods encode part of the server's permissions
  * logic, including the restrictions on what bits can be set in a Role's
  * permission matrix based on the rights granted in the client's
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}.  We determine
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.  We determine
  * what GanymedeSession we are operating in for that case 
- * by asking our {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} owner.</P>
+ * by asking our {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} owner.</P>
  */
 
 public class PermissionMatrixDBField extends DBField implements perm_field {
@@ -117,7 +117,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -129,7 +129,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    * <P>This method is used to mark a field as undefined when it is
    * checked out for editing.  Different subclasses of
-   * {@link arlut.csd.ddroid.server.DBField DBField} may
+   * {@link arlut.csd.ganymede.server.DBField DBField} may
    * implement this in different ways, if simply setting the field's
    * value member to null is not appropriate.  Any namespace values claimed
    * by the field will be released, and when the transaction is
@@ -151,9 +151,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>This utility method extracts the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} name from a coded
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} name from a coded
    * permission entry held in a
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix}/PermissionMatrixDBField
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix}/PermissionMatrixDBField
    * Matrix.</P>
    */
 
@@ -199,9 +199,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>This utility method extracts the 
-   * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField} name from a coded
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} name from a coded
    * permission entry held in a
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix}/PermissionMatrixDBField
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix}/PermissionMatrixDBField
    * Matrix.</P>
    */
 
@@ -278,7 +278,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>Returns true if the given String encodes the identity of
-   * a {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} and
+   * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and
    * not a field within a DBObjectBase.</P>
    */
 
@@ -289,10 +289,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>This method returns true if the given
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix}/
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix}/
    * PermissionMatrixDBField key refers to a currently valid 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}/
-   * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}/
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * in the loaded schema.</P>
    */
 
@@ -456,7 +456,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>Receive constructor.  Used to create a PermissionMatrixDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -473,10 +473,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -670,7 +670,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    * Returns an Object carrying the value held in this field.<br><br>
    *
-   * This is intended to be used within the Directory Droid server, it bypasses
+   * This is intended to be used within the Ganymede server, it bypasses
    * the permissions checking that getValues() does.
    *
    */
@@ -1034,7 +1034,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Return a serializable, read-only copy of this field's permission
    * matrix
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
+   * @see arlut.csd.ganymede.rmi.perm_field
    *
    */
 
@@ -1053,7 +1053,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * with an object that is being edited, or if the client is logged
    * into the server as supergash.</P>
    * 
-   * @see arlut.csd.ddroid.rmi.perm_field
+   * @see arlut.csd.ganymede.rmi.perm_field
    */
 
   public PermMatrix getTemplateMatrix()
@@ -1083,11 +1083,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * Returns a PermEntry object representing this 
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix}'s 
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix}'s 
    * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(short baseID, short fieldID)
@@ -1099,8 +1099,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;baseID&gt;
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(short baseID)
@@ -1112,8 +1112,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;field&gt; in base &lt;base&gt;
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(Base base, BaseField field)
@@ -1133,8 +1133,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;base&gt;
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(Base base)
@@ -1182,8 +1182,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * <P>This operation will fail if this
    * PermissionMatrixDBField is not editable.</P>
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public ReturnVal setPerm(Base base, BaseField field, PermEntry entry)
@@ -1211,8 +1211,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * the permission will be applied to the object as a whole rather
    * than any individual field within the object
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermEntry 
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermEntry 
    */
 
   public synchronized ReturnVal setPerm(short baseID, short fieldID, PermEntry entry)
@@ -1259,8 +1259,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * <P>This operation will fail if this
    * PermissionMatrixDBField is not editable.</P>
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public ReturnVal setPerm(Base base, PermEntry entry)
@@ -1286,8 +1286,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * <P>This operation will fail if this
    * PermissionMatrixDBField is not editable.</P>
    *
-   * @see arlut.csd.ddroid.rmi.perm_field
-   * @see arlut.csd.ddroid.common.PermEntry
+   * @see arlut.csd.ganymede.rmi.perm_field
+   * @see arlut.csd.ganymede.common.PermEntry
    */
 
   public synchronized ReturnVal setPerm(short baseID, PermEntry entry)
@@ -1406,8 +1406,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    * <P>Private method to generate a key for use in
    * our internal Hashtable, used to encode the 
-   * permission for a given {@link arlut.csd.ddroid.server.DBObjectBase
-   * DBObjectBase} and {@link arlut.csd.ddroid.server.DBObjectBaseField
+   * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
+   * DBObjectBase} and {@link arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseField}.</P>
    */
 
@@ -1419,7 +1419,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    * <P>Private method to generate a key for use in
    * our internal Hashtable, used to encode the
-   * permission for a given {@link arlut.csd.ddroid.server.DBObjectBase
+   * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
    * DBObjectBase}.</P>
    */
   
@@ -1430,8 +1430,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * <P>This method is used to basically dump state out of this field
-   * so that the {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}
-   * {@link arlut.csd.ddroid.server.DBEditSet#checkpoint(java.lang.String) checkpoint()}
+   * so that the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String) checkpoint()}
    * code can restore it later
    * if need be.</P>
    */
@@ -1578,10 +1578,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 /**
  * <P>Helper class used to handle checkpointing of a 
- * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}'s
+ * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}'s
  * state.
  *
- * <P>See {@link arlut.csd.ddroid.server.PermissionMatrixDBField#checkpoint() 
+ * <P>See {@link arlut.csd.ganymede.server.PermissionMatrixDBField#checkpoint() 
  * PermissionMatrixDBField.checkpoint()} for more detail.</P>
  */
 

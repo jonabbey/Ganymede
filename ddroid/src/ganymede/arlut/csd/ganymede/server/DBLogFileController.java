@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -66,7 +66,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import arlut.csd.Util.WordWrap;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -76,11 +76,11 @@ import arlut.csd.ddroid.common.Invid;
 
 /**
  * <p>This controller class manages the recording and retrieval of
- * {@link arlut.csd.ddroid.server.DBLogEvent DBLogEvents} for the {@link
- * arlut.csd.ddroid.server.DBLog DBLog} class, using an on-disk text file for
+ * {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvents} for the {@link
+ * arlut.csd.ganymede.server.DBLog DBLog} class, using an on-disk text file for
  * the storage format.</p>
  *
- * <p>The file format used by this controller is the classic Directory Droid log
+ * <p>The file format used by this controller is the classic Ganymede log
  * style, in which each event is stored on a line, with parameters
  * separated by pipe characters.  This file format is documented in the
  * server doc directory at doc/logDesign.html, or on the web at

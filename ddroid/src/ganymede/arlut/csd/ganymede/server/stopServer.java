@@ -4,7 +4,7 @@
 
    stopServer.java
 
-   Command-line app to shut down a Directory Droid server, with password info
+   Command-line app to shut down a Ganymede server, with password info
    drawn from a properties file.
 
    Created: 28 April 1999
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -65,9 +65,9 @@ import java.rmi.RemoteException;
 import java.util.Properties;
 
 import arlut.csd.Util.ParseArgs;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -76,7 +76,7 @@ import arlut.csd.ddroid.rmi.adminSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * Command-line app to shut down a Directory Droid server, with password info
+ * Command-line app to shut down a Ganymede server, with password info
  * drawn from a properties file.
  */
 
@@ -106,14 +106,14 @@ public class stopServer {
 
     if (propFilename == null)
       {
-	System.err.println("Directory Droid stopServer: Error, invalid command line parameters");
+	System.err.println("Ganymede stopServer: Error, invalid command line parameters");
  	System.err.println("Usage: java stopServer [-delay] properties=<property file>");
 	return;
       }
 
     if (!loadProperties(propFilename))
       {
-	System.out.println("Directory Droid stopServer: Error, couldn't successfully load properties from file " + 
+	System.out.println("Ganymede stopServer: Error, couldn't successfully load properties from file " + 
 			   propFilename + ".");
 	return;
       }
@@ -131,23 +131,23 @@ public class stopServer {
       }
     catch (NotBoundException ex)
       {
-	System.err.println("Directory Droid stopServer: server url " + 
+	System.err.println("Ganymede stopServer: server url " + 
 			   server_url + " not running, or could not connect\n" + ex );
 	System.exit(1);
       }
     catch (java.rmi.UnknownHostException ex)
       {
-	System.err.println("Directory Droid stopServer: bad server URL " + server_url);
+	System.err.println("Ganymede stopServer: bad server URL " + server_url);
 	System.exit(1);
       }
     catch (RemoteException ex)
       {
-	System.err.println("Directory Droid stopServer: couldn't connect to server object " + server_url);
+	System.err.println("Ganymede stopServer: couldn't connect to server object " + server_url);
 	System.exit(1);
       }
     catch (java.net.MalformedURLException ex)
       {
-	System.err.println("Directory Droid stopServer: malformed server url " + server_url);
+	System.err.println("Ganymede stopServer: malformed server url " + server_url);
 	System.exit(1);
       }
 
@@ -155,7 +155,7 @@ public class stopServer {
       {
 	java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
-	System.out.print("Directory Droid server admin password:");
+	System.out.print("Ganymede server admin password:");
 
 	try
 	  {
@@ -170,7 +170,7 @@ public class stopServer {
 	System.out.println();
       }
 
-    System.out.println("Directory Droid stopServer: Shutting down Directory Droid server");
+    System.out.println("Ganymede stopServer: Shutting down Ganymede server");
 
     try
       {
@@ -178,7 +178,7 @@ public class stopServer {
       }
     catch (RemoteException rx)
       {
-	System.err.println("Directory Droid stopServer: Error, server not up (?) " + rx);
+	System.err.println("Ganymede stopServer: Error, server not up (?) " + rx);
 	System.exit(1);
       }
 
@@ -193,11 +193,11 @@ public class stopServer {
 
     if (!waitForUsers)
       {
-	System.out.println("Directory Droid stopServer: Directory Droid server shutdown");
+	System.out.println("Ganymede stopServer: Ganymede server shutdown");
       }
     else
       {
-	System.out.println("Directory Droid stopServer: Directory Droid server shutdown initiated\nServer will "
+	System.out.println("Ganymede stopServer: Ganymede server shutdown initiated\nServer will "
 			   + "shut down when all users are logged out.");
       }
 
@@ -209,7 +209,7 @@ public class stopServer {
    * file.</p>
    *
    * <p>This method is public so that loader code linked with the
-   * Directory Droid server code can initialize the properties without
+   * Ganymede server code can initialize the properties without
    * going through Ganymede.main().</p>
    */
 
@@ -326,13 +326,13 @@ class stopServerAdmin {
       }
     catch (NullPointerException ex)
       {
-	System.err.println("Directory Droid stopServer: Error, couldn't log into server with admin privs.");
+	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.");
 	System.exit(1);
       }
 
     if (aSession == null)
       {
-	System.err.println("Directory Droid stopServer: Error, couldn't log into server with admin privs.. bad password?");
+	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.. bad password?");
 	System.exit(1);
       }
   }

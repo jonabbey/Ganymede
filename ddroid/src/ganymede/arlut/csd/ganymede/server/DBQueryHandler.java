@@ -2,7 +2,7 @@
 
    DBQueryHandler.java
 
-   This is the query processing engine for the Directory Droid database.
+   This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
    Last Mod Date: $Date$
@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,20 +51,20 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.DDPermissionsException;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryAndNode;
-import arlut.csd.ddroid.common.QueryDeRefNode;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.QueryOrNode;
+import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryAndNode;
+import arlut.csd.ganymede.common.QueryDeRefNode;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.QueryOrNode;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,20 +73,20 @@ import arlut.csd.ddroid.common.QueryOrNode;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is the query processing engine for the Directory Droid database.  Static
+ * <P>This class is the query processing engine for the Ganymede database.  Static
  * methods in this class are used to test a query tree against an individual object
  * in the database.</P>
  *
- * <P>The {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
- * {@link arlut.csd.ddroid.server.GanymedeSession#queryDispatch(arlut.csd.ddroid.common.Query,
- * boolean, boolean, arlut.csd.ddroid.server.DBLock, arlut.csd.ddroid.server.DBEditObject)
+ * <P>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+ * {@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,
+ * boolean, boolean, arlut.csd.ganymede.server.DBLock, arlut.csd.ganymede.server.DBEditObject)
  * queryDispatch()}
  * method contains most of the query engine's
  * logic (including namespace-indexed query optimization).  This class is just
  * responsible for applying a recursive QueryNode tree to a particular object.</P>
  *
- * @see {@link arlut.csd.ddroid.common.QueryNode QueryNode}
- * @see {@link arlut.csd.ddroid.common.Query Query}
+ * @see {@link arlut.csd.ganymede.common.QueryNode QueryNode}
+ * @see {@link arlut.csd.ganymede.common.Query Query}
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1103,7 +1103,7 @@ public class DBQueryHandler {
 
   /**
    *
-   * IP address values are encoded as byte arrays in the Directory Droid server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for equality.
    *
    */
@@ -1130,7 +1130,7 @@ public class DBQueryHandler {
 
   /**
    *
-   * IP address values are encoded as byte arrays in the Directory Droid server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for a prefix relationship.
    *
    * @return Returns true if param1 begins with param2.
@@ -1163,7 +1163,7 @@ public class DBQueryHandler {
 
   /**
    *
-   * IP address values are encoded as byte arrays in the Directory Droid server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for a suffix relationship.
    *   
    * @return Returns true if param1 ends with param2.
@@ -1203,8 +1203,8 @@ public class DBQueryHandler {
    * for the address 129.116.0.0, ipAddrNoPad() would return
    * 129.116.</P>
    *
-   * <P>Note that, like all Directory Droid code dealing with IP addresses,
-   * Directory Droid is using the u2s() and s2u() methods here to handle
+   * <P>Note that, like all Ganymede code dealing with IP addresses,
+   * Ganymede is using the u2s() and s2u() methods here to handle
    * encoded unsigned values in the Java signed byte/Byte type/object.</P>
    */
 

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -85,18 +85,18 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.booleanSemaphore;
-import arlut.csd.ddroid.common.BaseListTransport;
-import arlut.csd.ddroid.common.CategoryTransport;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.BaseField;
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.CategoryNode;
-import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ganymede.common.BaseListTransport;
+import arlut.csd.ganymede.common.CategoryTransport;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.BaseField;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.CategoryNode;
+import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -106,35 +106,35 @@ import arlut.csd.ddroid.rmi.Session;
 
 /**
  * <p>The data dictionary and object store for a particular kind of
- * object in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the
- * Directory Droid server.</p>
+ * object in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the
+ * Ganymede server.</p>
  *
  * <p>Each DBObjectBase object includes a set of
- * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField} objects, which
+ * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} objects, which
  * define the types and constraints on fields that may be present in objects
  * of this type.  These field definitions are held in an
- * {@link arlut.csd.ddroid.server.DBBaseFieldTable DBBaseFieldTable}.</p>
+ * {@link arlut.csd.ganymede.server.DBBaseFieldTable DBBaseFieldTable}.</p>
  *
- * <p>The actual {@link arlut.csd.ddroid.server.DBObject DBObject}'s themselves are
- * contained in an optimized {@link arlut.csd.ddroid.server.DBObjectTable DBObjectTable}
+ * <p>The actual {@link arlut.csd.ganymede.server.DBObject DBObject}'s themselves are
+ * contained in an optimized {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable}
  * contained within this DBObjectBase.</p>
  *
  * <p>In addition to holding name, type id, and category information for a
  * given object type, the DBObjectBase class may also contain a string classname
  * for a Java class to be dynamically loaded to manage the server's interactions
  * with objects of this type.  Such a class name must refer to a subclass of the
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} class.  If such a custom
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} class.  If such a custom
  * class is defined for this object type, DBObjectBase will contain an
- * {@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook} DBEditObject
+ * {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook} DBEditObject
  * instance whose methods will be consulted to customize a lot of the server's
  * functioning.</p>
  *
- * <p>DBObjectBase also keeps track of {@link arlut.csd.ddroid.server.DBReadLock DBReadLocks},
- * {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLocks}, and 
- * {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLocks}, to manage 
+ * <p>DBObjectBase also keeps track of {@link arlut.csd.ganymede.server.DBReadLock DBReadLocks},
+ * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLocks}, and 
+ * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLocks}, to manage 
  * changes to be made to objects contained in this DBObjectBase.</p>
  *
- * <p>DBObjectBase implements the {@link arlut.csd.ddroid.rmi.Base Base} RMI remote 
+ * <p>DBObjectBase implements the {@link arlut.csd.ganymede.rmi.Base Base} RMI remote 
  * interface, which is used by the client to determine type information for objects
  * of this type, as well as by the schema editor when the schema is being edited.</p>
  */
@@ -145,10 +145,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBObjectBase");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBObjectBase");
 
   /**
    * <P>More debugging.</P>
@@ -190,7 +190,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /* - */
 
   /**
-   * <P>The central Directory Droid database object that this object base is contained
+   * <P>The central Ganymede database object that this object base is contained
    * within.</P>
    */
 
@@ -204,8 +204,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>short type id code for this object type.  This number is
-   * used as the {@link arlut.csd.ddroid.common.Invid#type type} code
-   * in {@link arlut.csd.ddroid.common.Invid Invid}s pointing to objects
+   * used as the {@link arlut.csd.ganymede.common.Invid#type type} code
+   * in {@link arlut.csd.ganymede.common.Invid Invid}s pointing to objects
    * of this type.</P>
    */
 
@@ -213,11 +213,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>Fully qualified package and class name for a custom 
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
    * to be dynamically loaded to manage operations on this DBObjectBase.</P>
    *
    * <p>Note that this needs not to be private because {@link
-   * arlut.csd.ddroid.server.DBStore#initializeSchema()} uses it to
+   * arlut.csd.ganymede.server.DBStore#initializeSchema()} uses it to
    * initialize class definitions when bootstrapping.  If we ever
    * revise the initializeSchema code (tricky, given that
    * setClassInfo() automatically sets the classdef and creates the
@@ -230,7 +230,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>Class definition for a
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
    * dynamically loaded to manage operations on this DBObjectBase.</P>
    */
 
@@ -259,7 +259,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>If true, this type of object is used as a target for an
-   * edit-in-place {@link arlut.csd.ddroid.server.InvidDBField
+   * edit-in-place {@link arlut.csd.ganymede.server.InvidDBField
    * InvidDBField}.</P>
    */
 
@@ -270,7 +270,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * Custom field dictionary sorted in display order.  This Vector
    * does *not* include any built-in fields.  Elements of this Vector
-   * are {@link arlut.csd.ddroid.server.DBObjectBaseField
+   * are {@link arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseFields}.
    */
 
@@ -309,7 +309,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <P>Timestamp for the last time this DBObjectBase was
    * changed, used by 
-   * {@link arlut.csd.ddroid.server.GanymedeBuilderTask GanymedeBuilderTasks} 
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTasks} 
    * to determine whether a particular build sequence is necessary.</P>
    */
 
@@ -317,7 +317,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>If this DBObjectBase is locked with an exclusive lock
-   * (a {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}),
+   * (a {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}),
    * this field will point to it.</P>
    *
    * <P>This field is not currently used for anything in particular
@@ -328,12 +328,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private DBLock currentLock;
 
   /**
-   * <P>Set of {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}s
+   * <P>Set of {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}s
    * pending on this DBObjectBase.  DBWriteLocks will add themselves
    * to the writerList upon entering establish().  If writerList is
-   * not empty, no new {@link arlut.csd.ddroid.server.DBReadLock
+   * not empty, no new {@link arlut.csd.ganymede.server.DBReadLock
    * DBReadLock}s will be allowed to add to add themselve to the readerList
-   * in this DBObjectBase.  {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLock}s
+   * in this DBObjectBase.  {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}s
    * don't check the writerList, and will add themselves to the dumperList
    * as needed, which will block any further writers from queuing up
    * in the list.</P>
@@ -355,19 +355,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private Vector writerList;
 
   /**
-   * <P>Collection of {@link arlut.csd.ddroid.server.DBReadLock DBReadLock}s
+   * <P>Collection of {@link arlut.csd.ganymede.server.DBReadLock DBReadLock}s
    * that are locked on this DBObjectBase.</P>
    */
 
   private Vector readerList;
 
   /**
-   * <P>Set of {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLock}s
+   * <P>Set of {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}s
    * pending on this DBObjectBase.  DBDumpLocks will add themselves to
    * the dumperList upon entering establish().  If dumperList is not
-   * empty, no new {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}s
+   * empty, no new {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}s
    * will be allowed to add themselves to the {@link
-   * arlut.csd.ddroid.server.DBObjectBase#writerList writerList} in this
+   * arlut.csd.ganymede.server.DBObjectBase#writerList writerList} in this
    * DBObjectBase.</P>
    *
    * <P>Note that there is no guarantee that DBDumpLocks will be granted
@@ -383,7 +383,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private Vector dumperList;
 
   /**
-   * <P>Collection of {@link arlut.csd.ddroid.server.DBDumpLock DBDumpLock}s
+   * <P>Collection of {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}s
    * that are locked on this DBObjectBase.</P>
    */
 
@@ -406,7 +406,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>This Vector holds the current collection of {@link
-   * arlut.csd.ddroid.server.DBObject DBObject} objects in this
+   * arlut.csd.ganymede.server.DBObject DBObject} objects in this
    * DBObjectBase, for enumeration access.  The GanymedeSession query
    * logic iterates over this Vector so that querying on single bases
    * can proceed while commits are under way.</P>
@@ -425,22 +425,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <P>Each DBObjectBase can have an instantiation of a custom
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
    * to respond to a number of 'pseudostatic' method calls which customize
-   * the Directory Droid server's behavior when dealing with objects of this DBObjectBase's
+   * the Ganymede server's behavior when dealing with objects of this DBObjectBase's
    * type.  The DBObjectBase 
-   * {@link arlut.csd.ddroid.server.DBObjectBase#createHook() createHook()} method
+   * {@link arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()} method
    * is responsible for loading the custom DBEditObject subclass
-   * ({@link arlut.csd.ddroid.server.DBObjectBase#classdef classdef}) from
-   * the {@link arlut.csd.ddroid.server.DBObjectBase#classname classname}
+   * ({@link arlut.csd.ganymede.server.DBObjectBase#classdef classdef}) from
+   * the {@link arlut.csd.ganymede.server.DBObjectBase#classname classname}
    * specified in the ganymede.db schema section.</P>
    *
    * <P>objectHook should never be null while the server is in operation. If the
-   * Directory Droid schema definition data in the ganymede.db file does not specify
+   * Ganymede schema definition data in the ganymede.db file does not specify
    * a special class for this object type's objectHook, DBObjectBase should have
    * an instance of the base DBEditObject class here.</P>
    *
-   * <P>See the Directory Droid DBEditObject subclassing/customization guide for a lot
+   * <P>See the Ganymede DBEditObject subclassing/customization guide for a lot
    * more details on the use of DBEditObjects as objectHooks.</P>
    */
 
@@ -454,7 +454,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @param store The DBStore database this DBObjectBase is being created for.
    * @param embedded If true, objects of this DBObjectBase type will not
    * be top-level objects, but rather will be embedded using edit-in-place
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBFields}.
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBFields}.
    */
 
   public DBObjectBase(DBStore store, boolean embedded) throws RemoteException
@@ -470,7 +470,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @param store The DBStore database this DBObjectBase is being created for.
    * @param embedded If true, objects of this DBObjectBase type will not
    * be top-level objects, but rather will be embedded using edit-in-place
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBFields}.
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBFields}.
    * @param createFields If true, the standard fields required by the server
    * for its own operations will be created as part of DBObjectBase creation.  This
    * should be false if this DBObjectBase is being created in the process of loading
@@ -534,7 +534,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * and load the objects of this type in from the standing store.</p>
    *
    * @param in Input stream to read this object base from.
-   * @param store The Directory Droid database object we are loading into.
+   * @param store The Ganymede database object we are loading into.
    */
 
   public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
@@ -856,7 +856,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * This method is used to add a DBObjectBase's information to this
-   * {@link arlut.csd.ddroid.common.CategoryTransport
+   * {@link arlut.csd.ganymede.common.CategoryTransport
    * CategoryTransport} object for serialization to the client.
    */
 
@@ -884,7 +884,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * This method is used to add a DBObjectBase's information to this
-   * {@link arlut.csd.ddroid.common.BaseListTransport
+   * {@link arlut.csd.ganymede.common.BaseListTransport
    * BaseListTransport} object for serialization to the client.
    */
 
@@ -1435,7 +1435,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * depends on for its operation, such as permissions, notification,
    * and logging object types.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public boolean isRemovable()
@@ -1466,7 +1466,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>
    * This method will attempt to invoke an apppropriate <i>factory</i> method
    * on this object base's specified custom class. This adds a layer of 
-   * indirection to DDroid's custom class loading behaviour. Instead of trying
+   * indirection to Ganymede's custom class loading behaviour. Instead of trying
    * to invoke a constructor directly on the custom class, we instead look for
    * a method called "factory" in the custom class that takes the same
    * parameters.
@@ -1474,14 +1474,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * 
    * <p>
    * This allows programmers to define a custom class that can do fancy tricks
-   * before constructing a new {@link arlut.csd.ddroid.server DBEditObject
+   * before constructing a new {@link arlut.csd.ganymede.server DBEditObject
    * DBEditObject} like, say, loading the class from a Jython interpreter, or
    * doing code-generation from an external class descriptor file.
    * </p>
    * 
    * @param classParams the list of parameter types
    * @param methodParams the parameters to pass to the factory method
-   * @return a new {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * @return a new {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * @throws SecurityException
    * @throws InvocationTargetException
    * @throws IllegalAccessException
@@ -1516,7 +1516,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /** 
    * <p>This method is used to create a DBEditObject subclass handle
-   * ({@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook}),
+   * ({@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}),
    * to allow various classes to make calls to overridden static
    * methods for DBEditObject subclasses.</p> 
    */
@@ -2006,9 +2006,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>Returns the name of this object type. Guaranteed
-   * to be unique in the Directory Droid server. </p>
+   * to be unique in the Ganymede server. </p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public String getName()
@@ -2018,7 +2018,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * Returns the name and category path of this object type.
-   * Guaranteed to be unique in the Directory Droid server.
+   * Guaranteed to be unique in the Ganymede server.
    */
 
   public String getPath()
@@ -2042,10 +2042,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Sets the name for this object type</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized ReturnVal setName(String newName)
@@ -2102,7 +2102,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>Returns the name of the class managing this object type</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
   
   public String getClassName()
@@ -2129,10 +2129,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    *
    * <p>The newClassName argument must be fully qualified, and must
    * refer to one of two kinds of classes.  The first is a {@link
-   * arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass that
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass that
    * implements the requisite three constructors, a la the traditional
    * Ganymede customization hook.  The second is any class
-   * implementing the {@link arlut.csd.ddroid.common.DDPluginFactory
+   * implementing the {@link arlut.csd.ganymede.common.DDPluginFactory
    * DDPluginFactory} interface, which provides a set of factory
    * methods which return DBEditObject instances.</p>
    *
@@ -2144,10 +2144,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * server execution.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized ReturnVal setClassInfo(String newClassName, String newOptionString)
@@ -2216,8 +2216,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
       }
 
-    if (objectHook.getClass().getName().equals("arlut.csd.ddroid.server.DBEditObject") &&
-	!classname.equals("arlut.csd.ddroid.server.DBEditObject"))
+    if (objectHook.getClass().getName().equals("arlut.csd.ganymede.server.DBEditObject") &&
+	!classname.equals("arlut.csd.ganymede.server.DBEditObject"))
       {
 	ReturnVal retVal = new ReturnVal(false);
 
@@ -2363,7 +2363,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns true if the current session is permitted to
    * create an object of this type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public boolean canCreate(Session session)
@@ -2374,7 +2374,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>Returns true if this object type can be inactivated</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized boolean canInactivate()
@@ -2385,7 +2385,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>Returns the invid type id for this object definition</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public short getTypeID()
@@ -2434,7 +2434,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * label field designated if labels for this object type are dynamically
    * generated.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public short getLabelField()
@@ -2447,7 +2447,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * primary label field.  null is returned if no label has been
    * designated.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public String getLabelFieldName()
@@ -2489,10 +2489,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Returns all {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}
+   * <p>Returns all {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * base field definitions for objects of this type, in random order.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public Vector getFields()
@@ -2501,7 +2501,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}
+   * <p>Returns {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * base field definitions for objects of this type.
    *
    * <P>If includeBuiltIns is false, the fields returned will be the
@@ -2510,7 +2510,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * built-in fields will be appended to the Vector after the custom
    * types, in random order.</P>
    *
-   * @see arlut.csd.ddroid.rmi.Base 
+   * @see arlut.csd.ganymede.rmi.Base 
    */
 
   public synchronized Vector getFields(boolean includeBuiltIns)
@@ -2559,8 +2559,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the field definition for the field matching id,
    * or null if no match found.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public BaseField getField(short id)
@@ -2572,8 +2572,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the field definition for the field matching name,
    * or null if no match found.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized BaseField getField(String name)
@@ -2609,14 +2609,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Choose what field will serve as this objectBase's label.  A fieldName
    * parameter of null will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ddroid.server.DBEditObject#getLabelHook(arlut.csd.ddroid.server.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public ReturnVal setLabelField(String fieldName)
@@ -2661,14 +2661,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Choose what field will serve as this objectBase's label.  A fieldID
    * parameter of -1 will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ddroid.server.DBEditObject#getLabelHook(arlut.csd.ddroid.server.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public ReturnVal setLabelField(short fieldID)
@@ -2692,11 +2692,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>Get the parent Category for this object type.  This is used by the
-   * Directory Droid client and schema editor to present object types in
+   * Ganymede client and schema editor to present object types in
    * a hierarchical tree.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
-   * @see arlut.csd.ddroid.rmi.CategoryNode
+   * @see arlut.csd.ganymede.rmi.Base
+   * @see arlut.csd.ganymede.rmi.CategoryNode
    */
 
   public Category getCategory()
@@ -2712,10 +2712,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * object.  That addNode() operation will call setCategory() here.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.CategoryNode
+   * @see arlut.csd.ganymede.rmi.CategoryNode
    */
 
   public void setCategory(Category category)
@@ -2733,10 +2733,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * field definitions hash, and returns a reference to it. </p>
    *
    * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
-   * by the Directory Droid schema editor.</p>
+   * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
   
   public synchronized BaseField createNewField()
@@ -2800,7 +2800,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Of course, this removal will only take effect if
    * the schema editor commits.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized ReturnVal deleteField(String fieldName)
@@ -2888,7 +2888,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>This method is used by the SchemaEditor to detect whether any
    * objects are using a field definition.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Base
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public boolean fieldInUse(String fieldName)
@@ -3159,7 +3159,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <P>This method is used to allow objects in this base to notify us when
    * their state changes.  It is called from the
-   * {@link arlut.csd.ddroid.server.DBEditSet DBEditSet} commit() method.</P>
+   * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} commit() method.</P>
    *
    * <P>We use this method to be able to determine the last time anything in
    * this DBObjectBase changed when making decisions as to what needs to
@@ -3210,7 +3210,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Used by {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock} to establish or clear a lock.</p>
+   * <p>Used by {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock} to establish or clear a lock.</p>
    */
 
   void setWriteInProgress(boolean state)
@@ -3233,7 +3233,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Used by {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock} to
+   * <p>Used by {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock} to
    * set a possibly informative lock reference, so that a debugger can
    * show a reference to the DBWriteLock locking us down.</p>
    */
@@ -3446,8 +3446,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>Returns a vector of field definition templates, in display order.</p>
    *
-   * @see arlut.csd.ddroid.common.FieldTemplate
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.common.FieldTemplate
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized Vector getFieldTemplateVector()

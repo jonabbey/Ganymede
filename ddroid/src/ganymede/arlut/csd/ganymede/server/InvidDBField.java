@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -66,14 +66,14 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,16 +82,16 @@ import arlut.csd.ddroid.rmi.invid_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>InvidDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
- * for the storage and handling of {@link arlut.csd.ddroid.common.Invid Invid}
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * <P>InvidDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
+ * for the storage and handling of {@link arlut.csd.ganymede.common.Invid Invid}
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to InvidDBFields through the
- * {@link arlut.csd.ddroid.rmi.invid_field invid_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to InvidDBFields through the
+ * {@link arlut.csd.ganymede.rmi.invid_field invid_field} RMI interface.</P> 
  *
  * <P>This class implements one of the most fundamental pieces of logic in the
- * Directory Droid server, the object pointer/object binding logic.  Whenever the
+ * Ganymede server, the object pointer/object binding logic.  Whenever the
  * client calls setValue(), setElement(), addElement(), or deleteElement()
  * on an InvidDBField, the object being pointed to by the Invid being set
  * or cleared will be checked out for editing and the corresponding back
@@ -101,7 +101,7 @@ import arlut.csd.ddroid.rmi.invid_field;
  * references in the server are symmetric.  If one object points to
  * another via an InvidDBField, the target of that pointer will point
  * back, either through a field explicitly specified in the schema, or
- * through the server's in-memory {@link arlut.csd.ddroid.server.DBStore#backPointers backPointers}
+ * through the server's in-memory {@link arlut.csd.ganymede.server.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
  * @version $Id$
@@ -114,10 +114,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.InvidDBField");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.InvidDBField");
 
   // ---
 
@@ -128,7 +128,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * actually contained in this field, we'll null this out.</p>
    *
    * <p>Note that having this here costs us 4 bytes RAM for every InvidDBField
-   * held in the Directory Droid server's database, but without it we'll have
+   * held in the Ganymede server's database, but without it we'll have
    * an extraordinarily painful time doing mass adds/deletes.</p>
    */
 
@@ -136,7 +136,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    * <P>Receive constructor.  Used to create a InvidDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -153,10 +153,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -418,7 +418,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * <P>This method writes out an Invid in XML form to a Ganymede
    * XML data dump stream.</P>
    *
-   * <P>Whenever Directory Droid writes out an Invid to an XML data dump, it
+   * <P>Whenever Ganymede writes out an Invid to an XML data dump, it
    * uses an &lt;invid&gt; element with two attributes, type and
    * id.  type is the name of the object type that the invid points
    * to, and id is an identifying label for the target object.</P>
@@ -542,10 +542,10 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * <P>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
-   * {@link arlut.csd.ddroid.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ddroid.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
    * method.</P>
    *
    * <P>If this method checked permissions and the getPerm() method
@@ -629,7 +629,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * label from the state of that object as it existed at the start of
    * the current transaction.  This is to allow us to do proper
    * logging of the values deleted from this field in the case of the
-   * string generated by {@link arlut.csd.ddroid.server.DBEditObject#diff()
+   * string generated by {@link arlut.csd.ganymede.server.DBEditObject#diff()
    * DBEditObject.diff()} during transaction logging.</P>
    *
    * <p>If forceOriginal is set to true, getRemoteLabel will always
@@ -916,7 +916,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    *
-   * @see arlut.csd.ddroid.server.InvidDBField#unbind(arlut.csd.ddroid.common.Invid, boolean)
+   * @see arlut.csd.ganymede.server.InvidDBField#unbind(arlut.csd.ganymede.common.Invid, boolean)
    */
 
   private final ReturnVal bind(Invid oldRemote, Invid newRemote, boolean local)
@@ -1126,7 +1126,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    // "InvidDBField.bind(): Couldn''t unlink from old reference"
 		    // "Field {0} could not be unlinked from the {1} {2} object. 
-		    // This is probably a temporary condition due to other user activity on the Directory Droid server."
+		    // This is probably a temporary condition due to other user activity on the Ganymede server."
 		    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						      ts.l("bind.busy_old_temp",
 							   this.toString(), remobj.toString(), remobj.getTypeName()));
@@ -1136,7 +1136,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		// "InvidDBField.bind(): Couldn''t unlink from old reference"
 		// "Field {0} could not be unlinked from the {1} {2} object. 
-		// This is probably a temporary condition due to other user activity on the Directory Droid server."
+		// This is probably a temporary condition due to other user activity on the Ganymede server."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						  ts.l("bind.busy_old_temp",
 						       this.toString(), remobj.toString(), remobj.getTypeName()));
@@ -1296,7 +1296,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		// "InvidDBField.bind(): Couldn''t link to new reference"
 		// "Field {0} could not be linked to the {1} {2} object.  
-		// This is probably a temporary condition due to other user activity on the Directory Droid server."
+		// This is probably a temporary condition due to other user activity on the Ganymede server."
 		return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
 						  ts.l("bind.busy_new_temp", this.toString(), remobj.toString(), remobj.getTypeName()));
 	      }
@@ -1305,7 +1305,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    // "InvidDBField.bind(): Couldn''t link to new reference"
 	    // "Field {0} could not be linked to the {1} {2} object.  
-	    // This is probably a temporary condition due to other user activity on the Directory Droid server."
+	    // This is probably a temporary condition due to other user activity on the Ganymede server."
 	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
 					      ts.l("bind.busy_new_temp", this.toString(), remobj.toString(), remobj.getTypeName()));
 	  }
@@ -1565,7 +1565,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
 		    // "Field {0} could not be unlinked from the {1} {2} object.  
-		    // This is probably a temporary condition due to other user activity on the Directory Droid server."
+		    // This is probably a temporary condition due to other user activity on the Ganymede server."
 		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
 						      ts.l("bind.busy_old_temp", this.toString(), remobj.toString(), remobj.getTypeName()));
 		  }
@@ -2273,7 +2273,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * to permissions limitations.
    * @param noWizards If true, wizards will be skipped
    *
-   * @see arlut.csd.ddroid.server.DBSession
+   * @see arlut.csd.ganymede.server.DBSession
    * 
    */
 
@@ -2448,7 +2448,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * to permissions limitations.
    * @param noWizards If true, wizards will be skipped
    *
-   * @see arlut.csd.ddroid.server.DBSession
+   * @see arlut.csd.ganymede.server.DBSession
    *
    */
   
@@ -3023,16 +3023,16 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>Creates and adds a new embedded object in this
    * field, if it is an edit-in-place vector.</p>
    *
-   * <p>Returns a {@link arlut.csd.ddroid.common.ReturnVal ReturnVal} which
+   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} which
    * conveys a success or failure result.  If the createNewEmbedded()
    * call was successful, the ReturnVal will contain
-   * {@link arlut.csd.ddroid.common.Invid Invid} and {@link
-   * arlut.csd.ddroid.rmi.db_object db_object}, which can be retrieved
-   * using the ReturnVal {@link arlut.csd.ddroid.common.ReturnVal#getInvid() getInvid()} 
-   * and {@link arlut.csd.ddroid.common.ReturnVal#getObject() getObject()}
+   * {@link arlut.csd.ganymede.common.Invid Invid} and {@link
+   * arlut.csd.ganymede.rmi.db_object db_object}, which can be retrieved
+   * using the ReturnVal {@link arlut.csd.ganymede.common.ReturnVal#getInvid() getInvid()} 
+   * and {@link arlut.csd.ganymede.common.ReturnVal#getObject() getObject()}
    * methods..</p>
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    */
 
   public ReturnVal createNewEmbedded() throws NotLoggedInException
@@ -3044,13 +3044,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>Creates and adds a new embedded object in this
    * field, if it is an edit-in-place vector.</p>
    *
-   * <p>Returns a {@link arlut.csd.ddroid.common.ReturnVal ReturnVal} which
+   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} which
    * conveys a success or failure result.  If the createNewEmbedded()
    * call was successful, the ReturnVal will contain
-   * {@link arlut.csd.ddroid.common.Invid Invid} and {@link
-   * arlut.csd.ddroid.rmi.db_object db_object}, which can be retrieved
-   * using the ReturnVal {@link arlut.csd.ddroid.common.ReturnVal#getInvid() getInvid()} 
-   * and {@link arlut.csd.ddroid.common.ReturnVal#getObject() getObject()}
+   * {@link arlut.csd.ganymede.common.Invid Invid} and {@link
+   * arlut.csd.ganymede.rmi.db_object db_object}, which can be retrieved
+   * using the ReturnVal {@link arlut.csd.ganymede.common.ReturnVal#getInvid() getInvid()} 
+   * and {@link arlut.csd.ganymede.common.ReturnVal#getObject() getObject()}
    * methods..</p>
    *
    * @param local If true, we don't check permission to edit this
@@ -3262,7 +3262,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    */
 
   public short getTargetBase()
@@ -3748,7 +3748,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Returns true if this invid field may only point to objects
    * of a particular type.
    * 
-   * @see arlut.csd.ddroid.rmi.invid_field 
+   * @see arlut.csd.ganymede.rmi.invid_field 
    *
    */
 
@@ -3762,7 +3762,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Returns a QueryResult encoded list of the current values
    * stored in this field.
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    *
    */
 
@@ -3853,7 +3853,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * mustChoose() returns true, &lt;none&gt; is not an acceptable
    * choice for this field after the field's value is initially set.
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    */
 
   public boolean mustChoose()
@@ -3872,7 +3872,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Returns a StringBuffer encoded list of acceptable invid values
    * for this field.
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    */
 
   public QueryResult choices() throws NotLoggedInException
@@ -3884,7 +3884,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Returns a StringBuffer encoded list of acceptable invid values
    * for this field.
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
+   * @see arlut.csd.ganymede.rmi.invid_field
    */
 
   public QueryResult choices(boolean applyFilter) throws NotLoggedInException

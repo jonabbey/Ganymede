@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -66,7 +66,7 @@ import java.util.Vector;
 
 /**
  * <P>This class coordinates lock activity for a server-side
- * {@link arlut.csd.ddroid.server.DBSession DBSession} object.  This class handles
+ * {@link arlut.csd.ganymede.server.DBSession DBSession} object.  This class handles
  * the logic to make sure that a session does not grant a new lock that would
  * conflict with a lock already held by the same session.</P>
  */
@@ -106,11 +106,11 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <p>Establishes a read lock for the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases}
+   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the read lock 
-   * can be established.  If any of the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases}
+   * can be established.  If any of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
    * in the bases vector have transactions
    * currently committing, the establishment of the read lock will be suspended
    * until all such transactions are committed.</p>
@@ -161,7 +161,7 @@ public class DBSessionLockManager {
 
   /**
    * <P>openReadLock establishes a read lock for the entire
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>The thread calling this method will block until the read lock 
    * can be established.  If transactions on the database are
@@ -210,7 +210,7 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <p>Establishes a write lock for the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases}
+   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the write lock

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -62,8 +62,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.date_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.date_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -72,15 +72,15 @@ import arlut.csd.ddroid.rmi.date_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DateDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
+ * <P>DateDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
  * for the storage and handling of Date
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to DateDBFields through the
- * {@link arlut.csd.ddroid.rmi.date_field date_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to DateDBFields through the
+ * {@link arlut.csd.ganymede.rmi.date_field date_field} RMI interface.</P> 
  *
- * <P>Directory Droid uses the standard Java Date class, which can encode dates
+ * <P>Ganymede uses the standard Java Date class, which can encode dates
  * from roughly 300 million years B.C. to 300 million years A.D., with
  * millisecond resolution.  No Y2k problems here. ;-)</P>
  */
@@ -94,7 +94,7 @@ public class DateDBField extends DBField implements date_field {
 
   /**
    * <P>Receive constructor.  Used to create a DateDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -109,10 +109,10 @@ public class DateDBField extends DBField implements date_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -307,11 +307,11 @@ public class DateDBField extends DBField implements date_field {
    * set.</P>
    *
    * <P>We depend on our owner's 
-   * {@link arlut.csd.ddroid.server.DBEditObject#isDateLimited(arlut.csd.ddroid.server.DBField) isDateLimited()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#isDateLimited(arlut.csd.ganymede.server.DBField) isDateLimited()}
    * method to tell us whether this Date field should be limited or not
    * in this editing context.</P>
    *
-   * @see arlut.csd.ddroid.rmi.date_field
+   * @see arlut.csd.ganymede.rmi.date_field
    */
 
   public boolean limited()
@@ -334,10 +334,10 @@ public class DateDBField extends DBField implements date_field {
    * <P>Returns the earliest date acceptable for this field</P>
    *
    * <P>We depend on our owner's 
-   * {@link arlut.csd.ddroid.server.DBEditObject#minDate(arlut.csd.ddroid.server.DBField) minDate()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#minDate(arlut.csd.ganymede.server.DBField) minDate()}
    * method to tell us what the earliest acceptable Date for this field is.</P>
    *
-   * @see arlut.csd.ddroid.rmi.date_field
+   * @see arlut.csd.ganymede.rmi.date_field
    */
 
   public Date minDate()
@@ -360,10 +360,10 @@ public class DateDBField extends DBField implements date_field {
    * <P>Returns the latest date acceptable for this field</P>
    *
    * <P>We depend on our owner's 
-   * {@link arlut.csd.ddroid.server.DBEditObject#maxDate(arlut.csd.ddroid.server.DBField) maxDate()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#maxDate(arlut.csd.ganymede.server.DBField) maxDate()}
    * method to tell us what the earliest acceptable Date for this field is.</P>
    *
-   * @see arlut.csd.ddroid.rmi.date_field
+   * @see arlut.csd.ganymede.rmi.date_field
    */
 
   public Date maxDate()

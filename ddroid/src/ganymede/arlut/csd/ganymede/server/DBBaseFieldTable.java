@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
@@ -65,8 +65,8 @@ import java.util.NoSuchElementException;
 /**
  * <P>A customized variant of the java.util.Hashtable class that is
  * tuned for use in managing
- * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}s
- * in a Directory Droid {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}.</P>
+ * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}s
+ * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
  * 
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT

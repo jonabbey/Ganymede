@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 
@@ -67,7 +67,7 @@ import arlut.csd.Util.TranslationService;
 
 /**
  * <p>Runnable class to do a journal sync.  Issued by the 
- * {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  */
 
 class dumpAndArchiveTask implements Runnable {
@@ -78,7 +78,7 @@ class dumpAndArchiveTask implements Runnable {
   {
     if (dumpAndArchiveTask.ts == null)
       {
-	dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumpAndArchiveTask");
+	dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.dumpAndArchiveTask");
       }
   }
 

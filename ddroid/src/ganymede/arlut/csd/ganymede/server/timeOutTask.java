@@ -2,8 +2,8 @@
 
    timeOutTask.java
 
-   This task allows a Directory Droid administrator to trigger a
-   server-side garbage collection cycle through the Directory Droid
+   This task allows a Ganymede administrator to trigger a
+   server-side garbage collection cycle through the Ganymede
    Administration Console.
 
    Created: 20 May 2004
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 
 /*------------------------------------------------------------------------------
@@ -65,11 +65,11 @@ package arlut.csd.ddroid.server;
 
 /**
  * <p>Runnable class to do a periodic sweep of idle users.  Registered with
- * the {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} by
- * {@link arlut.csd.ddroid.server.Ganymede#registerTasks() registerTasks()}, to
+ * the {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} by
+ * {@link arlut.csd.ganymede.server.Ganymede#registerTasks() registerTasks()}, to
  * run every minute.</p>
  *
- * <p>This task implements {@link arlut.csd.ddroid.server.silentTask silentTask}
+ * <p>This task implements {@link arlut.csd.ganymede.server.silentTask silentTask}
  * in order to signal the GanymedeScheduler not to print anything to the console
  * when the task is run.</p>
  */

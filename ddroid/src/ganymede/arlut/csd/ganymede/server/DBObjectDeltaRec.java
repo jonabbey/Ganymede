@@ -6,7 +6,7 @@
    made to a DBObject in the DBStore.
  
    This class will be used in to handle writing and reading records of
-   changes made to objects in the Directory Droid journal file.
+   changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
    Last Mod Date: $Date$
@@ -18,7 +18,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -62,8 +62,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -77,7 +77,7 @@ import arlut.csd.ddroid.common.Invid;
  * made to a DBObject in the DBStore.<br><br>
  *
  * This class will be used in to handle writing and reading records of
- * changes made to objects in the Directory Droid journal file.
+ * changes made to objects in the Ganymede journal file.
  *
  */
 
@@ -95,7 +95,7 @@ public final class DBObjectDeltaRec implements FieldType {
   /**
    *
    * This DBObjectDeltaRec constructor is used to generate a delta record
-   * that records the difference between two objects for the Directory Droid journal
+   * that records the difference between two objects for the Ganymede journal
    *
    *
    */

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -76,14 +76,14 @@ import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLStartDocument;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.XMLWarning;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.NameSpace;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.XMLSession;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.NameSpace;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.XMLSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -94,10 +94,10 @@ import arlut.csd.ddroid.rmi.XMLSession;
 /**
  * <p>This class handles all XML loading operations for the Ganymede
  * server.  GanymedeXMLSession's are created by the {@link
- * arlut.csd.ddroid.server.GanymedeServer GanymedeServer}'s {@link
- * arlut.csd.ddroid.server.GanymedeServer#xmlLogin(arlut.csd.ganymede.Client)
+ * arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s {@link
+ * arlut.csd.ganymede.server.GanymedeServer#xmlLogin(arlut.csd.ganymede.Client)
  * xmlLogin()} method.  A GanymedeXMLSession is created on top of a
- * {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession} and
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} and
  * interacts with the database through that session.  A
  * GanymedeXMLSession generally looks to the rest of the server like
  * any other client, except that if the XML file contains a
@@ -108,7 +108,7 @@ import arlut.csd.ddroid.rmi.XMLSession;
  * processed.</p>
  *
  * <p>Once xmlLogin creates (and RMI exports) a GanymedeXMLSession, an xmlclient
- * repeatedly calls the {@link arlut.csd.ddroid.server.GanymedeXMLSession#xmlSubmit(byte[]) xmlSubmit()}
+ * repeatedly calls the {@link arlut.csd.ganymede.server.GanymedeXMLSession#xmlSubmit(byte[]) xmlSubmit()}
  * method, which writes the bytes received into a pipe.  The GanymedeXMLSession's
  * thread (also initiated by GanymedeServer.xmlLogin()) then loops, reading
  * data off of the pipe with an {@link arlut.csd.Util.XMLReader XMLReader} and
@@ -127,8 +127,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This major version number is compared with the "major"
-   * attribute in the Directory Droid XML document element.  We won't
-   * try to read Directory Droid XML files whose major and/or minor numbers
+   * attribute in the Ganymede XML document element.  We won't
+   * try to read Ganymede XML files whose major and/or minor numbers
    * are too high.</p> 
    */
 
@@ -136,8 +136,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This minor version number is compared with the "minor"
-   * attribute in the Directory Droid XML document element.  We won't
-   * try to read Directory Droid XML files whose major and/or minor numbers
+   * attribute in the Ganymede XML document element.  We won't
+   * try to read Ganymede XML files whose major and/or minor numbers
    * are too high.</p> 
    */
 
@@ -175,7 +175,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   /**
    * <p>Hashtable mapping object type names to
    * hashtables mapping field names to 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * objects.</p>
    */
 
@@ -184,7 +184,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   /**
    * <p>Hashtable mapping Short object type ids to
    * hashtables mapping field names to 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * objects.</p>
    */
 
@@ -193,22 +193,22 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   /**
    * <P>Hashtable mapping Short type ids to
    * hashes which map local object designations to
-   * actual {@link arlut.csd.ddroid.server.xmlobject xmlobject}
+   * actual {@link arlut.csd.ganymede.server.xmlobject xmlobject}
    * records.</P>
    */
 
   public Hashtable objectStore = new Hashtable();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.server.xmlobject xmlobjects}
-   * that correspond to new Directory Droid server objects
+   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
+   * that correspond to new Ganymede server objects
    * that have been/need to be created by this GanymedeXMLSession.</p>
    */
 
   public Vector createdObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.server.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be checked out for editing by this
    * GanymedeXMLSession.</p> 
@@ -217,8 +217,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector editedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.server.xmlobject
-   * xmlobjects} that correspond to Directory Droid server objects that have
+   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject
+   * xmlobjects} that correspond to Ganymede server objects that have
    * been created/checked out for editing during embedded invid field
    * processing, and which need to have their invid fields registered
    * after everything else is done.</p> 
@@ -227,7 +227,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector embeddedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.server.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be inactivated by this
    * GanymedeXMLSession.</p>
@@ -236,7 +236,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector inactivatedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.server.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be deleted by this
    * GanymedeXMLSession.</p>
@@ -398,7 +398,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * <p>This method returns a remote reference to the underlying
    * GanymedeSession in use on the server.</p>
    *
-   * @see arlut.csd.ddroid.rmi.XMLSession
+   * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
   public Session getSession()
@@ -417,7 +417,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * will only block if the server has filled up its internal buffers
    * and must wait to digest more of the already submitted XML.</p> 
    *
-   * @see arlut.csd.ddroid.rmi.XMLSession
+   * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
   public ReturnVal xmlSubmit(byte[] bytes) throws NotLoggedInException
@@ -492,7 +492,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * <p>This method is synchronized to cause it to block until the
    * background parser completes.</p>
    *
-   * @see arlut.csd.ddroid.rmi.XMLSession
+   * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
   public synchronized ReturnVal xmlEnd()
@@ -699,7 +699,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (!docElement.matches("ganymede"))
 	  {
-	    err.println("Error, XML Stream does not contain a Directory Droid XML file.");
+	    err.println("Error, XML Stream does not contain a Ganymede XML file.");
 	    err.println("Unrecognized XML element: " + docElement);
 	    return;
 	  }
@@ -1592,7 +1592,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This method is used by the XML schema editing code
-   * in {@link arlut.csd.ddroid.server.GanymedeXMLSession GanymedeXMLSession}
+   * in {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}
    * to fix up the category tree to match that specified in the XML
    * &lt;ganyschema&gt; element.</p>
    */
@@ -1718,8 +1718,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * &lt;/ganydata&gt; element, if such is to be found.</p>
    *
    * <p>Before starting to read data from the &lt;ganydata&gt; element,
-   * this method communicates with the Directory Droid server database through the
-   * normal client {@link arlut.csd.ddroid.rmi.Session Session} interface.</p>
+   * this method communicates with the Ganymede server database through the
+   * normal client {@link arlut.csd.ganymede.rmi.Session Session} interface.</p>
    *
    * <p>The contents of &lt;ganydata&gt; are scanned, and an in-memory
    * datastructure is constructed in the GanymedeXMLSession.  All
@@ -2145,7 +2145,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This helper method returns a hash of field names to
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate} based
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} based
    * on the underscore-for-space XML encoded object type name.</p>
    *
    * <p>The Hashtable returned by this method is intended to be used
@@ -2159,7 +2159,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This helper method takes a hash of field names to
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate} and an
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
    * returned.</p> 
@@ -2247,12 +2247,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	if (attempt.getDialog() != null)
 	  {
-	    err.println("Directory Droid xmlclient: couldn't open transaction " + session.username +
+	    err.println("Ganymede xmlclient: couldn't open transaction " + session.username +
 			": " + attempt.getDialog().getText());
 	  }
 	else
 	  {
-	    err.println("Directory Droid xmlclient: couldn't open transaction " + session.username);
+	    err.println("Ganymede xmlclient: couldn't open transaction " + session.username);
 	  }
 	
 	return false;

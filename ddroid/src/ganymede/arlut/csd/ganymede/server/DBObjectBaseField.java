@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -65,12 +65,12 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLUtils;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.BaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -79,26 +79,26 @@ import arlut.csd.ddroid.rmi.BaseField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>An entry in the Directory Droid server's {@link arlut.csd.ddroid.server.DBStore DBStore}
+ * <p>An entry in the Ganymede server's {@link arlut.csd.ganymede.server.DBStore DBStore}
  * schema dictionary.  DBStore contains a collection of 
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects, which define
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, which define
  * the schema information for a particular type of object held in the Ganymede
  * database.  A DBObjectBaseField is contained within a DBObjectBase, and defines
  * the name, id, type, and constraints of a particular field that can be held
- * in {@link arlut.csd.ddroid.server.DBObject DBObjects} of that type, including
- * a controlling {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace}, if
+ * in {@link arlut.csd.ganymede.server.DBObject DBObjects} of that type, including
+ * a controlling {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, if
  * appropriate.</P>
  *
- * <P>Each {@link arlut.csd.ddroid.server.DBField DBField} held in the server's
+ * <P>Each {@link arlut.csd.ganymede.server.DBField DBField} held in the server's
  * database holds a reference to a DBObjectBaseField, and the DBField's methods
  * will consult the DBObjectBaseField during run-time to make decisions based
  * on specified constraints defined in the DBObjectBaseField.</P>
  *
- * <P>The Directory Droid schema editor uses the {@link arlut.csd.ddroid.rmi.BaseField BaseField}
+ * <P>The Ganymede schema editor uses the {@link arlut.csd.ganymede.rmi.BaseField BaseField}
  * remote interface to make changes to a DBObjectBaseField's constraint information
- * during schema editing. The Directory Droid client may also use the BaseField interface
+ * during schema editing. The Ganymede client may also use the BaseField interface
  * to learn about the field's type information, but it may also download a
- * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate} that carries a
+ * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} that carries a
  * DBObjectBaseField's type information in an efficiently retrieved summary.</P>
  */
 
@@ -128,7 +128,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   short field_code = -1;
 
   /**
-   * {@link arlut.csd.ddroid.common.FieldType Field Type} for this field
+   * {@link arlut.csd.ganymede.common.FieldType Field Type} for this field
    */
 
   short field_type = -1;
@@ -202,7 +202,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
   /**
    * Regular Expression string for input-filtering
-   * in {@link arlut.csd.ddroid.server.StringDBField}s.
+   * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
   String regexpPat = null;	// introduced in ganymede.db version 1.14
@@ -216,7 +216,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
   /**
    * Compiled regular expression for input-filtering
-   * in {@link arlut.csd.ddroid.server.StringDBField}s.
+   * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
   gnu.regexp.RE regexp = null;
@@ -2336,7 +2336,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * all.. even the field names needn't be edited by anyone, since
    * they aren't shown in the client.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isEditable()
@@ -2358,7 +2358,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method returns true if this field definition can be removed
    * by the schema editor.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isRemovable()
@@ -2371,7 +2371,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * is intended to be visible to the client normally,
    * false otherwise.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isVisible()
@@ -2385,7 +2385,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * prevent incompatible modifications to fields that are in use
    * in the database.</P>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isInUse()
@@ -2401,7 +2401,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the Base we are a part of.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public Base getBase()
@@ -2427,7 +2427,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the name of this field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getName()
@@ -2439,7 +2439,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>Sets the name of this field</p>
    *
    * @param name The new name to put in this field
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setName(String name)
@@ -2543,7 +2543,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the name of the class managing instances of this field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getClassName()
@@ -2554,7 +2554,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Sets the name of the class managing instances of this field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setClassName(String name)
@@ -2613,7 +2613,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the comment defined in the schema for this field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getComment()
@@ -2624,7 +2624,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Sets the comment defined in the schema for this field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setComment(String s)
@@ -2643,7 +2643,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>Returns the field type</p>
    *
    * <p>Where type is one of the following
-   * constants defined in the {@link arlut.csd.ddroid.common.FieldType FieldType}
+   * constants defined in the {@link arlut.csd.ganymede.common.FieldType FieldType}
    * interface:</p>
    *
    * <pre>
@@ -2658,8 +2658,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    *   static short FLOAT = 8;
    * </pre>
    *
-   * @see arlut.csd.ddroid.server.DBStore
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.server.DBStore
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getType()
@@ -2668,7 +2668,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   }
 
   /**
-   * <p>Sets the {@link arlut.csd.ddroid.common.FieldType field type}
+   * <p>Sets the {@link arlut.csd.ganymede.common.FieldType field type}
    * for this field.  Changing the basic type of a field that is already being
    * used in the server will cause very bad things to happen.  The
    * right way to change an existing field is to delete the field, commit
@@ -2678,7 +2678,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>If the new field type is not string, invid, or IP, the field
    * will be made a scalar field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setType(short type)
@@ -2756,7 +2756,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of boolean type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isBoolean()
@@ -2767,7 +2767,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of numeric type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isNumeric()
@@ -2778,7 +2778,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of float type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isFloat()
@@ -2789,7 +2789,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of date type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isDate()
@@ -2800,7 +2800,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of string type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isString()
@@ -2811,7 +2811,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of invid type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isInvid()
@@ -2822,7 +2822,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of permission matrix type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isPermMatrix()
@@ -2833,7 +2833,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of password type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isPassword()
@@ -2844,7 +2844,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is of IP type</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isIP()
@@ -2855,7 +2855,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this field is a vector field, false otherwise.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isArray()
@@ -2875,7 +2875,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * scalar to vector, but a vector to scalar change is an incompatible
    * change.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setArray(boolean b)
@@ -2926,13 +2926,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
   /**
    * <p>Returns id code for this field.  Each field in a
-   * {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * {@link arlut.csd.ganymede.server.DBObject DBObject}
    * has a unique code which identifies the field.  This code represents
    * the field in the on-disk data store, and is used by 
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * to choose what field to change in the setField method.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getID()
@@ -3022,7 +3022,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the array size limitation for this field if it is an array field</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getMaxArraySize()
@@ -3038,7 +3038,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Set the maximum number of values allowed in this vector field.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setMaxArraySize(short limit)
@@ -3093,7 +3093,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns true if this is a boolean field with labels</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isLabeled()
@@ -3112,7 +3112,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a boolean type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setLabeled(boolean b)
@@ -3144,7 +3144,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getTrueLabel()
@@ -3164,7 +3164,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setTrueLabel(String label)
@@ -3198,7 +3198,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getFalseLabel()
@@ -3218,7 +3218,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setFalseLabel(String label)
@@ -3257,7 +3257,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getMinLength()
@@ -3276,7 +3276,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setMinLength(short val)
@@ -3323,7 +3323,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getMaxLength()
@@ -3343,7 +3343,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setMaxLength(short val)
@@ -3389,7 +3389,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getOKChars()
@@ -3410,7 +3410,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setOKChars(String s)
@@ -3450,7 +3450,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getBadChars()
@@ -3471,7 +3471,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setBadChars(String s)
@@ -3511,7 +3511,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isMultiLine()
@@ -3531,7 +3531,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setMultiLine(boolean b)
@@ -3564,7 +3564,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getRegexpPat()
@@ -3584,7 +3584,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public String getRegexpDesc()
@@ -3603,7 +3603,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setRegexpPat(String s)
@@ -3663,7 +3663,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setRegexpDesc(String s)
@@ -3713,7 +3713,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   /**
    * <p>Returns the label of this string, numeric, or IP field's namespace.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getNameSpaceLabel()
@@ -3743,7 +3743,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string, numeric, or IP type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setNameSpace(String nameSpaceId)
@@ -3794,7 +3794,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    getID() == SchemaConstants.UserUserName)
 	  {
 	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Directory Droid server " +
+					      "Proper functioning of the Ganymede server " +
 					      "depends on user names being unique.");
 	  }
 
@@ -3802,7 +3802,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    getID() == SchemaConstants.PersonaLabelField)
 	  {
 	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Directory Droid server " +
+					      "Proper functioning of the Ganymede server " +
 					      "depends on persona labels being unique.");
 	  }
 
@@ -3810,7 +3810,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    getID() == SchemaConstants.OwnerNameField)
 	  {
 	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Directory Droid server " +
+					      "Proper functioning of the Ganymede server " +
 					      "depends on owner group labels being unique.");
 	  }
 
@@ -3818,7 +3818,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    getID() == SchemaConstants.EventToken)
 	  {
 	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Directory Droid server " +
+					      "Proper functioning of the Ganymede server " +
 					      "depends on event tokens being unique.");
 	  }
 
@@ -3826,7 +3826,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    getID() == SchemaConstants.RoleName)
 	  {
 	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Directory Droid server " +
+					      "Proper functioning of the Ganymede server " +
 					      "depends on Role names being unique.");
 	  }
 
@@ -3946,7 +3946,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method is used internally to set a namespace constraint.</p>
    *
    * <p>It does not appear that this method is currently used.. rather that
-   * {@link arlut.csd.ddroid.server.DBObjectBaseField#setNameSpace(java.lang.String)
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField#setNameSpace(java.lang.String)
    * setNameSpace(string)} is.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
@@ -4033,7 +4033,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>Returns true if this is an invid field which is intended as an editInPlace
    * reference for the client's rendering.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isEditInPlace()
@@ -4048,7 +4048,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setEditInPlace(boolean b)
@@ -4089,7 +4089,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isTargetRestricted()
@@ -4112,7 +4112,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getTargetBase()
@@ -4132,7 +4132,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setTargetBase(short val)
@@ -4200,7 +4200,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public synchronized ReturnVal setTargetBase(String baseName)
@@ -4291,7 +4291,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isSymmetric()
@@ -4312,7 +4312,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public short getTargetField()
@@ -4334,7 +4334,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setTargetField(short val)
@@ -4435,7 +4435,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setTargetField(String fieldName)
@@ -4547,7 +4547,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * stores passwords in UNIX crypt format, and can thus accept
    * pre-crypted passwords.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isCrypted()
@@ -4566,7 +4566,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setCrypted(boolean b)
@@ -4591,7 +4591,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * stores passwords in OpenBSD/FreeBSD/PAM md5crypt() format, and
    * can thus accept pre-crypted passwords.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isMD5Crypted()
@@ -4611,7 +4611,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public ReturnVal setMD5Crypted(boolean b)
@@ -4636,7 +4636,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * stores passwords in Apache md5crypt() format, and
    * can thus accept pre-crypted passwords.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isApacheMD5Crypted()
@@ -4656,7 +4656,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public ReturnVal setApacheMD5Crypted(boolean b)
@@ -4684,7 +4684,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * hashing formats, they will not be kept in plaintext on disk,
    * unless isPlainText() returns true.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isWinHashed()
@@ -4702,7 +4702,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public ReturnVal setWinHashed(boolean b)
@@ -4772,7 +4772,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * will keep a copy of the password in plaintext in the Ganymede
    * server's on-disk database.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isPlainText()
@@ -4784,14 +4784,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method is used to specify that this password field
    * should keep a copy of the password in plaintext on disk,
    * even if other hash methods are in use which could be
-   * used for Directory Droid login authentication.  If no hash methods
+   * used for Ganymede login authentication.  If no hash methods
    * are enabled for this password field, plaintext will be stored
    * on disk even if isPlainText() returns false for this field definition.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setPlainText(boolean b)
@@ -4952,7 +4952,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method is only for human information, and the precise
    * results returned are subject to change at any time.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public String getTypeDesc()
@@ -5130,7 +5130,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method is only for human elucidation, and the precise
    * results returned are subject to change at any time.</p>
    *
-   * @see arlut.csd.ddroid.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public String getTypeDescHTML()
@@ -5331,7 +5331,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   }
 
   /**
-   * <p>This method is used when the Directory Droid server dumps its schema.
+   * <p>This method is used when the Ganymede server dumps its schema.
    * It prints an HTML description of this field type to the PrintWriter
    * specified.</p>
    *
@@ -5348,7 +5348,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   }
 
   /**
-   * <p>This method is used when the Directory Droid server dumps its schema.
+   * <p>This method is used when the Ganymede server dumps its schema.
    * It prints an ASCII description of this field type to the PrintWriter
    * specified.</p>
    *

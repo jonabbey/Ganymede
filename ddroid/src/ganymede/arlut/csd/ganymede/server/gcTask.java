@@ -2,8 +2,8 @@
 
    gcTask.java
 
-   This task allows a Directory Droid administrator to trigger a
-   server-side garbage collection cycle through the Directory Droid
+   This task allows a Ganymede administrator to trigger a
+   server-side garbage collection cycle through the Ganymede
    Administration Console.
 
    Created: 20 May 2004
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import arlut.csd.Util.TranslationService;
 
@@ -66,7 +66,7 @@ import arlut.csd.Util.TranslationService;
 
 /**
  * <p>Runnable class to do a synchronous garbage collection run.  Issued
- * by the {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * by the {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  *
  * <p>I'm not sure that there is any point to having a synchronous garbage
  * collection task.. the idea was that we could schedule a full gc when
@@ -87,7 +87,7 @@ class gcTask implements Runnable {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.gcTask");
+	ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.gcTask");
       }
   }
 

@@ -3,10 +3,10 @@
 JythonTask.java
 
 This class acts as a proxy for a separate Builder Task (a class that handles 
-processing DDroid's data for use in DNS/LDAP/Mail server/etc.) that's written
+processing Ganymede's data for use in DNS/LDAP/Mail server/etc.) that's written
 in Jython. This task takes one parameter, a URI that points to the actual Jython
 code. The code is downloaded, loaded, and executed as if it was any other 
-DDroid native-Java task.
+Ganymede native-Java task.
 
 Created: 22 July 2004
 Last Mod Date: $Date$
@@ -18,7 +18,7 @@ Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
 -----------------------------------------------------------------------
       
-Directory Droid Directory Management System
+Ganymede Directory Management System
 
 Copyright (C) 1996-2004
 The University of Texas at Austin
@@ -53,7 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA
 
 */
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -61,19 +61,19 @@ import org.python.core.PyException;
 import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /**
  * <p>
  * This class acts as a proxy for a separate Builder Task (a class that handles
- * processing DDroid's data for use in DNS/LDAP/Mail server/etc.) that's written
+ * processing Ganymede's data for use in DNS/LDAP/Mail server/etc.) that's written
  * in Jython. This task doesn't do much on its own; it simply bootstraps a
  * Jython interpreter to a state where it can execute a "proper" builder task
  * written in Jython and stored at an external location.
  * </p>
  * <p>
- * Every JythonTask needs to be registered in the DDroid database via the task
+ * Every JythonTask needs to be registered in the Ganymede database via the task
  * object type. They all require a single option string: the URI of the "real"
  * builder task that is written in Jython. The URI can point to a resource using
  * any protocol the Jython <code>urllib</code> module can handle (http://,
@@ -81,7 +81,7 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * </p>
  * <p>
  * The "real" task, written in Jython, is ideally a subclass of
- * {@link arlut.csd.ddroid.server.GanymedeBuilderTask GanymedeBuilderTask}
+ * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTask}
  * (though it can simply be any class that implements the
  * {@link java.lang.Runnable Runnable}interface). This class will bootstrap a
  * new Jython interpreter, load the class defined at the specified URI, and then

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -63,15 +63,15 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DBDumpLock is a {@link arlut.csd.ddroid.server.DBLock DBLock} object used to lock the
- * {@link arlut.csd.ddroid.server.DBStore DBStore} for the purpose of
+ * <P>DBDumpLock is a {@link arlut.csd.ganymede.server.DBLock DBLock} object used to lock the
+ * {@link arlut.csd.ganymede.server.DBStore DBStore} for the purpose of
  * dumping the database.  A DBDumpLock establish request has lower
- * priority than {@link arlut.csd.ddroid.server.DBWriteLock DBWriteLock}
+ * priority than {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}
  * requests, but once a DBDumpLock establish
  * request is submitted, no new DBWriteLock can be established until
  * the dumping thread has completed the dump and released the lock.</P>
  *
- * <P>{@link arlut.csd.ddroid.server.DBReadLock DBReadLock}'s can be established
+ * <P>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
  * while a DBDumpLock is active.</P>
  */
 
@@ -299,7 +299,7 @@ class DBDumpLock extends DBLock {
    * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects.  If
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
    * establish(), establish() will throw an InterruptedException.</P>
    *

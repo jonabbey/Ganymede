@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,20 +51,20 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,8 +73,8 @@ import arlut.csd.ddroid.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid server task, for use with the {@link
- * arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * <p>This is a Ganymede server task, for use with the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  * 
  * <p>The GanymedeExpirationTask scans through all objects in the
  * database and handles expiration and/or removal for any object whose Expiration
@@ -84,7 +84,7 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * GanymedeScheduler, but running it more often won't hurt anything.</p>
  *
  * <p>The standard GanymedeExpirationTask is paired with the
- * standard {@link arlut.csd.ddroid.server.GanymedeWarningTask GanymedeWarningTask} task,
+ * standard {@link arlut.csd.ganymede.server.GanymedeWarningTask GanymedeWarningTask} task,
  * which sends out email warning of expirations and removals to occur in the
  * near future.</p>
  */

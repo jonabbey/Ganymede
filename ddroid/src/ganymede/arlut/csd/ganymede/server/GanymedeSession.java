@@ -2,7 +2,7 @@
 
    GanymedeSession.java
  
-   This class is the heart of the Directory Droid server.
+   This class is the heart of the Ganymede server.
 
    Each client logged on to the server will hold a reference to a unique
    GanymedeSession object.  This object provides services to the client, tracks
@@ -24,7 +24,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -61,7 +61,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -88,31 +88,31 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.Util.booleanSemaphore;
-import arlut.csd.ddroid.common.AdminEntry;
-import arlut.csd.ddroid.common.BaseListTransport;
-import arlut.csd.ddroid.common.CategoryTransport;
-import arlut.csd.ddroid.common.ClientMessage;
-import arlut.csd.ddroid.common.DDParseException;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ObjectHandle;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.PermMatrix;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.QueryResultContainer;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.BaseField;
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.ClientAsyncResponder;
-import arlut.csd.ddroid.rmi.FileReceiver;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ganymede.common.AdminEntry;
+import arlut.csd.ganymede.common.BaseListTransport;
+import arlut.csd.ganymede.common.CategoryTransport;
+import arlut.csd.ganymede.common.ClientMessage;
+import arlut.csd.ganymede.common.DDParseException;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.PermMatrix;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.QueryResultContainer;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.BaseField;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.ClientAsyncResponder;
+import arlut.csd.ganymede.rmi.FileReceiver;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -121,51 +121,51 @@ import arlut.csd.ddroid.rmi.db_object;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>User-level session object in the Directory Droid server.  Each client
- * that logs in to the Directory Droid server through the {@link
- * arlut.csd.ddroid.server.GanymedeServer GanymedeServer} {@link
- * arlut.csd.ddroid.server.GanymedeServer#login(java.lang.String, java.lang.String)
+ * <P>User-level session object in the Ganymede server.  Each client
+ * that logs in to the Ganymede server through the {@link
+ * arlut.csd.ganymede.server.GanymedeServer GanymedeServer} {@link
+ * arlut.csd.ganymede.server.GanymedeServer#login(java.lang.String, java.lang.String)
  * login()} method gets a GanymedeSession object, which oversees that
  * client's interactions with the server.  The client talks to its
  * GanymedeSession object through the {@link
- * arlut.csd.ddroid.rmi.Session Session} RMI interface, making calls to
+ * arlut.csd.ganymede.rmi.Session Session} RMI interface, making calls to
  * access schema information and database objects in the server.</P>
  *
  * <P>The GanymedeSession class provides query and editing services to
  * the client, tracks the client's status, and manages permissions.
  * Most of the actual database handling is done through a second,
  * database-layer session object called a {@link
- * arlut.csd.ddroid.server.DBSession DBSession} that GanymedeSession
+ * arlut.csd.ganymede.server.DBSession DBSession} that GanymedeSession
  * maintains for each user.  GanymedeSession methods like {@link
- * arlut.csd.ddroid.server.GanymedeSession#view_db_object(arlut.csd.ddroid.common.Invid)
+ * arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
  * view_db_object()} and {@link
- * arlut.csd.ddroid.server.GanymedeSession#edit_db_object(arlut.csd.ddroid.common.Invid)
+ * arlut.csd.ganymede.server.GanymedeSession#edit_db_object(arlut.csd.ganymede.common.Invid)
  * edit_db_object()} make calls on the DBSession to actually access
- * {@link arlut.csd.ddroid.server.DBObject DBObjects} in the Ganymede
+ * {@link arlut.csd.ganymede.server.DBObject DBObjects} in the Ganymede
  * database.  The client then receives a serialized {@link
- * arlut.csd.ddroid.common.ReturnVal ReturnVal} which may include a remote
- * {@link arlut.csd.ddroid.rmi.db_object db_object} reference so that
+ * arlut.csd.ganymede.common.ReturnVal ReturnVal} which may include a remote
+ * {@link arlut.csd.ganymede.rmi.db_object db_object} reference so that
  * the client can directly talk to the DBObject or
- * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} over RMI.</P>
+ * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} over RMI.</P>
  *
  * <P>Once a GanymedeSession is created by the GanymedeServer's login()
  * method, the client is considered to be authenticated, and may make
  * as many Session calls as it likes, until the GanymedeSession's
- * {@link arlut.csd.ddroid.server.GanymedeSession#logout() logout()} method
+ * {@link arlut.csd.ganymede.server.GanymedeSession#logout() logout()} method
  * is called.  If the client dies or loses its network connection to 
- * the Directory Droid server for more than 10 minutes, the RMI system will
+ * the Ganymede server for more than 10 minutes, the RMI system will
  * automatically call GanymedeSession's
- * {@link arlut.csd.ddroid.server.GanymedeSession#unreferenced() unreferenced()}
+ * {@link arlut.csd.ganymede.server.GanymedeSession#unreferenced() unreferenced()}
  * method, which will log the client out from the server.</P>
  *
- * <P>The Directory Droid server is transactional, and the client must call
+ * <P>The Ganymede server is transactional, and the client must call
  * {@link
- * arlut.csd.ddroid.server.GanymedeSession#openTransaction(java.lang.String)
+ * arlut.csd.ganymede.server.GanymedeSession#openTransaction(java.lang.String)
  * openTransaction()} before making any changes via edit_db_object()
  * or other editing methods.  In turn, changes made by the client
  * using the edit_db_object() and related methods will not actually be
- * 'locked-in' to the Directory Droid database until the {@link
- * arlut.csd.ddroid.server.GanymedeSession#commitTransaction()
+ * 'locked-in' to the Ganymede database until the {@link
+ * arlut.csd.ganymede.server.GanymedeSession#commitTransaction()
  * commitTransaction()} method is called.</P>
  *
  * <p>Most methods in this class are synchronized to avoid race condition
@@ -182,10 +182,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeSession");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeSession");
 
   // ---
 
@@ -247,7 +247,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <P>This variable tracks whether or not the client desires to have
    * wizards presented.  If this is false, custom plug-in code
    * for the object types stored in the
-   * {@link arlut.csd.ddroid.server.DBStore DBStore} may either
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} may either
    * refuse certain operations or will resort to taking a default action.</P>
    */
   
@@ -312,7 +312,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>The current status message for this client.  The 
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin} code
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} code
    * that manages the admin consoles will consult this String when it
    * updates the admin consoles.</P>
    */
@@ -321,7 +321,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>Description of the last action recorded for this client.  The
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
    * code that manages the admin consoles will consult
    * this String when it updates the admin consoles.</P>
    */
@@ -341,7 +341,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <P>A GanymedeSession can have a single wizard active.  If this variable
    * is non-null, a custom type-specific
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass has instantiated
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass has instantiated
    * a wizard to interact with the user.</P>
    */
 
@@ -410,7 +410,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <P>This variable stores the permission bits that are applicable to objects
    * that the current persona has ownership privilege over.  This matrix
    * is always a permissive superset of
-   * {@link arlut.csd.ddroid.server.GanymedeSession#defaultPerms defaultPerms}.</P>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#defaultPerms defaultPerms}.</P>
    */
 
   PermMatrix personaPerms;
@@ -419,7 +419,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This variable stores the permission bits that are applicable
    * to generic objects not specifically owned by this persona.</p>
    *
-   * <p>Each permission object in the Directory Droid database includes
+   * <p>Each permission object in the Ganymede database includes
    * permissions as apply to objects owned by the persona and as apply
    * to objects not owned by the persona.</p>
    *
@@ -435,7 +435,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * objects that the current persona has ownership privilege over and
    * which the current admin has permission to delegate to subordinate
    * roles.  This matrix is always a permissive superset of
-   * {@link arlut.csd.ddroid.server.GanymedeSession#delegatableDefaultPerms
+   * {@link arlut.csd.ganymede.server.GanymedeSession#delegatableDefaultPerms
    * delegatableDefaultPerms}.</P>
    */
 
@@ -447,7 +447,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * the current admin has permission to delegate to subordinate
    * roles.</p>
    *
-   * <p>Each permission object in the Directory Droid database includes
+   * <p>Each permission object in the Ganymede database includes
    * permissions as apply to objects owned by the persona and as apply
    * to objects not owned by the persona.</p>
    *
@@ -459,7 +459,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   PermMatrix delegatableDefaultPerms;
 
   /**
-   * <P>A reference to the Directory Droid {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * <P>A reference to the Ganymede {@link arlut.csd.ganymede.server.DBObject DBObject}
    * storing our default permissions,
    * or the permissions that applies when we are not in supergash mode
    * and we do not have any ownership over the object in question.</P>
@@ -469,7 +469,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This variable is a vector of object references
-   * ({@link arlut.csd.ddroid.common.Invid Invid}'s) to the owner groups
+   * ({@link arlut.csd.ganymede.common.Invid Invid}'s) to the owner groups
    * that the client has requested newly created objects be placed in.  While
    * this vector is not-null, any new objects created will be owned by the list
    * of ownergroups held here.</P>
@@ -490,7 +490,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   Vector visibilityFilterInvids = null;
 
   /**
-   * <P>This variable caches the {@link arlut.csd.ddroid.common.AdminEntry AdminEntry}
+   * <P>This variable caches the {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * object which is reported to admin consoles connected to the
    * server when the console is updated.</P>
    */
@@ -523,7 +523,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * </p>Constructor for a server-internal GanymedeSession.  Used when
    * the server's internal code needs to do a query, etc.  Note that
-   * the Directory Droid server will create one of these fairly early
+   * the Ganymede server will create one of these fairly early
    * on, and will keep it around for internal usage.  Note that we
    * don't add this to the data structures used for the admin
    * console.</p>
@@ -545,7 +545,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * </p>Constructor for a server-internal GanymedeSession.  Used when
    * the server's internal code needs to do a query, etc.  Note that
-   * the Directory Droid server will create one of these fairly early
+   * the Ganymede server will create one of these fairly early
    * on, and will keep it around for internal usage.  Note that we
    * don't add this to the data structures used for the admin
    * console.</p>
@@ -627,8 +627,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * client.</p>
    *
    * <p>This constructor is called by the
-   * {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer}
-   * {@link arlut.csd.ddroid.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+   * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}
+   * {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
    * method.</p>
    *
    * <p>A Client can log in either as an end-user or as a admin persona.  Typically,
@@ -641,13 +641,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param personaObject The user's initial admin persona 
    * @param exportObjects If true, we'll export any viewed or edited objects for
    * direct RMI access.  We don't need to do this is we're being driven by a server-side
-   * {@link arlut.csd.ddroid.server.GanymedeXMLSession}, for instance.
+   * {@link arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
    * @param clientIsRemote If true, we're being driven remotely, either by a direct
-   * Directory Droid client or by a remotely operated GanymedeXMLSession.  We'll set up an
-   * {@link arlut.csd.ddroid.server.serverClientAsyncResponder serverClientAsyncResponder},
+   * Ganymede client or by a remotely operated GanymedeXMLSession.  We'll set up an
+   * {@link arlut.csd.ganymede.server.serverClientAsyncResponder serverClientAsyncResponder},
    * AKA an asyncPort, for the remote client to poll for async notifications.
    *
-   * @see arlut.csd.ddroid.server.GanymedeServer#login(java.lang.String, java.lang.String)
+   * @see arlut.csd.ganymede.server.GanymedeServer#login(java.lang.String, java.lang.String)
    */
   
   public GanymedeSession(String loginName, DBObject userObject, 
@@ -777,7 +777,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>Pass-through method for schema kit code.  This method is not
    * intended to be available to the client over RMI anymore, as
-   * {@link arlut.csd.ddroid.server.DBSession#checkpoint(java.lang.String)
+   * {@link arlut.csd.ganymede.server.DBSession#checkpoint(java.lang.String)
    * DBSession.checkpoint()} now does a thread comparison to make sure
    * that nothing is attempting to do interleaved checkpoint
    * operations, and RMI doesn't guarantee that successive remote
@@ -798,7 +798,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>Pass-through method for schema kit code.  This method is not
    * intended to be available to the client over RMI anymore, as
-   * {@link arlut.csd.ddroid.server.DBSession#checkpoint(java.lang.String)
+   * {@link arlut.csd.ganymede.server.DBSession#checkpoint(java.lang.String)
    * DBSession.checkpoint()} now does a thread comparison to make sure
    * that nothing is attempting to do interleaved checkpoint
    * operations, and RMI doesn't guarantee that successive remote
@@ -859,12 +859,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This method is used to generate a serializable
-   * {@link arlut.csd.ddroid.common.AdminEntry AdminEntry}
+   * {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * object summarizing this GanymedeSession's state for
    * the admin console.</P>
    *
    * <P>Used by code in
-   * {@link arlut.csd.ddroid.server.GanymedeAdmin GanymedeAdmin}.</P>
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</P>
    */
 
   public AdminEntry getAdminEntry()
@@ -1026,7 +1026,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * to the client.  It is used to update the clients so they
    * know when a build is being processed.</p>
    *
-   * <p>See {@link arlut.csd.ddroid.common.ClientMessage ClientMessage}
+   * <p>See {@link arlut.csd.ganymede.common.ClientMessage ClientMessage}
    * for the list of acceptable client message types.</p>
    */
 
@@ -1081,7 +1081,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is partially synchronized, to avoid locking up
    * the admin console if this user's session has become deadlocked.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void logout()
@@ -1288,7 +1288,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @param val If true, wizards will be enabled.
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void enableWizards(boolean val)
@@ -1323,9 +1323,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method is used to tell the client where to look
-   * to access the Directory Droid help document tree.</p>
+   * to access the Ganymede help document tree.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public String getHelpBase()
@@ -1408,7 +1408,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method is used to allow the client to retrieve a remote reference to
-   * a {@link arlut.csd.ddroid.server.serverClientAsyncResponder}, which will allow
+   * a {@link arlut.csd.ganymede.server.serverClientAsyncResponder}, which will allow
    * the client to poll the server for asynchronous messages from the server.</p>
    *
    * <p>This is used to allow the server to send build status change notifications and
@@ -1432,7 +1432,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method returns the identification string that the server
    * has assigned to the user.</p>
    * 
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public String getMyUserName()
@@ -1463,7 +1463,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method returns a list of personae names available
    * to the user logged in.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public Vector getPersonae() throws NotLoggedInException
@@ -1510,7 +1510,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * permissions that the user has and the objects that are
    * accessible in the database.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized boolean selectPersona(String persona, String password) throws NotLoggedInException
@@ -1846,7 +1846,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @deprecated Superseded by the more efficient getBaseList()
    * 
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public Vector getTypes() throws NotLoggedInException
@@ -1880,8 +1880,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
    *
-   * @see arlut.csd.ddroid.rmi.Category
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public Category getRootCategory() throws NotLoggedInException
@@ -1898,8 +1898,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * and base structure on the server.  The returned CategoryTransport
    * will include only object types that are editable by the user.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Category
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public CategoryTransport getCategoryTree() throws NotLoggedInException
@@ -1919,8 +1919,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * will only include those object types that are editable by the
    * client.
    *
-   * @see arlut.csd.ddroid.rmi.Category
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables) throws NotLoggedInException
@@ -1986,8 +1986,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * between DBStore and GanymedeSession, as the BaseListTransport
    * constructor calls other synchronized methods on GanymedeSession</p>
    *
-   * @see arlut.csd.ddroid.common.BaseListTransport
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.common.BaseListTransport
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized BaseListTransport getBaseList() throws NotLoggedInException
@@ -2067,8 +2067,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This vector may be cached, as it is static for this object type over
    * the lifetime of any GanymedeSession.</p>
    *
-   * @see arlut.csd.ddroid.common.FieldTemplate
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.common.FieldTemplate
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public Vector getFieldTemplateVector(short baseId) throws NotLoggedInException
@@ -2094,7 +2094,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    * 
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal openTransaction(String describe) throws NotLoggedInException
@@ -2115,7 +2115,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    * 
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal openTransaction(String describe, boolean interactive) throws NotLoggedInException
@@ -2181,7 +2181,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * to commitTransaction().</p>
    *
    * <p>This method is synchronized to avoid nested-monitor deadlock in
-   * {@link arlut.csd.ddroid.server.DBSession#commitTransaction() DBSession.commitTransaction()}
+   * {@link arlut.csd.ganymede.server.DBSession#commitTransaction() DBSession.commitTransaction()}
    * </p>.
    *
    * @param abortOnFail If true, the transaction will be aborted if it
@@ -2193,7 +2193,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    *
-   * @see arlut.csd.ddroid.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session 
    */
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail) throws NotLoggedInException
@@ -2283,7 +2283,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    * 
-   * @see arlut.csd.ddroid.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session 
    */
 
   public ReturnVal commitTransaction() throws NotLoggedInException
@@ -2299,7 +2299,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return a ReturnVal object if the transaction could not be aborted,
    *         or null if there were no problems
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal abortTransaction() throws NotLoggedInException
@@ -2334,7 +2334,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method allows clients to cause mail to be sent from the
-   * Directory Droid server when they can't do it themselves.  The mail
+   * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
@@ -2419,7 +2419,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	mailer.sendmsg(returnAddr,
 		       addresses,
-		       "Directory Droid: " + subject,
+		       "Ganymede: " + subject,
 		       body.toString());
       }
     catch (ProtocolException ex)
@@ -2434,7 +2434,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method allows clients to cause mail to be sent from the
-   * Directory Droid server when they can't do it themselves.  The mail
+   * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
@@ -2528,7 +2528,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	mailer.sendHTMLmsg(returnAddr,
 			   addresses,
-			   "Directory Droid: " + subject,
+			   "Ganymede: " + subject,
 			   (HTMLbody != null) ? HTMLbody.toString(): null,
 			   "greport.html",
 			   asciiContent.toString());
@@ -2554,7 +2554,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @param invidVector Vector of Invid's to get the status for.
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized QueryResult queryInvids(Vector invidVector) throws NotLoggedInException
@@ -2663,20 +2663,20 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
-   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
    * <p>This version of dump() takes a query in string
-   * form, based on Deepak's ANTLR-specified Directory Droid
+   * form, based on Deepak's ANTLR-specified Ganymede
    * query grammar.</p>
    *
    * <p>This method uses the GanymedeSession query() apparatus, and
    * may not be called from a DBEditObject's commitPhase1/2() methods
    * without risking deadlock.</p>
    *
-   * @see arlut.csd.ddroid.common.Query
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.common.Query
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized DumpResult dump(String queryString) throws NotLoggedInException, DDParseException
@@ -2692,7 +2692,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
-   * {@link arlut.csd.ddroid.common.DumpResult DumpResult}
+   * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
    *
@@ -2700,8 +2700,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * may not be called from a DBEditObject's commitPhase1/2() methods
    * without risking deadlock.</p>
    *
-   * @see arlut.csd.ddroid.common.Query
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.common.Query
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized DumpResult dump(Query query) throws NotLoggedInException
@@ -2917,13 +2917,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * database.</p>
    *
    * <p>This version of query() takes a query in string
-   * form, based on Deepak's ANTLR-specified Directory Droid
+   * form, based on Deepak's ANTLR-specified Ganymede
    * query grammar.</p>
    *
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session 
    */
 
   public QueryResult query(String queryString) throws NotLoggedInException, DDParseException
@@ -2944,7 +2944,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session 
    */
 
   public QueryResult query(Query query) throws NotLoggedInException
@@ -2955,14 +2955,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>Server-side method for doing object listing with support for DBObject's
-   * {@link arlut.csd.ddroid.server.DBObject#lookupLabel(arlut.csd.ddroid.server.DBObject) lookupLabel}
+   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
    * method.</p>
    *
    * @param query The query to be performed
    * @param perspectiveObject There are occasions when the server will want to do internal
    * querying in which the label of an object matching the query criteria is synthesized
    * for use in a particular context.  If non-null, perspectiveObject's 
-   * {@link arlut.csd.ddroid.server.DBObject#lookupLabel(arlut.csd.ddroid.server.DBObject) lookupLabel}
+   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
    * method will be used to generate the label for a result entry.
    */
 
@@ -3052,11 +3052,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method provides the hook for doing all manner of internal
-   * object listing for the Directory Droid database.  This method will not
+   * object listing for the Ganymede database.  This method will not
    * take into account any optional owner filtering, but it will honor
    * the editableOnly flag in the Query.</p>
    *
-   * @return A Vector of {@link arlut.csd.ddroid.common.Result Result} objects
+   * @return A Vector of {@link arlut.csd.ganymede.common.Result Result} objects
    */
 
   public Vector internalQuery(Query query)
@@ -3096,7 +3096,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param perspectiveObject There are occasions when the server will want to do internal
    * querying in which the label of an object matching the query criteria is synthesized
    * for use in a particular context.  If non-null, perspectiveObject's 
-   * {@link arlut.csd.ddroid.server.DBObject#lookupLabel(arlut.csd.ddroid.server.DBObject) lookupLabel}
+   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
    * method will be used to generate the label for a result entry.
    */
 
@@ -3563,7 +3563,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param internal If true, we won't check permissions
    * @param perspectiveObject This is an object that can be consulted
    * to see what its
-   * {@link arlut.csd.ddroid.server.DBObject#lookupLabel(arlut.csd.ddroid.server.DBObject) lookupLabel()}
+   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel()}
    * method will return.  This can be null without harmful effect, but if
    * is it not null, a custom DBEditObject subclass can choose to present
    * the label of obj from its perspective.  This is used to simulate
@@ -3660,7 +3660,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * and the label returned will be viewed through the context
    * of the current transaction, if any.</P>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */ 
 
   public String viewObjectLabel(Invid invid)
@@ -3712,12 +3712,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer viewObjectHistory(Invid invid, Date since) throws NotLoggedInException
@@ -3727,14 +3727,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
    * @param fullTransactions If false, only events directly involving the requested
    * object will be included in the result buffer.
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
@@ -3778,7 +3778,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This method returns a multi-line string containing excerpts from
-   * the Directory Droid log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -3786,7 +3786,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A String containing a record of events for the Invid in question,
    * or null if permissions are denied to view the history.
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer viewAdminHistory(Invid invid, Date since) throws NotLoggedInException
@@ -3835,9 +3835,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>View an object from the database.  The ReturnVal returned will
-   * carry a {@link arlut.csd.ddroid.rmi.db_object db_object} reference,
+   * carry a {@link arlut.csd.ganymede.rmi.db_object db_object} reference,
    * which can be obtained by the client
-   * calling {@link arlut.csd.ddroid.common.ReturnVal#getObject() ReturnVal.getObject()}.
+   * calling {@link arlut.csd.ganymede.common.ReturnVal#getObject() ReturnVal.getObject()}.
    * If the object could not be
    * viewed for some reason, the ReturnVal will carry an encoded error
    * dialog for the client to display.</p>
@@ -3855,7 +3855,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * see that version of the object.</p>
    *
    * <p>NOTE: It is critical that any code that looks at the values of
-   * fields in a {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * fields in a {@link arlut.csd.ganymede.server.DBObject DBObject}
    * go through a view_db_object() method
    * or else the object will not properly know who owns it, which
    * is critical for it to be able to properly authenticate field
@@ -3931,17 +3931,17 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Check an object out from the database for editing.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
    * by the client calling
-   * {@link arlut.csd.ddroid.common.ReturnVal#getObject() ReturnVal.getObject()}.
+   * {@link arlut.csd.ganymede.common.ReturnVal#getObject() ReturnVal.getObject()}.
    * If the object could not be checked out for editing for some
    * reason, the ReturnVal will carry an encoded error dialog for the
    * client to display.</p>
    *
    * <p>Keep in mind that only one GanymedeSession can have a particular
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} checked out for
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once checked out, the object will be unavailable
    * to any other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}
-   * or {@link arlut.csd.ddroid.server.GanymedeSession#abortTransaction() abortTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}
+   * or {@link arlut.csd.ganymede.server.GanymedeSession#abortTransaction() abortTransaction()}.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
@@ -4068,16 +4068,16 @@ final public class GanymedeSession implements Session, Unreferenced {
    * will carry an encoded error dialog for the client to display.</p>
    *
    * <p>Keep in mind that only one GanymedeSession can have a particular
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} checked out for
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
    * to any other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal create_db_object(short type) throws NotLoggedInException
@@ -4093,10 +4093,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * will carry an encoded error dialog for the client to display.</p>
    *
    * <p>Keep in mind that only one GanymedeSession can have a particular
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject} checked out for
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
    * to any other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
    * @param embedded If true, assume the object created is embedded and
@@ -4304,7 +4304,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *    
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal clone_db_object(Invid invid) throws NotLoggedInException
@@ -4363,7 +4363,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This method must be called within a transactional context.  The object's
    * change in status will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * <p>Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
@@ -4374,7 +4374,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return a ReturnVal object if the object could not be inactivated,
    *         or null if there were no problems
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal inactivate_db_object(Invid invid) throws NotLoggedInException
@@ -4449,14 +4449,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * however.</p>
    *
    * <p>The client should check the returned ReturnVal's
-   * {@link arlut.csd.ddroid.common.ReturnVal#getObjectStatus() getObjectStatus()}
+   * {@link arlut.csd.ganymede.common.ReturnVal#getObjectStatus() getObjectStatus()}
    * method to see whether the re-activated object has an expiration date set.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
    * change in status will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal reactivate_db_object(Invid invid) throws NotLoggedInException
@@ -4527,12 +4527,12 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This method must be called within a transactional context.  The object's
    * removal will not be visible to other sessions until this session calls 
-   * {@link arlut.csd.ddroid.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
    *         or null if there were no problems
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal remove_db_object(Invid invid) throws NotLoggedInException
@@ -4690,7 +4690,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>Private server-side helper method used to transmit the server's database in XML
-   * format to an {@link arlut.csd.ddroid.rmi.FileReceiver FileReceiver} remote receiving
+   * format to an {@link arlut.csd.ganymede.rmi.FileReceiver FileReceiver} remote receiving
    * interface.</p>
    */
 
@@ -4751,7 +4751,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    mySession.forceOff(ts.l("sendXML.dump_error"));
 		  }
 	      }
-	  }}, "Directory Droid XMLSession Schema/Data Dump Thread");
+	  }}, "Ganymede XMLSession Schema/Data Dump Thread");
 
 	// and set it running
 
@@ -5169,14 +5169,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * bits for the field in the object.</P>
    *
    * <P>This method duplicates the logic of {@link
-   * arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject)
+   * arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject)
    * getPerm(object)} internally for efficiency.  This method is
    * called <B>quite</B> a lot in the server, and has been tuned
    * to use the pre-calculated GanymedeSession
-   * {@link arlut.csd.ddroid.server.GanymedeSession#defaultPerms defaultPerms}
-   * and {@link arlut.csd.ddroid.server.GanymedeSession#personaPerms personaPerms}
+   * {@link arlut.csd.ganymede.server.GanymedeSession#defaultPerms defaultPerms}
+   * and {@link arlut.csd.ganymede.server.GanymedeSession#personaPerms personaPerms}
    * objects which cache the effective permissions for fields in the
-   * Directory Droid {@link arlut.csd.ddroid.server.DBStore DBStore} for the current
+   * Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore} for the current
    * persona.</P>
    */
 
@@ -5466,7 +5466,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * owned.</P>
    *
    * <P>This is used by the
-   * {@link arlut.csd.ddroid.server.GanymedeSession#dump(arlut.csd.ddroid.common.Query) dump()} 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query) dump()} 
    * code to determine whether a field should
    * be added to the set of possible fields to be returned at the
    * time that the dump results are being prepared.</P>
@@ -5536,7 +5536,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This convenience method resets defaultPerms from the default
-   * permission object in the Directory Droid database.</P>
+   * permission object in the Ganymede database.</P>
    */
 
   private void resetDefaultPerms()
@@ -5972,7 +5972,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <P>This method gives access to the DBObject for the administrator's
    * persona record, if any.  This is used by
-   * {@link arlut.csd.ddroid.server.DBSession DBSession} to get the
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
    * label for the administrator for record keeping.</P>
    */
   
@@ -5983,9 +5983,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <P>This method returns a reference to the 
-   * {@link arlut.csd.ddroid.server.DBSession DBSession} object encapsulated
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} object encapsulated
    * by this GanymedeSession object.  This is intended to be used by
-   * subclasses of {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * subclasses of {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * that might not necessarily be in the arlut.csd.ganymede package.</P>
    */
 
@@ -6004,7 +6004,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Returns true if a wizard is currently interacting
    * with the user.</p>
    *
-   * @see arlut.csd.ddroid.server.GanymediatorWizard
+   * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
 
   public boolean isWizardActive()
@@ -6016,7 +6016,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Returns true if a particular wizard is currently
    * interacting with the user.</p>
    *
-   * @see arlut.csd.ddroid.server.GanymediatorWizard
+   * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
 
   public boolean isWizardActive(GanymediatorWizard wizard)
@@ -6028,7 +6028,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Returns the active wizard, if any, for
    * this GanymedeSession.</p>
    *
-   * @see arlut.csd.ddroid.server.GanymediatorWizard
+   * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
 
   public GanymediatorWizard getWizard()
@@ -6042,7 +6042,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>If an active wizard is already registered, this method will return
    * false.</p>
    *
-   * @see arlut.csd.ddroid.server.GanymediatorWizard
+   * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
 
   public boolean registerWizard(GanymediatorWizard wizard)
@@ -6065,7 +6065,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * is not equal to the wizard parameter, an IllegalArgumentException will
    * be thrown.</p>
    *
-   * @see arlut.csd.ddroid.server.GanymediatorWizard
+   * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
 
   public void unregisterWizard(GanymediatorWizard wizard)

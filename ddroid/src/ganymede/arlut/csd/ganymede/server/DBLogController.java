@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,11 +52,11 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Date;
 
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -66,8 +66,8 @@ import arlut.csd.ddroid.common.Invid;
 
 /**
  * <p>This controller interface manages the recording and retrieval of
- * {@link arlut.csd.ddroid.server.DBLogEvent DBLogEvents} for the {@link
- * arlut.csd.ddroid.server.DBLog DBLog} class.</p>
+ * {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvents} for the {@link
+ * arlut.csd.ganymede.server.DBLog DBLog} class.</p>
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT

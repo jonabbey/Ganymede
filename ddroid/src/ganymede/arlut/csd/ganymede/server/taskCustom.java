@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,15 +50,15 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -344,13 +344,13 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
    * cases in which change to an object would result in an external
    * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Directory Droid server</b>, the process invokation should be placed here,
+   * Ganymede server</b>, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
    * synchronized.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBEditSet
    */
 
   public void commitPhase2()

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -63,26 +63,26 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A DBWriteLock is a {@link arlut.csd.ddroid.server.DBLock DBLock} subclass
+ * <p>A DBWriteLock is a {@link arlut.csd.ganymede.server.DBLock DBLock} subclass
  * used to lock one or more
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBases} for the purposes
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} for the purposes
  * of committing changes into those bases, preventing any
  * other threads from reading or writing to the database while the update
  * is being performed.  When a DBWriteLock
  * is established on a DBObjectBase, the establishing thread suspends until
  * all readers currently working in the specified DBObjectBases complete.  The
  * write lock is then established, and the thread possessing the DBWriteLock
- * is free to replace objects in the {@link arlut.csd.ddroid.server.DBStore DBStore}
+ * is free to replace objects in the {@link arlut.csd.ganymede.server.DBStore DBStore}
  * with modified copies.</p>
  *
  * <p>DBWriteLocks are typically created and managed by the code in the 
- * {@link arlut.csd.ddroid.server.DBEditSet DBEditSet}
+ * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
  * class.  It is very important that any thread that obtains a DBWriteLock be
  * scrupulous about releasing the lock in a timely fashion once the
  * appropriate changes are made in the database. </p>
  *
- * @see arlut.csd.ddroid.server.DBEditSet
- * @see arlut.csd.ddroid.server.DBObjectBase
+ * @see arlut.csd.ganymede.server.DBEditSet
+ * @see arlut.csd.ganymede.server.DBObjectBase
  */
 
 public class DBWriteLock extends DBLock {
@@ -469,7 +469,7 @@ public class DBWriteLock extends DBLock {
    * <P>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} objects.  If
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
    * establish(), establish() will throw an InterruptedException.</P>
    *

@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 
 /*------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ package arlut.csd.ddroid.server;
 /**
  * <p>This is a Ganymede-specific RuntimeException that can be thrown by the
  * server if a piece of the server's code encounters a condition that violates
- * the fundamental integrity constraint guarantees of the Directory Droid database.</p>
+ * the fundamental integrity constraint guarantees of the Ganymede database.</p>
  */
 
 public class ResourceInitializationException extends Exception {

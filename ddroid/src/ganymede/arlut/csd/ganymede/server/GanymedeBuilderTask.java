@@ -3,7 +3,7 @@
    GanymedeBuilderTask.java
 
    This class provides a template for code to be attached to the server to
-   handle propagating data from the Directory Droid object store into the wide
+   handle propagating data from the Ganymede object store into the wide
    world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.
    
    Created: 17 February 1998
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -71,8 +71,8 @@ import java.util.Vector;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.zipIt;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,12 +82,12 @@ import arlut.csd.ddroid.common.SchemaConstants;
 
 /**
  * <P>This class provides a template for code to be attached to the server to
- * handle propagating data from the Directory Droid object store into the wide
+ * handle propagating data from the Ganymede object store into the wide
  * world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.</P>
  *
  * <P>Subclasses of GanymedeBuilderTask need to implement builderPhase1()
  * and builderPhase2().  builderPhase1() is run while a dumpLock is established
- * on {@link arlut.csd.ddroid.server.DBStore DBStore}, guaranteeing a 
+ * on {@link arlut.csd.ganymede.server.DBStore DBStore}, guaranteeing a 
  * transaction-consistent database state.  builderPhase1() should do whatever
  * is required to write out files or otherwise propagate data out from the
  * database.  If builderPhase1() returns true, the dump lock is released and
@@ -98,7 +98,7 @@ import arlut.csd.ddroid.common.SchemaConstants;
  * <P>All subclasses of GanymedeBuilderTask need to be registered in the Ganymede
  * database via the task object type.  GanymedeBuilderTasks registered to be
  * run on database commit will automatically be issued by the
- * {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler} when transactions
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} when transactions
  * commit.  The GanymedeScheduler is designed so that it will not re-issue a specific
  * task while a previous instance of the task is still running, so you don't have
  * to worry about builderPhase2() taking a fair amount of time.  builderPhase1() should
@@ -428,7 +428,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *
    * @param baseid The id number of the base to be listed
    *
-   * @return An Enumeration of {@link arlut.csd.ddroid.server.DBObject DBObject} references
+   * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
    */
 
   protected final Enumeration enumerateObjects(short baseid)
@@ -448,7 +448,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * <P>This method is used by subclasses of GanymedeBuilderTask to
-   * obtain a reference to a {@link arlut.csd.ddroid.server.DBObject DBObject}
+   * obtain a reference to a {@link arlut.csd.ganymede.server.DBObject DBObject}
    * matching a given invid.</P>
    *
    * @param invid The object id of the object to be viewed
@@ -501,7 +501,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * require direct access to the database.</P>
    *
    * <P>For instance, for an NIS builder task, builderPhase1() would scan
-   * the Directory Droid object store and write out NIS-compatible source
+   * the Ganymede object store and write out NIS-compatible source
    * files.  builderPhase1() would return, the run() method drops the
    * dump lock so that other transactions can be committed, and then
    * builderPhase2() can be run to turn those on-disk files written by
@@ -639,7 +639,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * <P>This method returns the Vector of option strings registered
-   * for this task object in the Directory Droid database, or null if no
+   * for this task object in the Ganymede database, or null if no
    * option strings are defined.</P>
    */
 

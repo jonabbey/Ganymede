@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -123,10 +123,10 @@ class JythonServerProtocol {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.JythonServerProtocol");
+  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.JythonServerProtocol");
 
   public static String doneString = null;
 
@@ -157,8 +157,8 @@ class JythonServerProtocol {
     interp.exec("sys.path.append( sys.prefix + '" + System.getProperty("file.separator") + "' + 'jython-lib.jar' )");
     
     /* Seed the interpreter with a pointer to important Ganymede classes */
-    interp.exec("from arlut.csd.ddroid.server import *");
-    interp.exec("from arlut.csd.ddroid.common import *");
+    interp.exec("from arlut.csd.ganymede.server import *");
+    interp.exec("from arlut.csd.ganymede.common import *");
   }
 
   public void createSession(String personaName)
@@ -195,7 +195,7 @@ class JythonServerProtocol {
     
     if (input == null)
       {
-	// '\nHello {0}\nWelcome to the Directory Droid Jython interpreter!\n\nType "quit" to exit.\n{1}'
+	// '\nHello {0}\nWelcome to the Ganymede Jython interpreter!\n\nType "quit" to exit.\n{1}'
 	return ts.l("processInput.greeting", socket.getInetAddress().getHostAddress(), prompt);
       }
     
@@ -237,10 +237,10 @@ class JythonServerWorker extends Thread {
 
   /**
    * <p>TranslationService object for handling string localization in
-   * the Directory Droid server.</p>
+   * the Ganymede server.</p>
    */
 
-  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.JythonServerWorker");
+  private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.JythonServerWorker");
   
   private Socket socket = null;
   private JythonServerProtocol protocol = null;
@@ -288,7 +288,7 @@ class JythonServerWorker extends Thread {
                   }
                 else
                   {
-		    // "ERROR: Can't log in to the Directory Droid server.. semaphore disabled: {0}"
+		    // "ERROR: Can't log in to the Ganymede server.. semaphore disabled: {0}"
                     out.print(ts.l("run.nologins_semaphore", error));
                   }
 		out.print("\n");

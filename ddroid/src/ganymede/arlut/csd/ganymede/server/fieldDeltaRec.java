@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Vector;
 
@@ -70,8 +70,8 @@ import arlut.csd.Util.VectorUtils;
  * been made to a particular field in a DBObject.  This class is used
  * by the DBObjectDeltaRec class to keep track of changes to fields.
  *
- * @see arlut.csd.ddroid.server.DBObjectDeltaRec
- * @see arlut.csd.ddroid.server.DBField
+ * @see arlut.csd.ganymede.server.DBObjectDeltaRec
+ * @see arlut.csd.ganymede.server.DBField
  * 
  */
 

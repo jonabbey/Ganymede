@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,15 +52,15 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.boolean_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.boolean_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,20 +69,20 @@ import arlut.csd.ddroid.rmi.boolean_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>BooleanDBField is a subclass of {@link arlut.csd.ddroid.server.DBField DBField}
+ * <P>BooleanDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
  * for the storage and handling of boolean
- * fields in the {@link arlut.csd.ddroid.server.DBStore DBStore} on the Ganymede
+ * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
  * server.</P>
  *
- * <P>The Directory Droid client talks to BooleanDBFields through the
- * {@link arlut.csd.ddroid.rmi.boolean_field boolean_field} RMI interface.</P> 
+ * <P>The Ganymede client talks to BooleanDBFields through the
+ * {@link arlut.csd.ganymede.rmi.boolean_field boolean_field} RMI interface.</P> 
  */
 
 public class BooleanDBField extends DBField implements boolean_field {
 
   /**
    * <P>Receive constructor.  Used to create a BooleanDBField from a
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}/{@link arlut.csd.ddroid.server.DBJournal DBJournal}
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
    * DataInput stream.</P>
    */
 
@@ -97,10 +97,10 @@ public class BooleanDBField extends DBField implements boolean_field {
   /**
    * <P>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
    * field if so desired.</P>
@@ -196,7 +196,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.
    *
-   * @see arlut.csd.ddroid.rmi.db_field
+   * @see arlut.csd.ganymede.rmi.db_field
    *
    */
 
@@ -208,7 +208,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   /**
    * <P>This method is used to mark a field as undefined when it is
    * checked out for editing.  Different subclasses of
-   * {@link arlut.csd.ddroid.server.DBField DBField} may
+   * {@link arlut.csd.ganymede.server.DBField DBField} may
    * implement this in different ways, if simply setting the field's
    * value member to null is not appropriate.  Any namespace values claimed
    * by the field will be released, and when the transaction is
@@ -255,10 +255,10 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    * <P>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
-   * {@link arlut.csd.ddroid.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ddroid.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ddroid.server.GanymedeSession#getPerm(arlut.csd.ddroid.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
    * method.</P>
    *
    * <P>If this method checked permissions and the getPerm() method
@@ -339,7 +339,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * Returns true if this field is defined to have the true/false
    * values associated with labels.
    *
-   * @see arlut.csd.ddroid.rmi.boolean_field
+   * @see arlut.csd.ganymede.rmi.boolean_field
    */
 
   public boolean labeled()
@@ -352,7 +352,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * Returns the true label if this field is defined to have the true/false
    * values associated with labels.
    *
-   * @see arlut.csd.ddroid.rmi.boolean_field
+   * @see arlut.csd.ganymede.rmi.boolean_field
    */
 
   public String trueLabel()
@@ -365,7 +365,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * Returns the false label if this field is defined to have the true/false
    * values associated with labels.
    *
-   * @see arlut.csd.ddroid.rmi.boolean_field
+   * @see arlut.csd.ganymede.rmi.boolean_field
    */
 
   public String falseLabel()

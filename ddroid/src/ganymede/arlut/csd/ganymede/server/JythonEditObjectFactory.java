@@ -15,7 +15,7 @@ Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
 -----------------------------------------------------------------------
       
-Directory Droid Directory Management System
+Ganymede Directory Management System
 
 Copyright (C) 1996-2004
 The University of Texas at Austin
@@ -50,25 +50,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA
 
 */
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import org.python.core.PyException;
 import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /**
  * <p>
  * This class is a factory for Jython-based DBEditObject subclasses. It will
  * attempt to load the source for these subclasses from an external location
  * that is specified in the options of the given 
- * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}.
+ * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.
  * </p>
  * 
  * <p>
  * It implements the 3 required factory methods that are analogues of the 3
- * constructors for all {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+ * constructors for all {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
  * constructors.
  * </p>
  */
@@ -82,7 +82,7 @@ public class JythonEditObjectFactory {
 
   /**
    * <p>
-   * Factory version of the {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * Factory version of the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * customization constructor.
    * </p>
    * 
@@ -97,7 +97,7 @@ public class JythonEditObjectFactory {
 
   /**
    * <p>
-   * Factory version of the {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * Factory version of the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * new object constructor.
    * </p>
    * 
@@ -114,7 +114,7 @@ public class JythonEditObjectFactory {
   
   /**
    * <p>
-   * Factory version of the {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * Factory version of the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * check-out constructor.
    * </p>
    * 
@@ -133,7 +133,7 @@ public class JythonEditObjectFactory {
    * This is the <i>workhorse</i> factory method that the constructors all end up
    * calling in the end. This function will simply pass all of the possible 
    * constructor parameters to the Jython-based
-   * {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}, whose constructor
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}, whose constructor
    * is smart enough to determine which superclass constructor to call.
    * </p>
    * 
@@ -266,7 +266,7 @@ public class JythonEditObjectFactory {
 
   /**
    * <p>
-   * Similar to {@link arlut.csd.ddroid.server.JythonEditObjectFactory.unloadURI unloadURI},
+   * Similar to {@link arlut.csd.ganymede.server.JythonEditObjectFactory.unloadURI unloadURI},
    * except this method will unload <b>ALL</b> of the class definitions
    * in the cache.
    * </p>

@@ -25,7 +25,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -62,14 +62,14 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.adminAsyncMessage;
-import arlut.csd.ddroid.rmi.AdminAsyncResponder;
+import arlut.csd.ganymede.common.adminAsyncMessage;
+import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -90,7 +90,7 @@ import arlut.csd.ddroid.rmi.AdminAsyncResponder;
  * notification to the client, even if the client is running behind a
  * system-level firewall.</p>
  *
- * @see arlut.csd.ddroid.common.clientAsyncMessage
+ * @see arlut.csd.ganymede.common.clientAsyncMessage
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -99,7 +99,7 @@ import arlut.csd.ddroid.rmi.AdminAsyncResponder;
 public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
   /**
-   * <p>Our queue of {@link arlut.csd.ddroid.common.adminAsyncMessage adminAsyncMessage} objects.</p>
+   * <p>Our queue of {@link arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessage} objects.</p>
    */
 
   private final adminAsyncMessage[] eventBuffer;
@@ -257,7 +257,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to set the server start
+   * <p>This method is called by the Ganymede server to set the server start
    * date in the admin console.</p>
    */
 
@@ -268,7 +268,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to set the last dump
+   * <p>This method is called by the Ganymede server to set the last dump
    * date in the admin console.</p>
    */
 
@@ -279,7 +279,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to set the number of
+   * <p>This method is called by the Ganymede server to set the number of
    * transactions in the server's journal in the admin console.</p>
    */
 
@@ -290,7 +290,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to set the number of
+   * <p>This method is called by the Ganymede server to set the number of
    * objects checked out in the admin console.</p>
    */
 
@@ -301,7 +301,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to set the number of
+   * <p>This method is called by the Ganymede server to set the number of
    * locks held in the admin console.</p>
    */
 
@@ -312,7 +312,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to update the memory
+   * <p>This method is called by the Ganymede server to update the memory
    * status display in the admin console.</p>
    */
 
@@ -329,7 +329,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to update the
+   * <p>This method is called by the Ganymede server to update the
    * admin console's server state display.</p>
    */
 
@@ -340,7 +340,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to add to the
+   * <p>This method is called by the Ganymede server to add to the
    * admin console's log display.</p>
    */
 
@@ -387,7 +387,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to update the
+   * <p>This method is called by the Ganymede server to update the
    * number of admin consoles attached to the server.</p>
    */
 
@@ -398,10 +398,10 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to update the
+   * <p>This method is called by the Ganymede server to update the
    * admin console's connected user table.</p>
    *
-   * @param entries a Vector of {@link arlut.csd.ddroid.common.AdminEntry AdminEntry}
+   * @param entries a Vector of {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * login description objects.
    */
 
@@ -414,11 +414,11 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   }
 
   /**
-   * <p>This method is called by the Directory Droid server to update the
+   * <p>This method is called by the Ganymede server to update the
    * admin console's task table.</p>
    *
-   * @param tasks a Vector of {@link arlut.csd.ddroid.common.scheduleHandle scheduleHandle}
-   * objects describing the tasks registered in the Directory Droid server.
+   * @param tasks a Vector of {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle}
+   * objects describing the tasks registered in the Ganymede server.
    */
 
   public void changeTasks(Vector tasks) throws RemoteException

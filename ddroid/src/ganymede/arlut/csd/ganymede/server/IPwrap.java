@@ -3,7 +3,7 @@
    IPwrap.java
 
    This is a wrapper class for the Byte array IP value representation
-   that allows IP addresses to be processed by the Directory Droid namespace
+   that allows IP addresses to be processed by the Ganymede namespace
    hash system.
    
    Created: 20 May 1998
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 
 /*------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ package arlut.csd.ddroid.server;
 /**
  *
  * This is a wrapper class for the Byte array IP value representation
- * that allows IP addresses to be processed by the Directory Droid namespace
+ * that allows IP addresses to be processed by the Ganymede namespace
  * hash system.
  *
  */

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.server;
+package arlut.csd.ganymede.server;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -70,7 +70,7 @@ import java.util.Hashtable;
  * thereafter.</p>
  *
  * <p>This hashtable also has special support for handling arrays of Bytes as
- * keys in the hash, using the {@link arlut.csd.ddroid.server.IPwrap IPwrap}
+ * keys in the hash, using the {@link arlut.csd.ganymede.server.IPwrap IPwrap}
  * class for I.P. address representation.</p>
  */
 
