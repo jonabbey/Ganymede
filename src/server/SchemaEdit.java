@@ -5,7 +5,7 @@
    Client side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,7 @@ public interface SchemaEdit extends Remote {
   public Base getBase(short id) throws RemoteException;
   public Base getBase(String baseName) throws RemoteException;
 
-  public Base createNewBase(Category category, boolean embedded) throws RemoteException;
+  public Base createNewBase(Category category, boolean embedded, boolean lowRange) throws RemoteException;
   public void deleteBase(Base b) throws RemoteException;
 
   public NameSpace[] getNameSpaces() throws RemoteException;
