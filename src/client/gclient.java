@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -139,6 +139,108 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     windowBar;
 
   /* -- */
+
+  /**
+   *
+   * This static method parses a result or string dump
+   * into a vector of component Result or String
+   * objects.  Queries will always return a
+   * Result object dump, choice list methods on
+   * fields will often simply return a String
+   * object dump.
+   *
+   */
+
+  static public Vector parseDump(StringBuffer buffer)
+  {
+    StringBuffer tempString = new StringBuffer();
+    char[] chars = buffer.toString().toCharArray();
+    int index = 0;
+    Vector results = new Vector();
+    Invid invid = null;
+    boolean includeInvid;
+
+    /* -- */
+
+    tempString.setLength(0);
+
+    while (index < chars.length && chars[index] != '\n')
+      {
+	tempString.append(chars[index++]);
+      }
+
+    if (tempString.toString().equals("inv"))
+      {
+	includeInvid = true;
+      }
+    else
+      {
+	includeInvid = false;
+      }
+
+    index++;			// skip over newline
+
+    while (index < chars.length)
+      {
+	if (includeInvid)
+	  {
+	    // first read in the Invid
+
+	    tempString.setLength(0); // truncate the buffer
+
+	    // System.err.println("Parsing row " + rows++);
+
+	    while (chars[index] != '|')
+	      {
+		// if we have a backslashed character, take the backslashed char
+		// as a literal
+	    
+		if (chars[index] == '\n')
+		  {
+		    throw new RuntimeException("parse error in row");
+		  }
+	    
+		tempString.append(chars[index++]);
+	      }
+
+	    //	System.err.println("Invid string: " + tempString.toString());
+	    
+	    invid = new Invid(tempString.toString());
+	    
+	    index++;		// skip over |
+	  }
+
+	// now read in the label
+
+	tempString.setLength(0); // truncate the buffer
+
+	while (chars[index] != '\n')
+	  {
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+
+	    if (chars[index] == '\\')
+	      {
+		index++;
+	      }
+
+	    tempString.append(chars[index++]);
+	  }
+
+	if (includeInvid)
+	  {
+	    results.addElement(new Result(invid, tempString.toString()));
+	  }
+	else
+	  {
+	    results.addElement(tempString.toString());
+	  }
+
+	index++;		// skip newline
+      }
+
+    return results;
+  }
 
   /**
    *
@@ -714,7 +816,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	else
 	  {
 	    StringBuffer resultDump =  session.query(_query);
-	    Vector unsorted_objects = parseResultDump(resultDump.toString());
+	    Vector unsorted_objects = gclient.parseDump(resultDump);
 
 	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
 
@@ -1269,67 +1371,7 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 
   }
 
-  private Vector parseResultDump(String buffer)
-  {
-    StringBuffer tempString = new StringBuffer();
-    char[] chars = buffer.toCharArray();
-    int index = 0;
-    Vector results = new Vector();
-    Invid invid;
 
-    /* -- */
-
-    while (index < chars.length)
-      {
-	// first read in the Invid
-
-	tempString.setLength(0); // truncate the buffer
-
-	// System.err.println("Parsing row " + rows++);
-
-	while (chars[index] != '|')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-	    
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in row");
-	      }
-	    
-	    tempString.append(chars[index++]);
-	  }
-
-	//	System.err.println("Invid string: " + tempString.toString());
-
-	invid = new Invid(tempString.toString());
-
-	index++;		// skip over |
-
-	// now read in the label
-
-	tempString.setLength(0); // truncate the buffer
-
-	while (chars[index] != '\n')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
-
-	    tempString.append(chars[index++]);
-	  }
-
-	results.addElement(new Result(invid, tempString.toString()));
-
-	index++;		// skip newline
-      }
-
-    return results;
-  }
 
 }
 
