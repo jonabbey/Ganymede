@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2001/09/24 21:47:43 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2001/10/01 17:17:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -438,58 +438,72 @@ public class DBEditSet {
 	return;
       }
 
-    Thread thisThread = java.lang.Thread.currentThread();
+    /*
+      I had tried to put some check logic to make sure that multiple threads interacting
+      with the checkpoint system wouldn't interfere with each other, by trying to
+      track the last thread that did a checkpoint operation, but the way RMI works, two
+      subsequent client actions by the same client could be processed on separate server
+      threads, making this check overly restrictive.
 
-    int waitcount = 0;
+      So, off for now.  If this lets multiple threads overlap checkpoint and rollback
+      operations in an unsafe way, we'll just have to suffer that.
+    */
 
-    while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
+    if (true)
       {
-	System.err.println("DBEditSet.checkpoint(\"" + name + "\") waiting for prior thread " +
-			   currentCheckpointThread.toString() +
-			   " to finish with prior checkpoint");
-	try
-	  {
-	    wait(1000);		// only wait a second at a time, so we'll get lots of printlns if we get stuck
-	  }
-	catch (InterruptedException ex)
-	  {
-	    ex.printStackTrace();
-	    throw new RuntimeException(ex.getMessage());
-	  }
+	Thread thisThread = java.lang.Thread.currentThread();
 
-	waitcount++;
-
-	if (waitcount > 60)
+	int waitcount = 0;
+	
+	while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
 	  {
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") has waited to checkpoint for 60 seconds");
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") giving up to avoid deadlock");
-
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") stack trace:");
-	    thisThread.dumpStack();
-	    
-	    if (currentCheckpointThread.isAlive())
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") waiting for prior thread " +
+			       currentCheckpointThread.toString() + "(\"" + checkpoints.getTopName() + "\")" +
+			       " to finish with prior checkpoint");
+	    try
 	      {
-		System.err.println("DBEditSet.checkpoint(\"" + name + "\") printing blocking thread stack trace:");
-		currentCheckpointThread.dumpStack();
+		wait(1000);		// only wait a second at a time, so we'll get lots of printlns if we get stuck
 	      }
-
-	    throw new RuntimeException("DBEditSet.checkpoint(\"" + name + "\") timed out");
+	    catch (InterruptedException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+	    
+	    waitcount++;
+	    
+	    if (waitcount > 60)
+	      {
+		System.err.println("DBEditSet.checkpoint(\"" + name + "\") has waited to checkpoint for 60 seconds");
+		System.err.println("DBEditSet.checkpoint(\"" + name + "\") giving up to avoid deadlock");
+		
+		System.err.println("DBEditSet.checkpoint(\"" + name + "\") stack trace:");
+		thisThread.dumpStack();
+		
+		if (currentCheckpointThread.isAlive())
+		  {
+		    System.err.println("DBEditSet.checkpoint(\"" + name + "\") printing blocking thread stack trace:");
+		    currentCheckpointThread.dumpStack();
+		  }
+		
+		throw new RuntimeException("DBEditSet.checkpoint(\"" + name + "\") timed out");
+	      }
 	  }
+	
+	if (waitcount > 0)
+	  {
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") proceeding");
+	  }
+
+	// if we slept until the transaction was committed or aborted, oops
+
+	if (session == null)
+	  {
+	    throw new RuntimeException("DBEditSet.checkpoint(" + name + ") slept until transaction committed/cleared");
+	  }
+	
+	currentCheckpointThread = thisThread;
       }
-
-    if (waitcount > 0)
-      {
-	System.err.println("DBEditSet.checkpoint(\"" + name + "\") proceeding");
-      }
-
-    // if we slept until the transaction was committed or aborted, oops
-
-    if (session == null)
-      {
-	throw new RuntimeException("DBEditSet.checkpoint(" + name + ") slept until transaction committed/cleared");
-      }
-
-    currentCheckpointThread = thisThread;
 
     // checkpoint our objects, logEvents, and deletion locks
 
