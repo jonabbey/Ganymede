@@ -5,7 +5,7 @@
    Namespace tree node for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ class SpaceNode extends arlut.csd.Tree.treeNode {
   /* -- */
 
   SpaceNode(treeNode parent, String text, NameSpace space, treeNode insertAfter,
-	    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+	    boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.space = space;
