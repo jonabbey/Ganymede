@@ -12,6 +12,8 @@
  *
  ****************************************************************************/
 
+package jcrypt;			// thanks, 1.4 javac! ;-(
+
 public class jcrypt
 {
    private jcrypt() {}

@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2002/03/02 01:43:20 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2002/03/16 01:54:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,9 +55,8 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
-import MD5;
-import MD5Crypt;
-import jcrypt;
+import md5.*;
+import jcrypt.*;
 import arlut.csd.crypto.*;
 
 import arlut.csd.JDialog.*;
