@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,6 +63,7 @@ public interface BaseField extends Remote {
   public boolean isInvid() throws RemoteException;
   public boolean isPermMatrix() throws RemoteException;
   public boolean isPassword() throws RemoteException;
+  public boolean isIP() throws RemoteException;
 
   public void setType(short type) throws RemoteException;
 
