@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -568,8 +568,8 @@ public class IPDBField extends DBField implements ip_field {
 	i++;
       }
 
-    System.err.println("loCompress = " + loCompress);
-    System.err.println("hiCompress = " + hiCompress);
+    // System.err.println("loCompress = " + loCompress);
+    // System.err.println("hiCompress = " + hiCompress);
 
     // okay, we've calculated our compression block, if any..
     // let's also check to see if we want to represent the
