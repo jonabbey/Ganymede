@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/10/29 16:14:06 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/11/05 00:31:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -231,7 +231,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // password attributes
 
   boolean crypted = true;	// UNIX encryption is the default.
-  boolean storePlaintext = false;
+  boolean md5crypted = false;	// OpenBSD style md5crypt() is not
+  boolean storePlaintext = false; // nor is plaintext
 
   // schema editing
 
@@ -353,6 +354,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     targetField = original.targetField;
 
     crypted = original.crypted;
+    md5crypted = original.md5crypted;
     storePlaintext = original.storePlaintext;
 
     // We'll just re-use the original's FieldTemplate for the time
@@ -511,6 +513,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 
 	out.writeBoolean(crypted);
+	out.writeBoolean(md5crypted);
 	out.writeBoolean(storePlaintext);
       }
   }
@@ -712,6 +715,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 
 	crypted = in.readBoolean();
+
+	// at 1.16 we introduce md5crypted
+
+	if ((base.store.file_major >1) || (base.store.file_minor >= 16))
+	  {
+	    md5crypted = in.readBoolean();
+	  }
+	else
+	  {
+	    md5crypted = false;
+	  }
 
 	if ((base.store.file_major >1) || (base.store.file_minor >= 10))
 	  {
@@ -2167,7 +2181,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * <p>This method is used to specify that this password field
    * should store passwords in UNIX crypt format.  If passwords
    * are stored in UNIX crypt format, they will not be kept in
-   * plaintext on disk.</p>
+   * plaintext on disk, regardless of the setting of setPlainText().</p>
+   *
+   * <p>setCrypted() is not mutually exclusive with setMD5Crypted().</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
@@ -2190,6 +2206,48 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     crypted = b;
   }
 
+  /** 
+   * <p>This method returns true if this is a password field that
+   * stores passwords in OpenBSD/FreeBSD/PAM md5crypt() format, and
+   * can thus accept pre-crypted passwords.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public boolean isMD5Crypted()
+  {
+    return md5crypted;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in OpenBSD/FreeBSD/PAM md5crypt() format.  If
+   * passwords are stored in md5crypt() format, they will not be kept
+   * in plaintext on disk, regardless of the setting of setPlainText().</p>
+   *
+   * <p>setMD5Crypted() is not mutually exclusive with setCrypted().</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public void setMD5Crypted(boolean b)
+  {    
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    md5crypted = b;
+  }
+
   /**
    * <p>This method returns true if this is a password field that
    * will keep a copy of the password in plaintext.</p>
@@ -2209,10 +2267,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * false, plaintext will be treated as true, whether
    * or not this is explicitly set by the schema editor.</p>
    *
-   * <p>If crypted is true, fields of this type will never retain
+   * <p>If crypted or md5crypted is true, fields of this type will never retain
    * the plaintext password information on disk.  Plaintext 
    * password information will only be retained in the on-disk
-   * ganymede.db file if crypted is false.</p>
+   * ganymede.db file if crypted and md5crypted are both false.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
@@ -2373,6 +2431,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (crypted)
 	  {
 	    result += " <crypted>";
+	  }
+
+	if (md5crypted)
+	  {
+	    result += " <md5 crypted>";
 	  }
 
 	if (storePlaintext)
@@ -2569,6 +2632,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (crypted)
 	  {
 	    result += "crypted";
+	  }
+
+	if (md5crypted)
+	  {
+	    result += " md5crypted";
 	  }
 
 	if (storePlaintext)

@@ -6,8 +6,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/08/05 22:08:47 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/11/05 00:31:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,30 +111,51 @@ public interface pass_field extends db_field {
   boolean matchPlainText(String text) throws RemoteException;
 
   /**
-   *
-   * Verification method for comparing a crypt'ed entry with a crypted
+   * <p>Verification method for comparing a crypt'ed entry with a crypted
    * value.  The salts for the stored and submitted values must match
    * in order for a comparison to be made, else an illegal argument
-   * exception will be thrown
-   *
+   * exception will be thrown.</p>
    */
 
   boolean matchCryptText(String text) throws RemoteException;
 
   /**
-   *
-   * Method to obtain the SALT for a stored crypted password.  If the
-   * client is going to submit a pre-crypted password for comparison
-   * via matchCryptText(), it must be salted by the salt returned by
-   * this method.
-   *  
+   * <p>Verification method for comparing an OpenBSD-style md5crypt()'ed
+   * entry with a crypted value.  The salts for the stored and
+   * submitted values must match in order for a comparison to be made,
+   * else an illegal argument exception will be thrown.</p>
+   */
+
+  boolean matchMD5CryptText(String text) throws RemoteException;
+
+  /** 
+   * <p>Method to obtain the SALT for a stored crypted password.  If
+   * the client is going to submit a pre-crypted password for
+   * comparison via matchCryptText(), it must be salted by the salt
+   * returned by this method.</p>
+   * 
+   * <p>If the password is not stored in crypt() form, null will be
+   * returned.</p> 
    */
 
   String getSalt() throws RemoteException;
 
-  /**
+  /** 
+   * <p>Method to obtain the SALT for a stored OpenBSD-style
+   * md5crypt()'ed password.  If the client is going to submit a
+   * pre-crypted password for comparison via matchMD5CryptText(), it
+   * must be salted by the salt returned by this method.</p>
+   *
+   * <p>If the password is not stored in md5crypt() form,
+   * null will be returned.</p>
+   */
+
+  String getMD5Salt() throws RemoteException;
+
+  /** 
    * <p>This method is used to set the password for this field,
-   * crypting it if this password field is stored crypted.</p>
+   * crypting it in various ways if this password field is stored
+   * crypted.</p> 
    */
 
   ReturnVal setPlainTextPass(String text) throws RemoteException;
@@ -147,11 +168,11 @@ public interface pass_field extends db_field {
 
   ReturnVal setCryptPass(String text) throws RemoteException;
 
-  /** 
-   * <p>This method is used to set a pre-crypted MD5 password for
-   * this field.  This method will return false if this password field
-   * is not stored crypted.</p>
+  /**
+   * <p>This method is used to set a pre-crypted OpenBSD-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p> 
    */
 
-  ReturnVal setMD5Pass(String text) throws RemoteException;
+  ReturnVal setMD5CryptedPass(String text) throws RemoteException;
 }

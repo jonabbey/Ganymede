@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/10/29 16:14:04 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 1999/11/05 00:31:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -123,6 +123,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     labeledCF,			// boolean
     editInPlaceCF,		// invid
     cryptedCF,			// password
+    md5cryptedCF,		// password
     plainTextCF,		// password
     multiLineCF;		// string
 
@@ -223,7 +224,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "UNIX/MD5 Crypted:" , rowcount++);
+    addRow(editPanel, cryptedCF, "UNIX Crypted:" , rowcount++);
+
+    md5cryptedCF = new JcheckboxField(null, false, true);
+    md5cryptedCF.setCallback(this);
+    addRow(editPanel, md5cryptedCF, "OpenBSD-style MD5 Crypted:" , rowcount++);
 
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
@@ -379,11 +384,13 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     if (passwordShowing)
       {
 	setRowVisible(cryptedCF, true);
+	setRowVisible(md5cryptedCF, true);
 	setRowVisible(plainTextCF, true);
       }
     else
       {
 	setRowVisible(cryptedCF, false);
+	setRowVisible(md5cryptedCF, false);
 	setRowVisible(plainTextCF, false);
       }
 
@@ -921,12 +928,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    passwordShowing = true;
 
 	    cryptedCF.setValue(fieldDef.isCrypted());
+	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
 	    plainTextCF.setValue(fieldDef.isPlainText());
 
 	    // if a password is not crypted, it *must* keep
 	    // passwords in plaintext
-
-
 	  }
 	else if (fieldDef.isIP())
 	  {
@@ -1237,10 +1243,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	multiLineCF.setEnabled(isEditable);
 	cryptedCF.setEnabled(isEditable);
+	md5cryptedCF.setEnabled(isEditable);
 
 	if (passwordShowing)
 	  {
-	    if (!cryptedCF.isSelected() && plainTextCF.isSelected())
+	    // if we aren't using crypt() or md5crypt() password
+	    // storage, we have to use plaintext
+
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected())
+		&& plainTextCF.isSelected())
 	      {
 		plainTextCF.setEnabled(false);
 	      }
@@ -1469,12 +1480,40 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    // a password field has to have plaintext stored if it
 	    // is not to store the password in crypted form.
 
-	    if (!cryptedCF.isSelected() && !plainTextCF.isSelected())
+	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() 
+		&& !plainTextCF.isSelected())
 	      {
 		plainTextCF.setValue(true);
 	      }
 
-	    if (!cryptedCF.isSelected())
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected()))
+	      {
+		plainTextCF.setEnabled(false);
+	      }
+	    else
+	      {
+		plainTextCF.setEnabled(fieldDef.isEditable() || owner.developMode);
+	      }
+	  }
+	else if (comp == md5cryptedCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("md5cryptedCF");
+	      }
+
+	    fieldDef.setMD5Crypted((md5cryptedCF.isSelected()));
+
+	    // a password field has to have plaintext stored if it
+	    // is not to store the password in crypted form.
+
+	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() 
+		&& !plainTextCF.isSelected())
+	      {
+		plainTextCF.setValue(true);
+	      }
+
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected()))
 	      {
 		plainTextCF.setEnabled(false);
 	      }
