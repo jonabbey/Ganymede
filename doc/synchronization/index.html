@@ -310,7 +310,7 @@
     writing a full-state builder task with the GanymedeBuilderTask
     class.</p>
 
-    <samp class="listing">
+    <pre class="listing">
 package arlut.csd.ganymede.userKit;
 
 import arlut.csd.ganymede.server.*;
@@ -321,13 +321,13 @@ import java.util.*;
 import java.text.*;
 import java.io.*;
 
-</samp>
+</pre>
 <p>First we have our beginning declarations.  Generally speaking,
 you'll create a separate package for your custom schema classes, and
 you'll need to import everything from the
 <code>arlut.csd.ganymede.server</code> and
 <code>arlut.csd.ganymede.common</code> packages.</p>
-<samp class="listing">
+<pre class="listing">
 
 /**
  * This class is intended to dump the Ganymede datastore to the
@@ -365,7 +365,7 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
     taskDefObjInvid = _taskObjInvid;
   }
 
-</samp>
+</pre>
 <p>And here we see the class declaration subclassing
 GanymedeBuilderTask, member variable declarations, and our
 constructor, which must take an <a
@@ -373,7 +373,7 @@ href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a>
 parameter, and set the <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#taskDefObjInvid">taskDefObjInvid</a>
 variable from the GanymedeBuilderTask class.</p>
-<samp class="listing">
+<pre class="listing">
 
   /**
    * This method runs with a dumpLock obtained for the builder task.
@@ -529,7 +529,7 @@ variable from the GanymedeBuilderTask class.</p>
 
     return result;
   }
-</samp>
+</pre>
 
 <p>And here we have our <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
@@ -562,7 +562,7 @@ class="filename">/etc/group</code> type environment.</p>
 will return false, which will tell the GanymedeBuilderTask base class
 not to bother running builderPhase2().</p>
 
-<samp class="listing">
+<pre class="listing">
 
   /**
    *
@@ -619,7 +619,7 @@ not to bother running builderPhase2().</p>
 
     return true;
   }
-</samp>
+</pre>
 
 <p><a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>,
@@ -650,7 +650,7 @@ files that your external builder script is still working with.</p>
 <p>What I say to you three times is true.  Never let your external
 builder script return until it is truly finished with its build.</p>
 
-<samp class="listing">
+<pre class="listing">
 
   // ***
   //
@@ -908,7 +908,7 @@ builder script return until it is truly finished with its build.</p>
     writer.println(result.toString());
   }
 }
-</samp>
+</pre>
 
 <p>All of the rest of the class is dedicated to utility helper methods
 that are used to handle chores for the <a
