@@ -1,7 +1,51 @@
-Ganymede Release 0.99.6
-August 27, 1999
+Ganymede Release 0.99.7
+October ??, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.6 to 0.99.7 -------------------
+
+RELEASE DATE: October ?? , 1999
+
+1. [SERVER] Fixed the Ganymede server's registry binding for localhost
+
+Michael McEniry (mmceniry@itsc.uah.edu) provided a patch to
+Ganymede.java which corrects the problem on Linux systems with the
+server failing on startup with a localhost RMI registry binding
+permissions failure.
+
+2. [SERVER] Fixed object deletion for multi-level nested objects
+
+Martin Schneider (martin@ira.uka.de) wrote to report that deleting
+objects which contained embedded objects which contain embedded
+objects fails on transaction commit.. the problem was that the
+GanymedeSession.getContainingObj() method couldn't walk the embedding
+stack to find the top-level parent to determine object ownership for
+logging purposes.
+
+GanymedeSession.getContainingObj() will now check to see if it is
+trying to find the parent of an embedded object which has been
+processed for deletion, in which case it will check the original
+version of the object in order to find the original parent.
+
+3. [SERVER] Added support for regexp matching in StringDBField
+
+Added support for specifying a regular expression pattern in string
+fields.  Modified the server and schema editor to support regular
+expression binding to string fields.
+
+The older 'OkChars' and 'BadChars' string field parameters are still
+maintained.. any change to a string field must satisfy any regular
+expression specified in addition to the OkChars and BadChars
+parameters.
+
+This change bumps the DBStore revision numbers to
+
+	major: 1
+	minor: 14
+
+Martin Schneider (martin@ira.uka.de) asked for this change, it seemed
+like a good idea to me.
 
 -------------------- Changes from 0.99.5 to 0.99.6 -------------------
 
@@ -177,7 +221,7 @@ done by Ganymede.main().
 In the new Java 1.3 beta, code-named Kestrel, a lot of JInternalFrame
 code has been changed.  Several things in the Ganymede client had to
 be tweaked to insure internal windows in the Ganymede client work
-acceptably well with all existing versions Swing.
+acceptably well with all existing versions of Swing.
 
 -------------------- Changes from 0.99.4 to 0.99.5 -------------------
 
