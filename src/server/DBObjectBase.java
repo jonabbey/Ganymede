@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -200,6 +200,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 
 	fieldHash.put(new Short(SchemaConstants.RemovalField), bf);
+
+	/* And our 3 field, the history trail */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "History List";
+	bf.field_code = SchemaConstants.HistoryField;
+	bf.field_type = FieldType.INVID;
+	bf.field_order = 3;
+	bf.editable = false;
+	bf.removable = false;
+	bf.allowedTarget = SchemaConstants.HistoryBase;
+	bf.targetField = SchemaConstants.HistoryObjects;
+
+	fieldHash.put(new Short(SchemaConstants.HistoryField), bf);
       }
 
     objectHook = this.createHook();
@@ -1402,7 +1417,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    id = 3;			// 0, 1, and 2 are reserved
+    id = 256;  // reserve 256 field slots for built-in types
 
     enum = fieldHash.elements();
 
