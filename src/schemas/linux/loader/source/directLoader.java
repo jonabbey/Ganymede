@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -182,7 +182,7 @@ public class directLoader {
 
 	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
 
-	    PermEntry defPerm = new PermEntry(true, true, true);
+	    PermEntry defPerm = new PermEntry(true, true, true, true);
 	
 	    pf.setPerm(SchemaConstants.UserBase, defPerm);
 	    pf.setPerm((short) 257, defPerm); // group privs
