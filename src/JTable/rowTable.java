@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,6 +13,7 @@
 package csd.Table;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 
 /*------------------------------------------------------------------------------
@@ -28,10 +29,10 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.8 $ %D% 
+ * @version $Revision: 1.9 $ %D% 
  */
 
-public class rowTable extends baseTable {
+public class rowTable extends baseTable implements ActionListener {
 
   Hashtable 
     index;
@@ -62,6 +63,7 @@ public class rowTable extends baseTable {
    * @param hVertFill   true if horizontal lines should be drawn in the vertical fill region
    * 			(only applies if vertFill and horizLines are true)
    * @param callback    reference to an object that implements the rowSelectCallback interface
+   * @param menu  reference to a popup menu to be associated with rows in this table
    *
    */
 
@@ -76,13 +78,26 @@ public class rowTable extends baseTable {
 		  String[] headers,
 		  boolean horizLines, boolean vertLines,
 		  boolean vertFill, boolean hVertFill,
-		  rowSelectCallback callback)
+		  rowSelectCallback callback,
+		  PopupMenu menu)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill);
+	  headers, horizLines, vertLines, vertFill, hVertFill,
+	  menu);
 
     this.callback = callback;
+
+    if (menu!= null)
+      {
+	MenuItem temp;
+
+	for (int i = 0; i < menu.getItemCount(); i++)
+	  {
+	    temp = menu.getItem(i);
+	    temp.addActionListener(this);
+	  }
+      }
 
     index = new Hashtable();
     crossref = new Vector();
@@ -94,10 +109,13 @@ public class rowTable extends baseTable {
    * @param colWidths  array of initial column widths
    * @param headers    array of column header titles, must be same size as colWidths
    * @param callback    reference to an object that implements the rowSelectCallback interface
+   * @param menu  reference to a popup menu to be associated with rows in this table
    *
    */
 
-  public rowTable(int[] colWidths, String[] headers, rowSelectCallback callback)
+  public rowTable(int[] colWidths, String[] headers, 
+		  rowSelectCallback callback, 
+		  PopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -110,7 +128,7 @@ public class rowTable extends baseTable {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 false, true, true, false, callback);
+	 false, true, true, false, callback, menu);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -225,6 +243,32 @@ public class rowTable extends baseTable {
   }
 
   /**
+   * Unselect all cells
+   */
+
+  public void unSelectAll()
+  {
+    for (int i = 0; i < rows.size(); i++)
+      {
+	if (testRowSelected(i))
+	  {
+	    unSelectRow(i);
+	    if (callback != null)
+	      {
+		// if we get a nullpointer exception on
+		// element here, it means that the tableCanvas
+		// code didn't properly check to make sure that
+		// the location clicked on corresponded to
+		// a proper row
+		callback.rowUnSelected(((rowHandle)crossref.elementAt(i)).key, true);
+	      }
+	  }
+      }
+
+    refreshTable();
+  }
+
+  /**
    * Erases all the cells in the table and removes any per-cell
    * attribute sets.  
    */
@@ -255,6 +299,7 @@ public class rowTable extends baseTable {
     element = new rowHandle(this, key);
 
     index.put(key, element);
+    reShape();
   }
 
   /**
@@ -294,6 +339,8 @@ public class rowTable extends baseTable {
       {
 	((rowHandle) crossref.elementAt(i)).rownum = i;
       }
+
+    reShape();
   }
 
   /**
@@ -463,6 +510,45 @@ public class rowTable extends baseTable {
     return index.keys();
   }
 
+  /**
+   * Method used to handle the popup menu 
+   */
+  
+  public void actionPerformed(ActionEvent e)
+  {
+    rowHandle element = null;
+
+    /* -- */
+
+    //    System.err.println("rowTable.actionPerformed");
+
+    if (callback == null)
+      {
+	return;
+      }
+
+    for (int i = 0; i < crossref.size(); i++)
+      {
+	if (((rowHandle) crossref.elementAt(i)).rownum == menuRow)
+	  {
+	    element = (rowHandle) crossref.elementAt(i);
+	  }
+      }
+    
+    // perform our callback
+
+    if (element != null)
+      {
+	callback.rowMenuPerformed(element.key, e);
+      }
+
+    // clear our lastpopped menu row, col
+
+    menuRow = -1;
+    menuCol = -1;
+
+  }
+
 }
 
 /*------------------------------------------------------------------------------
@@ -486,7 +572,7 @@ class rowHandle {
     parent.addRow(false);	// don't repaint table
     rownum = parent.rows.size() - 1; // we always add the new row to the end
 
-    System.err.println("New rowHandle created, key = " + key + ", num = " + rownum);
+    // System.err.println("New rowHandle created, key = " + key + ", num = " + rownum);
 
     this.key = key;
 
