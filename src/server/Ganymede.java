@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -253,7 +253,7 @@ public class Ganymede {
 
     cal.setTime(currentTime);
 
-    cal.add(Calendar.MINUTE, 5);
+    cal.add(Calendar.HOUR, 6);
 
     scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY),
 				cal.get(Calendar.MINUTE),
