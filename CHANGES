@@ -36,6 +36,9 @@ variable was defined.  This has been fixed by making the
 DBNameSpaceHandle.getField() method look up objects directly out of
 the DBStore tables without using a GanymedeSession, if needed.
 
+Thanks to Gaurav Bhargava at Villanova University for reporting
+this bug.
+
 I also fixed a bad bug that caused transaction processing in the
 journal handling code to repeatedly process object records in the
 journal.  The journal processing code was not clearing the entry
