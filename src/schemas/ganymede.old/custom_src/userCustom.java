@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -353,7 +353,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	try
 	  {
-	    System.err.println("userCustom: creating inactivation wizard");
+	    if (debug)
+	      {
+		System.err.println("userCustom: creating inactivation wizard");
+	      }
 
 	    theWiz = new userInactivateWizard(this.gSession, this);
 	  }
@@ -362,7 +365,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
 	  }
 
-	System.err.println("userCustom: returning inactivation wizard");
+	if (debug)
+	  {
+	    System.err.println("userCustom: returning inactivation wizard");
+	  }
 
 	return theWiz.getStartDialog();
       }
@@ -410,7 +416,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     try
       {
-	System.err.println("userCustom: creating reactivation wizard");
+	if (debug)
+	  {
+	    System.err.println("userCustom: creating reactivation wizard");
+	  }
 	
 	theWiz = new userReactivateWizard(this.gSession, this);
       }
@@ -419,7 +428,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
       }
 
-    System.err.println("userCustom: returning reactivation wizard");
+    if (debug)
+      {
+	System.err.println("userCustom: returning reactivation wizard");
+      }
     
     return theWiz.getStartDialog();
   }
@@ -682,19 +694,28 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
-	    System.err.println("userCustom - updateShellChoiceList()");
+	    if (debug)
+	      {
+		System.err.println("userCustom - updateShellChoiceList()");
+	      }
 
 	    shellChoices = new QueryResult();
 
 	    Query query = new Query("Shell Choice", null, false);
 
 	    // internalQuery doesn't care if the query has its filtered bit set
-
-	    System.err.println("userCustom - issuing query");
+	    
+	    if (debug)
+	      {
+		System.err.println("userCustom - issuing query");
+	      }
 
 	    Vector results = internalSession().internalQuery(query);
-
-	    System.err.println("userCustom - processing query results");
+	    
+	    if (debug)
+	      {
+		System.err.println("userCustom - processing query results");
+	      }
 	
 	    for (int i = 0; i < results.size(); i++)
 	      {
@@ -781,7 +802,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    tempString = value + ":" + suffix;
 
-	    System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
+	    if (debug)
+	      {
+		System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
+	      }
 
 	    ReturnVal retVal = sf.setValueLocal(tempString);
 
@@ -835,7 +859,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // if the groups field is being changed, we may need to intervene
 
-    System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+    if (debug)
+      {
+	System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+      }
 
     if (field.getID() == GROUPLIST)
       {
@@ -862,7 +889,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    Vector valueAry = getFieldValuesLocal(GROUPLIST);
 	    Invid delVal = (Invid) valueAry.elementAt(index);
 
-	    System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
+	    if (debug)
+	      {
+		System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
+	      }
 
 	    if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
 	      {
@@ -870,8 +900,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// home group.  The client will need to rescan,
 		// but no biggie.
 
-		System.err.println("userCustom: I don't think " + gSession.viewObjectLabel(delVal) + 
-				   " is the home group");
+		if (debug)
+		  {
+		    System.err.println("userCustom: I don't think " + gSession.viewObjectLabel(delVal) + 
+				       " is the home group");
+		  }
 
 		result = new ReturnVal(true);
 		result.addRescanField(HOMEGROUP);
