@@ -279,7 +279,10 @@ _3. Installing the Server_
    zipped up once a day. Nothing in this directory is used by the
    Ganymede server for any purpose other than your peace of mind in case
    you have a problem with the Ganymede server and need to get back an
-   old copy of a passwd or nis file.
+   old copy of a passwd or nis file in a pinch. If you don't want to
+   spend the disk space on archival copies of your network data files,
+   just edit the ganymede.properties file and comment out the
+   'ganymede.builder.backups' property.
    
 _4. Installing A Schema Kit_
 
@@ -632,4 +635,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Fri Jan 12 16:55:11 CST 2001
+   Last modified: Wed Jan 24 20:24:52 CST 2001
