@@ -151,11 +151,11 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "sync.ldif", "ldap");
+	    out = openOutFile(path + "users.ldif", "ldap");
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open sync.ldif file: " + ex);
+	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open users.ldif file: " + ex);
 	  }
 	
 	if (out != null)
@@ -171,7 +171,29 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 		    
 		    writeLDIFUserEntry(out, entity);
 		  }
+	      }
+	    finally
+	      {
+		out.close();
+	      }
+	  }
 
+	out = null;
+
+	try
+	  {
+	    out = openOutFile(path + "groups.ldif", "ldap");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open groups.ldif file: " + ex);
+	  }
+
+	if (out != null)
+	  {
+	    try
+	      {
+		DBObject entity;
 		Enumeration groups = enumerateObjects((short) 257);
 		
 		while (groups.hasMoreElements())
@@ -268,7 +290,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Wrong entity type");
       }
 
-    writeLDIF(out, "dn", "uid=" + user.getLabel() + ", cn=users, dc=xserve");
+    writeLDIF(out, "dn", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
     writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString());
     writeLDIF(out, "sn", user.getLabel());
 
@@ -332,7 +354,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Wrong entity type");
       }
 
-    writeLDIF(out, "dn", "cn=" + group.getLabel() + ", cn=groups, dc=xserve");
+    writeLDIF(out, "dn", "cn=" + group.getLabel() + ",cn=groups,dc=xserve");
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
     Vector users = group.getFieldValuesLocal(groupSchema.USERS);
