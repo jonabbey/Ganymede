@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/05/21 07:21:43 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/07/09 06:35:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -186,6 +186,27 @@ class DBNameSpaceHandle implements Cloneable {
       {
 	throw new RuntimeException(ex.getMessage());
       }
+  }
+
+  /**
+   * <p>This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.</p>
+   */
+
+  public boolean matches(Invid fieldInvid, short fieldId)
+  {
+    return (this.fieldInvid == fieldInvid) && (this.fieldId == fieldId);
+  }
+
+  /**
+   * <p>This method is used to verify that this handle points to the same
+   * kind of field as the one specified by the parameter list.</p>
+   */
+
+  public boolean matches (short objectType, short fieldId)
+  {
+    return (this.fieldInvid.getType() == objectType) &&
+      (this.fieldId == fieldId);
   }
 
   public void cleanup()

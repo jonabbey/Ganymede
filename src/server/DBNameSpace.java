@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/07/06 20:50:24 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/07/09 06:34:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,13 +115,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   static final int TRANSCOUNT = 30;
 
   /**
-   * <p>If original is false, this namespace is a copy that is being
-   * used for manipulations during schema editing.</p>
-   */
-
-  private boolean original = true;
-
-  /**
    * <p>treat differently-cased Strings as the same for key?</p>
    */
 
@@ -141,6 +134,18 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    */
 
   private Hashtable uniqueHash;
+
+  /**
+   * <p>During schema editing, we keep a copy of the uniqueHash that we had
+   * when schema edited started.  If fields are detached or attached to this
+   * namespace during schema editing, we will make the appropriate changes
+   * to the uniqueHash.  If the schema edit is committed, uniqueHash is kept
+   * and saveHash is cleared.  If the schema edit is cancelled, uniqueHash
+   * is set back to saveHash and the saveHash reference is cleared.  saveHash
+   * will always be null except during schema editing.</p>
+   */
+
+  private Hashtable saveHash = null;
 
   /**
    * <p>Hashtable mapping {@link arlut.csd.ganymede.DBEditSet
@@ -182,50 +187,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
-  }
-
-  /**
-   * <p>This method produces a copy of this namespace to be
-   * manipulated during schema editing as fields are attached and
-   * detached from a namespace definition.</p>
-   */
-
-  public DBNameSpace(DBNameSpace original) throws RemoteException
-  {
-    this.original = false;	// we're a copy
-
-    this.caseInsensitive = original.caseInsensitive;
-    this.name = original.name;
-    this.transactions = new Hashtable(TRANSCOUNT);
-    this.uniqueHash = new GHashtable(original.uniqueHash.size(), caseInsensitive);
-
-    Enumeration enum = original.uniqueHash.keys();
-
-    while (enum.hasMoreElements())
-      {
-	Object key = enum.nextElement();
-
-	DBNameSpaceHandle handle = (DBNameSpaceHandle) original.uniqueHash.get(key);
-
-	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
-
-	// a DBNameSpace copy should only be constructed during schema
-	// editing
-
-	if (handleCopy.owner != null)
-	  {
-	    throw new RuntimeException("Error, non-null handle owner found during copy of namespace " + 
-				       this.toString() + " for key: " + key);
-	  }
-
-	if (handleCopy.shadowField != null)
-	  {
-	    throw new RuntimeException("Error, non-null handle shadowField found during copy of namespace " + 
-				       this.toString() + " for key: " + key);
-	  }
-
-	this.uniqueHash.put(key, handleCopy);
-      }
   }
 
   /**
@@ -476,6 +437,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean testmark(DBEditSet editSet, Object value)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceHandle handle;
 
     /* -- */
@@ -520,6 +486,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean mark(DBEditSet editSet, Object value, DBField field)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceHandle handle;
     
     /* -- */
@@ -527,6 +498,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     if (debug)
       {
 	System.err.println(editSet.getSession().getKey() + ": DBNameSpace.mark(): enter");
+      }
+
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
       }
 
     if (uniqueHash.containsKey(value))
@@ -659,6 +635,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceHandle handle;
     
     /* -- */
@@ -770,6 +751,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean testunmark(DBEditSet editSet, Object value)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceHandle handle;
 
     /* -- */
@@ -819,6 +805,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean unmark(DBEditSet editSet, Object value)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceHandle handle;
     
     /* -- */
@@ -899,6 +890,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void checkpoint(DBEditSet editSet, String name)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     getTransactionRecord(editSet).pushCheckpoint(name, new DBNameSpaceCkPoint(this, editSet));
   }
 
@@ -924,6 +920,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void popCheckpoint(DBEditSet editSet, String name)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     getTransactionRecord(editSet).popCheckpoint(name);
   }
 
@@ -947,6 +948,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized boolean rollback(DBEditSet editSet, String name)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     Object value;
     Vector elementsToRemove = new Vector();
     DBNameSpaceTransaction tRecord; 
@@ -1059,6 +1065,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void abort(DBEditSet editSet)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceTransaction tRecord;
     Enumeration enum;
     Object value;
@@ -1119,6 +1130,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void commit(DBEditSet editSet)
   {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("still in schema edit");
+      }
+
     DBNameSpaceTransaction tRecord;
     Enumeration enum;
     Object value;
@@ -1199,6 +1215,185 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   public String toString()
   {
     return name;
+  }
+
+  /**
+   * <p>This method prepares this DBNameSpace for changes to be made during schema editing.
+   * A back-up copy of the uniqueHash is made, to allow reversion in case the schema
+   * edit is aborted.  Between schemaEditCheckout() and either schemaEditCommit() or
+   * schemaEditAbort(), the schemaEditRegister() and schemaEditUnregister() methods
+   * may be called to handle attaching/detaching fields to the namespace.</p>
+   */
+
+  public synchronized void schemaEditCheckout()
+  {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException("non-null savehash");
+      }
+
+    this.saveHash = this.uniqueHash;
+
+    uniqueHash = new GHashtable(saveHash.size(), caseInsensitive);
+
+    Enumeration enum = saveHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	Object key = enum.nextElement();
+
+	DBNameSpaceHandle handle = (DBNameSpaceHandle) saveHash.get(key);
+
+	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
+
+	// a DBNameSpace copy should only be constructed during schema
+	// editing
+
+	if (handleCopy.owner != null)
+	  {
+	    throw new RuntimeException("Error, non-null handle owner found during copy of namespace " + 
+				       this.toString() + " for key: " + key);
+	  }
+
+	if (handleCopy.shadowField != null)
+	  {
+	    throw new RuntimeException("Error, non-null handle shadowField found during copy of namespace " + 
+				       this.toString() + " for key: " + key);
+	  }
+
+	this.uniqueHash.put(key, handleCopy);
+      }
+  }
+
+  /**
+   * <p>Returns true if this namespace has already been checked out for schema editing.</p>
+   */
+
+  public synchronized boolean isSchemaEditInProgress()
+  {
+    return (this.saveHash != null);
+  }
+
+  /**
+   * <p>This method locks in any changes made after schema editing is complete.</p>
+   */
+
+  public synchronized void schemaEditCommit()
+  {
+    if (this.saveHash == null)
+      {
+	throw new RuntimeException("not in schema edit");
+      }
+
+    this.saveHash = null;
+  }
+
+  /**
+   * <p>This method aborts any changes made during schema editing.</p>
+   */
+
+  public synchronized void schemaEditAbort()
+  {
+    if (this.saveHash == null)
+      {
+	throw new RuntimeException("not in schema edit");
+      }
+
+    this.uniqueHash = this.saveHash;
+    this.saveHash = null;
+  }
+
+  /**
+   * <p>This method links the given value to the specified field.  If the
+   * value has already been allocated, schemaEditRegister will return false
+   * and the value won't be attached to the field in question.</p>
+   *
+   * @return true if the value could be registered with the specified field,
+   * false otherwise
+   */
+
+  public synchronized boolean schemaEditRegister(Object value, DBField field)
+  {
+    if (this.saveHash == null)
+      {
+	throw new RuntimeException("not in schema edit");
+      }
+
+    if (uniqueHash.containsKey(value))
+      {
+	return false;
+      }
+
+    DBNameSpaceHandle handle = new DBNameSpaceHandle(null, true, field);
+
+    uniqueHash.put(value, handle);
+
+    return true;
+  }
+
+  /**
+   * <p>This method unlinks a single item from this namespace index, if and only
+   * if the value is associated with the object and field id specified.</p>
+   *
+   * @return true if the value was associated with the object and field specified,
+   * false otherwise.  If false is returned, no value was removed from this
+   * namespace.
+   */
+
+  public synchronized boolean schemaEditUnregister(Object value, Invid objid, short field)
+  {
+    if (this.saveHash == null)
+      {
+	throw new RuntimeException("not in schema edit");
+      }
+
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+    if (handle == null)
+      {
+	return false;
+      }
+
+    if (!handle.matches(objid, field))
+      {
+	return false;
+      }
+
+    uniqueHash.remove(value);
+
+    return true;
+  }
+
+  /**
+   * <p>This method unlinks all values that are associated with the specified
+   * object type and field id from this namespace.</p>
+   */
+
+  public synchronized void schemaEditUnregister(short objectType, short fieldId)
+  {
+    if (this.saveHash == null)
+      {
+	throw new RuntimeException("not in schema edit");
+      }
+
+    Vector elementsToRemove = new Vector();
+    Enumeration enum = this.uniqueHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	Object value = enum.nextElement();
+	DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
+
+	if (handle.matches(objectType, fieldId))
+	  {
+	    elementsToRemove.addElement(value);
+	  }
+      }
+
+    for (int i = 0; i < elementsToRemove.size(); i++)
+      {
+	this.uniqueHash.remove(elementsToRemove.elementAt(i));
+      }
   }
 }
 
