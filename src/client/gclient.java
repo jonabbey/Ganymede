@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.153 $
-   Last Mod Date: $Date: 1999/07/14 04:44:22 $
+   Version: $Revision: 1.154 $
+   Last Mod Date: $Date: 1999/07/21 05:35:52 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.153 $ $Date: 1999/07/14 04:44:22 $ $Name:  $
+ * @version $Revision: 1.154 $ $Date: 1999/07/21 05:35:52 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -3823,6 +3823,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public void commitTransaction()
   {
     ReturnVal retVal;
+    boolean succeeded = false;
 
     /* -- */
 
@@ -3842,7 +3843,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    retVal = handleReturnVal(retVal);
 	  }
 
-	boolean succeeded = (retVal == null) ? true : retVal.didSucceed();
+	succeeded = (retVal == null) ? true : retVal.didSucceed();
 
 	// if we succeed, we clean up.  If we don't,
 	// retVal.doNormalProcessing can be false, in which case the
@@ -3882,10 +3883,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    // the server cancelled our transaction.  We don't need to
 	    // call cancelTransaction ourselves.
 
-	    wp.closeEditables();
-	    cleanUpAfterCancel();
-	    openNewTransaction();
-
 	    showErrorMessage("Error: commit failed", "Could not commit your changes.");
 	  }
       }
@@ -3896,12 +3893,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     catch (Exception e)
       {
 	e.printStackTrace();
-	showErrorMessage("Exception during commit: " + e);
-	throw new RuntimeException("Exception during commit: " + e);
+	showErrorMessage("Exception during commit: " + e.getMessage());
+	throw new RuntimeException("Exception during commit: " + e.getMessage());
       }
     finally
       {
 	setNormalCursor();
+
+	if (!succeeded)
+	  {
+	    wp.closeEditables();
+	    cleanUpAfterCancel();
+	    openNewTransaction();
+	  }
       }
   }
 
