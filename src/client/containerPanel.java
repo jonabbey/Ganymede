@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.74 $ %D%
+    Version: $Revision: 1.75 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,10 +108,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   boolean
     isEmbedded,
     loading = false,
-    loaded = false;
+    loaded = false,
+    isPersonaPanel = false;
 
   short 
     type;
+
+  Object
+    context;
 
   /* -- */
 
@@ -124,6 +128,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param parent   Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param frame    framePanel holding this containerPanel(although this cp is not necessarily in the "General" tab)
+   * @param context An object that can be provided to identify the context in
+   * which this containerPanel is being created.
    *
    */
 
@@ -131,9 +137,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			boolean      editable, 
 			gclient      gc,
 			windowPanel  window,
-			framePanel   frame)
+			framePanel   frame,
+			Object context)
   {
-    this(object, editable, gc, window, frame, null, true);
+    this(object, editable, gc, window, frame, null, true, context);
   }
 
   /**
@@ -146,6 +153,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    * @param frame    framePanel holding this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
+   * @param context An object that can be provided to identify the context in
+   * which this containerPanel is being created.
    */
 
   public containerPanel(db_object object, 
@@ -153,9 +162,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			gclient gc, 
 			windowPanel window, 
 			framePanel frame, 
-			JProgressBar progressBar)
+			JProgressBar progressBar,
+			Object context)
   {
-    this(object, editable, gc, window, frame, progressBar, true);
+    this(object, editable, gc, window, frame, progressBar, true, context);
   }
 
   /**
@@ -168,28 +178,48 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param loadNow  If true, container panel will be loaded immediately
+   * @param context An object that can be provided to identify the context in
+   * which this containerPanel is being created.
    *
    */
 
-  public containerPanel(db_object object, 
-			boolean editable, 
-			gclient gc,			
-			windowPanel window, 
-			framePanel frame, 
-			JProgressBar progressBar, 
-			boolean loadNow)
+  public containerPanel(db_object object,
+			boolean editable,
+			gclient gc,
+			windowPanel window,
+			framePanel frame,
+			JProgressBar progressBar,
+			boolean loadNow,
+			Object context)
   {
-    this(object, editable, gc, window, frame, progressBar, loadNow, false);
+    this(object, editable, gc, window, frame, progressBar, loadNow, false, context);
   }
 
-  public containerPanel(db_object object, 
-			boolean editable, 
-			gclient gc,			
-			windowPanel window, 
-			framePanel frame, 
-			JProgressBar progressBar, 
+  /**
+   *
+   * primary constructor for containerPanel
+   *
+   * @param object   The object to be displayed
+   * @param editable If true, the fields presented will be enabled for editing
+   * @param parent   Parent gclient of this container
+   * @param window   windowPanel containing this containerPanel
+   * @param progressBar JProgressBar to be updated, can be null
+   * @param loadNow  If true, container panel will be loaded immediately
+   * @param isCreating  
+   * @param context An object that can be provided to identify the context in
+   * which this containerPanel is being created.
+   *
+   */
+
+  public containerPanel(db_object object,
+			boolean editable,
+			gclient gc,
+			windowPanel window,
+			framePanel frame,
+			JProgressBar progressBar,
 			boolean loadNow,
-			boolean isCreating)
+			boolean isCreating,
+			Object context)
   {
     super(false);
 
@@ -211,6 +241,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.frame = frame;
     this.progressBar = progressBar;
     this.isCreating = isCreating;
+    this.context = context;
+
+    if (context != null && (context instanceof personaPanel))
+      {
+	isPersonaPanel = true;
+      }
 
     // initialize layout
 
@@ -377,11 +413,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 
 		// Skip some fields.  custom panels hold the built ins, and a few others.
+
+		// If we are a persona panel, hide the associated user field.
 		    
-		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
+		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned))
 		    ||  (ID == SchemaConstants.BackLinksField)
 		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
+		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded())
+		    || (isPersonaPanel && (type == SchemaConstants.PersonaBase)
+			&& (ID == SchemaConstants.PersonaAssocUser)))
 		  {
 		    if (debug)
 		      {
