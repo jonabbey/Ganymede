@@ -3636,7 +3636,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-    xmlOut.attribute("id", getXMLLabel());
+    xmlOut.attribute("id", original.getXMLLabel());
     xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 
