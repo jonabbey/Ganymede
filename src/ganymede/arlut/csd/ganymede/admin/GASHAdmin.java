@@ -508,11 +508,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		{
 		  if (!ssl_logo)
 		    {
-		      loginButton.setText("Login to server (NO SSL)");
+		      loginButton.setText("Administrate Server (NO SSL)");
 		    }
 		  else
 		    {
-		      loginButton.setText("Login to server");
+		      loginButton.setText("Administrate Server");
 		    }
 
 		  username.setEnabled(true);
