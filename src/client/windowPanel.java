@@ -21,7 +21,7 @@ import arlut.csd.JDataComponent.*;
 
 public class windowPanel extends JPanel implements ActionListener, InternalFrameListener, JsetValueCallback{
 
-  JFrame
+  gclient
     parent;
 
   JLayeredPane 
@@ -44,17 +44,16 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   WindowBar 
     windowBar;
 
-  public windowPanel(JFrame parent, Menu windowMenu)
+  public windowPanel(gclient parent, Menu windowMenu)
     {
       System.out.println("Initializing windowPanel");
       objectHash = new Hashtable();
       windowList = new Hashtable();
       this.windowBar = windowBar;
-
-      this.setBuffered(true);
-
       this.windowMenu = windowMenu;
       this.parent = parent;
+
+      this.setBuffered(true);
 
       setLayout(new BorderLayout());
       lc = new JLayeredPane();
@@ -82,6 +81,16 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	{
 	  System.err.println("null object passed to addWindow");
 	  return;
+	}
+      if (editable)
+	{
+	  parent.setStatus("Opening object for edit");
+	  System.out.println("Setting status for edit");
+	}
+      else
+	{
+	  parent.setStatus("Getting object for viewing");
+	  System.out.println("Setting status for viewing");
 	}
 
       parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -128,7 +137,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
       w.setTitle(title);
       windowList.put(title, w);
-      System.out.println("   adding to windowBar " + title);
+      //System.out.println("   adding to windowBar " + title);
       windowBar.addButton(title);
 
 
@@ -195,7 +204,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  try
 		    {
 		      sf.setToolTipText((String)fields[i].getComment());
-		      System.out.println("Setting tool tip to " + (String)fields[i].getComment());
+		      //System.out.println("Setting tool tip to " + (String)fields[i].getComment());
 		    }
 		  catch (RemoteException rx)
 		    {
@@ -210,11 +219,42 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  objectHash.put(df, fields[i]);
 		  df.setEditable(editable);
 		  df.setCallback(this);
+		  try
+		    {
+		      Date date = ((Date)fields[i].getValue());
+		      if (date != null)
+			{
+			  df.setDate(date);
+			}
+		    }
+		  catch (RemoteException rx)
+		    {
+		      throw new RuntimeException("Could not get date: " + rx);
+		    }
+
 		  addRow(panel, df, name, i);
 		}
 	      else if (type == FieldType.BOOLEAN)
 		{
-		  //Add a boolean here
+		  //JcheckboxField cb = new JcheckboxField();
+		  JCheckbox cb = new JCheckbox();
+		  objectHash.put(cb, fields[i]);
+		  cb.setEnabled(editable);
+		  cb.addActionListener(this);
+		  //cb.setCallback(this);
+		  try
+		    {		 
+		      cb.setSelected(((Boolean)fields[i].getValue()).booleanValue());
+		    }
+		  catch (RemoteException rx)
+		    {
+		      throw new RuntimeException("Could not set checkbox value: " + rx);
+		    }
+		  catch (NullPointerException ex)
+		    {
+		      System.out.println("Null pointer: " + ex);
+		    }
+		  addRow(panel, cb, name, i);
 		}
 	      else
 		{
@@ -252,15 +292,17 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       lc.moveToFront(w);
       updateMenu();
       parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+      parent.setStatus(" ");
     }
 
-  public void addTableWindow(Session session, Vector results, String title)
+  public void addTableWindow(Session session, Query query, Vector results, String title)
     {
       parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       gResultTable rt = null;
       try
 	{
-	  rt = new gResultTable(session, results);
+	  rt = new gResultTable(this, session, query, results);
 
 	}
       catch (RemoteException rx)
@@ -296,9 +338,10 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	      title = temp + num++;
 	    }
 	  
-	  System.out.println("Setting title to " + title);
+	  //System.out.println("Setting title to " + title);
 	  rt.setTitle(title);
 	  windowList.put(title, rt);
+	  windowBar.addButton(title);
 	  
 	  lc.add(rt);
 	  lc.moveToFront(rt);
@@ -409,6 +452,22 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	}
     }
 
+  public void refreshTableWindows()
+    {
+      Enumeration enum = windowList.keys();
+      while (enum.hasMoreElements())
+	{
+	  Object obj = windowList.get(enum.nextElement());
+	  if (obj instanceof gResultTable)
+	    {
+	      ((gResultTable)obj).refreshQuery();
+	    }
+	}
+
+
+    }
+
+
   // Event handlers
   public boolean setValuePerformed(JValueObject v)
     {
@@ -418,8 +477,18 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  db_field field = (db_field)objectHash.get(v.getSource());
 	  try
 	    {
-	      System.out.println(field.getTypeDesc() + " set to " + v.getValue());
-	      return field.setValue(v.getValue());
+	      System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	      if (field.setValue(v.getValue()))
+		{
+		  parent.somethingChanged = true;
+		  return true;
+		}
+	      else
+		{
+		  System.err.println("Could not change field, reverting to " + (String)field.getValue());
+		  ((JstringField)v.getSource()).setText((String)field.getValue());
+		  return false;
+		}
 	    }
 	  catch (RemoteException rx)
 	    {
@@ -429,6 +498,16 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       else if (v.getSource() instanceof JdateField)
 	{
 	  System.out.println("date field changed");
+	  db_field field = (db_field)objectHash.get(v.getSource());
+	  try
+	    {
+	      parent.somethingChanged = true;
+	      return field.setValue(((JdateField)v.getSource()).getDate());
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("Could not set field value: " + rx);
+	    }
 	}
       else
 	{
@@ -444,13 +523,34 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  String label = ((MenuItem)e.getSource()).getLabel();
 	  showWindow(label);
 	}
+      if (e.getSource() instanceof JCheckbox)
+	{
+	  db_field field = (db_field)objectHash.get(e.getSource());
+	  try
+	    {
+	      
+	      if (field.setValue(new Boolean(((JCheckbox)e.getSource()).isSelected())))
+		{
+		  parent.somethingChanged = true;
+		}
+	      else
+		{
+		  System.err.println("Could not change checkbox, resetting it now");
+		  ((JCheckbox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("Could not set field value: " + rx);
+	    }
+	}
     }
 
   public  void frameDidClose(InternalFrameEvent e)
     {
       String oldTitle = e.getInternalFrame().getTitle();
       windowList.remove(oldTitle);
-      System.out.println(" Removing button- " + oldTitle);
+      //System.out.println(" Removing button- " + oldTitle);
       windowBar.removeButton(oldTitle);
       updateMenu();
     }
