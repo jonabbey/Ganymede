@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -272,6 +272,7 @@ public class ReturnVal implements java.io.Serializable {
   public ReturnVal(boolean success, boolean doNormalProcessing)
   {
     this.success = success;
+    this.doNormalProcessing = doNormalProcessing;
     rescanList = null;
     objRescanHash = null;
     dialog = null;
