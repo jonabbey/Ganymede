@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.68 $ %D%
+   Version: $Revision: 1.69 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -705,7 +705,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public boolean anonymousLinkOK(short fieldID)
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
     // assume that anonymous linking is not ok by default
 
@@ -721,7 +721,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public boolean anonymousUnlinkOK(short fieldID)
+  public boolean anonymousUnlinkOK(DBObject object, short fieldID)
   {
     // assume that unlinking is ok by default
 
