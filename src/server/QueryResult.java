@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,33 +81,6 @@ public class QueryResult implements java.io.Serializable {
     if (!forTransport)
       {
 	objects = new Vector();
-      }
-  }
-
-  /**
-   *
-   * This method is used to add an object's information to
-   * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server.  
-   *
-   */
-
-  public synchronized void addRow(DBObject object, boolean editable)
-  {
-    if (debug)
-      {
-	System.err.println("QueryResult: addRow(" + object.getLabel() + ")");
-      }
-
-    addRow(object.getInvid(), object.getLabel(),
-	   object.isInactivated(),
-	   object.willExpire(),
-	   object.willBeRemoved(),
-	   editable);
-
-    if (!forTransport)
-      {
-	objects.addElement(object);
       }
   }
 
