@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -192,6 +192,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public void addWindow(db_object object, boolean editable, String objectType)
   {
+    this.addWindow(object, editable, objectType, false);
+  }
+
+  public void addWindow(db_object object, boolean editable, String objectType, boolean isNewlyCreated)
+  {
     String temp, title;
 
     if (object == null)
@@ -316,7 +321,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	title = temp + num++;
       }
 
-    framePanel w = new framePanel(object, editable, this, title);
+    framePanel w = new framePanel(object, editable, this, title, isNewlyCreated);
     w.setOpaque(true);
 
     windowList.put(title, w);
