@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -281,6 +281,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.LOGINSHELL:
 	  case userSchema.HOMEDIR:
 	  case userSchema.VOLUMES:
+	  case userSchema.CATEGORY:
 	    return true;
 	  }
       }
@@ -296,7 +297,38 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.LOGINSHELL:
 	  case userSchema.HOMEDIR:
 	  case userSchema.VOLUMES:
+	  case userSchema.CATEGORY:
 	    return true;
+	  }
+      }
+
+    // Whether or not the social security field is required depends on
+    // the user category.
+
+    if (fieldid == userSchema.SOCIALSECURITY)
+      {
+	try
+	  {
+	    Invid catInvid = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
+
+	    // we're PSEUDOSTATIC, so we need to get ahold of the internal session
+	    // so we can look up objects
+	    
+	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
+
+	    Boolean ssRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.SSREQUIRED);
+
+	    return ssRequired.booleanValue();
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // if we can't get the category reference, assume that we
+	    // aren't gonna require the category.. the user will still
+	    // be prompted to set a category, and once they go back
+	    // and do that and try to re-commit, they'll hit us again
+	    // and we can make the proper determination at that point.
+
+	    return false;
 	  }
       }
 
@@ -983,6 +1015,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;
       }
 
+
     // when we rename a user, we have lots to do.. a number of other
     // fields in this object and others need to be updated to match.
 
@@ -1251,6 +1284,51 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	  }
 
+	// if the user category is changed, we need to be sure and get
+	// the expiration date set..
+
+	if (field.getID() == CATEGORY)
+	  {
+	    if (gSession.isWizardActive() && 
+		gSession.getWizard() instanceof userCategoryWizard)
+	      {
+		userCategoryWizard uw = (userCategoryWizard) gSession.getWizard();
+		
+		if (uw.getState() == uw.DONE)
+		  {
+		    // ok, assume the wizard has taken care of getting everything prepped and
+		    // approved for us.  An active wizard has approved the operation
+
+		    return null;
+		  }
+	      }
+
+	    try
+	      {
+		if (param1 != null || !deleting)
+		  {
+		    return new userCategoryWizard(getGSession(), this, 
+						  (Invid) getFieldValueLocal(userSchema.CATEGORY),
+						  (Invid) param1).getStartDialog();
+		  }
+		else
+		  {
+		    return null;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		return Ganymede.createErrorDialog("Server error",
+						  "userCustom.wizardHook(): can't initialize userCategoryWizard.");
+	      }
+	  }
+
+	//
+	//	if (field.getID() == SchemaConstants.ExpirationField)
+	//	  {
+	//	    return changeExpiration(value);
+	//	  }
+	
 	if ((field.getID() != USERNAME) ||
 	    (operation != SETVAL))
 	  {
