@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1394,7 +1394,7 @@ public class DBStore {
 	// create Builder Task Base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Event";
+	b.object_name = "Builder Task";
 	b.type_code = (short) SchemaConstants.BuilderBase; // 5
 	b.displayOrder = b.type_code;
 
