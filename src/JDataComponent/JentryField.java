@@ -32,8 +32,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
   protected JsetValueCallback my_parent = null;
 
-  protected JcomponentAttr valueAttr = null;
-
   //////////////////
   // Constructors //
   //////////////////
@@ -63,14 +61,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
     return changed;
   }
 
-  /**
-   *  returns a JcomponentAttr object for the JentryField
-   */
-
-  public JcomponentAttr getValueAttr()
-  {
-    return this.valueAttr;
-  }
   
   /**
    *  sets the parent of this component for callback purposes
@@ -105,125 +95,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
     return true;
   }
   
-  /**
-   * sets the background color for the JentryField
-   * and forces a repaint
-   *
-   * @param color the color which will be used
-   */
-
-  public void setBackground(Color color)
-  {
-    //setValueBackColor(color,true);
-    super.setBackground(color);
-  }
-
-  
-  /**
-   * sets the background color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueBackColor(Color color,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setBackground(color);
-    
-    setValueAttr(valueAttr,repaint);
-  }
-  
-  
-  /**
-   * sets the attributes for the JentryField
-   *
-   * @param attrib the attributes which will be used
-   * @param repaint true if the label component needs to be repainted
-   */
-
-  public void setValueAttr(JcomponentAttr attributes,boolean repaint)
-  {
-    this.valueAttr = attributes;
-
-    super.setFont(attributes.font);
-    super.setForeground(attributes.fg);
-    super.setBackground(attributes.bg);
-
-    if (repaint)
-      {
-	this.repaint();
-      }
-  }
-
-  /**
-   *  sets the font for the JentryField and
-   *  forces a repaint
-   *
-   * @param f the font which will be used
-   */
-
-  public void setFont(Font f)
-  {
-    //setValueFont(f,true);
-    super.setFont(f);
-  }
-  
-  /**
-   *  sets the font for the JentryField
-   *
-   * @param f the font which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueFont(Font f,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setFont(f);
-
-    setValueAttr(valueAttr,repaint);
-  }
-
-  /**
-   * sets the foreground color for the JentryField
-   * and forces a repaint.
-   *
-   * @param color the color which will be used
-   */
-
-  public void setForeground(Color color)
-  {
-    //setValueForeColor(color,true);    
-    super.setForeground(color);
-  }
-
-  /**
-   * sets the foreground color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-
-  public void setValueForeColor(Color color,boolean repaint)
-  {
-    if (valueAttr == null)
-      {
-	return;
-      }
-    
-    valueAttr.setForeground(color);
-
-    setValueAttr(valueAttr,repaint);
-  } 
-
   /**
    *
    * We only want certain keystrokes to be registered by the field.
@@ -279,7 +150,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
       {
 	System.out.println("focusGained");
       }
-
   }
 }
 
