@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2002/03/02 00:37:11 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2002/03/02 01:54:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -744,13 +744,13 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     controlMenu = new JMenu("Control", false); // no tear-off
     controlMenu.setMnemonic('c');
 
-    dumpMI = new JMenuItem("Dump Database");
-    dumpMI.setMnemonic('d');
-    dumpMI.addActionListener(this);
+    clearLogMI = new JMenuItem("Clear Log Panel");
+    clearLogMI.setMnemonic('l');
+    clearLogMI.addActionListener(this);
 
-    shutdownMI = new JMenuItem("Shutdown Ganymede");
-    shutdownMI.setMnemonic('s');
-    shutdownMI.addActionListener(this);
+    forceBuildMI = new JMenuItem("Force Build");
+    forceBuildMI.setMnemonic('f');
+    forceBuildMI.addActionListener(this);
 
     killAllMI = new JMenuItem("Kill Off All Users");
     killAllMI.setMnemonic('k');
@@ -760,20 +760,20 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     schemaMI.setMnemonic('e');
     schemaMI.addActionListener(this);
 
-    forceBuildMI = new JMenuItem("Force Build");
-    forceBuildMI.setMnemonic('f');
-    forceBuildMI.addActionListener(this);
+    shutdownMI = new JMenuItem("Shutdown Ganymede");
+    shutdownMI.setMnemonic('s');
+    shutdownMI.addActionListener(this);
 
-    clearLogMI = new JMenuItem("Clear Log Panel");
-    clearLogMI.setMnemonic('l');
-    clearLogMI.addActionListener(this);
+    dumpMI = new JMenuItem("Dump Database");
+    dumpMI.setMnemonic('d');
+    dumpMI.addActionListener(this);
 
     quitMI = new JMenuItem("Quit Console");
     quitMI.setMnemonic('q');
     quitMI.addActionListener(this);
 
-    controlMenu.add(forceBuildMI);
     controlMenu.add(clearLogMI);
+    controlMenu.add(forceBuildMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
     controlMenu.add(shutdownMI);
