@@ -4,9 +4,12 @@
 
  An implementation of JListBox used to display strings.
 
- Mike Mulvaney Aug 21, 1996
+ Created: 21 Aug 1997
+ Version: $Revision: 1.2 $ %D%
+ Module By: Mike Mulvaney
+ Applied Research Laboratories, The University of Texas at Austin
 
- */
+*/
 
 package arlut.csd.JDataComponent;
 
