@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 1999/02/02 22:00:45 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 1999/02/11 00:56:44 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -280,7 +280,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     clearTreeMI,
     filterQueryMI,
     defaultOwnerMI,
-    showHelpMI;
+    showHelpMI,
+    toggleToolBarMI;
 
   private boolean
     defaultOwnerChosen = false;
@@ -404,6 +405,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     fileMenu = new JMenu("File");
     fileMenu.setMnemonic('f');
     fileMenu.setDelay(0);
+
+    //    toggleToolBarMI = new JMenuItem("Toggle Toolbar");
+    //    toggleToolBarMI.setMnemonic('t');
+    //    toggleToolBarMI.addActionListener(this);
+
     logoutMI = new JMenuItem("Logout");
     logoutMI.setMnemonic('l');
     logoutMI.addActionListener(this);
@@ -422,6 +428,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     fileMenu.add(clearTreeMI);
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
+    //    fileMenu.add(toggleToolBarMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
 
@@ -480,6 +487,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     windowMenu = new JMenu("Windows");
     windowMenu.setMnemonic('w');
 
+   
     // Look and Feel menu
 
     LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
@@ -504,6 +512,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     if ((!showToolbar) && (personae != null))
       {
 	PersonaMenu = new JMenu("Persona");
+	PersonaMenu.setMnemonic('p');
 	personaGroup = new ButtonGroup();
 	
 	for (int i = 0; i < personae.size(); i++)
@@ -525,9 +534,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	personasExist = true;
       }
     else if (showToolbar && personae != null)
-      {
-	currentPersonaString = my_username;
-      }
+    {
+    currentPersonaString = my_username;
+    }
 
     // Help menu
 
@@ -746,6 +755,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
 
+
     JPanel bottomButtonP = new JPanel(false);
 
     bottomButtonP.add(commit);
@@ -763,6 +773,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     JPanel bottomBar = new JPanel(false);
     bottomBar.setLayout(new BorderLayout());
 
+
     statusLabel.setEditable(false);
     statusLabel.setOpaque(false);
     statusLabel.setBorder(statusBorder);
@@ -778,6 +789,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     bottomBar.add("West", lP);
     bottomBar.add("Center", statusLabel);
     bottomBar.add("East", bottomButtonP);
+
     mainPanel.add("South", bottomBar);
 
     setStatus("Starting up");
@@ -1793,69 +1805,77 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   JPanel createToolbar()
   {
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setBorder(BorderFactory.createEmptyBorder(0,4,0,4));
-
-    JPanel toolPanel = new JPanel(new BorderLayout());
-    JPanel personaPanel = new JPanel(new BorderLayout());
-
-    JToolBar toolBar = new JToolBar();
-    toolBar.setBorderPainted(true);
     Insets insets = new Insets(0,0,0,0);
-    
-    toolBar.setMargin(insets);
 
+    JPanel toolBarPanel = new JPanel(new BorderLayout());
+    JPanel personaPanel = new JPanel(new BorderLayout());
+    JToolBar toolBar = new JToolBar();
+
+    toolBar.setBorderPainted(true);
+    toolBar.setFloatable(false);
+    toolBar.setMargin(insets);
+    
     JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
+    //JButton b = new JButton(new ImageIcon(newToolbarIcon));
+    int origButtonWidth = b.getWidth();
+    b.setMargin(insets);
     b.setActionCommand("create new object");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Create a new object");
     b.addActionListener(this);
-    b.setMargin(insets);
     toolBar.add(b);
 
+
     b = new JButton("Edit", new ImageIcon(pencil));
+    //b = new JButton(new ImageIcon(pencil));
+    b.setMargin(insets);
     b.setActionCommand("open object for editing");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Edit an object");
     b.addActionListener(this);
-    b.setMargin(insets);
     toolBar.add(b);
 
+
     b = new JButton("Delete", new ImageIcon(trash));
+    //b = new JButton(new ImageIcon(trash));
+    b.setMargin(insets);
     b.setActionCommand("delete an object");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Delete an object");
     b.addActionListener(this);
-    b.setMargin(insets);
     toolBar.add(b);
 
+
     b = new JButton("View", new ImageIcon(search));
+    //b = new JButton(new ImageIcon(search));
+    b.setMargin(insets);
     b.setActionCommand("open object for viewing");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("View an object");
-    b.setMargin(insets);
     b.addActionListener(this);
     toolBar.add(b);
 
+
     b = new JButton("Query", new ImageIcon(queryIcon));
+    //b = new JButton(new ImageIcon(queryIcon));
+    b.setAlignmentX(Component.CENTER_ALIGNMENT);
+    b.setMargin(insets);
     b.setActionCommand("compose a query");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Compose a query");
-    b.setMargin(insets);
     b.addActionListener(this);
     toolBar.add(b);
 
-    toolPanel.add("Center",toolBar);
 
     // if we just have a single persona, don't hassle with
     // a personaCombo
     
-    if ((personae != null)  && personae.size() > 1)
+     if ((personae != null)  && personae.size() > 1)
       {
 	if (debug)
 	  {
@@ -1870,29 +1890,26 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 
 	personaCombo.setSelectedItem(my_username);
-
 	personaCombo.addActionListener(personaListener);
 
-	// Check this out
+	JPanel pStuff = new JPanel(new FlowLayout());
 
-	JPanel POuterpanel = new JPanel(new BorderLayout());
-	JPanel PInnerpanel = new JPanel(new BorderLayout());
-	PInnerpanel.add("Center", new JLabel("Persona:", SwingConstants.RIGHT));
-	PInnerpanel.add("East", personaCombo);
-	POuterpanel.add("South", PInnerpanel);
 
-	personaPanel.add("Center",POuterpanel);
+	pStuff.add(new JLabel("Persona:"));
+	pStuff.add(personaCombo);
+	personaPanel.add("South", pStuff);
 
-	panel.add("East",personaPanel);
+
       }
     else if (debug)
       {
 	System.out.println("No personas.");
       }
 
-    panel.add("Center",toolPanel);
-
-    return panel;
+     toolBarPanel.add("Center",toolBar);
+     toolBarPanel.add("East",personaPanel);
+ 
+    return toolBarPanel;
   }
 
   /**
@@ -1903,7 +1920,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (personaCombo != null)
       {
-	personaCombo.setSelectedItem(persona);
+	personaCombo.setSelectedItem("Persona: " + persona);
       }
   }
 
@@ -3176,6 +3193,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     openDialog.setText("Open object for editing");
+    openDialog.setIcon(new ImageIcon(pencil));
     openDialog.setReturnEditableOnly(true);
     Invid invid = openDialog.chooseInvid();
 
@@ -3218,6 +3236,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     openDialog.setText("Open object for viewing");
+    openDialog.setIcon(new ImageIcon(search));
     openDialog.setReturnEditableOnly(false);
 
     Invid invid = openDialog.chooseInvid();
@@ -3258,6 +3277,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     openDialog.setText("Choose object to be inactivated");
+    openDialog.setIcon(null);
     openDialog.setReturnEditableOnly(true);
 
     Invid invid = openDialog.chooseInvid();
@@ -3288,6 +3308,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     openDialog.setText("Choose object to be deleted");
+    openDialog.setIcon(new ImageIcon(trash));
     openDialog.setReturnEditableOnly(true);
 
     Invid invid = openDialog.chooseInvid();
@@ -4004,6 +4025,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    logout();
 	  }
       }
+
+    else if (source == toggleToolBarMI)
+      {
+	// toggle appearance of the toolbar
+      }
+
     else if (command.equals("create new object"))
       {
 	createObjectDialog();
