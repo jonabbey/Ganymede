@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2001/07/06 20:50:24 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2001/08/14 16:42:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.129 $ $Date: 2001/07/06 20:50:24 $
+ * @version $Revision: 1.130 $ $Date: 2001/08/14 16:42:02 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -277,6 +277,11 @@ public class DBObject implements db_object, FieldType, Remote {
 
   DBObject(DBObjectBase objectBase, DataInput in, boolean journalProcessing) throws IOException
   {
+    if (objectBase == null)
+      {
+	throw new RuntimeException("Error, null object base");
+      }
+
     this.objectBase = objectBase;
     shadowObject = null;
     receive(in, journalProcessing);
@@ -2220,6 +2225,16 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public void print(PrintStream out)
   {
+    print(new PrintWriter(out));
+  }
+
+  /**
+   * <p>Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.</p>
+   */
+
+  public void print(PrintWriter out)
+  {
     DBField field;
 
     /* -- */
@@ -2268,6 +2283,21 @@ public class DBObject implements db_object, FieldType, Remote {
 	      }
 	  } 
       }   
+  }
+
+  /**
+   * <p>This method takes the print method and dumps it to a String</p>
+   */
+
+  public String toFullString()
+  {
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+
+    this.print(writer);
+    writer.close();
+
+    return stringTarget.toString();
   }
 
   /**

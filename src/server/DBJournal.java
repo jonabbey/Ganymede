@@ -6,15 +6,15 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2001/08/13 21:02:31 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2001/08/14 16:42:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -84,7 +84,7 @@ import java.util.*;
 
 public class DBJournal implements ObjectStatus {
 
-  static boolean debug = false;
+  static boolean debug = true;
 
   public static void setDebug(boolean val)
   {
@@ -173,6 +173,7 @@ public class DBJournal implements ObjectStatus {
 	  {
 	    System.err.println("Writing DBStore Journal header");
 	  }
+
 	initialize(jFile);
 
 	dirty = false;
@@ -688,6 +689,10 @@ public class DBJournal implements ObjectStatus {
 
 class JournalEntry {
 
+  static boolean debug = true;
+
+  // ---
+
   DBObjectBase base;
   int id;
   DBObject obj;			// if null, we'll delete
@@ -713,6 +718,12 @@ class JournalEntry {
       currentHandle;
 
     /* -- */
+
+    if (debug)
+      {
+	System.err.println("JournalEntry.process():");
+	System.err.println(this.toString());
+      }
 
     if (obj == null)
       {
@@ -855,6 +866,34 @@ class JournalEntry {
 	  {
 	    base.maxid = id;
 	  }
+      }
+  }
+
+  public String toString()
+  {
+    if (base != null && obj != null)
+      {
+	return "base: " + base.toString() + "\n" +
+	  "id: " + id + "\n" +
+	  "obj: \n" + obj.toFullString();
+      }
+    else if (base != null)
+      {
+	return "base: " + base.toString() + "\n" +
+	  "id: " + id + "\n" +
+	  "obj: null";
+      }
+    else if (obj != null)
+      {
+	return "base: null\n" +
+	  "id: " + id + "\n" +
+	  "obj: \n" + obj.toFullString();
+      }
+    else
+      {
+	return "base: null\n" +
+	  "id: " + id + "\n" +
+	  "obj: null";
       }
   }
 }

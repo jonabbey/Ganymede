@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/03/28 05:16:31 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/08/14 16:42:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.52 $ $Date: 2001/03/28 05:16:31 $
+ * @version $Revision: 1.53 $ $Date: 2001/08/14 16:42:03 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -734,8 +734,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     Ganymede.forceBuilderTasks();
 
-    return Ganymede.createInfoDialog("Forced Rebuild Scheduled",
-				     "A full rebuild of all external data files has been scheduled.");
+    return null;
   }
 
   /**

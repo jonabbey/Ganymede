@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2001/01/12 01:12:33 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/08/14 16:42:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,7 +75,7 @@ import java.rmi.RemoteException;
 
 public class DBObjectDeltaRec implements FieldType {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
