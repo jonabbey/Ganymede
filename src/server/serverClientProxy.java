@@ -11,15 +11,15 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2003/03/11 20:27:45 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2003/09/03 23:56:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.6 $ $Date: 2003/03/11 20:27:45 $
+ * @version $Revision: 1.7 $ $Date: 2003/09/03 23:56:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {
@@ -265,7 +265,7 @@ public class serverClientProxy implements Runnable {
 
 		errorCondition = null; 
 	      }
-	    catch (RemoteException ex)
+	    catch (java.io.IOException ex)
 	      {
 		// if we get two RemoteExceptions in a row from
 		// dispatch, throw in the towel, we're done.

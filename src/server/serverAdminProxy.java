@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2003/02/10 22:20:39 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2003/09/03 23:56:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.Util.booleanSemaphore;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.27 $ $Date: 2003/02/10 22:20:39 $
+ * @version $Revision: 1.28 $ $Date: 2003/09/03 23:56:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -451,7 +451,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
 		errorCondition = null; 
 	      }
-	    catch (RemoteException ex)
+	    catch (java.io.IOException ex)
 	      {
 		// if we get two RemoteExceptions in a row from
 		// dispatch, throw in the towel, we're done.
