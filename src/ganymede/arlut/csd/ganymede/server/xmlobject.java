@@ -536,13 +536,18 @@ public class xmlobject {
 
 	    if (debug)
 	      {
-		xSession.err.println("xmlobject calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
 	      }
 
 	    invid = xSession.session.findLabeledObject(id, type.shortValue());
 
 	    if (invid == null)
 	      {
+		if (debug)
+		  {
+		    xSession.err.println("xmlobject.getInvid() deciding known non existent on " type + ":" + id);
+		  }
+
 		knownNonExistent = true;
 	      }
 

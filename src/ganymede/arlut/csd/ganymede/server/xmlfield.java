@@ -105,7 +105,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 public class xmlfield implements FieldType {
 
-  final static boolean debug = false;
+  final static boolean debug = true;
 
   /**
    * <p>Formatter that we use for generating and parsing date fields</p>
@@ -1554,7 +1554,7 @@ public class xmlfield implements FieldType {
 	return invids;
       }
 
-    // if we're an embedded object field, 
+    // if we're an embedded object field, we'll contain xmlobjects
 
     for (int i=0; i < values.size(); i++)
       {
@@ -1607,7 +1607,7 @@ public class xmlfield implements FieldType {
 	return objects;
       }
 
-    // if we're an embedded object field, 
+    // if we're an embedded object field, we'll contain xmlobjects
 
     for (int i=0; i < values.size(); i++)
       {
