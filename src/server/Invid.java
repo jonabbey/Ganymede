@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ public class Invid {
     if ((type < FIRST) ||
 	(type > LAST))
       {
-	throw new IndexOutOfBoundsException();
+	throw new IndexOutOfBoundsException("type out of range " + type);
       }
 
     this.type = type;
