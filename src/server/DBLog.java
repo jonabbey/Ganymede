@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/03/04 00:54:07 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/03/06 22:37:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -510,8 +510,14 @@ public class DBLog {
 							     transaction.session,
 							     transactionType));
 
-	    // now we record who we actually sent the mail to, so it is logged
-	    // properly
+	    // and we want to make sure and send this event to any
+	    // addresses listed in the starttransaction system event
+	    // object.
+
+	    sentTo = VectorUtils.union(sentTo, transactionType.addressVect);
+
+	    // now we record in the event who we actually sent the
+	    // mail to, so it is logged properly
 
 	    event.notifyVect = sentTo;
 
