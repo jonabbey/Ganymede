@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.86 $ %D%
+    Version: $Revision: 1.87 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -3185,7 +3185,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 	
     choices = gc.sortListHandleVector(choices);
-    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
+    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), !mustChoose);
 
     // Find currentListHandle
     
