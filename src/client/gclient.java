@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -218,30 +218,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   //
 
   treeMenu 
+    objectViewPM,
     objectReactivatePM,
     objectInactivatePM,
     objectRemovePM;
-
-  MenuItem
-    objViewMI,
-    objEditMI,
-    objCloneMI,
-    objInactivateMI,
-    objDeleteMI,
-    objReactivateMI;
 
   treeMenu 
     pMenuAll = new treeMenu(),
     pMenuEditable= new treeMenu();
   
-  MenuItem 
-    createMI = null,
-    viewMI = null,
-    viewAllMI = null,
-    queryMI = null,
-    showAllMI = null,
-    hideNonEditMI = null;
-
   JMenuBar 
     menubar;
 
@@ -464,24 +449,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Create menus for the tree
 
-    createMI = new MenuItem("Create");
-    viewMI = new MenuItem("List editable");
-    viewAllMI = new MenuItem("List all");
-    queryMI = new MenuItem("Query");
-    showAllMI = new MenuItem("Show All Objects");
-    hideNonEditMI = new MenuItem("Hide Non-Editables");
+    pMenuAll.add(new MenuItem("List editable"));
+    pMenuAll.add(new MenuItem("List all"));
+    pMenuAll.add(new MenuItem("Create"));
+    pMenuAll.add(new MenuItem("Query"));
+    pMenuAll.add(new MenuItem("Hide Non-Editables"));
 
-    pMenuAll.add(viewMI);
-    pMenuAll.add(viewAllMI);
-    pMenuAll.add(createMI);
-    pMenuAll.add(queryMI);
-    pMenuAll.add(hideNonEditMI);
-
-    pMenuEditable.add(viewMI);
-    pMenuEditable.add(viewAllMI);
-    pMenuEditable.add(createMI);
-    pMenuEditable.add(queryMI);
-    pMenuEditable.add(showAllMI);
+    pMenuEditable.add(new MenuItem("List editable"));
+    pMenuEditable.add(new MenuItem("List all"));
+    pMenuEditable.add(new MenuItem("Create"));
+    pMenuEditable.add(new MenuItem("Query"));
+    pMenuEditable.add(new MenuItem("Show All Objects"));
 
     if (debug)
       {
@@ -560,30 +538,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	System.out.println("Creating pop up menus");
       }
 
-    objViewMI = new MenuItem("View Object");
-    objEditMI = new MenuItem("Edit Object");
-    objCloneMI = new MenuItem("Clone Object");
+    objectViewPM = new treeMenu();
+    objectViewPM.add(new MenuItem("View Object"));
 
     objectRemovePM = new treeMenu();
-    objDeleteMI = new MenuItem("Delete Object");
-    objectRemovePM.add(objViewMI);
-    objectRemovePM.add(objEditMI);
-    objectRemovePM.add(objCloneMI);
-    objectRemovePM.add(objDeleteMI);
+    objectRemovePM.add(new MenuItem("View Object"));
+    objectRemovePM.add(new MenuItem("Edit Object"));
+    objectRemovePM.add(new MenuItem("Clone Object"));
+    objectRemovePM.add(new MenuItem("Delete Object"));
 
     objectInactivatePM = new treeMenu();
-    objInactivateMI = new MenuItem("Inactivate Object");
     objectInactivatePM.add(new MenuItem("View Object"));
     objectInactivatePM.add(new MenuItem("Edit Object"));
     objectInactivatePM.add(new MenuItem("Clone Object"));
-    objectInactivatePM.add(objInactivateMI);
+    objectInactivatePM.add(new MenuItem("Inactivate Object"));
 
     objectReactivatePM = new treeMenu();
-    objReactivateMI = new MenuItem("Reactivate Object");
     objectReactivatePM.add(new MenuItem("View Object"));
     objectReactivatePM.add(new MenuItem("Edit Object"));;
     objectReactivatePM.add(new MenuItem("Clone Object"));
-    objectReactivatePM.add(objReactivateMI);
+    objectReactivatePM.add(new MenuItem("Reactivate Object"));
 
     try
       {
@@ -1477,7 +1451,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	id = base.getTypeID();
 	//Now get all the children
-	_query = new Query(id, null, !node.isShowAll());
+	_query = new Query(id, null, false);// include all, even non-editables
 	node.setQuery(_query);
       }
     catch (RemoteException rx)
@@ -1510,7 +1484,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
       }
     
-    objectHandles = objectlist.getObjectHandles(true); // include inactives
+    objectHandles = objectlist.getObjectHandles(true); // include inactives, non-editables
 
     // **
     //
@@ -1538,6 +1512,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	if (i < objectHandles.size())
 	  {
 	    handle = (ObjectHandle) objectHandles.elementAt(i);
+
+	    if (!node.isShowAll() && !handle.isEditable())
+	      {
+		i++;		// skip this one
+		continue;
+	      }
 
 	    invid = handle.getInvid();
 	    label = handle.getLabel();
@@ -1571,7 +1551,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 					      oldNode, false,
 					      handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
 					      handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
-					      node.canInactivate() ? objectInactivatePM : objectRemovePM,
+					      handle.isEditable() ? (node.canInactivate()
+								     ? objectInactivatePM : objectRemovePM) : objectViewPM,
+					       
 					      handle);
 	    
 	    invidNodeHash.put(invid, objNode);
@@ -3205,7 +3187,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     //	treeNodeExpanded(node);
     //      }
     
-    if (event.getSource() == createMI)
+    if (event.getActionCommand().equals("Create"))
       {
 	System.out.println("createMI");
 
@@ -3229,7 +3211,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    System.err.println("not a base node, can't create");
 	  }
       }
-    else if (event.getSource() ==  viewMI)
+    else if (event.getActionCommand().equals("List editable"))
       {
 	System.out.println("viewMI");
 
@@ -3269,8 +3251,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    System.out.println("viewMI from a node other than a BaseNode");
 	  }
       }
-    
-    else if (event.getSource() ==  viewAllMI)
+    else if (event.getActionCommand().equals("List all"))
       {
 	if (debug)
 	  {
@@ -3313,7 +3294,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    System.out.println("viewAllMI from a node other than a BaseNode");
 	  }
       }
-    else if (event.getSource() ==  queryMI)
+    else if (event.getActionCommand().equals("Query"))
       {
 	System.out.println("queryMI");
 
@@ -3355,7 +3336,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 	  }
       }
-    else if (event.getSource() == showAllMI)
+    else if (event.getActionCommand().equals("Show All Objects"))
       {
 	BaseNode bn = (BaseNode) node;
 	Base base = bn.getBase();
@@ -3371,24 +3352,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    throw new RuntimeException("couldn't get the base id" + ex);
 	  }
-
-	// we want to force a full refresh of this id
-
-	cachedLists.removeList(id);
 
 	bn.showAll(true);
 	node.setMenu(pMenuAll);
 
-	try
+	if (bn.isOpen())
 	  {
-	    refreshObjects(bn, true);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("oops, couldn't refresh base" + ex);
+	    try
+	      {
+		refreshObjects(bn, true);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("oops, couldn't refresh base" + ex);
+	      }
 	  }
       }
-    else if (event.getSource() == hideNonEditMI)
+    else if (event.getActionCommand().equals("Hide Non-Editables"))
       {
 	BaseNode bn = (BaseNode) node;
 	Base base = bn.getBase();
@@ -3405,20 +3385,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    throw new RuntimeException("couldn't get the base id" + ex);
 	  }
 
-	// we want to force a full refresh of this id
-
-	cachedLists.removeList(id);
-
 	bn.showAll(false);
 	bn.setMenu(pMenuEditable);
 
-	try
+	if (bn.isOpen())
 	  {
-	    refreshObjects(bn, true);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("oops, couldn't refresh base" + ex);
+	    // this makes the ratchet operation in refreshObjects() faster
+	    // in the common case where there are many more editables than
+	    // non-editables.
+
+	    tree.removeChildren(bn, false);
+	    tree.expandNode(bn, false);
+	    
+	    try
+	      {
+		refreshObjects(bn, true);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("oops, couldn't refresh base" + ex);
+	      }
 	  }
       }
     else if (event.getActionCommand().equals("View Object"))
@@ -3613,7 +3599,7 @@ class InvidNode extends arlut.csd.JTree.treeNode {
   private ObjectHandle handle;
 
   public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
-		    boolean expandable, int openImage, int closedImage, treeMenu menu,
+		   boolean expandable, int openImage, int closedImage, treeMenu menu,
 		   ObjectHandle handle)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
