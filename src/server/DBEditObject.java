@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,13 @@ import java.util.*;
  */
 
 public class DBEditObject extends DBObject {
+
+  static boolean debug = true;
+
+  public static void setDebug(boolean val)
+  {
+    debug = val;
+  }
 
   DBObject original;
   DBEditSet editset; 
@@ -221,10 +228,20 @@ public class DBEditObject extends DBObject {
 
     if (namespace != null)
       {
+	if (debug)
+	  {
+	    System.err.println("DBEditObject.setField(): doing namespace check on " + 
+			       namespace.name + " for field " + fieldDef.field_name);
+	  }
+
 	if (!field.mark(editset, namespace))
 	  {
 	    editset.session.setLastError("couldn't set field " + fieldDef.field_name + " due to a namespace conflict");
 	    return false;	// couldn't set this value.. namespace conflict
+	  }
+	else if (debug)
+	  {
+	    System.err.println("DBEditObject.setField(): passed namespace check");
 	  }
       }  
 
