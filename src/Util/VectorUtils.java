@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/06/15 02:47:07 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/07/21 23:19:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -122,6 +122,11 @@ public class VectorUtils {
 
   public static void unionAdd(Vector vect, Object obj)
   {
+    if (obj == null)
+      {
+	return;
+      }
+
     for (int i = 0; i < vect.size(); i++)
       {
 	if (obj.equals(vect.elementAt(i)))
