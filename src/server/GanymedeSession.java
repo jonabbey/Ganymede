@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.85 $ %D%
+   Version: $Revision: 1.86 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1637,6 +1637,39 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     QueryResult temp_result = queryDispatch(query, false, false, null, null);
 
+    // any associated queries?
+
+    if (query.linkedQueries != null)
+      {
+	if (debug)
+	  {
+	    System.err.println("Primary query result: " + temp_result.size());
+	  }
+
+	for (int i = 0; i < query.linkedQueries.size(); i++)
+	  {
+	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
+	    QueryResult adjunctResult = queryDispatch(adjunctQuery, false, false,
+						      null, null);
+
+	    if (debug)
+	      {
+		System.err.println("Adjunct query (" + adjunctQuery.objectName +
+				   ") result: " + adjunctResult.size());
+	      }
+
+	    if (temp_result != null)
+	      {
+		temp_result = temp_result.intersection(adjunctResult);
+
+		if (debug)
+		  {
+		    System.err.println("Intersection result: " + temp_result.size());
+		  }
+	      }
+	  }
+      }
+
     if (debug)
       {
 	System.err.println("dump(): processed queryDispatch, building dumpResult buffer");
@@ -1757,7 +1790,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public QueryResult query(Query query, DBEditObject perspectiveObject)
   {
     checklogin();
-    return queryDispatch(query, false, true, null, perspectiveObject);
+
+    QueryResult result = queryDispatch(query, false, true, null, perspectiveObject);
+
+    // any associated queries?
+
+    if (query.linkedQueries != null)
+      {
+	for (int i = 0; i < query.linkedQueries.size(); i++)
+	  {
+	    result = result.intersection(queryDispatch((Query) query.linkedQueries.elementAt(i), 
+						       false, true, null, perspectiveObject));
+	  }
+      }
+
+    return result;
   }
 
   /**
