@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/02/16 11:31:10 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/03/29 01:29:47 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.14 $ $Date: 2000/02/16 11:31:10 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 2000/03/29 01:29:47 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -319,8 +319,11 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
   public void disconnect() throws RemoteException
   {
-    session.logout();
-    session = null;
+    if (session != null)
+      {
+	session.logout();
+	session = null;
+      }
   }
 
   // **
