@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,7 +70,7 @@ public class QueryResult implements java.io.Serializable {
 	System.err.println("QueryResult: addRow(" + object.getLabel() + ")");
       }
 
-    buffer.append(object.resultDump());
+    addRow(object.getInvid(), object.getLabel());
   }
 
   /**
@@ -183,10 +183,11 @@ public class QueryResult implements java.io.Serializable {
    * listHandle gives Label, Invid.
    */
 
-  public Vector getListHandles()
+  public synchronized Vector getListHandles()
   {
-    
     Vector valueHandles = new Vector();
+
+    /* -- */
     
     for (int i = 0; i < size(); i++)
       {
@@ -266,25 +267,22 @@ public class QueryResult implements java.io.Serializable {
 
 	// now read in the label for this invid
 
+	tempString.setLength(0); // truncate the buffer
+
 	while (chars[index] != '\n')
 	  {
-	    tempString.setLength(0); // truncate the buffer
-
-	    while (chars[index] != '\n')
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+	    
+	    if (chars[index] == '\\')
 	      {
-		// if we have a backslashed character, take the backslashed char
-		// as a literal
-
-		if (chars[index] == '\\')
-		  {
-		    index++;
-		  }
-
-		tempString.append(chars[index++]);
+		index++;
 	      }
-
-	    labels.addElement(tempString.toString());
+	    
+	    tempString.append(chars[index++]);
 	  }
+
+	labels.addElement(tempString.toString());
 
 	index++; // skip newline
       }
