@@ -1,9 +1,9 @@
-Ganymede Release 1.0.10
-April 2, 2002
+Ganymede Release 1.0.11
+December 16, 2002
 CREDITS
 ---------------------------------------------
 
-Ganymede has been under development for over 5 years now, in both
+Ganymede has been under development for over 6 years now, in both
 planning and execution.  The work has primarily been performed in the
 Computer Science Division of The Applied Research Laboratories, The
 University of Texas at Austin, with support from CSD and ARL
@@ -158,8 +158,9 @@ The Qsmtp class was originally written by James Driscoll
 (maus@io.com), and placed into the public domain.  See
 http://www.io.com/~maus/JavaPage.html for details and additional free
 Java code. Note that the version of Qstmp packaged with Ganymede has
-been significantly modified, to provide more convenient use and
-rudimentary MIME support.
+been significantly modified, to provide more convenient use in a
+threaded context, and to provide rudimentary MIME file attachment
+support.
 
 Some of the MD5 classes used in the server were written by Santeri
 Paavolainen, and are included in Ganymede under the terms of the GNU

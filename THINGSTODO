@@ -1,5 +1,5 @@
-Ganymede Release 1.0.10
-April 2, 2002
+Ganymede Release 1.0.11
+December 9, 2002
 THINGSTODO
 ---------------------------------------------
 
@@ -161,6 +161,32 @@ owner field.
 Finally, there would need to be custom logic that would enforce the
 current permission logic, allowing only users who can edit the
 'Objects Owned' field for an owner group to add objects to that list.
+
+8) Move build system to Ant
+
+We may do this for the next release.  Moving to Ant would make it
+possible to build Ganymede on Windows, although the whole system is
+really designed to manage directory services on a Unix-like system.
+
+9) Support server targeting with common client
+
+Right now at ARL, we are running two instances of the Ganymede server,
+one for our internal information, and one for accounts in the DMZ.  At
+present, the Ganymede client and admin console are 'pre-loaded' with
+properties specifying where the Ganymede server is.  It would be nice
+to have a way to start the client or admin console, have the client
+code get a list of local Ganymede servers, and present the user with a
+choice of server to log into.
+
+This may well not be worth the effort to code it, but it might be nice
+to do.  Letting a single admin console monitor multiple Ganymede
+servers might be particularly nice.
+
+10) Rename Ganymede
+
+We long since past need to ditch the Ganymede name.  We have a name
+that we're thinking of going to, we just need to create the new logo,
+graphics, and rework all of the documentation, ugh.
 
 ---
 

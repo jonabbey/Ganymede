@@ -1,5 +1,5 @@
 Ganymede Release 1.0.11
-December 9, 2002
+December 16, 2002
 README
 ---------------------------------------------
 
@@ -34,11 +34,7 @@ This release includes:
 Things you will need:
 
   A JDK 1.1.7 or better compliant JVM to run the server, client, and
-  admin console.  We recommend using Sun's JDK 1.3 where you can.
-  JDK 1.3 on UNIX thus far only seems to support 8 and 24 bit color
-  displays and performs poorly on remote displays.  For this reason,
-  the Ganymede client and admin console are designed to be able to
-  work with JDK 1.1.7 as well as 1.2, 1.3, or 1.4.
+  admin console.  We recommend using Sun's JDK 1.4 where you can.
 
   If you intend to use the Ganymede clients with a 1.1 series JDK, you
   will need to download Swing 1.1 (or later) from Sun.  Swing 1.1.1
@@ -51,7 +47,7 @@ Things you will need:
   the best thing to do is to install the latest JDK 1.3 package, which
   includes an up-to-date Swing.  Most of the client testing on the
   current release has been performed with JDK 1.1.8 on Solaris,
-  JDK 1.4 beta on Linux, and JDK 1.3 on Windows.
+  JDK 1.4.1 on Linux, and JDK 1.4 on Windows.
 
   Lots of bugs in Swing and JDK have been fixed in JDK 1.3.. get it
   or 1.4 if you can.
