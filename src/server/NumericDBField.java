@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -214,6 +214,40 @@ public class NumericDBField extends DBField implements num_field {
 
     return ((Integer) values.elementAt(index)).intValue();
   }
+
+  public synchronized String getValueString()
+  {
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    if (!isVector())
+      {
+	if (value == null)
+	  {
+	    return "null";
+	  }
+
+	return Integer.toString(this.value());
+      }
+
+    String result = "";
+    int size = size();
+
+    for (int i = 0; i < size; i++)
+      {
+	if (!result.equals(""))
+	  {
+	    result = result + ", ";
+	  }
+
+	result = result + Integer.toString(this.value(i));
+      }
+
+    return result;
+  }
+
 
   // ****
   //

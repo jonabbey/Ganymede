@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -223,6 +223,46 @@ public class DateDBField extends DBField implements date_field {
       }
 
     return (Date) values.elementAt(index);
+  }
+
+  public synchronized String getValueString()
+  {
+    Calendar cal = GregorianCalendar.getInstance();
+
+    /* -- */
+
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    if (!isVector())
+      {
+	if (value == null)
+	  {
+	    return "null";
+	  }
+
+	cal.setTime(this.value());
+	return cal.toString();
+      }
+
+    String result = "";
+    int size = size();
+
+    for (int i = 0; i < size; i++)
+      {
+	if (!result.equals(""))
+	  {
+	    result = result + ", ";
+	  }
+
+	cal.setTime(this.value(i));
+
+	result = result + cal.toString();
+      }
+
+    return result;
   }
 
   // ****

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -236,6 +236,39 @@ public class InvidDBField extends DBField implements invid_field {
       }
 
     return (Invid) values.elementAt(index);
+  }
+
+  public synchronized String getValueString()
+  {
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    if (!isVector())
+      {
+	if (value == null)
+	  {
+	    return "null";
+	  }
+
+	return this.value().toString();
+      }
+
+    String result = "";
+    int size = size();
+
+    for (int i = 0; i < size; i++)
+      {
+	if (!result.equals(""))
+	  {
+	    result = result + ", ";
+	  }
+
+	result = result + this.value(i).toString();
+      }
+
+    return result;
   }
 
   // ****
