@@ -83,7 +83,6 @@ import java.text.MessageFormat;
  * @author Jonathan Abbey
  */
 
-
 public class TranslationService {
 
   // - Statics
@@ -94,10 +93,24 @@ public class TranslationService {
    * later on of tracking the TranslationService objects we create and
    * possibly supporting some kind of reload functionality, howsomever
    * primitive.</p>
+   */
 
   public static TranslationService getTranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
     return new TranslationService(resourceName, locale);
+  }
+
+  /**
+   * <p>This is a factory method for creating TranslationService
+   * objects.  We use a factory method so that we have the option
+   * later on of tracking the TranslationService objects we create and
+   * possibly supporting some kind of reload functionality, howsomever
+   * primitive.</p>
+   */
+
+  public static TranslationService getTranslationService(String resourceName) throws MissingResourceException
+  {
+    return new TranslationService(resourceName, null);
   }
 
   // ---
@@ -109,6 +122,7 @@ public class TranslationService {
   String lastKey = null;
   Object[] singleArgs, doubleArgs, tripleArgs;
   String resourceName;
+  int wordWrapCols=0;
 
   /* -- */
 
@@ -133,8 +147,68 @@ public class TranslationService {
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and a parameter and creates a localized string out of them.</p>
+   * <p>This method sets the desired word wrap columns for this
+   * TranslationService.  Any formatted strings returned by this
+   * TranslationService will be wrapped to the number of columns
+   * specified.</p>
+   *
+   * <p>If cols is 0, word wrapping will be disabled.</p>
+   *
+   * @return The number of columns that this TranslationService was previously
+   * wrapping at
+   */
+
+  public int setWordWrap(int cols)
+  {
+    int old_value = this.wordWrapCols;
+
+    if (cols <= 0)
+      {
+	wordWrapCols = 0;
+      }
+    else
+      {
+	wordWrapCols = cols;
+      }
+
+    return old_value;
+  }
+
+  /**
+   * <p>This method takes a localization key and returns the localized
+   * string that matches it in this TranslationService.</p>
+   *
+   * <p>This heavily overloaded method is called 'l' for localize, and
+   * it has such a short name so that I can use it everywhere in
+   * Ganymede without concern.</p>
+   */
+
+  public synchronized String l(String key)
+  {
+    String pattern = null;
+
+    /* -- */
+
+    if (this.lastKey == null || key != this.lastKey)
+      {
+	try
+	  {
+	    pattern = bundle.getString(key);
+	  }
+	catch (MissingResourceException ex)
+	  {
+	    return null;
+	  }
+
+	this.lastKey = key;
+      }
+
+    return wrap(pattern);
+  }
+
+  /**
+   * <p>This method takes a localization key and a parameter and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -174,12 +248,12 @@ public class TranslationService {
 
     this.singleArgs[0] = param; 
 
-    return formatter.format(pattern, singleArgs);
+    return wrap(formatter.format(pattern, singleArgs));
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and a parameter and creates a localized string out of them.</p>
+   * <p>This method takes a localization key and a parameter and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -219,12 +293,12 @@ public class TranslationService {
 
     this.singleArgs[0] = new Integer(param); 
 
-    return formatter.format(pattern, singleArgs);
+    return wrap(formatter.format(pattern, singleArgs));
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and parameters and creates a localized string out of them.</p>
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -265,12 +339,12 @@ public class TranslationService {
     this.doubleArgs[0] = param; 
     this.doubleArgs[0] = param2; 
 
-    return formatter.format(pattern, doubleArgs);
+    return wrap(formatter.format(pattern, doubleArgs));
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and parameters and creates a localized string out of them.</p>
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -311,12 +385,12 @@ public class TranslationService {
     this.doubleArgs[0] = param; 
     this.doubleArgs[0] = new Integer(param2); 
 
-    return formatter.format(pattern, doubleArgs);
+    return wrap(formatter.format(pattern, doubleArgs));
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and parameters and creates a localized string out of them.</p>
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -358,12 +432,12 @@ public class TranslationService {
     this.tripleArgs[0] = param2; 
     this.tripleArgs[0] = param3; 
 
-    return formatter.format(pattern, tripleArgs);
+    return wrap(formatter.format(pattern, tripleArgs));
   }
 
   /**
-   * <p>This method takes a {@link java.text.MessageFormat MessageFormat}
-   * pattern and parameters and creates a localized string out of them.</p>
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
@@ -405,12 +479,22 @@ public class TranslationService {
     this.tripleArgs[0] = param2; 
     this.tripleArgs[0] = new Integer(param3); 
 
-    return formatter.format(pattern, tripleArgs);
+    return wrap(formatter.format(pattern, tripleArgs));
   }
 
   public String toString()
   {
     return("TranslationService: " + resourceName + ", locale = " + ourLocale.toString());
+  }
+
+  private String wrap(String in)
+  {
+    if (wordWrapCols > 0 && in.length() > wordWrapCols)
+      {
+	return WordWrap.wrap(in, wordWrapCols);
+      }
+
+    return in;
   }
 }
 
