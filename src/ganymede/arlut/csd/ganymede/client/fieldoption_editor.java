@@ -775,7 +775,12 @@ class DelegateRenderer implements TableCellRenderer
     /* Fields are rendered as combo boxes */
     else
     {
-      return new ComboRenderer(editable, this.treetable, opvalue);
+      /* If we're in edit mode, show a combo box */
+      if (this.editable)
+        return new ComboRenderer(editable, this.treetable, opvalue);
+      /* If we're read-only, then use a simple JLabel */
+      else
+        return new JLabel(fieldoption_editor.labels[opvalue]);
     }
   }
 }
