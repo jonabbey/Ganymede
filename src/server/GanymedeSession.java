@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.82 $ %D%
+   Version: $Revision: 1.83 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,6 +69,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
   
   public boolean enableWizards = true;
+
+  /**
+   *
+   * If this variable is set to true, no custom wizard code will ever
+   * be invoked, and required fields will not be forced.  This is
+   * intended primarily for direct database loading.
+   *
+   * This variable is not intended ever to be available to the client,
+   * but should only be set by local server code.
+   *   
+   */
+  
+  public boolean enableOversight = true;
 
   /**
    *
@@ -640,6 +653,31 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public void enableWizards(boolean val)
   {
     this.enableWizards = val;
+  }
+
+  /**
+   *
+   * This method is used to allow local server-side code to request
+   * that no oversight be maintained over changes made to the server
+   * through this GanymedeSession.<br><br>
+   *
+   * This is intended <b>only</b> for trusted code that does its own
+   * checking and validation on changes made to the database.  If
+   * oversight is turned off, no wizard code will be called, and the
+   * required field logic will be bypassed.  Extreme care must
+   * be used in disabling oversight, and oversight should only be
+   * turned off for direct loading and other situations where there
+   * won't be multi-user use, to avoid breaking constraints that
+   * custom plug-ins count on.<br><br>
+   *
+   * Oversight is enabled by default.
+   *
+   * @param val If true, oversight will be enabled.
+   * */
+
+  public void enableOversight(boolean val)
+  {
+    this.enableOversight = val;
   }
 
   /**
