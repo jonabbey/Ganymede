@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -226,6 +226,11 @@ public class JstringField extends JentryField implements KeyListener{
 
   public String getValue() 
   {
+    if (!(getText().equals(value)))
+      {
+	sendCallback();
+      }
+
     return value;
   }
 
@@ -263,6 +268,7 @@ public class JstringField extends JentryField implements KeyListener{
    *
    * @param s each character in this string will be considered a disallowed character
    */
+
   public void setDisallowedChars(String s)
   {
     if (s!= null)
@@ -369,61 +375,67 @@ public class JstringField extends JentryField implements KeyListener{
 	return;
       }
     
-    if (allowCallback) 
+    if (!allowCallback) 
       {
-	boolean b = false;
-	  
-	try 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: making callback");
-	      }
+	value = str;
+	return;
+      }
 
-	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
-	  }
-	catch (RemoteException re)
+    boolean b = false;
+	  
+    try 
+      {
+	if (debug)
 	  {
+	    System.err.println("JstringField.processFocusEvent: making callback");
 	  }
-	    
-	if (b==false) 
+	
+	b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+      }
+    catch (RemoteException re)
+      {
+      }
+
+    // If the setValuePerformed callback failed, we'll revert the value to our last
+    // approved value
+    
+    if (!b) 
+      {
+	if (debug)
 	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: setValue rejected");
+	    System.err.println("JstringField.processFocusEvent: setValue rejected");
 		
-		if (value == null)
-		  {
-		    System.err.println("JstringField.processFocusEvent: resetting to empty string");
-		  }
-		else
-		  {
-		    System.err.println("JstringField.processFocusEvent: resetting to " + value);
-		  }
-	      }
-	    
 	    if (value == null)
 	      {
-		super.setText("");
+		System.err.println("JstringField.processFocusEvent: resetting to empty string");
 	      }
 	    else
 	      {
-		super.setText(value);
+		System.err.println("JstringField.processFocusEvent: resetting to " + value);
 	      }
+	  }
 	    
-	    changed = false;
-	  }
-	else 
+	if (value == null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: setValue accepted");
-	      }
-
-	    value = str;
-		
-	    changed = false;
+	    super.setText("");
 	  }
+	else
+	  {
+	    super.setText(value);
+	  }
+	    
+	changed = false;
+      }
+    else 
+      {
+	if (debug)
+	  {
+	    System.err.println("JstringField.processFocusEvent: setValue accepted");
+	  }
+
+	value = str;
+		
+	changed = false;
       }
   }
   
