@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -201,6 +201,11 @@ public class DBReadLock extends DBLock {
 
 	    if (lockManager.schemaEditInProgress)
 	      {
+		if (debug)
+		  {
+		    System.err.println("DBReadLock (" + key + "):  schema editor is in progress");
+		  }
+
 		okay = false;
 	      }
 
@@ -213,6 +218,11 @@ public class DBReadLock extends DBLock {
 		    
 		if (!base.isWriterEmpty())
 		  {
+		    if (debug)
+		      {
+			System.err.println("DBReadLock (" + key + "):  base " + base.getName() + " has writers queued");
+		      }
+
 		    okay = false;
 		  }
 	      }
