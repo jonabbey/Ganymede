@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.79 $ %D%
+   Version: $Revision: 1.80 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -706,13 +706,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * user only has editing access for the source InvidDBField and not
    * the target.
    *
+   * @param object The object that the link is to be created in
+   * @param fieldID The field that the link is to be created in
+   * @param gsession Who is trying to do this linking?
+   *
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  public boolean anonymousLinkOK(DBObject object, short fieldID, GanymedeSession gsession)
   {
-    // assume that anonymous linking is not ok by default
-
-    return false;
+    return anonymousLinkOK(object, fieldID);
   }
 
   /**
@@ -722,13 +724,49 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * user only has editing access for the source InvidDBField and not
    * the target.
    *
+   * @param object The object that the link is to be removed from
+   * @param fieldID The field that the linkk is to be removed from
+   * @param gsession Who is trying to do this unlinking?
+   *
+   */
+
+  public boolean anonymousUnlinkOK(DBObject object, short fieldID, GanymedeSession gsession)
+  {
+    return anonymousUnlinkOK(object, fieldID);
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   * @param object The object that the link is to be created in
+   * @param fieldID The field that the link is to be created in
+   *
+   */
+
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  {
+    return false;		// by default, permission is denied
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * rescind a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   * @param object The object that the link is to be removed from
+   * @param fieldID The field that the linkk is to be removed from
+   *
    */
 
   public boolean anonymousUnlinkOK(DBObject object, short fieldID)
   {
-    // assume that unlinking is ok by default
-
-    return true;
+    return true;		// by default, permission is granted to unlink
   }
 
   /**
