@@ -7,7 +7,7 @@
    depends on for administering default permissions.
    
    Created: 21 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,20 +87,20 @@ public interface SchemaConstants {
   /** what objects does this owner set own? */
   final static short OwnerObjectsOwned = 102; 
 
-  /** what email addresses should be notified if objects owned change? */
-  final static short OwnerMailList = 103; 
-
   /**
    * If true, all mail sent in care of this owner group will be
    * distributed to all admins on the list automatically
    */
   final static short OwnerCcAdmins = 104; 
 
+  /** what external email addresses should be notified if objects owned change? */
+  final static short OwnerExternalMail = 105;
+
   /** the following is a fixed object id's */
   final static short OwnerSupergash = 1;
 
   //
-  //  /* administrator roles have a defined set of fields */
+  //  /* Admin Personae */
   //
 
   /** an administrator privilege record */
@@ -126,6 +126,12 @@ public interface SchemaConstants {
 
   /** boolean, does this role have *full* access to the admin console? */
   final static short PersonaAdminPower = 106; 
+
+  /** 
+   * string, the mail address for this administrator, if not implicitly
+   * extracted from their user name.
+   */
+  final static short PersonaMailAddr = 107; 
 
   /** Object number for a pre-defined object used by the server */
   final static short PersonaSupergashObj = 1;
@@ -155,6 +161,10 @@ public interface SchemaConstants {
 
   /** Object number for a pre-defined object used by the server */
   final static short RoleDefaultObj = 1;
+
+  //
+  // /* User */
+  //
 
   /* users have a defined set of fields */
   final static short UserBase = 3;
@@ -191,12 +201,6 @@ public interface SchemaConstants {
 
   /** if true, events of this type should be mailed (Boolean field) */
   final static short EventMailBoolean = 103; 
-
-  /**
-   * list of email addresses to send this to, in addition to any
-   * specifically requested by the code (Invid vector field) 
-   */
-  final static short EventMailList = 104;
 
   /**
    * if true, the admin performing the action will get a copy of any
@@ -242,17 +246,6 @@ public interface SchemaConstants {
   final static short ObjectEventDescription = 102; 
 
   /**
-   * if true, events of this type should be mailed (Boolean field) 
-   */
-  final static short ObjectEventMailBoolean = 103; 
-
-  /**
-   * list of email addresses to send this to, in addition to any
-   * specifically requested by the code (Invid vector field) 
-   */
-  final static short ObjectEventMailList = 104;
-
-  /**
    * if true, the admin performing the action will get a copy of any
    * mail (Boolean field) 
    */
@@ -281,7 +274,7 @@ public interface SchemaConstants {
    * That is, addresses in raw string form, rather than as an invid reference
    * to a user or email list recorded in Ganymede. (String field)
    */
-  final static short ObjectEventExternalMail = 107;
+  final static short ObjectEventExternalMail = 109;
 
   //  
   //  /* builder classes */
