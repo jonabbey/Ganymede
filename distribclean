@@ -49,7 +49,7 @@ cd $GROOTDIR
 
 echo "Removing custom install scripts"
 
-rm -f installClient*
+rm -f installClient
 rm -f installServer
 rm -f installWeb
 
