@@ -17,7 +17,7 @@
    call back this GanymediatorWizard to continue along the process.
    
    Created: 29 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,7 @@ package arlut.csd.ganymede;
 
 import java.lang.reflect.*;
 import java.rmi.*;
+import java.io.*;
 import java.rmi.server.*;
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -321,10 +322,13 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
       {
 	InvocationTargetException invex = (InvocationTargetException) ex;
 	Throwable original = invex.getTargetException();
+
+	StringWriter stringTarget = new StringWriter();
 	
+	original.printStackTrace(new PrintWriter(stringTarget));
 	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Invocation error in state " + 
-					  state + "\n\n" + original.getMessage());
+					  state + "\n\n" + stringTarget.toString());
       }
     catch (IllegalAccessException ex)
       {
