@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.106 $ %D%
+   Version: $Revision: 1.107 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,6 +50,9 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
+ * @version $Revision: 1.107 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ *   
  */
 
 final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
@@ -2950,67 +2953,44 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public ReturnVal view_db_object(Invid invid)
   {
-    return view_db_object(invid, true);
-  }
-
-  /**
-   * View an object from the database.  The ReturnVal returned will
-   * carry a db_object reference, which can be obtained by the client
-   * calling ReturnVal.getObject().  If the object could not be
-   * viewed for some reason, the ReturnVal will carry an encoded error
-   * dialog for the client to display.<br><br>
-   *
-   * view_db_object() can be done at any time, outside of the bounds of
-   * any transaction.  view_db_object() returns a snapshot of the object's
-   * state at the time the view_db_object() call is processed, and will
-   * be transaction-consistent internally.<br><br>
-   *
-   * If view_db_object() is called during a transaction, the object
-   * will be returned as it stands during the transaction.. that is,
-   * if the object has been changed during the transaction, that
-   * changed object will be returned, even if the transaction has
-   * not yet been committed, and other clients would not be able to
-   * see that version of the object.<br><br>
-   *
-   * NOTE: It is critical that any code that looks at the values of
-   * fields in a DBObject go through a view_db_object() method
-   * or else the object will not properly know who owns it, which
-   * is critical for it to be able to properly authenticate field
-   * access.  Keep in mind, however, that view_db_object clones the
-   * DBObject in question, so this method is very heavyweight.
-   *
-   * @return A ReturnVal carrying an object reference and/or error dialog
-   *
-   * @see arlut.csd.ganymede.Session
-   * 
-   */
-
-  public ReturnVal view_db_object(Invid invid, boolean checkPerms)
-  {
     ReturnVal result;
     db_object objref;
     DBObject obj;
     PermEntry perm;
-
+    
     /* -- */
 
     checklogin();
+
+    // let a NullPointerException be thrown if we were given a null
+    // Invid.
 
     obj = (DBObject) session.viewDBObject(invid);
 
     if (obj == null)
       {
-	throw new NullPointerException("argh!! null obj in view_db_object on " +
-				       invid.toString());
+	return Ganymede.createErrorDialog("Object Not Found",
+					  "Could not find object " + invid.toString() +
+					  " in the database.  Perhaps the object doesn't exist?");
       }
 
-    if (!checkPerms || getPerm(obj).isVisible())
+    if (getPerm(obj).isVisible())
       {
 	try
 	  {
 	    setLastEvent("view_db_object: " + obj.getLabel());
 
-	    // return a copy that knows what GanymedeSession is looking at it
+	    // return a copy that knows what GanymedeSession is
+	    // looking at it so that it can do per-field visibility
+	    // checks.
+
+	    // copying the object also guarantees that if the
+	    // DBSession has checked out the object for editing
+	    // (possibly in a way that the user wouldn't normally have
+	    // permission to do, as in anonymous invid
+	    // linking/unlinking), that the client won't be able to
+	    // directly manipulate the DBEditObject in the transaction
+	    // to get around permission enforcement.
 
 	    objref = new DBObject(obj, this);
 
@@ -3062,8 +3042,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (obj == null)
       {
 	return Ganymede.createErrorDialog("Object not found",
-					  "Error, object [" + invid + "] does not appear to exist");
+					  "Error, object [" + invid + "] does not appear to exist.  Couldn't edit it.");
       }
+
+    // we always want to check permissions, even if the object has
+    // already been checked out by our DBSession.. some of the
+    // InvidDBField Invid binding logic can check out the object for
+    // editing in a way that the user's permissions would not normally
+    // allow.  By checking perms up front, we may be preventing the
+    // user from getting access to the object in supergash context.
 
     if (getPerm(obj).isEditable())
       {
