@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -44,9 +44,12 @@ import java.util.*;
  *
  * <p>This is kind of like modern dating.</p>
  *
+ * @version $Revision: 1.12 $ %D% (Created 2 July 1996)
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ *
  */
 
-public class DBObject {
+public class DBObject implements db_object {
 
   static boolean debug = true;
 
@@ -55,30 +58,51 @@ public class DBObject {
     debug = val;
   }
 
+  /* - */
+
   DBObjectBase objectBase;
   int id;			// 32 bit id - the object's invariant id
-  short tmp_count;
   Hashtable fields;
-  DBEditObject shadowObject;	// if this object is being edited, this points
-				// to the shadow
+  Date removalDate;
+  Date expirationDate;
 
-  boolean markedAsDeleted;	// for when the object is deleted in a transaction.
-				// i.e., can't check this out even though there
-				// is no shadow checked out
-  DBEditSet editset;
+  DBEditObject shadowObject;	// if this object is being edited or removed, this points
+				// to the shadow that manages the changes
+  
+  DBEditSet editset;		// transaction that this object has been checked out in
+				// care of.
 
   /* -- */
+
+  /**
+   *
+   * Base constructor, used to create a new object of
+   * type objectBase.  Note that DBObject itself is
+   * a mere carrier of data and there is nothing application
+   * type specific in a base DBObject.  The only type
+   * information is represented by the DBObjectBase passed
+   * in to this constructor.
+   *
+   */
 
   DBObject(DBObjectBase objectBase)
   {
     this.objectBase = objectBase;
     id = 0;
-    tmp_count = 0;
     fields = null;
+
+    removalDate = null;
+    expirationDate = null;
     shadowObject = null;
     editset = null;
-    markedAsDeleted = false;
   }
+
+  /**
+   *
+   * Constructor to create an object of type objectBase
+   * with the specified object number.
+   *
+   */
 
   DBObject(DBObjectBase objectBase, int id)
   {
@@ -86,18 +110,24 @@ public class DBObject {
     this.id = id;
   }
 
+  /**
+   *
+   * Read constructor.  Constructs an objectBase from a
+   * DataInput stream.
+   *
+   */
+
   DBObject(DBObjectBase objectBase, DataInput in) throws IOException
   {
     this.objectBase = objectBase;
     shadowObject = null;
     editset = null;
-    markedAsDeleted = false;
     receive(in);
   }
 
   /**
    *
-   * <p>This constructor is used to create a non-editable from a
+   * <p>This constructor is used to create a non-editable DBObject from a
    * DBEditObject that we have finished editing.  Whenever a
    * transaction checks a created or edited shadow back into the
    * DBStore, it actually does so by creating a new DBObject to
@@ -105,20 +135,121 @@ public class DBObject {
    *
    * @param eObj The shadow object to copy into the new DBObject
    *
-   * @see csd.DBStore.DBEditSet#commit()
-   * @see csd.DBStore.DBEditSet#release()
+   * @see arlut.csd.ganymede.DBEditSet#commit()
+   * @see arlut.csd.ganymede.DBEditSet#release()
    * 
    */
   
   DBObject(DBEditObject eObj)
   {
+    Enumeration enum;
+    DBField field;
+    Object key;
+
+    /* -- */
+
     objectBase = eObj.objectBase;
     id = eObj.id;
-    tmp_count = 0;  // we just use tmp_count for a scratch variable
-    fields = eObj.fields;
+    removalDate = eObj.removalDate;
+    expirationDate = eObj.expirationDate;
+
     shadowObject = null;
-    markedAsDeleted = false;
     editset = null;
+
+    fields = new Hashtable();
+
+    // put any defined fields into the object we're going
+    // to commit back into our DBStore
+
+    enum = eObj.fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	field = (DBField) eObj.fields.get(key);
+
+	if (field.isDefined())
+	  {
+	    field.setOwner(this); // this will make the field non-editable
+	    fields.put(key, field);
+	  }
+      }
+  }
+
+  /**
+   *
+   * Returns the numeric id of the object in the objectBase
+   *
+   */
+
+  public int getID()
+  {
+    return id;
+  }
+
+  /**
+   *
+   * Returns the invid of this object
+   * for the db_object remote interface
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public Invid getInvid()
+  {
+    return new Invid(getTypeID(), getID());
+  }
+
+  /**
+   *
+   * Returns the numeric id of the object in the objectBase
+   *
+   */
+
+  public short getTypeID()
+  {
+    return objectBase.type_count;
+  }
+
+  /**
+   *
+   * Returns the data dictionary for this object
+   *
+   */
+
+  public DBObjectBase getBase()
+  {
+    return objectBase;
+  }
+
+  /**
+   *
+   * Returns the primary label of this object.. this will be
+   * subclassed by subclasses of DBEditObject to provide
+   * identification of the primary label of an object from
+   * one of the fields in the object.
+   *
+   * This base implementation just gives a generic
+   * label for the object.
+   *
+   * @see arlut.csd.ganymede.db_object
+   *
+   */
+
+  public String getLabel()
+  {
+    return getTypeDesc() + ":" + getID();
+  }
+
+  /**
+   *
+   * Returns the string of the object's type
+   *
+   */
+
+  public String getTypeDesc()
+  {
+    return objectBase.object_name;
   }
   
   /**
@@ -131,7 +262,7 @@ public class DBObject {
    *
    */
 
-  void emit(DataOutput out) throws IOException
+  synchronized void emit(DataOutput out) throws IOException
   {
     Enumeration enum;
     Short key;
@@ -140,6 +271,18 @@ public class DBObject {
 
     out.writeInt(id);
     out.writeShort(fields.size());
+
+    out.writeBoolean(new Boolean(willExpire()));
+    if (willExpire())
+      {
+	out.writeLong(expirationDate.getTime());
+      }
+
+    out.writeBoolean(new Boolean(isInactivated()));
+    if (isInactivated())
+      {
+	out.writeLong(removalDate.getTime());
+      }
    
     enum = fields.keys();
 
@@ -159,14 +302,14 @@ public class DBObject {
    *
    */
 
-  void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in) throws IOException
   {
     DBField tmp;
-    DBArrayField tmp2;
     DBObjectBaseField definition;
     short fieldcode;
     short type;
     Short key;
+    int tmp_count;
 
     /* -- */
 
@@ -183,6 +326,24 @@ public class DBObject {
 	System.err.println("DBObject.receive(): tmp_count = 0");
       }
 
+    if (in.readBoolean().booleanValue())
+      {
+	expirationDate = new Date(in.readLong());
+      }
+    else
+      {
+	expirationDate = null;
+      }
+
+    if (in.readBoolean().booleanValue())
+      {
+	removalDate = new Date(in.readLong());
+      }
+    else
+      {
+	removalDate = null;
+      }
+
     fields = new Hashtable(tmp_count);
 
     for (int i = 0; i < tmp_count; i++)
@@ -195,75 +356,53 @@ public class DBObject {
 
 	definition = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
-	type = definition.field_type;
+	type = definition.getType();
 
-	// can't use a switch since the compiler doesn't take DBStore.WHATEVER
-	// as a legal switch label
+	switch (type)
+	  {
+	  case DBStore.BOOLEAN:
+	    tmp = new BooleanDBField(this, in, definition);
+	    break;
 
-	if (type == DBStore.BOOLEAN)
-	  { 
-	    tmp = new BooleanDBField(in, definition);
+	  case DBStore.NUMERIC:
+	    tmp = new NumericDBField(this, in, definition);
+	    break;
+
+	  case DBStore.DATE:
+	    tmp = new DateDBField(this, in, definition);
+	    break;
+
+	  case DBStore.STRING:
+	    tmp = new StringDBField(this, in, definition);
+	    break;
+
+	  case DBStore.INVID:
+	    tmp = new InvidDBField(this, in, definition);
+	    break;
 	  }
-	else if (type == DBStore.BOOLEANARRAY)
-	  {
-	    tmp = new BooleanArrayDBField(in, definition);
-	  }
-	else if (type == DBStore.NUMERIC)
-	  {
-	    tmp = new NumericDBField(in, definition);
-	  }
-	else if (type == DBStore.NUMERICARRAY)
-	  {
-	    tmp = new NumericArrayDBField(in, definition);
-	  }
-	else if (type == DBStore.DATE)
-	  {
-	    tmp = new DateDBField(in, definition);
-	  }
-	else if (type == DBStore.DATEARRAY)
-	  {
-	    tmp = new DateArrayDBField(in, definition);
-	  }
-	else if (type == DBStore.STRING)
-	  {
-	    tmp = new StringDBField(in, definition);
-	  }
-	else if (type == DBStore.STRINGARRAY)
-	  {
-	    tmp = new StringArrayDBField(in, definition);
-	  }
-	else if (type == DBStore.INVID)
-	  {
-	    tmp = new InvidDBField(in, definition);
-	  }
-	else if (type == DBStore.INVIDARRAY)
-	  {
-	    tmp = new InvidArrayDBField(in, definition);
-	  }
-	else
+
+	if (tmp == null)
 	  {
 	    throw new Error("Don't recognize field type in datastore");
 	  }
 
 	if (definition.namespace != null)
 	  {
-	    if (tmp instanceof DBArrayField)
+	    if (tmp.isVector())
 	      {
-		tmp2 = (DBArrayField) tmp;
-
 		// mark the elements in the vector in the namespace
 		// note that we don't use the namespace mark method here, 
 		// because we are just setting up the namespace, not
 		// manipulating it in the context of an editset
 
-		for (int j = 0; j < tmp2.size(); i++)
+		for (int j = 0; j < tmp.size(); i++)
 		  {
-		    if (definition.namespace.uniqueHash.containsKey(tmp2.key(j)))
+		    if (definition.namespace.uniqueHash.containsKey(tmp.key(j)))
 		      {
-			throw new RuntimeException("Duplicate unique value detected: " + tmp2.key(j));
+			throw new RuntimeException("Duplicate unique value detected: " + tmp.key(j));
 		      } 
 
-		    definition.namespace.uniqueHash.put(tmp2.key(j), new DBNameSpaceHandle(null, true, tmp2));
+		    definition.namespace.uniqueHash.put(tmp.key(j), new DBNameSpaceHandle(null, true, tmp));
 		  }
 	      }
 	    else
@@ -279,9 +418,6 @@ public class DBObject {
 	      }
 	  }
 	
-	// let the field know who daddy is
-	tmp.owner = this;
-	    
 	// now add the field to our fields hash
 	fields.put(key, tmp);
       }
@@ -310,17 +446,17 @@ public class DBObject {
 
   synchronized DBEditObject createShadow(DBEditSet editset)
   {
-    if ((shadowObject != null) || markedAsDeleted)
+    if (shadowObject != null)
       {
 	// this object has already been checked out
-	// for editing or has been marked as deleted
+	// for editing / deleting
 
 	return null;
       }
 
     shadowObject = new DBEditObject(this, editset);
 
-    editset.addChangedObject(shadowObject);
+    editset.addObject(shadowObject);
     this.editset = editset;
     
     return shadowObject;
@@ -332,16 +468,15 @@ public class DBObject {
    *
    * @param editset The transaction owning this object's shadow.
    *
-   * @see csd.DBStore.DBEditSet#release()
+   * @see arlut.csd.ganymede.DBEditSet#release()
    *
    */
 
   synchronized boolean clearShadow(DBEditSet editset)
   {
-    if (markedAsDeleted || editset != this.editset)
+    if (editset != this.editset)
       {
-	// couldn't clear the shadow.. either this
-	// object was marked as deleted or this editset
+	// couldn't clear the shadow..  this editSet
 	// wasn't the one to create the shadow
 
 	return false;
@@ -355,79 +490,197 @@ public class DBObject {
 
   /**
    *
-   * <p>Mark this object as deleted by the given editset.</p>
-   *
-   * <p>An object that is marked for deletion cannot be
-   * checked out for editing or marked for deletion
-   * by another editset.  When the editset that has marked
-   * this object has committed, this object will be unlinked
-   * from the objectBase.</p>
-   *
-   * @param editset The transaction seeking to delete this object.
-   *
-   * @see csd.DBStore.DBSession#deleteDBObject()
-   * @see csd.DBStore.DBEditSet#release()
+   * Returns the transaction object owning this object, or
+   * null if an unowned data object.
    *
    */
 
-  synchronized boolean markAsDeleted(DBEditSet editset)
+  DBEditSet getEditSet()
   {
-    if ((shadowObject != null) || markedAsDeleted)
-      {
-	// this object has already been checked out
-	// for editing or has been marked as deleted
-
-	return false;
-      }
-
-    markedAsDeleted = true;
-    this.editset = editset;
-
-    return true;
+    return editset;
   }
 
-  /**
-   *
-   * <p>Clear out a deletion mark.  Used for editset abort.</p>
-   *
-   * <p>Once the deletion mark is cleared, the object is considered
-   * up for grabs for any other transaction wishing to check it out
-   * for editing or mark it for deletion.  Assuming of course, that
-   * this object wasn't checked out for editing *and* marked for
-   * deletion. Which shouldn't happen, I don't think. </p>
-   *
-   * @param editset The transaction that previously marked this object for deletion.
-   *
-   */
-
-  synchronized boolean clearDeletionMark(DBEditSet editset)
-  {
-    if (!markedAsDeleted || editset != this.editset)
-      {
-	// couldn't clear the deletion mark.. either this
-	// object wasn't marked as deleted or this editset
-	// wasn't the one to mark us.
-
-	return false;
-      }
-
-    markedAsDeleted = false;
-    this.editset = null;
-
-    return true;
-  }
-  
   /**
    *
    * <p>Get read-only access to a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
    *
+   *
+   * @see arlut.csd.ganymede.db_object
    */
 
-  public DBField viewField(short id)
+  public DBField getField(short id)
   {
     return (DBField) fields.get(new Short(id));
+  }
+
+  /**
+   *
+   * <p>Get read-only access to a field from this object, by name.</p>
+   *
+   * @param fieldname The fieldname for the desired field of this object
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  synchronized public DBField getField(String fieldname)
+  {
+    Enumeration enum;
+    DBField field;
+
+    /* -- */
+
+    enum = fields.elements();
+
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+	if (field.getName().equalsIgnoreCase(fieldname))
+	  {
+	    return field;
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   *
+   * <p>Get read-only list of DBFields contained in this object.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  synchronized public DBField[] listFields()
+  {
+    DBField[] results;
+    DBField temp;
+    Enumeration enum;
+    int size;
+
+    /* -- */
+    
+    size = fields.size();
+    results = new DBField[size];
+
+    enum = fields.elements();
+
+    // note that a hash doesn't keep the fields in any particular
+    // order.. 
+
+    while (enum.hasMoreElements())
+      {
+	results[--size] = (DBField) enum.nextElement();
+      }
+
+    if (size != 0)
+      {
+	throw new RuntimeException("synchronization error, fields hash modified");
+      }
+
+    // simple minded sort
+
+    for (int i = 0; i < results.length; i++)
+      {
+	for (int j = i+1; j < results.length; j++)
+	  {
+	    if (results[i].getID() > results[j].getID())
+	      {
+		temp = results[i];
+		results[i] = results[j];
+		results[j] = temp;
+	      }
+	  }
+      }
+
+    return results;
+  }
+
+  /**
+   *
+   * <p>Returns true if the last field change peformed on this
+   * object necessitates the client rescanning this object to
+   * reveal previously invisible fields or to hide previously
+   * visible fields.</p>
+   *
+   * <p>Note that a non-editable DBObject never needs to be
+   * rescanned, this method only has an impact on DBEditObject
+   * and subclasses thereof.</p>
+   *
+   * <p>shouldRescan() should reset itself after returning
+   * true</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean shouldRescan()
+  {
+    return false;
+  }
+
+  /**
+   *
+   * <p>Returns true if inactivate() is a valid operation on
+   * checked-out objects of this type.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean canInactivate()
+  {
+    return objectBase.canInactivate();
+  }
+  
+  /**
+   *
+   * <p>Returns true if this object has been inactivated and is
+   * pending deletion.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean isInactivated()
+  {
+    return removalDate != null;
+  }
+
+  /**
+   *
+   * <p>Returns the date that this object is to go through final removal
+   * if it has been inactivated.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public Date getRemovalDate()
+  {
+    return removalDate;
+  }
+
+  /**
+   *
+   * <p>Returns true if this object has an expiration date set.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean willExpire()
+  {
+    return expirationDate != null;
+  }
+
+  /**
+   *
+   * <p>Returns the date that this object is to be automatically
+   * inactivated if it has an expiration date set.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public Date getExpirationDate()
+  {
+    return expirationDate;
   }
 
   /**
@@ -437,7 +690,7 @@ public class DBObject {
    *
    */
 
-  public synchronized void print(PrintStream out)
+  synchronized public void print(PrintStream out)
   {
     Enumeration enum;
     Object key;
