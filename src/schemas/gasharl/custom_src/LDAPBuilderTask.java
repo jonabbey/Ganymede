@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2004/03/24 03:34:47 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2004/03/24 03:40:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,7 +216,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       {
 	buildScript = System.getProperty("ganymede.builder.scriptlocation");
 	buildScript = PathComplete.completePath(buildScript);
-	buildScript = buildScript + "gashbuilder";
+	buildScript = buildScript + "ldapbuilder";
       }
 
     file = new File(buildScript);
@@ -248,7 +248,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
+	Ganymede.debug(buildScript + " doesn't exist, not running external LDAP build script");
       }
 
     Ganymede.debug("LDAPBuilderTask builderPhase2 completed");
@@ -266,25 +266,24 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       }
 
     writeLDIF(out, "dn", "uid=" + user.getLabel() + ", cn=users, dc=xserve");
-
-    String guid = (String) user.getFieldValueLocal(userSchema.GUID).toString();
-
-    writeLDIF(out, "apple-generateduid", guid);
-
+    writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString());
     writeLDIF(out, "sn", user.getLabel());
 
     PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
 
-    writeBinaryLDIF(out, "userPassword", "{CRYPT}" + pdbf.getUNIXCryptText());
+    if (pdbf != null)
+      {
+	writeBinaryLDIF(out, "userPassword", "{CRYPT}" + pdbf.getUNIXCryptText());
+      }
+    else
+      {
+	writeBinaryLDIF(out, "userPassword", "");
+      }
 
     writeLDIF(out, "loginShell", user.getFieldValueLocal(userSchema.LOGINSHELL).toString());
-    
     writeLDIF(out, "uidNumber", user.getFieldValueLocal(userSchema.UID).toString());
 
-    Invid groupInvid = (Invid) user.getFieldValueLocal(userSchema.HOMEGROUP);
-    
-    DBObject group = getObject(groupInvid);
-
+    DBObject group = getObject((Invid) user.getFieldValueLocal(userSchema.HOMEGROUP));
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
     writeLDIF(out, "authAuthority", ";basic;");
@@ -318,8 +317,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < users.size(); i++)
       {
-	Invid userInvid = (Invid) users.elementAt(i);
-	DBObject user = getObject(userInvid);
+	DBObject user = getObject((Invid) users.elementAt(i));
 
 	writeLDIF(out, "memberUid", user.getLabel());
       }
@@ -330,8 +328,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < users.size(); i++)
       {
-	Invid userInvid = (Invid) users.elementAt(i);
-	DBObject user = getObject(userInvid);
+	DBObject user = getObject((Invid) users.elementAt(i));
 
 	writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
       }
