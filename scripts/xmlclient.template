@@ -5,8 +5,8 @@
 # Usage: xmlclient username=<username> [password=<password>] <xmlfilename>
 #
 # Release: $Name:  $
-# Version: $Revision: 1.5 $
-# Date:    $Date: 2001/06/06 21:57:24 $
+# Version: $Revision: 1.6 $
+# Date:    $Date: 2001/06/06 22:23:35 $
 #
 # Module by: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 #
@@ -29,7 +29,7 @@ trap "echo Aborted" 2
 export CLASSPATH
 
 stty -echo
-$JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES $*;SAVE = $?
+$JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES $*;SAVE=$?
 stty echo
 
 exit $SAVE
