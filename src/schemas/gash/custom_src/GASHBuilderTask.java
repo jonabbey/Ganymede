@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/12/14 23:41:18 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/12/15 00:22:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -706,7 +706,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String refLabel;
 
     int lengthlimit;
-    int subgroup = 2;
+    int subgroup = 1;
     String subname;
 
     /* -- */
@@ -737,8 +737,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    refLabel = getLabel(ref);
 	    
 	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		subname = name + subgroup;
+	      {		
+		if (subgroup > 1)
+		  {
+		    subname = name + "-ext" + subgroup;
+		  }
+		else
+		  {
+		    subname = name + "-ext";
+		  }
 		
 		buffer.append(" ");
 		buffer.append(subname);
@@ -762,7 +769,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    if (buffer.length() + refLabel.length() > lengthlimit)
 	      {
-		subname = name + subgroup;
+		if (subgroup > 1)
+		  {
+		    subname = name + "-ext" + subgroup;
+		  }
+		else
+		  {
+		    subname = name + "-ext";
+		  }
 
 		buffer.append(" ");
 		buffer.append(subname);
@@ -803,7 +817,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String refLabel;
 
     int lengthlimit;
-    int subgroup = 2;
+    int subgroup = 1;
     String subname;
 
     /* -- */
@@ -835,7 +849,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    if (buffer.length() + refLabel.length() > lengthlimit)
 	      {
-		subname = name + subgroup;
+		if (subgroup > 1)
+		  {
+		    subname = name + "-ext" + subgroup;
+		  }
+		else
+		  {
+		    subname = name + "-ext";
+		  }
 
 		buffer.append(" ");
 		buffer.append(subname);
@@ -860,7 +881,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    if (buffer.length() + refLabel.length() > lengthlimit)
 	      {
-		subname = name + subgroup;
+		if (subgroup > 1)
+		  {
+		    subname = name + "-ext" + subgroup;
+		  }
+		else
+		  {
+		    subname = name + "-ext";
+		  }
 
 		buffer.append(" ");
 		buffer.append(subname);
