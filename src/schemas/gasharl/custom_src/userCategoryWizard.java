@@ -7,8 +7,8 @@
    
    Created: 13 October 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:05:07 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/07/14 04:45:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -599,9 +599,13 @@ public class userCategoryWizard extends GanymediatorWizard {
   }
 
   /**
+   * <P>This method starts off the wizard process.</P>
    *
-   * This method starts off the wizard process
-   *
+   * <P>This method will always be overridden in GanymediatorWizard
+   * subclasses.  It is critical that if this method returns null
+   * (indicating that the wizard doesn't need to interact with
+   * the client), that this method calls unregister() to clear the
+   * wizard from the GanymedeSession.</P>
    */
 
   public ReturnVal getStartDialog()
@@ -616,6 +620,7 @@ public class userCategoryWizard extends GanymediatorWizard {
       {
 	// don't need to ask the user anything, let things go on.
 
+	unregister();
 	return null;
       }
     

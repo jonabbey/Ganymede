@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 1999/06/25 01:46:31 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 1999/07/14 04:45:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,8 +51,10 @@ package arlut.csd.ganymede.custom;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.PathComplete;
 
 import java.util.*;
+import java.io.*;
 import java.rmi.*;
 
 /*------------------------------------------------------------------------------
@@ -85,6 +87,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   static String mailsuffix = null;
   static String homedir = null;
+
+  static String renameFilename = null;
+  static File renameHandler = null;
+
+  static String createFilename = null;
+  static File createHandler = null;
 
   // ---
 
@@ -1641,11 +1649,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 						  "a user object with an active wizard.");
 	      }
 	  }
-	else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userRenameWizard))
+	else if (gSession.isWizardActive())
 	  {
 	    return Ganymede.createErrorDialog("User Object Error",
 					      "The client is attempting to do an operation on " +
-					      "a user object with mismatched active wizard.");
+					      "a user object with mismatched active wizard.\n" +
+					      "Wizard id: " + gSession.getWizard());
 	  }
 	else
 	  {
@@ -1740,7 +1749,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (!name.equals(oldname))
 	  {
-	    handleUserRename();
+	    handleUserRename(oldname, name);
 	  }
 
 	// did we change home directory volumes?
@@ -1850,6 +1859,162 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	System.err.println("userCustom: " + getLabel() + ", in createUserExternals().");
       }
+
+    if (createHandler == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("userCustom: createUserExternals: getting createFilename");
+	  }
+
+	createFilename = System.getProperty("ganymede.builder.scriptlocation");
+
+	if (createFilename == null)
+	  {
+	    Ganymede.debug("userCustom.createUserExternals(): Couldn't find ganymede.builder.scriptlocation property");
+	    return;
+	  }
+
+	// make sure we've got the path separator at the end of
+	// createFilename, add our script name
+
+	createFilename = PathComplete.completePath(createFilename) + "directory_maker";
+
+	if (debug)
+	  {
+	    System.err.println("userCustom: createUserExternals: createFilename = " + createFilename);
+	  }
+
+	createHandler = new File(createFilename);
+      }
+
+    // we'll call our external script with the following
+    //
+    // parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname>
+
+    String volName = null;
+    String username;
+    Integer id;
+    Integer gid;
+
+    /* -- */
+
+    // get the user's uid
+
+    id = (Integer) getFieldValueLocal(userSchema.UID);
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: id = " + id);
+      }
+
+    // get the user's name
+
+    username = getLabel();
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: username = " + username);
+      }
+
+    // get the user's home gid
+
+    DBObject homeGroup = getSession().viewDBObject((Invid) getFieldValueLocal(userSchema.HOMEGROUP));
+    gid = (Integer) homeGroup.getFieldValueLocal(groupSchema.GID);
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: gid = " + gid);
+      }
+
+    // get the volume name defined for the user on auto.home.default
+
+    InvidDBField mapEntries = (InvidDBField) getField(userSchema.VOLUMES);
+    Vector entries = mapEntries.getValues();
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: looking for mapInvid");
+      }
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: looking for volume");
+      }
+
+    if (entries.size() < 1)
+      {
+	System.err.println("Couldn't handle createUserExternals for user " + username +
+			   ", because we don't have a volume defined");
+	return;
+      }
+
+    // we know that the auto.home.default entry will be the first one
+
+    Invid entryInvid = (Invid) entries.elementAt(0);
+    DBObject entryObj = getSession().viewDBObject(entryInvid);
+
+    Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
+    DBObject volumeObj = getSession().viewDBObject(volumeInvid);
+    volName = (String) volumeObj.getFieldValueLocal(volumeSchema.LABEL);
+
+    if (debug)
+      {
+	System.err.println("userCustom: createUserExternals: found volume " + volName);
+      }
+
+    // call the external creation script
+
+    if (createHandler.exists())
+      {
+	try
+	  {
+	    String execLine = createFilename + " " + volName + " " + 
+	      username + " " + id + " " + gid + 
+	      " auto.home.default";
+
+	    if (debug)
+	      {
+		System.err.println("createUserExternals: running " + execLine);
+	      }
+
+	    int result;
+	    Process p = java.lang.Runtime.getRuntime().exec(execLine);
+
+	    try
+	      {
+		if (debug)
+		  {
+		    System.err.println("createUserExternals: blocking ");
+		  }
+
+		p.waitFor();
+
+		if (debug)
+		  {
+		    System.err.println("createUserExternals: done ");
+		  }
+
+		result = p.exitValue();
+
+		if (result != 0)
+		  {
+		    Ganymede.debug("Couldn't handle externals for creating user " + username +
+				   "\n" + createFilename + " returned a non-zero result: " + result);
+		  }
+	      }
+	    catch (InterruptedException ex)
+	      {
+		Ganymede.debug("Couldn't handle externals for creating user " + username + "\n" +
+			       ex.getMessage());
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't handle externals for creating user " + username + "\n" +
+			   ex.getMessage());
+	  }
+      }
   }
 
   /**
@@ -1911,12 +2076,81 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
-  private void handleUserRename()
+  private void handleUserRename(String orig, String newname)
   {
     if (debug)
       {
-	System.err.println("userCustom.handleUserRename(): user " + original.getLabel() +
-			   "has been renamed to " + getLabel());
+	System.err.println("userCustom.handleUserRename(): user " + orig +
+			   "has been renamed to " + newname);
+      }
+
+    if (renameHandler == null)
+      {
+	renameFilename = System.getProperty("ganymede.builder.scriptlocation");
+
+	if (renameFilename == null)
+	  {
+	    Ganymede.debug("userCustom.handleUserRename(): Couldn't find ganymede.builder.scriptlocation property");
+	    return;
+	  }
+
+	// make sure we've got the path separator at the end of
+	// renameFilename, add our script name
+
+	renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
+
+	renameHandler = new File(renameFilename);
+      }
+
+    if (renameHandler.exists())
+      {
+	try
+	  {
+	    String execLine = renameFilename + " " + orig + " " + newname;
+
+	    if (debug)
+	      {
+		System.err.println("handleUserRename: running " + execLine);
+	      }
+
+	    int result;
+	    Process p = java.lang.Runtime.getRuntime().exec(execLine);
+
+	    try
+	      {
+		if (debug)
+		  {
+		    System.err.println("handleUserRename: blocking");
+		  }
+
+		p.waitFor();
+
+		if (debug)
+		  {
+		    System.err.println("handleUserRename: done");
+		  }
+
+		result = p.exitValue();
+
+		if (result != 0)
+		  {
+		    Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
+				   newname + "\n" + renameFilename + " returned a non-zero result: " + result);
+		  }
+	      }
+	    catch (InterruptedException ex)
+	      {
+		Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
+			       newname + "\n" + 
+			       ex.getMessage());
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
+			   newname + "\n" + 
+			   ex.getMessage());
+	  }
       }
   }
 }
