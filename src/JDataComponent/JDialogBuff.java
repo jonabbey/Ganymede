@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,8 @@ public class JDialogBuff implements java.io.Serializable {
   // ---
   
   StringBuffer buffer;		// serialized dialog resource description
+
+  transient String text = null;
 
   /* -- */
 
@@ -238,6 +240,8 @@ public class JDialogBuff implements java.io.Serializable {
     addChunk("@3", OK, null);
     addChunk("@4", Cancel, null);
     addChunk("@5", image, null);
+
+    this.text = Text;
   }
 
   /**
@@ -350,6 +354,20 @@ public class JDialogBuff implements java.io.Serializable {
   public void addPassword(String label, boolean isNew)
   {
     addChunk("@pass", label, new Boolean(isNew).toString());
+  }
+
+  /**
+   *
+   * This is a convenience function for the server, to allow code
+   * on the server to easily extract the main body of a dialog
+   * encoded in a JDialogBuff.  This method won't return anything
+   * useful post-serialization.
+   *
+   */
+
+  public String getText()
+  {
+    return text;
   }
 
   // from here on down, it's strictly for internal processing. -------------
