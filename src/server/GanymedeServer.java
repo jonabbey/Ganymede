@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -155,6 +155,25 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    if (pdbf.matchPlainText(clientPass))
 	      {
 		found = true;
+	      }
+	  }
+
+	// okay, if the user logged in directly to his persona
+	// (broccol:GASH Admin, etc.), try to find his base user
+	// account.
+
+	if (clientName.indexOf(':') != -1)
+	  {
+	    String userName = clientName.substring(0, clientName.indexOf(':'));
+
+	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
+	    userQuery = new Query(SchemaConstants.UserBase, root, false);
+	
+	    results = Ganymede.internalSession.internalQuery(userQuery);
+
+	    if (results.size() == 1)
+	      {
+		user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
 	      }
 	  }
       }
