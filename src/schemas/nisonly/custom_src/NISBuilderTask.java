@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,8 @@ import java.io.*;
 public class NISBuilderTask extends GanymedeBuilderTask {
 
   private static String path = null;
+  private static String buildScript = null;
+  private static Runtime runtime = null;
 
   // ---
 
@@ -193,7 +195,49 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
   public boolean builderPhase2()
   {
-    Ganymede.debug("Need to run external NIS build script");
+    File
+      file;
+
+    /* -- */
+
+    if (buildScript == null)
+      {
+	buildScript = path + "nisbuilder";
+      }
+
+    file = new File(buildScript);
+
+    if (file.exists())
+      {
+	if (runtime == null)
+	  {
+	    runtime = Runtime.getRuntime();
+	  }
+
+	try
+	  {
+	    Process process;
+
+	    /* -- */
+
+	    process = runtime.exec(buildScript);
+
+	    process.waitFor();
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+	  }
+      }
+    else
+      {
+	Ganymede.debug(buildScript + " doesn't exist, not running external NIS build script");
+      }
+
     return true;
   }
 
