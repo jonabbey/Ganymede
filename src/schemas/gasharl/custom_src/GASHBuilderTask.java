@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/10/10 20:47:04 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/10/11 15:43:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -310,7 +310,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    runtime = Runtime.getRuntime();
 	  }
 
-	Process process;
+	Process process = null;
 
 	/* -- */
 
@@ -335,9 +335,38 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    // fact that Process keeps its file descriptors open by
 	    // default until Garbage Collection
 
-	    process.getInputStream().close();
-	    process.getOutputStream().close();
-	    process.getErrorStream().close();
+	    try
+	      {
+		process.getInputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getOutputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getErrorStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
 	  }
       }
     else
