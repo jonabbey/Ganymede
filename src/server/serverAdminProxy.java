@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/02/02 18:36:33 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/02/02 19:01:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.8 $ $Date: 2000/02/02 18:36:33 $
+ * @version $Revision: 1.9 $ $Date: 2000/02/02 19:01:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -103,13 +103,6 @@ public class serverAdminProxy implements Admin, Runnable {
   private int maxBufferSize = 15; // only 10 kinds of things, most of which we coalesce/replace
 
   /**
-   * <p>If we have a CHANGESTATUS log append event in the eventBuffer, we'll
-   * keep a pointer to it here so we don't have to search for it in changeStatus().</p>
-   */
-
-  private adminEvent logAppendEvent = null;
-
-  /**
    * <p>Our remote reference to the admin console client</p>
    */
 
@@ -131,12 +124,19 @@ public class serverAdminProxy implements Admin, Runnable {
 
   private String errorCondition;
 
+  /**
+   * <p>Handy direct look-up table for events in eventBuffer</p>
+   */
+
+  private adminEvent lookUp[];
+
   /* -- */
 
   public serverAdminProxy(Admin remoteConsole)
   {
     this.remoteConsole = remoteConsole;
     eventBuffer = new Vector();
+    lookUp = new adminEvent[adminEvent.LAST - adminEvent.FIRST + 1];
 
     commThread = new Thread(this, "admin console proxy");
     commThread.start();
@@ -311,11 +311,11 @@ public class serverAdminProxy implements Admin, Runnable {
 	// go ahead and append the new log entry directly to its
 	// StringBuffer
 
-	if (logAppendEvent != null)
+	if (lookUp[adminEvent.CHANGESTATUS] != null)
 	  {
 	    // coalesce this append to the log message
 
-	    StringBuffer buffer = (StringBuffer) logAppendEvent.param;
+	    StringBuffer buffer = (StringBuffer) lookUp[adminEvent.CHANGESTATUS].param;
 	    buffer.append(stampedLineBuffer.toString());
 	    return;
 	  }
@@ -334,7 +334,7 @@ public class serverAdminProxy implements Admin, Runnable {
 	// changeStatus can directly append more text until such time
 	// as our commThread can send the log event to the console
 
-	logAppendEvent = newLogEvent;
+	lookUp[adminEvent.CHANGESTATUS] = newLogEvent;
       }
   }
 
@@ -406,13 +406,11 @@ public class serverAdminProxy implements Admin, Runnable {
 	    event = (adminEvent) eventBuffer.elementAt(0);
 	    eventBuffer.removeElementAt(0);
 
-	    // if we are dequeuing a changeStatus log append event,
-	    // clear the direct pointer to it used by changeStatus().
+	    // clear the direct pointer to this event so that
+	    // changeStatus() and replaceEvent() will know that we
+	    // don't have an event of this kind in our buffer anymore.
 
-	    if (event == logAppendEvent)
-	      {
-		logAppendEvent = null;
-	      }
+	    lookUp[event.method] = null;
 	  }
 
 	try
@@ -489,23 +487,30 @@ public class serverAdminProxy implements Admin, Runnable {
 	    throw new RemoteException("serverAdminProxy: console disconnected");
 	  }
 
-	for (int i = 0; i < eventBuffer.size(); i++)
+	// if we have an instance of this event on our eventBuffer,
+	// update its parameter with the new event's info.
+
+	if (lookUp[newEvent.method] != null)
 	  {
-	    oldEvent = (adminEvent) eventBuffer.elementAt(i);
-	    
-	    if (oldEvent.method == newEvent.method)
-	      {
-		eventBuffer.setElementAt(newEvent, i);
-		return;
-	      }
+	    lookUp[newEvent.method].param = newEvent.param;
+	    return;
 	  }
+
+	// okay, we don't have an event of matching type on our eventBuffer
+	// queue.  Check for overflow and add the element ourselves.
 
 	if (eventBuffer.size() >= maxBufferSize)
 	  {
 	    throwOverflow();
 	  }
-	
+
 	eventBuffer.addElement(newEvent);
+
+	// remember that we have an event of this type on our eventBuffer
+	// for direct lookup by later replaceEvent calls.
+
+	lookUp[newEvent.method] = newEvent;
+
 	eventBuffer.notify();
       }
   }
@@ -567,6 +572,7 @@ class adminEvent {
   static final byte CHANGEUSERS = 8;
   static final byte CHANGETASKS = 9;
   static final byte LAST = 9;
+
 
   /* --- */
 
