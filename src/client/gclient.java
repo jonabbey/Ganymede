@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.82 $ %D%
+   Version: $Revision: 1.83 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1251,6 +1251,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     wizardActive = true;
+
     while ((retVal != null) && (retVal.getDialog() != null))
       {
 	if (debug)
@@ -1281,6 +1282,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	setNormalCursor();
 
+	// display the Dialog sent to us by the server, get the
+	// result of the user's interaction with it.
+
 	Hashtable result = dialog.DialogShow();
 
 	setWaitCursor();
@@ -1298,6 +1302,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		  {
 		    System.out.println("Sending result to callback: " + result);
 		  }
+
+		// send the dialog results to the server
 
 		retVal = retVal.getCallback().respond(result);
 
@@ -1330,85 +1336,100 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     // Check for objects that need to be rescanned
-    if (retVal != null)
+
+    if (retVal == null)
+      {
+	return retVal;
+      }
+
+    if (debug)
+      {
+	System.err.println("** gclient: rescan dump: " +retVal.dumpRescanInfo());
+      }
+
+    if (!retVal.doRescan())
+      {
+	return retVal;
+      }
+
+    Vector objects = retVal.getRescanObjectsList();
+	    
+    if (objects == null)
+      {
+	System.err.println("Odd, was told to rescan, but there's nothing there!");
+	return retVal;
+      }
+    
+    if (debug)
+      {
+	System.out.println("Rescanning " + objects.size() + " objects.");
+      }
+    
+    Enumeration invids = objects.elements();
+
+    // Loop over all the invids, and try to find
+    // containerPanels for them.
+    
+    while (invids.hasMoreElements())
       {
 	if (debug)
 	  {
-	    System.err.println("** gclient: rescan dump: " +retVal.dumpRescanInfo());
+	    System.out.println("Casting to Invid");
 	  }
 
-	Hashtable rescan = retVal.getObjResultSet();
-	if (rescan != null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Rescanning " + rescan.size() + " objects.");
-	      }
-
-	    Enumeration keys = rescan.keys();
-
-	    //
-	    // Loop over all the invids, and try to find
-	    // containerPanels for them.
-	    //
-
-	    while (keys.hasMoreElements())
-	      {
-		if (debug)
-		  {
-		    System.out.println("Casting to Invid");
-		  }
-
-		Invid invid = (Invid)keys.nextElement();
+	Invid invid = (Invid) invids.nextElement();
 		
+	if (debug)
+	  {
+	    System.out.println("objectResultSet: updating invid: " + invid);
+	  }
+
+	Enumeration windows = wp.getWindows();
+
+	// Loop over each window
+
+	while (windows.hasMoreElements())
+	  {
+	    Object o = windows.nextElement();
+
+	    if (o instanceof framePanel)
+	      {
+		framePanel fp = (framePanel)o;
+
 		if (debug)
 		  {
-		    System.out.println("objectResultSet: updating invid: " + invid);
+		    System.out.println("Checking framePanel: " + fp.getTitle());
 		  }
-		Enumeration windows = wp.getWindows();
 
-		// Loop over each window
-		while(windows.hasMoreElements())
+		// Loop over each containerPanel in the window
+
+		for (int i = 0; i < fp.containerPanels.size(); i++)
 		  {
-		    Object o = windows.nextElement();
-		    if (o instanceof framePanel)
+		    containerPanel cp = (containerPanel)fp.containerPanels.elementAt(i);
+
+		    if (debug)
 		      {
-			framePanel fp = (framePanel)o;
+			System.out.println("Checking containerPanel number " + i);
+			System.out.println("  cp.invid= " + cp.getObjectInvid() + " lookng for: " + invid);
+		      }
+				
+		    if (cp.getObjectInvid().equals(invid))
+		      {
 			if (debug)
 			  {
-			    System.out.println("Checking framePanel: " + fp.getTitle());
+			    System.out.println("Found container panel for " + invid);
 			  }
+				    
+			cp.checkReturnValForRescan((ReturnVal)rescan.get(invid));
 
-
-			// Loop over each containerPanel in the window
-			for (int i = 0; i < fp.containerPanels.size(); i++)
-			  {
-			    containerPanel cp = (containerPanel)fp.containerPanels.elementAt(i);
-
-			    if (debug)
-			      {
-				System.out.println("Checking containerPanel number " + i);
-				System.out.println("  cp.invid= " + cp.getObjectInvid() + " lookng for: " + invid);
-			      }
-
-			    if (cp.getObjectInvid().equals(invid))
-			      {
-				if (debug)
-				  {
-				    System.out.println("Found container panel for " + invid);
-				  }
-
-				cp.checkReturnValForRescan((ReturnVal)rescan.get(invid));
 				// Don't break the loop, because there
 				// might be multiple containerPanels
 				// or multiple windows containing this
 				// invid.
-			      }
-			  }
 		      }
 		  }
 	      }
-	  }	
+	  }
       }
 
     if (debug)
