@@ -6,7 +6,7 @@
    GASH group_info file
    
    Created: 29 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,14 +35,23 @@ public class Group {
     tokens.ordinaryChar('\n');
   }
 
+  /**
+   *
+   * Our (extra-super-simple) parser.
+   *
+   */
+
+  Parser parser;
+
   // member fields
 
   String name;
   String password;
   int gid;
   Vector users;
-  String contract;
-  String description;
+
+  String contract = "";
+  String description = "";
 
   // instance constructor
 
@@ -53,90 +62,39 @@ public class Group {
 
   public boolean loadLine(StreamTokenizer tokens) throws IOException, EOFException
   {
-    int token;
+    parser = new Parser(tokens);
 
-    /* -- */
-
-    // read groupname
-
-    tokens.nextToken();
-
-    if (tokens.ttype == StreamTokenizer.TT_EOF)
+    if (parser.EOFnext())
       {
 	return true;
       }
-    else
+
+    name = parser.getNextBit();
+    password = parser.getNextBit(); 
+    gid = parser.getNextInt();
+
+    // skip the : before the user list
+
+    tokens.nextToken();
+
+    while (parser.checkNextToken() != ':' && !parser.atEOF() && !parser.atEOL())
       {
-	tokens.pushBack();
+	users.addElement(parser.getNextBit());
       }
 
-    name = getNextBit(tokens);
-
-    //    System.out.println("name = '" + name + "'");
-
-    password = getNextBit(tokens); 
-
-    // System.out.println("password = '" + password + "'");
-
-    String gidString = getNextBit(tokens);
-    gid = new Integer(gidString).intValue();
-
-    // System.out.println("gid = '" + gid + "'");
-
-    token = tokens.nextToken();
-
-    if (tokens.ttype == ':')
+    if (parser.checkNextToken() == ':')
       {
-	token = tokens.nextToken();
-      }
-    else
-      {
-	System.err.println("Parse error after gid");
+	contract = parser.getNextBit();
       }
 
-    while (tokens.ttype != ':' && (tokens.ttype != StreamTokenizer.TT_EOL) &&
-	    (tokens.ttype != StreamTokenizer.TT_EOF))
+    if (parser.checkNextToken() == ':')
       {
-	if (tokens.ttype != StreamTokenizer.TT_WORD)
-	  {
-	    System.err.println("parse error in user list");
-	  }
-	else
-	  {
-	    //	    System.out.print(" " + tokens.sval);
-	    users.addElement(tokens.sval);
-	  }
-
-	token = tokens.nextToken();
-
-	if (tokens.ttype == ',')
-	  {
-	    token = tokens.nextToken();
-	  }
+	description = parser.getNextBit();
       }
 
-    if (tokens.ttype == StreamTokenizer.TT_EOL || tokens.ttype == StreamTokenizer.TT_EOF)
-      {
-	contract = "";
-	description = "";
-	
-	return (tokens.ttype == StreamTokenizer.TT_EOF);
-      }
+    parser.skipToEndLine();
 
-    contract = getNextBit(tokens);
-    description = getNextBit(tokens);
-
-    // get to the end of line
-
-    // System.err.println("HEY! Token = " + token + ", ttype = " + tokens.ttype);
-
-    while ((tokens.ttype != StreamTokenizer.TT_EOL) && (tokens.ttype != StreamTokenizer.TT_EOF))
-      {
-	// System.err.print(".");
-	token = tokens.nextToken();
-      }
-
-    return (tokens.ttype == StreamTokenizer.TT_EOF);
+    return parser.atEOF();
   }
 
   public void display()
@@ -156,54 +114,6 @@ public class Group {
       }
 
     System.out.println("\tContract: " + contract + ", Descrip: " + description);
-  }
-  
-  private String getNextBit(StreamTokenizer tokens) throws IOException
-  {
-    int token;
-    String result;
-
-    token = tokens.nextToken();
-
-    if ((tokens.ttype == StreamTokenizer.TT_EOF) ||
-	(tokens.ttype == StreamTokenizer.TT_EOL))
-      {
-	return "";
-      }
-
-    while (tokens.ttype == ':' || tokens.ttype == ',')
-      {
-	//	System.err.println("*");
-	token = tokens.nextToken();
-      }
-
-    if (tokens.ttype == StreamTokenizer.TT_WORD)
-      {
-	//	System.err.println("returning native word");
-	return tokens.sval;
-      }
-
-    if (tokens.ttype == StreamTokenizer.TT_NUMBER)
-      {
-	// System.err.println("returning converted word");
-	result = Integer.toString(new Double(tokens.nval).intValue());
-
-	while (tokens.ttype != ':' && tokens.ttype != ',' && tokens.ttype != StreamTokenizer.TT_EOF &&
-	       tokens.ttype != StreamTokenizer.TT_EOL)
-	  {
-	    token = tokens.nextToken();
-	    
-	    if (tokens.ttype == StreamTokenizer.TT_WORD)
-	      {
-		result += tokens.sval;
-	      }
-	  }
-
-	return result;
-      }
-
-
-    return null;
   }
 
 }
