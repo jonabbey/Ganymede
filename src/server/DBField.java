@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -71,9 +71,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /* -- */
 
-  public DBField() throws RemoteException
+  public DBField()
   {
-    super();
     permCache = null;
   }
   

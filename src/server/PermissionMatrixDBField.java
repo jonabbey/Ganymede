@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -318,7 +318,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   PermissionMatrixDBField(DBObject owner, 
 			  DataInput in,
-			  DBObjectBaseField definition) throws IOException, RemoteException
+			  DBObjectBaseField definition) throws IOException
   {
     super();			// initialize UnicastRemoteObject
 
@@ -340,11 +340,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    */
 
-  PermissionMatrixDBField(DBObject owner, 
-			  DBObjectBaseField definition) throws RemoteException
+  PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition)
   {
-    super();			// initialize UnicastRemoteObject
-
     this.owner = owner;
     this.definition = definition;
     
@@ -360,13 +357,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    */
 
-  public PermissionMatrixDBField(DBObject owner, 
-				 PermissionMatrixDBField field) throws RemoteException
+  public PermissionMatrixDBField(DBObject owner, PermissionMatrixDBField field)
   {
-    super();			// initialize UnicastRemoteObject
-
-    // --
-
     Object key;
     PermEntry entry;
 
@@ -511,14 +503,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public Object clone()
   {
-    try
-      {
-	return new PermissionMatrixDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("Couldn't create PermissionMatrixDBField: " + ex);
-      }
+    return new PermissionMatrixDBField(owner, this);
   }
 
   synchronized void emit(DataOutput out) throws IOException

@@ -9,7 +9,7 @@
    changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -697,14 +697,7 @@ public class DBObjectDeltaRec implements FieldType {
 
     /* -- */
 
-    try
-      {
-	copy = new DBObject(original, null);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("Error, RMI system failure: " + ex.getMessage());
-      }
+    copy = new DBObject(original, null);
 
     // now process the fieldDeltaRec's.
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,7 +55,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  BooleanDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  BooleanDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -72,7 +72,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, BooleanDBField field) throws RemoteException
+  public BooleanDBField(DBObject owner, BooleanDBField field)
   {
     this.owner = owner;
     definition = field.definition;
@@ -89,7 +89,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition) throws RemoteException
+  public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -105,21 +105,14 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
+  public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
   {
-    try
-      {
-	return new BooleanDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't clone boolean field: " + ex);
-      }
+    return new BooleanDBField(owner, this);
   }
 
   void emit(DataOutput out) throws IOException

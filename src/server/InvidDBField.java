@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.94 $ %D%
+   Version: $Revision: 1.95 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.94 $ %D%
+ * @version $Revision: 1.95 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -74,7 +74,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     super();			// may throw RemoteException
 
@@ -96,10 +96,8 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  InvidDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  InvidDBField(DBObject owner, DBObjectBaseField definition)
   {
-    super();			// may throw RemoteException
-
     this.owner = owner;
     this.definition = definition;
     
@@ -122,10 +120,8 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, InvidDBField field) throws RemoteException
+  public InvidDBField(DBObject owner, InvidDBField field)
   {
-    super();			// may throw RemoteException
-
     this.owner = owner;
     definition = field.definition;
     
@@ -149,10 +145,8 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition) throws RemoteException
+  public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition)
   {
-    super();			// may throw RemoteException
-
     if (definition.isArray())
       {
 	throw new IllegalArgumentException("scalar value constructor called on vector field " + getName() +
@@ -177,10 +171,8 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
+  public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
-    super();			// may throw RemoteException
-
     if (!definition.isArray())
       {
 	throw new IllegalArgumentException("vector value constructor called on scalar field " + getName() +
@@ -206,14 +198,7 @@ public final class InvidDBField extends DBField implements invid_field {
   
   public Object clone()
   {
-    try
-      {
-	return new InvidDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("Couldn't create InvidDBField: " + ex);
-      }
+    return new InvidDBField(owner, this);
   }
 
   /**

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1017,18 +1017,12 @@ public class DBEditSet {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.EDITING:
 
-	    try
-	      {
-		// Create a read-only version of eObj, with all fields
-		// reset to checked-in status, put it into our object hash
+	    // Create a read-only version of eObj, with all fields
+	    // reset to checked-in status, put it into our object hash
+	    
+	    base.objectTable.put(new DBObject(eObj)); // have to sync, since we don't prevent viewDBObject()
+	    base.store.checkIn(); // update checkout count
 
-		base.objectTable.put(new DBObject(eObj)); // have to sync, since we don't prevent viewDBObject()
-		base.store.checkIn(); // update checkout count
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new Error("couldn't save edited object " + eObj + ", we're down in flames.");
-	      }
 	    break;
 
 	  case DBEditObject.DELETING:

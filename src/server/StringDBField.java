@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     defined = true;
     value = values = null;
@@ -54,7 +54,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  StringDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  StringDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -78,7 +78,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, StringDBField field) throws RemoteException
+  public StringDBField(DBObject owner, StringDBField field)
   {
     this.owner = owner;
     definition = field.definition;
@@ -103,7 +103,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, String value, DBObjectBaseField definition) throws RemoteException
+  public StringDBField(DBObject owner, String value, DBObjectBaseField definition)
   {
     if (definition.isArray())
       {
@@ -132,7 +132,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
+  public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     if (!definition.isArray())
       {
@@ -158,14 +158,7 @@ public class StringDBField extends DBField implements string_field {
 
   public Object clone()
   {
-    try
-      {
-	return new StringDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't clone StringDBField: " + ex);
-      }
+    return new StringDBField(owner, this);
   }
 
   void emit(DataOutput out) throws IOException

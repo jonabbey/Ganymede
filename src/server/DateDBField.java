@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = values = null;
     this.owner = owner;
@@ -53,7 +53,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  DateDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  DateDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -69,7 +69,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, DateDBField field) throws RemoteException
+  public DateDBField(DBObject owner, DateDBField field)
   {
     this.owner = owner;
     definition = field.definition;
@@ -86,7 +86,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, Date value, DBObjectBaseField definition) throws RemoteException
+  public DateDBField(DBObject owner, Date value, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -110,21 +110,14 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
+  public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
   {
-    try
-      {
-	return new DateDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't clone date field: " + ex);
-      }
+    return new DateDBField(owner, this);
   }
 
   void emit(DataOutput out) throws IOException

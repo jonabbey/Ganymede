@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,7 +43,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  PasswordDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  PasswordDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     defined = true;
     value = values = null;
@@ -64,7 +64,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  PasswordDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  PasswordDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -80,7 +80,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  public PasswordDBField(DBObject owner, PasswordDBField field) throws RemoteException
+  public PasswordDBField(DBObject owner, PasswordDBField field)
   {
     this.owner = owner;
     definition = field.definition;
@@ -141,14 +141,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public Object clone()
   {
-    try
-      {
-	return new PasswordDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't clone PasswordDBField: " + ex);
-      }
+    return new PasswordDBField(owner, this);
   }
 
   void emit(DataOutput out) throws IOException

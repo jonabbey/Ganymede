@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = values = null;
     this.owner = owner;
@@ -53,7 +53,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  NumericDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  NumericDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -69,7 +69,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, NumericDBField field) throws RemoteException
+  public NumericDBField(DBObject owner, NumericDBField field)
   {
     this.owner = owner;
     definition = field.definition;
@@ -86,7 +86,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, int value, DBObjectBaseField definition) throws RemoteException
+  public NumericDBField(DBObject owner, int value, DBObjectBaseField definition)
   {
     this.owner = owner;
     this.definition = definition;
@@ -102,21 +102,14 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
+  public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
   {
-    try
-      {
-	return new NumericDBField(owner, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't clone NumericDBField: " + ex);
-      }
+    return new NumericDBField(owner, this);
   }
 
   void emit(DataOutput out) throws IOException

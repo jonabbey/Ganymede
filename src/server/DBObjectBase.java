@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.75 $ %D%
+   Version: $Revision: 1.76 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1005,15 +1005,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (classdef == null)
       {
-	try
-	  {
-	    e_object = new DBEditObject(this, invid, editset);
-	  }
-	catch (RemoteException ex)
-	  {
-	    editset.getSession().setLastError("createNewObject failure: " + ex);
-	    e_object = null;
-	  }
+	e_object = new DBEditObject(this, invid, editset);
       }
     else
       {

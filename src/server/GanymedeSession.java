@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.111 $ %D%
+   Version: $Revision: 1.112 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.111 $ %D%
+ * @version $Revision: 1.112 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -3072,52 +3072,45 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (getPerm(obj).isVisible())
       {
-	try
+	setLastEvent("view_db_object: " + obj.getLabel());
+
+	// return a copy that knows what GanymedeSession is
+	// looking at it so that it can do per-field visibility
+	// checks.
+
+	// copying the object also guarantees that if the
+	// DBSession has checked out the object for editing
+	// (possibly in a way that the user wouldn't normally have
+	// permission to do, as in anonymous invid
+	// linking/unlinking), that the client won't be able to
+	// directly manipulate the DBEditObject in the transaction
+	// to get around permission enforcement.
+
+	objref = new DBObject(obj, this);
+
+	result = new ReturnVal(true); // success
+	result.setObject(objref);
+
+	if (Ganymede.remotelyAccessible)
 	  {
-	    setLastEvent("view_db_object: " + obj.getLabel());
+	    // the exportObject call will fail if the object has
+	    // already been exported.  Unfortunately, there doesn't
+	    // seem to be much way to tell this beforehand, so
+	    // we won't bother to try.
 
-	    // return a copy that knows what GanymedeSession is
-	    // looking at it so that it can do per-field visibility
-	    // checks.
-
-	    // copying the object also guarantees that if the
-	    // DBSession has checked out the object for editing
-	    // (possibly in a way that the user wouldn't normally have
-	    // permission to do, as in anonymous invid
-	    // linking/unlinking), that the client won't be able to
-	    // directly manipulate the DBEditObject in the transaction
-	    // to get around permission enforcement.
-
-	    objref = new DBObject(obj, this);
-
-	    result = new ReturnVal(true); // success
-	    result.setObject(objref);
-
-	    if (Ganymede.remotelyAccessible)
+	    try
 	      {
-		// the exportObject call will fail if the object has
-		// already been exported.  Unfortunately, there doesn't
-		// seem to be much way to tell this beforehand, so
-		// we won't bother to try.
-
-		try
-		  {
-		    UnicastRemoteObject.exportObject(objref);
-		  }
-		catch (RemoteException ex)
-		  {
-		    //		    ex.printStackTrace();
-		  }
-
-		((DBObject) objref).exportFields();
+		UnicastRemoteObject.exportObject(objref);
+	      }
+	    catch (RemoteException ex)
+	      {
+		//		    ex.printStackTrace();
 	      }
 
-	    return result;
+	    ((DBObject) objref).exportFields();
 	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't create copy of DBObject: " + ex);
-	  }
+
+	return result;
       }
     else
       {

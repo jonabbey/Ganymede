@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.57 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.58 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -142,7 +142,8 @@ public class DBObject implements db_object, FieldType, Remote {
    * a no-param constructor for a static method handle
    *
    */
-  public DBObject() throws RemoteException
+
+  public DBObject()
   {
     gSession = null;
   }
@@ -158,7 +159,7 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    */
 
-  DBObject(DBObjectBase objectBase) throws RemoteException
+  DBObject(DBObjectBase objectBase)
   {
     this.objectBase = objectBase;
     id = 0;
@@ -178,7 +179,7 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    */
 
-  DBObject(DBObjectBase objectBase, int id) throws RemoteException
+  DBObject(DBObjectBase objectBase, int id)
   {
     this(objectBase);
     this.id = id;
@@ -193,7 +194,7 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    */
 
-  DBObject(DBObjectBase objectBase, DataInput in, boolean journalProcessing) throws IOException, RemoteException
+  DBObject(DBObjectBase objectBase, DataInput in, boolean journalProcessing) throws IOException
   {
     this.objectBase = objectBase;
     shadowObject = null;
@@ -217,7 +218,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * 
    */
   
-  DBObject(DBEditObject eObj) throws RemoteException
+  DBObject(DBEditObject eObj)
   {
     Enumeration enum;
     DBField field;
@@ -268,7 +269,7 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    */
 
-  public DBObject(DBObject original, GanymedeSession gSession) throws RemoteException
+  public DBObject(DBObject original, GanymedeSession gSession)
   {
     Enumeration enum;
     DBField field, copy;
@@ -1007,20 +1008,7 @@ public class DBObject implements db_object, FieldType, Remote {
       }
     else
       {
-	try
-	  {
-	    shadowObject = new DBEditObject(this, editset);
-	  }
-	catch (RemoteException ex)
-	  {
-	    // note that we know editset is set here, so we find our GanymedeSession
-	    // instance through the editset since we may not be explicitly checked out
-	    // for viewing
-
-	    editset.getSession().setLastError("remote exception creating shadow for " + 
-					      getBase().getName() + ": " + getID());
-	    return null;
-	  }
+	shadowObject = new DBEditObject(this, editset);
       }
 
     editset.addObject(shadowObject);

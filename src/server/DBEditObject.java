@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.89 $ %D%
+   Version: $Revision: 1.90 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.89 $ %D%
+ * @version $Revision: 1.90 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -122,7 +122,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public DBEditObject(DBObjectBase base) throws RemoteException
+  public DBEditObject(DBObjectBase base)
   {
     this.objectBase = base;
     editset = null;		// this will be our cue to our static handle status for our methods
@@ -141,7 +141,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.DBField
    */
 
-  public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid.getNum());
 
@@ -237,7 +237,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public DBEditObject(DBObject original, DBEditSet editset) throws RemoteException
+  public DBEditObject(DBObject original, DBEditSet editset)
   {
     super(original.objectBase);
 
