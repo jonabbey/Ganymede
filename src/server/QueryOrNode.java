@@ -4,8 +4,8 @@
 
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:52 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/06/19 03:21:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,11 @@ package arlut.csd.ganymede;
                                                                      QueryOrNode
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Logical OR node for use in a serialized {@link arlut.csd.ganymede.Query Query}
+ * object's {@link arlut.csd.ganymede.QueryNode QueryNode} tree.</P>
+ */
 
 public class QueryOrNode extends QueryNode {
 

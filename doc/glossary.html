@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede File Glossary 0.99.1 - 27 May 1999</title>
+    <title>Ganymede File Glossary 0.99.2 - 18 June 1999</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.1 - 27 May 1999</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.2 - 18 June 1999</FONT></h1>
 <hr>
     <p>This page contains descriptions of various significant files that are part
     of the Ganymede package.</p>
@@ -40,6 +40,7 @@
       <li><a href="#runServer">runServer</a></li>
       <li><a href="#stopServer">stopServer</a></li>
       <li><a href="#decodeDB">decodeDB</a></li>
+      <li><a href="#permdecodeDB">permdecodeDB</a></li>
       </ul></li>
 
       <li><a href="#clientfiles">Client Files</a>
@@ -456,6 +457,22 @@
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="permdecodeDB"><b>permdecodeDB</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>permdecodeDB</b></code></font> is a Bourne shell script located in the
+    server's <code>bin</code> directory. <font color="#ff0000"><code><b>permdecodeDB</b></code></font>
+    is used for diagnostic and development purposes, to print out a summary of
+    all permissions records in all Role objects encoded by a <a href="#ganymede.db">ganymede.db</a> or 
+    <a href="#ganymede.schema">ganymede.schema</a> file.</p>
+
+    <p>Usage:</p>
+
+    <pre>	permdecodeDB ../db/ganymede.db</pre>
+
+    <p></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><a name="clientfiles"><b>Client Files</b></h2></td>
       </tr>
@@ -609,7 +626,7 @@
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Thu May 27 21:34:07 CDT 1999
+Last modified: Fri Jun 18 18:38:42 CDT 1999
 <!-- hhmts end -->
   </body>
 </html>

@@ -2,8 +2,8 @@
 #
 # Ganymede admin jar build script
 #
-# Version: $Revision: 1.12 $
-# Date: $Date: 1999/04/15 23:07:50 $
+# Version: $Revision: 1.13 $
+# Date: $Date: 1999/06/19 03:20:56 $
 #
 ############################################################
 
@@ -64,6 +64,9 @@ cd arlut/csd
 rm -f JTree
 ln -s $TARGETDIR/arlut/csd/JTree JTree
 cd ../..
+
+# And get the subset of the arlut.csd.ganymede classes we need symlinked
+# into our admin_classes directory for inclusion in the jar
 
 ./sync_tree
 

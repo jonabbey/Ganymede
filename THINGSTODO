@@ -1,5 +1,5 @@
 Ganymede Developer Release 0.99.2
-June ??, 1999
+June 18, 1999
 THINGSTODO
 ---------------------------------------------
 
@@ -65,6 +65,12 @@ anytime soon, but it really should be done.
 All of the loader code for the included shema kits is pretty
 unpleasant.  We recently incorporated GNU regexp into the server, and
 the NIS/GASH loader code should probably take advantage of it.
+
+- 18 June 1999 -
+
+Actually, I did try to do the passwd/group/etc. file parsing using
+GNU regexp in the loader code, but it was far too slow for bulk
+loading.  I may revisit this if gnu.regexp changes much.
 
 5) Internationalization
 

@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/04/28 09:32:27 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/06/19 03:20:57 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
+ * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -456,14 +456,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // The Login GUI has been set up.  Now the server connection needs
     // to be properly established.
     
-    /* RMI initialization stuff. We do this for our iClient object. */
-
-    if (!WeAreApplet)
-      {
-	//Applets don't like you setting the sercurity manager!
-	//System.setSecurityManager(new RMISecurityManager());
-      }
-    
     /* Get a reference to the server */
 
     my_thread.start();
@@ -799,7 +791,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
+ * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -884,7 +876,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.56 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
+ * @version $Revision: 1.57 $ $Date: 1999/06/19 03:20:57 $ $Name:  $
  * @author Jonathan Abbey
  */
 

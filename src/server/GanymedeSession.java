@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 1999/06/18 22:43:24 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 1999/06/19 03:21:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,13 +124,13 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.136 $ %D%
+ * @version $Revision: 1.137 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
@@ -4767,7 +4767,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaTimeStamp.setTime(System.currentTimeMillis());
       }
 
-    if (true)
+    if (debug)
       {
 	System.err.println("GanymedeSession.updatePerms(): finished full permissions recalc for " + 
 			   (personaName == null ? username : personaName));

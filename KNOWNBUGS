@@ -1,9 +1,9 @@
-Ganymede Developer Release 0.99
-April 16, 1999
+Ganymede Developer Release 0.99.2
+June 18, 1999
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 0.99 requires Swing 1.1 or later, as it
+Ganymede release 0.99.2 requires Swing 1.1 or later, as it
 is built to expect the Swing libraries to be in the package
 javax.swing, rather than com.sun.java.swing, as it was in prior
 versions.
@@ -15,7 +15,7 @@ account name/ password is not properly reset.  It is, instead, user:
 monitor, password: display.  If you start a new ganymede.db file
 from scratch, the monitor account should be configured properly.
 
-2) The gash and gasharl schemas are provided in dev5c is intended to
+2) The gash and gasharl schemas are provided in 0.99.2 is intended to
 enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
 are, however, a relatively small number of functions that are not
 performed by Ganymede with the gash schemas.  These include the
@@ -49,15 +49,6 @@ that group does not have an explicit reference to the user.  All
 of the wizards and schema logic embodied in the bsd schema still
 assume that there won't be any purely implicit group membership
 references in the user's gid field.
-
-5) There are still a number of small gui bugs arising out of the Swing
-libraries, as of Swing 1.1.  In particular, the permissions editor
-requires the user to click twice on a checkbox to set or clear it.
-
-6) Using the JDK 1.2 RC1 plug-in on Win32, the html files in the help,
-'about ganymede', and MOTD will not be properly displayed.  This bug
-has been reported to Sun, and will hopefully be fixed in a 1.2.1
-release soon.
 
 Comments welcome. ;-)
 

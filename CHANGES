@@ -1,13 +1,13 @@
 Ganymede Release 0.99.2
-June ??, 1999
+June 18, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.1 to 0.99.2 -------------------
 
-RELEASE DATE: June ??, 1999
+RELEASE DATE: June 18, 1999
 
-1. [DOCUMENTATION] Improved javadocs
+1. [DOCUMENTATION] Seriously Improved Javadocs
 
 Lots more improvements to the source code javadocs.  Improving the
 javadocs is an ongoing project.. I really want to make it possible to
@@ -85,6 +85,56 @@ effectively lost create, which was previously inherited.
 
 Added debugging toString() to DBField, PermMatrix classes.
 Added getFieldName(short) to DBObject, db_object.
+
+7. [ADMIN CONSOLE] Fixed admin console
+
+The admin console now works properly in a browser, and properly
+initializes under all conditions.  
+
+The magic incantation to get the Ganymede Admin console to find the
+arlut/csd/ganymede/GanymedeServer_Stub.class file was to include the
+arlut/csd/ganymede/Client.class in the ganymedeAdmin.jar file.
+
+Apparently, Sun's RMI classloading logic freaks out if it comes across
+a reference to an unavailable RMI remote interface parameter in a RMI
+remote method _Stub.class file, even if the freaked-out client in
+question never refers to that method call.
+
+I tried *everything* to figure this out, before finally noticing the
+blurb in the Java plug-in's console about the Client.class load
+attempt.. d'oh.  I wound up having to include
+arlut.csd.ganymede.Client and arlut.csd.ganymede.GanymedeScheduler
+because both were referenced by RMI methods or serialized objects the
+admin console needed.
+
+In addition to fixing the ganymedeAdmin.jar file, the applet code was
+revised to be closer to that of the standard client, to improve its
+behavior and appearance in a web browser context.
+
+I still need to make a nice 'admin console' logo for the admin console
+applet.
+
+Thanks to Charles Adams (charles.adams@central.sun.com) and Andy
+Johnson (andyjohnson@engineer.com) for reporting the problem with the
+admin console not working properly with the Java plug-in.
+
+8. [SERVER] Fixed login logic
+
+In 0.99.1 and before, the server had an ambiguity that would allow
+users to login to the wrong priviliged admin account on occasion, if
+there was more than one account with the same persona name.
+
+I.e., if there was persona account 'broccol:supergash' and
+'supergash', each with different passwords, the broccol:supergash
+password could allow access to the non-user-associated supergash
+admin account.  This was true for both normal client login and for
+admin console attachment.
+
+9. [SERVER] Fixed DBQueryHandler's field DEFINED logic
+
+The Ganymede server's DBQueryHandler would throw an exception if
+attempting to process a "field is defined" QueryDataNode if the field
+in fact did not exist.
 
 -------------------- Changes from 0.99 to 0.99.1 -------------------
 

@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.6 $
-# $Date: 1999/02/02 22:00:04 $
+# $Revision: 1.7 $
+# $Date: 1999/06/19 03:20:55 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -24,7 +24,7 @@
 		     "ObjectHandle", "Ganymediator", "GanymediatorWizard",
 		     "GanymedeConfig", "adminSession",
 		     "SchemaEdit", "scheduleHandle",
-		     "GASHSchema", "iAdmin");
+		     "GASHSchema", "iAdmin", "iAdmin_Skel");
 
 # What directory are we handling?
 
@@ -60,24 +60,6 @@ print "\nAttempting to link admin stubs\n\n";
 
 opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
-closedir SOURCEDIR;
-
-foreach $file (@stubs) {
-  print "Linking " . $file . "\n";
-
-  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
-
-  if (!$result){
-    print "$! -- $file\n";
-  }
-}
-
-# Now we need to link in any Skel classes
-
-print "\nAttempting to link admin skels\n\n";
-
-opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
-@stubs = grep /_Skel/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@stubs) {

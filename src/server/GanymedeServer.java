@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/06/18 22:43:23 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 1999/06/19 03:21:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -188,8 +188,22 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// versions of the database or new.  Going forward we'll
 	// want to match here against the PersonaLabelField.
 
+	// note.. this is a hack for compatibility.. the
+	// personalabelfield will always be good, but if it does not
+	// exist, we'll go ahead and match against the persona name
+	// field as long as we don't have an associated user in that
+	// persona.. this is to avoid confusing 'broccol:supergash'
+	// with 'supergash'
+
+	// the persona label field would be like 'broccol:supergash',
+	// whereas the persona name would be 'supergash', which could
+	// be confused with the supergash account.
+
 	root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
-			       new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName));
+			       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
+								  QueryDataNode.EQUALS, clientName),
+						new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
+										   QueryDataNode.DEFINED, null))));
 
 	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
@@ -518,9 +532,23 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     // versions of the database or new.  Going forward we'll
     // want to match here against the PersonaLabelField.
 
-    root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName),
-			   new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName));
-
+    // note.. this is a hack for compatibility.. the
+    // personalabelfield will always be good, but if it does not
+    // exist, we'll go ahead and match against the persona name
+    // field as long as we don't have an associated user in that
+    // persona.. this is to avoid confusing 'broccol:supergash'
+    // with 'supergash'
+    
+    // the persona label field would be like 'broccol:supergash',
+    // whereas the persona name would be 'supergash', which could
+    // be confused with the supergash account.
+    
+    root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
+			   new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
+							      QueryDataNode.EQUALS, clientName),
+					    new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
+									       QueryDataNode.DEFINED, null))));
+    
     userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
     Vector results = Ganymede.internalSession.internalQuery(userQuery);

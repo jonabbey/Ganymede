@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/06/15 02:48:20 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/06/19 03:21:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,7 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.22 $ $Date: 1999/06/15 02:48:20 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 1999/06/19 03:21:01 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -229,7 +229,7 @@ public class DBQueryHandler {
 
 	    if (n.comparator == n.DEFINED)
 	      {
-		return field.isDefined();
+		return (field != null) && field.isDefined();
 	      }
 
 	    // ok.. check to see if we are checking against the length of an

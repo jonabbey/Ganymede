@@ -3,12 +3,12 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="GENERATOR" content="Mozilla/4.5 [en] (WinNT; I) [Netscape]">
-   <title>Ganymede Release 0.99.1 - Server Overview 27 May 1999</title>
+   <title>Ganymede Release 0.99.2 - Server Overview 18 June 1999</title>
 </head>
 <body bgcolor="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.99.1<br>Server Overview 27 May 1999</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.99.2<br>Server Overview 18 June 1999</FONT></h1>
 
 <hr>
 
@@ -30,12 +30,15 @@ hashtables. This gives the server good performance and multi-threaded safety
 at the cost of a potentially quite large RAM footprint. All objects managed
 by Ganymede are kept in memory while the Ganymede server is running.</p>
 
-<p>All objects in the database are identified by a type number/object number
-pair called an invid, for Invariant ID. All objects in the database are
-of a single type, and each object type has its own set of fields defined
-in the schema, and may be associated with a Java plug-in class to provide
-intelligent management of objects of that type. The type space is flat,
-there is no type inheritance hierarchy.</p>
+<p>All objects in the database are identified by a type number/object
+number pair called an invid, for Invariant ID. All objects in the
+database are of a single type (i.e., there is no type inheritance),
+and each object type has its own set of fields defined in the schema,
+and may be associated with a Java plug-in class to provide intelligent
+management of objects of that type. See the <a
+href="customization/index.html">DBEditObject subclassing guide</a> for
+details on the use of object management plug-ins in customizing the
+Ganymede server.</P>
 
 <p>Because the invid is the <i>sine qua non</i> of the object storage system,
 it defines how many objects can be stored in the Ganymede server. There

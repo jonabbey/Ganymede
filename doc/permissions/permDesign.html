@@ -38,12 +38,13 @@ Role object contains two <font color = "#FF0000">Permissions
 Matrices</font>: one for objects owned, and one for default
 persmissions.  These permission matrices contain an array of booleans
 which allow access to the database by object type and field, with
-create, edit, view permissions categories.  These permissions bits are
-OR'ed together across all of an Admin Persona's permission matrices,
-and filters the admin Persona's permissions when accessing any object
-in the Ganymede database.  A large set of Admin Personae may be
-configured with the same Permissions Matrix object, allowing for
-central permissions administration.</p>
+create, edit, view, and delete permissions categories.  These
+permissions bits are combined together across all of an Admin
+Persona's permission matrices, and filters the admin Persona's
+permissions when accessing any object in the Ganymede database.  A
+large set of Admin Personae may be configured with the same
+Permissions Matrix object, allowing for central permissions
+administration.</p>
 
 <p>The combination of the <font color = "#FF0000">Owner Groups</font>,
 which determine which objects are accessible, and the <font color =
