@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -738,45 +738,53 @@ class dumpTask implements Runnable {
   }
 
   public void run()
-   {
-     boolean started = false;
-     boolean completed = false;
+  {
+    boolean started = false;
+    boolean completed = false;
 
-     try
-       {
-	 if (Ganymede.server.activeUsers.size() > 0)
-	   {
-	     Ganymede.debug("Deferring dump task - users logged in");
-	     return;
-	   }
+    /* -- */
 
-	 started = true;
-	 Ganymede.debug("Running dump task");
+    try
+      {
+	if (Ganymede.db.journal.clean())
+	  {
+	    Ganymede.debug("Deferring dump task - the journal is clean");
+	    return;
+	  }
 
-	 try
-	   {
-	     Ganymede.db.dump(Ganymede.dbFilename, true);
-	   }
-	 catch (IOException ex)
-	   {
-	     Ganymede.debug("dump could not succeed.. IO error " + ex.getMessage());
-	   }
+	if (Ganymede.server.activeUsers.size() > 0)
+	  {
+	    Ganymede.debug("Deferring dump task - users logged in");
+	    return;
+	  }
 
-	 Ganymede.debug("Completed dump task");
-	 completed = true;
-       }
-     finally
-       {
-	 // we'll go through here if our task was stopped
-	 // note that the DBStore dump code will handle
-	 // thread death ok.
+	started = true;
+	Ganymede.debug("Running dump task");
 
-	 if (started && !completed)
-	   {
-	     Ganymede.debug("dumpTask forced to stop");
-	   }
-       }
-   }
+	try
+	  {
+	    Ganymede.db.dump(Ganymede.dbFilename, true);
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("dump could not succeed.. IO error " + ex.getMessage());
+	  }
+
+	Ganymede.debug("Completed dump task");
+	completed = true;
+      }
+    finally
+      {
+	// we'll go through here if our task was stopped
+	// note that the DBStore dump code will handle
+	// thread death ok.
+
+	if (started && !completed)
+	  {
+	    Ganymede.debug("dumpTask forced to stop");
+	  }
+      }
+  }
 }
 
 class gcTask implements Runnable {
