@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,8 +28,11 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 public abstract class DBField extends UnicastRemoteObject implements db_field, Cloneable {
 
-  Object value;
-  Vector values;  
+  Object 
+    value,			// the object's current value, for scalars
+    newValue = null;		// the object's new value, for use by custom verification classes
+
+  Vector values;
   DBObject owner;
   DBObjectBaseField definition;
   boolean defined;
@@ -469,12 +472,50 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	throw new IllegalArgumentException("scalar accessor called on vector");
       }
 
+    // if this field is virtualized, let our customizer provide the
+    // value
+
     if (owner.objectBase.objectHook.virtualizeField(getID()))
       {
 	return owner.objectBase.objectHook.getVirtualValue(this);
       }
 
     return value;
+  }
+
+  /**
+   *
+   * This method is used to allow server-side custom code to get access to
+   * a proposed new value before it is finalized, used when making a change
+   * to this field causes other fields to be changed which need to insure
+   * that this field has an appropriate value first.
+   *
+   * This method is not intended to be accessible to the client.
+   *
+   * This method does not support virtualized fields.
+   *
+   * This method will only have a useful value during the
+   * course of the containing objects' finalizeSetValue() call.  It
+   * is intended that this field will set the new value in setValue(),
+   * call owner.finalizeSetValue(), then clear the newValue.
+   *
+   * What, this code a hack?
+   *
+   */
+
+  public Object getNewValue()
+  {
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    if (isVector())
+      {
+	throw new IllegalArgumentException("scalar accessor called on vector");
+      }
+
+    return newValue;
   }
 
   /**
@@ -604,6 +645,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
+    this.newValue = value;
+
     if (eObj.finalizeSetValue(this, value))
       {
 	if (value != null)
@@ -617,10 +660,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    defined = false;	// the key
 	  }
 
+	this.newValue = null;
+
 	return retVal;		// success
       }
     else
       {
+	this.newValue = null;
+
 	// our owner disapproved of the operation,
 	// undo the namespace manipulations, if any,
 	// and finish up.
@@ -632,7 +679,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	  }
 
 	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-					 "Custom code rejected set operation for value " + value);
+					  "Custom code rejected set operation for value " + value);
       }
   }
 
