@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -479,6 +479,11 @@ class DBNameSpace {
    * <p>Method to put the editSet's current namespace modifications into
    * final effect and to make any abandoned values available for other
    * namespaces.</p>
+   *
+   * <p>Note that a NameSpace should really never fail here.  We assume that
+   * all NameSpace management code up to this point has functioned properly..
+   * at this point, the EditSet has already committed changes to the DBStore
+   * and to any external processes, we're just doing paperwork at this point.</p>
    *
    * @param editSet The transaction being committed.
    */
