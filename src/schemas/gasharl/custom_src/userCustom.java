@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/10/10 05:45:26 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/10/29 16:13:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1878,7 +1878,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     String mapName = mapObj.getLabel();
 
     Integer id = (Integer) getFieldValueLocal(userSchema.UID);
-    DBObject homeGroup = getSession().viewDBObject((Invid) getFieldValueLocal(userSchema.HOMEGROUP));
+    Invid homegroupInvid = (Invid) getFieldValueLocal(userSchema.HOMEGROUP);
+
+    if (homegroupInvid == null)
+      {
+	// the user didn't completely fill out this user
+	// object.. return silently and let the transaction logic tell
+	// the user what the problem is.
+
+	return;
+      }
+
+    DBObject homeGroup = getSession().viewDBObject(homegroupInvid);
     Integer gid = (Integer) homeGroup.getFieldValueLocal(groupSchema.GID);
 
     boolean success = false;
