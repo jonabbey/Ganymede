@@ -1,7 +1,7 @@
 
    Ganymede
    
-      Ganymede UNIX Installation Guide Release 0.99.8 - 23 November 1999
+       Ganymede UNIX Installation Guide Release 0.99.9 - 13 January 2000
                                        
      _________________________________________________________________
                                       
@@ -70,9 +70,7 @@ _2. Installing server files_
    plaintext passwords. The ganymede.properties file must be protected,
    as it has the the root (supergash) password chosen at install time in
    plaintext. If desired, the ganymede.properties file can be edited to
-   remove the ganymede.defaultrootpass entry. If you do this, you will
-   not be able to use stopServer to cleanly shut the server down from the
-   command line.
+   remove the ganymede.defaultrootpass entry.
    
    With those notes out of the way, run installServer to install the
    server. installServer will ask you a number of questions, including
@@ -389,4 +387,4 @@ _5. Loading the server_
    
     Jonathan Abbey
     
-   Last modified: Mon Nov 22 14:37:30 CST 1999
+   Last modified: Thu Jan 13 18:41:25 CST 2000

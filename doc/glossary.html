@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede File Glossary 0.99.8 - 23 November 1999</title>
+    <title>Ganymede File Glossary 0.99.9 - 13 January 2000</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.8 - 23 November 1999</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.9 - 13 January 2000</FONT></h1>
 <hr>
     <p>This page contains descriptions of various significant files that are part
     of the Ganymede package.</p>
@@ -279,17 +279,22 @@
     contain schema-specific configuration as well as the basic configuration properties
     needed by the server.</p>
 
-    <p>The <font color="#ff0000"><code><b>ganymede.properties</b></code></font> file
-    is commented, and most properties in it should be self-explanatory.  The one property
-    that you should be particularly aware of is the <code>ganymede.defaultrootpass</code> property,
-    which holds the server's supergash (root) password.  This property is used to
-    set the server's password every time that <a href="#runServer">runServer</a> is
-    run, unless <a href="#runServer">runServer</a> has been edited to remove the "-resetadmin"
-    command line flag.  You can remove the <code>ganymede.defaultrootpass</code> property entry
-    if you want to keep the plaintext password out of your file system, but if you do
-    remove <code>ganymede.defaultrootpass</code>, the 
-    <a href="#stopServer">stopServer</a> command will no longer be able to log into the
-    server to shut it down.</p>
+    <p>The <font
+    color="#ff0000"><code><b>ganymede.properties</b></code></font>
+    file is commented, and most properties in it should be
+    self-explanatory.  The one property that you should be
+    particularly aware of is the <code>ganymede.defaultrootpass</code>
+    property, which holds the server's supergash (root) password.
+    This property is used to set the server's password every time that
+    <a href="#runServer">runServer</a> is run, unless <a
+    href="#runServer">runServer</a> has been edited to remove the
+    "-resetadmin" command line flag.  You can remove the
+    <code>ganymede.defaultrootpass</code> property entry if you want
+    to keep the plaintext password out of your file system, but if you
+    do remove <code>ganymede.defaultrootpass</code>, the <a
+    href="#stopServer">stopServer</a> command will have to prompt for
+    the server's "root" password in order to log into the server to
+    shut it down.</p>
     
     <p>The Ganymede client installation has its own <a href="#client.properties">client.properties</a>
     file.</p>
@@ -468,17 +473,19 @@
       <tr BGCOLOR="#CCCCFF">
 	<td colspan="1" align="right"><h3><a name="stopServer"><b>stopServer</b></h3></td></tr></table> 
     
-    <p><font color="#ff0000"><code><b>stopServer</b></code></font>
-    is a Bourne shell script, located in the server's
-    <code>bin</code> directory, which when run will connect to the server using RMI and
+    <p><font color="#ff0000"><code><b>stopServer</b></code></font> is
+    a Bourne shell script, located in the server's <code>bin</code>
+    directory, which when run will connect to the server using RMI and
     order it to shut down.  It depends on having access to the <A
     href="#server.properties">ganymede.properties</a> file in order to
     determine the address of the running server as well as the
     server's supergash password.  If you have removed the supergash
     password from the <A
     href="#server.properties">ganymede.properties</a> file in order to
-    keep the password secret, <font color="#ff0000"><code><b>stopServer</b></code></font> will not be able to login to
-    the server to bring it down.</p>
+    keep the password secret, <font
+    color="#ff0000"><code><b>stopServer</b></code></font> will prompt
+    for the server's supergash password in order to shut down the
+    server.</p>
 
     <p><font color="#ff0000"><code><b>stopServer</b></code></font>
     uses the admin console's API to shut the server
@@ -683,7 +690,7 @@
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Mon Nov 22 14:37:51 CST 1999
+Last modified: Thu Jan 13 18:43:57 CST 2000
 <!-- hhmts end -->
   </body>
 </html>

@@ -1,17 +1,22 @@
 Ganymede Release 0.99.9
-January ??, 2000
+January 13, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
-RELEASE DATE: January ?? , 2000
+RELEASE DATE: January 13, 2000
 
-1. [SCHEMA] Fixed error when editing system in room with no networks
+1. [SCHEMA] Fixed gasharl schema errors
 
-The gasharl schema kit had a bug which made it impossible to edit a
+a. The gasharl schema kit had a bug which made it impossible to edit a
 system if that system was connected to a room that had no networks
 listed.
+
+b. The gasharl GASHBuilderTask code is designed to handle netgroups that
+overflow the 1024 byte NIS line length limit, but the code that
+handled netgroup folding did so very inefficiently, putting only one
+netgroup entry per line after the first.
 
 2. [SERVER] Fixed race condition in Qstmp stopThreaded() method
 
@@ -22,7 +27,7 @@ clean server shut-down.
 
 3. [SERVER] Fixed various deadlock possibilities in server
 
-The 3 DBLock subclasses (DBReadLock, DBWriteLock, DBDumpLock) did not
+a. The 3 DBLock subclasses (DBReadLock, DBWriteLock, DBDumpLock) did not
 properly call notifyAll() on the DBStore object if they threw an
 exception in their establish() method.  Now, all synchronized blocks
 in the DBLock subclasses use try..finally to guarantee that other
@@ -37,18 +42,42 @@ the same identifier as the standard 'internal' session used to process
 queries in the login process, so if a login was attempted during a
 builder task's phase1 execution, or during portions of the expire or
 warning task, an exception could be thrown, possibly causing
-threadlock if other threads had wait()'ed at that point.
+threadlock if other threads had wait()'ed at that point.  All this
+should be fixed now.
 
-All this should be fixed now.
+b. There are several ways a user can be forced off of the Ganymede
+server..  the idle timer, the admin console, and the RMI unreferenced
+object mechanism.  Previously, various essential objects in the server
+could get locked if the client refused to respond to the server's
+disconnect command.  Now the client force-disconnect code is better
+coordinated so only one thread in the server will ever attempt to
+force the user to disconnect, and that thread will itself spawn a
+background thread to force the user to disconnect.  As a result,
+although the server may wind up with a single dangling thread per
+client if the RMI system blocks trying to call the client, nothing
+in the server will deadlock because of it.
 
-4. [SCHEMA] The gasharl netgroup folding code wasn't working properly
+As a result of this change, knocking a user off the system by the
+admin console is no longer a synchronous operation, so it may take a
+few seconds before the admin console updates to show the results of a
+user kill operation.
 
-The gasharl GASHBuilderTask code is designed to handle netgroups that
-overflow the 1024 byte NIS line length limit, but the code that
-handled netgroup folding did so very inefficiently, putting only one
-netgroup entry per line after the first.
+c. The admin console code in the server had a number of problems that
+could lead to a deadlock that blocked any admin console operations
+(including the stopServer script).
 
-5. [SERVER/CLIENT] Added support for 'browse' mode
+The server code that handles communications to/from the admin consoles
+have been significantly reworked so as to not be vulnerable to a
+threadlock condition, and some redundant operations have been pruned
+to reduce overhead.  A number of possible race conditions have been
+closed.
+
+This will make the server faster and safer when admin consoles are
+attached, but the admin console updating is still generally
+synchronous.  Every admin console connected to the Ganymede server
+will slow the server down a bit.
+
+4. [SERVER/CLIENT] Added support for 'browse' mode in client
 
 John Knutson pointed out that the Ganymede client wasn't an adequate
 directory browser because it always hid things that couldn't be
@@ -66,7 +95,8 @@ under the client's 'File' menu.  I expect I may move this someplace
 else in the client's GUI eventually.
 
 This involved changes to GanymedeSession.java, Session.java, and
-CategoryTransport.java on the server, and gclient.java on the client.
+CategoryTransport.java on the server, and gclient.java on the client,
+so a 0.99.9 server will now require a 0.99.9 client.
 
 As before, the server is really responsible for deciding what object
 types are reported to the client.. the client can't choose to show
@@ -74,7 +104,7 @@ object types in the tree if the server doesn't report them, but the
 client can now ask to have all visible object types reported, which it
 couldn't do before.
 
-6. [CLIENT] Reworked object folder pop-up menus in client tree display
+5. [CLIENT] Reworked object folder pop-up menus in client tree display
 
 The client's object folder pop-up menus in the tree display has been
 reworked to be less ambiguous.  The old 'List editable' and 'List all'
@@ -84,7 +114,7 @@ to the top of the pop-up menu.
 
 Hopefully this should be less confusing for folks.
 
-7. [SERVER] Fixed custom schema migration from 0.99.7
+6. [SERVER] Fixed custom schema migration bug from 0.99.8
 
 Change 0.99.8, #17, listed below, which modified how the server
 handles non-symmetrically linked InvidDBFields, didn't properly handle
@@ -103,6 +133,68 @@ set to field 8 (the obsolete backlinks field) in precisely the same
 way that it treats invid fields with no target field specified.  This
 should make Martin's ganymede.db file from 0.99.7 work properly in
 0.99.9.
+
+7. [SERVER] Made bad login user notification optional
+
+Previously, the Ganymede server would always attempt to send
+notification of a bad password/login attempt to the name of the user
+entered at the login attempt, regardless of the configuration of the
+'badpass' system event object.
+
+Now the Ganymede server will not do this unless the 'badpass' system
+event object in the ganymede.db database has the 'Cc: Admin' flag set.
+
+8. [SERVER] Took out unnecessary fields in DBField.java
+
+The DBField base class had a number of redundant or unnecessary
+fields, including both a scalar and vector field, even though no field
+is both a scalar and a vector.
+
+I've removed the Vector values holding field and replaced it with
+accessors which will treat the single value field as a Vector as
+appropriate.
+
+I also took out the 'fieldID' short, which was redundant, since the
+DBField.getFieldDef() method already calculated that information from
+the field definition reference.
+
+I also took out the 'newValue' field, which was only used in one very
+specialized case in the userCustom plug-in, and which was better
+handled by putting an extra field in that custom DBEditObject subclass.
+
+This will save 10 bytes per field in the database while in memory,
+with probably around 40 bytes of per-field overhead remaining for
+scalar fields, rather more for Vector fields.  Not a very big deal,
+but it does amount to 80-300 bytes of RAM per object in the
+database. For our current database, this probably saves us a megabyte
+of in-memory space, or around 3% of the total resident memory usage.
+That percentage could probably get quite a bit higher when the initial
+size of the server itself is amortized over larger and larger
+databases.
+
+This change doesn't affect the on-disk database file at all.
+
+9. [STOPSERVER] Modified the stopServer code to prompt for supergash password
+
+Previously, if the Ganymede server's supergash ("root") password was
+not kept in the server's ganymede.properties file, the stopServer
+client would simply fail.
+
+Now, if it can't load the supergash password from the
+ganymede.properties file, stopServer will prompt the user for the
+supergash password.
+
+10. [CLIENT] Threaded out the client's history panel to avoid locking GUI
+
+Here at ARL, our server log is getting quite large, and the round trip
+time for reporting on the history of changes to an object is getting
+large.  Because of this, the client's GUI has been locked for a longer
+and longer time as the client's GUI thread blocks waiting for the
+server to report the object history.
+
+Because of this, the Ganymede client has been modified to thread out
+history reporting.  The client's GUI will no longer lock up while the
+client is waiting to get a report on an object's history back.
 
 -------------------- Changes from 0.99.7 to 0.99.8 -------------------
 

@@ -1,9 +1,9 @@
-Ganymede Developer Release 0.99.8
-November 23, 1999
+Ganymede Developer Release 0.99.9
+January 13, 2000
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 0.99.8 requires Swing 1.1 or later, as it is built to
+Ganymede release 0.99.9 requires Swing 1.1 or later, as it is built to
 expect the Swing libraries to be in the package javax.swing, rather
 than com.sun.java.swing, as it was in prior versions.  Use of Java JRE
 1.2.2 for the clients is highly recommended, as many Swing bugs are
@@ -23,7 +23,7 @@ account name/ password is not properly reset.  It is, instead, user:
 monitor, password: display.  If you start a new ganymede.db file
 from scratch, the monitor account should be configured properly.
 
-2) The gash and gasharl schemas are provided in 0.99.8 is intended to
+2) The gash and gasharl schemas are provided in 0.99.9 is intended to
 enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
 are, however, a relatively small number of functions that are not
 performed by Ganymede with the gash schemas.  These include the
