@@ -809,12 +809,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal consistencyCheck(DBObject object)
   {
-    Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
-    Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
+    Byte[] address = (Byte[]) object.getFieldValueLocal(interfaceSchema.ADDRESS);
+    Invid netInvid = (Invid) object.getFieldValueLocal(interfaceSchema.IPNET);
 
     if (address != null && !systemCustom.checkMatchingNet(getSession(), netInvid, address))
       {
-	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch");
+	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + this.toString());
       }
 
     return null;
