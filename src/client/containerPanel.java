@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2001/03/29 05:33:56 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2001/03/29 08:34:39 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.118 $ $Date: 2001/03/29 05:33:56 $ $Name:  $
+ * @version $Revision: 1.119 $ $Date: 2001/03/29 08:34:39 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -502,6 +502,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (templates == null || templates.size() == 0)
 	  {
 	    System.err.println("No fields defined for this object type.. ??");
+
+	    if (templates == null)
+	      {
+		System.err.println("templates is *null*");
+	      }
+	    else
+	      {
+		System.err.println("templates is empty");
+	      }
 
 	    setStatus("No fields defined for this object type.. error.");
 	    return;
@@ -3586,6 +3595,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("containerPanel cleanUp()");
+      }
+
     // first we pull everything out of our panel
 
     enum = rowHash.keys();
@@ -3668,7 +3682,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (templates != null)
       {
-	templates.setSize(0);
+	// it is critical that we don't setSize(0) on templates,
+	// as it is belongs to Loader.  we can drop our reference
+	// to it, though.
+
 	templates = null;
       }
 

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2001/03/29 05:33:56 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2001/03/29 08:34:40 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -64,6 +64,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
@@ -91,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.64 $ $Date: 2001/03/29 05:33:56 $ $Name:  $
+ * @version $Revision: 1.65 $ $Date: 2001/03/29 08:34:40 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -124,17 +125,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * not attempt to call dispose().
    */
 
-  private boolean closed = false;
-
-  /**
-   * <p>Used with internalFrameClosed() to make our JInternalFrame close
-   * interception hack from Swing 1.1 work with Kestrel.</p>
-   *
-   * <p>If this variable is set to true, stopLoading() will
-   * not do anything.
-   */
-
-  private boolean loadingStopped = false;
+  private booleanSemaphore closed = new booleanSemaphore(false);
+  private booleanSemaphore running = new booleanSemaphore(false);
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -411,164 +403,178 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Starting thread in framePanel");
       }
 
-    // windowPanel wants to know if framePanel is changed
-    // Maybe this should be replaced with InternalFrameListener?
-
-    addInternalFrameListener(getWindowPanel());
-    
-    // Now setup the framePanel layout
-
-    pane = new JTabbedPane();
-    
-    // Add the panels to the tabbedPane (add just the panels that
-    // every object has.)
-
-    general = new JScrollPane();
-    pane.addTab("General", null, general);
-    general_index = current++;
-    owner = new JScrollPane();
-    pane.addTab("Owner", null, owner);
-    owner_index = current++;
-    
-    // Check to see if this gets an objects_owned panel
-    //
-    // Only OwnerBase objects get an objects_owned panel.  The
-    // supergash OwnerBase does not get an objects_owned panel.
-    //
-    // Only user objects get a persona panel.
-    
-    short id = -1;
+    running.set(true);
 
     try
       {
-	id = getObject().getTypeID();
+	// windowPanel wants to know if framePanel is changed
+	// Maybe this should be replaced with InternalFrameListener?
 
-	if (id == SchemaConstants.OwnerBase)
+	addInternalFrameListener(getWindowPanel());
+    
+	// Now setup the framePanel layout
+
+	pane = new JTabbedPane();
+    
+	// Add the panels to the tabbedPane (add just the panels that
+	// every object has.)
+
+	general = new JScrollPane();
+	pane.addTab("General", null, general);
+	general_index = current++;
+	owner = new JScrollPane();
+	pane.addTab("Owner", null, owner);
+	owner_index = current++;
+    
+	// Check to see if this gets an objects_owned panel
+	//
+	// Only OwnerBase objects get an objects_owned panel.  The
+	// supergash OwnerBase does not get an objects_owned panel.
+	//
+	// Only user objects get a persona panel.
+    
+	short id = -1;
+
+	try
 	  {
-	    if (getObjectInvid().equals(new Invid((short)0, 1)))
+	    id = getObject().getTypeID();
+
+	    if (id == SchemaConstants.OwnerBase)
 	      {
-		if (debug)
+		if (getObjectInvid().equals(new Invid((short)0, 1)))
 		  {
-		    System.out.println("framePanel:  Supergash doesn't get an ownership panel.");
+		    if (debug)
+		      {
+			System.out.println("framePanel:  Supergash doesn't get an ownership panel.");
+		      }
+		  }
+		else
+		  {
+		    objects_owned = new JScrollPane();
+		    pane.addTab("Objects Owned", null, objects_owned);
+		    objects_owned_index = current++;
 		  }
 	      }
-	    else
+	    else if (id == SchemaConstants.UserBase)
 	      {
-		objects_owned = new JScrollPane();
-		pane.addTab("Objects Owned", null, objects_owned);
-		objects_owned_index = current++;
-	      }
-	  }
-	else if (id == SchemaConstants.UserBase)
-	  {
-	    persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
+		persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
 	     
-	    // If the field is null, then that means that the aren't
-	    // any personas, and this is jsut a view window, so we
-	    // don't need the panel at all
+		// If the field is null, then that means that the aren't
+		// any personas, and this is jsut a view window, so we
+		// don't need the panel at all
 
-	    if (persona_field != null)
-	      {
-		personae = new JPanel(false);
-		pane.addTab("Personae", null, personae);
-		personae_index = current++;
+		if (persona_field != null)
+		  {
+		    personae = new JPanel(false);
+		    pane.addTab("Personae", null, personae);
+		    personae_index = current++;
+		  }
 	      }
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not check if this is ownerbase: " + rx);
-      }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not check if this is ownerbase: " + rx);
+	  }
     
-    // the client Loader thread should have already downloaded and
-    // cached the field template vector we're getting here.  If not,
-    // we'll block here while the Loader gets the information we need.
+	// the client Loader thread should have already downloaded and
+	// cached the field template vector we're getting here.  If not,
+	// we'll block here while the Loader gets the information we need.
 
-    templates = gc.getTemplateVector(id);
+	templates = gc.getTemplateVector(id);
     
-    // Add the notes panel
+	// Add the notes panel
 
-    try
-      {
-	notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get notes_field: " + rx);
-      }
+	try
+	  {
+	    notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get notes_field: " + rx);
+	  }
     
-    notes = new JScrollPane();
-    addNotesPanel();
+	notes = new JScrollPane();
+	addNotesPanel();
 
-    // Add the history tab
+	// Add the history tab
 
-    history = new JPanel(new BorderLayout());
-    pane.addTab("History", null, history);
-    history_index = current++;
+	history = new JPanel(new BorderLayout());
+	pane.addTab("History", null, history);
+	history_index = current++;
 
-    if (id == SchemaConstants.PersonaBase)
-      {
-	admin_history = new JScrollPane();
-	pane.addTab("Admin History", null, admin_history);
-	admin_history_index = current++;
-      }
+	if (id == SchemaConstants.PersonaBase)
+	  {
+	    admin_history = new JScrollPane();
+	    pane.addTab("Admin History", null, admin_history);
+	    admin_history_index = current++;
+	  }
 
-    // Only add the date panels if the date has been set.  In order
-    // to set the date, use the menu items.
+	// Only add the date panels if the date has been set.  In order
+	// to set the date, use the menu items.
     
-    try
-      {
-	exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
-	rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
+	try
+	  {
+	    exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
+	    rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
 	  
-	if ((exp_field != null) && (exp_field.getValue() != null))
-	  {
-	    addExpirationDatePanel();
+	    if ((exp_field != null) && (exp_field.getValue() != null))
+	      {
+		addExpirationDatePanel();
+	      }
+
+	    if ((rem_field != null) && (rem_field.getValue() != null))
+	      {
+		addRemovalDatePanel();
+	      }
 	  }
-
-	if ((rem_field != null) && (rem_field.getValue() != null))
+	catch (RemoteException rx)
 	  {
-	    addRemovalDatePanel();
+	    throw new RuntimeException("Could not get date fields: " + rx);
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get date fields: " + rx);
-      }
     
-    pane.addChangeListener(this);
+	pane.addChangeListener(this);
 
-    createPanel(general_index);
-    showTab(general_index);
+	createPanel(general_index);
+	showTab(general_index);
 
-    // Under Swing 1.1, making a JTabbedPane a contentPane for an internal
-    // frame causes the JTabbedPane to have some rendering bugs, so we
-    // wrap our JTabbedPane with a generic JPanel to avoid this.
+	// Under Swing 1.1, making a JTabbedPane a contentPane for an internal
+	// frame causes the JTabbedPane to have some rendering bugs, so we
+	// wrap our JTabbedPane with a generic JPanel to avoid this.
 
-    JPanel contentPanel = new JPanel();
-    contentPanel.setLayout(new BorderLayout());
-    contentPanel.add("Center", pane);
+	JPanel contentPanel = new JPanel();
+	contentPanel.setLayout(new BorderLayout());
+	contentPanel.add("Center", pane);
 
-    setContentPane(contentPanel);
+	setContentPane(contentPanel);
     
-    // Need to add the menubar at the end, so the user doesn't get
-    // into the menu items before the tabbed pane is all set up
+	// Need to add the menubar at the end, so the user doesn't get
+	// into the menu items before the tabbed pane is all set up
     
-    JMenuBar mb = createMenuBar(editable);
+	JMenuBar mb = createMenuBar(editable);
     
-    try
-      {
-	setJMenuBar(mb);
-      }
-    catch (Error ex)
-      {
-	// Swing 1.0.2 doesn't have this method, it is only in 1.0.3 and later
+	try
+	  {
+	    setJMenuBar(mb);
+	  }
+	catch (Error ex)
+	  {
+	    // Swing 1.0.2 doesn't have this method, it is only in 1.0.3 and later
 	
-	System.err.println("Not running recent version of swing.. no setJMenuBar method.");
-      }
+	    System.err.println("Not running recent version of swing.. no setJMenuBar method.");
+	  }
     
-    pane.invalidate();
-    validate();
+	pane.invalidate();
+	validate();
+      }
+    finally
+      {
+	if (closed.isSet())
+	  {
+	    cleanUp();
+	  }
+
+	running.set(false);
+      }
   }
 
   /**
@@ -1559,17 +1565,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	System.err.println("framePanel.internalFrameClosed(): frame closed");
       }
-
-    if (this.closed)
+    
+    if (this.closed.set(true))
       {
 	if (debug)
 	  {
 	    System.err.println("framePanel.internalFrameClosed(): frame already closed, doing nothing.");
 	  }
-
+	
 	return;
       }
-
+    
     for (int i = 0; i < containerPanels.size(); i++)
       {
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
@@ -1582,41 +1588,43 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	history_panel.unregister();
       }
-
-    this.closed = true;
-
+    
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): going invisible");
       }
-
+    
     this.setVisible(false);
-
+    
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposing");
       }
-
+    
     this.dispose();
-
+    
     this.removeAll();
-
+    
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposed");
       }
-
+    
     for (int i = 0; i < containerPanels.size(); i++)
       {
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
 	
 	cp.cleanUp();
       }
-
+    
     // finally, null out all references to make sure that we don't cascade
-    // any leaks
+    // any leaks.. if the run method is still going, we'll leave this alone
+    // and let run() take care of this as it leaves
 
-    cleanUp();
+    if (!running.isSet())
+      {
+	cleanUp();
+      }
   }
 
   public void internalFrameClosing(InternalFrameEvent event)
@@ -1737,6 +1745,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public final synchronized void cleanUp()
   {
+    if (debug)
+      {
+	System.err.println("framePanel.cleanUp()");
+      }
+
     this.removeVetoableChangeListener(this);
     this.removeInternalFrameListener(this);
 

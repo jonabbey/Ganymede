@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2001/03/29 05:33:55 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/03/29 08:34:38 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.25 $ $Date: 2001/03/29 05:33:55 $ $Name:  $
+ * @version $Revision: 1.26 $ $Date: 2001/03/29 08:34:38 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -243,6 +243,11 @@ public class Loader extends Thread {
 
   public void cleanUp()
   {
+    if (debug)
+      {
+	System.err.println("** Loader cleanUp()");
+      }
+
     keepGoing = false;
 
     synchronized (this) 
@@ -659,6 +664,11 @@ public class Loader extends Thread {
 
     if (!keepGoing)
       {
+	if (debug)
+	  {
+	    System.err.println("Loader.getTemplateVector() -- keepGoing is false");
+	  }
+
 	return null;
       }
 

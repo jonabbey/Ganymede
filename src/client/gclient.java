@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.182 $
-   Last Mod Date: $Date: 2001/03/29 05:33:57 $
+   Version: $Revision: 1.183 $
+   Last Mod Date: $Date: 2001/03/29 08:34:40 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -91,7 +91,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.182 $ $Date: 2001/03/29 05:33:57 $ $Name:  $
+ * @version $Revision: 1.183 $ $Date: 2001/03/29 08:34:40 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -131,7 +131,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/03/29 05:33:57 $";
+  static String release_date = "$Date: 2001/03/29 08:34:40 $";
   static String release_number = null;
 
   // ---
@@ -5131,6 +5131,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void cleanUp()
   {
+    if (debug)
+      {
+	System.err.println("gclient.cleanUp()");
+      }
+
     this.removeAll();
 
     creditsMessage = null;
