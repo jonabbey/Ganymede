@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2000/11/02 02:41:21 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2000/11/02 22:39:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.48 $ $Date: 2000/11/02 02:41:21 $
+ * @version $Revision: 1.49 $ $Date: 2000/11/02 22:39:08 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -736,89 +736,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     Ganymede.debug("Database dumped");
 
     return null;
-  }
-
-  /**
-   * <P>dump the current db schema to disk</P>
-   */
-
-  public ReturnVal dumpSchema()
-  {
-    if (!fullprivs)
-      {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute a schema dump");
-      }
-
-    setState("Dumping schema");
-
-    try
-      {
-	Ganymede.db.dumpXML(Ganymede.schemaProperty, false);
-      }
-    catch (IOException ex)
-      {
-	return Ganymede.createErrorDialog("Schema Dump Error",
-					  "Schema could not be dumped successfully. " + ex);
-      }
-    finally
-      {
-	setState("Normal Operation");
-      }
-
-    Ganymede.debug("Schema dumped");
-
-    return null;
-  }
-
-  /**
-   * <P>This method causes the server to reload any registered
-   * custom classes, and can be run after a schema edit
-   * to cause the new classes to take over management of
-   * their respective object types.</P>
-   *
-   * <P>It's not clear how well this actually works.. I think
-   * that custom classes that have already been loaded will
-   * not be reloaded by the class loader, and classes that
-   * have not been loaded previously will need to already
-   * be present in the jar file that the server is running out
-   * of, so this method is probably not useful in practice.</P>
-   *
-   * <P>Better to shutdown and restart the server.</P>
-   */
-
-  public ReturnVal reloadCustomClasses()
-  {
-    return Ganymede.createErrorDialog("Not implemented",
-				      "This function never really worked, and has been removed to simplify the code.");
-
-    /*
-      Enumeration enum;
-      DBObjectBase base;
-
-      
-      synchronized (Ganymede.db)
-      {
-      Ganymede.debug("entering reloadCustomClasses synchronization block");
-      
-      enum = Ganymede.db.objectBases.elements();
-      
-      if (enum != null)
-      {
-      while (enum.hasMoreElements())
-      {
-      base = (DBObjectBase) enum.nextElement();
-      
-      // force reload of class
-      
-      base.reloadCustomClass();
-      }
-      }
-      }
-      }
-
-      return null;
-    */
   }
 
   /**

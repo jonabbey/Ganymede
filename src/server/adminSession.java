@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/10/09 05:51:52 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/11/02 22:39:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.16 $ %D%
+ * @version $Revision: 1.17 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -115,30 +115,6 @@ public interface adminSession extends Remote {
   ReturnVal     dumpDB() throws RemoteException;
 
   /**
-   * <P>dump the current db schema to disk</P>
-   */
-
-  ReturnVal     dumpSchema() throws RemoteException;
-
-  /**
-   * <P>This method causes the server to reload any registered
-   * custom classes, and can be run after a schema edit
-   * to cause the new classes to take over management of
-   * their respective object types.</P>
-   *
-   * <P>It's not clear how well this actually works.. I think
-   * that custom classes that have already been loaded will
-   * not be reloaded by the class loader, and classes that
-   * have not been loaded previously will need to already
-   * be present in the jar file that the server is running out
-   * of, so this method is probably not useful in practice.</P>
-   *
-   * <P>Better to shutdown and restart the server.</P>
-   */
-
-  ReturnVal     reloadCustomClasses() throws RemoteException;
-
-  /**
    *
    * run a (possibly long-running) verification suite on the invid links
    *
@@ -148,10 +124,8 @@ public interface adminSession extends Remote {
 
   /**
    * <P>Removes any invid pointers in the Ganymede database whose
-   * targets are not properly defined.  Useful after dumping a
-   * schema with {@link arlut.csd.ganymede.adminSession#dumpSchema() dumpSchema()},
-   * which can leave lingering invid pointers as a result of
-   * the simplicity of its data filtering.</P>
+   * targets are not properly defined.  This should not happen
+   * unless there is a bug some place in the server.</P>
    */
 
   ReturnVal     runInvidSweep() throws RemoteException;

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2000/10/10 21:34:55 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2000/11/02 22:39:07 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -645,8 +645,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem runInvidSweepMI = null;
   JMenuItem runEmbeddedTestMI = null;
   JMenuItem runEmbeddedSweepMI = null;
-  JMenuItem dumpSchemaMI = null;
-  JMenuItem reloadClassesMI = null;
 
   JPopupMenu popMenu = null;
   JMenuItem killUserMI = null;
@@ -767,19 +765,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     runEmbeddedSweepMI = new JMenuItem("Repair Embedded Integrity");
     runEmbeddedSweepMI.addActionListener(this);
 
-    dumpSchemaMI = new JMenuItem("Dump Schema");
-    dumpSchemaMI.addActionListener(this);
-
-    reloadClassesMI = new JMenuItem("Reload Custom Classes");
-    reloadClassesMI.addActionListener(this);
-
     debugMenu.add(runInvidTestMI);
     debugMenu.add(runInvidSweepMI);
     debugMenu.add(runEmbeddedTestMI);
     debugMenu.add(runEmbeddedSweepMI);
-    debugMenu.addSeparator();
-    debugMenu.add(dumpSchemaMI);
-    debugMenu.add(reloadClassesMI);
 
     mbar.add(controlMenu);
     mbar.add(debugMenu);
@@ -1154,28 +1143,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      {
 		admin.forceDisconnect("Couldn't talk to server");
 	      }
-	  }
-      }
-    else if (event.getSource() == dumpSchemaMI)
-      {
-	try
-	  {
-	    admin.dumpSchema();
-	  }
-	catch (RemoteException e)
-	  {
-	    admin.forceDisconnect("Couldn't talk to server");
-	  }
-      }
-    else if (event.getSource() == reloadClassesMI)
-      {
-	try
-	  {
-	    admin.reloadClasses();
-	  }
-	catch (RemoteException e)
-	  {
-	    admin.forceDisconnect("Couldn't talk to server");
 	  }
       }
     else if (event.getSource() == runInvidTestMI)
@@ -2030,16 +1997,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   void dumpDB() throws RemoteException
   {
     handleReturnVal(aSession.dumpDB());
-  }
-
-  void dumpSchema() throws RemoteException
-  {
-    handleReturnVal(aSession.dumpSchema());
-  }
-
-  void reloadClasses() throws RemoteException
-  {
-    handleReturnVal(aSession.reloadCustomClasses());
   }
 
   void runInvidTest() throws RemoteException
