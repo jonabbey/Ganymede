@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/10/13 20:01:01 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/12/14 23:41:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -742,7 +742,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		
 		buffer.append(" ");
 		buffer.append(subname);
-		buffer.append("\n");
+		writer.println(buffer.toString());
+		buffer = new StringBuffer();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -765,7 +766,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		buffer.append(" ");
 		buffer.append(subname);
-		buffer.append("\n");
+		writer.println(buffer.toString());
+		buffer = new StringBuffer();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -837,7 +839,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		buffer.append(" ");
 		buffer.append(subname);
-		buffer.append("\n");
+		writer.println(buffer.toString());
+		buffer = new StringBuffer();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -861,7 +864,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		buffer.append(" ");
 		buffer.append(subname);
-		buffer.append("\n");
+		writer.println(buffer.toString());
+		buffer = new StringBuffer();
 		buffer.append(subname);
 		subgroup++;
 	      }
