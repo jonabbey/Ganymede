@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.25 $
-# $Date: 1999/01/21 16:56:11 $
+# $Revision: 1.26 $
+# $Date: 1999/01/21 19:53:17 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -114,6 +114,8 @@ classfiles:
 	\@cd $rootdir/src/server; \\
 	build
 	\@cd $rootdir/src/client; \\
+	build
+	\@cd $rootdir/src/password; \\
 	build
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
@@ -320,7 +322,8 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$rootdir/src/classes",
 	  "$rootdir/src/server", "Ganymede Server Classes", "$rootdir/src/classes",
 	  "$rootdir/src/client", "Ganymede Client Classes", "$rootdir/src/classes",
-	  "$rootdir/src/classes", "Ganymede Jars", "$rootdir/src/classes");
+	  "$rootdir/src/classes", "Ganymede Jars", "$rootdir/src/classes",
+	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes");
 
 print "Generating config.sh files in source directories.\n\n";
 
