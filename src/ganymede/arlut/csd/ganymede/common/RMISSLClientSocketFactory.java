@@ -95,7 +95,13 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 	RMISSLClientSocketFactory.printCallStack();
       }
 
-    return getSF().createSocket(host, port);
+    SSLSocket sock = (SSLSocket) getSF().createSocket(host, port);
+
+    SSLSession session = sock.getSession();
+
+    System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + session.getCipherSuite());
+
+    return sock;
   }
 
   public boolean equals(Object object)
