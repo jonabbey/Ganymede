@@ -8,15 +8,15 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2002/08/07 18:39:22 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2003/09/05 20:25:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -130,11 +130,12 @@ public class ReturnVal implements java.io.Serializable {
   Invid newObjectInvid = null;
 
   /**
-   * <p>A remote handle to a {@link arlut.csd.ganymede.db_object db_object}
+   * <p>A remote handle to an RMI reference of various kinds ({@link arlut.csd.ganymede.db_object db_object},
+   * {@link arlut.csd.ganymede.Session Session}, {@link arlut.csd.ganymede.XMLSession XMLSession})
    * on the server returned for use by the client.</p>
    */
 
-  db_object remoteObjectRef = null;
+  private Remote remoteObjectRef = null;
 
   /**
    * <p>A Serializable StringBuffer representation of objects and fields
@@ -223,7 +224,33 @@ public class ReturnVal implements java.io.Serializable {
 
   public db_object getObject()
   {
-    return remoteObjectRef;
+    return (db_object) remoteObjectRef;
+  }
+
+  /** 
+   * <p>This method is used to get a remote {@link
+   * arlut.csd.ganymede.Session Session} reference that the server
+   * wants to return to the client.  Used to return the results
+   * of a remote login attempt.  May be null if the login attempt
+   * failed.</p>
+   */
+
+  public Session getSession()
+  {
+    return (Session) remoteObjectRef;
+  }
+
+  /** 
+   * <p>This method is used to get a remote {@link
+   * arlut.csd.ganymede.XMLSession XMLSession} reference that the server
+   * wants to return to the client.  Used to return the results
+   * of a remote xml login attempt.  May be null if the login attempt
+   * failed.</p>
+   */
+
+  public XMLSession getXMLSession()
+  {
+    return (XMLSession) remoteObjectRef;
   }
 
   /**
@@ -731,5 +758,31 @@ public class ReturnVal implements java.io.Serializable {
   public void setObject(db_object object)
   {
     this.remoteObjectRef = object;
+  }
+
+  /** 
+   * <p>This method is used to set a {@link
+   * arlut.csd.ganymede.Session Session} reference that the client
+   * can retrieve from us at login time.</p>
+   *
+   * <p>For use on the server-side.</p> 
+   */
+
+  public void setSession(Session session)
+  {
+    this.remoteObjectRef = session;
+  }
+
+  /** 
+   * <p>This method is used to set a {@link
+   * arlut.csd.ganymede.XMLSession XMLSession} reference that the client
+   * can retrieve from us at login time.</p>
+   *
+   * <p>For use on the server-side.</p> 
+   */
+
+  public void setXMLSession(XMLSession session)
+  {
+    this.remoteObjectRef = session;
   }
 }
