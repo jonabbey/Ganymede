@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/04/11 20:50:18 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/05/19 04:43:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,6 +80,8 @@ import com.jclark.xml.sax.*;
 
 public class XMLReader implements org.xml.sax.DocumentHandler, 
 				  org.xml.sax.ErrorHandler, Runnable {
+  
+  public final static boolean debug = false;
 
   private org.xml.sax.Parser parser;
   private org.xml.sax.InputSource inputSource;
@@ -89,6 +91,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private Thread inputThread;
   private boolean done = false;
   private XMLItem pushback;
+  private XMLElement halfElement;
   private boolean skipWhiteSpace;
 
   /* -- */
@@ -184,38 +187,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		    finished = ((XMLCharData) value).containsNonWhitespace();
 		  }
 	      }
-
-	    // if we've got an open element, see if the very next
-	    // significant item is the matching close item, in which
-	    // case we'll label this XMLElement an empty element and
-	    // consume the matching close element.
-
-	    if (value instanceof XMLElement)
-	      {
-		XMLElement element = (XMLElement) value;
-
-		XMLItem nextItem = peekNextItem(skipWhiteSpaceChars);
-
-		if (nextItem != null && nextItem instanceof XMLCloseElement)
-		  {
-		    XMLCloseElement close = (XMLCloseElement) nextItem;
-
-		    if (close.matchesClose(element.getName()))
-		      {
-			element.setEmpty();
-			getNextItem(false); // coalesce the next item
-			
-			if (false)
-			  {
-			    System.err.println("XML Reader.getNextItem(): skipping forward to end of empty element " + 
-					       element);
-			  }
-		      }
-		  }
-	      }
 	  }
 
-	if (false)
+	if (debug)
 	  {
 	    System.err.println("XMLReader.getNextItem() returning " + value);
 	  }
@@ -309,37 +283,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		    finished = false; // loop again
 		  }
 	      }
-
-	    if (value instanceof XMLElement)
-	      {
-		XMLElement element = (XMLElement) value;
-
-		XMLItem nextItem;
-
-		if (pushback == null)
-		  {
-		    nextItem = peekSpecificItem(1);
-		  }
-		else
-		  {
-		    nextItem = peekSpecificItem(0);
-		  }
-		
-		if (nextItem != null && nextItem.matchesClose(element.getName()))
-		  {
-		    element.setEmpty();
-		    getNextItem(false); // coalesce the next item
-
-		    if (false)
-		      {
-			System.err.println("XML Reader.peekNextItem(): skipping forward to end of empty element " + 
-					   element);
-		      }
-		  }
-	      }
 	  } // while (!finished)
 
-	if (false)
+	if (debug)
 	  {
 	    System.err.println("XMLReader.peekNextItem() returning " + value);
 	  }
@@ -473,6 +419,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     while (nextItem != null && !nextItem.matchesClose(tagName))
       {
+	//System.err.println(">>> " + tagName + " seeking: " + nextItem);
 	nextItem = getNextItem(skipWhiteSpace);
       }
     
@@ -543,6 +490,27 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   }
 
   /**
+   * <p>This is a private helper method used to move a completed
+   * halfElement XMLElement (which stays half-completed until we know
+   * whether the SAX parser will give us an immediately following
+   * close element, in which case we want to mark the halfElement as
+   * empty and eat the subsequent close) into the XMLReader's primary
+   * buffer.</p>
+   */
+
+  private final void completeElement() throws SAXException
+  {
+    if (halfElement != null)
+      {
+	buffer.addElement(halfElement);
+
+	halfElement = null;
+	
+	buffer.notifyAll();
+      }
+  }
+
+  /**
    * <p>The locator allows the application to determine the end
    * position of any document-related event, even if the parser is
    * not reporting an error.  Typically, the application will
@@ -557,8 +525,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    *
    * @param locator An object that can return the location of
    *                any SAX document event.
-   * @see org.xml.sax.Locator
-   */
+   * @see org.xml.sax.Locator */
 
   public void setDocumentLocator(org.xml.sax.Locator locator)
   {
@@ -591,6 +558,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
+
+	completeElement();
 
 	if (done)
 	  {
@@ -633,6 +602,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
+
+	completeElement();
 
 	if (done)
 	  {
@@ -684,12 +655,15 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
+	completeElement();
+
 	if (done)
 	  {
 	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	  }
 	
-	buffer.addElement(new XMLElement(name, atts));
+	halfElement = new XMLElement(name, atts);
+
 	buffer.notifyAll();
       }
   }
@@ -726,6 +700,15 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
+	if (halfElement != null && halfElement.matches(name))
+	  {
+	    halfElement.setEmpty();
+	    completeElement();
+	    return;
+	  }
+
+	completeElement();
+	
 	if (done)
 	  {
 	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
@@ -778,6 +761,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
+	completeElement();
+
 	if (done)
 	  {
 	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
@@ -828,6 +813,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
+
+	completeElement();
 
 	if (done)
 	  {
@@ -895,6 +882,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
+	completeElement();
+
 	if (done)
 	  {
 	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
@@ -944,6 +933,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
+	completeElement();
+
 	if (done)
 	  {
 	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
@@ -990,6 +981,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
+
+	completeElement();
 
 	if (done)
 	  {

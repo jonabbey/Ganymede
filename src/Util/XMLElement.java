@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/22 06:27:14 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/05/19 04:43:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -225,7 +225,9 @@ public class XMLElement extends XMLItem {
 
     return (val.equals("1") || 
 	    val.equalsIgnoreCase("true") || 
-	    val.equalsIgnoreCase("t"));
+	    val.equalsIgnoreCase("t") ||
+	    val.equalsIgnoreCase("yes") ||
+	    val.equalsIgnoreCase("y"));
   }
 
   /**
@@ -282,7 +284,7 @@ public class XMLElement extends XMLItem {
 	    value = attributes.get(key);
 
 	    buffer.append(key);
-	    buffer.append("= \"");
+	    buffer.append("=\"");
 	    buffer.append(value);
 	    buffer.append("\"");
 

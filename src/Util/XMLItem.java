@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/15 03:36:51 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/05/19 04:43:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -169,6 +169,16 @@ public abstract class XMLItem {
    */
 
   public Integer getAttrInt(String name)
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <P>This method returns the name of an element, if this is
+   * the right kind of item.</P>
+   */
+
+  public String getName()
   {
     throw new IllegalArgumentException("not an XMLElement.");
   }

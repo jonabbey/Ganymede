@@ -6,8 +6,8 @@
    
    Created: 5 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:04 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/05/19 04:43:25 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,12 +97,12 @@ public class ParseArgs {
 
   public static String getArg(String argument, String[] args)
   {
-
     for (int i = 0; i < args.length; i++)
       {
 	if (args[i].startsWith(argument))
 	  {
 	    int index = args[i].indexOf("=");
+
 	    if (index > 0)
 	      {
 		return args[i].substring(index + 1);
@@ -115,7 +115,5 @@ public class ParseArgs {
       }
 
     return null;
-   
   }
-
 }
