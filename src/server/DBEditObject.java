@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.155 $
-   Last Mod Date: $Date: 2001/10/31 02:54:04 $
+   Version: $Revision: 1.156 $
+   Last Mod Date: $Date: 2001/11/05 20:42:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.155 $ $Date: 2001/10/31 02:54:04 $ $Name:  $
+ * @version $Revision: 1.156 $ $Date: 2001/11/05 20:42:54 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2036,13 +2036,24 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.</p>
+   * <p>This method provides a hook to allow choice lists for Invid
+   * fields that may have the list of choices returned filtered
+   * by the GanymedeSession's list of owner filters.  This method
+   * is directly called by InvidDBField.choices() if and only if a NON-filtered
+   * choice list is desired.  If a filtered choice list is desired,
+   * InvidDBField.choices() will call the single parameter obtainChoiceList()
+   * method.  Likewise, StringDBField will call the single parameter
+   * obtainChoiceList() method.  This enables users to simply override
+   * the single parameter obtainChoiceList() method, but at the cost
+   * of a failure to function reasonably if a non-filtered choice list
+   * is desired.</p>
    *
-   * <p>This method will provide a reasonable default for targetted
-   * invid fields.</p>
+   * <p>That is, this two parameter version is the best
+   * obtainChoiceList method to override, but if you have old plug-ins
+   * that override the single parameter obtainChoiceList method, it
+   * will generally work, as the client currently wants standard
+   * filtered Invid choice lists in all cases except owner list
+   * choices.</p>
    *
    * <p>NOTE: This method does not need to be synchronized.  Making this
    * synchronized can lead to DBEditObject/DBSession nested monitor

@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/03/08 22:43:56 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/11/05 20:42:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -186,7 +186,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field, boolean applyFilter)
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {
@@ -201,12 +201,17 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	// for the MEMBERS field.
 
 	Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
+	query1.setFiltered(applyFilter);
+
 	Query query2 = new Query((short) 275, null, false); // list all external email targets
+	query2.setFiltered(applyFilter);
 	
 	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
+	query3.setFiltered(applyFilter);
 	
 	QueryResult result = editset.getSession().getGSession().query(query1, this);
+
 	result.append(editset.getSession().getGSession().query(query2, this));
 	result.append(editset.getSession().getGSession().query(query3, this));
 	
