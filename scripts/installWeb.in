@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.9 $
-# $Date: 2000/12/05 23:52:25 $
+# $Revision: 1.10 $
+# $Date: 2001/01/09 17:27:00 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -12,6 +12,8 @@
 
 use File::Copy;
 use Cwd;
+
+$perlloc = "/opt/bin/perl5";
 
 # Make sure our current working directory is in the same directory as
 # the script
@@ -28,15 +30,19 @@ chdir($rootdir);
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL");
+@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL","XMLPATH");
 
 %vars = ("SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
-         "HTMLINSTALL" => "/sample/apache/html/ganymede");
+         "HTMLINSTALL" => "/sample/apache/html/ganymede",
+	 "XMLPATH" => "/ganymede-client/bin");
 
 %descrip = ("SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
-            "HTMLINSTALL" => "Where should the web access files be installed?");
+            "HTMLINSTALL" => "Where should the web access files be installed?",
+	    "XMLPATH" => "Where will the ganymede client binaries be installed?");
+
+&removelastslash($vars{"XMLPATH"});
 
 ####################
 
@@ -138,8 +144,9 @@ ENDOK
 
 &copy_file("jars/ganymede.jar", "$installdir/ganymede.jar");
 &copy_file("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar");
-&copy_file("jars/password.jar", "$installdir/password.jar");
 &copy_file("webforms/ganymede_title.gif", "$installdir/ganymede_title.gif");
+&copy_file("webforms/ganymede_title2_sm.gif", "$installdir/ganymede_title2_sm.gif");
+&copy_file("webforms/arlbw.jpg", "$installdir/arlbw.jpg");
 
 # Customize and copy the client web pages
 
@@ -148,8 +155,8 @@ ENDOK
 &install_file("webforms/client_native.html", "$installdir/client_native.html");
 &install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
 &install_file("webforms/console_native.html", "$installdir/console_native.html");
-&install_file("webforms/password_plugin.html", "$installdir/password_plugin.html");
-&install_file("webforms/password_native.html", "$installdir/password_native.html");
+&install_file("webforms/ganypass.pl", "$installdir/ganypass.pl");
+chmod 0755, "$installdir/ganypass.pl";
 
 print "\nDone\n";
 
@@ -204,6 +211,8 @@ sub install_file{
   while (<INPUT>) {
       s/#SERVERHOST/$vars{"SYSTEMNAME"}/g;
       s/#REGISTRYPORT/$vars{"REGISTRYPORT"}/g;
+      s/<#XMLPATH#>/$vars{"XMLPATH"}/g;
+      s/<#PERLEXE#>/$perlloc/g;
       print OUTPUT $_;
   }
 
