@@ -7,8 +7,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/06/18 22:43:11 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/11/02 23:41:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,14 +64,14 @@ import java.util.*;
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>
  *
- * @version $Revision: 1.3 $ $Date: 1999/06/18 22:43:11 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 1999/11/02 23:41:24 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 public class VecSortInsert {
 
   Compare comparator;
-  static boolean debug = false;
+  static final boolean debug = false;
 
   /* -- */
 
@@ -79,7 +79,6 @@ public class VecSortInsert {
   
   public static void main(String[] argv)
   {
-    debug = true;
     Vector test = new Vector();
 
     test.addElement("B");
@@ -231,9 +230,15 @@ public class VecSortInsert {
 
     if (objects.size() == 0)
       {
+	if (debug)
+	  {
+	    System.err.println("Inserting " + element + " at 0 to start list");
+	  }
+
 	objects.addElement(element);
 	return;
       }
+
 
     // java integer division rounds towards zero
 
@@ -244,7 +249,7 @@ public class VecSortInsert {
 
     while (low < high)
       {
-	if (debug)
+	if (false)
 	  {
 	    printTest(objects.size(), low, mid, high);
 	  }
@@ -261,18 +266,45 @@ public class VecSortInsert {
 	mid = (low + high) / 2;
       }
 
-    if (debug)
+    if (false)
       {
 	printTest(objects.size(), low, mid, high);
       }
 
-    if (mid >= objects.size() - 1)
+    if ((mid == objects.size()-1) && comparator.compare(element, objects.elementAt(objects.size()-1)) > 0)
       {
+	if (debug)
+	  {
+	    System.err.println("Inserting " + element + " at " + mid + " (end) of " + objects.size());
+	  }
+	
 	objects.addElement(element);
       }
     else
       {
+	if (debug)
+	  {
+	    System.err.println("Inserting " + element + " at " + mid + " in " + objects.size());
+	  }
+	
 	objects.insertElementAt(element, mid);
+      }
+
+    if (debug)
+      {
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		System.err.print(" ");
+	      }
+
+	    System.err.print(objects.elementAt(i));
+	  }
+
+	System.err.println();
+
+	//	printTest(objects.size(), low, mid, high);
       }
   }
 }
