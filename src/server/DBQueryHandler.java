@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -73,6 +73,20 @@ public class DBQueryHandler {
 
 	n = (QueryDataNode) qN;
 
+	if (n.fieldId == -2)
+	  {
+	    // compare the Invid
+
+	    if (n.comparator == n.EQUALS)
+	      {
+		return obj.getInvid().equals(n.value);
+	      }
+	    else
+	      {
+		return false;
+	      }
+	  }
+
 	if (n.fieldname != null)
 	  {
 	    field = (DBField) obj.getField(n.fieldname);
@@ -113,6 +127,28 @@ public class DBQueryHandler {
 		try
 		  {
 		    return (((String) string.getValue()).equalsIgnoreCase((String) n.value));
+		  }
+		catch (ClassCastException ex)
+		  {
+		    return false;
+		  }
+	      }
+	    else if (n.comparator == n.STARTSWITH)
+	      {
+		try
+		  {
+		    return (((String) string.getValue()).startsWith((String) n.value));
+		  }
+		catch (ClassCastException ex)
+		  {
+		    return false;
+		  }
+	      }
+	    else if (n.comparator == n.ENDSWITH)
+	      {
+		try
+		  {
+		    return (((String) string.getValue()).endsWith((String) n.value));
 		  }
 		catch (ClassCastException ex)
 		  {

@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,8 +27,10 @@ public class QueryDataNode extends QueryNode {
   static final byte GREAT = 4;
   static final byte GREATEQ = 5;
   static final byte NOCASEEQ = 6; // case insensitive string equals
-  static final byte UNDEFINED = 7;
-  static final byte LAST = 7;
+  static final byte STARTSWITH = 7;
+  static final byte ENDSWITH = 8;
+  static final byte UNDEFINED = 9;
+  static final byte LAST = 9;
 
   /* - */
 
@@ -67,6 +69,12 @@ public class QueryDataNode extends QueryNode {
    * This constructor creates a query node that will be matched
    * against a field in an object.
    *
+   * If fieldID == -1, the labels of objects in the database will be
+   * taken as the field for comparison's sake.
+   *
+   * If fieldID == -2, the Invid of objects in the database will be
+   * taken as the field for comparison's sake.
+   * 
    */
 
   public QueryDataNode(short fieldId, byte comparator, Object value)
