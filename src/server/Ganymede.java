@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2001/10/05 19:48:57 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2001/10/05 19:57:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -573,7 +573,7 @@ public class Ganymede {
 
 		    Ganymede.debug(WordWrap.wrap("Both the system hostname (" + 
 						 java.net.InetAddress.getLocalHost().getHostName() +
-						 ") and\nthe ganymede.serverhost definition (" + 
+						 ") and the ganymede.serverhost definition (" + 
 						 serverHostProperty + ") resolve to the 127.0.0.1 loopback address", 
 						 70));
 		    Ganymede.debug("\nThe Ganymede server must have an externally accessible IP address or else clients");
