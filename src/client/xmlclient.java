@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/07/28 04:59:30 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2002/03/16 02:34:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.38 $ $Date: 2001/07/28 04:59:30 $ $Name:  $
+ * @version $Revision: 1.39 $ $Date: 2002/03/16 02:34:36 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -147,7 +147,7 @@ public final class xmlclient implements ClientListener {
    * object.</p>
    */
 
-  public XMLReader reader = null;
+  public arlut.csd.Util.XMLReader reader = null;
 
   // ---
 
@@ -403,7 +403,7 @@ public final class xmlclient implements ClientListener {
   {
     try
       {
-	reader = new XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+	reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
 
 	XMLItem startDocument = getNextItem();
 
@@ -654,7 +654,7 @@ public final class xmlclient implements ClientListener {
   {
     try
       {
-	reader = new XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+	reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
 
 	XMLItem startDocument = getNextItem();
 
