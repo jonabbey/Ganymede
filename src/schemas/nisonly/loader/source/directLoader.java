@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -142,12 +142,12 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = (DBEditObject) createObject(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.RoleBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
-	retVal = current_obj.setFieldValueLocal(SchemaConstants.PermName, "GASH Admin");
+	retVal = current_obj.setFieldValueLocal(SchemaConstants.RoleName, "GASH Admin");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -158,7 +158,7 @@ public class directLoader {
 	    // note that QueryDataNode uses the label as the
 	    // comparator if you don't provide a field id
 
-	    Query q = new Query(SchemaConstants.PermBase, 
+	    Query q = new Query(SchemaConstants.RoleBase, 
 				new QueryDataNode(QueryDataNode.EQUALS, "GASH Admin"),
 				false);
 
@@ -181,7 +181,7 @@ public class directLoader {
 	  {
 	    System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
 
-	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.RoleMatrix);
 
 	    PermEntry defPerm = new PermEntry(true, true, true, true);
 	
@@ -507,7 +507,7 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("Add " + username + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
@@ -523,7 +523,7 @@ public class directLoader {
 		  {
 		    System.err.println("-- home group add " + username);
 		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
-		    current_field2.addElement(invid);
+		    ((DBField) current_field2).addElementLocal(invid);
 		  }
 	      }
 	    else
