@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.rmi.*;
 
 public class groupCustom extends DBEditObject implements SchemaConstants, groupSchema {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    *
