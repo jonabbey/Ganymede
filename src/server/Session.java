@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,11 +29,11 @@ import java.util.*;
 
 /**
  *   Client side interface definition for the Ganymede Session Object.  The
- *   Ganymede Session object holds the state for a .Ganymede client's session
+ *   Ganymede Session object holds the state for a Ganymede client's session
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.30 $ %D%
+ * @version $Revision: 1.31 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -76,9 +76,10 @@ public interface Session extends Remote {
 
   /**
    *
-   * This method is used to tell the client where to look
-   * to access the Ganymede help document tree.
-   *
+   * This method is used to tell the client where to look to access
+   * the Ganymede help document tree.  The String returned is a URL
+   * for the root of the Ganymede help web.
+   * 
    */
 
   String      getHelpBase() throws RemoteException;
@@ -132,10 +133,10 @@ public interface Session extends Remote {
    * the ability of the client to directly view any object that the client's
    * persona would normally have access to, but will reduce clutter and allow
    * the client to present the world as would be seen by administrator personas
-   * with just the listed ownerGroups accessible.
+   * with just the listed ownerGroups accessible.<br><br>
    *
    * This method cannot be used to grant access to objects that are accessible
-   * by the client's adminPersona.
+   * by the client's adminPersona.<br><br>
    *
    * Calling this method with ownerInvids set to null will turn off the filtering.
    *
@@ -149,7 +150,7 @@ public interface Session extends Remote {
 
   /**
    *
-   * List types of objects stored and manipulated through the Ganymede server.
+   * List types of objects stored and manipulated through the Ganymede server.<br><br>
    *
    * This method returns a vector of Base remote references.
    *
@@ -195,7 +196,7 @@ public interface Session extends Remote {
 
   /**
    *
-   * Returns a vector of field definition templates, in display order.
+   * Returns a vector of field definition templates, in display order.<br><br>
    *
    * This vector may be cached, as it is static for this object type.
    *
@@ -209,11 +210,11 @@ public interface Session extends Remote {
    *
    * This method call initiates a transaction on the server.  This
    * call must be executed before any objects are modified (created,
-   * edited, inactivated, removed).
+   * edited, inactivated, removed).<br><br>
    *
-   * Currently each client can only have one transaction open.. it
+   * Currently each client can only have one transaction open. It
    * is an error to call openTransaction() while another transaction
-   * is still open, and an exception will be thrown.
+   * is still open, and an exception will be thrown in this case.
    * 
    */
 
@@ -225,7 +226,7 @@ public interface Session extends Remote {
    * of an open transaction on the server.  At any time thereafter,
    * the server can be instructed to revert the transaction to the
    * state at the time of this checkpoint by calling rollback()
-   * with the same key.
+   * with the same key.<br><br>
    *
    * Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
@@ -238,24 +239,26 @@ public interface Session extends Remote {
   /**
    *
    * This method call causes the server to roll back the state
-   * of an open transaction on the server.
+   * of an open transaction on the server.<br><br>
    *
    * Checkpoints are held in a Stack on the server;  it is never
    * permissible to try to 'rollforward' to a checkpoint that
    * was itself rolled back.  That is, the following sequence is 
-   * not permissible.
+   * not permissible.<br><br>
    *
+   * <pre>
    * checkpoint("1");
-   * <changes>
+   * &lt;changes&gt;
    * checkpoint("2");
-   * <changes>
+   * &lt;changes&gt;
    * rollback("1");
    * rollback("2");
+   * </pre>
    *
    * At the time that the rollback("1") call is made, the server
    * forgets everything that has occurred in the transaction since
    * checkpoint 1.  checkpoint 2 no longer exists, and so the second
-   * rollback call will return false.
+   * rollback call will return false.<br><br>
    *
    * Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
@@ -307,7 +310,7 @@ public interface Session extends Remote {
    * file on the server, and the changes will become visible to other
    * clients.<br><br>
    *
-   * Committransaction() will return a ReturnVal indicating whether or
+   * commitTransaction() will return a ReturnVal indicating whether or
    * not the transaction could be committed, and whether or not the
    * transaction remains open for further attempts at commit.  If
    * ReturnVal.doNormalProcessing is set to true, the transaction
@@ -396,7 +399,7 @@ public interface Session extends Remote {
 
   /**
    *
-   * List objects in the database meeting the given query criteria.
+   * List objects in the database meeting the given query criteria.<br><br>
    *
    * The database will be read-locked during the query, assuring
    * a transaction-consistent view of the database.  The StringBuffer
@@ -418,12 +421,12 @@ public interface Session extends Remote {
   /**
    *
    * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to <invid>, since time <since>.
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this date, or all events if this is null.
    *
-   * @return A String containing a record of events for the Invid in question,
+   * @return A StringBuffer containing a record of events for the Invid in question,
    * or null if permissions are denied to view the history.
    *
    */
@@ -433,12 +436,12 @@ public interface Session extends Remote {
   /**
    *
    * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to <invid>, since time <since>.
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
    *
-   * @return A String containing a record of events for the Invid in question,
+   * @return A StringBuffer containing a record of events for the Invid in question,
    * or null if permissions are denied to view the history.
    *
    */
@@ -520,7 +523,7 @@ public interface Session extends Remote {
 
   /**
    *
-   * Inactivate an object in the database
+   * Inactivate an object in the database<br><br>
    *
    * Objects inactivated will typically be altered to reflect their inactive
    * status, but the object itself might not be purged from the Ganymede
@@ -534,12 +537,12 @@ public interface Session extends Remote {
 
   /**
    *
-   * Reactivates an inactivated object in the database
+   * Reactivates an inactivated object in the database<br><br>
    *
    * This method is only applicable to inactivated objects.  For such,
    * the object will be reactivated if possible, and the removal date
    * will be cleared.  The object may retain an expiration date,
-   * however.
+   * however.<br><br>
    *
    * The client should check the returned ReturnVal's
    * getObjectStatus() method to see whether the re-activated object
@@ -551,7 +554,7 @@ public interface Session extends Remote {
 
   /**
    *
-   * Remove an object from the database
+   * Remove an object from the database<br><br>
    *
    * Certain objects cannot be inactivated, but must instead be
    * simply removed on demand.  The active permissions for the client
