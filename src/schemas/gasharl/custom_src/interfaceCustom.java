@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,7 @@ import java.rmi.*;
 
 public class interfaceCustom extends DBEditObject implements SchemaConstants {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
