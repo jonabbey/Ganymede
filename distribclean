@@ -3,8 +3,8 @@
 # Ganymede distribution cleaner
 #
 # Release: $Name:  $
-# Version: $Revision: 1.4 $
-# Date: $Date: 1999/01/22 20:35:24 $
+# Version: $Revision: 1.5 $
+# Date: $Date: 1999/01/27 21:55:11 $
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
@@ -56,6 +56,26 @@ rm -f installServer
 # Clean up the src tree.. remove the configured makefile,
 # config.sh and rebuild files
 
+echo "Cleaning doc tree"
+
+cd doc
+
+find . -name config.sh -exec rm {} \;
+
+cd javadoc
+
+rm -rf *
+
+cd ../..
+
+echo "Cleaning jars"
+
+cd jars
+
+rm -f *.jar
+
+cd ..
+
 echo "Cleaning source tree"
 
 cd src
@@ -65,6 +85,8 @@ rm -f Makefile
 find . -name config.sh -exec rm {} \;
 
 find . -name rebuild -exec rm {} \;
+
+find schemas -name \*.class -exec rm {} \;
 
 # Clean up the classes tree.. we've got the jars, so we don't
 # need the classes in the classes tree.
