@@ -129,7 +129,7 @@ export CLASSPATH
 # '-logrmi' option does cause RMI calls to the
 # server to be logged to $INSTALLDIR/debug.log.
 
-$JAVA -Xms32m -Xmx256m $RMIGC arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
+$JAVA -server -Xms32m -Xmx256m $RMIGC arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
 
 #			     ----====----
 
@@ -144,4 +144,4 @@ $JAVA -Xms32m -Xmx256m $RMIGC arlut.csd.ganymede.server.Ganymede -resetadmin -lo
 # and -Xbootclasspath options, or you'll need to set the appropriate bootpath
 # for your JDK installation.
 
-#$JAVA -Xdebug -Xint -Xms32m -Xmx256m $RMIGC -Xbootclasspath:/usr/java1.2/jre/lib/rt.jar:/usr/java1.2/lib/tools.jar arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
+#$JAVA -server -Xdebug -Xint -Xms32m -Xmx256m $RMIGC -Xbootclasspath:/usr/java1.2/jre/lib/rt.jar:/usr/java1.2/lib/tools.jar arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
