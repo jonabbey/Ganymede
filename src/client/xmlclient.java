@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/10/07 07:08:00 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/10/07 07:12:55 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.28 $ $Date: 2000/10/07 07:08:00 $ $Name:  $
+ * @version $Revision: 1.29 $ $Date: 2000/10/07 07:12:55 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -308,7 +308,6 @@ public final class xmlclient implements ClientListener {
 	      {
 		System.err.print("Password for \"" + username + "\":");
 		password = in.readLine();
-		System.err.println();
 	      }
 	    catch (java.io.IOException ex)
 	      {
@@ -408,7 +407,6 @@ public final class xmlclient implements ClientListener {
 	      {
 		System.out.print("Password for \"" + username + "\":");
 		password = in.readLine();
-		System.out.println();
 	      }
 	    catch (java.io.IOException ex)
 	      {
