@@ -8,7 +8,7 @@
    Ganymede adminSession object holds the state for the Ganymede Admin console.
 
    Created: 28 May 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@
 package arlut.csd.ganymede;
 
 import java.rmi.*;
+import java.util.Date;
 
 public interface adminSession extends Remote {
 
@@ -30,6 +31,12 @@ public interface adminSession extends Remote {
   boolean     dumpSchema() throws RemoteException;
   boolean     reloadCustomClasses() throws RemoteException;
   void        runInvidTest() throws RemoteException;
+
+  boolean     runTaskNow(String name) throws RemoteException;
+  boolean     stopTask(String name) throws RemoteException;
+  boolean     disableTask(String name) throws RemoteException;
+  boolean     enableTask(String name) throws RemoteException;
+  boolean     rescheduleTask(String name, Date time, int interval) throws RemoteException;
 
   SchemaEdit  editSchema() throws RemoteException;
 }

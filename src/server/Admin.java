@@ -9,7 +9,7 @@
    appropriate.
 
    Created: 28 May 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,4 +35,5 @@ public interface Admin extends Remote {
   void changeStatus(String status) throws RemoteException;
   void changeAdmins(String adminStatus) throws RemoteException;
   void changeUsers(Vector entries) throws RemoteException;
+  void changeTasks(Vector tasks) throws RemoteException;
 }
