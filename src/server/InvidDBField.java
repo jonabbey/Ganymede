@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.161 $
-   Last Mod Date: $Date: 2001/10/10 22:57:18 $
+   Version: $Revision: 1.162 $
+   Last Mod Date: $Date: 2001/10/11 20:08:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.161 $ %D%
+ * @version $Revision: 1.162 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1333,7 +1333,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// if the object is being deleted or dropped, don't allow the link
 
-	if (newRef.getStatus() == ObjectStatus.DELETING || newRef.getStatus() != ObjectStatus.DROPPING)
+	if (newRef.getStatus() == ObjectStatus.DELETING || newRef.getStatus() == ObjectStatus.DROPPING)
 	  {
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to remote object",
 					      "Field " + this.toString() + 
