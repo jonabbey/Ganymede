@@ -1723,6 +1723,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	about = new aboutGanyDialog(this, "About Ganymede");
       }
+    else
+      {
+	about.setTitle("About Ganymede");
+      }
 
     about.loadAboutText();
     about.setVisible(true);
@@ -1736,7 +1740,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, "About Ganymede");
+	about = new aboutGanyDialog(this, "Ganymede Credits");
+      }
+    else
+      {
+	about.setTitle("Ganymede Credits");
       }
 
     about.loadCreditsText();
@@ -1811,7 +1819,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Potentially useful when catching RemoteExceptions from the server.</p>
    */
 
-  public final void processExceptionRethrow(Exception ex)
+  public final void processExceptionRethrow(Throwable ex)
   {
     processException(ex);
 
@@ -1825,7 +1833,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Potentially useful when catching RemoteExceptions from the server.</p>
    */
 
-  public final void processExceptionRethrow(Exception ex, String message)
+  public final void processExceptionRethrow(Throwable ex, String message)
   {
     processException(ex, message);
 
@@ -1837,7 +1845,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * exception.</p>
    */
 
-  public final void processException(Exception ex)
+  public final void processException(Throwable ex)
   {
     processException(ex, null);
   }
@@ -1847,8 +1855,31 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * exception.</p>
    */
 
-  public final void processException(Exception ex, String message)
+  public final void processException(Throwable ex, String message)
   {
+    // make sure we're not processing an exception that has been
+    // rethrown by processExceptionRethrow..
+
+    boolean foundRethrow = false;
+
+    StackTraceElement[] frames = ex.getStackTrace();
+
+    for (int i = 0; !foundRethrow && i < frames.length; i++)
+      {
+	StackTraceElement frame = frames[i];
+
+	if (frame.getMethodName().equals("processExceptionRethrow") &&
+	    frame.getClassName().endsWith("gclient"))
+	  {
+	    foundRethrow = true;
+	  }
+      }
+
+    if (foundRethrow)
+      {
+	return;
+      }
+
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
     
@@ -1863,8 +1894,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	if (ex instanceof RegexpException)
 	  {
-	    // don't bother showing them the stack trace if they
-	    // entered a bad regexp into a dialog
+	    // don't bother showing them the stack trace (or offering
+	    // to transmit the error to the server) if they entered a
+	    // bad regexp into a dialog
 
 	    showErrorMessage(ex.getMessage());
 	  }
@@ -1881,11 +1913,55 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		text = stringTarget.toString();
 	      }
 
-	    showErrorMessage("Exception", text);
+	    showExceptionMessage("Exception", text, getErrorImage());
 	  }
       }
 
     setNormalCursor();
+  }
+
+  /** 
+   * Show an Exception dialog, and offer to transmit the error message to
+   * the server.
+   *
+   * @param title title of dialog.
+   * @param message Text of dialog.
+   * @param icon optional icon to display.
+   */
+
+  public final void showExceptionMessage(String title, String message, Image icon)
+  {
+    if (debug)
+      {
+	System.out.println("Error message: " + message);
+      }
+
+    final gclient gc = this;
+    final String Title = title;
+    final String Message = message;
+    final Image fIcon = icon;
+
+    SwingUtilities.invokeLater(new Runnable() 
+			       {
+				 public void run()
+				   {
+				     ExceptionDialog x = new ExceptionDialog(gc, Title, Message, fIcon); // implicit show
+
+				     if (x.didRequestReport())
+				       {
+					 try
+					   {
+					     session.reportClientBug("GUI Client", Message);
+					   }
+					 catch (Throwable ex)
+					   {
+					     // ignore
+					   }
+				       }
+				   }
+			       });
+
+    setStatus(title + ": " + message, 10);
   }
 
   public final void showNotLoggedIn()
@@ -1941,7 +2017,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     setStatus(title + ": " + message, 10);
   }
-
 
   /**
    * Set the cursor to a wait cursor(usually a watch.)
