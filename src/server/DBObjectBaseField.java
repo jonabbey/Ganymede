@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,6 +74,10 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   boolean editInPlace = false;
   short allowedTarget = -1;	// no target restrictions
   short targetField = -1;
+
+  // password attributes
+  
+  boolean crypted = false;
 
   // schema editing
 
@@ -168,6 +172,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     allowedTarget = original.allowedTarget;
     targetField = original.targetField;
 
+    crypted = original.crypted;
+
     this.editor = editor;
     changed = false;
   }
@@ -239,6 +245,30 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	out.writeShort(allowedTarget);
 	out.writeBoolean(editInPlace);
 	out.writeShort(targetField);
+      }
+    else if (isPassword())
+      {
+	out.writeShort(minLength);
+	out.writeShort(maxLength);
+	if (okChars == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(okChars);
+	  }
+	
+	if (badChars == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(badChars);
+	  }
+
+	out.writeBoolean(crypted);
       }
   }
 
@@ -334,6 +364,26 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	allowedTarget = in.readShort();
 	editInPlace = in.readBoolean();
 	targetField = in.readShort();
+      }
+    else if (isPassword())
+      {
+	minLength = in.readShort();
+	maxLength = in.readShort();
+	okChars = in.readUTF();
+	
+	if (okChars.equals(""))
+	  {
+	    okChars = null;
+	  }
+
+	badChars = in.readUTF();
+
+	if (badChars.equals(""))
+	  {
+	    badChars = null;
+	  }
+
+	crypted = in.readBoolean();
       }
 
     loading = false;
@@ -507,6 +557,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    *   static final short STRING = 3;
    *   static final short INVID = 4;
    *   static final short PERMISSIONMATRIX = 5;
+   *   static final short PASSWORD = 6;
    *
    * @see arlut.csd.ganymede.DBStore
    * @see arlut.csd.ganymede.BaseField
@@ -614,6 +665,18 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   public boolean isPermMatrix()
   {
     return (field_type == PERMISSIONMATRIX);
+  }
+
+  /**
+   * 
+   * Returns true if this field is of password type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isPassword()
+  {
+    return (field_type == PASSWORD);
   }
   
   /**
@@ -939,7 +1002,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public short getMinLength()
   {
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -961,7 +1024,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not editing");
       }
 
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -978,7 +1041,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public short getMaxLength()
   {
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1000,7 +1063,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not editing");
       }
 
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1017,7 +1080,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public String getOKChars()
   {
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1040,7 +1103,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not editing");
       }
 
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1057,7 +1120,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public String getBadChars()
   {
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1080,7 +1143,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not editing");
       }
 
-    if (!isString())
+    if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
       }
@@ -1513,6 +1576,26 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       }
   }
 
+  public boolean isCrypted()
+  {
+    return crypted;
+  }
+
+  public void setCrypted(boolean b)
+  {    
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    crypted = b;
+  }
+
   // general convenience methods
 
   /**
@@ -1548,6 +1631,10 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
       case PERMISSIONMATRIX:
 	result = "permission matrix";
+	break;
+
+      case PASSWORD:
+	result = "password";
 	break;
 
       default:
