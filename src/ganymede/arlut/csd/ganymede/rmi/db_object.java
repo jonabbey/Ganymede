@@ -170,6 +170,12 @@ public interface db_object extends java.rmi.Remote {
 
   /**
    * <p>Returns the primary label of this object.</p>
+   *
+   * <p>The label returned will usually be defined to be unique among
+   * objects of this type, but this is unfortunately not a hard
+   * guarantee at present.  See {@link
+   * arlut.csd.ganymede.server.DBObject#getLabel()} for full
+   * details.</p>
    */
 
   public String getLabel() throws RemoteException;
