@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -448,8 +448,8 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	e_object = (DBEditObject) internalSession.edit_db_object(new Invid(SchemaConstants.PersonaBase,
-									   SchemaConstants.PersonaSupergashObj));
+	e_object = (DBEditObject) internalSession.session.editDBObject(new Invid(SchemaConstants.PersonaBase,
+										 SchemaConstants.PersonaSupergashObj));
 
 	if (e_object == null)
 	  {
