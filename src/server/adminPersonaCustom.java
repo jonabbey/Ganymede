@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -322,6 +322,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    *
    * To be overridden in DBEditObject subclasses.
    * 
+   * <b>*PSEUDOSTATIC*</b>
+   *
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -338,10 +340,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     // Hide the associated user field if we are looking at the
     // supergash or monitor persona objects.
 
-    if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
-	(getInvid().getNum() <= 2))
+    if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
-	return false;
+	DBObject object = field.getOwner();
+
+	if (object.getInvid().getNum() <= 2)
+	  {
+	    return false;
+	  }
       }
 
     return super.canSeeField(session, field);
