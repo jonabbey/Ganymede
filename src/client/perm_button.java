@@ -5,7 +5,7 @@
    Description.
    
    Created: 20 January 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -36,6 +36,7 @@ class perm_button extends JButton implements ActionListener {
   Hashtable basehash;
   gclient gc;
   boolean justShowUser;
+  String title;
 
   /* -- */
 
@@ -53,7 +54,8 @@ class perm_button extends JButton implements ActionListener {
   public perm_button (perm_field field, 
 		      boolean enabled, 
 		      gclient gc,
-		      boolean justShowUser)
+		      boolean justShowUser,
+		      String title)
   {
     if (enabled)
       {
@@ -68,6 +70,7 @@ class perm_button extends JButton implements ActionListener {
     this.enabled = enabled;
     this.gc = gc;
     this.justShowUser = justShowUser;
+    this.title = title;
     
     addActionListener(this);
   }
@@ -86,7 +89,7 @@ class perm_button extends JButton implements ActionListener {
 	Frame parent = new Frame();
 	perm_editor editor = new perm_editor(field, 
 					     enabled, gc, 
-					     parent, "Permissions Editor",
+					     parent, "Permissions Editor: " + title,
 					     justShowUser);
 
 	System.out.println("Editor Created by perm button");
