@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -557,7 +557,7 @@ class DBNameSpace {
  *<p>This class will be manipulated by the DBNameSpace class and by the
  *DBEditObject class.</p>
  *
- * /
+ */
 
 
 class DBNameSpaceHandle {
