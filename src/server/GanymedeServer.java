@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2001/06/15 16:34:58 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2001/06/26 03:19:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -242,7 +242,14 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     clientName = client.getName();
     clientPass = client.getPassword();
 
-    GanymedeXMLSession xSession = new GanymedeXMLSession(processLogin(clientName, clientPass, client, false));
+    GanymedeSession mySession = processLogin(clientName, clientPass, client, false);
+
+    if (mySession == null)
+      {
+	return null;		// nope, no soup for you.
+      }
+
+    GanymedeXMLSession xSession = new GanymedeXMLSession(mySession);
  
     // spawn the GanymedeXMLSession's background parser thread
 
