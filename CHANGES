@@ -65,10 +65,113 @@ System.arraycopy operations within a Vector.  Won't make any
 noticeable difference, but after seeing Doug Lea's optimized
 concurrency structures (at
 http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html),
-I felt like tinkering.  At best, this might be able to speed up
-xmlclient and admin console operations (very) marginally.
+I felt like tinkering.
 
-7. [SERVER] Started to use JDK 1.2 Collections API
+7. [SERVER] Started to use JDK 1.2 Collections API (?)
+
+8. [SERVER/XML] Fixed feedback on transaction failure in the xml subsystem
+
+The Ganymede server's XML transaction logic was faulty, and would
+attempt to report a successful commit even in the circumstance where
+the commit-time transaction verification logic caused the transaction
+to be rejected.
+
+Now, an xmlclient transaction that could not complete due to
+consistency problems during transaction commit will no longer report a
+confusing mix of success and failure messages.
+
+9. [SERVER] Changed plug-in API for object labels
+
+The Ganymede object model has always had a rather poorly thought out
+implementation of object labeling, with two separate means of
+expressing object labels.  The first was by designated label field,
+the second was by calculated label field using the DBEditObject
+plugin's getLabelHook() method.  There were a number of problems
+with this.
+
+First, the Ganymede query engine completely ignored
+getLabelHook()-derived labels, and if an object type had both a
+designated label field and a getLabelHook() method in a DBEditObject
+plugin, the getLabelHook() was used for many but not all
+things.. querying on an object's label simply ignored the
+getLabelHook() method's output and searched on a label field if
+defined, or simply failed if no label field was assigned.
+
+Now, the Ganymede query engine will check the new useLabelHook()
+method for a plugin, and if that method returns true, the label field
+will be ignored in queries, in favor of the results from
+getLabelHook().
+
+To prevent things from being too confusing, the DBObject getLabel()
+method will now also consult the new useLabelHook() method, and if
+useLabelHook() does not return true, the getLabelHook() method will
+simply not be used under any circumstances.
+
+10. [SERVER] runServer now specifies less frequent full-heap GC
+
+Since 1.2, Sun's HotSpot JVM (server-mode) has incorporated
+generational garbage collection, which allows the JVM to perform
+limited-scope garbage collection passes over recently created objects
+relatively frequently, while avoiding full heap garbage collection
+passes unless and until the full heap as a whole is filled.  This
+allows the CPU loading due to garbage collection to be dramatically
+reduced, relative to a more naive full-heap garbage collector.
+
+Unfortunately, the Ganymede server has in the past not been
+benefitting greatly from generational garbage collection, due to a
+peculiarity of the RMI system.  By default, RMI programs that access
+remote objects (as the Ganymede server does to asynchronously send
+messages to the admin console and to the gui clients) do full-heap
+garbage collection on a periodic basis (once a minute) in order to
+quickly release any remote RMI objects.  This extra garbage collection
+activity is useless for the Ganymede server, as by design it will
+never relinquish references to the few remote objects it talks to
+until such time as the client or admin console disconnects/quits,
+whereupon the issue of client-side local garbage collection becomes
+moot.
+
+I've recently become aware of an RMI system tuning parameter for
+recent JVM's which allows this RMI full-heap gc interval to be tuned.
+I have edited the runServer script in the Ganymede distribution to set
+this tuning parameter to do full-heap gc once an hour.
+
+Previously, our Ganymede server was taking around .5 seconds every
+minute doing the full-heap GC cycle, now this overhead is only done
+once an hour, at the cost of a rather greater proportion of the
+server's allocated heap size 'in-use' on average.
+
+All of this is documented in the new runServer script, and this
+parameter can be tweaked as you like.  See
+http://java.sun.com/docs/hotspot/gc/ for complete details.
+
+11. [CLIENT] Several small improvements to the Ganymede user interface
+
+You can now hit enter after typing a search value in the query box and
+the query will be submitted for you.  This should save people from
+having to mouse down to the 'submit' button for each query.  You will
+still need to manually mouse down to the 'add choices' box if you want  
+to add an additional search constraint.  In addition, if a query
+returns no results, you'll now have the option to pop the query box 
+right back up, revise your query, and resubmit. 
+
+The GUI widget used for changing passwords in Ganymede will now
+provide a quick dialog box telling you that you didn't type the
+password the same way twice, rather than silently clearing the fields
+and having you try again without any guidance as to why.
+
+Thanks to Marcus Walker and Tom Embleton for these suggestions.. I
+hope the changes I made help out.
+
+12. [SERVER] Improved logging for newly created objects
+
+I slightly reworked the commit_createLogEvent() method in DBEditSet so
+that newly created objects will use DBObject.getPrintString() to
+create a full summary of the newly created object, as is done when
+such objects are deleted, rather than using the DBEditObject.diff()
+method.
+
+This has the advantage that newly created objects which contain
+embedded objects will include full information on the embedded objects.
 
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 
