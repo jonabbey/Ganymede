@@ -210,6 +210,7 @@ public class TranslationService {
   public String l(String key)
   {
     String pattern = null;
+    String result;
 
     /* -- */
 
@@ -221,15 +222,19 @@ public class TranslationService {
       {
 	return null;
       }
-    
-    if (wordWrapCols > 0 && pattern.length() > wordWrapCols)
-      {
-	return WordWrap.wrap(pattern, wordWrapCols);
-      }
-    else
-      {
-	return pattern;
-      }
+
+    // we don't actually need to use format with no template
+    // substitutions, but if we don't, then we'll have different
+    // property file rules for how to handle single quotes in the two
+    // cases.  Easier just to always use format and insist that all
+    // single quotes in the property files are doubled up.
+
+    // Thanks Sun, for such a brain-dead quoting system.  What was
+    // wrong with backslash-escape, again?
+
+    result = this.format(pattern, null);
+
+    return result;
   }
 
   /**
