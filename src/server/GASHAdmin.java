@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2001/05/23 03:55:02 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2001/05/25 07:22:08 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -632,7 +632,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static String debugFilename = null;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/05/23 03:55:02 $";
+  static String release_date = "$Date: 2001/05/25 07:22:08 $";
   static String release_number = null;
 
   // ---
@@ -2016,35 +2016,9 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	return;
       }
 
-    AdminEntry e;
-
     /* -- */
 
-    frame.table.clearCells();
-    
-    // Process entries from the server
-
-    for (int i = 0; i < entries.size(); i++)
-      {
-	e = (AdminEntry) entries.elementAt(i);
-
-	frame.table.newRow(e.username);
-
-	if (e.personaName == null || e.personaName.equals(""))
-	  {
-	    frame.table.setCellText(e.username, 0, e.username, false);
-	  }
-	else
-	  {
-	    frame.table.setCellText(e.username, 0, e.personaName, false);
-	  }
-
-	frame.table.setCellText(e.username, 1, e.hostname, false);
-	frame.table.setCellText(e.username, 2, e.status, false);
-	frame.table.setCellText(e.username, 3, e.connecttime, false);
-	frame.table.setCellText(e.username, 4, e.event, false);
-	frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
-      }
+    final Vector localEntries = entries;
 
     // And refresh our table.. we'll wait until this succeeds so we
     // don't get the server sending us more updates before the table
@@ -2054,6 +2028,34 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	SwingUtilities.invokeAndWait(new Runnable() {
 	  public void run() {
+
+	    AdminEntry e;
+	    frame.table.clearCells();
+    
+	    // Process entries from the server
+
+	    for (int i = 0; i < localEntries.size(); i++)
+	      {
+		e = (AdminEntry) localEntries.elementAt(i);
+
+		frame.table.newRow(e.username);
+
+		if (e.personaName == null || e.personaName.equals(""))
+		  {
+		    frame.table.setCellText(e.username, 0, e.username, false);
+		  }
+		else
+		  {
+		    frame.table.setCellText(e.username, 0, e.personaName, false);
+		  }
+
+		frame.table.setCellText(e.username, 1, e.hostname, false);
+		frame.table.setCellText(e.username, 2, e.status, false);
+		frame.table.setCellText(e.username, 3, e.connecttime, false);
+		frame.table.setCellText(e.username, 4, e.event, false);
+		frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
+	      }
+
 	    frame.table.refreshTable();
 	  }
 	});
