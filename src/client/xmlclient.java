@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/05/09 04:11:05 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/05/17 00:05:59 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -78,7 +78,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2000/05/09 04:11:05 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2000/05/17 00:05:59 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -101,6 +101,12 @@ public class xmlclient implements ClientListener {
    */
 
   public static final int minorVersion = 0;
+
+  /**
+   * <p>Singleton reference to the instantiated xmlclient object.</p>
+   */
+
+  public static xmlclient xc = null;
 
   // ---
 
@@ -139,13 +145,57 @@ public class xmlclient implements ClientListener {
   public XMLReader reader = null;
 
   /**
-   * <P>Hashtable mapping object type names to
+   * <p>Hashtable mapping object type names to
+   * hashtables mapping field names to 
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * objects.</p>
+   */
+
+  public Hashtable objectTypes = new Hashtable();
+
+  /**
+   * <P>Hashtable mapping Short type ids to
    * hashes which map local object designations to
    * actual {@link arlut.csd.ganymede.client.xmlobject xmlobject}
    * records.</P>
    */
 
-  public Hashtable objectTypes = new Hashtable();
+  public Hashtable objectStore = new Hashtable();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * that correspond to new Ganymede server objects
+   * that have been/need to be created by the xmlclient.</p>
+   */
+
+  public Vector createdObjects = new Vector();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * that correspond to pre-existing Ganymede
+   * server objects that have been/need to be checked out for editing by the
+   * xmlclient.</p> 
+   */
+
+  public Vector editedObjects = new Vector();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * that correspond to pre-existing Ganymede
+   * server objects that have been/need to be inactivated by the
+   * xmlclient.</p> 
+   */
+
+  public Vector inactivatedObjects = new Vector();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * that correspond to pre-existing Ganymede
+   * server objects that have been/need to be deleted by the
+   * xmlclient.</p> 
+   */
+
+  public Vector deletedObjects = new Vector();
 
   /**
    * <P>The loader is a thread that obtains information from
@@ -176,8 +226,8 @@ public class xmlclient implements ClientListener {
 
   public static void main(String argv[])
   {
-    xmlclient xclient = new xmlclient(argv);
-    xclient.processXML();
+    xc = new xmlclient(argv);
+    xc.processXML();
   }
   
   public xmlclient(String argv[])
@@ -392,7 +442,7 @@ public class xmlclient implements ClientListener {
    * have to check for error and warning conditions.</p>
    */
 
-  private XMLItem getNextItem() throws SAXException
+  public XMLItem getNextItem() throws SAXException
   {
     XMLItem item = null;
 
@@ -486,9 +536,40 @@ public class xmlclient implements ClientListener {
 
     while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
       {
-	//	System.err.println(item);
+	if (item.matches("object"))
+	  {
+	    String mode = item.getAttrStr("action");
+
+	    xmlobject objectRecord = new xmlobject((XMLElement) item);
+
+	    if (mode == null || mode.equals("create"))
+	      {
+		createdObjects.addElement(objectRecord);
+	      }
+	    else if (mode.equals("edit"))
+	      {
+		editedObjects.addElement(objectRecord);
+	      }
+	    else if (mode.equals("delete"))
+	      {
+		editedObjects.addElement(objectRecord);
+	      }
+	    else if (mode.equals("inactivate"))
+	      {
+		inactivatedObjects.addElement(objectRecord);
+	      }
+
+	    storeObject(objectRecord);
+	  }
+
 	item = getNextItem();
       }
+
+    System.err.println("Assembling data");
+
+    System.err.println("Transmitting data");
+
+    System.err.println("Committing transaction");
 
     System.err.println("/processData");
   }
@@ -559,34 +640,145 @@ public class xmlclient implements ClientListener {
   }
 
   /**
-   * <p>This private helper method returns a hash of field names to
+   * <p>This method records an xmlobject that has been loaded from the
+   * XML file into the xmlclient objectTypes hash.
+   */
+
+  public void storeObject(xmlobject object)
+  {
+    Hashtable objectHash = (Hashtable) objectStore.get(object.type);
+
+    if (objectHash == null)
+      {
+	objectHash = new Hashtable();
+	objectStore.put(object.type, objectHash);
+      }
+
+    if (object.id != null)
+      {
+	objectHash.put(object.id, object);
+      }
+    else if (object.num != -1)
+      {
+	objectHash.put(new Integer(object.num), object);
+      }
+  }
+
+  /**
+   * <p>This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.</p>
+   *
+   * @param baseName An XML-encoded object type string
+   * @param objectID The id string for the object in question
+   */
+
+  public xmlobject getObject(String baseName, String objectID)
+  {
+    return getObject(new Short(getTypeNum(baseName)), objectID);
+  }
+
+  /**
+   * <p>This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.</p>
+   *
+   * @param baseID a Short holding the number of object type sought
+   * @param objectID The id string for the object in question
+   */
+
+  public xmlobject getObject(Short baseID, String objectID)
+  {
+    Hashtable objectHash = (Hashtable) objectStore.get(baseID);
+
+    if (objectHash == null)
+      {
+	return null;
+      }
+
+    return (xmlobject) objectHash.get(objectID);
+  }
+
+  /**
+   * <p>This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.</p>
+   *
+   * @param baseName An XML-encoded object type string
+   * @param objectNum The Integer object number for the object sought
+   */
+
+  public xmlobject getObject(String baseName, Integer objectNum)
+  {
+    return getObject(new Short(getTypeNum(baseName)), objectNum);
+  }
+
+  /**
+   * <p>This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.</p>
+   *
+   * @param baseID a Short holding the number of object type sought
+   * @param objectNum The Integer object number for the object sought
+   */
+
+  public xmlobject getObject(Short baseID, Integer objectNum)
+  {
+    Hashtable objectHash = (Hashtable) objectStore.get(baseID);
+
+    if (objectHash == null)
+      {
+	return null;
+      }
+
+    return (xmlobject) objectHash.get(objectNum);
+  }
+
+  /**
+   * <p>This helper method returns the short id number of an object
+   * type based on its underscore-for-space encoded XML object type
+   * name.</p>
+   *
+   * <p>If the named object type cannot be found, a
+   * NullPointerException will be thrown.</p>
+   */
+
+  public short getTypeNum(String objectTypeName)
+  {
+    Hashtable nameHash = loader.getNameToShort();
+    Short val = (Short) nameHash.get(XMLUtils.XMLDecode(objectTypeName));
+    return val.shortValue();
+  }
+
+  /**
+   * <p>This helper method returns a hash of field names to
    * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} based
-   * on the underscore-for-space XML encoded objec type name.</p>
+   * on the underscore-for-space XML encoded object type name.</p>
    *
    * <p>The Hashtable returned by this method is intended to be used
    * with the getObjectFieldType method.</p>
    */
 
-  private Hashtable getFieldHash(String objectTypeName)
+  public Hashtable getFieldHash(String objectTypeName)
   {
     return (Hashtable) objectTypes.get(XMLUtils.XMLDecode(objectTypeName));
   }
 
   /**
-   * <p>This private helper method takes a hash of field names to
+   * <p>This helper method takes a hash of field names to
    * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
    * returned.</p> 
    */
 
-  private FieldTemplate getObjectFieldType(Hashtable fieldHash, String fieldName)
+  public FieldTemplate getObjectFieldType(Hashtable fieldHash, String fieldName)
   {
     return (FieldTemplate) fieldHash.get(XMLUtils.XMLDecode(fieldName));
   }
 
   private void transmitData()
   {
+    ReturnVal attempt;
+
+    /* -- */
+
     try
       {
 	try

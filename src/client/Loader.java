@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/05/09 04:11:05 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/05/17 00:05:59 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.18 $ $Date: 2000/05/09 04:11:05 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2000/05/17 00:05:59 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -77,7 +77,8 @@ public class Loader extends Thread {
     baseMap,
     baseNames,
     baseHash,
-    baseToShort;
+    baseToShort,
+    nameShorts;
 
   private Vector
     baseList;
@@ -463,6 +464,55 @@ public class Loader extends Thread {
   }
 
   /**
+   * <p>Returns a hashtable mapping base names to their object type id
+   * in Short form.  This is used by the XML client to quickly map
+   * object type names to the numeric type id.</p>
+   *
+   * <p>If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.</p> 
+   */
+
+  public Hashtable getNameToShort()
+  {
+    // baseToShort is loaded in the loadBaseMap function, so we can just
+    // check to see if the baseMapLoaded is true.
+
+    while (! baseMapLoaded)
+      {
+	if (debug)
+	  {
+	    System.out.println("Loader: waiting for base hash");
+	  }
+
+	synchronized (this)
+	  {
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	if (nameShorts == null)
+	  {
+	    System.out.println("nameShorts is null");
+	  }
+	else
+	  {
+	    System.out.println("returning nameShorts");
+	  }
+      }
+
+    return nameShorts;
+  }
+
+  /**
    * <P>Returns a {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
    * for a field specified by object type id and field name.</P>
    */
@@ -609,6 +659,13 @@ public class Loader extends Thread {
     notifyAll();
   }
 
+  /**
+   * loadBaseNames constructs a hashtable mapping Base references
+   * to base names.  This is intended to serve as a local cache
+   * to avoid having to do round-trip calls to the server just
+   * to get a Base reference's name.
+   */
+
   private synchronized void loadBaseNames() throws RemoteException
   {
     baseNames = new Hashtable();
@@ -705,6 +762,7 @@ public class Loader extends Thread {
 
     baseMap = new Hashtable(size);
     baseToShort = new Hashtable(size);
+    nameShorts = new Hashtable(size);
 
     for (int i = 0; i < size; i++)
       {
@@ -713,6 +771,7 @@ public class Loader extends Thread {
 
 	baseMap.put(id, base);
 	baseToShort.put(base, id);
+	nameShorts.put(base.getName(), id);
       }
 
     baseMapLoaded = true;

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/05/04 04:17:44 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/05/17 00:06:00 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -52,6 +52,8 @@
 package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.Util.*;
+import org.xml.sax.*;
 
 import java.util.Vector;
 
@@ -66,7 +68,7 @@ import java.util.Vector;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2000/05/04 04:17:44 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2000/05/17 00:06:00 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -76,22 +78,145 @@ public class xmlobject {
    * <p>The local identifier string for this object</p>
    */
 
-  String local;
-  String type;
-  Invid invid;
-  int num;
+  String id = null;
+
+  /**
+   * Descriptive typeString for this object
+   */
+
+  String typeString = null;
+
+  /**
+   * <p>The short object type id for this object type.</p>
+   *
+   * <p>Will be null if undefined.</p>
+   */
+
+  Short type = null;
+
+  /**
+   * <p>The server-side object identifier for this object.  Will
+   * be null until we create or locate this object in the server.</p>
+   */
+
+  Invid invid = null;
+
+  /**
+   * <p>The object number, if known.  This may be used to identify
+   * an object on the server if the object is not thought to have
+   * a unique identifier string.</p>
+   *
+   * <p>Will be negative one if undefined.</p>
+   */
+
+  int num = -1;
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.client.xmlfield xmlfield}
    * objects.</p>
    */
 
-  Vector fields;
+  Vector fields = null;
 
   /* -- */
+
+  /**
+   * <p>This constructor takes the XMLElement defining an object to
+   * be created or manipulated on the server and loads all information
+   * for this object into the xmlobject created.</p>
+   *
+   * <p>This constructor reads all elements from the xmlclient
+   * XML stream up to and including the matching close element for
+   * this object.</p>
+   */
   
-  public xmlobject(String type, String local, int num)
+  public xmlobject(XMLElement openElement) throws SAXException
   {
+    // handle any attributes in the element
+
+    type = new Short(xmlclient.xc.getTypeNum(openElement.getAttrStr("type")));
+
+    id = openElement.getAttrStr("id"); // may be null
+
+    Integer numInt = openElement.getAttrInt("num");
+
+    if (numInt != null)
+      {
+	num = numInt.intValue();
+      }
+
+    // if we get an inactivate or delete request, our object element
+    // might be empty, in which case, deal.
+
+    if (openElement.isEmpty())
+      {
+	return;
+      }
+
+    // okay, we should contain some fields, then
+
     fields = new Vector();
+
+    XMLItem nextItem = xmlclient.xc.getNextItem();
+
+    while (!nextItem.matchesClose("object") && !(nextItem instanceof XMLEndDocument))
+      {
+	if (nextItem instanceof XMLElement)
+	  {
+	    // the xmlfield constructor will consume all elements up
+	    // to and including the matching field close element
+
+	    fields.addElement(new xmlfield(this, (XMLElement) nextItem));
+	  }
+	else
+	  {
+	    System.err.println("Unrecognized XML content in object " + 
+			       openElement + ":" + nextItem);
+	  }
+
+	nextItem = xmlclient.xc.getNextItem();
+      }
+  }
+
+  public short getType()
+  {
+    return type.shortValue();
+  }
+
+  /**
+   * <p>This method returns a field definition for a named field.
+   * The fieldName string is assumed to be underscore-for-space XML
+   * encoded.</p>
+   */
+
+  public FieldTemplate getFieldDef(String fieldName)
+  {
+    return xmlclient.xc.loader.getFieldTemplate(type, XMLUtils.XMLDecode(fieldName));
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    result.append("<object type=\"");
+    result.append(typeString);
+
+    if (id != null)
+      {
+	result.append(" id=\"");
+	result.append(id);
+	result.append("\"");
+      }
+
+    if (num != -1)
+      {
+	result.append(" num=\"");
+	result.append(num);
+	result.append("\"");
+      }
+
+    result.append(">");
+
+    return result.toString();
   }
 }
