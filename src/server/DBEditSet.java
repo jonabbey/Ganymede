@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -150,6 +150,83 @@ public class DBEditSet {
 	// just need something to mark the slot in the hash table,
 	basesModified.put(object.objectBase, this);	
       }
+  }
+
+  /**
+   *
+   * This method is used to register a log event with this transaction.
+   * If the transaction successfully commits, the provided log event
+   * will be recorded in the Ganymede log file and mail notification will
+   * be sent out if appropriate.
+   *
+   * @param eventClassToken a short string specifying a DBObject record describing
+   * the general category for the event
+   * @param description Descriptive text to be entered in the record of the event
+   * @param admin Invid pointing to the adminPersona that fired the event, if any
+   * @param adminName String containing the name of the adminPersona that fired the event, if any
+   * @param objects A vector of invids of objects involved in this event.
+   * @param notifyList A vector of Strings listing email addresses to send notification
+   * of this event to.
+   */
+
+  public void logEvent(String eventClassToken, String description,
+		       Invid admin, String adminName,
+		       Vector objects, Vector notifyList)
+  {
+    DBLogEvent event = new DBLogEvent(eventClassToken, description,
+				      admin, adminName,
+				      objects, notifyList);
+    logEvents.addElement(event);
+  }
+
+  /**
+   *
+   * This method is used to register a log event with this transaction.
+   * If the transaction successfully commits, the provided log event
+   * will be recorded in the Ganymede log file and mail notification will
+   * be sent out if appropriate.
+   *
+   * @param event A pre-formed log event to register with this transaction.
+   *
+   */
+
+  public void logEvent(DBLogEvent event)
+  {
+    logEvents.addElement(event);
+  }
+
+  /**
+   *
+   * This method is used to record a message to be sent out when
+   * the transaction is committed.
+   *
+   * @param addressList Vector of Strings, the address list
+   * @param subject The subject line of the message
+   * @param message The body of the message
+   *
+   */
+
+  public void logMail(Vector addresses, String subject, String message)
+  {
+    logEvents.addElement(new DBMailEvent(addresses, subject, message));
+  }
+
+  /**
+   *
+   * This method is used to record a message to be sent out when
+   * the transaction is committed.
+   *
+   * @param addressList Vector of Strings, the address list
+   * @param subject The subject line of the message
+   * @param message The body of the message
+   * @param html if true, the message will be sent as an html mime attachement
+   *
+   */
+
+  public void logMail(Vector addresses, String subject, String message,
+		      boolean html)
+  {
+    logEvents.addElement(new DBMailEvent(addresses, subject, message, html));
   }
 
   /**
@@ -835,13 +912,12 @@ public class DBEditSet {
 			    System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
 			  }
 			
-			logEvents.addElement(new DBLogEvent("objectchanged",
-							    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
-							    (gSession.personaInvid == null ?
-							     gSession.userInvid : gSession.personaInvid),
-							    gSession.username,
-							    invids,
-							    null));
+			logEvent("objectchanged",
+				 eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+				 (gSession.personaInvid == null ?
+				  gSession.userInvid : gSession.personaInvid),
+				 gSession.username,
+				 invids, null);
 		      }
 		    
 		    break;
@@ -867,13 +943,12 @@ public class DBEditSet {
 			    System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
 			  }
 			
-			logEvents.addElement(new DBLogEvent("objectcreated",
-							    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
-							    (gSession.personaInvid == null ?
-							     gSession.userInvid : gSession.personaInvid),
-							    gSession.username,
-							    invids,
-							    null));
+			logEvent("objectcreated",
+				 eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+				 (gSession.personaInvid == null ?
+				  gSession.userInvid : gSession.personaInvid),
+				 gSession.username,
+				 invids, null);
 		      }
 
 		    break;
@@ -890,13 +965,12 @@ public class DBEditSet {
 
 		    // DBEditObject.diff() does not work for deleted objects.
 
-		    logEvents.addElement(new DBLogEvent("deleteobject",
-							eObj.getTypeDesc() + ":" + eObj.getLabel(),
-							(gSession.personaInvid == null ?
-							 gSession.userInvid : gSession.personaInvid),
-							gSession.username,
-							invids,
-							null));
+		    logEvent("deleteobject",
+			     eObj.getTypeDesc() + ":" + eObj.getLabel(),
+			     (gSession.personaInvid == null ?
+			      gSession.userInvid : gSession.personaInvid),
+			     gSession.username,
+			     invids, null);
 
 		    break;
 		    
