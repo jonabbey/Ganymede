@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -122,7 +122,14 @@ public interface SchemaConstants {
 
   final static short EventMailToSelf = 105;
 
+  /* builder classes */
+
+  final static short BuilderBase = 5; // Records of DBBuilderTask classes we want to attach to the server
+
+  final static short BuilderTaskName = 100; // name of this builder task (i.e., DNSBuilder, NISBuilder)
+  final static short BuilderTaskClass = 101; // what is the fully qualified classname for this builder task?
+
   /* what's the last base we currently have defined as a mandatory base? */
 
-  final static short FinalBase = EventBase;
+  final static short FinalBase = BuilderBase;
 }
