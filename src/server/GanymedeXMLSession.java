@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/11/04 03:42:46 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/11/04 04:13:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1071,7 +1071,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (schemadebug)
 	  {
-	    err.println("11. Woohoo, Martha, I is a-coming home!");
+	    err.println("Successfully completed XML schema edit.");
 	  }
 
 	_success = true;
@@ -2436,6 +2436,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     return success;
   }
 
+  /**
+   * this private helper method increments a counting
+   * integer in table, keyed by type.
+   */
+
   private void incCount(Hashtable table, String type)
   {
     Integer x = (Integer) table.get(type);
@@ -2624,14 +2629,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private boolean handleReturnVal(ReturnVal retval)
   {
+    if (retval != null && retval.getDialogText() != null)
+      {
+	err.println(retval.getDialogText());
+      }
+
     if (retval == null || retval.didSucceed())
       {
 	return true;
-      }
-
-    if (retval.getDialogText() != null)
-      {
-	err.println(retval.getDialogText());
       }
 
     return false;
