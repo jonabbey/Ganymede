@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1055,52 +1055,6 @@ public class DBStore {
 	b.setLabelField(SchemaConstants.UserUserName);
     
 	setBase(b);
-
-	// Create history base
-
-	b = new DBObjectBase(this, false);
-	b.object_name = "History";
-	b.type_code = (short) SchemaConstants.HistoryBase; // 3
-	b.displayOrder = b.type_code;
-
-	adminCategory.addNode(b, false, false);	// add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.HistoryDescrip;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Description";
-	bf.field_order = 0;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "Description of a historical event";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.HistoryObjects;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Objects";
-	bf.allowedTarget = -2;	// any kind of object, but with a fixed target field
-	bf.targetField = SchemaConstants.HistoryField;
-	bf.editInPlace = false;
-	bf.field_order = 1;
-	bf.removable = false;
-	bf.editable = false;
- 	bf.comment = "List of objects involved in this event";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.HistoryDate;
-	bf.field_type = FieldType.DATE;
-	bf.field_name = "Date";
-	bf.field_order = 2;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "Date this event occurred";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	b.setLabelField(SchemaConstants.UserUserName);
-
-	setBase(b);
       }
     catch (RemoteException ex)
       {
@@ -1116,7 +1070,9 @@ public class DBStore {
 
     DBSession session = login("supergash");
 
-    session.openTransaction();
+    session.id = "internal";
+
+    session.openTransaction("DBStore bootstrap initialization");
 
     DBEditObject eO =(DBEditObject) session.createDBObject(SchemaConstants.AdminBase); // create a new admin object
 
