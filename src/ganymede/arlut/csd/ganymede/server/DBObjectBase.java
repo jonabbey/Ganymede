@@ -2630,6 +2630,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * <p>Returns the field definition for the field matching id,
+   * or null if no match found.</p>
+   */
+
+  public BaseField getField(Short id)
+  {
+    return fieldTable.get(id.shortValue());
+  }
+
+  /**
    * <p>Returns the field definition for the field matching name,
    * or null if no match found.</p>
    *

@@ -66,6 +66,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.Util.FileOps;
@@ -413,6 +415,66 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    return base.lastChange.after(oldLastRunTime);
 	  }
       }
+  }
+
+  /**
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
+   * determine whether a particular base has had any modifications of
+   * interest made to it since the last time this builder task was
+   * run.</p>
+   *
+   * <p>If none of the fields listed have changed since this
+   * GanymedeBuilderTask was last run, baseChanged() will return
+   * false.  If any of the fields in the fieldIds list have changed
+   * since this GanymedeBuilderTask last ran, baseChanged() will
+   * return true.</p>
+   *
+   * @param baseid The id number of the base to be checked
+   * @param fieldIds A list of java.lang.Short's containing the
+   * id numbers of the fields to examine.
+   */
+
+  protected final boolean baseChanged(short baseid, List fieldIds)
+  {
+    if (forceAllBases || (oldLastRunTime == null))
+      {
+	return true;
+      }
+
+    DBObjectBase base = Ganymede.db.getObjectBase(baseid);
+	
+    // if the base in question hasn't changed at all since our last
+    // build, we don't need to worry about looking at the individual
+    // fields.
+
+    if (base.lastChange == null || !base.lastChange.after(oldLastRunTime))
+      {
+	return false;
+      }
+
+    // now we check out each field
+
+    if (fieldIds == null || fieldIds.size() == 0)
+      {
+	throw new IllegalArgumentException("Null/empty fieldIds");
+      }
+
+    DBObjectBaseField fieldDef = null;
+
+    Iterator iterator = fieldIds.iterator();
+
+    while (iterator.hasNext())
+      {
+	Short idObj = (Short) iterator.next();
+	fieldDef = (DBObjectBaseField) base.getField(idObj);
+
+	if (fieldDef.lastChange.after(oldLastRunTime))
+	  {
+	    return true;
+	  }
+      }
+
+    return false;
   }
 
   /**
