@@ -68,7 +68,7 @@ import java.awt.*;
  * @author Jonathan Abbey
  */
 
-public class JSetValueObject {
+public class JSetValueObject extends JValueObject {
 
   private Component source;
   private Object value;

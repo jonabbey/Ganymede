@@ -68,7 +68,7 @@ import java.awt.*;
  * @author Jonathan Abbey
  */
 
-public class JErrorValueObject {
+public class JErrorValueObject extends JValueObject {
 
   private Component source;
   private String message;
