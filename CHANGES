@@ -77,7 +77,8 @@ logic present.
 6. [SCHEMA] Lots of refinements to gasharl schema
 
 Modified the loader code to use BufferedReader, and to take care
-of a few deprecation warnings.
+of a few deprecation warnings.  Loading files from GASH should
+be a good bit faster now.
 
 The GASHARL schema now includes fields in the admin persona and owner
 group objects to track information used for more complete GASH
