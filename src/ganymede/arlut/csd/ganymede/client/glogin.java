@@ -88,6 +88,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
 import arlut.csd.ganymede.rmi.Server;
@@ -204,10 +206,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   protected Thread my_thread = new Thread(this);
 
-  protected boolean connected = false;
-
-  private boolean autologin = false;
-
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
 
@@ -219,6 +217,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   protected JButton connector;
   protected JButton _quitButton;
   protected JPanel bPanel;
+
+  char spinAry[] = {'/','-', '\\', '|'};
+  int spindex = 0;
+
+  String connectError = null;
+
+  private booleanSemaphore connected = new booleanSemaphore(false);
+  private booleanSemaphore connecting = new booleanSemaphore(false);
+
+  /* -- */
 
   /**
    * This main() function will allow this applet to run as an application
@@ -298,7 +306,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // The Login GUI has been set up.  Now the server connection needs
     // to be properly established.
     
-    /* Get a reference to the server */
+    my_client = new ClientBase(server_url, this);
+    
+    /* Spawn a thread to get connected to the server, using the
+     * ClientBase we just created */
 
     my_thread.start();
   }
@@ -374,6 +385,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbc.gridx = 1;
     gbc.weightx = 1.0;
     gbl.setConstraints(username, gbc);
+    username.setEnabled(false);
     loginBox.add(username);
     
     JLabel passL = new JLabel("Password:");
@@ -391,13 +403,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbc.gridx = 1;
     gbc.weightx = 1.0;
     gbl.setConstraints(passwd, gbc);
+    passwd.setEnabled(false);
     loginBox.add(passwd);
 
     gbc.ipady = 0;
     
     _quitButton = new JButton("Quit");
 
-    connector = new JButton("Connecting...");
+    connector = new JButton("Connecting... " + spinAry[spindex]);
     connector.setOpaque(true);
     connector.addActionListener(this);
 
@@ -524,95 +537,120 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public void run() 
   {
-    if (connected)
-      {
-	return;
-      }
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	connector.setText("Connecting...");
-	connector.paintImmediately(connector.getVisibleRect());
-	username.setEnabled(false);
-	username.paintImmediately(username.getVisibleRect());
-	passwd.setEnabled(false);
-	passwd.paintImmediately(passwd.getVisibleRect());
-      }
-    });
-
     int try_number = 0;
-    
-    while (!connected)
+
+    /* -- */
+
+    if (connecting.set(true))
       {
-	if (try_number++ > 10)
+	return;			// we already have a thread running
+      }
+
+    try
+      {
+	if (connected.isSet())
 	  {
-	    System.out.println("I've tried ten times to connect, but I can't do it.  Maybe the server is down.");
-
-	    SwingUtilities.invokeLater(new Runnable() {
-	      public void run() {
-		enableButtons(true);
-		connector.setText("Attempt to reconnect");
-		connector.paintImmediately(connector.getVisibleRect());
-	      }
-	    });
-
-	    my_thread = null;
 	    return;
 	  }
 
-	try
+	while (!connected.isSet())
 	  {
-	    my_client = new ClientBase(server_url, this);  // Exception will happen here
-
-	    connected = true;
-
-	    SwingUtilities.invokeLater(new Runnable() {
-	      public void run() {
-		connector.setText("Login to server");
-		enableButtons(true);
-		connector.paintImmediately(connector.getVisibleRect());
-		setNormalCursor();
-		
-		username.setEnabled(true);
-		passwd.setEnabled(true);
-		username.paintImmediately(username.getVisibleRect());
-		passwd.paintImmediately(passwd.getVisibleRect());
-		username.requestFocus();
-		
-		invalidate();
-		validate();
-	      }
-	    });
-	    
-	    // we've done our work, remember that.
-	    
-	    my_thread = null;
-
-	    // if the user prompted a re-acquire by hitting the login
-	    // button, go ahead and login.
-
-	    if (autologin)
+	    if (try_number++ > 20)
 	      {
-		autologin = false;
-		connector.doClick();
+		break;
 	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    if (debug)
+
+	    try
 	      {
-		System.out.println("Could not start up the ClientBase, trying again..." + rx);
+		SwingUtilities.invokeAndWait(new Runnable()
+		  {
+		    public void run()
+		    {
+		      connector.setText("Connecting... " + spinAry[spindex]);
+		    }
+		  });
+	      }
+	    catch (Exception ex)
+	      {
+		ex.printStackTrace();
+	      }
+	    
+	    try
+	      {
+		my_client.connect();	// exceptions ahoy!
+
+		connected.set(true);
+		break;
+	      }
+	    catch (Throwable ex)
+	      {
+		connectError = ex.getMessage();
 	      }
 
 	    try 
 	      {
-		// Wait for 1 sec before retrying to connect to server
-		Thread.sleep(1000);
+		spindex++;
+		
+		if (spindex >= spinAry.length)
+		  {
+		    spindex = 0;
+		  }
+		
+		// Wait for 1/4 sec before retrying to connect to server
+		
+		Thread.sleep(250);
 	      }
 	    catch (InterruptedException e) 
 	      {
 	      }
 	  }
+
+	if (connected.isSet())
+	  {
+	    SwingUtilities.invokeLater(new Runnable() {
+		public void run() {
+		  connector.setText("Login to server");
+		  enableButtons(true);
+		  connector.paintImmediately(connector.getVisibleRect());
+		  setNormalCursor();
+		
+		  username.setEnabled(true);
+		  passwd.setEnabled(true);
+		  username.paintImmediately(username.getVisibleRect());
+		  passwd.paintImmediately(passwd.getVisibleRect());
+		  username.requestFocus();
+		
+		  invalidate();
+		  validate();
+		}
+	      });
+	  }
+	else
+	  {
+	    new StringDialog(my_frame,
+			     "Login error",
+			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + connectError,
+			     "OK", null,
+			     getErrorImage()).DialogShow();
+
+	    SwingUtilities.invokeLater(new Runnable() 
+	      {
+		public void run()
+		{
+		  connector.setText("Connect");
+		  username.setEnabled(false);
+		  passwd.setEnabled(false);
+		  
+		  username.requestFocus();
+		  invalidate();
+		  validate();
+		}
+	      });
+	  }
+      }
+    finally
+      {
+	connecting.set(false);
       }
   }
 
@@ -729,40 +767,26 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
     else if (e.getSource() == passwd)
       {
-	if (!my_client.isConnected() && my_thread == null)
-	  {
-	    // looks like the ClientBase object lost connection to
-	    // the RMI server.. let's try to re-acquire.
-	    
-	    connector.setText("Connecting...");
-	    connector.setEnabled(false);
-	    autologin = true;
-	    connected = false;
-	    my_thread = new Thread(this);
-	    my_thread.start();
-	    return;
-	  }
-	else
-	  {
-	    connector.doClick();
-	  }
+	connector.doClick();
       }
     else if (e.getSource() == connector)
       {
 	setWaitCursor();
 
-	if (!my_client.isConnected() && my_thread == null)
+	if (!my_client.isConnected())
 	  {
-	    // looks like the ClientBase object lost connection to
-	    // the RMI server.. let's try to re-acquire.
-	    
-	    connector.setText("Connecting...");
-	    connector.setEnabled(false);
-	    autologin = true;	// the user hit enter or the login button.. remember
-	    connected = false;
-	    my_thread = new Thread(this);
-	    my_thread.start();
-	    return;
+	    if (connecting.isSet())
+	      {
+		return;		// our connection thread is still trying to connect
+	      }
+	    else
+	      {
+		// looks like the ClientBase object lost connection to
+		// the RMI server.. let's try to re-acquire.
+
+		new Thread(this).start();
+		return;
+	      }
 	  }
 
 	String uname = username.getText().trim();
@@ -770,6 +794,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	my_username = uname;
 	my_passwd = pword;
+	my_session = null;
 	
 	try
 	  {
@@ -792,16 +817,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    // This means that the user was not able to log into the server properly.
 
-	    if (!my_client.isConnected() && my_thread == null)
+	    if (!my_client.isConnected() && !connecting.isSet())
 	      {
 		// looks like the ClientBase object lost connection to
 		// the RMI server.. let's try to re-acquire.
 
-		connector.setText("Connecting...");
-		connector.setEnabled(false);
-		connected = false;
-		my_thread = new Thread(this);
-		my_thread.start();
+		new Thread(this).start();
+		return;
 	      }
 	    else
 	      {

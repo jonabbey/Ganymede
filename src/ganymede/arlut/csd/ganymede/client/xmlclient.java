@@ -516,6 +516,16 @@ public final class xmlclient implements ClientListener {
 
     ClientBase client = new ClientBase(server_url, this);
 
+    try
+      {
+	client.connect();
+      }
+    catch (Throwable ex)
+      {
+	System.err.println("Error connecting to the server: " + ex.getMessage());
+	return false;
+      }
+
     XMLSession xSession = client.xmlLogin(username, password);
 
     if (xSession == null)

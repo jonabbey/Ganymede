@@ -56,6 +56,7 @@
 
 package arlut.csd.ganymede.client;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -68,6 +69,7 @@ import arlut.csd.ganymede.rmi.ClientAsyncResponder;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.XMLSession;
+import arlut.csd.Util.booleanSemaphore;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -85,7 +87,7 @@ import arlut.csd.ganymede.rmi.XMLSession;
 
 public class ClientBase implements Runnable {
 
-  private final static boolean debug = false;
+  private final static boolean debug = true;
 
   // ---
 
@@ -121,80 +123,51 @@ public class ClientBase implements Runnable {
 
   private XMLSession xSession = null;
  
-  private boolean connected = false;
   private Vector listeners = new Vector();
+  private String myServerURL = null;
+
+  private booleanSemaphore connected = new booleanSemaphore(false);
 
   /* -- */
 
   /**
    * <p>This constructor takes a URL for the Ganymede server to connect to, a
    * reference to an object implementing the ClientListener interface to
-   * report problems.  The constructor will establish an initial connection
-   * to the server and prepare itself for subsequent login before returning.</p>
+   * report problems.</p>
    *
    * @param serverURL An rmi:// URL for a Ganymede server.
    * @param listener A ClientListener to report problems and disconnection to.
    */
 
-  public ClientBase(String serverURL, ClientListener listener) throws RemoteException
+  public ClientBase(String serverURL, ClientListener listener)
   {
     if (listener == null || serverURL == null || serverURL.length() == 0)
       {
 	throw new IllegalArgumentException("bad argument");
       }
     
+    myServerURL = serverURL;
     listeners.addElement(listener);
+  }
+
+  /**
+   * <p>This method attempts to establish and verify an RMI connection to the
+   * server.</p>
+   */
     
-    if (debug)
+  public boolean connect() throws RemoteException, NotBoundException, MalformedURLException
+  {
+    Remote obj = Naming.lookup(myServerURL);
+	
+    if (obj instanceof Server)
       {
-	System.err.println("Initializing ClientBase object");
+	server = (Server) obj;
+	server.up();
       }
-    
-    try
-      {
-	connected = true;
-	
-	Remote obj = Naming.lookup(serverURL);
-	
-	if (obj instanceof Server)
-	  {
-	    server = (Server) obj;
-	    server.up();
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	connected = false;
-	
-	if (debug)
-	  {
-	    System.err.println("RMI: Couldn't bind to server url " + serverURL + "\n" + ex );
-	  }
-	
-	sendErrorMessage("RMI: Couldn't bind to server url " + serverURL + "\n" + ex );
-      }
-    catch (java.rmi.UnknownHostException ex)
-      {
-	connected = false;
-	
-	if (debug)
-	  {
-	    System.err.println("RMI: Couldn't find server\n" + serverURL );
-	  }
-	
-	sendErrorMessage("RMI: Couldn't find server\n" + serverURL );
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	connected = false;
-	
-	if (debug)
-	  {
-	    System.err.println("RMI: Malformed URL " + serverURL );
-	  }
-	
-	sendErrorMessage("RMI: Malformed URL " + serverURL );
-      }
+
+    connected.set(true);
+
+    return true;
   }
 
   /**
@@ -260,7 +233,7 @@ public class ClientBase implements Runnable {
       }
     catch (NullPointerException ex)
       {
-	connected = false;
+	connected.set(false);
 
 	if (debug)
 	  {
@@ -271,7 +244,7 @@ public class ClientBase implements Runnable {
       }
     catch (Exception ex)
       {
-	connected = false;
+	connected.set(false);
 
 	if (debug)
 	  {
@@ -351,7 +324,7 @@ public class ClientBase implements Runnable {
       }
     catch (NullPointerException ex)
       {
-	connected = false;
+	connected.set(false);
 
 	if (debug)
 	  {
@@ -362,7 +335,7 @@ public class ClientBase implements Runnable {
       }
     catch (Exception ex)
       {
-	connected = false;
+	connected.set(false);
 
 	if (debug)
 	  {
@@ -416,7 +389,7 @@ public class ClientBase implements Runnable {
 
   public boolean isConnected()
   {
-    if (!connected)
+    if (!connected.isSet())
       {
 	return false;
       }
@@ -485,7 +458,7 @@ public class ClientBase implements Runnable {
 
   public void forceDisconnect(String reason)
   {
-    connected = false;
+    connected.set(false);
     session = null;
 
     ClientEvent e = new ClientEvent("Server forced disconect: " + reason);

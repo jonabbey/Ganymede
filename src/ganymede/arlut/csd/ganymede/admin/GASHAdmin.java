@@ -156,7 +156,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   char spinAry[] = {'/','-', '\\', '|'};
   int spindex = 0;
 
-  String loginError = null;
+  String connectError = null;
 
   private booleanSemaphore connecting = new booleanSemaphore(false);
   private booleanSemaphore connected = new booleanSemaphore(false);
@@ -399,7 +399,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public void run() 
   {
-
     int try_number = 0;
 
     /* -- */
@@ -438,7 +437,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	      }
 	    catch (Throwable ex)
 	      {
-		loginError = ex.getMessage();
+		connectError = ex.getMessage();
 	      }
 	    
 	    try 
@@ -478,17 +477,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	
 	if (connected.isSet())
 	  {
-	    final GASHAdmin localLoginBox = this;
-	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
 		public void run()
 		{
-		  localLoginBox.loginButton.setText("Login to server");
-		  localLoginBox.username.setEnabled(true);
-		  localLoginBox.password.setEnabled(true);
+		  loginButton.setText("Login to server");
+		  username.setEnabled(true);
+		  password.setEnabled(true);
 		  
-		  localLoginBox.username.requestFocus();
+		  username.requestFocus();
 		  invalidate();
 		  validate();
 		}
@@ -496,23 +493,21 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  }
 	else
 	  {
-	    new StringDialog(frame,
+	    new StringDialog(new JFrame(),
 			     "Login error",
-			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + loginError,
+			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + connectError,
 			     "OK", null,
 			     getErrorImage()).DialogShow();
-	    
-	    final GASHAdmin localLoginBox = this;
 	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
 		public void run()
 		{
-		  localLoginBox.loginButton.setText("Connect");
-		  localLoginBox.username.setEnabled(false);
-		  localLoginBox.password.setEnabled(false);
+		  loginButton.setText("Connect");
+		  username.setEnabled(false);
+		  password.setEnabled(false);
 		  
-		  localLoginBox.username.requestFocus();
+		  username.requestFocus();
 		  invalidate();
 		  validate();
 		}
