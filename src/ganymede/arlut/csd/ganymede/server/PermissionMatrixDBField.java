@@ -1324,42 +1324,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
-   * <P>Sets the permission entry for all fields in base &lt;baseID&gt;
-   * to PermEntry &lt;entry&gt;</P>
-   *
-   * <P>This operation will fail if this
-   * PermissionMatrixDBField is not editable.</P>
-   *
-   * @param includeBuiltins if true, this will set the permissions for the
-   * built-in fields to entry as well as the custom fields.
-   */
-
-  public synchronized ReturnVal setFieldPerms(short baseID, PermEntry entry, boolean includeBuiltins)
-  {
-    if (!isEditable())
-      {
-	return Ganymede.createErrorDialog("Permissions Error",
-					  "You don't have permissions to edit this field");
-      }
-
-    Vector fields = owner.getBase().getFields(includeBuiltins);
-
-    for (int i = 0; i < fields.size(); i++)
-      {
-	short fieldID = ((DBObjectBaseField) fields.elementAt(i)).getID();
-
-	if (allowablePermEntry(baseID, fieldID, entry))
-	  {
-	    matrix.put(matrixEntry(baseID, fieldID), entry);
-	  }
-      }
-
-    defined = true;
-
-    return null;
-  }
-
-  /**
    * <P>This internal method is used to cull out any entries in this
    * permissions field that are non-operative, either by referring to
    * an object/field type that does not exist, or by being redundant.</P>

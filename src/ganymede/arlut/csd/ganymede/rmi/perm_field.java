@@ -202,17 +202,4 @@ public interface perm_field extends db_field {
    */
 
   public ReturnVal setPerm(Base base, PermEntry entry) throws RemoteException;
-
-  /**
-   * <P>Sets the permission entry for all fields in base &lt;baseID&gt;
-   * to PermEntry &lt;entry&gt;</P>
-   *
-   * <P>This operation will fail if this
-   * PermissionMatrixDBField is not editable.</P>
-   *
-   * @param includeBuiltins if true, this will set the permissions for the
-   * built-in fields to entry as well as the custom fields.
-   */
-
-  public ReturnVal setFieldPerms(short baseID, PermEntry entry, boolean includeBuiltins) throws RemoteException;
 }
