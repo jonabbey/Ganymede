@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -185,12 +185,12 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = (DBEditObject) createObject(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.RoleBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
-	retVal = current_obj.setFieldValueLocal(SchemaConstants.PermName, "GASH Admin");
+	retVal = current_obj.setFieldValueLocal(SchemaConstants.RoleName, "GASH Admin");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -201,7 +201,7 @@ public class directLoader {
 	    // note that QueryDataNode uses the label as the
 	    // comparator if you don't provide a field id
 
-	    Query q = new Query(SchemaConstants.PermBase, 
+	    Query q = new Query(SchemaConstants.RoleBase, 
 				new QueryDataNode(QueryDataNode.EQUALS, "GASH Admin"),
 				false);
 
@@ -228,7 +228,7 @@ public class directLoader {
 
 	// set permissions for objects owned by the GASH administrator
 
-	perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+	perm_field pf = (perm_field) current_obj.getField(SchemaConstants.RoleMatrix);
 
 	// visible, editable, create, delete
 
@@ -255,7 +255,7 @@ public class directLoader {
 	// these objects permit anonymous linking to allow systems and
 	// interfaces to be linked in.
 
-	pf = (perm_field) current_obj.getField(SchemaConstants.PermDefaultMatrix);
+	pf = (perm_field) current_obj.getField(SchemaConstants.RoleDefaultMatrix);
 
 	// visible, editable, create, delete
 
@@ -1221,7 +1221,7 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("Attempting to add " + username + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
@@ -1245,7 +1245,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(objInvid); // add this group
+		((DBField) f).addElementLocal(objInvid); // add this group
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -1293,7 +1293,7 @@ public class directLoader {
 
 		    if (!ok)
 		      {
-			retVal = current_field.addElement(invid);
+			retVal = ((DBField) current_field).addElementLocal(invid);
 
 			ok = (retVal == null || retVal.didSucceed());
 		      }
@@ -1452,7 +1452,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(invid); // add this user
+		((DBField) f).addElementLocal(invid); // add this user
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -1491,12 +1491,12 @@ public class directLoader {
 	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminPower, new Boolean(false));
 
 	    db_field personaField = newPersona.getField(SchemaConstants.PersonaGroupsField);
-	    personaField.addElement(ogRec.getInvid());
+	    ((DBField) personaField).addElementLocal(ogRec.getInvid());
 
 	    // this is a GASH admininstrator, so give it the GASH perm matrix
 
 	    personaField = newPersona.getField(SchemaConstants.PersonaPrivs);
-	    personaField.addElement(gashadminPermInvid);
+	    ((DBField)personaField).addElementLocal(gashadminPermInvid);
 	  }
       }
   }
@@ -1578,7 +1578,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(objInvid); // add this group
+		((DBField) f).addElementLocal(objInvid); // add this group
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -1628,7 +1628,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(objInvid); // add this group
+		((DBField) f).addElementLocal(objInvid); // add this group
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -1658,7 +1658,7 @@ public class directLoader {
 
 		if (targetInvid != null)
 		  {
-		    current_field.addElement(targetInvid);
+		    ((DBField) current_field).addElementLocal(targetInvid);
 		  }
 		else
 		  {
@@ -1666,7 +1666,7 @@ public class directLoader {
 
 		    if (targetInvid != null)
 		      {
-			current_field.addElement(targetInvid);
+			((DBField) current_field).addElementLocal(targetInvid);
 		      }
 		    else
 		      {
@@ -1750,7 +1750,7 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("\tAdd " + username + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
@@ -1766,7 +1766,7 @@ public class directLoader {
 		  {
 		    System.err.println("\t-- home group add " + username);
 		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
-		    current_field2.addElement(invid);
+		    ((DBField) current_field2).addElementLocal(invid);
 		  }
 	      }
 	    else
@@ -1786,7 +1786,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(objInvid); // add this group
+		((DBField) f).addElementLocal(objInvid); // add this group
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -2171,7 +2171,7 @@ public class directLoader {
 		    db_object ownerGroup = editObject(ogRec.getInvid());
 		    db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		    f.addElement(objInvid); // add this group
+		    ((DBField) f).addElementLocal(objInvid); // add this group
 		    System.out.print(" " + ogRec.prefix);
 		    owners.put(ogRec.getInvid(), ogRec);
 		  }
@@ -2197,7 +2197,7 @@ public class directLoader {
 			db_object ownerGroup = editObject(ogRec.getInvid());
 			db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 			
-			f.addElement(objInvid); // add this group.. this is a bi-directional link-up
+			((DBField) f).addElementLocal(objInvid); // add this group.. this is a bi-directional link-up
 
 			System.out.print(" " + ogRec.prefix);
 			owners.put(ogRec.getInvid(), ogRec);
@@ -2272,7 +2272,7 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("Attempting to add " + systemname + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
@@ -2296,7 +2296,7 @@ public class directLoader {
 		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
-		f.addElement(objInvid); // add this group
+		((DBField) f).addElementLocal(objInvid); // add this group
 		System.out.print(" " + ogRec.prefix);
 	      }
 	  }
@@ -2336,7 +2336,7 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("Attempting to add " + subName + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
