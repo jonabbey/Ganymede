@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/10/27 02:49:24 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/10/28 00:58:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -223,6 +223,88 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    */
 
   private boolean success = false;
+
+  /**
+   * <p>If we are editing the server's schema from the XML source, this
+   * field will hold a reference to a DBSchemaEdit object.</p>
+   */
+
+  private DBSchemaEdit editor = null;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * namespaces from the xml file that need to be added to the current
+   * schema.  Elements in this vector are empty XMLElements that contain
+   * name and optional case-sensitive attributes.</p>
+   */
+
+  private Vector spacesToAdd;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * namespaces from the xml file that need to be removed from the
+   * current schema. Elements in this vector are empty XMLElements
+   * that contain name and optional case-sensitive attributes.</p> 
+   */
+
+  private Vector spacesToRemove;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * namespaces from the xml file that need to be edited in the
+   * current schema.  Since namespaces can only be edited in the sense
+   * of toggling the case sensitivity flag, this vector will only
+   * contain XMLElements for namespaces that need to have their case
+   * sensitivity toggled. Elements in this vector are empty
+   * XMLElements that contain name and optional case-sensitive
+   * attributes.</p> 
+   */
+
+  private Vector spacesToEdit;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * object types from the xml file that need to be added to the current
+   * schema.  Elements in this vector are XMLItem trees rooted
+   * with the appropriate &lt;objectdef&gt; elements.</p>
+   */
+
+  private Vector basesToAdd;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * object types from the xml file that need to be removed from the
+   * current schema.  Elements in this vector are XMLItem trees rooted
+   * with the appropriate &lt;objectdef&gt; elements.</p> 
+   */
+
+  private Vector basesToRemove;
+
+  /**
+   * <p>This vector is used by the XML schema editing logic to track
+   * object types from the xml file that need to be edited in the
+   * current schema.  Elements in this vector are XMLItem trees rooted
+   * with the appropriate &lt;objectdef&gt; elements.</p> 
+   */
+
+  private Vector basesToEdit;
+
+  /**
+   * <p>This XMLItem is the XMLElement root of the namespace tree,
+   * rooted with the &lt;namespaces&gt; element.  Children of this
+   * node will be &lt;namespace&gt; elements.</p>
+   */
+
+  private XMLItem namespaceTree = null;
+
+  /**
+   * <p>This XMLItem is the XMLElement root of the category tree,
+   * rooted with the top-level &lt;category&gt; element.
+   * Children of this node will be either &lt;category&gt; or
+   * &lt;objectdef&gt; elements.</p> 
+   */
+
+  private XMLItem categoryTree = null;
   
   /* -- */
 
@@ -560,6 +642,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
   {
+
+    /* -- */
+    
     if (!session.isSuperGash())
       {
 	err.println("Skipping <ganyschema> element.. not logged in with supergash privileges");
@@ -582,7 +667,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	return false;
       }
 
-    DBSchemaEdit editor = editSchema();
+    editor = editSchema();
 
     if (editor == null)
       {
@@ -595,9 +680,45 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
+	XMLItem schemaChildren[] = schemaTree.getChildren();
+
+	if (schemaChildren == null)
+	  {
+	    success = true;	// no editing to be done
+	    return true;
+	  }
+
+	// if schemaChildren was not null, XMLReader will guarantee
+	// that it has at least one element
+	
+	int nextchild = 0;
+
+	if (schemaChildren[nextchild].matches("namespaces"))
+	  {
+	    namespaceTree = schemaChildren[nextchild++];
+	  }
+
+	if (schemaChildren.length > nextchild && schemaChildren[nextchild].matches("object_type_definitions"))
+	  {
+	    XMLItem otdItem = schemaChildren[nextchild];
+
+	    if (otdItem.getChildren() == null || otdItem.getChildren().length != 1)
+	      {
+		err.println("Error, the object_type_definitions element does not contain a singly-rooted category tree.");
+		success = false;
+		return false;
+	      }
+
+	    categoryTree = otdItem.getChildren()[0];
+	  }
+
       }
     finally
       {
+	// break apart the XML item tree for gc
+
+	schemaTree.dissolve();
+
 	// either of these will clear the semaphore lock
 	// created by editSchema() above
 
@@ -612,6 +733,90 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    return false;
 	  }
       }
+  }
+
+  /**
+   * <p>This method fills in spacesToAdd, spacesToRemove, and spacesToEdit.</p>
+   */
+
+  private boolean calculateNameSpaces()
+  {
+    try
+      {
+	NameSpace[] list = editor.getNameSpaces();
+
+	Vector current = new Vector(list.length);
+
+	for (int i = 0; i < list.length; i++)
+	  {
+	    current.addElement(list[i].getName());
+	  }
+
+	XMLItem XNamespaces[] = namespaceTree.getChildren();
+
+	Vector newSpaces = new Vector(XNamespaces.length);
+	Hashtable entries = new Hashtable(XNamespaces.length);
+
+	for (int i = 0; i < XNamespaces.length; i++)
+	  {
+	    if (!XNamespaces[i].matches("namespace"))
+	      {
+		err.println("unrecognized namespace element: " + XNamespaces[i]);
+		return false;
+	      }
+
+	    newSpaces.addElement(XNamespaces[i].getName());
+	    entries.put(XNamespaces[i].getName(), XNamespaces[i]);
+	  }
+
+	Vector additions = VectorUtils.difference(newSpaces, current);
+	Vector deletions = VectorUtils.difference(current, newSpaces);
+	Vector possibleEdits = VectorUtils.intersection(newSpaces, current);
+
+	spacesToAdd = new Vector();
+
+	for (int i = 0; i < additions.size(); i++)
+	  {
+	    XMLItem entry = (XMLItem) entries.get(additions.elementAt(i));
+
+	    spacesToAdd.addElement(entry);
+	  }
+
+	spacesToRemove = new Vector();
+
+	for (int i = 0; i < deletions.size(); i++)
+	  {
+	    XMLItem entry = (XMLItem) entries.get(deletions.elementAt(i));
+
+	    spacesToRemove.addElement(entry);
+	  }
+
+	spacesToEdit = new Vector();
+
+	for (int i = 0; i < possibleEdits.size(); i++)
+	  {
+	    boolean newSensitive;
+	    boolean oldSensitive;
+
+	    XMLItem entry = (XMLItem) entries.get(possibleEdits.elementAt(i));
+	    NameSpace oldEntry = editor.getNameSpace((String) possibleEdits.elementAt(i));
+
+	    newSensitive = entry.getAttrBoolean("case-sensitive");
+	    oldSensitive = oldEntry.isCaseInsensitive();
+
+	    if (newSensitive != oldSensitive)
+	      {
+		spacesToEdit.addElement(entry);
+	      }
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
+      }
+
+    return true;
   }
 
   /**
