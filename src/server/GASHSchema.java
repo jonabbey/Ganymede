@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -666,27 +666,36 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	results = dialog.DialogShow();
 
 	//Now check the hash
-	System.out.println("Printing the hash:");
-	Enumeration enum = results.elements();
-	while (enum.hasMoreElements()) 
+	if (results == null)
 	  {
-	    //String label = (String)enum.nextElement();
-	    Object ob = enum.nextElement();
-	    if (ob instanceof String) 
+	    System.out.println("null hashtable");
+	  }
+	else 
+	  {
+	    System.out.println("Printing the hash:");
+	    Enumeration enum = results.keys();
+	    while (enum.hasMoreElements()) 
 	      {
-		String label = (String)ob;
-		System.out.println(label + "=" + results.get(label));
+		//String label = (String)enum.nextElement();
+		String label = (String)enum.nextElement();
+		Object ob = results.get(label);
+		if (ob instanceof String) 
+		  {
+		    System.out.println(label + " = " + (String)ob);
+		  }
+		if (ob instanceof Boolean)
+		  {
+		    Boolean bool = (Boolean)ob;
+		    if (bool.booleanValue())
+		      {
+			System.out.println(label + " is true");
+		      }
+		    else
+		      {
+			System.out.println(label + " is false");
+		      }
+		  }
 	      }
-	    if (ob instanceof Boolean)
-	      {
-		Boolean bool = (Boolean)ob;
-		//This shouldn't matter, should all be strings, but 
-		//it gives as Boolean class exception.  I don't think that
-		// there are any Booleans, just labels and strings,
-		// checkboxField doesn't even do anything yet.
-		// Weird, huh?
-	      }
-
 	  }
 	System.out.println("That's it for the hash");
 
