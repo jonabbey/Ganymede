@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -150,7 +150,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
       progressPanel = new JPanel();
-      //progressPanel.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
       progressBar = new JProgressBar();
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
@@ -180,21 +179,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       setTitle(title);
       
+      System.out.println("Creating menu bar");
       JMenuBar mb = wp.createMenuBar(editable, object, this);
       setMenuBar(mb);
 
       // Now setup the framePanel layout
       pane = new JTabbedPane();
-      pane.addChangeListener(this);
-
-      // Create all the panes
-
-      
       
       // Add the panels to the tabbedPane
+      System.out.println("Adding GENERAL " + current);
       general = new JScrollPane();
       pane.addTab("General", null, general);
       GENERAL = current++;
+      System.out.println("GENERAL=" + GENERAL);
       owner = new JScrollPane();
       pane.addTab("Owner", null, owner);
       OWNER = current++;
@@ -235,12 +232,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       notes = new JScrollPane();
       addNotesPanel();
 
+      pane.addChangeListener(this);
+
+      // Create all the panes
+
       showGeneralTab();
       contentPane.remove(progressPanel);
       contentPane.add("Center", pane);
 
-      //contentPane.invalidate();
-      contentPane.validate();
+      contentPane.invalidate();
+      System.out.println("Calling validate in the fp");
+      validate();
+      System.out.println("Done Calling validate in the fp");
     }
 
   /**
@@ -267,6 +270,35 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
   */
     
+
+  public void printObject()
+  {
+    PrintJob j = Toolkit.getDefaultToolkit().getPrintJob(getgclient(), "Print window", new Properties());
+
+    if (j == null)
+      {
+	System.out.println("Cancelled");
+	return;
+      }
+
+    Graphics page = j.getGraphics();
+
+    int index = pane.getSelectedIndex();
+    if (index < 0)
+      {
+	System.out.println("No pane selected?");
+      }
+    else
+      {
+	System.out.println("Printing " + index);
+	pane.getComponentAt(index).print(page);
+      }
+
+    page.dispose();
+    j.end();
+
+  }
+
   //This need to be changed to show the progress bar
   void create_general_panel()
     {
@@ -282,13 +314,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       general.setViewportView(cp);
       //general.setViewportView(progressBar);
       general_created = true;
-      //general.invalidate();
-      //pane.validate();
+      setStatus("Done");
+      
     }
 
   // Don't use this
   public void validate_general()
     {
+      System.out.println("Crazy monkey!  Don't use validate_general!");
       general.invalidate();
       validate();
     }
@@ -302,8 +335,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
 	  
       expiration_date_created = true;
-      expiration_date.invalidate();
-      validate();
+
+      setStatus("Done");
+      
     }
 
   void create_removal_date_panel()
@@ -315,8 +349,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
 	  
       removal_date_created = true;
-      removal_date.invalidate();
-      validate();
+
+      setStatus("Done");
+      
     }
 
   void create_owner_panel()
@@ -336,7 +371,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
 	
       owner_created = true;
-
+      setStatus("Done");
+      
       owner.invalidate();
       validate();
     }
@@ -369,6 +405,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       notes.setViewportView(my_notesPanel);
 
       notes_created = true;
+      setStatus("Done");
 
       notes.invalidate();
       validate();
@@ -397,6 +434,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       objects_owned.invalidate();
       validate();
 
+      setStatus("Done");
     }
 
   void create_personae_panel()
@@ -422,6 +460,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       personae.invalidate();
       validate();
 
+      setStatus("Done");
     }
 
   /**
@@ -500,7 +539,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
     }
 
-	
+  //
+  // showPanel(int) will generate the actual panel.  I don't know if we need
+  // showPanel after each of these, or just for the first one.  It is kinda
+  // a hack anyway, since the whole framePanel changed so many times.  Maybe
+  // the whole thing should be overhauled.
+  //
+
   public void showGeneralTab()
     {
       if (GENERAL == -1)
@@ -508,7 +553,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.out.println("General tab has not been created.");
 	  return;
 	}
+      System.out.println("Setting general as the selected index.");
       pane.setSelectedIndex(GENERAL);
+      showPanel(GENERAL);
     }
 
   public void showOwnerTab()
@@ -571,6 +618,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   public void stateChanged(ChangeEvent e)
     {
       int index = pane.getSelectedIndex();
+
+      showPanel(index);
+    }
+
+  public void showPanel(int index)
+    {
+      System.out.println("index = " + index + " GENERAL= " + GENERAL);
 	
       if (index == GENERAL)
 	{
@@ -632,8 +686,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
 	}
-      
-      setStatus("Done");
       
     }
 
