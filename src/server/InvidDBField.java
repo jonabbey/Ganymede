@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
-public class InvidDBField extends DBField implements invid_field {
+public final class InvidDBField extends DBField implements invid_field {
 
   static final boolean debug = false;
 
@@ -149,7 +149,7 @@ public class InvidDBField extends DBField implements invid_field {
     else
       {
 	this.values = (Vector) values.clone();
-	defined = true;
+	defined = (values.size() > 0);
       }
 
     value = null;
@@ -519,9 +519,6 @@ public class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("not an editable invid field");
       }
 
-    eObj = (DBEditObject) this.owner;
-    session = eObj.getSession();
-
     // find out whether we need to do anything to maintain symmetry
 
     if (!getFieldDef().isSymmetric())
@@ -529,9 +526,13 @@ public class InvidDBField extends DBField implements invid_field {
 	return true;
       }
 
+    eObj = (DBEditObject) this.owner;
+    session = eObj.getSession();
+
     // find out what field in remote we might need to update
 
     targetField = getFieldDef().getTargetField();
+    
     oldRef = session.editDBObject(remote);
 	
     if (oldRef == null)
@@ -823,6 +824,10 @@ public class InvidDBField extends DBField implements invid_field {
 	  {
 	    defined = false;
 	  }
+	else
+	  {
+	    defined = true;
+	  }
 
 	return true;
       }
@@ -972,10 +977,10 @@ public class InvidDBField extends DBField implements invid_field {
       {
 	values.addElement(value);
 
-	if (debug)
-	  {
-	    setLastError("InvidDBField debug: successfully added " + value);
-	  }
+	//	if (debug)
+	//	  {
+	//	    setLastError("InvidDBField debug: successfully added " + value);
+	//	  }
 
 	defined = true;		// very important!
 
