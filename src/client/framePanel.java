@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2002/03/01 22:35:28 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2002/06/29 01:44:46 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.78 $ $Date: 2002/03/01 22:35:28 $ $Name:  $
+ * @version $Revision: 1.79 $ $Date: 2002/06/29 01:44:46 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1092,7 +1092,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     if (rem_date_panel == null)
       {
-	addExpirationDatePanel();
+	addRemovalDatePanel();
 	create_removal_date_panel();
 	return;
       }
