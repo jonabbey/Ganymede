@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -849,7 +849,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	    Vector valueAry = getFieldValuesLocal((short) 264);
 	    Invid delVal = (Invid) valueAry.elementAt(index);
 
-	    System.err.println("userCustom: deleting group element " + getGSession().viewObjectLabel(delVal));
+	    System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
 
 	    if (!delVal.equals(getFieldValueLocal((short) 265)))
 	      {
@@ -857,7 +857,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 		// home group.  The client will need to rescan,
 		// but no biggie.
 
-		System.err.println("userCustom: I don't think " + getGSession().viewObjectLabel(delVal) + 
+		System.err.println("userCustom: I don't think " + gSession.viewObjectLabel(delVal) + 
 				   " is the home group");
 
 		result = new ReturnVal(true);
@@ -881,7 +881,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 		  }
 		else
 		  {
-		    if (groupWizard.object != this)
+		    if (groupWizard.userObject != this)
 		      {
 			System.err.println("userCustom.wizardHook(): bad object");
 		      }
@@ -911,7 +911,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	      {
 		groupWizard = new userHomeGroupDelWizard(this.gSession,
 							 this,
-							 field,
 							 param1);
 	      }
 	    catch (RemoteException ex)
@@ -953,8 +952,8 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if ((renameWizard.getState() == renameWizard.DONE) &&
 	    (renameWizard.field == field) &&
-	    (renameWizard.object == this) &&
-	    (renameWizard.param == param1))
+	    (renameWizard.userObject == this) &&
+	    (renameWizard.newname == param1))
 	  {
 	    // ok, assume the wizard has taken care of getting everything prepped and
 	    // approved for us.  An active wizard has approved the operation
@@ -970,12 +969,12 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("userCustom.wizardHook(): bad field");
 	      }
 
-	    if (renameWizard.object != this)
+	    if (renameWizard.userObject != this)
 	      {
 		System.err.println("userCustom.wizardHook(): bad object");
 	      }
 
-	    if (renameWizard.param != param1)
+	    if (renameWizard.newname != param1)
 	      {
 		System.err.println("userCustom.wizardHook(): bad param");
 	      }
@@ -1015,7 +1014,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	    renameWizard = new userRenameWizard(this.gSession,
 						this,
 						field,
-						param1);
+						(String) param1);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1030,10 +1029,5 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	return renameWizard.getStartDialog();
       }
-  }
-
-  GanymedeSession getGSession()
-  {
-    return gSession;
   }
 }
