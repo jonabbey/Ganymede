@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2001/04/12 10:23:00 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2001/06/27 20:59:17 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2047,10 +2047,14 @@ class OptionsPanel extends JPanel {
 
   querybox parent;
 
-  Hashtable checkboxes = new Hashtable();
-
   JPanel builtInPanel = new JPanel();
   JPanel customPanel = new JPanel();
+
+  StringSelector builtInSelector, 
+		 customSelector;
+
+  int numBuiltInChoices,
+      numCustomChoices;
 
   /* -- */
 
@@ -2080,17 +2084,17 @@ class OptionsPanel extends JPanel {
     gbc.weighty = 1.0;
 
     builtInPanel.setBorder(new TitledBorder(new EtchedBorder(),"Built-In Fields"));
-    builtInPanel.setLayout(new FlowLayout());
+    builtInPanel.setLayout(new BorderLayout());
 
-    gbc.gridy = 0;
+    gbc.gridx = 0;
     gbl.setConstraints(builtInPanel, gbc);
 
     add(builtInPanel);
 
     customPanel.setBorder(new TitledBorder(new EtchedBorder(),"Custom Fields"));
-    customPanel.setLayout(new FlowLayout());
+    customPanel.setLayout(new BorderLayout());
 
-    gbc.gridy = 1;
+    gbc.gridx = 1;
     gbl.setConstraints(customPanel, gbc);
 
     add(customPanel);
@@ -2108,12 +2112,22 @@ class OptionsPanel extends JPanel {
   public void resetBoxes()
   {
     FieldTemplate template;
-    JCheckBox newCheck;
     Vector fields;
+
+    Vector
+      builtInItems_Vect = new Vector(),
+      customItems_Vect = new Vector();
+
+    JList 
+      builtIn_List,
+      custom_List;
+
+    JScrollPane
+      builtIn_Scroll,
+      custom_Scroll;
 
     /* -- */
 
-    checkboxes.clear();
     customPanel.removeAll();
     builtInPanel.removeAll();
 
@@ -2123,20 +2137,36 @@ class OptionsPanel extends JPanel {
       {	
 	template = (FieldTemplate) fields.elementAt(i);
 
-	newCheck = new JCheckBox(template.getName());
-	checkboxes.put(template.getName(), newCheck);
-
 	if (template.isBuiltIn())
 	  {
-	    builtInPanel.add(newCheck);
-	    newCheck.setSelected(false);
+	    builtInItems_Vect.add( template.getName() );
 	  }
 	else
 	  {
-	    customPanel.add(newCheck);
-	    newCheck.setSelected(true);
+	    customItems_Vect.add( template.getName() );
 	  }
+	
       }
+
+    numBuiltInChoices = builtInItems_Vect.size();
+    numCustomChoices = customItems_Vect.size();
+      
+    builtInSelector = new StringSelector( builtInItems_Vect, 
+					  new Vector(), 
+					  builtInPanel,
+					  true,
+					  "In",
+					  "Out" );
+
+    customSelector = new StringSelector( new Vector(),
+					 customItems_Vect,
+					 customPanel,
+					 true,
+					 "In",
+					 "Out" );
+
+    builtInPanel.add( builtInSelector, BorderLayout.CENTER );
+    customPanel.add( customSelector, BorderLayout.CENTER );
   }
 
   /**
@@ -2150,34 +2180,15 @@ class OptionsPanel extends JPanel {
   public Vector getReturnFields()
   {
     Vector fieldsToReturn = new Vector();
-    Enumeration enum = checkboxes.keys();
-    boolean allFields = true;
 
     /* -- */
 
-    while (enum.hasMoreElements())
-      {
-	String key = (String) enum.nextElement();
-	JCheckBox checkbox = (JCheckBox) checkboxes.get(key);
-	
-	if (checkbox.isSelected())
-	  {
-	    fieldsToReturn.addElement(key);
-	  }
-	else
-	  {
-	    allFields = false;
-	  }
-      }
+    fieldsToReturn.addAll( builtInSelector.getChosenStrings() );
+    fieldsToReturn.addAll( customSelector.getChosenStrings() );
 
-    // if allFields is still true, let the Query mechanism
-    // return default fields.
-    
-    if (allFields)
-      {
-	fieldsToReturn = null;
-      }
+    if ( fieldsToReturn.size() == (numBuiltInChoices + numCustomChoices) ) 
+	fieldsToReturn = null; 
 
-    return fieldsToReturn;
+    return fieldsToReturn; 
   }
 }
