@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.39 $
-# $Date: 2001/07/28 08:08:44 $
+# $Revision: 1.40 $
+# $Date: 2001/07/30 07:02:05 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -197,7 +197,6 @@ $installdir = $vars{"SERVERINSTALL"};
 &makedir("$installdir/html", 0750); print ".";
 &copydir("doc", "$installdir/doc"); print ".";
 copy("README", "$installdir/README"); print ".";
-copy("README.xml", "$installdir/README.xml"); print ".";
 copy("INSTALL", "$installdir/INSTALL"); print ".";
 copy("UPGRADE", "$installdir/UPGRADE"); print ".";
 copy("CHANGES", "$installdir/CHANGES"); print ".";
