@@ -223,7 +223,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		      }
 
 		    passwordThing pt = (passwordThing)element;
-		    JstringField sf = new JstringField();
+		    JpasswordField sf = new JpasswordField();
 		    //		    sf.setEchoChar('*');
 		    sf.setEditable(true);
 		    sf.setCallback(this); 
@@ -393,6 +393,17 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
       {
 	String label = (String)componentHash.get(comp);
 	JstringField sf = (JstringField)comp;
+	valueHash.put(label, sf.getText());
+
+	if (debug)
+	  {
+	    System.out.println("Setting " + label + " to " + sf.getText());
+	  }
+      }
+    else if (comp instanceof JpasswordField)
+      {
+	String label = (String)componentHash.get(comp);
+	JpasswordField sf = (JpasswordField)comp;
 	valueHash.put(label, sf.getText());
 
 	if (debug)
