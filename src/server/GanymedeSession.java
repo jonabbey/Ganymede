@@ -1,13 +1,20 @@
 /*
 
    GanymedeSession.java
+ 
+   This class is the heart of the Ganymede server.
 
-   The GanymedeSession class is the template for the server-side objects
-   that track a client's login and provide operations to be performed in
-   the Ganymede server.
-   
+   Each client logged on to the server will hold a reference to a unique
+   GanymedeSession object.  This object provides services to the client, tracks
+   the client's status, manages permissions, and keeps track of the client's
+   transactions.
+
+   Most methods in this class are synchronized to avoid race condition
+   security holes between the persona change logic and the actual
+   operations.
+
    Created: 17 January 1997
-   Version: $Revision: 1.95 $ %D%
+   Version: $Revision: 1.96 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,13 +40,16 @@ import arlut.csd.JDialog.*;
 
 /**
  *
- * The GanymedeSession class is the template for the server-side objects
- * that track a client's login and provide operations to be performed in
- * the Ganymede server.<br><br>
+ * This class is the heart of the Ganymede server.<br><br>
+ *
+ * Each client logged on to the server will hold a reference to a
+ * unique GanymedeSession object.  This object provides services to
+ * the client, tracks the client's status, manages permissions, and
+ * keeps track of the client's transactions.<br><br>
  *
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
- *
+ * 
  */
 
 final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
@@ -149,6 +159,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   String status = null;
 
   /**
+   *
    * Description of the last action recorded for this client.  The
    * GanymedeAdmin code that manages the admin consoles will consult
    * this String when it updates the admin consoles.
@@ -158,6 +169,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   String lastEvent = null;
 
   /**
+   *
    * Our DBSession object.  DBSession is the generic DBStore access
    * layer.  A GanymedeSession is layered on top of a DBSession to
    * provide access control and remote access via RMI.  The DBSession
@@ -320,12 +332,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * the server's internal code needs to do a query, etc.  Note that
    * the Ganymede server will create this fairly early on, and will
    * keep it around for internal usage.  Note that we don't add
-   * this to the data structures used for the admin console.
+   * this to the data structures used for the admin console.<br><br>
    *
    * Note that all internal session activities (queries, etc.) are
    * currently using a single, synchronized DBSession object.. this
    * mean that only one user at a time can currently be processed for
-   * login. 8-(
+   * login. 8-(<br><br>
    * 
    * Internal sessions, as created by this constructor, have full
    * privileges to do any possible operation.
@@ -438,16 +450,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return supergashMode;
   }
 
+  /**
+   *
+   * This method is used to flag an error condition that the client
+   * can then call getLastError() to look up.  This system functions
+   * similarly to the errno system in C, and has similar problems
+   * in a multi-thread environment.  Most Ganymede code now uses
+   * ReturnVal objects to pass back error information in response
+   * to a client operation.
+   *
+   */
+
   void setLastError(String status)
   {
     lastError = status;
     Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + lastError + ")");
   }
 
-  // if the server decides this person needs to get off
-  // (if the user times out, is forced off by an admin, the
-  // server is going down),
-  // it will call this method to knock them off.
+  /**
+   *
+   * If the server decides this person needs to get off (if the user
+   * times out, is forced off by an admin, the server is going down),
+   * it will call this method to knock them off.  
+   *
+   */
 
   void forceOff(String reason)
   {
@@ -499,11 +525,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    *
    * This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.
+   * remote object is no longer referenced by any remote objects.<br><br>
    *
-   * This method handles abnormal logouts.
+   * This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.
    *
-   * @see java.rim.server.Unreferenced
+   * @see java.rmi.server.Unreferenced
    *
    */
 
@@ -523,10 +550,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   //************************************************************
 
   /** 
-   * getLastError() returns text explaining the last
-   * error condition 
    *
-   * @see arlut.csd.ganymede.Session
+   * getLastError() returns text explaining the last error condition.<br><br>
+   *
+   * This method is now all-but-deprecated, as most code in the Ganymede
+   * server now uses ReturnVal objects to return error information.
+   *
+   * @see setLastError
+   * @see arlut.csd.ganymede.Session 
    */
   
   public String getLastError()
@@ -554,7 +585,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * Log out this session.  After this method is called, no other
    * methods may be called on this session object.<br><br>
    *
-   * This method is partially synchronized.
+   * This method is partially synchronized, to avoid locking up
+   * the admin console if this user's session has become deadlocked.
    *
    * @see arlut.csd.ganymede.Session
    * 
@@ -629,7 +661,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	GanymedeServer.clearActiveUser(username);
 	GanymedeAdmin.refreshUsers();
 
-	ownerList = null;		// make GC happier
+	// help the garbage collector
+
+	ownerList = null;
+	personaObj = null;
+	permBase = null;
+	defaultObj = null;
+	newObjectOwnerInvids = null;
+	defaultPerms = null;
+	visibilityFilterInvids = null;
+	personaPerms = null;
+	defaultPerms = null;
 
 	Ganymede.debug("User " + username + " logged off");
 
@@ -677,7 +719,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * Oversight is enabled by default.
    *
    * @param val If true, oversight will be enabled.
-   * */
+   * 
+   */
 
   public void enableOversight(boolean val)
   {
@@ -1098,7 +1141,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * This method is synchronized to avoid any possible deadlock
    * between DBStore and GanymedeSession, as the CategoryTransport
-   * constructor calls other synchronized methods on GanymedeSession
+   * constructor calls other synchronized methods on GanymedeSession.
    *
    * @see arlut.csd.ganymede.Category
    * @see arlut.csd.ganymede.Session
