@@ -1,0 +1,103 @@
+Ganymede schemas README
+
+$Revision: 1.1 $
+$Date: 1999/01/19 21:58:38 $
+
+Jonathan Abbey, jonabbey@arlut.utexas.edu
+Applied Research Laboratories, The University of Texas at Austin
+
+------------------------------------------------------------------------------
+
+This directory contains a bunch of schema kits, some more fully
+developed than others.  Each schema kit includes two main directories,
+loader/ and custom_src/.
+
+The loader directory contains code to initialize a ganymede database
+from existing text files, such as /etc/passwd, /etc/group, and so on.
+
+loader also contains a ganymede database template file called
+ganymede.schema, which defines the object and field types used by the
+schema kit.
+
+The custom_src directory contains .java and .class files for custom
+logic that is loaded into the server to manage objects of a given
+type.  This binding of classes to object types is accomplished in the
+ganymede.schema file, which can record a class name for each type of
+object defined.  The custom_src directory holds the source code for
+those classes, as well as for auxiliary classes that are used by the
+bound classes.  These auxiliary classes can include wizards and the
+like.
+
+The custom_src directory includes 2 scripts.  build is used to
+compile the source code for the schema kit into the classes directory
+contained in the schema kit directory.  The buildCustomJar script is
+used to produce a custom.jar file.  This class archive is actually
+used by the top-level install scripts to integrate the schema's
+classes with the server at run-time.  A schema kit must have a
+compiled custom.jar file to be used with the server.
+
+The schema kits currently included with this distribution include
+the following:
+
+--
+
+bsd
+
+	This schema kit includes code to load passwd and group data
+from BSD 4.4 based systems, and to manage users and groups in the
+Ganymede server.  It supports the BSD shadow password schema, and
+is intended for demonstration purposes.
+
+--
+
+linux
+
+	This schema kit is very similar to the bsd kit, in as much
+as it only includes code to manage users and groups.  The loader
+code is written to process Linux passwd and group files.
+
+--
+
+nisonly
+
+	This schema kit is again similar to the bsd and linux kits,
+but it is designed to manage passwd and group maps formatted according
+to Solaris conventions.  A better title for this schema kit might be
+'Solaris users and groups only'.
+
+--
+
+gasharl
+
+	This schema kit is the most highly developed at present.  It
+is intended to serve as a replacement for GASH as it is used at ARL,
+and includes comprehensive support for managing a single NIS domain
+and a single DNS domain.  The loader code is designed to read data
+from pre-existing GASH files.  ARL-specific logic is embodied in this
+schema kit.
+
+--
+
+gash
+
+	This schema kit is an older and somewhat simpler version of
+the gasharl schema kit.  It has not been actively maintained for
+awhile, and doesn't support some ARL-specific logic, such as user
+categories and mandatory expiration dates for certain kinds of user
+accounts.
+	
+
+--
+
+ganymede.old
+
+	This schema kit is not currently functional.  It was developed
+to extend the GASHARL kit logic to a more flexible and abstract
+design, with support for separating personal identity from user
+accounts, and for providing more flexible DNS support.  This schema
+kit does not currently build cleanly, but we will eventually revisit
+the design of this schema kit and build on it for integration in the
+laboratory.
+	
+
+------------------------------------------------------------------------------
