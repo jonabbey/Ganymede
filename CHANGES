@@ -1,11 +1,11 @@
 Ganymede Release 0.99
-April ??, 1999
+April 14, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.98 to 0.99 -------------------
 
-RELEASE DATE: April ??, 1999
+RELEASE DATE: April 14, 1999
 
 1. [SCHEMA] gasharl schema mods
 
@@ -42,26 +42,20 @@ The server had always had support for DROPPED objects as well
 as DELETED objects, the change above just really takes advantage
 of this more.
 
-4. [DOCUMENTATION] Documentation improvments
-
-Added a lot of documentation to explain the message-passing between
-GUI components in the client, and for the internal structure of the 
-Ganymede client.
-
-5. [SERVER/CLIENT] Added case-insensitive regexp matching
+4. [SERVER/CLIENT] Added case-insensitive regexp matching
 
 The server and client now support performing a case-insensitive
 regular expression comparison when querying on string and object
 reference (invid) fields.
 
-6. [CLIENT] Scalar invid fields are now always sorted
+5. [CLIENT] Scalar invid fields are now always sorted
 
 Scalar invid fields would become unsorted when the server instructed
 the client to refresh them.  The client will now properly sort
 invid lists from the server on field refresh as well as on field
 construction.
 
-7. [CLIENT] Client code simplified, documented, improved
+6. [CLIENT] Client code simplified, documented, improved
 
 Embedded object vector panels were seriously broken, and would break
 when you tried to delete entries.  The vectorPanel refresh logic
@@ -78,7 +72,7 @@ Lots and lots of javadocs added and corrected in the client code.
 Some of the debug output when running the client in debug mode has
 been cleaned up.
 
-8. [CLIENT] Fixed error on loading 'inactivate.gif' on HPUX JVM
+7. [CLIENT] Fixed error on loading 'inactivate.gif' on HPUX JVM
 
 The client included code to try to create an inactivate icon from a
 file called inactivate.gif.  That file did not exist in the jar file
@@ -87,25 +81,48 @@ exception on this, even though Sun's JVM's do not.
 
 Reported by Lewis Muhlenkamp (lewism@tt.comm.mot.com)
 
-9. [DISTRIBUTION] Build scripts, make files no longer require '.' in PATH
+8. [DISTRIBUTION] Build scripts, make files no longer require '.' in PATH
 
 The Ganymede install and build scripts required '.' in the user's PATH
 during install.  This should no longer be the case.
 
 Reported by Lewis Muhlenkamp (lewism@tt.comm.mot.com)
 
-10. [DISTRIBUTION] configure prompts for Swing jar location
+9. [DISTRIBUTION] configure prompts for Swing jar location
 
 Previously, src/make client would fail because the client's build
 script didn't know how to find the Swing swingall.jar file if it
 wasn't in the user's CLASSPATH.  Now the initial configure bootstrap
 script will ask for the location of the Swing jar files so that the
-source tree can be properly configured.
-
-The installClient script still prompts for the location of the Swing
-jar files independently, however.
+build scripts in the source tree can be properly configured.
 
 Reported by Lewis Muhlenkamp (lewism@tt.comm.mot.com)
+
+10. [CLIENT] Fixed focus handling for IP address component
+
+The JIPField GUI component class had problems with reentrancy that
+could cause problems when dialogs were thrown up in response to
+focus loss.
+
+11. [CLIENT] Added toolbar to the Query Results window
+
+The File menu on the Query Results window was really unobtrusive, and
+didn't really emphasize to users that they could mail out the query
+table.  Brian put in a spiffy mini-toolbar to show people what's up.
+
+12. [CLIENT] JComboBoxes in client are more keyboard friendly
+
+Previously, JComboBoxes in the client used the default
+KeySelectionManager, which only allowed you to search for items by
+their first letter.  You can now type in a full name of an object and
+as long as you don't pause for more than a half-second between
+keystrokes, the JComboBox will find the object by its full name.
+
+Actually, this doesn't work as well as it sounds, because Swing's
+KeySelectionManager stuff doesn't let you use the keystrokes to choose
+an entry in a JComboBox before actually selecting it, and selecting
+items in the Ganymede client will tend to be a slow operation due to
+the round-trip to the server.
 
 -------------------- Changes from 0.97 to 0.98 -------------------
 
