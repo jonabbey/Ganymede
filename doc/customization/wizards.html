@@ -713,14 +713,14 @@ public class userRenameWizard extends GanymediatorWizard {
     href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#respond(java.util.Hashtable)">respond()</a>
   method, which unpacked the results for us.  We use the
   <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#getParam(java.lang.String)">getParam()</a>
-  method to get the value for that checkbox, using the name we gave it as the key.<?p>
+  method to get the value for that checkbox, using the name we gave it as the key.</p>
 
   <pre>
 
     // One thing we need to check is whether the new name that they
     // are wanting is already an alias for them..
 
-    StringDBField aliases = (StringDBField) userObject.getField(userSchema.ALIASES);
+    <a href="../javadoc/arlut/csd/ganymede/StringDBField.html">StringDBField</a> aliases = (StringDBField) userObject.<a href="../javadoc/arlut/csd/ganymede/DBObject.html#getField(short)">getField</a>(userSchema.ALIASES);
 
     if (aliases != null)
       {
@@ -830,7 +830,7 @@ public class userRenameWizard extends GanymediatorWizard {
 <!-- Created: Tue Jul 27 11:55:19 CDT 1999 -->
     <FONT FACE="Arial,Helvetica"><i>
 	<!-- hhmts start -->
-Last modified: Wed Jul 28 17:40:27 CDT 1999
+Last modified: Wed Jul 28 17:46:06 CDT 1999
 <!-- hhmts end -->
       </i></FONT>
   </body>
