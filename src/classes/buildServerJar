@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.18 $
-# Date: $Date: 2001/04/23 05:06:55 $
+# Version: $Revision: 1.19 $
+# Date: $Date: 2002/03/16 02:48:26 $
 #
 ############################################################
 
@@ -64,29 +64,22 @@ cd ../..
 
 # we're in the server_classes directory
 
-rm -f jcrypt.class
-ln -s ../jcrypt.class .
+rm -rf jcrypt
+mkdir jcrypt
+cd jcrypt
+ln -s ../../jcrypt/* .
+cd ..
 
-rm -f Qsmtp.class
-ln -s ../Qsmtp.class .
+rm -rf Qsmtp
+mkdir Qsmtp
+cd Qsmtp
+ln -s ../../Qsmtp/* .
+cd ..
 
-rm -f messageObject.class
-ln -s ../messageObject.class .
-
-rm -f MD5.class
-ln -s ../MD5.class .
-
-rm -f MD5InputStream.class
-ln -s ../MD5InputStream.class .
-
-rm -f MD5OutputStream.class
-ln -s ../MD5OutputStream.class .
-
-rm -f MD5State.class
-ln -s ../MD5State.class .
-
-rm -f MD5Crypt.class
-ln -s ../MD5Crypt.class .
+rm -rf md5
+mkdir md5
+cd md5
+ln -s ../../md5/* .
 
 echo "Syncing main server tree"
 
