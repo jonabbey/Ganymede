@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -656,7 +656,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean mustChoose(DBField field)
   {
-    return (field.getID() == SIGNATURE); // we want to force signature alias choosing
+    if (field.getID() == SIGNATURE)
+      {
+	// we want to force signature alias choosing
+
+	return true;
+      }
+
+    return super.mustChoose(field);
   }
 
   /**
@@ -1002,8 +1009,39 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		return null;	// ok, whatever.. no rescan
 	      }
+
+	    // create a volume entry for the user.
+
+	    InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
+	    Invid invid = invf.createNewEmbedded(true);
+
+	    // find the auto.home.default map, if we can.
+
+	    Vector results = getGSession().internalQuery(new Query((short) 277, 
+								   new QueryDataNode(QueryDataNode.EQUALS,
+										     "auto.home.default")));
+
+	    // if we found auto.home.default, set the new volume entry map
+	    // field to point to auto.home.default.
+
+	    if (results != null && results.size() == 1)
+	      {
+		Result objid = (Result) results.elementAt(0);
+
+		DBEditObject eObj = getSession().editDBObject(invid);
+		field = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
+
+		field.setValueLocal(objid.getInvid());
+
+		// we want the permissions system to reject edit privs
+		// on this now.. by setting permCache to null, we allow
+		// the mapEntryCustom permOverride method to get a chance
+		// to refuse edit privileges.
+
+		field.clearPermCache();	// *sync*
+	      }
 	    
-	    result = new ReturnVal(true);
+	    result = new ReturnVal(true, true);	// go ahead and allow DBField.setValue() to operate
 	    
 	    result.addRescanField(userSchema.UNIXENABLED);
 	    result.addRescanField(userSchema.UID);
@@ -1023,7 +1061,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (field.getID() == ALIASES)
       {
-	result = new ReturnVal(true);
+	result = new ReturnVal(true, true);
 	    
 	result.addRescanField(userSchema.SIGNATURE);
 
@@ -1039,7 +1077,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // ok, no big deal, but we will need to have the client
 	    // rescan the choice list for the home group field
 
-	    result = new ReturnVal(true);
+	    result = new ReturnVal(true, true);
 	    result.addRescanField(HOMEGROUP);
 	    groupChoices = null;
 	    return result;
@@ -1072,7 +1110,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 				       " is the home group");
 		  }
 
-		result = new ReturnVal(true);
+		result = new ReturnVal(true, true);
 		result.addRescanField(HOMEGROUP);
 		groupChoices = null;
 		return result;
@@ -1146,7 +1184,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;		// by default, we just ok whatever else
       }
 
-    if (field.getValue() == null)
+    // ok, we're doing a user rename.. check to see if we need to do a
+    // wizard
+
+    if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
       {
 	return null;
       }
