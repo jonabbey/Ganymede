@@ -5,7 +5,7 @@
    This file is a management class for owner-group records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,87 +67,35 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  public boolean anonymousLinkOK(DBObject object, short fieldID, GanymedeSession gsession)
   {
-    // We want users to be able to do remote link/unlink operations
-    // to our objects owned field
+    // If an admin is a member of our group, we'll let them link
+    // in objects to us, otherwise, forget it.
 
     if (fieldID == SchemaConstants.OwnerObjectsOwned)
       {
-	return true;
-      }
-    else
-      {
-	return false;
-      }
-  }
-
-  /**
-   *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
-   *
-   * If there is no caching key, this method will return null.
-   *
-   */
-
-  public Object obtainChoicesKey(DBField field)
-  {
-    if (field.getID() == 103)
-      {
-	return null;
-      }
-
-    return super.obtainChoicesKey(field);
-  }
-
-  /**
-   *
-   * This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
-   *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
-   * 
-   */
-
-  public QueryResult obtainChoiceList(DBField field)
-  {
-    if (field.getID() == 103)	// mail list
-      {
-	QueryResult result;
-	GanymedeSession session = editset.getSession().getGSession();
-
-	/* -- */
-
-	result = session.query(new Query(SchemaConstants.UserBase));
-	
-	if (result == null)
+	if (object.getInvid().getNum() == SchemaConstants.OwnerSupergash)
 	  {
-	    result = session.query(new Query((short) 274));
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 274))); // email list
+	    // we don't ever want to explicitly list objects under
+	    // the supergash owner group.
+
+	    return false;
 	  }
 
-	if (result == null)
+	if (gsession.isSuperGash())
 	  {
-	    result = session.query(new Query((short) 275)); // email redirect
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 275))); // email redirect
+	    return true;
 	  }
 
-	return result;
+	Vector tmpInvidList = new Vector();
+	tmpInvidList.addElement(object.getInvid());
+
+	if (gsession.isMemberAll(tmpInvidList))
+	  {
+	    return true;
+	  }
       }
-
-    return super.obtainChoiceList(field);
+    
+    return false;
   }
 }
