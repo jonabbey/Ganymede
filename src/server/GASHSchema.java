@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1005,31 +1005,54 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	FieldNode fNode = (FieldNode)currentNode;
 	BaseField field = fNode.getField();
 	boolean isEditable = false;
+	boolean isRemovable = false;
+
 	try
 	  {
-	    isEditable = field.isEditable();
+	    isRemovable = field.isRemovable();
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new IllegalArgumentException("can't tell if field is editable, assuming false: " + rx);
+	    throw new IllegalArgumentException("Can't get isRemoveable, assuming false: " +rx);
 	  }
-	if (isEditable)
+	if (isRemovable)
 	  {
-	    System.err.println("deleting field node");
-	    
-	    deleteFieldDialog.setVisible(true);
+	    try
+	      {
+		isEditable = field.isEditable();
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("can't tell if field is editable, assuming false: " + rx);
+	      }
+
+	    if (isEditable)
+	      {
+		System.err.println("deleting field node");
+		
+		deleteFieldDialog.setVisible(true);
+	      }
+	    else
+	      {
+		StringDialog notEditableDialog = new StringDialog(this, 
+								  "Error: field not editable",
+								  "This field is not editable.  You cannot delete it.",
+								  "Ok",
+								  null);
+		notEditableDialog.DialogShow();
+		
+	      }
 	  }
 	else
 	  {
-	    StringDialog notEditableDialog = new StringDialog(this, 
-							      "Error: field not editable",
-							      "This field is not editable.  You cannot delete it.  Sorry, but those are the rules.",
+	    StringDialog notRemovaleDialog = new StringDialog(this,
+							      "Error: field not removable",
+							      "This field is not removable.",
 							      "Ok",
 							      null);
-	    notEditableDialog.DialogShow();
-
-
+	    notRemovaleDialog.DialogShow();
 	  }
+	  
       }
   }
 
