@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/03/09 18:46:14 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/11/07 09:30:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -292,6 +292,44 @@ public class VectorUtils {
 	  {
 	    result.addElement(item);
 	  }
+      }
+
+    return result;
+  }
+
+  /**
+   * <P>This method returns a Vector of items that appeared in the 
+   * vector parameter more than once.</P>
+   *
+   * <P>If no duplicates are found or if vector is null, this method
+   * returns null.
+   */
+
+  public static Vector duplicates(Vector vector)
+  {
+    if (vector == null)
+      {
+	return null;
+      }
+
+    Vector result = null;
+    Hashtable found = new Hashtable();
+
+    for (int i = 0; i < vector.size(); i++)
+      {
+	Object item = vector.elementAt(i);
+
+	if (found.containsKey(item))
+	  {
+	    if (result == null)
+	      {
+		result = new Vector();
+	      }
+
+	    unionAdd(result, item);
+	  }
+
+	found.put(item, item);
       }
 
     return result;

@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/10/26 09:00:02 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/11/07 09:30:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -684,10 +684,13 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
     catch (SAXException ex)
       {
-	close();
-	ex.printStackTrace();
-	err.println("XMLReader parse error: " + ex.getMessage());
-	throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
+	if (!done)
+	  {
+	    close();
+	    ex.printStackTrace();
+	    err.println("XMLReader parse error: " + ex.getMessage());
+	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
+	  }
       }
     catch (IOException ex)
       {
@@ -781,7 +784,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -829,7 +831,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -885,7 +886,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -941,7 +941,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -998,8 +997,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
+ 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	    throw ex;
 	  }
 	
@@ -1056,7 +1054,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -1128,7 +1125,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
@@ -1183,7 +1179,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 
@@ -1237,7 +1232,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    err.println(ex.getMessage());
 	    throw ex;
 	  }
 	
