@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -149,6 +149,11 @@ public class GanymedeExpirationTask implements Runnable {
 		    Ganymede.debug("Expiration task was not able to inactivate object " + 
 				   base.getName() + ":" + result.toString());
 		  }
+		else
+		  {
+		    Ganymede.debug("Expiration task inactivated object " + 
+				   base.getName() + ":" + result.toString());
+		  }
 	      }
 	  }
 
@@ -199,6 +204,11 @@ public class GanymedeExpirationTask implements Runnable {
 		    Ganymede.debug("Expiration task was not able to remove object " + 
 				   base.getName() + ":" + result.toString());
 		  }
+		else
+		  {
+		    Ganymede.debug("Expiration task deleted object " + 
+				   base.getName() + ":" + result.toString());
+		  }
 	      }
 	  }
 	
@@ -212,6 +222,8 @@ public class GanymedeExpirationTask implements Runnable {
 
 	    if (retVal.doNormalProcessing)
 	      {
+		Ganymede.debug("Expiration Task: couldn't fully commit, trying to abort.");
+
 		mySession.abortTransaction();
 	      }
 	  }
