@@ -6,8 +6,8 @@
    
    Created: 20 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/04/25 19:23:59 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/04/26 02:42:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -236,14 +236,7 @@ public class networkCustom extends DBEditObject {
     // we want to grant ownership if the "Public Network" checkbox
     // is selected
 
-    Boolean value = (Boolean) object.getFieldValueLocal(networkSchema.PUBLICNETWORK);
-
-    if (value == null || !value.booleanValue())
-      {
-	return false;
-      }
-
-    return true;
+    return object.isSet(networkSchema.PUBLICNETWORK);
   }
 
   /**
