@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.4 $
-# Date: $Date: 1999/01/20 04:40:33 $
+# Version: $Revision: 1.5 $
+# Date: $Date: 1999/01/20 18:58:26 $
 #
 ############################################################
 
@@ -28,6 +28,16 @@ mv -f ganymedeServer.jar ganymedeServer.jar.old
 
 cd server_classes
 
+# We need the Util package for lots of things
+
+ln -s ../arlut/csd/Util arlut/csd/Util
+
+# We need a few things from JDataComponent
+
+rm -rf arlut/csd/JDataComponent
+mkdir arlut/csd/JDataComponent
+ln -s ../arlut/csd/JDataComponent/listHandle.class arlut/csd/JDataComponent
+ln -s ../arlut/csd/JDialog arlut/csd/JDialog
 ln -s ../jcrypt.class .
 ln -s ../Qsmtp.class .
 
