@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2001/05/13 00:13:38 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2001/06/03 09:40:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -669,21 +669,7 @@ public class Ganymede {
   {
     if (debug)
       {
-	if (GanymedeServer.lSemaphore != null)
-	  {
-	    if (GanymedeServer.lSemaphore.checkEnabled() == null)
-	      {
-		System.err.println(GanymedeServer.lSemaphore.getCount() + "] " + string);
-	      }
-	    else
-	      {
-		System.err.println("*] " + string);
-	      }
-	  }
-	else
-	  {
-	    System.err.println(string);
-	  }
+	System.err.println(string);
       }
 
     GanymedeAdmin.setStatus(string);
