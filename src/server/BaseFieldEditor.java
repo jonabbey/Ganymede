@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.2 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.3 $ %D%
+   Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
