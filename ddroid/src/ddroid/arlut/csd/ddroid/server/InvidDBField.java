@@ -1374,7 +1374,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
     
-    newRetVal = newRefField.establish(owner.getInvid(), (anonymous2||local));
+    newRetVal = newRefField.establish(owner, (anonymous2||local));
 
     if (newRetVal != null && !newRetVal.didSucceed())
       {
@@ -1383,7 +1383,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (oldRefField != null)
 	  {
-	    oldRefField.establish(owner.getInvid(), (anonymous||local)); // hope this works
+	    oldRefField.establish(owner, (anonymous||local)); // hope this works
 	  }
 	
 	return newRetVal;
@@ -1803,13 +1803,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * <b>This method is private, and is not to be called by any code outside
    * of this class.</b>
    *
-   * @param newInvid The invid to be linked to this field.
+   * @param newObject The DBObject whose Invid is to be linked to this field.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    *
    */
 
-  private synchronized final ReturnVal establish(Invid newInvid, boolean local)
+  private synchronized final ReturnVal establish(DBObject newObject, boolean local)
   {
     Invid 
       tmp = null;
@@ -1817,6 +1817,8 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     
     ReturnVal retVal = null;
+
+    Invid newInvid = newObject.getInvid();
 
     /* -- */
 
@@ -1827,19 +1829,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (eObj.getStatus() == ObjectStatus.DELETING || eObj.getStatus() == ObjectStatus.DROPPING)
       {
-	return Ganymede.createErrorDialog("InvidDBField.establish(): object being deleted",
-					  "Couldn't establish a new linkage in field " + this.toString() +
-					  " because object " + getOwner().getLabel() + " has been deleted.");
+	// "InvidDBField.establish(): can''t link to deleted object"
+	// "Couldn''t establish a new linkage in field {0} because object {1} has been deleted."
+	return Ganymede.createErrorDialog(ts.l("establish.deletion_sub"),
+					  ts.l("establish.deletion_text", this.toString(), getOwner().getLabel()));
       }
 
     if (isVector())
       {
 	if (size() >= getMaxArraySize())
 	  {
-	    return Ganymede.createErrorDialog("InvidDBField.establish(): field overrun",
-					      "Couldn't establish a new linkage in vector field " + getName() +
-					      " in object " + getOwner().getLabel() +
-					      "because the vector field is already at maximum capacity");
+	    // "InvidDBField.establish(): Can''t link to full field"
+	    // "Couldn''t establish a new linkage in vector field {0} in object {1} because the vector field is already at maximum capacity."
+	    return Ganymede.createErrorDialog(ts.l("establish.overrun_sub"),
+					      ts.l("establish.overrun_text", getName(), getOwner().getLabel()));
 	  }
 
 	Vector values = getVectVal();
@@ -1848,16 +1851,18 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (values.contains(newInvid))
 	  {
-	    return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
-					      "The backfield pointer in vector invid field " + getName() +
-					      " in object " + getOwner().getLabel() + 
-					      " refused the pointer binding because it already points " +
-					      "back to the object requesting binding.  This sugests that " +
-					      "multiple fields in the originating object " + newInvid + 
-					      " are trying to link to one scalar field in we, the target, which " +
-					      "can't work.  If one of the fields in " + newInvid + " is ever " +
-					      "cleared or changed, we'll be cleared and the reflexive relationship " +
-					      "will be broken.\n\nHave your adopter check the schema.");
+	    // "InvidDBField.establish(): Schema logic error"
+	    // "The reverse link field field {0} in object {1} refused the pointer binding 
+	    // because it already points back to the object requesting binding.  This sugests that multiple fields in the originating 
+	    // object {2} {3} are trying to link to one vector field in we, the target, which can''t work.  If one of the fields in {3} 
+	    // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
+	    // Have your adopter check the schema."
+	    return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+					      ts.l("establish.schema_text",
+						   getName(),
+						   getOwner().getLabel(),
+						   newObject.getTypeName(),
+						   newObject.getLabel()));
 	  }
 
 	retVal = eObj.finalizeAddElement(this, newInvid);
@@ -1872,27 +1877,28 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (retVal.getDialog() != null)
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
-						  "Couldn't establish a new linkage in vector field " + getName() +
-						  " in object " + getOwner().getLabel() +
-						  "because the custom plug in code for this object refused to " +
-						  "approve the operation:\n\n" + retVal.getDialog().getText());
+		// "InvidDBField.establish(): finalizeAddElement refused"
+		// "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code 
+		// for this object refused to approve the operation:\n\n{2}"
+		return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+						  ts.l("establish.no_add_text",
+						       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
-						  "Couldn't establish a new linkage in vector field " + getName() +
-						  " in object " + getOwner().getLabel() +
-						  "because the custom plug in code for this object refused to " +
-						  "approve the operation.");
+		// "InvidDBField.establish(): finalizeAddElement refused"
+		// "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code 
+		// for this object refused to approve the operation."
+		return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+						  ts.l("establish.no_add_text2", getName(), getOwner().getLabel()));
 	      }
 	  }
       }
     else
       {
-	// ok, since we're scalar, *we* need to be unbound from *our* existing target
-	// to be free to point back to our friend who is trying to establish a link
-	// to us
+	// ok, since we're scalar, *we* need to be unbound from *our*
+	// existing target in order to be free to point back to our
+	// friend who is trying to establish a link to us
 
 	if (value != null)
 	  {
@@ -1900,16 +1906,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	    
 	    if (tmp.equals(newInvid))
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
-						  "The backfield pointer in scalar invid field " + getName() +
-						  " in object " + getOwner().getLabel() + 
-						  " refused the pointer binding because it already points " +
-						  "back to the object requesting binding.  This sugests that " +
-						  "multiple fields in the originating object " + newInvid + 
-						  " are trying to link to one scalar field in we, the target, which " +
-						  "can't work.  If one of the fields in " + newInvid + " is ever " +
-						  "cleared or changed, we'll be cleared and the reflexive relationship " +
-						  "will be broken.\n\nHave your adopter check the schema.");
+		// "InvidDBField.establish(): schema logic error"
+		// "The reverse link field field {0} in object {1} refused the pointer binding 
+		// because it already points back to the object requesting binding.  This sugests that multiple fields in the originating 
+		// object {2} {3} are trying to link to one scalar field in we, the target, which can''t work.  If one of the fields in {3} 
+		// were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
+		// Have your adopter check the schema."
+		return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+						  ts.l("establish.schema_scalar_text",
+						       getName(), getOwner().getLabel(), newObject.getTypeName(), newObject.getLabel()));
 	      }
 
 	    retVal = unbind(tmp, local);
@@ -1947,19 +1952,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (newRetVal.getDialog() != null)
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
-						  "Couldn't establish a new linkage in field " + getName() +
-						  " in object " + getOwner().getLabel() +
-						  "because the custom plug in code for this object refused to " +
-						  "approve the operation:\n\n" + newRetVal.getDialog().getText());
+		// "InvidDBField.establish(): finalizeSetValue refused"
+		// "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code 
+		// for this object refused to approve the operation:\n\n{2}"
+		return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+						  ts.l("establish.no_set_text",
+						       getName(), getOwner().getLabel(), newRetVal.getDialog().getText()));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
-						  "Couldn't establish a new linkage in field " + getName() +
-						  " in object " + getOwner().getLabel() +
-						  "because the custom plug in code for this object refused to " +
-						  "approve the operation.");
+		// "InvidDBField.establish(): finalizeSetValue refused"
+		// "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code 
+		// for this object refused to approve the operation."
+		return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+						  ts.l("establish.no_set_text2",
+						       getName(), getOwner().getLabel()));
 	      }
 	  }
       }
@@ -2018,9 +2025,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    if (backpointers == null)
 		      {
-			Ganymede.debug("*** InvidDBField.test(): No backpointer hash at all for Invid " + temp + 
-				       " pointed to from : " + 
-				       objectName + " in field " + getName());
+			// "*** InvidDBField.test(): No backpointer hash at all for Invid {0} pointed to from : {1} in field {2}"
+			Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
 			result = false;
 
 			continue;
@@ -2028,9 +2034,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    if (!backpointers.containsKey(myInvid))
 		      {
-			Ganymede.debug("*** InvidDBField.test(): backpointer hash doesn't contain " + myInvid + 
-				       " for Invid " + temp + " pointed to from : " + 
-				       objectName + " in field " + getName());
+			// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+			Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
 			result = false;
 
 			continue;
@@ -2045,8 +2050,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (target == null)
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object " + temp + " located: " + 
-				   objectName + " in field " + getName());
+		    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
 		    result = false;
 
 		    continue;
@@ -2062,9 +2067,8 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    String fieldName = ((DBField) target.getField(targetField)).getName();
 
-		    Ganymede.debug("**** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>" +
-				   owner.lookupLabel(target) + ":" + fieldName + ", referenced from " + objectName +
-				   ":" + getName());
+		    // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
+		    Ganymede.debug(ts.l("test.bad_symmetry", owner.lookupLabel(target), fieldName, objectName, getName()));
 		    result = false;
 
 		    continue;
@@ -2072,19 +2076,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (backField == null)
 		  {
-		    Ganymede.debug("InvidDBField.test(): Object " + objectName + ", field " + getName() + 
-				   " is targeting a field, " + targetField + ", in object " + 
-				   target + " which does not exist!");
+		    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which does not exist!"
+		    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
 		    result = false;
 
 		    continue;
 		  }
-
-		if (backField != null && !backField.isDefined())
+		else if (!backField.isDefined())
 		  {
-		    Ganymede.debug("InvidDBField.test(): Object " + objectName + ", field " + getName() + 
-				   " is targeting a field, " + targetField + ", in object " + 
-				   target + " which is not defined.!");
+		    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which is not defined!"
+		    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
 		    result = false;
 
 		    continue;
@@ -2094,8 +2095,8 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    if (backField.getVectVal() == null)
 		      {
-			Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
-				       temp + " in object " + objectName + " in field " + getName());
+			// "*** InvidDBField.test(): Null back-link invid found for invid {0} in object {1} in field {2}"
+			Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
 			result = false;
 		    
 			continue;
@@ -2120,9 +2121,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 			if (!found)
 			  {
-			    Ganymede.debug("*** InvidDBField.test(): No back-link invid found for invid " + 
-					   temp + " in object " + objectName + ":" + getName() + " in " + 
-					   backField.getName());
+			    // "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
+			    Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
 			    result = false;
 			
 			    continue;
@@ -2133,8 +2133,8 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    if ((backField.value == null) || !(backField.value.equals(myInvid)))
 		      {
-			Ganymede.debug("*** InvidDBField.test(): <scalar> No back-link invid found for invid " + 
-				       temp + " in object " + objectName + " in field " + getName());
+			// "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
+			Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
 			result = false;
 		    
 			continue;
@@ -2155,17 +2155,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (backpointers == null)
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): No backpointer hash at all for Invid " + temp + 
-				   " pointed to from : " + 
-				   objectName + " in field " + getName());
+		    Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
 		    result = false;
 		  }
 
 		if (!backpointers.containsKey(myInvid))
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): backpointer hash doesn't contain " + myInvid + 
-				   " for Invid " + temp + " pointed to from : " + 
-				   objectName + " in field " + getName());
+		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
 		    result = false;
 		  }
 	      }
@@ -2178,9 +2174,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (target == null)
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object " + temp + " located: " + 
-				   objectName + " in scalar field " + getName());
-	    
+		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
 		    return false;
 		  }
 
@@ -2190,17 +2184,20 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 		catch (ClassCastException ex)
 		  {
-		    Ganymede.debug("**** InvidDBField.test(): schema error!  back-reference field not an invid field!! " +
-				   "field: " + getName() + " in object " + objectName);
+		    String fieldName = ((DBField) target.getField(targetField)).getName();
 
+		    Ganymede.debug(ts.l("test.bad_symmetry",  owner.lookupLabel(target), fieldName, objectName, getName()));
 		    return false;
 		  }
 
-		if (backField == null || !backField.isDefined())
+		if (backField == null)
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): No proper back-reference field in targeted field: " + 
-				   objectName + ":" + getName());
-	    
+		    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
+		    return false;
+		  }
+		else if (!backField.isDefined())
+		  {
+		    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
 		    return false;
 		  }
 	
@@ -2210,9 +2207,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    if (backValues == null)
 		      {
-			Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
-				       temp + " in object " + objectName + " in field " + getName());
-		    
+			Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
 			return false;
 		      }
 		    else
@@ -2232,10 +2227,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 			if (!found)
 			  {
-			    Ganymede.debug(">>> InvidDBField.test(): No back-link invid found for invid " + 
-					   temp + " in object " + objectName + ":" + getName() + " in " + 
-					   backField.getName());
-
+			    Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
 			    return false;
 			  }
 		      }
@@ -2244,16 +2236,14 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    if ((backField.value == null) || !(backField.value.equals(myInvid)))
 		      {
-			Ganymede.debug("*** InvidDBField.test(): <scalar> No back-link invid found for invid " + 
-				       temp + " in object " + objectName + ":" + getName());
-		    
+			Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
 			return false;
 		      }
 		  }
 	      }
 	  }
       }
-
+    
     return result;
   }
 
@@ -2299,15 +2289,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
+	// "Don''t have permission to change field {0} in object {1}"
 	return Ganymede.createErrorDialog("InvidDBField.setValue()",
-					  "don't have permission to change field /  non-editable object: " +
-					   getName() + " in object " + owner.getLabel());
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
- 	throw new IllegalArgumentException("scalar method called on a vector field: " + getName() +
-					   " in object " + owner.getLabel());
+	// "Scalar method called on a vector field: {0} in object {1}"
+ 	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     if ((this.value == null && value == null) ||
@@ -2477,20 +2467,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (isEditInPlace())
       {
-	throw new IllegalArgumentException("can't manually set element in edit-in-place vector: " +
-					   getName() + " in object " + owner.getLabel());
+	// "Can''t manually set element in edit-in-place vector: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("setElement.edit_in_place", getName(), owner.getLabel()));
       }
 
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.setElement()",
-					  "don't have permission to change field /  non-editable object: " +
-					  getName() + " in object " + owner.getLabel());
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -2629,24 +2618,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (isEditInPlace())
-      {
-	return Ganymede.createErrorDialog("InvidDBFIeld.addElement()",
-					  "can't manually add element to edit-in-place vector " +
-					  getName() + " in object " + owner.getLabel());
-      }
-
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	return Ganymede.createErrorDialog("InvidDBFIeld.addElement()",
-					  "don't have permission to change field /  non-editable object " +
-					  getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.addElement()",
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
+      }
+
+    if (isEditInPlace())
+      {
+	return Ganymede.createErrorDialog("InvidDBField.addElement()",
+					  ts.l("addElement.edit_in_place", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " +
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -2667,9 +2653,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (size() >= getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement() - vector overflow",
-					  "Field " + getName() +
-					  " already at or beyond array size limit");
+	// "InvidDBField.addElement() - vector overflow"
+	// "Field {0} already at or beyond array size limit."
+	return Ganymede.createErrorDialog(ts.l("addElement.overflow_sub"),
+					  ts.l("addElement.overflow_text", getName()));
       }
 
     remote = (Invid) value;
@@ -2801,39 +2788,37 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isEditInPlace())
       {
+	// "Can''t manually add elements to edit-in-place vector: {0} in object {1}"
 	return Ganymede.createErrorDialog("InvidDBField.addElements()",
-					  "can't manually add elements to edit-in-place vector " +
-					  getName() + " in object " + owner.getLabel());
+					  ts.l("addElements.edit_in_place", getName(), owner.getLabel()));
       }
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
 	return Ganymede.createErrorDialog("InvidDBField.addElements()",
-					  "don't have permission to change field /  non-editable object " +
-					  getName() + " in object " + owner.getLabel());
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     values = getVectVal(); // cast once
 
     if (submittedValues == null || submittedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElements()",
-					  "Field " + getName() + " can't add a null/empty vector");
+	return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+					  ts.l("addElements.null_empty_param", getName()));
       }
 
     // can we add this many values?
 
     if (size() + submittedValues.size() > getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElements()",
-					  "Field " + getName() + 
-					  " can't take " + submittedValues.size() + " new values");
+	return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+					  ts.l("addElements.overflow_text", getName(), Integer.toString(submittedValues.size()),
+					       Integer.toString(size()), Integer.toString(getMaxArraySize())));
       }
 
     // don't bother adding values we've already got
@@ -3081,29 +3066,26 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
-					  "Don't have permission to change field /  non-editable object: " +
-					  getName() + " in object " + owner.getLabel());
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector method called on a scalar field " +
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
 
     if (!isEditInPlace())
       {
-	throw new IllegalArgumentException("edit-in-place method called on a referential invid field " +
-					   getName() + " in object " + owner.getLabel());
+	// "Edit-in-place method called on a referential invid field {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("createNewEmbedded.non_embedded", getName(), owner.getLabel()));
       }
 
     if (size() >= getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("Field overflow",
-					  "Field " + getName() +
-					  " is already at or beyond the specified array size limit.");
+	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+					  ts.l("addElement.overflow_text", getName()));
       }
 
     DBEditObject eObj = (DBEditObject) owner;
@@ -3115,9 +3097,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (retVal == null)
       {
-	return Ganymede.createErrorDialog("Couldn't create new embedded object",
-					  "A null value was returned by the createNewEmbeddedObject call in the " +
-					  getName() + " field.\n\nThis may be due to a permissions problem");
+	// "Couldn''t create new embedded object"
+	// "A null value was returned by the createNewEmbeddedObject() call in the {0} field.\n\nThis may be due to a customization problem."
+	return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
+					  ts.l("createNewEmbedded.failure_text", getName()));
       }
     else if (!retVal.didSucceed())
       {
@@ -3128,9 +3111,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newObj == null)
       {
-	return Ganymede.createErrorDialog("Couldn't create new embedded object",
-					  "An error occurred in trying to create a new embedded object in the " +
-					  getName() + " field.\n\nThis may be due to a permissions problem");
+	// "Couldn''t create new embedded object"
+	// "An error occurred in trying to create a new embedded object in the {0} field.\n\nThis may be due to a permissions problem."
+	return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
+					  ts.l("createNewEmbedded.null_embedded", getName()));
       }
 
     // now we need to do the binding as appropriate.
@@ -3259,16 +3243,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (newRetVal.getDialog() != null)
 	  {
-	    return Ganymede.createErrorDialog("Couldn't create embedded object",
-					      "The custom code for this object type refused to okay adding " +
-					      "a new embedded object.  It was created, though.\n\n" +
-					      newRetVal.getDialog().getText());
+	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
+					      ts.l("createNewEmbedded.refused_creation", newRetVal.getDialog().getText()));
 	  }
 	else
 	  {
-	    return Ganymede.createErrorDialog("Couldn't create embedded object",
-					      "The custom code for this object type refused to okay adding " +
-					      "a new embedded object.  It was created, though.");
+	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
+					      ts.l("createNewEmbedded.refused_creation_no_text"));
 	  }
       }
   }
@@ -3381,23 +3362,15 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
-					  "don't have permission to change field /  non-editable object " +
-					  getName() + " in object " + owner.getLabel());
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " +
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
-
-    if ((index < 0) || (index >= values.size()))
-      {
-	throw new IllegalArgumentException("invalid index " + index + 
-					   getName() + " in object " + owner.getLabel());
-      }
 
     remote = (Invid) values.elementAt(index);
 
@@ -3515,13 +3488,19 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (newRetVal.getDialog() != null)
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-						  "Couldn't finalize\n\n" + newRetVal.getDialog().getText());
+		// "InvidDBField.deleteElement() - custom code rejected element deletion"
+		// "Custom code refused deletion of element {0} from field {1} in object {2}.\n\n{3}"
+		return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+						  ts.l("deleteElement.no_finalize", Integer.toString(index), 
+						       getName(), owner.getLabel(), newRetVal.getDialog().getText()));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-						  "Couldn't finalize element deletion\n");
+		// "InvidDBField.deleteElement() - custom code rejected element deletion"
+		// "Custom code refused deletion of element {0} from field {1} in object {2}."
+		return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+						  ts.l("deleteElement.no_finalize_no_text",
+						       Integer.toString(index), getName(), owner.getLabel()));
 	      }
 	  }
       }
@@ -3564,15 +3543,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
-					  "don't have permission to change field /  non-editable object " +
-					  getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " +
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     currentValues = getVectVal();
@@ -3583,9 +3560,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (notPresent.size() != 0)
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElements()",
-					  "Field " + getName() + " can't remove non-present items: " +
-					  VectorUtils.vectorString(notPresent));
+	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+					  ts.l("deleteElements.not_found", getName(), VectorUtils.vectorString(notPresent)));
       }
 
     // see if our container wants to intercede in the removing operation
@@ -3802,8 +3778,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("can't call encodedValues on scalar field: " +
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -3825,9 +3800,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (object == null)
 	      {
-		Ganymede.debug("Error in InvidDBField field <" + owner.getLabel() + ":" + getName() +
-			       "> encodedValues() method.. couldn't " +
-			       "view invid " + invid.toString() + " to pull its label");
+		Ganymede.debug(ts.l("encodedValues.bad_invid", owner.getLabel(), getName(), invid));
 
 		label = invid.toString();
 	      }
@@ -3891,7 +3864,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	throw new IllegalArgumentException("can't call mustChoose on an invid field in a non-editable context.");
+	throw new IllegalArgumentException(ts.l("global.non_editable"));
       }
   }
 
@@ -3922,8 +3895,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not an editable field: " + 
-					   getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException(ts.l("global.non_editable"));
       }
 
     // if choices is called, the client has asked to get
@@ -4021,19 +3993,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-	return Ganymede.createErrorDialog("Invid Field Error",
-					  "Don't have permission to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+					  ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	return Ganymede.createErrorDialog("Invid Field Error",
-					  "Submitted value " + o + " is not an invid!  Major client error while" +
-					  " trying to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+					  ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
       }
 
     inv = (Invid) o;
@@ -4045,14 +4014,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    // the invid points to an object of the wrong type
 
-	    return Ganymede.createErrorDialog("Invid Field Error",
-					      "invid value " + inv + 
-					      " points to the wrong kind of" +
-					      " object for field " +
-					      getName() + " in object " + owner.getLabel() +
-					      " which should point to an" +
-					      " object of type " + 
-					      getTargetBase());
+	    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+					      ts.l("verifyNewValue.bad_object_type", inv, getName(), owner.getLabel(), Integer.toString(getTargetBase())));
 	  }
 
 	if (!local && mustChoose())
@@ -4065,8 +4028,8 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 		catch (NotLoggedInException ex)
 		  {
-		    return Ganymede.createErrorDialog("Error",
-						      "Not Logged In");
+		    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+						      ts.l("global.not_logged_in"));
 		  }
 	      }
 
@@ -4092,11 +4055,8 @@ public final class InvidDBField extends DBField implements invid_field {
 			System.err.println(qr);
 		      }
 
-		    return Ganymede.createErrorDialog("Invid Field Error",
-						      invLabel + 
-						      " is not a valid choice for field " +
-						      getName() + " in object " + owner.getLabel() +
-						      ".");
+		    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+						      ts.l("verifyNewValue.bad_choice", invLabel, getName(), owner.getLabel()));
 		  }
 	      }
 	  }
