@@ -6,7 +6,7 @@
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,14 @@ public class PermMatrix {
 
   public PermMatrix(PermissionMatrixDBField field)
   {
-    this.matrix = (Hashtable) field.matrix.clone();
+    if (field.matrix != null)
+      {
+	this.matrix = (Hashtable) field.matrix.clone();
+      }
+    else
+      {
+	this.matrix = new Hashtable();
+      }
   }
 
   public PermMatrix(PermMatrix orig)
