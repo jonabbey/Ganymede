@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,7 +67,7 @@ final public class DBSession {
    * <p>This constructor is intended to be called by the DBStore login() method.</p>
    *
    * @param store The DBStore database this session belongs to.
-   * @param adminObject The admin object for the user associated with this session, or null if none (only for system init)
+   * @param GSession The Ganymede session associated with this DBSession
    * @param key An identifying key with meaning to whatever code is using arlut.csd.ganymede
    *
    */
