@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,7 @@ import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.lang.reflect.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -50,7 +51,7 @@ import java.lang.reflect.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.16 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.17 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -123,12 +124,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    */
 
-  DBObject(DBObjectBase objectBase, DataInput in) throws IOException, RemoteException
+  DBObject(DBObjectBase objectBase, DataInput in, boolean journalProcessing) throws IOException, RemoteException
   {
     this.objectBase = objectBase;
     shadowObject = null;
     editset = null;
-    receive(in);
+    receive(in, journalProcessing);
   }
 
   /**
@@ -381,7 +382,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    */
 
-  synchronized void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
   {
     DBField 
       tmp = null;
@@ -485,7 +486,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    throw new Error("Don't recognize field type in datastore");
 	  }
 
-	if (definition.namespace != null)
+	if (!journalProcessing && (definition.namespace != null))
 	  {
 	    if (tmp.isVector())
 	      {
@@ -662,15 +663,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   synchronized public db_field[] listFields()
   {
-    DBField[] results;
-    DBField temp;
+    db_field[] results;
     Enumeration enum;
     int size;
 
     /* -- */
     
     size = fields.size();
-    results = new DBField[size];
+    results = new db_field[size];
 
     enum = fields.elements();
 
@@ -679,7 +679,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     while (enum.hasMoreElements())
       {
-	results[--size] = (DBField) enum.nextElement();
+	results[--size] = (db_field) enum.nextElement();
       }
 
     if (size != 0)
@@ -687,20 +687,40 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	throw new RuntimeException("synchronization error, fields hash modified");
       }
 
-    // simple minded sort
+    // sort
 
-    for (int i = 0; i < results.length; i++)
-      {
-	for (int j = i+1; j < results.length; j++)
-	  {
-	    if (results[i].getID() > results[j].getID())
-	      {
-		temp = results[i];
-		results[i] = results[j];
-		results[j] = temp;
-	      }
-	  }
-      }
+    (new QuickSort(results,  
+		   new arlut.csd.Util.Compare()
+		   {
+		     public int compare(Object a, Object b) 
+		       {
+			 db_field aF, bF;
+			 
+			 aF = (db_field) a;
+			 bF = (db_field) b;
+			 
+			 try
+			   {
+			     if (aF.getID() < bF.getID())
+			       {
+				 return -1;
+			       }
+			     else if (aF.getID() > bF.getID())
+			       {
+				 return 1;
+			       }
+			     else
+			       {
+				 return 0;
+			       }
+			   }
+			 catch (RemoteException ex)
+			   {
+			     throw new RuntimeException("couldn't get field ID in sort" + ex);
+			   }
+		       }
+		   }
+		   )).sort();
 
     return results;
   }
