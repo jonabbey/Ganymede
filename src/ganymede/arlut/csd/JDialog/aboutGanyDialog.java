@@ -154,12 +154,14 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbc.fill = GridBagConstraints.BOTH;
     gbc.anchor = GridBagConstraints.CENTER;
     gbc.gridy = 1;
+    gbc.weighty = 1.0;
     gbl.setConstraints(scrollPane, gbc);
     pane.add(scrollPane);
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.SOUTH;    
     gbc.gridy = 2;
+    gbc.weighty = 0.0;
     gbl.setConstraints(ok, gbc);
     pane.add(ok);
 
