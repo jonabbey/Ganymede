@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 2000/11/10 05:04:51 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 2000/12/13 18:39:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.141 $ $Date: 2000/11/10 05:04:51 $ $Name:  $
+ * @version $Revision: 1.142 $ $Date: 2000/12/13 18:39:08 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3075,10 +3075,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p><B>WARNING!</B> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
-   * on the Ganymede database (such as the GanymedeSession query
-   * calls, including {@link
-   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
-   * short) findLabeledObject()}), or else you will lock the server.</p>
+   * on the Ganymede database.  At this point, this means no composite
+   * queries on embedded object types, where you seek an object based
+   * on a field in an embedded object and in the object itself, using
+   * the GanymedeSession query calls, or else you will lock the server.</p>
    *
    * <p>This method should NEVER try to edit or change any DBEditObject
    * in the server.. at this point in the game, the server has fixed the
@@ -3128,11 +3128,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p><B>WARNING!</B> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
-   * on the Ganymede database (such as the GanymedeSession query
-   * calls, including {@link
-   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
-   * short) findLabeledObject()}), or else you will lock the server.</p>
-   *
+   * on the Ganymede database.  At this point, this means no composite
+   * queries on embedded object types, where you seek an object based
+   * on a field in an embedded object and in the object itself, using
+   * the GanymedeSession query calls, or else you will lock the server.</p>
+
    * <p>This method should NEVER try to edit or change any DBEditObject
    * in the server.. at this point in the game, the server has fixed the
    * transaction working set and is depending on commitPhase2() not trying
@@ -3199,10 +3199,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p><B>WARNING!</B> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
-   * on the Ganymede database (such as the GanymedeSession query
-   * calls, including {@link
-   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
-   * short) findLabeledObject()}), or else you will lock the server.</p>
+   * on the Ganymede database.  At this point, this means no composite
+   * queries on embedded object types, where you seek an object based
+   * on a field in an embedded object and in the object itself, using
+   * the GanymedeSession query calls, or else you will lock the server.</p>
    *
    * @param finalAbort If true, this object is being dropped, either due to an
    * aborted transaction or a checkpoint rollback.  
