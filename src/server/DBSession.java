@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2002/03/15 03:54:51 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2002/03/15 22:33:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.111 $ %D%
+ * @version $Revision: 1.112 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -122,21 +122,10 @@ final public class DBSession {
   DBStore store;
 
   /**
-   * <P>Vector of {@link arlut.csd.ganymede.DBLock DBLock} objects held
-   * by this session.  This needs to be a Vector because a DBSession
-   * can legitimately hold multiple {@link arlut.csd.ganymede.DBReadLock DBReadLock}
-   * objects at a time.  Only one writer lock is allowed at a time, however,
-   * to avoid deadlock.</P>
-   *
-   * <P>The DBStore's {@link arlut.csd.ganymede.DBLockSync
-   * DBLockSync} object is used, in conjunction with the {@link
-   * arlut.csd.ganymede.DBLock#establish(java.lang.Object)
-   * establish()} methods in the DBReadLock, {@link
-   * arlut.csd.ganymede.DBWriteLock DBWriteLock}, and {@link
-   * arlut.csd.ganymede.DBDumpLock DBDumpLock} classes.</P> 
+   * <p>Manager for locks held by this session.</p>
    */
 
-  private Vector lockVect = new Vector();
+  private DBSessionLockManager lockManager;
 
   /**
    * <P>Transaction handle for this session.</P>
@@ -184,9 +173,9 @@ final public class DBSession {
     this.key = key;
     this.GSession = GSession;
 
-    store.login(this);
-
     editSet = null;
+
+    lockManager = new DBSessionLockManager(this);
   }
 
   /**
@@ -203,13 +192,11 @@ final public class DBSession {
 	abortTransaction();
       }
 
-    store.logout(this);
-
     // help GC
 
     store = null;
     GSession = null;
-    lockVect = null;
+    lockManager = null;
     key = null;
   }
 
@@ -1369,19 +1356,7 @@ final public class DBSession {
 
   public boolean isLocked(DBLock lockParam)
   {
-    if (lockParam == null)
-      {
-	throw new IllegalArgumentException("bad param to isLocked()");
-      }
-
-    if (!lockVect.contains(lockParam))
-      {
-	return false;
-      }
-    else
-      {
-	return (lockParam.isLocked());
-      }
+    return lockManager.isLocked(lockParam);
   }
 
   /**
@@ -1400,42 +1375,9 @@ final public class DBSession {
    * will be made to those ObjectBases until the read lock is released.</p>
    */
 
-  public synchronized DBReadLock openReadLock(Vector bases) throws InterruptedException
+  public DBReadLock openReadLock(Vector bases) throws InterruptedException
   {
-    DBReadLock lock;
-
-    /* -- */
-
-    // we'll never be able to establish a read lock if we have to
-    // wait for this thread to release an existing write lock..
-
-    if (lockVect.size() != 0)
-      {
-	boolean lockOK;
-
-	for (int i = 0; i < lockVect.size(); i++)
-	  {
-	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
-
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		if (oldLock.overlaps(bases))
-		  {
-		    throw new InterruptedException("Can't establish read lock, session " + getID() +
-						   " already has overlapping write lock:\n" +
-						   oldLock.toString());
-		  }
-	      }
-	  }
-      }
-
-    lock = new DBReadLock(store, bases);
-
-    lockVect.addElement(lock);
-
-    lock.establish(key);
-
-    return lock;
+    return lockManager.openReadLock(bases);
   }
 
   /**
@@ -1453,36 +1395,9 @@ final public class DBSession {
    * will be made to those ObjectBases until the read lock is released.</P>
    */
 
-  public synchronized DBReadLock openReadLock() throws InterruptedException
+  public DBReadLock openReadLock() throws InterruptedException
   {
-    DBReadLock lock;
-
-    /* -- */
-
-    // we'll never be able to establish a read lock if we have to
-    // wait for this thread to release an existing write lock..
-
-    if (lockVect.size() != 0)
-      {
-	for (int i = 0; i < lockVect.size(); i++)
-	  {
-	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
-
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		throw new InterruptedException("Can't establish global read lock, session " + getID() +
-					       " already has write lock:\n" +
-					       oldLock.toString());
-	      }
-	  }
-      }
-
-    lock = new DBReadLock(store);
-    lockVect.addElement(lock);
-
-    lock.establish(key);
-
-    return lock;
+    return lockManager.openReadLock();
   }
 
   /**
@@ -1499,40 +1414,9 @@ final public class DBSession {
    * will block until the lock can be acquired.</p>
    */
 
-  public synchronized DBWriteLock openWriteLock(Vector bases) throws InterruptedException
+  public DBWriteLock openWriteLock(Vector bases) throws InterruptedException
   {
-    DBWriteLock lock;
-
-    /* -- */
-
-    // we'll never be able to establish a write lock if we have to
-    // wait for this thread to release read, write, or dump locks..
-    // and we must not have pre-existing locks on bases not
-    // overlapping with our bases parameter either, or else we risk
-    // dead-lock later on..
-
-    if (lockVect.size() != 0)
-      {
-	StringBuffer resultBuffer = new StringBuffer();
-
-	for (int i = 0; i < lockVect.size(); i++)
-	  {
-	    resultBuffer.append(lockVect.elementAt(i).toString());
-	    resultBuffer.append("\n");
-	  }
-
-	throw new InterruptedException("Can't establish write lock, session " + getID() + 
-				       " already has locks:\n" +
-				       resultBuffer.toString());
-      }
-
-    lock = new DBWriteLock(store, bases);
-
-    lockVect.addElement(lock);
-
-    lock.establish(key);
-
-    return lock;
+    return lockManager.openWriteLock(bases);
   }
 
   /**
@@ -1540,36 +1424,9 @@ final public class DBSession {
    * server.</P>
    */
 
-  public synchronized DBDumpLock openDumpLock() throws InterruptedException
+  public DBDumpLock openDumpLock() throws InterruptedException
   {
-    DBDumpLock lock;
-
-    /* -- */
-
-    // we'll never be able to establish a dump lock if we have to
-    // wait for this thread to release an existing write lock..
-
-    if (lockVect.size() != 0)
-      {
-	for (int i = 0; i < lockVect.size(); i++)
-	  {
-	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
-
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		throw new InterruptedException("Can't establish global dump lock, session " + getID() +
-					       " already has write lock:\n" +
-					       oldLock.toString());
-	      }
-	  }
-      }
-
-    lock = new DBDumpLock(store);
-    lockVect.addElement(lock);
-
-    lock.establish(key);
-
-    return lock;
+    return lockManager.openDumpLock();
   }
 
   /**
@@ -1581,41 +1438,17 @@ final public class DBSession {
    * <P>This method must be synchronized to avoid conflicting with
    * iterations on lockVect.</P> */
 
-  public synchronized void releaseLock(DBLock lock)
+  public void releaseLock(DBLock lock)
   {
-    lock.release();		// *sync* DBStore
-    lockVect.removeElement(lock);
+    lockManager.releaseLock(lock);
   }
 
   /**
-   * <P>releaseAllLocks() releases all locks held by this
-   * session.</P>
-   *
-   * <P>This method is *not* synchronized.  This method must
-   * only be called by code synchronized on this DBSession
-   * instance, as for instance {@link arlut.csd.ganymede.DBSession#logout() logout()}
-   * and {@link arlut.csd.ganymede.DBSession#commitTransaction() commitTransaction()}.</P>
    */
 
   private void releaseAllLocks()
   {
-    DBLock lock;
-    Enumeration enum = lockVect.elements();
-
-    /* -- */
-
-    if (debug)
-      {
-	System.err.println(key + ": releasing all locks");
-      }
-    
-    while (enum.hasMoreElements())
-      {
-	lock = (DBLock) enum.nextElement();
-	lock.abort();		// blocks until the lock can be cleared
-      }
-
-    lockVect.removeAllElements();
+    lockManager.releaseAllLocks();
   }
 
   /**
@@ -1694,7 +1527,6 @@ final public class DBSession {
   public synchronized ReturnVal commitTransaction()
   {
     ReturnVal retVal = null;
-    boolean result;
 
     /* -- */
 
@@ -1798,9 +1630,7 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Returns true if this session has an transaction open
-   *
+   * <p>Returns true if this session has an transaction open</p>
    */
 
   public boolean isTransactionOpen()
@@ -1813,13 +1643,8 @@ final public class DBSession {
    * transaction on behalf of an interactive client.</p>
    */
 
-  public synchronized boolean isInteractive()
+  public boolean isInteractive()
   {
-    if (editSet == null)
-      {
-	throw new IllegalArgumentException("isInteractive() called with null editSet");
-      }
-
     return editSet.isInteractive();
   }
 

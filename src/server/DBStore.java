@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.147 $
-   Last Mod Date: $Date: 2001/10/17 19:22:33 $
+   Version: $Revision: 1.148 $
+   Last Mod Date: $Date: 2002/03/15 22:33:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.147 $ %D%
+ * @version $Revision: 1.148 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -228,12 +228,6 @@ public final class DBStore {
 
   Hashtable backPointers;
 
-  /**
-   * <p>Vector of {@link arlut.csd.ganymede.DBSession DBSession} objects.</p>
-   */
-
-  private Vector sessions;
-
   /** 
    * A collection of {@link arlut.csd.ganymede.DBNameSpace
    * DBNameSpaces} registered in this DBStore.  
@@ -309,7 +303,6 @@ public final class DBStore {
     objectBases = new Hashtable(20); // default 
     backPointers = new Hashtable(1000);	// default
     nameSpaces = new Vector();
-    sessions = new Vector();
 
     try
       {
@@ -1078,24 +1071,6 @@ public final class DBStore {
 	    outStream.close();
 	  }
       }
-  }
-
-  /**
-   * <p>Adds a session to our records.</p>
-   */
-
-  public synchronized void login(DBSession session)
-  {
-    this.sessions.addElement(session);
-  }
-
-  /**
-   * <p>Removes a session from our records.</p>
-   */
-
-  public synchronized void logout(DBSession session)
-  {
-    this.sessions.removeElement(session);
   }
 
   /** 
