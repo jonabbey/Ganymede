@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -25,14 +25,16 @@ import java.util.*;
 
 /**
  *
- * A DBEditObject is a copy of a DBObject that has been exclusively checked out
- * from the main database so that a DBSession can edit the fields of the object.  The
- * DBEditObject class keeps track of the changes made to fields, keeping things
- * properly synchronized with unique field name spaces.<br><br>
+ * A DBEditObject is a copy of a DBObject that has been exclusively
+ * checked out from the main database so that a DBSession can edit the
+ * fields of the object.  The DBEditObject class keeps track of the
+ * changes made to fields, keeping things properly synchronized with
+ * unique field name spaces.<br><br>
  *
- * All DBEditObjects are obtained in the context of a DBEditSet.  When the 
- * DBEditSet is committed, the DBEditObject is made to replace the original object
- * from the DBStore.  If the EditSet is aborted, the DBEditObject is dropped.
+ * All DBEditObjects are obtained in the context of a DBEditSet.  When
+ * the DBEditSet is committed, the DBEditObject is made to replace the
+ * original object from the DBStore.  If the EditSet is aborted, the
+ * DBEditObject is dropped.
  *
  */
 
@@ -52,25 +54,110 @@ public class DBEditObject extends DBObject {
 
   DBEditObject(DBObject original, DBEditSet editset)
   {
-    super(original.objectBase);
-    this.editset = editset;
-    this.original = original;
-    this.id = original.id;
-    this.tmp_count = 0;
-    this.objectBase = original.objectBase;
-    this.shadowObject = null;
+    Enumeration enum;
+    Object key;
+    DBObjectBaseField fieldDef;
+    DBField field, tmp;
 
-    // this clones the hash, but not the individual fields.. since
-    // non-array fields can't be modified once created this is
-    // okay.. we'll clone the array fields' arrays when/if we need to
+    /* -- */
 
-    if (original.fields != null)
+    // do we also want to synchronize on the object base
+    // below?
+
+    synchronized (original)
       {
-	fields = (Hashtable) original.fields.clone();
-      }
-    else
-      {
+	super(original.objectBase);
+	this.editset = editset;
+	this.original = original;
+	this.id = original.id;
+	this.tmp_count = 0;
+	this.objectBase = original.objectBase;
+	this.shadowObject = null;
+
 	fields = new Hashtable();
+
+	// clone the fields from the original object
+	// since we own these, the field-modifying
+	// methods on the copied fields will allow editing
+	// to go forward
+
+	if (original.fields != null)
+	  {
+	    enum = original.fields.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		field = (DBField) enum.nextElement();
+
+		switch (field.getType())
+		  {
+		  case DBStore.BOOLEAN:
+		    tmp = new BooleanDBField(this, field);
+		    break;
+		    
+		  case DBStore.NUMERIC:
+		    tmp = new NumericDBField(this, field);
+		    break;
+
+		  case DBStore.DATE:
+		    tmp = new DateDBField(this, field);
+		    break;
+
+		  case DBStore.STRING:
+		    tmp = new StringDBField(this, field);
+		    break;
+		    
+		  case DBStore.INVID:
+		    tmp = new InvidDBField(this, field);
+		    break;
+		  }
+
+		fields.put(key, tmp);
+	      }
+	  }
+      }
+	
+    // now create slots for any fields that are in this object type's
+    // DBObjectBase, but which were not present in the original
+    
+    synchronized (definition)
+      {
+	enum = definition.fieldHash.keys();
+	
+	while (enum.hasMoreElements())
+	  {
+	    key = enum.nextElement();
+	    
+	    if (!fields.containsKey(key))
+	      {
+		fieldDef = (DBObjectBaseField) definition.fieldHash.get(key);
+		
+		switch (fieldDef.getType())
+		  {
+		  case DBStore.BOOLEAN:
+		    tmp = new BooleanDBField(this, fieldDef);
+		    break;
+		    
+		  case DBStore.NUMERIC:
+		    tmp = new NumericDBField(this, fieldDef);
+		    break;
+		
+		  case DBStore.DATE:
+		    tmp = new DateDBField(this, fieldDef);
+		    break;
+
+		  case DBStore.STRING:
+		    tmp = new StringDBField(this, fieldDef);
+		    break;
+		    
+		  case DBStore.INVID:
+		    tmp = new InvidDBField(this, fieldDef);
+		    break;
+		  }
+
+		fields.put(key, tmp);
+	      }
+	  }
       }
   }
 
@@ -85,125 +172,17 @@ public class DBEditObject extends DBObject {
    * @param fieldcode The idcode for the field to be replaced.
    * @param field The new field value to fill the fieldcode slot.
    *
-   * @see csd.DBStore.DBField
+   * @see arlut.csd.ganymede.DBField
    *
    */
   public boolean setField(short fieldcode, DBField field)
   {
     DBNameSpace namespace;
-    short type;
     DBObjectBaseField fieldDef;
     DBField oldField;
     Short key;
 
     /* -- */
-
-    key = new Short(fieldcode);
-
-    if (!objectBase.fieldHash.containsKey(key))
-      {
-	throw new RuntimeException("bad field code: " + key + " in " + 
-				   objectBase.object_name +
-				   "(" + objectBase.type_code + ")" +
-				   " field hash.");
-      }
-
-    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
-
-    type = fieldDef.field_type;
-    namespace = fieldDef.namespace;
-
-    if (!(((field instanceof DBArrayField) &&
-	   (type == DBStore.BOOLEANARRAY && (field instanceof BooleanArrayDBField)) ||
-	   (type == DBStore.NUMERICARRAY && (field instanceof NumericArrayDBField)) ||
-	   (type == DBStore.DATEARRAY && (field instanceof DateArrayDBField)) ||
-	   (type == DBStore.STRINGARRAY && (field instanceof StringArrayDBField)) ||
-	   (type == DBStore.INVIDARRAY  && (field instanceof InvidArrayDBField))) ||
-	  (type == DBStore.BOOLEAN && (field instanceof BooleanDBField)) ||
-	  (type == DBStore.NUMERIC && (field instanceof NumericDBField)) ||
-	  (type == DBStore.DATE && (field instanceof DateDBField)) ||
-	  (type == DBStore.STRING && (field instanceof StringDBField)) ||
-	  (type == DBStore.INVID && (field instanceof InvidDBField))))
-      {
-	throw new RuntimeException("Don't recognize field type in datastore");
-      }
-
-    // if this is a constrained field, make sure that this new field meets
-    // with the necessary conditions.
-
-    if (fieldDef.limit != -1)
-      {
-	if (type == DBStore.STRING)
-	  {
-	    if (((StringDBField) field).value().length() > fieldDef.limit)
-	      {
-		// string too long
-
-		editset.session.setLastError("string value " + ((StringDBField) field).value() + " is too long for field " + fieldDef.field_name + " which has a length limit of " + fieldDef.limit);
-
-		return false;
-	      }
-	  }
-
-	if (type == DBStore.STRINGARRAY)
-	  {
-	    int length;
-	    StringArrayDBField sarray;
-
-	    sarray = (StringArrayDBField) field;
-	    length = sarray.size();
-
-	    for (int i = 0; i < length; i++)
-	      {
-		if (sarray.value(i).length() > fieldDef.limit)
-		  {
-		    // a string in the new field is too long
-
-		    editset.session.setLastError("string value " + sarray.value(i) + " is too long for field " + fieldDef.field_name + " which has a length limit of " + fieldDef.limit);
-
-		    return false;
-		  }
-	      }
-	  }
-
-	if (type == DBStore.INVID)
-	  {
-	    InvidDBField invid;
-
-	    invid = (InvidDBField) field;
-
-	    if (invid.value.getType() != fieldDef.limit)
-	      {
-		// the invid points to an object of the wrong type
-
-		editset.session.setLastError("invid value " + ((InvidDBField) field).value() + " points to the wrong kind of object for field " + fieldDef.field_name + " which should point to an object of type " + fieldDef.limit);
-
-		return false;
-	      }
-	  }
-
-	if (type == DBStore.INVIDARRAY)
-	  {
-	    int length;
-	    InvidArrayDBField iarray;
-
-	    iarray = (InvidArrayDBField) field;
-	    length = iarray.size();
-
-	    for (int i = 0; i < length; i++)
-	      {
-		if (iarray.value(i).getType() != fieldDef.limit)
-		  {
-		    // an invid in the array points to an object of the wrong type
-
-		    editset.session.setLastError("invid value " + iarray.value(i) + " points to the wrong kind of object for field " + fieldDef.field_name + " which should point to an object of type " + fieldDef.limit);
-
-		    return false;
-		  }
-	      }
-	  }
-
-      }
 
     // check to see if we already have an instance of this field
 
@@ -218,7 +197,8 @@ public class DBEditObject extends DBObject {
 
 	    if (!oldField.unmark(editset, namespace))
 	      {
-		throw new RuntimeException(editset.session.key + ": Argh, namespace/editset corruption");
+		throw new RuntimeException(editset.session.key +
+					   ": namespace/editset corruption");
 	      }
          }
       }
@@ -229,18 +209,22 @@ public class DBEditObject extends DBObject {
       {
 	if (debug)
 	  {
-	    System.err.println(editset.session.key + ": DBEditObject.setField(): doing namespace check on " + 
-			       namespace.name + " for field " + fieldDef.field_name);
+	    System.err.println(editset.session.key +
+			       ": DBEditObject.setField(): namespace check on " + 
+			       namespace.name + " for field " + fieldDef.getName());
 	  }
 
 	if (!field.mark(editset, namespace))
 	  {
-	    editset.session.setLastError("couldn't set field " + fieldDef.field_name + " due to a namespace conflict");
-	    return false;	// couldn't set this value.. namespace conflict
+	    editset.session.setLastError("couldn't set field " + 
+					 fieldDef.getName() +
+					 " due to a namespace conflict");
+	    return false;
 	  }
 	else if (debug)
 	  {
-	    System.err.println(editset.session.key + ": DBEditObject.setField(): passed namespace check");
+	    System.err.println(editset.session.key +
+			       ": DBEditObject.setField(): namespace check ok");
 	  }
       }  
 
@@ -271,7 +255,6 @@ public class DBEditObject extends DBObject {
   {
     DBNameSpace namespace;
     DBArrayField field;
-    short type;
     Short key;
     DBObjectBaseField fieldDef;
 
@@ -281,43 +264,104 @@ public class DBEditObject extends DBObject {
 
     fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
-    namespace = fieldDef.namespace;
+    if (fieldDef.isString())
+      {
+	namespace = fieldDef.getNameSpace();
+      }
+    else
+      {
+	namespace = null;
+      }
 
-    type = fieldDef.field_type;
-
-    if (!((type == DBStore.BOOLEANARRAY && (value instanceof Boolean)) ||
-	  (type == DBStore.NUMERICARRAY && (value instanceof Integer)) ||
-	  (type == DBStore.DATEARRAY && (value instanceof Date)) ||
-	  (type == DBStore.STRINGARRAY && (value instanceof String)) ||
-	  (type == DBStore.INVIDARRAY && (value instanceof Invid))))
+    if (!(fieldDef.isArray() &&
+	  ((fieldDef.isBoolean() && (value instanceof Boolean)) ||
+	   (fieldDef.isNumeric() && (value instanceof Integer)) ||
+	   (fieldDef.isDate() && (value instanceof Date)) ||
+	   (fieldDef.isString() && (value instanceof String)) ||
+	   (fieldDef.isInvid() && (value instanceof Invid)))))
       {
 	// not an array field, or the field type doesn't match value
 
-	editset.session.setLastError("wrong typed value " + value + " for " + fieldDef.field_name);
+	editset.session.setLastError("wrong typed value " +
+				     value + " for " + fieldDef.getName());
 	
 	return false;
       }
+
+    // if we're a string field, check the value being added for appropriate value
     
-    if (fieldDef.limit != -1)
+    if (fieldDef.isString())
       {
-	if (type == DBStore.STRINGARRAY)
+	String s = (String) value;
+
+	/* - */
+
+	if (s.length() > fieldDef.getMaxLength())
 	  {
-	    if (((String) value).length() > fieldDef.limit)
+	    editset.session.setLastError("couldn't add " + s + " to field " +
+					 fieldDef.getName() +
+					 ": string too long for field");
+	    return false;
+	  }
+
+	if (s.length() < fieldDef.getMinLength())
+	  {
+	    editset.session.setLastError("couldn't add " + s + " to field " + 
+					 fieldDef.getName() +
+					 ": string too short for field");
+	    return false;
+	  }
+
+	if (fieldDef.getOKChars() != null)
+	  {
+	    String ok = fieldDef.getOKChars();
+
+	    for (int i = 0; i < s.length(); i++)
 	      {
-		editset.session.setLastError("couldn't add " + value + " to field " + fieldDef.field_name + ": string too long for field");
-		return false;
+		if (ok.indexOf(s.charAt(i)) == -1)
+		  {
+		    editset.session.setLastError("string value" + s +
+						 "contains a bad character " +
+						 s.charAt(i));
+		    return false;
+		  }
 	      }
 	  }
 
-	if (type == DBStore.INVIDARRAY)
+	if (fieldDef.getBadChars() != null)
 	  {
-	    if (((Invid) value).getType() != fieldDef.limit)
+	    String bad = fieldDef.getBadChars();
+
+	    for (int i = 0; i < s.length(); i++)
 	      {
-		editset.session.setLastError("couldn't add " + value + " to field " + fieldDef.field_name + ": invid type mismatch");
-		return false;
+		if (bad.indexOf(s.charAt(i)) != -1)
+		  {
+		    editset.session.setLastError("string value" + s +
+						 "contains a bad character " + 
+						 s.charAt(i));
+		    return false;
+		  }
 	      }
 	  }
       }
+
+    if (fieldDef.isInvid())
+      {
+	Invid invid = (Invid) value;
+
+	/* - */
+
+	if (fieldDef.isTargetRestricted() &&
+	    invid.getType() != fieldDef.getAllowedTarget())
+	  {
+	    editset.session.setLastError("couldn't add " + invid + " to field "
+					 + fieldDef.getName() +
+					 ": invid type mismatch");
+	    return false;
+	  }
+      }
+
+    //JON: need to handle symmetry issues here
 
     if (!fields.containsKey(key))
       {
@@ -347,7 +391,9 @@ public class DBEditObject extends DBObject {
       {
 	if (!namespace.mark(editset, value, field))
 	  {
-	    editset.session.setLastError("couldn't add  " + value + " to field " + fieldDef.field_name + " due to a namespace conflict");
+	    editset.session.setLastError("couldn't add  " + value + 
+					 " to field " + fieldDef.getName() +
+					 " due to a namespace conflict");
 	    return false;
 	  }
       }
