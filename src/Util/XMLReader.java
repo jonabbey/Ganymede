@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/05/19 04:43:26 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/06/15 04:43:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -309,32 +309,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     return peekNextItem(this.skipWhiteSpace);
   }
 
-  /**
-   * <P>Private helper method for peekNextItem().</P>
-   */
-
-  private XMLItem peekSpecificItem(int index)
-  {
-    while (!done && buffer.size() < index + 1)
-      {
-	try
-	  {
-	    buffer.wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
-	  }
-      }
-
-    if (buffer.size() < index + 1)
-      {
-	return null;
-      }
-
-    return (XMLItem) buffer.elementAt(index);
-  }
-   
   /**
    * <P>pushbackItem() may be used to push the most recently read XMLItem back
    * onto the XMLReader's buffer.  The XMLReader code guarantees that there
