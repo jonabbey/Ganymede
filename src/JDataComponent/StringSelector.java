@@ -38,7 +38,7 @@ import arlut.csd.JTable.*;
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // --
 
@@ -228,7 +228,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     // JstringListBox does the sorting
-    in = new JstringListBox(inVector);
+    in = new JstringListBox(inVector, false, inPopup);
     in.setCallback(this);
 
     inPanel.setBorder(bborder);
@@ -278,7 +278,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 		if (! in.containsItem(lh))
 		  {
+		    //System.out.println("It's not in there, adding: " + lh);
 		    outVector.addElement(lh);
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.out.println("************* THIS ONES ALREADY IN THERE ************" + lh);
+		      }
 		  }
 	      }
 	  }
@@ -295,7 +303,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.setActionCommand("Add");
 	add.addActionListener(this);
 
-	out = new JstringListBox(outVector);
+	out = new JstringListBox(outVector, false, outPopup);
 	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
@@ -346,9 +354,52 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   // Public methods ------------------------------------------------------------
 
+  /**
+   * Change the text on the add button.
+   */
+  public void setButtonText(String text)
+  {
+    if (addCustom == null)
+      {
+	return;
+      }
+
+    addCustom.setText(text);
+    validate();
+  }
+
   public void setVisibleRowCount(int numRows)
   {
     System.out.println("I don't know how to setVisibleRowCount yet.");
+  }
+
+  public void addNewItem(Object item, boolean ShouldBeIn)
+  {
+    listHandle lh = null;
+    if (item instanceof String)
+      {
+	lh = new listHandle((String)item, item);
+      }
+    else if (item instanceof listHandle)
+      {
+	lh = (listHandle)item;
+      }
+    else
+      {
+	System.out.println("What's this supposed to be? " + item);
+	return;
+      }
+
+    if (ShouldBeIn)
+      {
+	in.addItem(lh);
+      }
+    else
+      {
+	out.addItem(lh);
+      }
+
+
   }
 
   /**
@@ -429,18 +480,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
 
-	if (mustChoose) 
-	  {
+	if (mustChoose) {
 	    // Check to see if it is in there
 	    System.out.println("Checking to see if this is a viable option");
-	    boolean inThere = false;
 
 	    if (out != null)
 	      {
-		if (out.containsLabel(item))
-		  {
+		if (out.containsLabel(item)) {
 		    out.setSelectedLabel(item);
-		    // Not sure if this cast is going to always work.
 		    listHandle handle = out.getSelectedHandle();
 			
 		    boolean ok = true;
@@ -465,46 +512,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		      {
 			putItemIn(handle);
 			custom.setText("");
-			inThere = true;
+			return;
 		      }
-		    else
-		      {
-			try
-			  {
-			    if (out == null)
-			      {
-				my_parent.setValuePerformed(new JValueObject(this, 
-									     0,  
-									     JValueObject.ERROR,
-									     "You can't choose stuff for this vector.  Sorry."));
-			      }
-			    else
-			      {
-				my_parent.setValuePerformed(new JValueObject(this, 
-									     0,  
-									     JValueObject.ERROR,
-									     "That choice is not appropriate.  Please choose from the list."));
-			      }
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
-			  }
-		      }
-
 		  }
-		
-	      }
-	
-
-	    if (! inThere)
-	      {
-		if (debug)
-		  {
-		    System.out.println("That's not in there, returning.");
-		  }
-		
-		if (allowCallback)
+		else  //It's not in the outbox.
 		  {
 		    try
 		      {
@@ -528,46 +539,82 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			throw new RuntimeException("Could not tell parent what is wrong: " + rx);
 		      }
 		  }
+		
 	      }
-	    return;
-	    
+	
 	  }
 	// not mustChoose, so you can stick it in there.
-	else if (allowCallback)
+	// But see, I need to see if it's in there first, because if it is, IF IT IS, then you have
+	// to move the String over.  HA!
+	else 
 	  {
-	    boolean ok = false;
-	    try
+	    if ((out != null) && out.containsLabel(item))
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
-								  0,  //in.getSelectedIndex(),
-								  JValueObject.ADD,
-								  item));  //item is a String
+		out.setSelectedLabel(item);
+		listHandle handle = out.getSelectedHandle();
+		
+		boolean ok = true;
+		
+		if (allowCallback)
+		  {
+		    ok = false;
+		    try
+		      {
+			ok = my_parent.setValuePerformed(new JValueObject(this, 
+									  0,  //in.getSelectedIndex(),
+									  JValueObject.ADD,
+									  handle.getObject()));
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new RuntimeException("Could not setValuePerformed: " + rx);
+		      }
+		
+		    if (ok)
+		      {
+			putItemIn(handle);
+			custom.setText("");
+		      }	
+		  }
+		else //no callback to check
+		  {
+		    in.addItem(new listHandle(item, item));
+		    //		    in.setSelectedValue(item, true);
+		    custom.setText("");
+		  }	
 	      }
-	    catch (RemoteException rx)
+	    else  //Not in the out box, send up the String
 	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
+		
+		boolean ok = false;
+		try
+		  {
+		    ok = my_parent.setValuePerformed(new JValueObject(this, 
+								      0,  //in.getSelectedIndex(),
+								      JValueObject.ADD,
+								      item));  //item is a String
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not setValuePerformed: " + rx);
+		  }
+		
+		if (ok)
+		  {
+		    in.addItem(new listHandle(item, item));
+		    
+		    //	in.setSelectedValue(item, true);
+		    custom.setText("");
+		  }
+		else
+		  {
+		    System.err.println("setValuePerformed returned false.");
+		  }
 	      }
 	    
-	    if (ok)
-	      {
-		in.addItem(new listHandle(item, item));
-		
-		//	in.setSelectedValue(item, true);
-		custom.setText("");
-	      }
-	    else
-	      {
-		System.err.println("setValuePerformed returned false.");
-	      }
+	    invalidate();
+	    parent.validate();
 	  }
-	else //no callback to check
-	  {
-	    in.addItem(new listHandle(item, item));
-	    //		    in.setSelectedValue(item, true);
-	    custom.setText("");
-	  }
-	invalidate();
-	parent.validate();
       }
   }
   
@@ -752,11 +799,41 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (o.getSource() == custom)
       {
+	if (!editable)
+	  {
+	    return false;
+	  }
+
 	addCustom.doClick();
 	return true;
       }
+    else if (o.getOperationType() == JValueObject.PARAMETER)  // from the popup menu
+      {
+	if (allowCallback)
+	  {
+	    System.out.println("Sending popup callback up from SS");
+	    try
+	      {
+		my_parent.setValuePerformed(new JValueObject(this,
+							     o.getIndex(),
+							     JValueObject.PARAMETER,
+							     o.getValue(),
+							     o.getParameter()));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		System.out.println("could not setValuePerformed from StringSelector: " + rx);
+	      }
+	    return true;
+	  }	
+      }
     else if (o.getSource() == in)
       {
+	if (!editable)
+	  {
+	    return false;
+	  }
+
 	if (o.getOperationType() == JValueObject.INSERT)
 	  {
 	    remove.doClick();
@@ -769,7 +846,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		add.setEnabled(false);
 	      }
 
-	    remove.setEnabled(true);
+	    if (remove != null)
+	      {
+		remove.setEnabled(true);
+	      }
 
 	    if (out != null)
 	      {
@@ -812,7 +892,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	return false;
       }
 
-
+    return false;  // should never really get here.
   }
 
 }
