@@ -8,8 +8,8 @@
 # for configurator.perl to use to do its thing.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.10 $
-# Last Mod Date: $Date: 1999/08/27 17:39:34 $
+# Version: $Revision: 1.11 $
+# Last Mod Date: $Date: 2000/10/10 05:09:59 $
 #
 ###############################################################################
 
@@ -72,7 +72,7 @@ export GJAVA
 
 guessswing="/opt/depot/swing-1.1.1"
 
-echo "Where are the Swing jar files located? [$guessswing] \c"
+echo "Where are the Swing jar files located (only needed for JDK 1.1)? [$guessswing] \c"
 
 read userswing
 

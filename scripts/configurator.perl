@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.51 $
-# $Date: 2000/09/15 06:58:23 $
+# $Revision: 1.52 $
+# $Date: 2000/10/10 05:10:00 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -311,7 +311,7 @@ JAVADIR=$javadir
 # will look here to find pre-compiled classes needed to compile
 # code in this directory
 
-CLASSDIR=$classdir:$ENV{"GSWING"}/swingall.jar
+CLASSDIR=$classdir$swingjar
 
 # Target location for classes built from sources in this directory.
 # This is just the root of the tree.. the javac compiler will
@@ -392,6 +392,16 @@ $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
 $swingdir = $ENV{GSWING};
+
+# if we have a swingall.jar file, set the $swingjar
+# string which will be appended into the config files
+# built
+
+if (-f "$swingdir/swingall.jar") {
+  $swingjar = ":$swingdir/swingall.jar";
+} else {
+  $swingjar = "";
+}
 
 # See if there's a user-defined target location
 # for the classes. Otherwise, use default.
@@ -517,7 +527,6 @@ write_makefile("$rootdir/src");
 print "Generating install scripts\n";
 
 write_install("installClient.in", "installClient");
-write_install("installClient2.in", "installClient2");
 write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
