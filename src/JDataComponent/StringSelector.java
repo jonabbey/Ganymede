@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/11/24 05:41:37 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/12/05 23:10:16 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,8 +93,9 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.29 $ $Date: 2000/11/24 05:41:37 $ $Name:  $
- * @author Mike Mulvaney, Jonathan Abbey */
+ * @version $Revision: 1.30 $ $Date: 2000/12/05 23:10:16 $ $Name:  $
+ * @author Mike Mulvaney, Jonathan Abbey
+ */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
 
@@ -637,7 +638,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    for (int i = 0; i < chosen.size(); i++)
 	      {
-		// What whill this do if it is not in available?  I don't know.
+		// What will this do if it is not in available?  I don't know.
 
 		try
 		  {
@@ -645,7 +646,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 		catch (Exception e)
 		  {
-		    System.out.println("Could not remove Element: " + chosen.elementAt(i) + ", not in available vector?");
+		    System.out.println("Could not remove Element: " + 
+				       chosen.elementAt(i) + ", not in available vector?");
 		  }
 	      }
 	  }
