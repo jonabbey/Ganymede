@@ -16,6 +16,7 @@ import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
 
 import arlut.csd.JDataComponent.*;
+import arlut.csd.ganymede.*;
 
 /**
  * Each object in a vector panel is wrapped in an elementWrapper.  This class
@@ -152,25 +153,68 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     return my_component;
   }
 
+  public Invid getObjectInvid()
+  {
+    if (! (my_component instanceof containerPanel))
+      {
+	return null;
+      }
+
+    return ((containerPanel)my_component).getObjectInvid();
+    
+  }
+
   /**
    *  Expand this element wrapper.
    *
-   * If makeOpen is true, expand(boolean) will open it or leave it open.
-   * expand() is a misnomer; it is really a toggle.  Use expand(boolean) to
-   * force open or closedness.
    */
-  public void expand(boolean makeOpen)
+  public void open()
   {
-    expanded = !makeOpen;
-    expand();
+    vp.wp.getgclient().setWaitCursor();
+
+    if (! loaded)
+      {
+	setStatus("Loading container panel, you are just gonna have to wait.");
+	((containerPanel)my_component).load();
+	add("Center", my_component);
+	loaded = true;
+      }
+    else
+      {
+	my_component.setVisible(true);
+      }
+    
+    expand.setIcon(vp.wp.openIcon);
+    expand.setToolTipText("Expand this element");
+    expanded = true;
+
+    vp.wp.getgclient().setNormalCursor();
   }
 
-  public void expand()
+  /**
+   * Close this element wrapper.
+   */
+  public void close()
   {
-    vp.wp.getgclient().setWaitCursor();;
+    vp.wp.getgclient().setWaitCursor();
+    my_component.setVisible(false);	
+    expand.setIcon(vp.wp.closeIcon);
+    expand.setToolTipText("Collapse this element");
+    expanded = false;
+    vp.wp.getgclient().setNormalCursor();
+  }
+
+  /**
+   * Toggle the elementWrapper open/closed.
+   *
+   * If the elementWrapper is open, this will close it.  If it is closed, this will open it.  
+   */
+  public void toggle()
+  {
+    vp.wp.getgclient().setWaitCursor();
     if (debug)
       {
-	System.out.println("expand().");
+	System.out.println("toggle().");
       }
 
     if (expanded)
@@ -180,37 +224,19 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    System.out.println("remove");
 	  }
 
-	//remove(my_component);
-	my_component.setVisible(false);	
-	expand.setIcon(vp.wp.closeIcon);
-	expand.setToolTipText("Collapse this element");
-	expanded = false;
+	close();
       }
     else
       {
-	if (! loaded)
-	  {
-	    setStatus("Loading container panel, you are just gonna have to wait.");
-	    ((containerPanel)my_component).load();
-	    add("Center", my_component);
-	    loaded = true;
-	  }
-	else
-	  {
-	    my_component.setVisible(true);
-	  }
-
-	expand.setIcon(vp.wp.openIcon);
-	expand.setToolTipText("Expand this element");
-	expanded = true;
+	open();
       }
 
     if(debug)
       {
-	System.out.println("Done with expand().");
+	System.out.println("Done with toggle().");
       }
 
-    vp.wp.getgclient().setNormalCursor();;    
+    vp.wp.getgclient().setNormalCursor();
   }
 
   public void actionPerformed(ActionEvent evt) 
@@ -221,12 +247,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       }
     if (evt.getSource() == remove) 
       {
-	JValueObject v = new JValueObject(getComponent(),"remove");
+	JValueObject v = new JValueObject(this,"remove");
 	vp.setValuePerformed(v);
       }
     else if (evt.getSource() == expand)
       {
-	expand();
+	toggle();
 	invalidate();
 	vp.container.frame.validate();
       }
@@ -240,7 +266,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (e.getWhen() - lastClick < 500)
       {
-	expand();
+	toggle();
 	invalidate();
 	vp.container.frame.validate();
 
