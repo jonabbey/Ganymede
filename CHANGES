@@ -101,6 +101,11 @@ The SSL support now present in Ganymede requires a minimum of Java 1.4
 to work.  We are therefore intending to make JDK 1.4 a minimum
 requirement of Ganymede 2.0.
 
+8. [SERVER, CLIENT] Changes to Query system (Deepak)
+
+XXX - I forget exactly what Deepak did, but I think the whole
+QueryResults system got changed.. ? XXX
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
