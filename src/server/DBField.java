@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1578,14 +1578,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	 return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
-     updatePermCache();		// *sync* this GanymedeSession
-
-     if (permCache == null)
+     synchronized (this)
        {
-	 return false;
+	 updatePermCache();		// *sync* this GanymedeSession
+	 
+	 if (permCache == null)
+	   {
+	     return false;
+	   }
+	 
+	 return permCache.isVisible();
        }
-	
-     return permCache.isVisible();
    }
 
   /**
@@ -1600,14 +1603,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   {
     if (owner.editset != null)
       {
-	updatePermCache();	// *sync* this GanymedeSession
-
-	if (permCache == null)
+	synchronized (this)
 	  {
-	    return false;
-	  }
+	    updatePermCache();	// *sync* this GanymedeSession
 
-	return permCache.isEditable();
+	    if (permCache == null)
+	      {
+		return false;
+	      }
+	    
+	    return permCache.isEditable();
+	  }
       }
     else
       {
