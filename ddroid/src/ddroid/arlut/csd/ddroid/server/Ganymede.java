@@ -72,7 +72,7 @@ import java.util.*;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.ParseArgs;
-import arlut.csd.Util.WordWrap;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -287,6 +287,13 @@ public class Ganymede {
 
   public static boolean forcelocalhost = false;
 
+  /**
+   * <p>TranslationService object for handling string localization in the Ganymede
+   * server.</p>
+   */
+
+  public static TranslationService ts = null;
+
   /* -- */
 
   /**
@@ -302,13 +309,14 @@ public class Ganymede {
 
     /* -- */
 
+    ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.ganymede");
+
     propFilename = ParseArgs.getArg("properties", argv);
 
     if (propFilename == null)
       {
-	System.err.println("Error: invalid command line parameters");
- 	System.err.print("Usage: java arlut.csd.ddroid.server.Ganymede");
-	System.err.println(" properties=<property file> [-resetadmin] [debug=<rmi debug file>]");
+	System.err.println(ts.l("main.cmd_line_error"));
+ 	System.err.println(ts.l("main.cmd_line_usage"));
 	return;
       }
 
@@ -320,12 +328,12 @@ public class Ganymede {
 
     if (!loadProperties(propFilename))
       {
-	System.out.println("Error, couldn't successfully load properties from file " + propFilename + ".");
+	System.err.println(ts.l("main.error_propload", propFilename));
 	return;
       }
     else
       {
-	System.out.println("Directory Droid server: loaded properties successfully from " + propFilename);
+	System.out.println(ts.l("main.ok_propload", propFilename));
       }
 
     // see whether our RMI registry currently has ganymede.server
@@ -347,8 +355,7 @@ public class Ganymede {
 	    
 	    if (serv.up())	// another exception opportunity
 	      {
-		System.err.println("*\n*\n* Error, another Directory Droid server is already running at: " + rmiServerURL);
-		System.err.println("* I can't startup until it is gone.\n*\n*");
+		System.err.println(ts.l("main.error_already_running", rmiServerURL));
 		System.exit(1);
 	      }
 	  }
@@ -378,12 +385,12 @@ public class Ganymede {
 
     if (inUse)
       {
-	System.err.println("Re-using existing RMI registry");
+	System.err.println(ts.l("main.info_reusing_registry"));
       }
 
     // create the database 
 
-    debug("Creating DBStore structures");
+    debug(ts.l("main.info_creating_dbstore"));
 
     db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
 
@@ -393,7 +400,7 @@ public class Ganymede {
     
     if (dataFile.exists())
       {
-	debug("Loading DBStore contents");
+	debug(ts.l("main.info_loading_dbstore"));
 	db.load(dbFilename, true);
       }
     else
@@ -403,10 +410,10 @@ public class Ganymede {
 
 	firstrun = true;
 
-	debug("No DBStore exists under filename " + dbFilename + ", not loading");
-	debug("Initializing new schema");
+	debug(ts.l("main.info_new_dbstore", dbFilename));
+	debug(ts.l("main.info_initializing_schema"));
 	db.initializeSchema();
-	debug("Template schema created.");
+	debug(ts.l("main.info_created_schema"));
 
 	try 
 	  {
@@ -416,14 +423,14 @@ public class Ganymede {
 	  {
 	    // what do we really want to do here?
 	    
-	    throw new RuntimeException("couldn't initialize journal");
+	    throw new RuntimeException(ts.l("main.error_no_init_journal"));
 	  }
 
 	// create the database objects required for the server's operation
 
-	debug("Creating mandatory database objects");
+	debug(ts.l("main.info_creating_mandatory"));
 	db.initializeObjects();
-	debug("Mandatory database objects created.");
+	debug(ts.l("main.info_created_mandatory"));
 
 	firstrun = false;
       }
@@ -436,13 +443,13 @@ public class Ganymede {
 
     if (false)
       {
-	debug("Initializing Security Manager");
+	debug(ts.l("main.info_init_security"));
 
 	System.setSecurityManager(new RMISecurityManager());
       }
     else
       {
-	debug("Not Initializing RMI Security Manager.. not supporting classfile transfer");
+	debug(ts.l("main.info_no_security"));
       }
 
     // if debug=<filename> was specified on the command line, tell the
@@ -457,7 +464,7 @@ public class Ganymede {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("couldn't open RMI debug log: " + ex);
+	    System.err.println(ts.l("main.error_fail_debug") + ex);
 	  }
       }
 
@@ -468,13 +475,13 @@ public class Ganymede {
 
     try
       {
-	debug("Creating GanymedeServer object");
+	debug(ts.l("main.info_creating_server"));
 
 	server = new GanymedeServer();
       }
     catch (Exception ex)
       {
-	debug("Couldn't create GanymedeServer: " + ex);
+	debug(ts.l("main.error_fail_server") + ex);
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -483,18 +490,18 @@ public class Ganymede {
 
     try
       {
-	debug("Creating internal Directory Droid Session");
+	debug(ts.l("main.info_creating_def_session"));
 	internalSession = new GanymedeSession();
 	internalSession.enableWizards(false);
 	internalSession.enableOversight(false);
 
-	debug("Creating master BaseListTransport object");
+	debug(ts.l("main.info_creating_baselist_trans"));
 
 	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("Couldn't establish internal session: " + ex);
+	throw new RuntimeException(ts.l("main.error_fail_session") + ex);
       }
 
     // set up the log
@@ -517,7 +524,7 @@ public class Ganymede {
     catch (IOException ex)
       {
 	ex.printStackTrace();
-	throw new RuntimeException("Couldn't initialize log file");
+	throw new RuntimeException(ts.l("main.error_log_file"));
       }
 
     // log our restart
@@ -526,11 +533,11 @@ public class Ganymede {
 
     if (debugFilename != null)
       {
-	startMesg = "Server startup - Debug mode";
+	startMesg = ts.l("main.info_debug_start");
       }
     else
       {
-	startMesg = "Server startup - Not in Debug mode";
+	startMesg = ts.l("main.info_nodebug_start");
       }
 
     log.logSystemEvent(new DBLogEvent("restart",
@@ -548,7 +555,7 @@ public class Ganymede {
       }
     catch (NotLoggedInException ex)
       {
-	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
 
     // Create the background scheduler
@@ -567,7 +574,7 @@ public class Ganymede {
       }
     catch (NotLoggedInException ex)
       {
-	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
 
     // Bind the GanymedeServer object in the RMI registry so clients
@@ -575,7 +582,7 @@ public class Ganymede {
 
     try
       {
-	debug("Binding GanymedeServer in RMI Registry");
+	debug(ts.l("main.info_binding_registry"));
 
 	// we use rebind so that we can bind successfully if the rmi
 	// registry is still running from a previous Directory Droid server
@@ -606,35 +613,33 @@ public class Ganymede {
 
 		    if (forcelocalhost)
 		      {
-			Ganymede.debug("\n** Warning **\n");
+			Ganymede.debug("\n** " + ts.l("main.warning") + " **\n");
 		      }
 		    else
 		      {
-			Ganymede.debug("\n** Error **\n");
+			Ganymede.debug("\n** " + ts.l("main.error") + " **\n");
 		      }
 
-		    Ganymede.debug(WordWrap.wrap("Both the system hostname (" + 
-						 java.net.InetAddress.getLocalHost().getHostName() +
-						 ") and the ganymede.serverhost definition (" + 
-						 serverHostProperty + ") resolve to the 127.0.0.1 loopback address", 
-						 70));
-		    Ganymede.debug("\nThe Directory Droid server must have an externally accessible IP address or else clients");
-		    Ganymede.debug("will not be able to communicate with the Directory Droid server from other than localhost.");
+		    Ganymede.debug(ts.l("main.error_loopback",
+					java.net.InetAddress.getLocalHost().getHostName(),
+					serverHostProperty));
+		    Ganymede.debug("\n");
+		    Ganymede.debug(ts.l("main.error_loopback_explain"));
 
 		    if (!forcelocalhost)
 		      {
-			Ganymede.debug(WordWrap.wrap("\nIf you really want to be only usable for localhost, " + 
-						     "edit the runServer script to use the -forcelocalhost option.", 70));
+			Ganymede.debug(ts.l("main.error_loopback_explain2"));
 			
-			Ganymede.debug("\nShutting down.\n");
+			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
 			
 			GanymedeServer.shutdown();
 		      }
 		  }
 		else
 		  {
-		    Ganymede.debug(WordWrap.wrap("Avoiding loopback " + java.net.InetAddress.getLocalHost().getHostName() + 
-						 " definition, binding to " + hostname, 70));
+		    Ganymede.debug(ts.l("main.info_avoiding_loopback",
+					java.net.InetAddress.getLocalHost().getHostName(),
+					hostname));
 		  }
 	      }
 	  }
@@ -646,7 +651,7 @@ public class Ganymede {
       }
     catch (Exception ex)
       {
-	debug("Couldn't establish server binding: " + ex);
+	debug(ts.l("main.error_no_binding") + ex);
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -659,10 +664,10 @@ public class Ganymede {
 
     if (debug)
       {
-	debug("Setup and bound server object OK");
+	debug(ts.l("main.info_setup_okay"));
       }
 
-    debug("Directory Droid Server Ready.");
+    debug(ts.l("main.info_ready"));
   }
 
   // debug routine
@@ -716,7 +721,7 @@ public class Ganymede {
 
     if (logInfoDialogs)
       {
-	System.err.println("Ganymede.createInfoDialog(): dialog says " + body);
+	System.err.println(ts.l("createInfoDialog.log_info", body));
       }
 
     return retVal;
@@ -732,13 +737,13 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     "OK",
+				     ts.l("createErrorDialog.ok"),
 				     null,
 				     "error.gif"));
 
     if (logErrorDialogs)
       {
-	System.err.println("Ganymede.createErrorDialog(): dialog says " + body);
+	System.err.println(ts.l("createErrorDialog.log_error", body));
       }
 
     return retVal;
@@ -755,8 +760,8 @@ public class Ganymede {
 
   static public ReturnVal loginError(Exception ex)
   {
-    return Ganymede.createErrorDialog("Error",
-				      "Not logged in");
+    return Ganymede.createErrorDialog(ts.l("loginError.error"),
+				      ts.l("loginError.explain"));
   }
 
   /**
@@ -801,7 +806,7 @@ public class Ganymede {
 
 	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
 	  {
-	    System.out.println("Resetting supergash password.");
+	    System.out.println(ts.l("startupHook.resetting"));
 
 	    internalSession.openTransaction("Directory Droid startupHook");
 
@@ -809,7 +814,7 @@ public class Ganymede {
 
 	    if (e_object == null)
 	      {
-		throw new RuntimeException("Error!  Couldn't pull " + rootname + " object");
+		throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
 	      }
 
 	    p = (PasswordDBField) e_object.getField("Password");
@@ -817,10 +822,10 @@ public class Ganymede {
 	    
 	    if (retval != null && !retval.didSucceed())
 	      {
-		throw new RuntimeException("Error!  Couldn't reset " + rootname + " password");
+		throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
 	      }
 
-	    System.out.println(rootname + " password reset to value specified in Directory Droid properties file");
+	    System.out.println(ts.l("startupHook.password_reset", rootname));
 
 	    retval = internalSession.commitTransaction();
 
@@ -835,67 +840,6 @@ public class Ganymede {
 		    internalSession.abortTransaction();
 		  }
 	      }
-	  }
-      }
-
-    // this bit was used to evolve the constant schema portions at
-    // one point.. of strictly historical interest now
-
-    if (false)
-      {
-	// manually insert the root (supergash) admin object
-
-	internalSession.openTransaction("Directory Droid startupHook");
-
-	defaultInv = Invid.createInvid(SchemaConstants.RoleBase,
-				       SchemaConstants.RoleDefaultObj);
-
-	if (DBStore.viewDBObject(defaultInv) == null)
-	  {
-	    System.err.println("Creating the RoleDefaultObj");
-
-	    // need to create the self perm object
-
-	    // create SchemaConstants.RoleDefaultObj
-
-	    retVal = internalSession.session.createDBObject(SchemaConstants.RoleBase, 
-							    defaultInv,
-							    null);
-
-	    if (retVal != null && retVal.didSucceed())
-	      {
-		e_object = (DBEditObject) retVal.getObject();
-
-		s = (StringDBField) e_object.getField(SchemaConstants.RoleName);
-		s.setValueLocal("Default Permissions");
-		
-		// By default, users will be able to view themselves and all their fields, anything
-		// else will have to be manually configured by the supergash administrator.
-		
-		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleMatrix);
-		pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(true, false, false, false)); 
-		
-		// By default, users will not be able to view, create, or edit anything.  The supergash
-		// administrator is free to reconfigure this.
-		
-		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleDefaultMatrix);
-		pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(false, false, false, false)); 
-	      }
-	  }
-	else
-	  {
-	    System.err.println("Not Creating the RoleDefaultObj");
-	  }
-
-	retVal = internalSession.commitTransaction();
-    
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    System.err.println("Ganymede.startupHook() succeeded");
-	  }
-	else
-	  {
-	    System.err.println("Ganymede.startupHook() did not succeed");
 	  }
       }
   }
@@ -919,7 +863,7 @@ public class Ganymede {
       {
 	if (objects.size() == 0)
 	  {
-	    System.err.println("** Empty list of builder tasks found in database!");
+	    System.err.println(ts.l("registerTasks.empty_builders"));
 	  }
 
 	for (int i = 0; i < objects.size(); i++)
@@ -928,7 +872,7 @@ public class Ganymede {
 
 	    if (debug)
 	      {
-		System.err.println("Processing task object for " + object);
+		System.err.println(ts.l("registerTasks.processing_task", object.toString()));
 	      }
 
 	    scheduler.registerTaskObject(object);
@@ -941,7 +885,7 @@ public class Ganymede {
       }
     else
       {
-	System.err.println("** No tasks found in database!");
+	System.err.println(ts.l("registerTasks.empty_tasks"));
       }
 
     // register background time-out task
@@ -949,22 +893,22 @@ public class Ganymede {
     scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
 				1,
 				new timeOutTask(),
-				"Idle Timer");
+				ts.l("registerTasks.idle_task"));
 
     scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
 				1,
 				new memoryStatusTask(),
-				"Memory Status Updater");
+				ts.l("registerTasks.memory_status_task"));
 
     scheduler.addActionOnDemand(new gcTask(),
-				"Garbage Collection Task");
+				ts.l("registerTasks.gc_task"));
   }
 
   static void registerBuilderTask(String taskName)
   {
     if (debug)
       {
-	System.err.println("Registering " + taskName + " for execution on transaction commit.");
+	System.err.println(ts.l("registerBuilderTask.debug_register", taskName));
       }
 
     synchronized (builderTasks)
@@ -977,7 +921,7 @@ public class Ganymede {
   {
     if (debug)
       {
-	System.err.println("Unregistering " + taskName + " for execution on transaction commit.");
+	System.err.println(ts.l("unregisterBuilderTask.debug_unregister", taskName));
       }
 
     builderTasks.removeElement(taskName); // sync'ed on builderTasks vector method
@@ -1143,8 +1087,7 @@ public class Ganymede {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Could not parse ganymede.timeoutIdleNoObjs property: " + 
-			       timeoutIdleNoObjsString);
+	    System.err.println(ts.l("loadProperties.no_parse_timeoutIdleNoObjs", timeoutIdleNoObjsString));
 	  }
       }
 
@@ -1158,64 +1101,60 @@ public class Ganymede {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Could not parse ganymede.timeoutIdleWithObjs property: " + 
-			       timeoutIdleWithObjsString);
+	    System.err.println(ts.l("loadProperties.no_parse_timeoutIdleWithObjs",
+				    timeoutIdleWithObjsString));
 	  }
       }
 
     if (dbFilename == null)
       {
-	System.err.println("Couldn't get the database property");
+	System.err.println(ts.l("loadProperties.no_db"));
 	success = false;
       }
 
     if (journalProperty == null)
       {
-	System.err.println("Couldn't get the journal property");
+	System.err.println(ts.l("loadProperties.no_journal"));
 	success = false;
       }
 
     if (logProperty == null)
       {
-	System.err.println("Couldn't get the log property");
+	System.err.println(ts.l("loadProperties.no_log"));
 	success = false;
       }
 
     if (htmlProperty == null)
       {
-	System.err.println("Couldn't get the html dump property");
+	System.err.println(ts.l("loadProperties.no_html"));
 	success = false;
       }
 
     if (serverHostProperty == null)
       {
-	System.err.println("Couldn't get the server host property");
+	System.err.println(ts.l("loadProperties.no_server_host"));
 	success = false;
       }
 
     if (rootname == null)
       {
-	System.err.println("Couldn't get the root name property");
+	System.err.println(ts.l("loadProperties.no_root_name"));
 	success = false;
       }
 
-    /*
-     * if (defaultrootpassProperty == null)
-     * {
-     * System.err.println("Couldn't get the default rootpass password property");
-     * success = false;
-     * }
-     */
+    // we don't care if we don't get the defaultrootpassProperty,
+    // since we don't require the user to keep their password in the
+    // server's properties file unless they want to reset it
 
     if (mailHostProperty == null)
       {
-	System.err.println("Couldn't get the mail host property");
+	System.err.println(ts.l("loadProperties.no_mail_host"));
 	success = false;
       }
 
     if (returnaddrProperty == null)
       {
-	System.err.println("Couldn't get the email return address property");
+	System.err.println(ts.l("loadProperties.no_email_addr"));
 	success = false;
       }
 
@@ -1235,26 +1174,25 @@ public class Ganymede {
 
     if (signatureFileProperty == null)
       {
-	System.err.println("Couldn't get the signature file property");
+	System.err.println(ts.l("loadProperties.no_sig"));
 	success = false;
       }
 
     if (helpbaseProperty == null || helpbaseProperty.equals(""))
       {
-	System.err.println("Couldn't get the help base property.. setting to null");
+	System.err.println(ts.l("loadProperties.no_help_base"));
 	helpbaseProperty = null;
       }
 
     if (monitornameProperty == null)
       {
-	System.err.print("Couldn't get the monitor name property.");
+	System.err.println(ts.l("loadProperties.no_monitor_name"));
 	success = false;
       }
 
     if (defaultmonitorpassProperty == null)
       {
-	System.err.print("Couldn't get the default monitor password property.. ");
-	System.err.println("may have problems if initializing a new db");
+	System.err.println(ts.l("loadProperties.no_monitor_pass"));
       }
 
     // get the registry port number
@@ -1269,8 +1207,7 @@ public class Ganymede {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
+	    System.err.println(ts.l("loadProperties.no_registry_port", registryPort));
 	  }
       }
 
@@ -1285,7 +1222,7 @@ public class Ganymede {
 	    String propName = arlut.csd.Util.PathComplete.completePath(schemaDirectoryProperty) + 
 	      "schema.properties";
 
-	    System.err.println("Attempting to read schema properties: " + propName);
+	    System.err.println(ts.l("loadProperties.reading_schema_props", propName));
 
 	    fis = new FileInputStream(propName);
 	    bis = new BufferedInputStream(fis);
@@ -1340,6 +1277,8 @@ public class Ganymede {
 
 class dumpTask implements Runnable {
 
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.dumptask");
+
   public dumpTask()
   {
   }
@@ -1356,7 +1295,7 @@ class dumpTask implements Runnable {
       {
 	if (Ganymede.db.journal.isClean())
 	  {
-	    Ganymede.debug("Deferring dump task - the journal is clean");
+	    Ganymede.debug(ts.l("deferring"));
 	    return;
 	  }
 
@@ -1366,7 +1305,7 @@ class dumpTask implements Runnable {
 	
 	    if (error != null)
 	      {
-		Ganymede.debug("Deferring dump task - semaphore disabled: " + error);
+		Ganymede.debug(ts.l("semaphore_disabled", error));
 		return;
 	      }
 	    else
@@ -1381,8 +1320,7 @@ class dumpTask implements Runnable {
 	  }
 
 	started = true;
-	Ganymede.debug("Running dump task - dumping " + 
-		       Ganymede.db.journal.transactionsInJournal + " transactions");
+	Ganymede.debug(ts.l("running", Ganymede.db.journal.transactionsInJournal));
 
 	try
 	  {
@@ -1390,7 +1328,7 @@ class dumpTask implements Runnable {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("dump could not succeed.. IO error " + ex.getMessage());
+	    Ganymede.debug(ts.l("dump_error", ex.getMessage()));
 	  }
 
 	completed = true;
@@ -1403,7 +1341,7 @@ class dumpTask implements Runnable {
 
 	if (started && !completed)
 	  {
-	    Ganymede.debug("dumpTask forced to stop");
+	    Ganymede.debug(ts.l("forced_stop"));
 	  }
 
 	if (gotSemaphore)
@@ -1411,7 +1349,7 @@ class dumpTask implements Runnable {
 	    GanymedeServer.lSemaphore.decrement();
 	  }
 
-	Ganymede.debug("Completed dump task");
+	Ganymede.debug(ts.l("completed"));
       }
   }
 }
