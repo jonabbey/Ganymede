@@ -257,6 +257,10 @@ public class SyncRunner implements Runnable {
 
   public SyncRunner(DBObject syncChannel)
   {
+    // on startup, we'll take the last known good transaction number
+    // for our baseline
+    this.transactionNumber = Ganymede.db.getTransactionNumber();
+
     updateInfo(syncChannel);
   }
 
@@ -408,6 +412,8 @@ public class SyncRunner implements Runnable {
 	xmlOut.skipLine();
 	xmlOut.close();		// close() automatically flushes before closing
       }
+
+    setTransactionNumber(transRecord.getTransactionNumber());
   }
 
   /**
@@ -429,6 +435,8 @@ public class SyncRunner implements Runnable {
 	Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
 	syncFile.delete();
       }
+
+    this.transactionNumber = transRecord.getTransactionNumber() - 1;
   }
 
   /**
