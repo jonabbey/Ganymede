@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ import gjt.ImageCanvas;
 import jdj.*;
 
 import arlut.csd.DataComponent.*;
-import oreilly.Dialog.InfoDialog;
+import arlut.csd.JDialog.*;
 import arlut.csd.ganymede.*;
 
 /**
@@ -57,7 +57,6 @@ public class glogin extends java.applet.Applet implements Runnable {
   protected static String my_username,my_passwd;
 
   protected static glogin my_glogin;
-  protected InfoDialog _infoD;
 
   private LoginHandler _loginHandler;
 
@@ -101,7 +100,8 @@ public class glogin extends java.applet.Applet implements Runnable {
 
   public void init() 
   {
-    
+    System.out.println("init in glogin");
+
     try
       {
 	my_glogin = this;
@@ -125,8 +125,6 @@ public class glogin extends java.applet.Applet implements Runnable {
 	System.out.println("The URL was malformed");
       }
    
-     _infoD = new InfoDialog(my_frame,true,"","");
- 
     setLayout(new BorderLayout());
 
     add(new ImageCanvas(ganymede_logo), "Center");
@@ -163,6 +161,7 @@ public class glogin extends java.applet.Applet implements Runnable {
     _loginHandler = new LoginHandler(this);
 
     connector = new JButton("Login to Server");
+    connector.setKeyAccelerator(KeyEvent.VK_ENTER);
     connector.setBackground(ClientColor.buttonBG);
     connector.addActionListener(_loginHandler);
     
@@ -186,9 +185,13 @@ public class glogin extends java.applet.Applet implements Runnable {
     // to be properly established.
     
     /* RMI initialization stuff. We do this for our iClient object. */
-      
-    System.setSecurityManager(new RMISecurityManager());
-      
+
+    if (!WeAreApplet)
+      {
+	//Applets don't like you setting the sercurity manager!
+	System.setSecurityManager(new RMISecurityManager());
+      }
+    
     /* Get a reference to the server */
 
     my_thread.start();
@@ -363,19 +366,7 @@ class LoginHandler implements ActionListener {
 	  }
 	catch (RemoteException ex)
 	  {
-	    //    System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-	    
-	    if (my_glogin._infoD == null)
-	      {
-		my_glogin._infoD = new InfoDialog(my_glogin.my_frame,true,"","");
-	      }
-	    
-	    my_glogin._infoD.setInfo("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-	    Dimension d = my_glogin._infoD.getPreferredSize();
-	    
-	    my_glogin._infoD.setSize(d.width,d.height);
-	    
-	    my_glogin._infoD.show();
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "RMI Error: Couldn't log into server: \n" + ex.getMessage());
 	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
@@ -385,20 +376,9 @@ class LoginHandler implements ActionListener {
 	  }
 	catch (NullPointerException ex)
 	  {
-	    // System.err.println("Error: Didn't get server reference.\n\nPlease Quit and Restart.");
-	    
-	    if (my_glogin._infoD == null)
-	      {
-		my_glogin._infoD = new InfoDialog(my_glogin.my_frame,true,"","");
-	      }
-	    
-	    my_glogin._infoD.setInfo("Error: Didn't get server reference.  Please Quit and Restart");
-	    Dimension d = my_glogin._infoD.getPreferredSize();
-	    
-	    my_glogin._infoD.setSize(d.width,d.height);
-	    
-	    my_glogin._infoD.show();
 
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "Error: Didn't get server reference.  Please Quit and Restart");
+	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
 	    
@@ -406,18 +386,8 @@ class LoginHandler implements ActionListener {
 	  }
 	catch (Exception ex) 
 	  {
-	    if (my_glogin._infoD == null)
-	      {
-		my_glogin._infoD = new InfoDialog(my_glogin.my_frame,true,"","");
-	      }
-	    
-	    my_glogin._infoD.setInfo("Error: "+ex.getMessage());
-	    Dimension d = my_glogin._infoD.getPreferredSize();
-	    
-	    my_glogin._infoD.setSize(d.width,d.height);
-	    
-	    my_glogin._infoD.show();
-	    
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "Error: " + ex.getMessage());
+	    	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
 
@@ -480,151 +450,3 @@ class LoginHandler implements ActionListener {
   }
 }
 
-/**
- * iClient does all the heavy lifting to connect the server with the client, and
- * provides callbacks that the server can use to notify the client when something
- * happens.
- */
-
-class iClient extends UnicastRemoteObject implements Client {
-
-  protected glogin applet = null;
-  protected Server server = null;
-  protected String username = null;
-  protected String password = null;
-  protected Session session = null;
-
-  /* -- */
-
-  public iClient(glogin applet, Server server, String username, String password) throws RemoteException
-  {
-    super();
-
-    // UnicastRemoteObject can throw RemoteException 
-
-    this.applet = applet;
-    this.server = server;
-    this.username = username;
-    this.password = password;
-
-    System.err.println("Initializing iClient object");
-
-    try
-      {
-	session = server.login(this);
-
-	if (session == null)
-	  {
-	    System.err.println("Couldn't log in to server... bad username/password?");
-
-	    if (applet._infoD == null)
-	      {
-		applet._infoD = new InfoDialog(applet.my_frame,true,"","");
-	      }
-	    
-	    applet._infoD.setInfo("Couldn't log in to server... bad username/password?");
-	    Dimension d = applet._infoD.getPreferredSize();
-
-	    applet._infoD.setSize(d.width,d.height);
-	
-	    applet._infoD.show();
-	  }
-	else
-	  {
-	    System.out.println("logged in");
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-
-	if (applet._infoD == null)
-	  {
-	    applet._infoD = new InfoDialog(applet.my_frame,true,"","");
-	  }
-
-	applet._infoD.setInfo("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-	Dimension d = applet._infoD.getPreferredSize();
-
-	applet._infoD.setSize(d.width,d.height);
-	
-	applet._infoD.show();
-
-	//System.exit(0);
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	//System.exit(0);
-
-	if (applet._infoD == null)
-	  {
-	    applet._infoD = new InfoDialog(applet.my_frame,true,"","");
-	  }
-
-	applet._infoD.setInfo("Error: Didn't get server reference.  Exiting now.");
-	Dimension d = applet._infoD.getPreferredSize();
-	
-	applet._infoD.setSize(d.width,d.height);
-	
-	applet._infoD.show();
-	
-      }
-    catch (Exception ex)
-      {
-	System.err.println("Got some other exception: " + ex);
-      }
-
-    //    System.err.println("Got session");
-
-/*    try
-      {
-	Type typeList[] = session.types();
-	
-	for (int i=0; i < typeList.length; i++)
-	  {
-	    System.err.println("Type: " + typeList[i]);
-	  }
-      }
-    catch (Exception ex)
-      {
-	System.err.println("typecatch: " + ex);
-      }
-*/	
-  }
-
-  /**
-   * Calls the logout() method on the Session object
-   */
-  public void disconnect() throws RemoteException
-  {
-    session.logout();
-  }
-
-  /**
-   * Allows the server to retrieve the username
-   */
-  public String getName() 
-  {
-    return username;
-  }
-
-  /**
-   * Allows the server to retrieve the password
-   */
-  public String getPassword()
-  {
-    return password;
-  }
-
-  /**
-   * Allows the server to force us off when it goes down
-   */
-  public void forceDisconnect(String reason)
-  {
-    System.err.println("Server forced disconnect: " + reason);
-
-    System.exit(0);
-
-  }
-}
