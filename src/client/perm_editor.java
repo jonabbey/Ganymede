@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
+
+import jdj.PackageResources; 
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.JSeparator;
@@ -46,21 +48,13 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   Session session;
   perm_field permField;
   PermMatrix matrix, templateMatrix;
-  Hashtable myHash, changeHash;
   Vector rowVector;
 
   gclient gc;
 
-  // changeHash will store the references to the bases and fields that have been 
-  // clicked as the keys to the hash, along with the value "happy" 
-
   JButton OkButton = new JButton ("Ok");
   JButton CancelButton = new JButton("Cancel");
  
-  int row = 0;
-
-  boolean justShowUser = false;
-
   boolean keepLoading = true;
 
   JProgressBar progressBar;
@@ -92,46 +86,45 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
    */
 
   public brian_editor (perm_field permField, 
-		      boolean enabled, gclient gc,
-		      Frame parent, String DialogTitle,
-		      boolean justShowUser)
+		       boolean enabled, gclient gc,
+		       Frame parent, String DialogTitle,
+		       boolean justShowUser) // need to get rid of justShowUser
   {
     super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
     
 
-    /* -- */
-      
-    // Main constructor for the perm_editor window
-      
+    // Main constructor for the perm_editor window      
+
     this.session = session;
     this.permField = permField;
     this.enabled = enabled;
     this.gc = gc;
-    this.justShowUser = justShowUser;
     
     if (!debug)
       {
 	this.debug = gc.debug;
       }
 
-    waitPanel = new JPanel(new BorderLayout(5, 5));
+
+    // Set up progress bar stuff
+
     progressBar = new JProgressBar();
     progressBar.setBorder(gc.emptyBorder10);
     progressBar.setMinimum(0);
     progressBar.setMaximum(29);
     progressBar.setValue(0);
+
     JPanel progressBarPanel = new JPanel();
     progressBarPanel.add(progressBar);
 
+    waitPanel = new JPanel(new BorderLayout(5, 5));
     waitPanel.add("Center", progressBarPanel);
     waitPanel.add("South", new JSeparator());
-    progressDialog = new JDialog(gc, "Loading permission editor", false);
 
-    
+    progressDialog = new JDialog(gc, "Loading permission editor", false);    
     progressDialog.getContentPane().setLayout(new BorderLayout(5, 5));
     progressDialog.getContentPane().add("Center", waitPanel);
     
-
     cancelLoadingButton = new JButton("Cancel");
     cancelLoadingButton.addActionListener(new ActionListener()
 					  {
@@ -140,9 +133,11 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 						keepLoading = false;
 					      }
 					  });
+
     JPanel cancelButtonPanel = new JPanel();
     cancelButtonPanel.add(cancelLoadingButton);
     progressDialog.getContentPane().add("South", cancelButtonPanel);
+
     JLabel loadingLabel = new JLabel("Loading permissions editor", SwingConstants.CENTER);
     loadingLabel.setBorder(gc.emptyBorder10);
     progressDialog.getContentPane().add("North", loadingLabel);
@@ -161,6 +156,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   {
     System.out.println("Starting thread");
 
+
     // Get a quick dump of the permission field's state
 
     try
@@ -173,7 +169,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	throw new RuntimeException("couldn't get permission matrix\n" + ex.getMessage());
       }
     
-    setBackground(Color.white); 
+    //    setBackground(Color.white); 
 
     if (debug)
       {
@@ -184,21 +180,18 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     CancelButton.addActionListener(this);
     OkButton.setBackground(Color.lightGray);
     CancelButton.setBackground(Color.lightGray);
+
     Choice_Buttons = new JPanel(); 
     Choice_Buttons.setLayout(new FlowLayout ());
     Choice_Buttons.add(OkButton);
     Choice_Buttons.add(CancelButton);
 
-    progressBar.setValue(1);
-
-
-
     progressBar.setValue(2);
     
     try 
       {
-	//	myHash = initHash();	// construct components
-	rowVector = initHash();
+
+	rowVector = initRowVector();
 
 	if (rowVector == null)
 	  {
@@ -206,13 +199,11 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	    return;
 	  }
 	
-	changeHash = new Hashtable();
-	
-	System.out.println("Hash initialized");
+	System.out.println("rowVector initialized");
 
 	if (debug)
 	  {
-	    System.err.println("got it, it " + (myHash == null ? "is " : "isn't ") + "equal to null");
+	    System.err.println("got it, it " + (rowVector == null ? "is " : "isn't ") + "equal to null");
 	  }
       }
     catch (RemoteException ex)
@@ -222,15 +213,16 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     
     getContentPane().remove(waitPanel);
     getContentPane().setLayout(new BorderLayout());
+
+    /* Initialize table w/ custom table model 
+       and custom cell renderers, 
+    */
     
-    BPermTableModel myModel = new BPermTableModel(rowVector);
-    JTable table = new JTable(myModel);
-    table.setShowHorizontalLines(false);
-    //table.setShowGrid(false);
-    table.setDefaultRenderer(String.class,
-			     new StringRenderer(rowVector));
-    table.setDefaultRenderer(Boolean.class,
-			     new BoolRenderer(rowVector));
+    BPermTableModel permModel = new BPermTableModel(rowVector);
+    JTable table = new JTable(permModel);
+
+    // Set default column widths
+ 
     TableColumn column = null;
     for (int i = 0; i < 5; i++) {
       column = table.getColumnModel().getColumn(i);
@@ -241,15 +233,24 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
       }
     }
 
+    // Uses custom renderers for Strings and Booleans
+
+    table.setDefaultRenderer(String.class,
+			     new StringRenderer(rowVector));
+    table.setDefaultRenderer(Boolean.class,
+			     new BoolRenderer(rowVector));
+
+    table.setShowHorizontalLines(false);
+
+
     edit_pane = new JScrollPane(table);
     
-    edit_pane.setBackground(Color.lightGray);
+    //    edit_pane.setBackground(Color.lightGray);
     getContentPane().add("Center", edit_pane);
     getContentPane().add("South", Choice_Buttons);
     gc.setWaitCursor();
     
-    progressDialog.setVisible(false);
-    
+    progressDialog.setVisible(false);    
     progressDialog.dispose();
     
     this.myshow(true);
@@ -257,20 +258,18 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   }
   
   /**
-   * This method will create the hash table that will be used
+   * This method will create a vector of row info that will be used
    * to store the permissions values for the base and basefields
-   * and their respective locations on the panel
    */
   
-  //private Hashtable initHash() throws RemoteException 
-  private Vector initHash() throws RemoteException 
+  private Vector initRowVector() throws RemoteException 
   {
     PermEntry entry, templateEntry;
     BaseDump base;
     FieldTemplate template;
-    Hashtable results = new Hashtable(); 
-    Component[] myAry;
-    PermRow myPermRow;
+    //    Hashtable results = new Hashtable(); 
+    //    Component[] myAry;
+    //    PermRow myPermRow;
     Vector rows = new Vector();
     boolean create, view, edit, delete;
     boolean createOK, viewOK, editOK, deleteOK;
@@ -299,7 +298,6 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	  {
 	    // Cancel was pushed.
 	    stopLoading();
-	    //return (Hashtable)null;
 	    return (Vector)null;
 	  }
 
@@ -310,18 +308,11 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	id = base.getTypeID();
 	name = base.getName();
 
-	if (justShowUser)
-	  {
-	    if (id != SchemaConstants.UserBase)
-	      {
-		continue;
-	      }
-	  }
-
 	if (debug)
 	  {
 	    System.err.println("init_hash: processing " + name);
 	  }
+
 
 	// retrieve the current permissions for this object type 
 	
@@ -374,17 +365,24 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	    createOK = viewOK = editOK = deleteOK = true;
 	  }
 
-	myPermRow = new PermRow(base, null, enabled);
-	myPermRow.viewOK = viewOK;
-	myPermRow.createOK = createOK;
-	myPermRow.editOK = editOK;
-	myPermRow.deleteOK = deleteOK;
-	myPermRow.visible = new Boolean(baseView);
-	myPermRow.creatable = new Boolean(baseCreate);
-	myPermRow.editable = new Boolean(baseEdit);
-	myPermRow.deletable = new Boolean(baseDelete);
 
-	rows.addElement(myPermRow);
+	// Initialize a PermRow object for this base and
+	// add it to the rows vector 
+
+	PermRow	basePermRow = new PermRow(base, null, enabled);
+	basePermRow.viewOK = viewOK;
+	basePermRow.createOK = createOK;
+	basePermRow.editOK = editOK;
+	basePermRow.deleteOK = deleteOK;
+	basePermRow.visible = new Boolean(baseView);
+	basePermRow.creatable = new Boolean(baseCreate);
+	basePermRow.editable = new Boolean(baseEdit);
+	basePermRow.deletable = new Boolean(baseDelete);
+
+	rows.addElement(basePermRow);
+
+
+	// Now go through the fields
 
 	visibleField = baseView;
 
@@ -459,22 +457,23 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	      }
 
 
-	    myPermRow = new PermRow(base, template, visibleField);
-	    myPermRow.viewOK = viewOK;
-	    myPermRow.createOK = createOK;
-	    myPermRow.editOK = editOK;
-	    myPermRow.deleteOK = deleteOK;
-	    myPermRow.visible = new Boolean(view);
-	    myPermRow.creatable = new Boolean(create);
-	    myPermRow.editable = new Boolean(edit);
-	    myPermRow.deletable = new Boolean(delete);
+	// Initialize a PermRow object for this field and
+	// add it to the rows vector 
+
+	    PermRow templatePermRow = new PermRow(base, template, visibleField);
+	    templatePermRow.viewOK = viewOK;
+	    templatePermRow.createOK = createOK;
+	    templatePermRow.editOK = editOK;
+	    templatePermRow.deleteOK = deleteOK;
+	    templatePermRow.visible = new Boolean(view);
+	    templatePermRow.creatable = new Boolean(create);
+	    templatePermRow.editable = new Boolean(edit);
+	    templatePermRow.deletable = new Boolean(delete);
 	    
-	    rows.addElement(myPermRow);
-	
+	    rows.addElement(templatePermRow);
 	  }
       }
     
-    //    return results;
     return rows;
   }
 
@@ -545,32 +544,34 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	return;
       }    
   }
-  
- 
+   
 }
 
+/*
+  BPermTableModel
+
+  This class describes and implements the table model for the permissions editor.
+*/
 
 class BPermTableModel extends AbstractTableModel {
-  Vector rows;
+
+  Vector rows; 
+  String[] columnNames = {"Name", 
+			    "Visible",
+			    "Creatable",
+			    "Editable",
+			    "Deletable"};
 
   public BPermTableModel(Vector rowVector) {
     this.rows = rowVector;
   } 
-
-  
-  String[] columnNames = {"Name", 
-			  "Visible",
-			  "Creatable",
-			  "Editable",
-			  "Deletable"};
-  
   
   public int getColumnCount() {
     return columnNames.length;
   }
   
   public int getRowCount() {
-     return rows.size();
+    return rows.size();
   }
   
   public String getColumnName(int col) {
@@ -581,9 +582,8 @@ class BPermTableModel extends AbstractTableModel {
     PermRow myRow = (PermRow)rows.elementAt(row);
     Object ref = myRow.reference;
     switch(col) {
-  
-    case 0:
-
+      
+    case 0: // This one is just for indent effect   
       if (ref instanceof BaseDump) {
 	BaseDump bd= (BaseDump) ref;
 	return " "+bd.getName();
@@ -593,22 +593,21 @@ class BPermTableModel extends AbstractTableModel {
 	return "   "+ft.getName();
       }
       
-    
     case 1:
       return myRow.visible;
-    
+      
     case 2:
       return myRow.creatable;
-    
+      
     case 3:
       return myRow.editable;
-    
+      
     case 4:
       return myRow.deletable;
-    
+      
     default:
       return new Integer(col);
-        }
+    }
   }
 
 
@@ -616,59 +615,90 @@ class BPermTableModel extends AbstractTableModel {
     return getValueAt(0, c).getClass();
   }
   
-  /*
-   * Don't need to implement this method unless your table's
-   * editable.
-   */
   public boolean isCellEditable(int row, int col) {
-    //Note that the data/cell address is constant,
-    //no matter where the cell appears onscreen.
-    if (col < 1) { 
-      return false;
-    } else {
-     PermRow myRow = (PermRow)rows.elementAt(row);
-     if (myRow.enabled) {
-     return true;
-     } else {
-       return false;
-     }
-    }
+
+      PermRow myRow = (PermRow)rows.elementAt(row);
+      if ((!myRow.enabled) || (col < 1)) {
+	return false;
+      } else {
+	
+	switch(col) {
+	  
+	case 1:
+	  if (!myRow.viewOK) 
+	    return false;
+	  else 
+	    return true;
+
+	case 2:
+	  if (!myRow.createOK) 
+	    return false;
+	  else 
+	    return true;
+
+	  
+	case 3:
+	  if (!myRow.editOK) 
+	    return false;
+	  else 
+	    return true;
+
+	  
+	case 4:
+	  if (!myRow.deleteOK) 
+	    return false;
+	  else 
+	    return true;
+ 
+	}
+	return true;
+      }
   }
   
-  /*
-   * Don't need to implement this method unless your table's
-   * data can change.
-   */
   public void setValueAt(Object value, int row, int col) {
     if (col > 0) {
       PermRow myRow = (PermRow)rows.elementAt(row);
+
       switch(col) {
 	
       case 1:
 	myRow.visible = (Boolean)value;
+
+	// If making a base selection
+	// update children too 
+
 	if (myRow.field == null) {
 	  setBaseChildren(row, col, value);
+	  
+	  // Take care of visibility of creatable
+	  // and editable children too
 
 	  if (myRow.creatable.booleanValue()) {
 	    setBaseChildren(row, col+1, value);
 	  }
-
+	  
 	  if (myRow.editable.booleanValue()) {
 	    setBaseChildren(row, col+2, value);
 	  }
-
+	  
 	}
 	break;
 	
       case 2:
 	myRow.creatable = (Boolean)value;
+
+	// If base, update children too
+
 	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
 	  setBaseChildren(row, col, value);
 	}
 	break;
-
+	
       case 3:
 	myRow.editable = (Boolean)value;
+
+	// If base, update children too
+
 	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
 	  setBaseChildren(row, col, value);
 	}
@@ -676,61 +706,83 @@ class BPermTableModel extends AbstractTableModel {
 	
       case 4:
 	myRow.deletable = (Boolean)value;
-	//	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
-	//	  setBaseChildren(row, col, value);
-	//}
+
+	// No update of children for deletable
 	break;
 	
       default:
-
 	// do nothing;
       }
-	  fireTableDataChanged();
-
+      fireTableDataChanged();
     }
-
   }
 
-  public void setBaseChildren(int row, int col, Object boolValue) {
-    Boolean value = (Boolean)boolValue;
-    PermRow baseRow = (PermRow) rows.elementAt(row);
 
+  /* Programmatically updates status of children when a 
+     base is toggled 
+  */
+
+  public void setBaseChildren(int row, int col, Object value) {
+    PermRow baseRow = (PermRow) rows.elementAt(row);
+    
     for (int i = row+1; i<=rows.size(); i++) {
       PermRow myRow = (PermRow) rows.elementAt(i);
-      if (myRow.field == null) {
+      if (myRow.field == null) { // stop updating when we run 
+	                         // out of children
 	break;
+
       } else {
 	
 	switch(col) {
 	case 1:
-	  myRow.visible = value;
+	  if (myRow.viewOK) {
+	    myRow.visible = (Boolean)value;
+	    
+	    myRow.enabled = ((Boolean)value).booleanValue();
+	    if (!myRow.enabled) {
+	      myRow.visible = new Boolean(false);
+	      myRow.creatable = new Boolean(false);
+	      myRow.editable = new Boolean(false);
+	      myRow.deletable = new Boolean(false);
+	    }
+	  }
 	  break;
+
 	case 2:
-	  myRow.creatable = value;
+	  if (myRow.createOK) {
+	    myRow.creatable = (Boolean)value;
+	  }
 	  break;
+
 	case 3:
-	  myRow.editable = value;
+	  if (myRow.editOK) {
+	    myRow.editable = (Boolean)value;
+	  }
 	  break;
+
 	case 4:
-	  myRow.deletable = value;
+	  if (myRow.deleteOK){
+	    myRow.deletable = (Boolean)value;
+	  }
 	  break;
+	  
 	default:
 	  // do nothing
-	}
-	if (col == 1) {
-	  myRow.enabled = value.booleanValue();
-	  if (!myRow.enabled) {
-	    myRow.visible = new Boolean(false);
-	    myRow.creatable = new Boolean(false);
-	    myRow.editable = new Boolean(false);
-	    myRow.deletable = new Boolean(false);
-	  
-	  }
 	}
       }
     }
   }
 }
+
+
+
+
+/* StringRenderer 
+
+   Provides custom renderer for String class.
+   Really only used to provide different colored backgrounds
+   for bases and fields. 
+*/
 
 class StringRenderer extends JLabel
   implements TableCellRenderer {
@@ -750,6 +802,7 @@ class StringRenderer extends JLabel
     
     PermRow myRow = (PermRow) rows.elementAt(row);
     Object ref = myRow.reference; 
+
     if (ref instanceof BaseDump) {
       setBackground(Color.white);
     }
@@ -763,11 +816,19 @@ class StringRenderer extends JLabel
   }
 }
 
+
+/* BoolRenderer
+
+ Provides custom renderer for Boolean class. 
+*/
+
 class BoolRenderer extends JCheckBox
     implements TableCellRenderer {
   
   Vector rows;
-  
+  Color lightGray2 = new Color(224,224,224); 
+  ImageIcon noAccess = new ImageIcon(PackageResources.getImageResource(this, "noaccess.gif", getClass()));
+
   public BoolRenderer(Vector rows) {
     super();
     this.rows = rows;
@@ -778,52 +839,87 @@ class BoolRenderer extends JCheckBox
 						 JTable table, Object value, 
 						 boolean isSelected, boolean hasFocus,
 						 int row, int column) {
-    setHorizontalAlignment(CENTER);   
-    
+        
     PermRow myRow = (PermRow) rows.elementAt(row);
+    Boolean selected = (Boolean)table.getValueAt(row,column);
     boolean enabled = myRow.enabled;
     Object ref = myRow.reference; 
+
+
+    // Take care of background colors
+
     if (ref instanceof BaseDump) {
       setBackground(Color.white);
     }
     else {
-      setBackground(new Color(224,224,224));
+      setBackground(lightGray2);
     }
+
+    // Check if viewOK, etc. If not, put
+    // noAccess icon ("X") instead of checkbox
     
     switch(column) {
     
     case 1:
-      if (!myRow.viewOK) {
-	setBackground(Color.blue);
+      if (myRow.viewOK) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());
+
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
       }
       break;
       
     case 2:
-      if (!myRow.createOK) {
-	setBackground(Color.blue);
+      if (myRow.createOK) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());
+
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
       }
       break;
       
     case 3:
-      if (!myRow.editOK) {
-	setBackground(Color.blue);
+      if (myRow.editOK) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());
+	
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
       }
       break;
-      
+
     case 4:
-      if (!myRow.deleteOK) {
-	setBackground(Color.blue);
+      if (myRow.deleteOK) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());
+	
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
       }
       break;
       
     }
-    setEnabled(enabled);
-    Boolean sel = (Boolean)table.getValueAt(row,column);
-    setSelected(sel.booleanValue());
+
     
+
+    // Center checkbox
+
+    setHorizontalAlignment(CENTER);   
+
     return this;
   }
 }
+
 
 class PermRow {
   Object reference;
