@@ -59,6 +59,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.text.NumberFormat;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -104,6 +105,8 @@ class GASHAdminDispatch implements Runnable {
 
   private Thread asyncPollThread = null;
   private volatile boolean okayToPoll = false;
+
+  NumberFormat numberFormatter = NumberFormat.getInstance();
 
   /* -- */
 
@@ -441,7 +444,11 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.memField.setText((lTotalMemory - lFreeMemory) + " / " + lFreeMemory + " / " + lTotalMemory);
+	String inuse = numberFormatter.format(lTotalMemory - lFreeMemory);
+	String free = numberFormatter.format(lFreeMemory);
+	String total = numberFormatter.format(lTotalMemory);
+	
+	frame.memField.setText(inuse + " / " + free + " / " + total);
       }
     });
   }
