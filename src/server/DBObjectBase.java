@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -184,6 +184,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   {
     this(store);
     receive(in);
+
+    // need to recreate objectHook now that we have loaded our classdef info
+    // from disk.
+
     objectHook = this.createHook();
   }
 
@@ -234,6 +238,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     
 	changed = false;
 	this.original = original;
+
+	// in case our classdef was set during the copy.
+
+	objectHook = this.createHook();
       }
   }
 
@@ -509,6 +517,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	parameterArray[1] = invid;
 	parameterArray[2] = editset;
 
+	String error_code = null;
+
 	try
 	  {
 	    c = classdef.getDeclaredConstructor(classArray);
@@ -516,21 +526,33 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	  }
 	catch (NoSuchMethodException ex)
 	  {
+	    error_code = "NoSuchMethod Exception";
 	  }
 	catch (SecurityException ex)
 	  {
+	    error_code = "Security Exception";
 	  }
 	catch (IllegalAccessException ex)
 	  {
+	    error_code = "Illegal Access Exception";
 	  }
 	catch (IllegalArgumentException ex)
 	  {
+	    error_code = "Illegal Argument Exception";
 	  }
 	catch (InstantiationException ex)
 	  {
+	    error_code = "Instantiation Exception";
 	  }
 	catch (InvocationTargetException ex)
 	  {
+	    error_code = "Invocation Target Exception";
+	  }
+
+	if (error_code != null)
+	  {
+	    editset.getSession().setLastError("createNewObject failure: " + 
+					      error_code + " in trying to construct custom object");
 	  }
       }
 
@@ -673,7 +695,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
     catch (ClassNotFoundException ex)
       {
-	Ganymede.debug("class definition could not be found: " + ex);
+	Ganymede.debug("class definition " + classname + " could not be found: " + ex);
 	classdef = null;
       }
 
@@ -700,10 +722,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public boolean canCreate(DBSession session)
   {
-    // we're going to want to dispatch to the appropriate
-    // DBEditObject subclasses canCreate() method.
-
-    return false;
+    return objectHook.canCreate(session);
   }
 
   /**
@@ -716,10 +735,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public boolean canCreate(Session session)
   {
-    // we're going to want to dispatch to the appropriate
-    // DBEditObject subclasses canCreate() method.
-
-    return false;
+    return objectHook.canCreate((DBSession) session);
   }
 
   /**
