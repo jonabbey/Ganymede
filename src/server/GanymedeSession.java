@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,6 +47,9 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   DBSession session;
 
+  Invid personaInvid;
+  Invid userInvid;
+
   /* -- */
 
   /**
@@ -74,7 +77,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     client = null;
     username = "internal";
     clienthost = "internal";
-    session = new DBSession(Ganymede.db, null, "internal");
+    session = new DBSession(Ganymede.db, this, "internal");
   }
 
   /**
@@ -83,10 +86,12 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * client.
    *
    * @param client Remote object exported by the client, provides id callbacks
+   * @param userObject The user record for this login
+   * @param personaObject The user's initial admin persona 
    * 
    */
   
-  GanymedeSession(Client client, DBObject adminObject) throws RemoteException
+  GanymedeSession(Client client, DBObject userObject, DBObject personaObject) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -94,6 +99,24 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     int i=2;
     
     this.client = client;
+
+    if (userObject != null)
+      {
+	userInvid = userObject.getInvid();
+      }
+    else
+      {
+	userInvid = null;
+      }
+
+    if (personaObject != null)
+      {
+	personaInvid = personaObject.getInvid();
+      }
+    else
+      {
+	personaInvid = null;	// shouldn't happen
+      }
     
     try
       {
@@ -134,8 +157,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // construct our DBSession
 
-    session = new DBSession(Ganymede.db, null, client.getName());
-    session.adminObject = adminObject;
+    session = new DBSession(Ganymede.db, this, client.getName());
 
     GanymedeServer.sessions.addElement(this);
     GanymedeAdmin.refreshUsers();
@@ -251,6 +273,101 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     this.username = null;
     this.lastError = null;
+  }
+
+  /**
+   *
+   * This method returns a list of personae names available
+   * to the user logged in.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public synchronized Vector getPersonae()
+  {
+    DBObject user;
+    Vector results;
+    InvidDBField inv;
+
+    /* -- */
+
+    user = getUser();
+
+    if (user == null)
+      {
+	return null;
+      }
+
+    results = new Vector();
+
+    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
+
+    for (int i = 0; i < inv.size(); i++)
+      {
+	results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
+      }
+
+    return results;
+  }
+
+  /**
+   *
+   * This method provides may be used to select an admin persona.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public synchronized boolean selectPersona(String persona, String password)
+  {
+    DBObject 
+      user,
+      personaObject = null;
+
+    InvidDBField inv;
+    Invid invid;
+    PasswordDBField pdbf;
+
+    /* -- */
+
+    user = getUser();
+
+    if (user == null)
+      {
+	return false;
+      }
+
+    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
+
+    for (int i = 0; i < inv.size(); i++)
+      {
+	invid = (Invid) inv.getElement(i);
+
+	personaObject = (DBObject) view_db_object(invid);
+
+	if (personaObject.getLabel().equals(persona))
+	  {
+	    break;
+	  }
+
+	personaObject = null;
+      }
+
+    if (personaObject == null)
+      {
+	return false;
+      }
+
+    pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
+    
+    if (pdbf != null && pdbf.matchPlainText(password))
+      {
+	personaInvid = personaObject.getInvid();
+	return true;
+      }
+
+    return false;
   }
 
   //  Database operations
@@ -398,7 +515,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Integer key;
     DBObject obj;
 
-
     /* -- */
 
     if (query == null)
@@ -503,9 +619,9 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized StringBuffer query(Query query)
+  public synchronized QueryResult query(Query query)
   {
-    StringBuffer result = new StringBuffer();
+    QueryResult result = new QueryResult();
     DBObjectBase base = null;
     Vector baseLock = new Vector();
     Enumeration enum;
@@ -554,10 +670,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : got read lock");
 
-    // our dump is going to have both invid's and labels
-
-    result.append("inv\n");
-
     enum = base.objectHash.keys();
 
     // need to check in here to see if we've had the lock yanked
@@ -570,7 +682,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	if (DBQueryHandler.matches(query, obj))
 	  {
 	    //	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
-	    result.append(obj.resultDump(session));
+	    result.addRow(obj);
 	  }
       }
 
@@ -798,6 +910,40 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     session.deleteDBObject(invid);
     return true;
+  }
+
+  /**
+   *
+   * Convenience method to get access to this session's UserBase
+   * instance.
+   *
+   */
+
+  DBObject getUser()
+  {
+    if (userInvid != null)
+      {
+	return (DBObject) view_db_object(userInvid);
+      }
+    
+    return null;
+  }
+
+  /**
+   *
+   * Convenience method to get access to this session's current
+   * PersonaBase instance.
+   *
+   */
+
+  DBObject getPersona()
+  {
+    if (personaInvid != null)
+      {
+	return (DBObject) view_db_object(personaInvid);
+      }
+
+    return null;
   }
 
 }

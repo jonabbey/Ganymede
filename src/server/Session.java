@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.10 $ %D%
+ * @version $Revision: 1.11 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -44,8 +44,24 @@ public interface Session extends Remote {
   // Client/server interface operations
 
   String      getLastError() throws RemoteException;
-  boolean     set_admin_info() throws RemoteException;
   void        logout() throws RemoteException;
+
+  /**
+   *
+   * This method returns a list of personae names available
+   * to the user logged in.
+   *
+   */
+
+  Vector      getPersonae() throws RemoteException;
+
+  /**
+   *
+   * This method provides may be used to select an admin persona.
+   *
+   */
+
+  boolean     selectPersona(String persona, String password) throws RemoteException;
 
   //  Database operations
 
@@ -140,7 +156,7 @@ public interface Session extends Remote {
    *
    */
 
-  StringBuffer    query(Query query) throws RemoteException;
+  QueryResult    query(Query query) throws RemoteException;
 
   /**
    *
