@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.34 $ %D%
+  Version: $Revision: 1.35 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.34 $ %D%
+ * @version $Revision: 1.35 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -435,6 +435,43 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public final String getCellText(tableCell cell)
   {
+    return cell.origText;
+  }
+
+  /**
+   * Gets the contents of a cell in the table.
+   *
+   * @param cell the cell to read text from
+   */
+
+  public final String getWrappedCellText(tableCell cell)
+  {
+    return cell.text;
+  }
+
+  /**
+   * Gets the contents of a cell in the table.
+   *
+   * @param x column number in range [0..# of columns-1]
+   * @param y row number in range [0..# of rows-1]
+   */
+
+  public String getCellText(int x, int y)
+  {
+    tableCell cell = getCell(x, y);
+    return cell.origText;
+  }
+
+  /**
+   * Gets the contents of a cell in the table.
+   *
+   * @param x column number in range [0..# of columns-1]
+   * @param y row number in range [0..# of rows-1]
+   */
+
+  public String getWrappedCellText(int x, int y)
+  {
+    tableCell cell = getCell(x, y);
     return cell.text;
   }
 
