@@ -6,15 +6,16 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2001/09/17 20:19:55 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2001/11/15 01:28:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -205,41 +206,12 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   public ReturnVal processDialog1()
   {
-    ReturnVal retVal;
-
-    /* -- */
-
-    System.err.println("userReactivateWizard.respond(): state == 1");
-
-    retVal = continueOn("Reactivate User",
-			"",
-			"OK",
-			"Cancel",
-			"question.gif");
-    
-    retVal.getDialog().addPassword("New Password", true);
-    
-    StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
-    
-    userObject.updateShellChoiceList();
-    retVal.getDialog().addChoice("Shell", 
-				 userObject.shellChoices.getLabels(),
-				 (String) stringfield.getValueLocal());
-
-    StringDBField addrField = (StringDBField) userObject.getField(EMAILTARGET);
-
-    if (addrField != null && addrField.size() > 0)
+    if (debug)
       {
-	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+	System.err.println("userReactivateWizard.respond(): state == 1");
       }
-    else
-      {
-	retVal.getDialog().addString("Forwarding Address");
-      }
-    
-    System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
-    
-    return retVal;
+
+    return genPhase2("Reactivate User", "");
   }
 
   /**
@@ -283,7 +255,17 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
     shell = (String) getParam("Shell");
     password = (String) getParam("New Password");
 
+    if (password == null || password.length() == 0)
+      {
+	setNextState(2);	// try again
+
+	retVal = genPhase2("Reactivate User", "You must set a password");
+
+	return retVal;
+      }
+
     // and do the inactivation.. userObject will consult us for
+
     // forward, shell, and password
 	    
     retVal = userObject.reactivate(this);
@@ -297,6 +279,43 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 		       "ok.gif").unionRescan(retVal);
       }
 
+    return retVal;
+  }
+
+  /**
+   * <p>Generate the dialog to be processed by processDialog2</p>
+   */
+
+  private ReturnVal genPhase2(String title, String body)
+  {
+    ReturnVal retVal = continueOn(title,
+				  body,
+				  "OK",
+				  "Cancel",
+				  "question.gif");
+    
+    retVal.getDialog().addPassword("New Password", true);
+    
+    StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
+    
+    userObject.updateShellChoiceList();
+    retVal.getDialog().addChoice("Shell", 
+				 userObject.shellChoices.getLabels(),
+				 (String) stringfield.getValueLocal());
+
+    StringDBField addrField = (StringDBField) userObject.getField(EMAILTARGET);
+
+    if (addrField != null && addrField.size() > 0)
+      {
+	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+      }
+    else
+      {
+	retVal.getDialog().addString("Forwarding Address");
+      }
+    
+    System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
+    
     return retVal;
   }
 }

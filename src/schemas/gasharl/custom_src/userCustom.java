@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2001/11/14 21:43:06 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2001/11/15 01:28:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1115,24 +1115,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    retVal = new ReturnVal(false);
-
-	    JDialogBuff dialog = new JDialogBuff("Reactivate User",
-						 "You must set a password",
-						 "OK",
-						 "Cancel",
-						 "question.gif");
-	    dialog.addPassword("New Password", true);
-
-	    updateShellChoiceList();
-	    dialog.addChoice("Shell", userCustom.shellChoices.getLabels());
-
-	    dialog.addString("Forwarding Address");
-	    
-	    retVal.setDialog(dialog);
-	    retVal.setCallback(reactivateWizard);
-
-	    return retVal;
+	    return Ganymede.createErrorDialog("userCustom.reactivate() error",
+					      "Error, reactivate() called without a password selected");
 	  }
 
 	// reset the shell
