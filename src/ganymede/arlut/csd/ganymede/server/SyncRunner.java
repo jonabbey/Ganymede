@@ -106,7 +106,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * a Sync Channel's so-called <code>Field Options</code> matrix of
  * objects and fields to sync, that Sync Channel will write an XML
  * file to the directory configured in the Sync Channel's
- * <code>Directory Path</code> field.</p>
+ * <code>Queue Directory</code> field.</p>
  *
  * <p>Each XML file that is created in a Sync Channel output directory
  * is given a unique filename, based on the number of transactions
@@ -149,7 +149,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * is called, it runs its external <code>Service Program</code>,
  * passing the most recently committed transaction number as a single
  * command line argument.  The <code>Service Program</code> is meant
- * to examine the <code>Directory Path</code> specified in the
+ * to examine the <code>Queue Directory</code> specified in the
  * <code>Sync Channel</code> object, and to process any XML files with
  * numbers less than or equal to its command line argument.  As is the
  * case with GanymedeBuilderTask, the GanymedeScheduler will not
