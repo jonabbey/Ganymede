@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1195,85 +1195,111 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * This method handles inactivation logic for this object type.  A
+   * DBEditObject must first be checked out for editing, then the
+   * inactivate() method can then be called on the object to put the
+   * object into inactive mode.  inactivate() will set the object's
+   * removal date and fix up any other state information to reflect
+   * the object's inactive status.<br><br>
    *
-   * This method handles inactivation logic for this object
-   * type.  DBEditObject's are checked out for editing, the
-   * inactivate() method can then be called on the object
-   * to put the object into inactive mode.  inactivate will
-   * set the object's removal date and fix up any
-   * other state information to reflect the object's
-   * inactive status.<br><br>
+   * inactive() is designed to run synchronously with the user's
+   * request for inactivation.  It can return a wizard reference
+   * in the ReturnVal object returned, to guide the user through
+   * a set of interactive dialogs to inactive the object.
    *
-   * It is up to commitPhase1() and commitPhase2() to handle
-   * any exterior actions related to the object's inactivation.<br><br>
    *
-   * inactivate() returns true if the internal inactivation bookkeeping was
-   * successful, and false if not.  A false return value will cause
-   * the DBSession to abort the transaction;  this method is not responsible
-   * for undoing an unsuccessful partial inactivation.
+   * The inactive() method can cause other objects to be deleted, can cause
+   * strings to be removed from fields in other objects, whatever.
+   *
+   * If remove() returns a ReturnVal that has its success flag set to false
+   * and does not include a JDialogBuff for further interaction with the
+   * user, then DBSEssion.inactivateDBObject() method will rollback any changes
+   * made by this method.
+   *
+   * IMPORTANT NOTE: If a custom object's inactivate() logic decides
+   * to enter into a wizard interaction with the user, that logic is
+   * responsible for calling editset.rollback("inactivate" +
+   * getLabel()) in the case of a failure to properly do all the inactivation
+   * stuff, where getLabel() must be the name of the object
+   * prior to any attempts to clear fields which could impact the
+   * returned label.
+   *
+   * Finally, it is up to commitPhase1() and commitPhase2() to handle
+   * any external actions related to object inactivation when
+   * the transaction is committed..
    *
    * @see #commitPhase1()
-   * @see #commitPhase2()
+   * @see #commitPhase2() 
    */
 
-  public boolean inactivate()
+  public ReturnVal inactivate()
   {
-    return true;
+    return null;
   }
 
   /**
    *
    * This method handles removal logic for this object type.  This method
-   * will be called from DBSession.deleteDBObject() during the transaction's
-   * commit logic.  The remove() method can cause other objects to be
-   * deleted, can cause strings to be removed from fields in other objects,
-   * whatever.
+   * will be called immediately from DBSession.deleteDBObject().
    *
-   * If remove() returns false, the transaction that the object is being
-   * deleted in will be aborted.
+   * The remove() method can cause other objects to be deleted, can cause
+   * strings to be removed from fields in other objects, whatever.
    *
+   * If remove() returns a ReturnVal that has its success flag set to false
+   * and does not include a JDialogBuff for further interaction with the
+   * user, the DBSEssion.deleteDBObject() method will rollback any changes
+   * made by this method.
+   *
+   * remove() is intended for subclassing, whereas finalizeRemove() is
+   * not.  finalizeRemove() provides the standard logic for wiping out
+   * fields and what not to cause the object to be unlinked from
+   * other objects.
+   *
+   * IMPORTANT NOTE: If a custom object's remove() logic decides to
+   * enter into a wizard interaction with the user, that logic is
+   * responsible for calling finalizeRemove() on the object when
+   * it is determined that the object really should be removed,
+   * *or* calling editset.rollback("del" + getLabel()), where
+   * getLabel() must be the name of the object prior to any attempts
+   * to clear fields which could impact the returned label.
+   * 
    */
 
-  public synchronized boolean remove()
+  public ReturnVal remove()
   {
-    return true;
+    return null;
   }
 
   /**
-   *
-   * This method handles Ganymede-internal deletion logic for this object
-   * type.  remove() is responsible for dissolving any invid inter-object
-   * references in particular.<br><br>
+   * This method handles Ganymede-internal deletion logic for this
+   * object type.  finalizeRemove() is responsible for dissolving any
+   * invid inter-object references in particular.<br><br>
    *
    * It is up to commitPhase1() and commitPhase2() to handle
-   * any external actions related to object removal.<br><br>
+   * any external actions related to object removal when
+   * the transaction is committed..<br><br>
    *
-   * remove() returns true if the internal removal bookkeeping was
-   * successful, and false if not.  A false return value will 
-   * cause the DBSession to abort the transaction; this method is not
-   * responsible for undoing unsuccessful partial removal bookkeeping.
+   * finalizeremove() returns true if the internal removal bookkeeping
+   * was successful, and false if not.  A false return value will
+   * cause the DBSession to rollback the transaction to the state
+   * prior to any removal actions for this object were attempted.
    *
-   * Note that this method is issued from DBEditSet's transaction commit
-   * logic, and should generally not be called from anywhere else.
+   * remove() is intended for subclassing, whereas finalizeRemove() is
+   * not.  finalizeRemove() provides the standard logic for wiping out
+   * fields and what not to cause the object to be unlinked from
+   * other objects.
    *
    * @see #commitPhase1()
-   * @see #commitPhase2()
+   * @see #commitPhase2() 
    */
 
-  public synchronized boolean finalizeRemove()
+  public final synchronized ReturnVal finalizeRemove()
   {
     DBField field;
     Enumeration enum;
     DBSession session;
 
     /* -- */
-
-    // call the remove logic hook
-
-    if (!remove())
-      {
-	return false;
-      }
 
     // we want to delete / null out all fields.. this will take care
     // of invid links, embedded objects, and namespace allocations.
@@ -1297,13 +1323,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			session.setLastError("DBEditObject disapproved of deleting element from field " + field.getName());
 		      }
 
-		    return false;
+		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+						      "DBEditObject disapproved of deleting element from field " + 
+						      field.getName());
 		  }
 	      }
 	  }
 	else
 	  {
-	    if (field.getType() != PERMISSIONMATRIX)
+	    // permission matrices and passwords don't
+	    // allow us to call set value directly.
+
+	    if (field.getType() != PERMISSIONMATRIX &&
+		field.getType() != PASSWORD)
 	      {
 		if (field.setValue(null) != null)
 		  {
@@ -1314,13 +1346,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			session.setLastError("DBEditObject could not clear field " + field.getName());
 		      }
 
-		    return false;
+		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+						      "DBEditObject could not clear field " + 
+						      field.getName());
 		  }
+	      }
+	    else
+	      {
+		field.defined = false;
 	      }
 	  }
       }
 
-    return true;
+    return null;
   }
 
   /**
@@ -1403,6 +1441,58 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public synchronized void release()
   {
     return;
+  }
+
+  // ***
+  //
+  // Checkpoint / Rollback support
+  //
+  // ***
+
+  synchronized Hashtable checkpoint()
+  {
+    Enumeration enum;
+    Object key, value;
+    Hashtable result = new Hashtable();
+    DBField field;
+
+    /* -- */
+
+    enum = fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	
+	field = (DBField) fields.get(key);
+
+	value = field.checkpoint();
+
+	result.put(key, value);
+      }
+
+    return result;
+  }
+
+  synchronized void rollback(Hashtable ckpoint)
+  {
+    Enumeration enum;
+    Object key, value;
+    Hashtable result = new Hashtable();
+    DBField field;
+
+    /* -- */
+
+    enum = ckpoint.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	
+	field = (DBField) fields.get(key);
+
+	field.rollback(ckpoint.get(key));
+      }
   }
 
   /**
