@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -171,6 +171,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.targetField = SchemaConstants.AdminObjectsOwned;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 	bf.array = true;
 
 	fieldHash.put(new Short(bf.field_code), bf);
@@ -185,6 +186,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 1;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -198,6 +200,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 2;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -211,6 +214,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 3;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -224,6 +228,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 4;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -237,6 +242,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 5;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -250,6 +256,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_order = 6;
 	bf.editable = false;
 	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -262,7 +269,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.field_type = FieldType.STRING;
 	bf.field_order = 7;
 	bf.editable = false;
-	bf.removable = false;
+	bf.removable = false;	
+	bf.builtIn = true;	// this isn't optional
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
@@ -1376,6 +1384,71 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    *
+   * This method is used to create a new builtIn field.  This
+   * method should *only* be called from DBSchemaEdit, which
+   * will insure that the new field will be created with a
+   * proper field id, and that before the schema edit transaction
+   * is finalized, all non-embedded object types will have an
+   * identical built-in field registered.
+   *
+   * Typically, the DBSchemaEdit code will create a new built-in on
+   * the SchemaConstants.UserBase objectbase, and then depend on
+   * DBSchemaEdit.synchronizeBuiltInFields() to replicate the
+   * new field into all the non-embedded bases.
+   *
+   * Once again, DBSchemaEdit developMode is *only* to be used when
+   * the built-in field types are being modified by a Ganymede developer.
+   *
+   * Such an action should never be taken lightly, as it *is* necessary
+   * to edit the DBObjectBase() constructor afterwards to keep the
+   * system consistent.
+   *
+   */
+  
+  synchronized DBObjectBaseField createNewBuiltIn(short id)
+  {
+    DBObjectBaseField field;
+
+    /* -- */
+
+    if (!store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    if (!editor.isDevelopMode())
+      {
+	throw new IllegalArgumentException("error.. createBuiltIn can only be called when the editor is in developMode");
+      }
+
+    if (isEmbedded())
+      {
+	throw new IllegalArgumentException("error.. schema editing built-ins is only supported for non-embedded objects");
+      }
+
+    try
+      {
+	field = new DBObjectBaseField(this, editor);
+	field.builtIn = true;
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't create field due to initialization error: " + ex);
+      }
+
+    // set its id
+
+    field.setID(id);
+
+    // and set it up in our field hash
+
+    fieldHash.put(new Short(id), field);
+
+    return field;
+  }
+
+  /**
+   *
    * This method is used to remove a field definition from 
    * the current schema.
    *
@@ -1561,7 +1634,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	obj = (DBObject) enum.nextElement();
 	
-	obj.objectBase = this;
+	obj.updateBaseRefs(this);
       }
   }
 
