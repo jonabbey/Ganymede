@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/03/29 22:56:25 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/03/30 20:14:02 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -72,10 +72,23 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * Each object window in the client is an instance of a framePanel.  A framePanel
- * is a JInternalFrame which contains a tabbed pane which incorporates a
- * Ganymede database object panel, owner panel, history panel, and other panels
- * as appropriate for specific object types.
+ * <p>An internal client window displaying and/or editing a particular database
+ * object from the Ganymede server. A framePanel is a JInternalFrame which contains a
+ * tabbed pane which incorporates a
+ * {@link arlut.csd.ganymede.client.containerPanel containerPanel} for
+ * viewing/editing a server-side database object, as well as several
+ * auxiliary panes such as an
+ * {@link arlut.csd.ganymede.client.ownerPanel ownerPanel},
+ * {@link arlut.csd.ganymede.client.historyPanel historyPanel}, and other
+ * panels as appropriate for specific object types.</p>
+ *
+ * <p>framePanel is itself a Runnable object.  When created, the framePanel
+ * constructor will spawn a new thread to execute its run() method.  This run()
+ * method communicates with the server in the background, downloading field information
+ * needed to present the object to the user for viewing and/or editing.</p>
+ *
+ * @version $Revision: 1.53 $ $Date: 1999/03/30 20:14:02 $ $Name:  $
+ * @author Michael Mulvaney 
  */
 
 public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener, VetoableChangeListener, InternalFrameListener {
@@ -84,15 +97,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * This will be loaded from gclient anyway.
    */
 
-  boolean debug = true;
+  boolean debug = false;
 
   /**
-   * used with vetoableChange() to work around Swing 1.1 bug preventing
+   * <p>used with vetoableChange() to work around Swing 1.1 bug preventing
    * setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from doing anything
-   * useful.
+   * useful.</p>
    *
-   * This variable needs to be set to true in order for setClosed() calls
-   * in windowPanel to avoid bringing up the dialogs.
+   * <p>This variable needs to be set to true in order for setClosed() calls
+   * in windowPanel to avoid bringing up the dialogs.</p>
    */
 
   boolean closingApproved = false;
@@ -123,8 +136,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   JProgressBar
     progressBar;
 
+  /**
+   * Panel to hold the progressBar while we are loading the fields for
+   * this object.
+   */
+
   JPanel
     progressPanel;
+
+  /**
+   * The tabbed pane holding our various panels.
+   */
 
   JTabbedPane 
     pane;
@@ -169,7 +191,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   JScrollPane admin_history;
 
   /**
-   * Holds an ownershipPanel (ownly for owner groups)
+   * Holds an ownershipPanel (only for owner groups)
    */
  
   JScrollPane objects_owned;
@@ -192,13 +214,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   Vector containerPanels = new Vector();
 
-  Vector
-    // fieldTemplates
-    templates, 
+  /**
+   * Vector of {@link arlut.csd.ganymede.fieldTemplate fieldTemplate}s used
+   * by the save() and sendMail() methods to enumerate this object's fields.
+   */
 
-    // contains the Integers that have been created.  These Integers
-    // are the index number of the panes.
-    createdList = new Vector(); 
+  Vector templates;
+
+  /**
+   * Vector of Integers used to track the tab panels that have been created.
+   */
+
+  Vector createdList = new Vector(); 
 
   date_field
     exp_field,
@@ -218,13 +245,24 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   boolean 
     editable;
 
-  // There can be only one!
+  /**
+   * Remote reference to the server-side object we are viewing or editing.
+   */
 
   db_object
     object;
 
+  /**
+   * Reference to the desktop pane containing the client's internal windows.  Used to access
+   * some GUI resources and to provide to new containerPanels created for embedded objects.
+   */
+
   windowPanel
     wp;
+
+  /**
+   * Reference to the client's main class, used for some utility functions.
+   */
 
   gclient
     gc;
@@ -238,8 +276,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * getObjectInvid() is called.
    */
 
-  private Invid
-    invid = null;
+  private Invid invid = null;
+
+  /**
+   * If true, this is a newly created object we're editing.  We care about this
+   * because we need to handle the user clicking on this window's close box
+   * a bit differently.
+   */
 
   boolean isCreating;
 
@@ -263,8 +306,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     this.isCreating = isCreating;
 
     // are we running the client in debug mode?
-    
-    debug = wp.gc.debug;
+
+    if (!debug)
+      {
+	debug = wp.gc.debug;
+      }
     
     setStatus("Building window.");
     
@@ -308,21 +354,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * Always called in the constructor, as a separate thread
+   * <p>Communicates with the server to download all of the information
+   * needed to present the database object associated with this window
+   * to the user.  Some of this data (types of fields defined in objects
+   * of this type, for instance) will have been already loaded into
+   * {@link arlut.csd.ganymede.client.gclient gclient}, but this method
+   * is reponsible for loading all data specific to the object being
+   * viewed and/or edited.</p>
    *
-   * It is important to note that adding a panel is not the same as
-   * creating the panel.  Adding a panel simply means adding the tab
-   * to the tab pane, and is accomplished through addXXXTab().  Those
-   * methods are all called here, in the run method, with the
-   * exception of the expiration date and removal date tabs, which can
-   * be added later if one of those dates is set.
-   *
-   * The createTab(int) method actually fills out the tab.  This
-   * method is called when a tab is clicked on for the first time, to
-   * avoid creating unessesary panels. 
-   *
-   * The only panel created in run() is the general panel.
-   *
+   * <p>This method also handles the creation of this window's tabbed
+   * pane, and adding the various tabs to it.  The actual panels
+   * attached to the various tabs will not actually be created and
+   * initialized unless and until the user selects the appropriate tab
+   * at some point.  The only panel actually created by this method is
+   * the general panel, which shows all of the non-built-in fields of
+   * the object we're talking to.</p>
    */
 
   public void run()
@@ -401,6 +447,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	throw new RuntimeException("Could not check if this is ownerbase: " + rx);
       }
     
+    // the client Loader thread should have already downloaded and
+    // cached the field template vector we're getting here.  If not,
+    // we'll block here while the Loader gets the information we need.
+
     templates = gc.getTemplateVector(id);
     
     // Add the notes panel
@@ -531,9 +581,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * Return the invid of the object contained in this frame panel.
+   * <p>Returns the invid of the object contained in this frame panel.</p>
    *
-   * If the invid has not been loaded, this method will load it first.
+   * <p>If the invid has not been loaded, this method will load it first.</p>
    *
    * @return The invid of the object in this frame panel.  
    */
@@ -564,10 +614,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * Refresh the tab that is showing.
+   * <p>Refresh the tab that is showing.</p>
    *
-   * Currently, this only refreshes the general panel.  Other panels
-   * will generate a nice dialog telling the user to go away.
+   * <p>Currently, this only refreshes the general panel.  Other panels
+   * will generate a nice dialog telling the user to go away.</p>
    */
 
   public void refresh()
@@ -577,6 +627,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     if (c instanceof JScrollPane)
       {
 	Component comp = ((JScrollPane)c).getViewport().getView();
+
 	if (comp instanceof containerPanel)
 	  {
 	    ((containerPanel)comp).updateAll();
@@ -591,9 +642,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
     
   /**
-   * Print a nasty-looking image of the frame.
+   * <p>Print a nasty-looking image of the frame.</p>
    *
-   * This hardly works.
+   * <p>This hardly works.</p>
    */
 
   public void printObject()
@@ -654,6 +705,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     j.end();
   }
 
+  /**
+   * Uses the Ganymede server to e-mail a summary of this object to one
+   * or more email addresses.
+   */
+
   public void sendMail()
   {
     SaveDialog dialog = new SaveDialog(gc, true);
@@ -711,6 +767,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	throw new RuntimeException("sending mail: " + rx);
       }
   }
+
+  /**
+   * Saves a summary of this object to disk.  Only available if the Ganymede client
+   * was run as an application.
+   */
 
   public void save()
   {
@@ -791,6 +852,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     gc.setNormalCursor();
   }
+
+  /**
+   * Generates a String representation of this object for save() and sendMail().
+   */
 
   private StringBuffer encodeObjectToStringBuffer(boolean showHistory, Date startDate)
   {
@@ -943,8 +1008,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     return menuBar;
   }
-
-  // This need to be changed to show the progress bar
 
   void create_general_panel()
   {
@@ -1571,10 +1634,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   *
    * When the internalFrame closes, we need to shut down any auxiliary
    * internalFrames associated with fields in any contained container panels.
-   * 
    */
 
   public void internalFrameClosed(InternalFrameEvent event)

@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:04:08 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/03/30 20:14:02 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -64,12 +64,13 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * The core of a client.  Provides all the logic necessary to
+ * <p>The core of a client.  Provides all the logic necessary to
  * establish a connection to the server and get logged in.  By using
  * this class, the server will only need an RMI stub for this class,
- * regardless of what client is written.
+ * regardless of what client is written.</p>
  *
+ * @version $Revision: 1.9 $ $Date: 1999/03/30 20:14:02 $ $Name:  $
+ * @author Mike Mulvaney
  */
 
 public class ClientBase extends UnicastRemoteObject implements Client {
@@ -79,17 +80,13 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   // ---
 
   /**
-   *
    * RMI reference to a Ganymede server
-   *
    */
 
   private Server server = null;
 
   /**
-   *
    * RMI reference to a client session on a Ganymede server
-   * 
    */
 
   private Session session = null;
@@ -102,93 +99,89 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   /* -- */
 
   /**
-   *
-   * This constructor takes a URL for the Ganymede server to connect to, a
+   * <p>This constructor takes a URL for the Ganymede server to connect to, a
    * reference to an object implementing the ClientListener interface to
    * report problems.  The constructor will establish an initial connection
-   * to the server and prepare itself for subsequent login before returning.
+   * to the server and prepare itself for subsequent login before returning.</p>
    *
    * @param serverURL An rmi:// URL for a Ganymede server.
    * @param listener A ClientListener to report problems and disconnection to.
-   *
    */
 
   public ClientBase(String serverURL, ClientListener listener) throws RemoteException
-    {
-      super();    // UnicastRemoteObject can throw RemoteException 
+  {
+    super();    // UnicastRemoteObject can throw RemoteException 
 
-      /* -- */
-
-      if (listener == null || serverURL == null || serverURL.length() == 0)
-	{
-	  throw new IllegalArgumentException("bad argument");
-	}
+    /* -- */
     
-      listeners.addElement(listener);
-
-      if (debug)
-	{
-	  System.err.println("Initializing BaseClient object");
-	}
-
-      try
-	{
-	  connected = true;
+    if (listener == null || serverURL == null || serverURL.length() == 0)
+      {
+	throw new IllegalArgumentException("bad argument");
+      }
+    
+    listeners.addElement(listener);
+    
+    if (debug)
+      {
+	System.err.println("Initializing BaseClient object");
+      }
+    
+    try
+      {
+	connected = true;
 	
-	  Remote obj = Naming.lookup(serverURL);
+	Remote obj = Naming.lookup(serverURL);
 	
-	  if (obj instanceof Server)
-	    {
-	      server = (Server) obj;
-	    }
-	}
-      catch (NotBoundException ex)
-	{
-	  connected = false;
+	if (obj instanceof Server)
+	  {
+	    server = (Server) obj;
+	  }
+      }
+    catch (NotBoundException ex)
+      {
+	connected = false;
 	
-	  if (debug)
-	    {
-	      System.err.println("RMI: Couldn't bind to server object\n" + ex );
-	    }
+	if (debug)
+	  {
+	    System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	  }
 	
-	  sendErrorMessage("RMI: Couldn't bind to server object\n" + ex );
-	}
-      catch (java.rmi.UnknownHostException ex)
-	{
-	  connected = false;
+	sendErrorMessage("RMI: Couldn't bind to server object\n" + ex );
+      }
+    catch (java.rmi.UnknownHostException ex)
+      {
+	connected = false;
 	
-	  if (debug)
-	    {
-	      System.err.println("RMI: Couldn't find server\n" + serverURL );
-	    }
+	if (debug)
+	  {
+	    System.err.println("RMI: Couldn't find server\n" + serverURL );
+	  }
 	
-	  sendErrorMessage("RMI: Couldn't find server\n" + serverURL );
-	}
-      catch (java.net.MalformedURLException ex)
-	{
-	  connected = false;
+	sendErrorMessage("RMI: Couldn't find server\n" + serverURL );
+      }
+    catch (java.net.MalformedURLException ex)
+      {
+	connected = false;
 	
-	  if (debug)
-	    {
-	      System.err.println("RMI: Malformed URL " + serverURL );
-	    }
+	if (debug)
+	  {
+	    System.err.println("RMI: Malformed URL " + serverURL );
+	  }
 	
-	  sendErrorMessage("RMI: Malformed URL " + serverURL );
-    }
+	sendErrorMessage("RMI: Malformed URL " + serverURL );
+      }
   }
 
   /**
-   *
-   * This method is used by a client to actually get logged into the
-   * server.  The Session handle returned is then used to do all
-   * server operations appropriate for a normal client.  Calling the
-   * Session logout() method will end the client's connection to the
-   * server.
+   * <p>This method is used by a client to actually get logged into the
+   * server.  The {@link arlut.csd.ganymede.Session Session} handle
+   * returned is then used to do all server operations appropriate 
+   * for a normal client.  Calling the Session logout() method will
+   * end the client's connection to the server.</p>
    *
    * @return null if login failed, else a valid server Session reference
    *
    * @see arlut.csd.ganymede.Session
-   *
    */
 
   public Session login(String username, String password) throws RemoteException
@@ -252,11 +245,9 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * This method can be used to retrieve a handle to the client's
+   * <p>This method can be used to retrieve a handle to the client's
    * login session.  This simply returns the same handle that
-   * login() returned, in case the client forgets it or something.
-   *
+   * login() returned, in case the client forgets it or something.</p>
    */
 
   public Session getSession()
@@ -265,11 +256,9 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * This method returns true if the client holds a valid reference to
+   * <p>This method returns true if the client holds a valid reference to
    * the server.  This will always return true unless the server has
-   * forced a disconnect.
-   * 
+   * forced a disconnect.</p>
    */
 
   public boolean isConnected()
@@ -278,9 +267,10 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * Register a client listener.
-   *
+   * <p>Register a client listener.  A client listener is an object
+   * that is to be notified if we get an asynchronous callback from
+   * the Ganymede server, such as a forced log-off, or if we need
+   * to report an error during login.</p>
    */
 
   public synchronized void addClientListener(ClientListener l)
@@ -289,9 +279,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * Remove a client listener.
-   *
+   * <p>Remove a client listener.</p>
    */
 
   public synchronized void removeClientListener(ClientListener l)
@@ -300,12 +288,10 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * Calls the logout() method on the Session object.  This
+   * <p>Calls the logout() method on the Session object.  This
    * could be done by the client using the Session reference
    * returned by the login() method, but using this method
-   * allows us to reflect login status internally.
-   *
+   * allows us to reflect login status internally.</p>
    */
 
   public void disconnect() throws RemoteException
@@ -323,11 +309,9 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   // **
 
   /**
-   *
-   * Allows the server to retrieve the username.
+   * <p>Allows the server to retrieve the username.</p>
    *
    * @see arlut.csd.ganymede.Client
-   *
    */
 
   public String getName() 
@@ -336,11 +320,9 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * Allows the server to retrieve the password.
+   * <p>Allows the server to retrieve the password.</p>
    *
    * @see arlut.csd.ganymede.Client
-   *
    */
 
   public String getPassword()
@@ -349,8 +331,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   }
 
   /**
-   *
-   * Allows the server to force us off when it goes down.
+   * <p>Allows the server to force us off when it goes down.</p>
    *
    * @see arlut.csd.ganymede.Client
    *
@@ -376,10 +357,8 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   // ***
 
   /**
-   *
-   * Private method to inform clientListeners if we get an error
-   * from the server after construction..
-   *
+   * <p>Private method to inform clientListeners if we get an error
+   * from the server after construction..</p>
    */
 
   private synchronized void sendErrorMessage(String message)

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 1999/03/17 05:32:47 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 1999/03/30 20:14:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -974,8 +974,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Returns the value of an element of this field,
-   * if a vector.
+   * <p>Returns the value of an element of this field,
+   * if a vector.</p>
    *
    * @see arlut.csd.ganymede.db_field
    *
@@ -1003,11 +1003,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Sets the value of an element of this field, if a vector.
+   * <p>Sets the value of an element of this field, if a vector.</p>
    *
-   * The ReturnVal object returned encodes
+   * <p>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</p>
    *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
@@ -1038,13 +1038,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Sets the value of an element of this field, if a vector.
+   * <p>Sets the value of an element of this field, if a vector.</p>
    *
-   * Server-side method only
+   * <p>Server-side method only</p>
    *
-   * The ReturnVal object returned encodes
+   * <p>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</p>
    *
    * @see arlut.csd.ganymede.DBSession
    *
@@ -1074,13 +1074,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Sets the value of an element of this field, if a vector.<br><br>
+   * <p>Sets the value of an element of this field, if a vector.</p>
    *
-   * Server-side method only<br><br>
+   * <p>Server-side method only</p>
    *
-   * The ReturnVal object returned encodes
+   * <p>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</p>
    *
    */
   
@@ -1187,11 +1187,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    *
-   * Adds an element to the end of this field, if a vector.<br><br>
+   * <p>Adds an element to the end of this field, if a vector.</p>
    *
-   * The ReturnVal object returned encodes
+   * <p>The ReturnVal object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.
+   * pass back a dialog.</p>
    *
    * @see arlut.csd.ganymede.db_field
    *
@@ -1332,15 +1332,15 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.<br><br>
+   * <p>The ReturnVal object returned encodes success or failure, 
+   * and may optionally pass back a dialog.</p>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public final ReturnVal deleteElement(int index)
@@ -1349,15 +1349,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.<br><br>
+   * <p>Server-side method only</p>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    */
 
   public final ReturnVal deleteElementLocal(int index)
@@ -1366,15 +1363,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.<br><br>
+   * <p>Server-side method only</p>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    */
 
   public synchronized ReturnVal deleteElement(int index, boolean local)
@@ -1460,15 +1454,15 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.
+   * <p>The ReturnVal object returned encodes success or failure, 
+   * and may optionally pass back a dialog.</p>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public final ReturnVal deleteElement(Object value)
@@ -1477,15 +1471,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.<br><br>
+   * <p>Server-side method only</p>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    */
 
   public final ReturnVal deleteElementLocal(Object value)
@@ -1494,15 +1485,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Deletes an element of this field, if a vector.</p>
    *
-   * Deletes an element of this field, if a vector.<br><br>
+   * <p>Server-side method only</p>
    *
-   * Server-side method only<br><br>
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
    */
 
   public synchronized ReturnVal deleteElement(Object value, boolean local)
@@ -1530,27 +1518,27 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					  "Could not delete null value from field " + getName());
       }
 
-    if (values.indexOf(value) == -1)
+    int index = indexOfValue(value);
+
+    if (index == -1)
       {
 	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
 					  "Could not delete value " + value +
 					  ", not present in field " + getName());
       }
 
-    return deleteElement(values.indexOf(value), local);	// *sync* DBNameSpace possible
+    return deleteElement(index, local);	// *sync* DBNameSpace possible
   }
 
   /**
+   * <p>Returns true if this field is a vector field and value is contained
+   *  in this field.</p>
    *
-   * This method returns true if this field is a vector
-   * field and value is contained in this field.<br><br>
-   *
-   * This method always checks for read privileges.
+   * <p>This method always checks for read privileges.</p>
    *
    * @param value The value to look for in this field
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public final boolean containsElement(Object value)
@@ -1559,17 +1547,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>This method returns true if this field is a vector
+   * field and value is contained in this field.</p>
    *
-   * This method returns true if this field is a vector
-   * field and value is contained in this field.<br><br>
-   *
-   * This method is server-side only, and never checks for read
-   * privileges.
+   * <p>This method is server-side only, and never checks for read
+   * privileges.</p>
    *
    * @param value The value to look for in this fieldu
-   * 
    */
-
 
   public final boolean containsElementLocal(Object value)
   {
@@ -1577,17 +1562,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>This method returns true if this field is a vector
+   * field and value is contained in this field.</p>
    *
-   * This method returns true if this field is a vector
-   * field and value is contained in this field.<br><br>
-   *
-   * This method is server-side only.
+   * <p>This method is server-side only.</p>
    *
    * @param value The value to look for in this field
    * @param local If false, read permissin is checked for this field
-   * 
    */
-
 
   public boolean containsElement(Object value, boolean local)
   {
@@ -1602,14 +1584,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    return values.contains(value);
+    return (indexOfValue(value) != -1);
   }
 
   /**
-   *
-   * This method returns a fieldDeltaRec object listing the changes
-   * between this field's state and that of the prior oldField state.
-   *
+   * Returns a {@link arlut.csd.ganymede.fieldDeltaRec fieldDeltaRec} 
+   * object listing the changes between this field's state and that
+   * of the prior oldField state.
    */
 
   public fieldDeltaRec getVectorDiff(DBField oldField)
@@ -1704,11 +1685,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Package-domain method to set the owner of this field.</p>
    *
-   * Package-domain method to set the owner of this field.
-   *
-   * Used by the DBObject copy constructor.
-   *
+   * <p>Used by the DBObject copy constructor.</p>
    */
 
   synchronized void setOwner(DBObject owner)
@@ -1724,14 +1703,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   // ****
 
   /** 
-   *
-   * unmark() is used to make any and all namespace values in this
+   * <p>unmark() is used to make any and all namespace values in this
    * field as available for use by other objects in the same editset.
    * When the editset is committed, any unmarked values will be
-   * flushed from the namespace.<br><br>
+   * flushed from the namespace.</p>
    *
-   * *Calls synchronized methods on DBNameSpace*
-   * 
+   * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
   boolean unmark()
@@ -1779,16 +1756,15 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * Unmark a specific value associated with this field, rather
+   * <p>Unmark a specific value associated with this field, rather
    * than unmark all values associated with this field.  Note
    * that this method does not check to see if the value is
    * currently associated with this field, it just goes ahead
    * and unmarks it.  This is to be used by the vector
    * modifiers (setElement, addElement, deleteElement, etc.)
-   * to keep track of namespace modifications as we go along.<br><br>
+   * to keep track of namespace modifications as we go along.</p>
    *
-   * *Calls synchronized methods on DBNameSpace*
+   * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
   boolean unmark(Object value)
@@ -1815,14 +1791,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /** 
-   *
-   * mark() is used to mark any and all values in this field as taken
+   * <p>mark() is used to mark any and all values in this field as taken
    * in the namespace.  When the editset is committed, marked values
    * will be permanently reserved in the namespace.  If the editset is
    * instead aborted, the namespace values will be returned to their
-   * pre-editset status.<br><br>
+   * pre-editset status.</p>
    *  
-   * *Calls synchronized methods on DBNameSpace*
+   * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
   boolean mark()
@@ -1865,15 +1840,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   *
-   * Mark a specific value associated with this field, rather than
+   * <p>Mark a specific value associated with this field, rather than
    * mark all values associated with this field.  Note that this
    * method does not in any way associate this value with this field
    * (add it, set it, etc.), it just marks it.  This is to be used by
    * the vector modifiers (setElement, addElement, etc.)  to keep
-   * track of namespace modifications as we go along.<br><br>g
+   * track of namespace modifications as we go along.</p>
    * 
-   * *Calls synchronized methods on DBNameSpace*
+   * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
   boolean mark(Object value)
@@ -1942,31 +1916,25 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   // ****
 
   /**
-   *
    * Overridable method to determine whether an
    * Object submitted to this field is of an appropriate
    * type.
-   *
    */
 
   abstract public boolean verifyTypeMatch(Object o);
 
   /**
-   *
    * Overridable method to verify that an object
    * submitted to this field has an appropriate
    * value.
-   *
    */
 
   abstract public ReturnVal verifyNewValue(Object o);
 
   /**
-   *
    * Overridable method to verify that the current
    * DBSession / DBEditSet has permission to read
    * values from this field.
-   *
    */
 
    public boolean verifyReadPermission()
@@ -1996,11 +1964,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    }
 
   /**
-   *
    * Overridable method to verify that the current
    * DBSession / DBEditSet has permission to write
    * values into this field.
-   *
    */
 
   public boolean verifyWritePermission()
@@ -2026,9 +1992,23 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
+   * <p>Sub-class hook to support elements for which the default
+   * equals() test is inadequate, such as IP addresses (represented
+   * as arrays of Byte[] objects.</p>
    *
+   * <p>Returns -1 if the value was not found in this field.</p>
+   *
+   * <p>This method assumes that the calling method has already verified
+   * that this is a vector field.</p>
+   */
+
+  public int indexOfValue(Object value)
+  {
+    return values.indexOf(value);
+  }
+
+  /**
    * This method clears this field's permCache.
-   *
    */
 
   public synchronized void clearPermCache()

@@ -8,8 +8,8 @@
    Heavily modified by Jon Abbey and Mike Mulvaney
    
    Created: 9 July 1997
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:04 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/03/30 20:13:44 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -62,6 +62,15 @@ import java.applet.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Utility class to provide resource-loading services.  Methods in this class
+ * can load images and other resources from either CLASSPATH or a jar file,
+ * depending on how the program using this class is run.</p>
+ *
+ * @version $Revision: 1.3 $ $Date: 1999/03/30 20:13:44 $ $Name:  $
+ * @author Jonathan Abbey
+ */
+
 public class PackageResources {
 
   static AppletContext context = null;
@@ -70,6 +79,14 @@ public class PackageResources {
   static final boolean debug = false;
 
   // ---
+
+  /**
+   * <p>Loads a generic resource by its filename from either CLASSPATH or a jar file,
+   * depending on how the code calling this method was run.</p>
+   *
+   * @param strResource Filename of resource to be loaded
+   * @param refClass Parent Class, used to find path to image
+   */
   
   public static URL getPackageResource(String strResource, Class refClass) 
   {
@@ -115,12 +132,12 @@ public class PackageResources {
   }
 
   /**
-   * Load an image
+   * <p>Loads an image by its filename from either CLASSPATH or a jar file,
+   * depending on how the code calling this method was run.</p>
    *
    * @param comp Parent component, used for Util.waitforimage
    * @param imageName Name of image to be loaded
    * @param refClass Parent Class, used to find path to image
-   *
    */
 
   public static Image getImageResource(Component comp, String imageName, Class refClass) 
@@ -193,6 +210,10 @@ public class PackageResources {
   }
 
   // from gjt 1.1
+
+  /**
+   * Helper method to handle the MediaTracker for image loading.
+   */
 
   public static void waitForImage(Component component, 
 				  Image image) 

@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/03/17 05:32:48 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/03/30 20:14:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -270,6 +270,80 @@ public class IPDBField extends DBField implements ip_field {
       }
   }
 
+  /**
+   * <p>Sub-class hook to support elements for which the default
+   * equals() test is inadequate, such as IP addresses (represented
+   * as arrays of Byte[] objects.</p>
+   *
+   * <p>Returns -1 if the value was not found in this field.</p>
+   *
+   * <p>This method assumes that the calling method has already verified
+   * that this is a vector field.</p>
+   */
+
+  public int indexOfValue(Object value)
+  {
+    if (!(value instanceof Byte[]))
+      {
+	return -1;
+      }
+
+    Byte[] foreignBytes = (Byte[]) value;
+
+    for (int i = 0; i < values.size(); i++)
+      {
+	Byte[] localBytes = (Byte[]) values.elementAt(i);
+	
+	if (equalTest(localBytes, foreignBytes))
+	  {
+	    return i;
+	  }
+      }
+
+    return -1;
+  }
+
+  /**
+   *
+   * Equality test.
+   *
+   */
+
+  private boolean equalTest(Byte[] localBytes, Byte[] foreignBytes)
+  {
+    if ((foreignBytes == null) && (localBytes == null))
+      {
+	return true;
+      }
+
+    if (((foreignBytes == null) && (localBytes != null)) ||
+	((foreignBytes != null) && (localBytes == null)))
+      {
+	return false;
+      }
+
+    if (foreignBytes.length != localBytes.length)
+      {
+	return false;
+      }
+
+    for (int i = 0; i < localBytes.length; i++)
+      {
+	try
+	  {
+	    if (!foreignBytes[i].equals(localBytes[i]))
+	      {
+		return false;
+	      }
+	  }
+	catch (NullPointerException ex)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
+  }
 
   // ****
   //

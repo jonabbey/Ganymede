@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/03/24 03:28:24 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/03/30 20:14:03 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -80,10 +80,13 @@ import arlut.csd.Util.PackageResources;
  * line via its static main() method, or as an applet loaded into a
  * web browser, generally with Sun's Java plug-in.</p>
  *
- * <p>This class also has a run() method for attempting to connect to
+ * <p>This class has a run() method for attempting to connect to
  * the server in the background once the applet is initialized.</p>
  *
- * @version $Revision: 1.53 $ $Date: 1999/03/24 03:28:24 $ $Name:  $
+ * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
+ * object is constructed, which handles all of the user's interactions with the server.</p>
+ *
+ * @version $Revision: 1.54 $ $Date: 1999/03/30 20:14:03 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -97,14 +100,90 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     server_url = null,
     helpBase = null;
 
+  /** 
+   * Client-side properties loaded from the command line or from the
+   * web page which contains the definition for glogin as an applet.
+   */
+
   public static Properties ganymedeProperties = null;
+
+  /** 
+   * The main client class, will be null until the user is logged in
+   * to the server.
+   */
+
+  public static gclient g_client;
+
+  /**
+   * If we are run from the command line, this frame will be used to contain
+   * the glogin applet in an application context.
+   */
+
+  protected static JFrame my_frame = null;
+
+  /** 
+   * Reference to the server acquired by RMI naming service.  Used to
+   * log into the server.  
+   */
+
+  protected static Server  my_server;
+
+  /**
+   * RMI object to handle getting us logged into the server, and to handle
+   * asynchronous callbacks from the server on our behalf.
+   */
+
+  protected static ClientBase my_client;
+
+  /**
+   * Reference to a user session on the server, will be null until the user is
+   * logged into the server.
+   */
+
+  protected static Session my_session;
+  protected static String my_username, my_passwd;
+
+  /**
+   * We're a singleton pattern.. this is a static reference to our actual login
+   * applet.
+   */
+
+  protected static glogin my_glogin;
+
+  /**
+   * If true, we are running as an applet and are limited by the Java sandbox.
+   * A few features of the client will be disabled if this is true (saving query
+   * reports to disk, etc.).
+   */
+
+  private static boolean WeAreApplet = true;
+
+  private static Container appletContentPane = null;
+
+  /**
+   * Background thread to handle force disconnect commands from the server.
+   * We need this thread because jdk 1.2 has a bug where RMI callbacks are
+   * not privileged to interact with the Swing thread.  By creating a thread
+   * to handle forced logouts ourselves, we can have an RMI callback pass
+   * a message to this thread (which has local privileges), which can then
+   * throw up a dialog explaining about being disconnected, etc.
+   */
+
+  protected static DeathWatcherThread deathThread;
 
   // ---
 
+  /**
+   * Background thread used to attempt to get the initial RMI connection to the
+   * Ganymede server.
+   */
+
+  protected Thread my_thread = new Thread(this);
+
+  protected boolean connected = false;
+
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
-
-  public static gclient g_client;
 
   protected Image ganymede_logo;
   protected JTextField username;
@@ -112,30 +191,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   protected JButton connector;
   protected JButton _quitButton;
   protected JPanel bPanel;
-  protected static JFrame my_frame = null;
-
-  protected static Server  my_server;
-
-  protected static ClientBase my_client;
-
-  protected static Session my_session;
-  protected static String my_username, my_passwd;
-
-  protected static glogin my_glogin;
-
-  protected Thread my_thread = new Thread(this);
-
-  protected boolean connected = false;
-
-  private static boolean WeAreApplet = true;
-
-  private static Container appletContentPane = null;
-
-  protected static DeathWatcherThread deathThread;
 
   /**
-   *  This main() function will allow this applet to run as an application
-   *  when it is not executed in the context of a browser.
+   * This main() function will allow this applet to run as an application
+   * when it is not executed in the context of a browser.  
    */
 
   public static void main (String args[])
@@ -201,15 +260,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     my_frame.show();
  
     my_glogin.init();
-    //my_glogin.start();
     my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
   }
 
   /**
-   *
    * This method returns true if the Ganymede client is running
    * as an applet.
-   *
    */
 
   public static boolean isApplet()
@@ -218,8 +274,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   *
-   *
+   * Standard applet initialization method.
    */
 
   public void init() 
@@ -511,9 +566,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Set the cursor to the normal cursor(usually a pointer.)
+   * <p>Set the cursor to the normal cursor(usually a pointer).</p>
    *
-   * This is dependent on the operating system.
+   * <p>This is dependent on the operating system.</p>
    */
 
   public void setNormalCursor()
@@ -522,10 +577,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   *
    * Handle button clicks, and enter being hit in the password
    * field.
-   *
    */
 
   public void actionPerformed(ActionEvent e)
@@ -612,6 +665,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
   }
 
+  /**
+   * Starts the main Ganymede client.
+   */
+
   private void startSession(Session session)
   {
     // try to get the URL for the help document tree
@@ -657,6 +714,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   // These are for the ClientListener
 
+  /**
+   * Handle a message from the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
+   * RMI object.
+   */
+
   public void messageReceived(ClientEvent e)
   {
     if (debug)
@@ -666,6 +728,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
   }
+
+  /**
+   * Handle a forced disconnect message from the
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} RMI object.
+   */
 
   public void disconnected(ClientEvent e)
   {
@@ -684,6 +751,23 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
                                                               DeathWatcherThread
 
 ------------------------------------------------------------------------------*/
+
+/** 
+ * <p>Client-side background thread to handle force disconnect commands
+ * from the server.  We need this thread because jdk 1.2 has a bug
+ * where RMI callbacks are not privileged to interact with the Swing
+ * thread.  By creating a thread to handle forced logouts ourselves,
+ * we can have an RMI callback pass a message to this thread (which
+ * has local privileges), which can then throw up a dialog explaining
+ * about being disconnected, etc.</p>
+ *
+ * <p>When run, this thread waits for die() to be called, whereupon it
+ * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
+ * actually shut down the client.</p>
+ *
+ * @version $Revision: 1.54 $ $Date: 1999/03/30 20:14:03 $ $Name:  $
+ * @author Jonathan Abbey
+ */
 
 class DeathWatcherThread extends Thread {
 
@@ -737,10 +821,8 @@ class DeathWatcherThread extends Thread {
   }
 
   /**
-   *
    * This method causes the DeathWatcherThread to kick off the
    * end-of-the-world process.
-   * 
    */
 
   public synchronized void die(String message)
@@ -756,6 +838,21 @@ class DeathWatcherThread extends Thread {
                                                                       ExitThread
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Client-side self-destruction thread.  This thread will be created and run
+ * when the server sends the client's
+ * {@link arlut.csd.ganymede.client.ClientBase ClientBase} a forced disconnect 
+ * RMI call.  When run, this thread starts a 30 second timer, while the 
+ * {@link arlut.csd.ganymede.client.DeathWatcherThread DeathWatcherThread} shows
+ * a dialog to the user, explaining the disconnect.  The user can click ok on
+ * that dialog, causing this thread's dieNow() method to terminate the timer.  In
+ * any case, when the timer counts down to zero, the glogin's logout() method 
+ * will be called, and the client's main window will be shutdown.</p>
+ *
+ * @version $Revision: 1.54 $ $Date: 1999/03/30 20:14:03 $ $Name:  $
+ * @author Jonathan Abbey
+ */
 
 class ExitThread extends Thread {
 

@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:05:57 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/03/30 20:14:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,39 @@ public interface db_field extends java.rmi.Remote {
   Object getElement(int index) throws RemoteException;
   ReturnVal setElement(int index, Object value) throws RemoteException;
   ReturnVal addElement(Object value) throws RemoteException;
+
+  /**
+   * <p>Deletes an element of this field, if a vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, 
+   * and may optionally pass back a dialog.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
+   */
+
   ReturnVal deleteElement(int index) throws RemoteException;
+
+  /**
+   * <p>Deletes an element of this field, if a vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, 
+   * and may optionally pass back a dialog.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
+   */
+
   ReturnVal deleteElement(Object value) throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is a vector field and value is contained
+   *  in this field.</p>
+   *
+   * <p>This method always checks for read privileges.</p>
+   *
+   * @param value The value to look for in this field
+   */
+
   boolean containsElement(Object value) throws RemoteException;
 }

@@ -7,8 +7,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/01/22 18:05:57 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/03/30 20:14:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,7 +58,7 @@ import java.rmi.RemoteException;
  * This interface defines the methods that the client can remotely
  * call on a object held in the Ganymede server.
  *
- * @version $Revision: 1.16 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.17 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -178,19 +178,21 @@ public interface db_object extends java.rmi.Remote {
   public boolean canInactivate() throws RemoteException;
 
   /**
-   *
    * <p>Returns true if this object has been inactivated and is
    * pending deletion.</p>
-   *
    */
 
   public boolean isInactivated() throws RemoteException;
 
   /**
-   *
+   * <p>Returns true if this object has all its required fields defined</p>
+   */
+
+  public boolean isValid() throws RemoteException;
+
+  /**
    * <p>Returns the date that this object is to go through final removal
    * if it has been inactivated.</p>
-   *
    */
 
   public Date getRemovalDate() throws RemoteException;

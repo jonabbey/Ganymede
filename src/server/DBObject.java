@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 1999/03/17 20:13:49 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 1999/03/30 20:14:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.66 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.67 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1391,19 +1391,31 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <p>Returns true if this object has all its required fields defined</p>
    *
-   * This method scans through all fields defined in the DBObjectBase
+   * <p>This method can be overridden in DBEditObject subclasses to do a
+   * more refined validity check if desired.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean isValid()
+  {
+    return (checkRequiredFields() == null);
+  }
+
+  /**
+   * <p>This method scans through all fields defined in the DBObjectBase
    * for this object type and determines if all required fields have
    * been filled in.  If everything is ok, this method will return
    * null.  If any required fields are found not to have been filled
    * out, this method returns a vector of field names that need to
-   * be filled out.
+   * be filled out.</p>
    *
-   * This method is used by the transaction commit logic to ensure a
+   * <p>This method is used by the transaction commit logic to ensure a
    * consistent transaction. If server-local code has called
    * GanymedeSession.enableOversight(false), this method will not be
-   * called at transaction commit time.
-   *   
+   * called at transaction commit time.</p>
    */
 
   public final synchronized Vector checkRequiredFields()
