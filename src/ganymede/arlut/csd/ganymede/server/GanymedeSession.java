@@ -4406,6 +4406,16 @@ final public class GanymedeSession implements Session, Unreferenced {
     
     vObj = (DBObject) retVal.getObject();
 
+    DBEditObject objectHook = Ganymede.db.getObjectBase(invid.getType()).getObjectHook();
+
+    if (!objectHook.canClone(session, vObj))
+      {
+	// "Cloning DENIED"
+	// "Cloning operation refused for {0} object {1}."
+	return Ganymede.createErrorDialog(ts.l("clone_db_object.denied"),
+					  ts.l("clone_db_object.denied_msg", vObj.getTypeName(), vObj.getLabel()));
+      }
+
     retVal = create_db_object(invid.getType());
     
     if (!retVal.didSucceed())

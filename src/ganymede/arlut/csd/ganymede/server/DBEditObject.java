@@ -1299,10 +1299,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>Customization method to verify whether the user has permission
-   * to clone a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for cloning by the client.</p>
+   * to clone a given object.  The client's {@link
+   * arlut.csd.ganymede.server.GanymedeSession} object will call this
+   * per-class method to do an object type- sensitive check to see if
+   * this object feels like being available for cloning by the
+   * client.</p>
    *
    * <p>To be overridden in DBEditObject subclasses.</p>
    *
