@@ -143,7 +143,7 @@ sub countparams {
 #########################################################################
 
 sub inchoverjavaargs {
-  my ($string, $fh) = @_;
+  my ($string, $fh, $line_number) = @_;
 
   my ($done, @mode, $arg_count);
 
@@ -320,6 +320,7 @@ sub inchoverjavaargs {
 
     if (!$done) {
       $string = <$fh>;
+      $line_number = $line_number + 1;
 
       if ($topmode == 6) {
 	pop(@mode);		# no longer in // mode
@@ -327,7 +328,7 @@ sub inchoverjavaargs {
     }
   }
 
-  return ($arg_count, $string);
+  return ($arg_count, $string, $line_number);
 }
 
 #########################################################################
@@ -351,6 +352,8 @@ sub examine_java {
   my $result = 0;
   my $prop_loaded = 0;
 
+  my $line_number = 0;
+
   $jfile =~ /\/([^\/]*)\.java$/;
 
   $sourcename = $1;
@@ -364,6 +367,8 @@ sub examine_java {
 
   open (IN, "<$jfile") || die "Couldn't open $jfile";
   while (<IN>) {
+    $line_number = $line_number + 1;
+
     if (/^\s*package\s*([^;]*);/) {
       $package = $1;
     }
@@ -422,22 +427,23 @@ sub examine_java {
       # to search for another ts.l() call.
 
       if ($value eq "") {
-	print "*** Error, couldn't find property for key $key!!! ***\n";
+	print "*** Error, couldn't find property for key $key on line $line_number!!! ***\n";
       } else {
 
-	($arg_count, $new_string) = inchoverjavaargs($rest, *IN);
+	($arg_count, $new_string, $line_number) = inchoverjavaargs($rest, *IN, $line_number);
 
         if ($showall_props) {
 	  print "Found ts.l($key) call, property takes $prop_param_count params, is \"$value\"\n";
 	}
 
 	if ($arg_count != $prop_param_count) {
-	  print "Error, ts.l($key) call takes $prop_param_count params in properties, but has $arg_count args in java code\n";
+	  print "Error, ts.l($key) call takes $prop_param_count params in properties, but has $arg_count args in java code on line $line_number\n";
 	  $result = 1;
 	}
 
 	if (defined $new_string) {
 	  $_ = $new_string;
+	  $line_number = $line_number - 1; # since we're redoing this line in the loop
 	  redo;
 	}
       }
