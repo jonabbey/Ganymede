@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -243,6 +243,45 @@ public class PasswordDBField extends DBField implements pass_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public String getDiffString(DBField orig)
+  {
+    PasswordDBField origP;
+    String a, b;
+
+    /* -- */
+
+    if (!(orig instanceof PasswordDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origP = (PasswordDBField) orig;
+
+    a = (String) origP.value;
+    b = (String) this.value;
+
+    if (!(a.equals(b)))
+      {
+	return "\tPassword changed";
+      }
+    else
+      {
+	return null;
+      }
   }
 
   // ****

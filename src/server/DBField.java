@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -293,6 +293,20 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    */
 
   abstract public String getEncodingString();
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  abstract public String getDiffString(DBField orig);
 
   /**
    *

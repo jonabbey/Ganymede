@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -323,6 +323,200 @@ public final class InvidDBField extends DBField implements invid_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public synchronized String getDiffString(DBField orig)
+  {
+    StringBuffer result = new StringBuffer();
+    InvidDBField origI;
+
+    /* -- */
+
+    if (!(orig instanceof InvidDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origI = (InvidDBField) orig;
+
+    if (isVector())
+      {
+	Vector 
+	  added = new Vector(),
+	  deleted = new Vector();
+
+	Enumeration enum;
+
+	Invid 
+	  elementA = null,
+	  elementB = null;
+
+	boolean found = false;
+
+	/* -- */
+
+	// find elements in the orig field that aren't in our present field
+
+	enum = origI.values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (Invid) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < values.size(); i++)
+	      {
+		elementB = (Invid) values.elementAt(i);
+
+		if (elementA.equals(elementB))
+		  {
+		    found = true;
+		  }
+	      }
+
+	    if (!found)
+	      {
+		deleted.addElement(elementA);
+	      }
+	  }
+
+	// find elements in present our field that aren't in the orig field
+
+	enum = values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (Invid) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < origI.values.size(); i++)
+	      {
+		elementB = (Invid) origI.values.elementAt(i);
+
+		if (elementA.equals(elementB))
+		  {
+		    found = true;
+		  }
+	      }
+
+	    if (!found)
+	      {
+		added.addElement(elementA);
+	      }
+	  }
+
+	// were there any changes at all?
+
+	if (deleted.size() == 0 && added.size() == 0)
+	  {
+	    return null;
+	  }
+	else
+	  {
+	    if (deleted.size() != 0)
+	      {
+		result.append("\tDeleted: ");
+	    
+		for (int i = 0; i < deleted.size(); i++)
+		  {
+		    elementA = (Invid) deleted.elementAt(i);
+
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+
+		    if (Ganymede.internalSession != null)
+		      {
+			result.append(Ganymede.internalSession.viewObjectLabel(elementA));
+		      }
+		    else
+		      {
+			result.append(elementA.toString());
+		      }
+		  }
+
+		result.append("\n");
+	      }
+
+	    if (added.size() != 0)
+	      {
+		result.append("\tAdded: ");
+	    
+		for (int i = 0; i < added.size(); i++)
+		  {
+		    elementA = (Invid) added.elementAt(i);
+
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+
+		    if (Ganymede.internalSession != null)
+		      {
+			result.append(Ganymede.internalSession.viewObjectLabel(elementA));
+		      }
+		    else
+		      {
+			result.append(elementA.toString());
+		      }
+		  }
+
+		result.append("\n");
+	      }
+
+	    return result.toString();
+	  }
+      }
+    else
+      {
+	if (origI.value().equals(this.value()))
+	  {
+	    return null;
+	  }
+	else
+	  {
+	    result.append("\tOld: ");
+
+	    if (Ganymede.internalSession != null)
+	      {
+		result.append(Ganymede.internalSession.viewObjectLabel(origI.value()));
+	      }
+	    else
+	      {
+		result.append(origI.value().toString());
+	      }
+
+	    result.append("\n\tNew: ");
+
+	    if (Ganymede.internalSession != null)
+	      {
+		result.append(Ganymede.internalSession.viewObjectLabel(this.value()));
+	      }
+	    else
+	      {
+		result.append(this.value().toString());
+	      }
+
+	    result.append("\n");
+	
+	    return result.toString();
+	  }
+      }
   }
 
   // ****

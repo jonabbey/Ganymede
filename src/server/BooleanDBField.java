@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -174,6 +174,47 @@ public class BooleanDBField extends DBField implements boolean_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public String getDiffString(DBField orig)
+  {
+    BooleanDBField origB;
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    if (!(orig instanceof BooleanDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origB = (BooleanDBField) orig;
+
+    if (origB.value() != this.value())
+      {
+	result.append("\tOld: ");
+	result.append(origB.value() ? "True" : "False");
+	result.append("\n\tNew: ");
+	result.append(this.value() ? "True" : "False");
+	
+	return result.toString();
+      }
+    else
+      {
+	return null;
+      }
   }
 
   // ****

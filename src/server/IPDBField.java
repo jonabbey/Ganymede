@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -659,6 +659,230 @@ public class IPDBField extends DBField implements ip_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public synchronized String getDiffString(DBField orig)
+  {
+    StringBuffer result = new StringBuffer();
+    IPDBField origI;
+
+    /* -- */
+
+    if (!(orig instanceof IPDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origI = (IPDBField) orig;
+
+    if (isVector())
+      {
+	Vector 
+	  added = new Vector(),
+	  deleted = new Vector();
+
+	Enumeration enum;
+
+	Byte[] elementA, elementB;
+
+	boolean found = false;
+
+	/* -- */
+
+	// find elements in the orig field that aren't in our present field
+
+	enum = origI.values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (Byte[]) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < values.size(); i++)
+	      {
+		elementB = (Byte[]) values.elementAt(i);
+
+		if (elementA.length == elementB.length)
+		  {
+		    found = true;
+
+		    for (int j = 0; j < elementA.length; j++)
+		      {
+			if (elementA[j] != elementB[j])
+			  {
+			    found = false;
+			  }
+		      }
+		  }
+	      }
+
+	    if (!found)
+	      {
+		deleted.addElement(elementA);
+	      }
+	  }
+
+	// find elements in present our field that aren't in the orig field
+
+	enum = values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (Byte[]) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < origI.values.size(); i++)
+	      {
+		elementB = (Byte[]) origI.values.elementAt(i);
+
+		if (elementA.length == elementB.length)
+		  {
+		    found = true;
+
+		    for (int j = 0; j < elementA.length; j++)
+		      {
+			if (elementA[j] != elementB[j])
+			  {
+			    found = false;
+			  }
+		      }
+		  }
+	      }
+
+	    if (!found)
+	      {
+		added.addElement(elementA);
+	      }
+	  }
+
+	// were there any changes at all?
+
+	if (deleted.size() == 0 && added.size() == 0)
+	  {
+	    return null;
+	  }
+	else
+	  {
+	    Byte[] x;
+
+	    if (deleted.size() != 0)
+	      {
+		result.append("\tDeleted: ");
+	    
+		for (int i = 0; i < deleted.size(); i++)
+		  {
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+		    
+		    x = (Byte[]) deleted.elementAt(i);
+
+		    if (x.length == 4)
+		      {
+			result.append(genIPV4string(x));
+		      }
+		    else 
+		      {
+			result.append(genIPV6string(x));
+		      }
+		  }
+
+		result.append("\n");
+	      }
+
+	    if (added.size() != 0)
+	      {
+		result.append("\tAdded: ");
+	    
+		for (int i = 0; i < added.size(); i++)
+		  {
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+
+		    x = (Byte[]) deleted.elementAt(i);
+
+		    if (x.length == 4)
+		      {
+			result.append(genIPV4string(x));
+		      }
+		    else 
+		      {
+			result.append(genIPV6string(x));
+		      }
+		  }
+
+		result.append("\n");
+	      }
+
+	    return result.toString();
+	  }
+      }
+    else
+      {
+	Byte[] x = (Byte[]) origI.value;
+	Byte[] y = (Byte[]) this.value;
+
+	if (x.length == y.length)
+	  {
+	    boolean nochange = true;
+
+	    for (int j = 0; j < x.length; j++)
+	      {
+		if (x[j] != y[j])
+		  {
+		    nochange = false;
+		  }
+	      }
+
+	    if (nochange)
+	      {
+		return null;
+	      }
+	  }
+
+	result.append("\tOld: ");
+	
+	if (x.length == 4)
+	  {
+	    result.append(genIPV4string(x));
+	  }
+	else 
+	  {
+	    result.append(genIPV6string(x));
+	  }
+
+	result.append("\n\tNew: ");
+
+	if (y.length == 4)
+	  {
+	    result.append(genIPV4string(x));
+	  }
+	else 
+	  {
+	    result.append(genIPV6string(x));
+	  }
+	
+	result.append("\n");
+	
+	return result.toString();
+      }
   }
 
   // ****

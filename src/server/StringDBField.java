@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -285,6 +285,162 @@ public class StringDBField extends DBField implements string_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns a String representing the change in value between this
+   * field and orig.  This String is intended for logging and email,
+   * not for any sort of programmatic activity.  The format of the
+   * generated string is not defined, but is intended to be suitable
+   * for inclusion in a log entry and in an email message.
+   *
+   * If there is no change in the field, null will be returned.
+   * 
+   */
+
+  public synchronized String getDiffString(DBField orig)
+  {
+    StringBuffer result = new StringBuffer();
+    StringDBField origS;
+
+    /* -- */
+
+    if (!(orig instanceof StringDBField))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    origS = (StringDBField) orig;
+
+    if (isVector())
+      {
+	Vector 
+	  added = new Vector(),
+	  deleted = new Vector();
+
+	Enumeration enum;
+
+	String elementA, elementB;
+
+	boolean found = false;
+
+	/* -- */
+
+	// find elements in the orig field that aren't in our present field
+
+	enum = origS.values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (String) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < values.size(); i++)
+	      {
+		elementB = (String) values.elementAt(i);
+
+		if (elementA.equals(elementB))
+		  {
+		    found = true;
+		  }
+	      }
+
+	    if (!found)
+	      {
+		deleted.addElement(elementA);
+	      }
+	  }
+
+	// find elements in present our field that aren't in the orig field
+
+	enum = values.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    elementA = (String) enum.nextElement();
+
+	    found = false;
+
+	    for (int i = 0; !found && i < origS.values.size(); i++)
+	      {
+		elementB = (String) origS.values.elementAt(i);
+
+		if (elementA.equals(elementB))
+		  {
+		    found = true;
+		  }
+	      }
+
+	    if (!found)
+	      {
+		added.addElement(elementA);
+	      }
+	  }
+
+	// were there any changes at all?
+
+	if (deleted.size() == 0 && added.size() == 0)
+	  {
+	    return null;
+	  }
+	else
+	  {
+	    if (deleted.size() != 0)
+	      {
+		result.append("\tDeleted: ");
+	    
+		for (int i = 0; i < deleted.size(); i++)
+		  {
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+
+		    result.append((String) deleted.elementAt(i));
+		  }
+
+		result.append("\n");
+	      }
+
+	    if (added.size() != 0)
+	      {
+		result.append("\tAdded: ");
+	    
+		for (int i = 0; i < added.size(); i++)
+		  {
+		    if (i > 0)
+		      {
+			result.append(", ");
+		      }
+
+		    result.append((String) added.elementAt(i));
+		  }
+
+		result.append("\n");
+	      }
+
+	    return result.toString();
+	  }
+      }
+    else
+      {
+	if (origS.value().equals(this.value()))
+	  {
+	    return null;
+	  }
+	else
+	  {
+	    result.append("\tOld: ");
+	    result.append(origS.value());
+	    result.append("\n\tNew: ");
+	    result.append(this.value());
+	    result.append("\n");
+	
+	    return result.toString();
+	  }
+      }
   }
 
   // ****
