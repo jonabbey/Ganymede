@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,6 @@ import java.rmi.server.*;
 
 class GanymedeSession extends UnicastRemoteObject implements Session {
 
-  GanymedeServer server;
   Client client;
 
   boolean logged_in;
@@ -58,7 +57,12 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * keep it around for internal usage.  Note that we don't add
    * this to the data structures used for the admin console.
    *
-   */ 
+   * Note that all internal session activities (queries, etc.) are
+   * currently using a single, synchronized DBSession object.. this
+   * mean that only one user at a time can currently be processed for
+   * login.
+   * 
+   */
 
   GanymedeSession() throws RemoteException
   {
@@ -66,7 +70,10 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // construct our DBSession
 
+    logged_in = true;
+    client = null;
     username = "internal";
+    clienthost = "internal";
     session = new DBSession(Ganymede.db, null, "internal");
   }
 
@@ -201,6 +208,11 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   synchronized public void logout()
   {
+    if (client == null)
+      {
+	return;
+      }
+
     Ganymede.debug("User " + username + " logging off");
     logged_in = false;
     this.client = null;
@@ -259,6 +271,19 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * Returns the root of the category tree on the server
+   *
+   * @see arlut.csd.ganymede.Category
+   *
+   */
+
+  public Category getRootCategory()
+  {
+    return Ganymede.db.rootCategory;
   }
 
   /**
@@ -361,6 +386,9 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	return null;
       }
 
+    // objectType will be -1 if the query is specifying the
+    // base with the base's name
+
     if (query.objectType != -1)
       {
 	base = Ganymede.db.getObjectBase(query.objectType);
@@ -423,6 +451,10 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   /**
    *
+   * This method is intended as a lightweight way of returning the
+   * current label of the specified invid.  No locking is done,
+   * and the label returned will be viewed through the context
+   * of the current transaction, if any.
    *
    * @see arlut.csd.ganymede.Session
    */ 
@@ -562,7 +594,8 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   
   public synchronized boolean remove_db_object(Invid invid) 
   {
-    return false;
+    session.deleteDBObject(invid);
+    return true;
   }
 
 }

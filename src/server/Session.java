@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.6 $ %D%
+ * @version $Revision: 1.7 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -59,6 +59,16 @@ public interface Session extends Remote {
    */
 
   Vector      getTypes() throws RemoteException;
+
+  /**
+   *
+   * Returns the root of the category tree on the server
+   *
+   * @see arlut.csd.ganymede.Category
+   *
+   */
+
+  Category    getRootCategory() throws RemoteException;
 
   /**
    *
