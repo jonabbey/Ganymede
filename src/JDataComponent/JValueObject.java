@@ -10,7 +10,7 @@
 
    
    Created: 28 Feb 1997
-   Version: 1.2 97/08/26
+   Version: $Revision: 1.7 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,28 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    JValueObject
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ *  JValueObject.java<br><br>
+ *
+ *  This class is primary a holder object that is used to
+ *  pass scalar and vector values and vector operation
+ *  instructions using a callback method to the Object designated
+ *  as an appropriate callback handler.<br><br>
+ *   
+ *  Created: 28 Feb 1997<br>
+ *  Version: $Revision: 1.7 $ %D%<br>
+ *  Module By: Navin Manohar<br>
+ *  Applied Research Laboratories, The University of Texas at Austin
+ *
+ */
 
 public class JValueObject {
 
@@ -41,108 +63,101 @@ public class JValueObject {
 
   private boolean Operation = false;  // true if the value object is asking for a field to be added
                                       // to a vectorContainer.
+  /* -- */
 
+  public JValueObject(Component source, Object value)
+  {
+    this.source = source;
+    this.value = value;
+    operationValue = SET;
+  }
 
-  public JValueObject(Component source,
-		     Object value)
-    {
-      this.source = source;
-      this.value = value;
-      operationValue = SET;
-    }
-
-  public JValueObject(Component source,
-		      Object value,
-		      int operation)
-    {
-      this.source = source;
-      this.value = value;
-      operationValue = operation;
-    }
+  public JValueObject(Component source, Object value, int operation)
+  {
+    this.source = source;
+    this.value = value;
+    operationValue = operation;
+  }
   
-  public JValueObject(Component source,
-		     int index,
-		     int operation)
-    {
+  public JValueObject(Component source, int index, int operation)
+  {
+    this.source = source;
+    this.index = index;
 
-      this.source = source;
-      this.index = index;
+    if ((operation > LAST) || (operation < FIRST))
+      {
+	throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
+      }
+    
+    this.operationValue = operation;
+    
+    Operation = true;
+  }
 
-      if ((operation > LAST) || (operation < FIRST))
-	{
-	  throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
-	}
+  public JValueObject(Component source, int index, int operation, Object value)
+  {
+    this(source, index, operation, value, null);
+  }
 
-      this.operationValue = operation;
+  public JValueObject(Component source, int index, int operation, Object value, Object parameter)
+  {
+    this.source = source;
+    this.index = index;
+    this.parameter = parameter;
+    
+    if ((operation < FIRST) || (operation > LAST))
+      {
+	throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
+      }
+    
+    this.operationValue = operation;
+    
+    Operation = true;
+    
+    this.value = value;
+  }
 
-      Operation = true;
-    }
-
-  public JValueObject(Component source,
-		      int index,
-		      int operation,
-		      Object value)
-    {
-      this(source, index, operation, value, null);
-    }
-
-  public JValueObject(Component source,
-		      int index,
-		      int operation,
-		      Object value,
-		      Object parameter)
-    {
-
-      this.source = source;
-      this.index = index;
-      this.parameter = parameter;
-     
-      if ((operation < FIRST) || (operation > LAST))
-	{
-	  throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
-	}
-
-      this.operationValue = operation;
-
-      Operation = true;
-
-      this.value = value;
-    }
-
-
-  public Component getSource() {
-
+  public Component getSource()
+  {
     return source;
   }
 
-  public Object getParameter() {
-   
+  public Object getParameter() 
+  {
     return parameter;
   }
 
-  public boolean isOperation() {
-
+  public boolean isOperation() 
+  {
     return Operation;
   }
 
-  public int getIndex() {
-
+  public int getIndex() 
+  {
     return index;
   }
 
-  public Object getValue() {
-    
+  public Object getValue() 
+  {
     return value;
   }
 
-  public int operationType() {
-
+  public int operationType() 
+  {
     return operationValue;
   }
 
-  public int getOperationType() {
+  public int getOperationType() 
+  {
     return operationValue;
   }
+
+  /**
+   *
+   * Method to get a human-readable description of the event carried
+   * by this object
+   * 
+   */
 
   public String toString()
   {
@@ -188,6 +203,5 @@ public class JValueObject {
     result += value;
 
     return result;
-
   }
 }
