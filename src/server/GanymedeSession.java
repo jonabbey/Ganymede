@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1227,7 +1227,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result = new DumpResult(fieldDefs);
 
-    QueryResult temp_result = queryDispatch(query, false, false);
+    QueryResult temp_result = queryDispatch(query, false, false, null);
 
     if (debug)
       {
@@ -1283,7 +1283,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized QueryResult query(Query query)
   {
-    return queryDispatch(query, false, true);
+    return queryDispatch(query, false, true, null);
   }
 
   /**
@@ -1299,7 +1299,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized Vector internalQuery(Query query)
   {
     Vector result = new Vector();
-    QueryResult internalResult = queryDispatch(query, true, false);
+    QueryResult internalResult = queryDispatch(query, true, false, null);
     Invid key;
     String val;
     Enumeration enum;
@@ -1330,10 +1330,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @param query The query to be handled
    * @param internal If true, the query filter setting will not be honored
    * @param forTransport If true, the QueryResult will build a buffer for serialization
+   * @param extantLock If non-null, queryDispatch will not attempt to establish its
+   * own lock on the relevant base(s) for the duration of the query.  The extantLock must
+   * have any bases that the queryDispatch method determines it needs access to locked.
    *
    */
 
-  public synchronized QueryResult queryDispatch(Query query, boolean internal, boolean forTransport)
+  public synchronized QueryResult queryDispatch(Query query, boolean internal, 
+						boolean forTransport, DBLock extantLock)
   {
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
@@ -1343,7 +1347,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Integer key;
     DBObject obj;
     PermEntry perm;
-    DBReadLock rLock;
+    DBLock rLock;
 
     // for processing embedded containment
 
@@ -1516,14 +1520,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	System.err.println("Query: " + username + " : opening read lock on " + base.getName());
       }
 
-    try
+    if (extantLock != null &&
+	((extantLock instanceof DBReadLock) ||
+	 (extantLock instanceof DBDumpLock)))
       {
-	rLock = session.openReadLock(baseLock);	// wait for it
+	for (int i = 0; i < baseLock.size(); i++)
+	  {
+	    if (!extantLock.isLocked((DBObjectBase) baseLock.elementAt(i)))
+	      {
+		throw new IllegalArgumentException("error, didn't have base " + 
+						   baseLock.elementAt(i) +
+						   " locked with extantLock");
+	      }
+	  }
+
+	rLock = extantLock;
       }
-    catch (InterruptedException ex)
+    else
       {
-	setLastError("lock interrupted");
-	return null;		// we're probably being booted off
+	try
+	  {
+	    rLock = session.openReadLock(baseLock);	// wait for it
+	  }
+	catch (InterruptedException ex)
+	  {
+	    setLastError("lock interrupted");
+	    return null;		// we're probably being booted off
+	  }
       }
 
     if (debug)
@@ -1568,7 +1591,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
       }
 
-    session.releaseReadLock(rLock);
+    if (extantLock == null)
+      {
+	session.releaseLock(rLock);
+      }
 
     if (debug)
       {
