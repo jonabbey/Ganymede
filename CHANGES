@@ -681,6 +681,23 @@ journal file when schema changes are committed, so there is no
 opportunity for a mismatch between the schema in the ganymede.db file
 and the object change records recorded in the server's journal file.
 
+44. [SERVER] Object Event Mail Is Now Coalesced
+
+Another change in response to bulk loading with the XML client.  It
+used to be that people who requested mail notification when certain
+operations happened to certain kinds of events (such as when a user
+was created or deleted, say) will now get a single message with a
+summary of all events of that type during a transaction rather than a
+single message for each event.
+
+We had a user who was subscribed to system creation objects and was
+getting hundreds of messages all at once every time I ran my bulk
+loader test.  Now he'll just get an easily deleted summary.
+
+In addition, when these events do happen one at a time, the message
+subject in the mail sent out by Ganymede will now include the name of
+the object operated on.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
