@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -832,6 +832,39 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	  }
 	return false;
       }
+  }
+
+  /**
+   *
+   * Deletes an element of this field, if a vector.
+   * Returns true on success, false on failure.
+   * If false is returned, the DBSession's
+   * last error value will have been set to
+   * indicate the reason for failure.
+   *
+   * @see arlut.csd.ganymede.DBSession
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public boolean deleteElement(Object value)
+  {
+    DBNameSpace ns;
+    DBEditObject eObj;
+
+    /* -- */
+
+    if (!isEditable())
+      {
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field");
+      }
+
+    return deleteElement(values.indexOf(value));
   }
 
   /**
