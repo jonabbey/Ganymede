@@ -4,8 +4,8 @@
 
    Created: 16 November 2001
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/11/17 02:32:15 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/11/17 02:36:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ package arlut.csd.Util;
 public class CVSVersion {
 
   static String CVS_release_name = "$Name:  $";
-  static String CVS_release_date = "$Date: 2001/11/17 02:32:15 $";
+  static String CVS_release_date = "$Date: 2001/11/17 02:36:43 $";
   static String release_string = null;
 
   // ---
@@ -103,10 +103,10 @@ public class CVSVersion {
     String release_name = null;
     String release_number = "version unknown";
 
-    // cut off leading $Name:  $, clean up whitespace
+    // cut off leading '$Name:  $', clean up whitespace
 	
     release_name = CVS_release_name.substring(6, CVS_release_name.length()-1);
-    release_name.trim();
+    release_name = release_name.trim();
 	
     // we use ganymede_XXX for our CVS tags
     
@@ -115,7 +115,7 @@ public class CVSVersion {
 	release_number = release_name.substring(release_name.indexOf('_') + 1, 
 						release_name.length());
       }
-    
+
     if (release_number.length() == 9)
       {
 	// convert XXXYYYZZZ style version number to x.y.z
@@ -159,5 +159,10 @@ public class CVSVersion {
       }
 
     return release_number + " - " + CVS_release_date;
+  }
+
+  public static void main(String[] args)
+  {
+    System.err.println(parseRelease("$Name:  $", CVS_release_date));
   }
 }
