@@ -248,13 +248,17 @@
     <p>The <b>&lt;ganyschema&gt;</b> element defines the structure of
       the Ganymede database, what types of objects are defined, what
       fields they have, what kind of data those fields can contained,
-      and what everything is called.  As of 1.0pre1 beta 2, there is
-      no code written that can read this section and set the server's
-      schema accordingly, but if the server is run with the -doXML
-      option, the server will dump out a ganymede.db.xml file that
-      will include the <b>&lt;ganyschema&gt;</b> section.</p>
+      and what everything is called.</p>
 
-    <p>The <b>&lt;ganyschema&gt;</b> element contains in turn two
+    <p>The <b>&lt;ganyschema&gt;</b> element is optional.  If you
+      run '<code>xmlclient -dumpschema</code>' or '<code>xmlclient -dump</code>', you will get
+      an XML file that includes the <b>&lt;ganyschema&gt;</b> element.
+      If you run xmlclient on an XML file that includes a <b>&lt;ganyschema&gt;</b>
+      element, xmlclient will attempt to edit the server's schema to
+      bring it into alignment with that described in the <b>&lt;ganyschema&gt;</b>
+      element.</p>
+
+    <p>The <b>&lt;ganyschema&gt;</b> element contains two
       other elements, <b>&lt;namespaces&gt;</b> and
       <b>&lt;object_type_definitions&gt;</b>.</p>
 
@@ -1885,7 +1889,7 @@ object on the server, regardless of whatever other activity the
     <pre>
       &lt;object type="User" id="broccol"&gt;
         &lt;Username&gt;broccol&lt;/Username&gt;
-        &lt;UID&gt;&lt;int val="12003"/&gt;&lt;/UID&gt;
+        &lt;UID&gt;12003&lt;/UID&gt;
         &lt;Password&gt;&lt;password crypt="j8hgwcyw232Jo"/&gt;&lt;/Password&gt;
         &lt;Account_Category&gt;&lt;invid type="User_Category" id="normal"/&gt;&lt;/Account_Category&gt;
         &lt;Full_Name&gt;Jonathan Abbey&lt;/Full_Name&gt;

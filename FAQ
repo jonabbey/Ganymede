@@ -46,6 +46,8 @@ directory information, and is designed with the goal of making it
 possible to let even untrained clerical staff handle things like user
 and DNS record creation and maintenance.
 
+     ------------------------------------------------------------
+
 2) Great!  Then I can just jump right in and use it, right?
 
    Um, no.  Ganymede itself is an extensible and customizable system
@@ -70,6 +72,8 @@ environment as complex as Ganymede is designed to be able to handle,
 you're likely to get a lot of details that will be different for each
 network.
 
+     ------------------------------------------------------------
+
 3) Who should be thinking of using Ganymede?
 
    From reading the above, you can tell that Ganymede is probably
@@ -81,11 +85,15 @@ managing things on a single system.. the Ganymede server takes up a
 lot of memory and you just wouldn't need its features for something so
 small.
 
+     ------------------------------------------------------------
+
 4) Is Ganymede secure from packet-sniffing?
 
    No. Ganymede has an effective internal security model, but all
 communications between the client/console and the Ganymede server are
 carried unencrypted.
+
+     ------------------------------------------------------------
 
 5) That's dumb.  I'm an ISP, I can't use this.. what were you thinking?
 
@@ -95,6 +103,8 @@ security and permissions model in this environment are designed for
 administrative separation rather than to prevent hacking, although
 everything possible short of transport-layer encryption has been
 done to keep everything as safe as possible.
+
+     ------------------------------------------------------------
 
 6) Any hope of a secure Ganymede for use in insecure networks?
 
@@ -129,6 +139,8 @@ over SSL.
 http://vonnieda.org/jSSL/        - Another free work.. still in progress?
 http://www.ixworld.com/javassl/  - Not portable, requires binary NT SSLeay libs
 http://www.phaos.com/            - Commercial, their SSLava stuff mentions RMI
+
+     ------------------------------------------------------------
 
 7) What do I need to run Ganymede?
 
@@ -166,14 +178,16 @@ like Sun's HotSpot VM are super-great.
 you'll want Sun's Java Plug-In version 1.2.2 or later, and at least a
 P133 with 32 megs.
 
+     ------------------------------------------------------------
+
 8) How scalable is Ganymede, with its memory-based database?
 
    An excellent question.  The Ganymede server is extensively
 multi-threaded and optimized, but memory is a fairly hard limit to get
 around.  Without any data loaded, and using the latest JVM for Solaris
-on UltraSPARC, the Ganymede server has a 57 meg memory image with
-17 megs resident.  With all of ARL's data loaded and an admin console
-attached, the server takes 58 megs memory image with 28 megs in-memory
+on UltraSPARC, the Ganymede server has a 61 meg memory image with 19
+megs resident.  With all of ARL's data loaded and an admin console
+attached, the server takes 62 megs memory image with 32 megs in-memory
 resident.  That data comprises:
 
    780 user/passwd records
@@ -185,37 +199,78 @@ resident.  That data comprises:
    2553 dns records
    ~600 room/network connectivity records
 
-or about 1.5 megs of data in the binary ganymede.db file.  At least
-with Sun's VM, memory usage seems to go up fairly closely as the
-amount of data in the ganymede.db file.  Even if we take the memory
-resident measurement as a better indication of how much the data
-in ganymede.db expands in memory, that's looking to be memory usage
-of 10 times the size of the binary ganymede.db file.  
+or about 1.5 megs of data in the binary ganymede.db file, using the
+'gasharl' schema definition.
 
-   Systems with 1 gig of RAM are not at all rare these days, so a
-hundred meg database seems at least conceivable, or a database with
-nearly 80,000 users and 255,000 systems.  Ganymede has not been tested
-to this level, and it would take an extremely well tuned VM to handle
-garbage collection for that size database, but Sun's HotSpot VM on a
-multi-processor machine might have a decent go at it.  Whether the JVM
-would handle i/o and threading for as many clients as is implied by
-such a scale, and whether Ganymede's hashing data structures would
-function efficiently at that scale are open questions.  The client
-would certainly have scaling problems before that point, from a
-user-interface standpoint if nothing else..
+   This is an interesting data point, but not a reliable guide.  Most
+JVM's will grow their heap until they reach the maximum defined heap
+size before commencing garbage collection.  To the extent that the
+Ganymede server creates a lot of temporary objects during runtime, the
+memory usage will increase possibly a good deal more quickly than the
+heap fills up with actual database objects.  
 
-   I personally wouldn't bet on 80,000 users and 255,000 systems, but
-8,000 users and 25,000 systems, or vice-versa should be very doable.
+Further, the memory usage patterns may be significantly different on
+different VM's.  On an Athlon box running Linux, the server with no
+data loaded takes up 11 megabytes, and only 23 megabytes with
+all of the above data loaded.
 
-   Going to a disk-based database makes things a bit difficult in
-Java, since Java doesn't make it possible to re-use memory buffers
-intelligently.. a Ganymede server reading items out of an on-disk
-database during run-time would be constantly creating new objects in
-memory anyway, with garbage collection required to re-use the memory.
-Java 1.2 supports a weak-references API that could be useful in
-allowing more effective use of memory, but given the common database
-access patterns (scanning all objects of a type to emit passwd, group,
-dns files), it's unclear how much of a benefit this would bring.
+   The only realistic way of testing the Ganymede server's data
+scalability is to set a particular heap limit and then to load a large
+quantity of objects into the server and test the server with multiple
+concurrent clients to see if the server will persist without hitting
+an OutOfMemory Error condition.
+
+   We can, however, perhaps take the Athlon/Linux case as a minimum
+bound, where data in the ganymede.db file grows by slightly less than
+ten times when expanded into linked objects in memory.
+
+   If we take this as a minimum bound, and if we imagine a system that
+can dedicate 1 gigabyte of RAM and/or swap for the JVM, a database
+hundred times that of the size we use at ARL seems at least
+conceivable, or a database with nearly 80,000 users and 255,000
+systems.  Ganymede has not been tested to this level, and it would
+take an extremely well tuned VM to handle garbage collection for that
+size database, but Sun's HotSpot VM on a multi-processor machine might
+have a decent go at it.  Whether the JVM would handle i/o and
+threading for as many clients as is implied by such a scale, and
+whether Ganymede's hashing data structures would function efficiently
+at that scale are open questions.  The client would certainly have
+scaling problems before that point, from a user-interface standpoint
+if nothing else.
+
+   I personally wouldn't bet money on the viability on 80,000 users
+and 255,000 systems without specifically testing at that level, but I
+think 8,000 users and 25,000 systems, or vice-versa should be very
+doable.  This should serve to scale to as large a size as you would
+realistically want for a single domain.  If you want to put enough
+data into Ganymede that a flat namespace would be difficult to live
+with, you'd probably want to go ahead and split things up into
+multiple servers for separate domains.
+
+   It might be possible to rearchitect Ganymede to be more scalable by
+going to a disk-based database runtime and using the Java 1.2 weak
+references API to manage in-process object caching, but given the
+current Ganymede design of doing complete dataset rebuilds when
+transactions are committed, it seems that most data would be
+continuously brought back in-process during the build phase after a
+transaction was committed.  Garbage collection should keep everything
+viable, but the i/o overhead would be very much greater.
+
+   With the current design, at least, an OutOfMemoryError would not
+cause precipitous data loss.  At the worst, the server would have to
+be shut down, the amount of heap dedicated to the jvm increased, and
+the server re-started.  If the heap size is bumping up against the
+maximum supported by a server-oriented JVM like Sun's HotSpot server
+VM, it would be necessary to export the server's data to XML, split
+the data, and create separate Ganymede servers for separate subdomains
+or separate object types.
+
+   The final word on scalability right now is that you should be sure
+and test with a representative dataset before committing to Ganymede,
+and if you find that it doesn't scale adequately, report your findings
+to the Ganymede mailing list.
+
+     ------------------------------------------------------------
 
 9) Why isn't Ganymede LDAP-based?  What about replication?
 
@@ -227,12 +282,14 @@ transaction and permissions models are superior to that of LDAP.
 
    The point of Ganymede is as much intelligent management of changes
 and relationships as it is mass storage of data.  Because Ganymede has
-a richer data model (object id's, symmetrical object pointers,
-explicit representations of IP address data types), reworking Ganymede
-on-top of LDAP would be difficult.  A lot of the intelligent
-management of Ganymede would have to be sacrificed in such a move,
-although the resulting system would probably be more scalable and
-would have higher performance at the high end.
+a richer data model in some ways (object id's, symmetrical object
+pointers, explicit representations of IP address data types), and
+poorer in others (Ganymede's current lack of support for an object
+type hierarchy), reworking Ganymede on-top of LDAP would be difficult.
+A lot of the intelligent management of Ganymede would have to be
+sacrificed in such a move, although the resulting system would
+probably be more scalable and would have higher performance at the
+high end.
 
    Going to a multi-server Ganymede system, a la Active Directory and
 NDS and LDAP servers generally might be interesting, but that would be
@@ -248,6 +305,8 @@ Instead, Ganymede is intended to feed things like NIS, DNS, and LDAP,
 which have their own means of doing replication and redundant servers
 for backups.
 
+     ------------------------------------------------------------
+
 10) What's up with DNS management?  The current stuff is weak.
 
    Yes, that's true.  We're working on code to support arbitrary DNS
@@ -255,6 +314,8 @@ management.  Instead of the current hosts_info file-of-evil that we
 inherited from GASH, we're developing an XML-based DNS system that
 will allow us to do both bulk and incremental DNS updates and, if we
 play our cards right, even flexible BIND file importing.  It's coming.
+
+     ------------------------------------------------------------
 
 11) What's this rpcpass thing in the client bin directory?
 
@@ -267,6 +328,8 @@ or --execute option.
 
    See the rpcpass entry in doc/glossary.html file for details,
 and the entry for 0.99.1 in the CHANGES file.
+
+     ------------------------------------------------------------
 
 12) Where's the documentation?
 
@@ -281,6 +344,8 @@ is like a child's brain, it needs input.
 on Ganymede.  It provides a very good conceptual and technical
 overview.  It's not so good as an operational manual, but we're
 struggling to get more operational documentation written.
+
+     ------------------------------------------------------------
 
 13) How can I help?
 
@@ -297,12 +362,16 @@ environment, let the list know.  If you see things in the basic engine
 or client that you think you could contribute to improving, let me
 know.
 
+     ------------------------------------------------------------
+
 14) Why is it called Ganymede?
 
    It's actually an acronym, standing for GAsh Network Manager, Deluxe
 Edition.  I wanted a name that connected this project to GASH, and I
 just couldn't come up with any great names that involved GASH in some
 fashion (I did come up with a lot of really bad names, though...)
+
+     ------------------------------------------------------------
 
 15) What is Ganymede's development history like?
 
@@ -327,7 +396,36 @@ than in something like C or C++ made it possible.  We still wound up
 with the massive pain and effort, however.  Hopefully it'll be useful
 to people.
 
-16) Where's the Ganymede web site?
+     ------------------------------------------------------------
+
+16) I see a bunch of messages about missing fonts when I run the
+    Ganymede client or admin console GUI under Linux, what's up?
+
+   The common implementations of the JVM provided by both Sun and the
+Blackdown organization include an AWT library that expects a number of
+fonts to be present on the X display.  Many of those fonts are
+available on a Sun Workstation but are generally not available on
+common X servers such as that from XFree86.org.  The lack of those
+fonts shouldn't get in the way of using the Ganymede GUI clients, but
+some font displays will appear a bit off, including the 'About Ganymede'
+and 'Credits' dialogs.
+
+   The Blackdown JDK FAQ addresses this question at
+
+http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.html#ss6.4
+
+     ------------------------------------------------------------
+
+17) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
+     ------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Ganymede FAQ
+Author: Jonathan Abbey
+Release: $name:  $
+Version: $Revision: 1.12 $
+Last Mod Date: $Date: 2001/01/31 00:41:19 $
+-------------------------------------------------------------------------------
