@@ -17,6 +17,7 @@
   -->
 
   <property name="src.dir" value="ddroid"/>
+  <property name="jython.dir" value="jython"/>
   <property name="lib.dir" value="lib"/>
   <property name="resources.dir" value="resources"/>
 
@@ -39,6 +40,9 @@
 
   <path id="classpath">
     <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${jython.dir}">
       <include name="**/*.jar"/>
     </fileset>
   </path>
@@ -247,6 +251,7 @@ refresh the jar files.
     <delete includeemptydirs="true" failonerror="false">
       <fileset dir="${build.classes}" includes="**/*"/>
       <fileset dir="${build.lib}" includes="*.jar"/>
+      <fileset dir="${build.doc}" includes="**/*"/>
     </delete>
   </target>
 

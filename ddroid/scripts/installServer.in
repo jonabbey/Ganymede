@@ -198,6 +198,7 @@ $installdir = $vars{"SERVERINSTALL"};
 &makedir("$installdir/backups", 0700); print ".";
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/html", 0750); print ".";
+&makedir("$installdir/jython", 0750); print ".";
 &copydir("doc", "$installdir/doc"); print ".";
 copy("README", "$installdir/README"); print ".";
 copy("INSTALL", "$installdir/INSTALL"); print ".";
@@ -210,9 +211,7 @@ copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
 copy("jars/ddroidServer.jar", "$installdir/jars/ddroidServer.jar"); print ".";
 copy("jars/gnu-regexp-1.1.4.jar", "$installdir/jars/gnu-regexp-1.1.4.jar"); print ".";
-copy("jars/jython.jar", "$installdir/jars/jython.jar"); print ".";
-copy("jars/jython-lib.jar", "$installdir/jars/jython-lib.jar"); print ".";
-&copydir("jars/Lib", "$installdir/jars/Lib"); print ".";
+&copydir("src/jython", "$installdir/jython"); print ".";
 
 # for the xmlclient, go ahead and install the client jar file
 
@@ -288,7 +287,7 @@ if ($version != 2) {
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ddroidServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar",
+               "CLASSPATH" => "$installdir/jars/ddroidServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
