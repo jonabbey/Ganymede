@@ -278,7 +278,7 @@ print "\nCustomizing Directory Droid runServer script\n";
 
 $version = &identifyjvm($vars{"JVM"}."/java");
 
-$template = "scripts/runServer.template2";
+$template = "scripts/runServer.template";
 if ($version != 2) {
   print "\nWarning, couldn't locate/verify " . $vars{"JVM"} . "/java.  Installing a Java 1.2+ configured runServer script.\n";
 }
