@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.154 $
-   Last Mod Date: $Date: 1999/07/21 05:35:52 $
+   Version: $Revision: 1.155 $
+   Last Mod Date: $Date: 1999/07/22 03:52:12 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.154 $ $Date: 1999/07/21 05:35:52 $ $Name:  $
+ * @version $Revision: 1.155 $ $Date: 1999/07/22 03:52:12 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,6 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
+  static String release_date = "$Date: 1999/07/22 03:52:12 $";
   static String release_number = null;
 
   // ---
@@ -529,6 +530,32 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       mainPanel;   //Everything is in this, so it is double buffered
 
     /* -- */
+
+    if (release_number == null)
+      {
+	// cut off leading $Name:  $, clean up whitespace
+
+	if (release_name.length() > 9)
+	  {
+	    release_name = release_name.substring(6, release_name.length()-1);
+	    release_name.trim();
+
+	    // we use ganymede_XXX for our CVS tags
+
+	    if (release_name.indexOf('_') != -1)
+	      {
+		release_number = release_name.substring(release_name.indexOf('_') + 1, 
+							release_name.length());
+	      }
+	  }
+
+	if (release_number == null)
+	  {
+	    release_number = "version unknown";
+	  }
+    
+	release_number = release_number + " - " + release_date;
+      }
 
     try
       {
@@ -958,7 +985,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     try
       {
-	ReturnVal rv = session.openTransaction("gclient");
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client " + release_number);
 	rv = handleReturnVal(rv);
 
 	if ((rv != null) && (!rv.didSucceed()))
@@ -1514,26 +1541,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	if (aboutMessage == null)
 	  {
-	    // cut off leading $Name:  $, clean up whitespace
-
-	    if (release_name.length() > 9)
-	      {
-		release_name = release_name.substring(6, release_name.length()-1);
-		release_name.trim();
-
-		// we use ganymede_XXX for our CVS tags
-
-		if (release_name.indexOf('_') != -1)
-		  {
-		    release_number = release_name.substring(release_name.indexOf('_') + 1, release_name.length());
-		  }
-	      }
-
-	    if (release_number == null)
-	      {
-		release_number = "unknown";
-	      }
-	    
 	    StringBuffer buffer = new StringBuffer();
 
 	    buffer.append("<head></head>");
@@ -4114,7 +4121,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     try
       {
-	ReturnVal rv = session.openTransaction("gclient");
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client " + release_number);
 	
 	handleReturnVal(rv);
 	if ((rv != null) && (!rv.didSucceed()))

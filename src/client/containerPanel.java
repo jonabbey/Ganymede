@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 1999/05/26 23:17:13 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 1999/07/22 03:52:11 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.106 $ $Date: 1999/05/26 23:17:13 $ $Name:  $
+ * @version $Revision: 1.107 $ $Date: 1999/07/22 03:52:11 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2293,6 +2293,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    ss.setCallback(this);
 
+	    String comment = fieldTemplate.getComment();
+	    
+	    if (comment != null && !comment.equals(""))
+	      {
+		ss.setToolTipText(comment);
+	      }
+
 	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
 	else
@@ -2310,6 +2317,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    ss.setCallback(this);
 
+	    String comment = fieldTemplate.getComment();
+	    
+	    if (comment != null && !comment.equals(""))
+	      {
+		ss.setToolTipText(comment);
+	      }
+
 	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
       }
@@ -2324,6 +2338,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					       300); // no availble list, so it is wider
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
+
+	String comment = fieldTemplate.getComment();
+	    
+	if (comment != null && !comment.equals(""))
+	  {
+	    ss.setToolTipText(comment);
+	  }
+
 	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
       }
   }
@@ -2515,6 +2537,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     ss.setCallback(this);
 
+    String comment = fieldTemplate.getComment();
+	    
+    if (comment != null && !comment.equals(""))
+      {
+	ss.setToolTipText(comment);
+      }
+
     addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
@@ -2548,6 +2577,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     vectorPanelList.addElement(vp);
     objectHash.put(vp, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
+
+    String comment = fieldTemplate.getComment();
+	    
+    if (comment != null && !comment.equals(""))
+      {
+	vp.setToolTipText(comment);
+      }
 
     addVectorRow(vp, templates.indexOf(fieldTemplate), 
 		 fieldTemplate.getName(), fieldInfo.isVisible());
@@ -2722,6 +2758,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	objectHash.put(combo, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
+
+	String comment = fieldTemplate.getComment();
+
+	if (comment != null && !comment.equals(""))
+	  {
+	    combo.setToolTipText(comment);
+	  }
 	    
 	addRow(combo, templates.indexOf(fieldTemplate), 
 	       fieldTemplate.getName(), fieldInfo.isVisible());
@@ -2819,6 +2862,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    pf.setCallback(this);
 	  }
+
+	String comment = fieldTemplate.getComment();
+
+	if (comment != null && !comment.equals(""))
+	  {
+	    pf.setToolTipText(comment);
+	  }
 	  
 	addRow(pf, templates.indexOf(fieldTemplate), field.getName(), field.isVisible());
       }
@@ -2838,7 +2888,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	// the server won't give us an unencrypted password, we're clear here
 			  
 	sf.setText((String)fieldInfo.getValue());
-	
 		      
 	sf.setEditable(false);
 
@@ -2982,6 +3031,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	cb.setToolTipText(comment);
+      }
+
     addRow(cb, templates.indexOf(fieldTemplate), 
 	   fieldTemplate.getName(), fieldInfo.isVisible());
   }
@@ -3013,6 +3069,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				     gc,
 				     false,
 				     fieldTemplate.getName());
+
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	pb.setToolTipText(comment);
+      }
     
     addRow(pb, templates.indexOf(fieldTemplate),
 	   fieldTemplate.getName(), fieldInfo.isVisible());
@@ -3084,6 +3147,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  getgclient().viewObject(thisInvid);
 		}
 	    });
+
+	    String comment = fieldTemplate.getComment();
+	    
+	    if (comment != null && !comment.equals(""))
+	      {
+		b.setToolTipText(comment);
+	      }
 
 	    addRow(b, 
 		   templates.indexOf(fieldTemplate), 
@@ -3296,6 +3366,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     if (debug)
       {
 	println("Adding to panel");
+      }
+
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	combo.setToolTipText(comment);
       }
     
     addRow(combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
