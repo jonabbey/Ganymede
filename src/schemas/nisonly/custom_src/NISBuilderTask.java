@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -147,36 +147,6 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	result = true;
-      }
-
-    if (baseChanged((short) 274) ||
-	baseChanged((short) 275))
-      {
-	Ganymede.debug("Need to build aliases map");
-	result = true;
-      }
-
-    if (baseChanged((short) 271) ||
-	baseChanged((short) 270))
-      {
-	Ganymede.debug("Need to build netgroup map");
-
-	if (writeNetgroupFile())
-	  {
-	    result = true;
-	  }
-      }
-
-    if (baseChanged((short) 277) ||
-	baseChanged((short) 276) ||
-	baseChanged((short) 278))
-      {
-	Ganymede.debug("Need to build automounter maps");
-
-	if (writeAutoMounterFiles())
-	  {
-	    result = true;
-	  }
       }
 
     return result;
@@ -341,11 +311,11 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	cryptedPass = "**Nopass**";
       }
 
-    uid = ((Integer) object.getFieldValueLocal((short) 256)).intValue();
+    uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
 
     // get the gid
     
-    groupInvid = (Invid) object.getFieldValueLocal((short) 265); // home group
+    groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
 
     if (groupInvid == null)
       {
@@ -355,16 +325,16 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     else
       {
 	group = getObject(groupInvid);
-	gid = ((Integer) group.getFieldValueLocal((short) 258)).intValue();
+	gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
       }
 
-    name = (String) object.getFieldValueLocal((short) 257);
-    room = (String) object.getFieldValueLocal((short) 259);
-    div = (String) object.getFieldValueLocal((short) 258);
-    officePhone = (String) object.getFieldValueLocal((short) 260);
-    homePhone = (String) object.getFieldValueLocal((short) 261);
-    directory = (String) object.getFieldValueLocal((short) 262);
-    shell = (String) object.getFieldValueLocal((short) 263);
+    name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+    room = (String) object.getFieldValueLocal(userSchema.ROOM);
+    div = (String) object.getFieldValueLocal(userSchema.DIVISION);
+    officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
+    homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
+    directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
+    shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
 
     // now build our output line
 
@@ -433,17 +403,17 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    groupname = (String) object.getFieldValueLocal((short) 256);
+    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
     // currently in the Ganymede schema, group passwords aren't in passfields.
 
-    pass = (String) object.getFieldValueLocal((short) 257);
-    gid = ((Integer) object.getFieldValueLocal((short) 258)).intValue();
+    pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
+    gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
     
     // we currently don't explicitly record the home group.. just take the first group
     // that the user is in.
 
-    invids = object.getFieldValuesLocal((short) 261);
+    invids = object.getFieldValuesLocal(groupSchema.USERS);
 
     if (invids == null)
       {
@@ -490,374 +460,5 @@ public class NISBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(result.toString());
-  }
-
-  /**
-   *
-   * This method generates a Netgroup file.
-   *
-   */
-
-  private boolean writeNetgroupFile()
-  {
-    PrintWriter netgroupFile = null;
-    DBObject netgroup;
-    Enumeration netgroups;
-
-    /* -- */
-
-    try
-      {
-	netgroupFile = openOutFile(path + "netgroup");
-      }
-    catch (IOException ex)
-      {
-	System.err.println("NISBuilderTask.writeNetgroup(): couldn't open netgroup file: " + ex);
-      }
-
-    // first the user netgroups
-
-    netgroups = enumerateObjects((short) 270);
-
-    while (netgroups.hasMoreElements())
-      {
-	netgroup = (DBObject) netgroups.nextElement();
-	
-	writeUserNetgroup(netgroup, netgroupFile);
-      }
-
-    // now the system netgroups
-    
-    netgroups = enumerateObjects((short) 271);
-
-    while (netgroups.hasMoreElements())
-      {
-	netgroup = (DBObject) netgroups.nextElement();
-	
-	writeSystemNetgroup(netgroup, netgroupFile);
-      }
-
-    netgroupFile.close();
-
-    return true;
-  }
-
-  /**
-   *
-   * This method writes out a single user netgroup out to disk,
-   * wrapping the netgroup if it gets too long.
-   *
-   * omg-u	csd-u (-,broccol,) (-,gomod,) (-,etcrh,)
-   *
-   */
-
-  private void writeUserNetgroup(DBObject object, PrintWriter writer)
-  {
-    StringBuffer buffer = new StringBuffer();
-
-    String name;
-    Vector users;
-    Vector memberNetgroups;
-
-    Invid ref;
-    String refLabel;
-
-    int lengthlimit;
-    int subgroup = 2;
-    String subname;
-
-    /* -- */
-
-    name = (String) object.getFieldValueLocal((short) 256);
-    users = object.getFieldValuesLocal((short) 257);
-    memberNetgroups = object.getFieldValuesLocal((short) 258);
-
-    // NIS limits the length of a line to 1024 characters.
-    // If the line looks like it'll go over, we'll truncate
-    // it, put in an entry to link the netgroup with a
-    // sub netgroup for continuation.
-
-    // Thus, we want to save enough space to be able to put
-    // the link information at the end.  We reduce it by
-    // a further 6 chars to leave space for the per-entry
-    // syntax.
-
-    lengthlimit = 1024 - name.length() - 6;
-
-    buffer.append(name);
-
-    if (memberNetgroups != null)
-      {
-	for (int i = 0; i < memberNetgroups.size(); i++)
-	  {
-	    ref = (Invid) memberNetgroups.elementAt(i);
-	    refLabel = getLabel(ref);
-	    
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		subname = name + subgroup;
-		
-		buffer.append(" ");
-		buffer.append(subname);
-		buffer.append("\n");
-		buffer.append(subname);
-		subgroup++;
-	      }
-	    
-	    buffer.append(" ");
-	    buffer.append(refLabel);
-	  }
-      }
-
-    if (users != null)
-      {
-	for (int i = 0; i < users.size(); i++)
-	  {
-	    ref = (Invid) users.elementAt(i);
-	    refLabel = getLabel(ref);
-
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		subname = name + subgroup;
-
-		buffer.append(" ");
-		buffer.append(subname);
-		buffer.append("\n");
-		buffer.append(subname);
-		subgroup++;
-	      }
-
-	    buffer.append(" ");
-	    buffer.append("(-,");
-	    buffer.append(refLabel);
-	    buffer.append(",)");
-	  }
-      }
-
-    writer.println(buffer.toString());
-  }
-
-  /**
-   *
-   * This method writes out a single user netgroup out to disk,
-   * wrapping the netgroup if it gets too long.
-   *
-   * omg-s	csd-s (csdsun1.arlut.utexas.edu,-,) (ns1.arlut.utexas.edu,-,)
-   *
-   */
-
-  private void writeSystemNetgroup(DBObject object, PrintWriter writer)
-  {
-    StringBuffer buffer = new StringBuffer();
-
-    String name;
-    Vector systems;
-    Vector memberNetgroups;
-
-    Invid ref;
-    String refLabel;
-
-    int lengthlimit;
-    int subgroup = 2;
-    String subname;
-
-    /* -- */
-
-    name = (String) object.getFieldValueLocal((short) 256);
-    systems = object.getFieldValuesLocal((short) 257);
-    memberNetgroups = object.getFieldValuesLocal((short) 258);
-
-    // NIS limits the length of a line to 1024 characters.
-    // If the line looks like it'll go over, we'll truncate
-    // it, put in an entry to link the netgroup with a
-    // sub netgroup for continuation.
-
-    // Thus, we want to save enough space to be able to put
-    // the link information at the end.  We reduce it by
-    // a further 6 chars to leave space for the per-entry
-    // syntax.
-
-    lengthlimit = 1024 - name.length() - 6;
-
-    buffer.append(name);
-
-    if (memberNetgroups != null)
-      {
-	for (int i = 0; i < memberNetgroups.size(); i++)
-	  {
-	    ref = (Invid) memberNetgroups.elementAt(i);
-	    refLabel = getLabel(ref);
-
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		subname = name + subgroup;
-
-		buffer.append(" ");
-		buffer.append(subname);
-		buffer.append("\n");
-		buffer.append(subname);
-		subgroup++;
-	      }
-
-	    buffer.append(" ");
-	    buffer.append(refLabel);
-	  }
-      }
-
-    if (systems != null)
-      {
-	for (int i = 0; i < systems.size(); i++)
-	  {
-	    ref = (Invid) systems.elementAt(i);
-	    refLabel = getLabel(ref);
-
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		subname = name + subgroup;
-
-		buffer.append(" ");
-		buffer.append(subname);
-		buffer.append("\n");
-		buffer.append(subname);
-		subgroup++;
-	      }
-
-	    buffer.append(" ");
-	    buffer.append("(");
-	    buffer.append(refLabel);
-	    buffer.append(",-,)");
-	  }
-      }
-
-    writer.println(buffer.toString());
-  }
-
-  /**
-   *
-   * This method generates an auto.vol file, along with auto.home.*
-   * files for all automounter records in the Ganymede database.
-   *
-   */
-
-  private boolean writeAutoMounterFiles()
-  {
-    PrintWriter autoFile = null;
-    DBObject map, obj, user;
-    Enumeration vols, maps, entries;
-    StringBuffer buf = new StringBuffer();
-    String mountopts, mapname;
-    Vector tempVect;
-    Invid ref, userRef;
-
-    /* -- */
-
-    // first, write out the auto.vol file
-
-    try
-      {
-	autoFile = openOutFile(path + "auto.vol");
-      }
-    catch (IOException ex)
-      {
-	System.err.println("NISBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
-      }
-
-    // find the volume definitions
-
-    vols = enumerateObjects((short) 276);
-
-    while (vols.hasMoreElements())
-      {
-	obj = (DBObject) vols.nextElement();
-
-	buf.setLength(0);
-	buf.append((String) obj.getFieldValueLocal((short) 256)); // volume label
-	buf.append("\t\t");
-
-	mountopts = (String) obj.getFieldValueLocal((short) 260); // mount options.. NeXT's like this.  Ugh.
-
-	if (mountopts != null && !mountopts.equals(""))
-	  {
-	    buf.append(mountopts);
-	    buf.append(" ");
-	  }
-
-	buf.append(getLabel((Invid) obj.getFieldValueLocal((short) 257))); // hostname
-	buf.append(":");
-	buf.append((String) obj.getFieldValueLocal((short) 258)); // mount path
-
-	autoFile.println(buf.toString());
-      }
-
-    autoFile.close();
-
-    // second, write out all the auto.home.* files mapping user name
-    // to volume name.  We depend on the GASH build scripts to convert
-    // these to the form that NIS will actually use.. we could and possibly
-    // will change this to write out the combined auto.home/auto.vol info
-    // rather than forcing it to be done after-the-fact via perl.
-
-    maps = enumerateObjects((short) 277);
-
-    while (maps.hasMoreElements())
-      {
-	map = (DBObject) maps.nextElement();
-
-	mapname = (String) map.getFieldValueLocal((short) 256);
-
-	try
-	  {
-	    autoFile = openOutFile(path + mapname);
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("NISBuilderTask.writeAutoMounterFiles(): couldn't open " + mapname + ": " + ex);
-	  }
-
-	tempVect = map.getFieldValuesLocal((short) 257);
-
-	if (tempVect == null)
-	  {
-	    autoFile.close();
-	    continue;
-	  }
-
-	entries = tempVect.elements();
-
-	while (entries.hasMoreElements())
-	  {
-	    ref = (Invid) entries.nextElement();
-	    obj = getObject(ref);
-
-	    // the entry is embedded in the user's record.. get the user' id and label
-
-	    userRef = (Invid) obj.getFieldValueLocal((short) 0);
-
-	    if (userRef.getType() != SchemaConstants.UserBase)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.setLength(0);
-	    
-	    buf.append(getLabel(userRef)); // the user's name
-	    buf.append("\t");
-
-	    ref = (Invid) obj.getFieldValueLocal((short) 257); // nfs volume for this entry
-
-	    if (ref == null || ref.getType() != (short) 276)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.append(getLabel(ref));
-
-	    autoFile.println(buf.toString());
-	  }
-
-	autoFile.close();
-      }
-
-    return true;
   }
 }
