@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -413,20 +413,32 @@ public class DBEditSet {
    *
    * commit is used to cause all changes in association with
    * this DBEditSet to be performed.  If commit() cannot make
-   * the changes for any reason, commit() will return false and
-   * the database will be unchanged.
+   * the changes for any reason, commit() will return a ReturnVal
+   * indicating failure and the cause of the commit failure, and
+   * will leave the transaction open for a subsequent commit() attempt,
+   * or an abort().<br><br>
    *
-   * @return Whether the transaction was committed (true) or released (false).
+   * The returned ReturnVal will have doNormalProcessing set to false if
+   * the transaction was completely aborted.  Both DBSession and the client
+   * should take a false doNormalProcessing boolean as an indicator that
+   * the transaction was simply wiped out and a new transaction should
+   * be opened for subsequent activity.  A true doNormalProcessing value
+   * indicates that the client can try the commit again at a later time,
+   * or manually cancel.
+   *
+   * @return a ReturnVal indicating success or failure, or null on success
+   * without comment.
    * 
    */
 
-  public synchronized boolean commit()
+  public synchronized ReturnVal commit()
   {
     Vector baseSet;
     Enumeration enum;
     DBObjectBase base;
     Object key;
     DBEditObject eObj;
+    ReturnVal retVal = null;
 
     Date modDate = new Date();
 
@@ -442,6 +454,8 @@ public class DBEditSet {
 	throw new RuntimeException("already committed or released");
       }
 
+    // determine what bases we need to lock to do this commit
+
     baseSet = new Vector();
     enum = basesModified.keys();
 
@@ -450,10 +464,15 @@ public class DBEditSet {
 	baseSet.addElement(enum.nextElement());
       }
 
+    // and try to lock the bases down.
+
     if (debug)
       {
 	System.err.println(session.key + ": DBEditSet.commit(): acquiring write lock");
       }
+
+    // We'll first check to see if we already have a lock open from a
+    // prior failed commit() attempt.
 
     if (wLock != null)
       {
@@ -463,16 +482,27 @@ public class DBEditSet {
                         	// thread's establish method to have an interrupted exception thrown
 	    wLock = null;
 
-	    System.err.println(session.key + ": DBEditSet.commit(): aborting dead write lock");
+	    Ganymede.debug(session.key + ": DBEditSet.commit(): killing dead write lock");
 	  }
 	else
 	  {
 	    System.err.println(session.key +
 			       ": DBEditSet.commit(): dead (?) write lock already established.. can't commit");
-	    release();
-	    return false;
+
+	    retVal =  Ganymede.createErrorDialog("Commit failure",
+						 "Couldn't commit transaction, there is an existing write " +
+						 "lock interfering with commit.");
+
+	    // we didn't kill off this transaction, we just couldn't commit it at
+	    // this time.. let the DBSession and client code know that.
+
+	    retVal.doNormalProcessing = true;
+
+	    return retVal;
 	  }
       }
+
+    // Create the lock on the bases changed
 
     wLock = new DBWriteLock(dbStore, baseSet);
     
@@ -480,6 +510,9 @@ public class DBEditSet {
       {
 	System.err.println(session.key + ": DBEditSet.commit(): created write lock");
       }
+
+    // and establish.  This establish() call will cause our thread to block
+    // until we can get all the bases we need locked.
 
     try
       {
@@ -491,7 +524,9 @@ public class DBEditSet {
 		       session.key);
 	release();
 	wLock = null;
-	return false;
+
+	return Ganymede.createErrorDialog("Commit failure",
+					  "Couldn't commit transaction, our write lock was denied.. server going down?");
       }
 
     // This yield is here to allow me to verify that the locking logic
@@ -505,8 +540,8 @@ public class DBEditSet {
 			   ": DBEditSet.commit(): established write lock");
       }
 
-    // write the creation and / or modification info into the object and 
-    // verify phase one of our commit protocol
+    // write the creation and / or modification info into the objects,
+    // run the objects' commit routines.
 
     DateDBField df;
     StringDBField sf;
@@ -525,127 +560,172 @@ public class DBEditSet {
 
     try
       {
-	boolean done = false;
+	// we're going to checkpoint the transaction here so that we
+	// can abort cleanly if something rejects go-ahead in
+	// commitPhase1().  commitPhase1() may not make any changes
+	// that we need to worry about, but once we call
+	// commitPhase1() on an object, we can't make _any_ changes to
+	// it.  So, we need to set the modification times and what-not
+	// before we call commitPhase1() and find out whether the object
+	// considers itself good to go.  In theory, we could avoid the
+	// checkpointing altogether and just assume that our timestamp
+	// changes to the object won't ever have any bearing on the
+	// object's commitPhase1() go/no go, but that would require
+	// special-case coding, whereas we can just use the checkpoint
+	// system to achieve the same ends generically.
+	
+	String checkpointLabel = "commit" + (new Date()).toString();
 
-	// we need to loop over the objects in our transaction until
-	// we don't have any objects in the transaction that need to
-	// be processed.  The act of handling the remove logic for an
-	// object may cause other objects to be pulled into this transaction's
-	// list of touched objects, in which case we'll need to keep looping
-	// until things settle out.
+	checkpoint(checkpointLabel);
 
-	// clone the object list so that we don't loop
-	// over a list of objects that is going to change on us
-
-	Vector objList = (Vector) objects.clone();
-
-	while (!done)
-	  {
-	    System.err.println("DBEditSet.commit(): looping the loop");
-
-	    // assume we're done, until we find out otherwise
-
-	    done = true;
-
-	    for (int i = 0; i < objList.size(); i++)
-	      {
-		eObj = (DBEditObject) objList.elementAt(i);
-
-		if (!eObj.finalized)
-		  {
-		    done = false; // we'll need to loop through again
-		  }
-		else
-		  {
-		    continue;	// skip this object, we've already processed it
-		  }
-
-		switch (eObj.getStatus())
-		  {
-		  case DBEditObject.CREATING:
-		    
-		    if (!eObj.isEmbedded())
-		      {
-			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-			df.setValueLocal(modDate);
-			
-			sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-			
-			result = session.getID();
-			
-			if (description != null)
-			  {
-			    result += ": " + description;
-			  }
-
-			sf.setValueLocal(result);
-		      }
-		    else if (false) // XXX debug
-		      {
-			System.err.println("XX committing embedded object:" + eObj.getLabel());
-
-			InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
-			
-			if (invf == null)
-			  {
-			    System.err.println("XX embedded object's container link is undefined (?!)");
-			  }
-			else
-			  {
-			    System.err.println("XX embedded object's container link value is: " + 
-					       invf.getValueString());
-			  }
-		      }
-
-		  case DBEditObject.EDITING:
-		    
-		    if (!eObj.getBase().isEmbedded())
-		      {
-			df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-			df.setValueLocal(modDate);
-
-			sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-
-			result = session.getID();
-
-			if (description != null)
-			  {
-			    result += ": " + description;
-			  }
-
-			sf.setValueLocal(result);
-		      }
-
-		    eObj.finalized = true;
-		    break;
-
-		  case DBEditObject.DELETING:
-		  case DBEditObject.DROPPING:
-
-		    // Deletion activities for this object were done at the time of the
-		    // client's request.. the commit logic may have something to do,
-		    // however.
-
-		    eObj.finalized = true;
-		    break;
-		  }
-	      }
-	  }
-
-	// now do the commit logic for the objects
+	// Ok, we now need to go through the objects that are being
+	// changed by this transaction and update their informational
+	// fields.
+    
+	// Note that we are assuming here that none of the changes we
+	// make at this point (setting creation dates, modification
+	// dates, etc.) will alter the working set of this transaction
+	// (i.e., no new objects will be brought into the transaction
+	// by anything we do here.)
 
 	for (int i = 0; i < objects.size(); i++)
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
 
-	    if (!eObj.commitPhase1())
+	    switch (eObj.getStatus())
 	      {
-		releaseWriteLock("transaction commit rejected in phase 1");
-		release();
-		Ganymede.debug("Transaction commit rejected in phase 1");
-		return false;
+	      case DBEditObject.CREATING:
+		    
+		if (!eObj.isEmbedded())
+		  {
+		    df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+		    df.setValueLocal(modDate);
+			
+		    sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+			
+		    result = session.getID();
+			
+		    if (description != null)
+		      {
+			result += ": " + description;
+		      }
+
+		    sf.setValueLocal(result);
+		  }
+
+		// * fall-through *
+
+	      case DBEditObject.EDITING:
+		    
+		if (!eObj.isEmbedded())
+		  {
+		    df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+		    df.setValueLocal(modDate);
+
+		    sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+
+		    result = session.getID();
+
+		    if (description != null)
+		      {
+			result += ": " + description;
+		      }
+
+		    sf.setValueLocal(result);
+		  }
+		else
+		  {
+		    InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
+			
+		    if (invf == null || invf.getValueLocal() == null)
+		      {
+			Ganymede.debug("DBEditSet.commit(): WARNING, an embedded object's " +
+				       "container link is undefined or null-valued.(?!)");
+		      }
+		  }
+
+		eObj.finalized = true;
+		break;
+
+	      case DBEditObject.DELETING:
+	      case DBEditObject.DROPPING:
+
+		// Deletion activities for this object were done at the time of the
+		// client's request.. the commit logic may have something to do,
+		// however.
+
+		eObj.finalized = true;
+		break;
 	      }
 	  }
+
+	// Check all the objects that we have checked out to make sure their
+	// commit logic approves the transaction.
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    eObj = (DBEditObject) objects.elementAt(i);
+
+	    retVal = eObj.checkRequiredFields();
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		// we're not going to clear out the transaction, 
+		// as there is a chance the user can fix things
+		// up.  We need to clear the committing flag on
+		// all objects that we've called commitPhase1()
+		// on so that they will accept future changes.
+		
+		for (int j = 0; j < i; j++)
+		  {
+		    eObj = (DBEditObject) objects.elementAt(i);
+		    eObj.release(); // undo committing flag
+		  }
+		
+		releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
+		
+		// undo the time stamp changes and what-not.
+		
+		rollback(checkpointLabel);
+		
+		// let DBSession/the client know they can retry things.
+		
+		retVal.doNormalProcessing = true;
+		return retVal;
+	      }
+
+	    retVal = eObj.commitPhase1();
+	
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		// we're not going to clear out the transaction, 
+		// as there is a chance the user can fix things
+		// up.  We need to clear the committing flag on
+		// all objects that we've called commitPhase1()
+		// on so that they will accept future changes.
+
+		for (int j = 0; j <= i; j++)
+		  {
+		    eObj = (DBEditObject) objects.elementAt(i);
+		    eObj.release(); // undo committing flag
+		  }
+	    
+		releaseWriteLock("transaction commit rejected in phase 1");
+
+		// undo the time stamp changes and what-not.
+
+		rollback(checkpointLabel);
+
+		// let DBSession/the client know they can retry things.
+
+		retVal.doNormalProcessing = true;
+		return retVal;
+	      }
+	  }
+
+	// we've gotten this far, phase one must have completed ok.
+
+	popCheckpoint(checkpointLabel);
 
 	// need to clear out any transients before
 	// we write the transaction out to disk
@@ -685,7 +765,6 @@ public class DBEditSet {
 
 		    if (diff != null)
 		      {
-			
 			if (debug)
 			  {
 			    System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
@@ -712,7 +791,14 @@ public class DBEditSet {
 		releaseWriteLock("couldn't write transaction to disk");
 		release();
 		Ganymede.debug("DBEditSet.commit(): Couldn't write transaction to disk");
-		return false;
+
+		// Ganymede.createErrorDialog() sets doNormalProcessing to false,
+		// so DBSession and the client should know we're doing a total
+		// scrub.
+		
+		return Ganymede.createErrorDialog("Couldn't commit transaction, couldn't write transaction to disk",
+						  "Couldn't commit transaction, the server may have run out of" +
+						  " disk space.  Couldn't write transaction to disk.");
 	      }
 	  }
 	catch (IOException ex)
@@ -726,7 +812,14 @@ public class DBEditSet {
 	    releaseWriteLock("IO Exception in transaction commit");
 	    release();
 	    Ganymede.debug("IO exception in transaction commit");
-	    return false;
+
+	    // Ganymede.createErrorDialog() sets doNormalProcessing to false,
+	    // so DBSession and the client should know we're doing a total
+	    // scrub.
+
+	    return Ganymede.createErrorDialog("Couldn't commit transaction, IOException caught writing journal",
+					      "Couldn't commit transaction, the server may have run out of" +
+					      " disk space.");
 	  }
 
 	// log it
@@ -744,7 +837,7 @@ public class DBEditSet {
 	  }
 
 	// phase one complete, go ahead and have all our
-	// objects do their 2nd level commit processes
+	// objects do their 2nd level (external) commit processes
 
 	for (int i = 0; i < objects.size(); i++)
 	  {
@@ -758,10 +851,16 @@ public class DBEditSet {
 	Ganymede.debug("** Caught exception while preparing transaction for commit: " + ex);
 	Ganymede.debug("** aborting transaction");
 	ex.printStackTrace();
-	Ganymede.debug(ex.getMessage());
 	releaseWriteLock("exception caught while preparing trans.");
 	release();
-	return false;
+
+	// Ganymede.createErrorDialog() sets doNormalProcessing to false,
+	// so DBSession and the client should know we're doing a total
+	// scrub.
+
+	retVal = Ganymede.createErrorDialog("Couldn't commit transaction, exception caught in DBEditSet.commit()",
+					    ex.getMessage());
+	return retVal;
       }
 
     if (debug)
@@ -810,20 +909,36 @@ public class DBEditSet {
 	    break;
 
 	  case DBEditObject.DELETING:
+
+	    // Deleted objects had their deletion finalization done before
+	    // we ever got to this point.  
+
+	    // Note that we don't try to release the id for previously
+	    // registered objects.. the base.releaseId() method really
+	    // can only handle popping object id's off of a stack, and
+	    // can't do anything for object id's unless the id was the
+	    // last one allocated in that base, which is unlikely
+	    // enough that we don't worry about it here.
+
 	    base.objectHash.remove(new Integer(eObj.id));
-	    base.store.checkIn(); // count it as checked out until it's deleted
+	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 
 	  case DBEditObject.DROPPING:
+
+	    // dropped objects had their deletion finalization done before
+	    // we ever got to this point.. 
+
 	    base.releaseId(eObj.getID()); // relinquish the unused invid
-	    base.store.checkIn(); // count it as checked out until it's deleted
+	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 	  }
       }
 
     if (debug)
       {
-	System.err.println(session.key + ": DBEditSet.commit(): transaction objects integrated into in-memory hashes");
+	System.err.println(session.key +
+			   ": DBEditSet.commit(): transaction objects integrated into in-memory hashes");
       }
 
     // confirm all namespace modifications associated with this editset
@@ -857,9 +972,17 @@ public class DBEditSet {
     objects = null;
     session = null;
 
+    // clear out any checkpoints that may be lingering
+
     checkpoints = new Stack();
 
-    return true;
+    // we're going to return a ReturnVal with doNormalProcessing set to
+    // false to let everyone above us know that we've totally cleared
+    // out this transaction, being as we were successful and all.
+
+    retVal = new ReturnVal(true, false);
+
+    return retVal;
   }
 
   /**
