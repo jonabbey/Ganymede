@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.86 $ %D%
+   Version: $Revision: 1.87 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,7 +154,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   //
 
   private boolean
-    showToolbar = false,       // Show the toolbar
+    showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
   
   helpPanel
@@ -257,6 +257,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   JMenuItem
     editObjectMI,
     viewObjectMI,
+    createObjectMI,
     cloneObjectMI,
     deleteObjectMI,
     inactivateObjectMI,
@@ -379,12 +380,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     actionMenu = new JMenu("Actions");
 
+    createObjectMI = new JMenuItem("Create Object");
+    createObjectMI.setMnemonic('c');
+    createObjectMI.setActionCommand("create new object");
+    createObjectMI.addActionListener(this);
+    
     editObjectMI = new JMenuItem("Edit Object");
     editObjectMI.setMnemonic('e');
     editObjectMI.setActionCommand("open object for editing");
     editObjectMI.addActionListener(this);
 
     viewObjectMI = new JMenuItem("View Object");
+    viewObjectMI.setMnemonic('v');
     viewObjectMI.setActionCommand("open object for viewing");
     viewObjectMI.addActionListener(this);
     
@@ -393,10 +400,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     //cloneObjectMI.addActionListener(this);
 
     deleteObjectMI = new JMenuItem("Delete Object");
+    deleteObjectMI.setMnemonic('d');
     deleteObjectMI.setActionCommand("delete an object");
     deleteObjectMI.addActionListener(this);
 
     inactivateObjectMI = new JMenuItem("Inactivate Object");
+    inactivateObjectMI.setMnemonic('i');
     inactivateObjectMI.setActionCommand("inactivate an object");
     inactivateObjectMI.addActionListener(this);
 
@@ -409,9 +418,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     actionMenu.add(menubarQueryMI);
     actionMenu.add(showLogMI);
     actionMenu.addSeparator();
-    actionMenu.add(editObjectMI);
-    //actionMenu.add(cloneObjectMI);
     actionMenu.add(viewObjectMI);
+    actionMenu.add(createObjectMI);
+    actionMenu.add(editObjectMI);
     actionMenu.add(deleteObjectMI);
     actionMenu.add(inactivateObjectMI);
 
@@ -422,7 +431,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	actionMenu.addSeparator();
 	actionMenu.add(viewAnInvid);
       }
-
 
     // windowMenu
 
@@ -1513,7 +1521,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else if (debug)
       {
-	
 	System.out.println("No personas.");
       }
 
