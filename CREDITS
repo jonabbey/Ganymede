@@ -202,7 +202,7 @@ The XML SAX reference classes and interfaces used by the Ganymede
 server's XML parsing routines were written and released into the
 public domain by David Meggison <david@megginson.com>.  More
 information on the SAX standard for XML parsing can be found at the
-SAX home page at http://www.megginson.com/SAX/.
+SAX home page at http://www.saxproject.org/.
 
 The Ganymede server uses James Clark's excellent XMLWriter and XP
 parser class libraries for XML generation and parsing.  Both are
@@ -231,7 +231,31 @@ The Ganymede client makes use of the Foxtrot project
 threading tool that allows us to synchronously decouple the client's
 GUI thread from certain kinds of long-standing network activity on the
 client while allowing the GUI thread to dispatch GUI events until the
-network activity is done.
+network activity is done.  The Foxtrot project is included in the
+Ganymede clients under the BSD license.
+
+Some code in Ganymede 2.0 is based on Terence Parr's ANTLR parser
+generator.  The src/lib directory contains a jar file of classes from
+his project, which he has placed into the public domain.  See 
+http://www.antlr.org/ for information on ANTLR.
+
+The 'ant validate' task makes use of the Perl Config::Properties
+package, copyright by Randy Jay Yarger, Craig Manley, and Salvador
+Fandiño.  It is free software, licensed under the same terms as Perl
+is.  At the time of this writing, the URL for Config::Properties is
+http://search.cpan.org/src/SALVA/Config-Properties-0.58/.
+
+The verification/launchers directory contains some scripts that can be
+used to launch the Ganymede server in conjunction with software
+coverage and/or performance profiling code.  The software coverage
+tool that is used is called Emma, and it is Copyright by Vlad
+Roubtsov.  See http://emma.sourceforge.net/ for details on and source
+code from Emma.  Emma is distributed and licensed under the Common
+Public License, at http://www.eclipse.org/legal/cpl-v10.html.  The
+profiling tool is called PerfAnal, and it is distributed under the GNU
+General Public License.  See
+http://java.sun.com/developer/technicalArticles/Programming/perfanal/
+for details on PerfAnal.
 
 --
 

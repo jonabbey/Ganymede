@@ -35,28 +35,30 @@ were still stuck with CVS.
 
 2. [SERVER] Localization
 
-The Ganymede server now incorporates a method for localizing message
-strings.  A new class, arlut.csd.Util.TranslationService, has been
-added which handles string lookup and templatization from string
-resource files held in the src/resources tree.  
+The Ganymede clients and server now incorporates a method for
+localizing message strings.  A new class,
+arlut.csd.Util.TranslationService, has been added which handles string
+lookup and templatization from string resource files held in the
+src/resources tree.
 
 The following classes have had their message strings pulled out into
 localization resource files:
 
-	DBEditSet              GanymedeSession
-	DBField                InvidDBField
-	DBObject               JythonServerProtocol
-	DBObjectBase           JythonServerWorker
-	DBSession              dumpAndArchiveTask
-	DBStore                dumpTask
-	Ganymede               gcTask
-	GanymedeServer         memoryStatusTask
-        DBEditObject           DBJournal
-        IPDBField              XMLTransmitter
-        SyncRunner             GASHAdmin
-        GASHAdminFrame         fieldoption_button
-        fieldoption_editor     GanymedeValidationTask
-        xmlclient              DBObjectBaseField
+	DBEditObject		GanymedeServer
+	DBEditSet		GanymedeSession
+	DBField			GanymedeValidationTask
+	DBJournal		GanymedeXMLSession
+	DBObjectBaseField	gcTask
+	DBObjectBase		InvidDBField
+	DBObject		IPDBField
+	DBSession		JythonServerProtocol
+	DBStore			JythonServerWorker
+	dumpAndArchiveTask	memoryStatusTask
+	dumpTask		SyncRunner
+	GanymedeBuilderTask	XMLTransmitter
+	Ganymede		xmlclient
+	GASHAdmin		GASHAdminFrame
+	fieldoption_button	fieldoption_editor		
 
 The default, American English versions of these localization files are
 simply called <classname>.properties.  When the Ganymede server is run

@@ -7,7 +7,7 @@
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br>Release 2.0 dev - ? ? 2005</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br/>Release 2.0 dev - ? ? 2005<br/>$Rev$</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
@@ -70,7 +70,8 @@ Ganymede server, the Ganymede client suite, and the schema kit.</p>
 your network directory information in its built-in object database and
 updating various network services when changes are made.  The server
 is designed to be installed on a UNIX system, and depends on Java and
-Perl to carry out its internal and external operations.</p>
+scripting languages such as Perl or Python to carry out its internal
+and external operations.</p>
 
 <p>The Ganymede client suite includes a variety of command-line, web,
 and GUI clients that can connect to the Ganymede server over the
@@ -141,15 +142,6 @@ UNIX or Mac OS X system and then use a web server to publish the
 clients to your network, using either the Java Plugin or the Java Web
 Start tools.</p>
 
-<p>By default, Java's security model will not allow a downloaded
-applet to establish a network connection to any system other than the
-one it was downloaded from, so you will need to install Apache or
-another web server on the same machine on which you will be running
-the Ganymede server.  You should probably go ahead and install the
-Ganymede server and Apache on a dedicated machine rather than
-installing the Ganymede server on your existing web server machine,
-if you are worried about performance.</p>
-
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><b>2. Configuring and Building the Distribution for Your Site</b></h2></td>
@@ -179,8 +171,7 @@ placed into the client's ganymede.jar and the admin console's
 ganymedeAdmin.jar files.  In this way, your Ganymede client and admin
 console will be tied to your Ganymede server.  By generating unique
 key and certificates for each installation, you can be assured that
-the clients you distribute are talking to your Ganymede server, and
-vice-versa.</p>
+the clients you distribute are talking to your Ganymede server.</p>
 
 <p>After building the Ganymede software, <a
 href="glossary.html#configure">configure</a> will copy a few scripts
@@ -305,9 +296,11 @@ directory.</p>
 <dt><b>What mailhost should Ganymede use to send out diagnostic mail?</b></dt>
 <dd>
 	<p>The Ganymede server is able to send out email in response
-	to a variety of system events.  If the UNIX system you are
-	installing Ganymede on is able to send mail, you are probably
-	okay with the default.</p>
+	to a variety of system events.  If you don't want the Ganymede
+	server ever to send email, you can leave this blank.
+	Otherwise you should enter the DNS name or IP address of a
+	mail server that will accept unauthenticated SMTP mail from
+	the Ganymede server.</p>
 </dd>
 
 <dt><b>What email address should Ganymede sign on email that it sends out?</b></dt>
@@ -562,7 +555,7 @@ generate for you.
 process running, that being the Ganymede server.  If you are running
 the Ganymede server on certain older versions of the Linux system, you
 may see what looks like a very large number of Java processes running.
-This is perfectly normal.  In current versions of Linux, the
+This is perfectly normal.  In those versions of Linux, the
 <code>ps</code> and <code>top</code> commands will show you a separate
 entry for each thread that is running in a given process.  The
 Ganymede server is heavily multithreaded, so you should expect to see
@@ -577,8 +570,9 @@ shutdown message, which will result in the server kicking any active
 users off the system, consolidating its database to disk, and finally
 shutting down.  The Ganymede server is designed to recover smoothly on
 restart if it is killed or if the system crashes or is rebooted at any
-point during its execution, but the server might spend a bit of time
-consolidating data from its journal in such cases.</p>
+point during its execution, but if the server is not shut down
+cleanly, it might spend a bit of time consolidating data from its
+journal when it starts up again.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -704,8 +698,8 @@ document, below, for details on supporting JNLP launch.</p>
 platform that supports Java 1.4 or better, as the clients are written
 in pure Java.  The Ganymede clients are dual-mode, and will work both
 as an applet and as a command line application.  If you are trying to
-run the clients on a platform like OS/2, AS/400, or VMS, and can't
-take advantage of JNLP launch services, you may want to examine the <a
+run the clients on a platform that supports Java 1.4 but which doesn't
+have a JNLP launcher available, you may want to examine the <a
 href="glossary.html#ganymede">ganymede</a> and <a
 href="glossary.html#ganymedeAdmin">ganymedeAdmin</a> launch scripts
 installed by the <a
@@ -719,7 +713,7 @@ appropriate translations of the launch scripts for your platform.</p>
     </table> 
     
 <p>The <a href="glossary.html#installWeb">installWeb</a> script is
-used to install, on your UNIX system, the html, cgi, jnlp and java
+used to install, on your UNIX system, the html, cgi, JNLP and java
 files needed to support client access to Ganymede from a web browser.
 When you run <a href="glossary.html#installWeb">installWeb</a>, it
 will ask you a small number of questions, including the following:</p>
@@ -812,23 +806,19 @@ requires both JavaScript and Java support.</p>
 
 <p>If you do want your users to be able to run the full Ganymede
 client, you will need to be sure that their web browsers are
-configured properly.  Your users will need their web browser to be
-configured with Java 1.4 or better.  The Ganymede web launch page has
-two options available for launching clients.  'Java Web Start' is
-probably the most efficient way of launching the clients, as it allows
-your users' systems to cache the applet jar files locally for fast
-startup.  If you do not have your web server configured to support
-JNLP files, however, they will need to use 'Native'.</p>
+configured properly, either with support for running Java 1.4 applets
+directly, or for passing a JNLP file to Java Web Start.</p>
 
-<p><b>IMPORTANT NOTE</b>: whenever you run applets using the Native
-mode, the applets can only run as long as the log-in applet is still
-displayed in the web browser.  If you close the main browser window or
-click to a different page (either by following a link or by clicking
-back on the browser), the applet will be shut down.  Both the Ganymede
-client and admin console have been written so that this shut-down is
-handled in an orderly fashion, but the shut-down is unavoidable, so be
-sure not to disturb the applet frame while you are using the client or
-console.</p>
+
+<p><b>IMPORTANT NOTE</b>: whenever you run applets using the Native or
+Java Plug In mode, the applets can only run as long as the log-in
+applet is still displayed in the web browser.  If you close the main
+browser window or click to a different page (either by following a
+link or by clicking back on the browser), the applet will be shut
+down.  Both the Ganymede client and admin console have been written so
+that this shut-down is handled in an orderly fashion, but the
+shut-down is unavoidable, so be sure not to disturb the applet frame
+while you are using the client or console.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -836,22 +826,21 @@ console.</p>
       </tr>
     </table> 
 
-    <p>As of Ganymede 1.0.5, Ganymede supports the use of Sun's Java
-    Web Start at <a
-    href="http://java.sun.com/products/javawebstart/">http://java.sun.com/products/javawebstart/</a>
+    <p>Ganymede supports the use of Sun's Java Web Start (at <a
+    href="http://java.sun.com/products/javawebstart/">http://java.sun.com/products/javawebstart/</a>)
     to handle launching the Ganymede client and admin console.  With
-    Java Web Start, your users will be able to run the Ganymede client
-    applets on their Windows desktops without needing to bother with a
-    web browser.  Users on platforms other than Windows may want to
-    look at the OpenJNLP project at <a
+    Java Web Start, your users should be able to run the Ganymede
+    client applets on their Windows or Linux desktops without needing
+    to bother with a web browser.  Users on platforms other than
+    Windows may want to look at the OpenJNLP project at <a
     href="http://openjnlp.nanode.org/">http://openjnlp.nanode.org/</a>
     or the JavaURL project at <a
     href="http://www.amherst.edu/~tliron/javaurl/">http://www.amherst.edu/~tliron/javaurl/</a>.</p>
 
-    <p>In order to support any JNLP launcher service on the client, your web server has to be
-    configured to identify the proper MIME type for the Java Network
-    Launch Protocol (.jnlp) files that tell the Java Web Start system
-    how to manage the Ganymede clients.</p>
+    <p>In order to support any JNLP launcher service on the client,
+    your web server has to be configured to identify the proper MIME
+    type for the Java Network Launch Protocol (.jnlp) files that tell
+    the Java Web Start system how to manage the Ganymede clients.</p>
 
     <p>If you are running Apache, configuring your web server to
     support the Java Web Start option for launching the Ganymede
@@ -869,16 +858,25 @@ console.</p>
         application/x-java-jnlp-file jnlp
     </pre>
 
-    <p>Whichever approach you choose, you may need to cause your web server to re-read its
-    configuration file.  With an Apache server, this can be achieved by sending a HUP signal to the server.
-    If you don't know what that means, simply stopping and restarting your web server
-    should work too.</p>
+    <p>Whichever approach you choose, you may need to cause your web
+    server to re-read its configuration file.  With an Apache server,
+    this can be achieved by sending a HUP signal to the server.  If
+    you don't know what that means, simply stopping and restarting
+    your web server should work too.</p>
 
-    <p>If you don't perform this step, your users will not be able to
-    use the Java Web Start launch option, but they should still be
-    able to run the Ganymede clients from their web browser, with
-    somewhat less convenience, if they have the Java Plugin
-    installed.</p>
+    <p>In addition to the server-side configuration, your users' web
+    browsers must be configured to run the JNLP launcher when a
+    resource of MIME type <code>application/x-java-jnlp-file</code> is
+    downloaded.  The Java Web Start package should take care of that
+    automatically on Windows and Mac OS X, but on a Linux or FreeBSD
+    system, your users may have to do some manual configuration.</p>
+
+    <p>If you don't configure your server and your users' clients for
+    the use of JNLP, your users will not be able to use the Java Web
+    Start launch option, but they should still be able to run the
+    Ganymede clients from their web browser, with somewhat less
+    convenience.</p>
+
     <hr>
 
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>

@@ -79,15 +79,13 @@
     <p><font color="#ff0000"><code><b>configure</b></code></font> is
     the first script that must be run after unpacking the UNIX
     Ganymede distribution.  configure asks a few questions to
-    determine the location of Perl 5.003 or later, as well as the jdk
-    binaries and the Swing GUI library.  <font
-    color="#ff0000"><code><b>configure</b></code></font> then creates
+    determine the location of Perl 5.003 or later, Java, and Ant. <font
+    color="#ff0000"><code><b>configure</b></code></font> then builds the Ganymede
+    software for you and creates
     the <a href="#installServer">installServer</a>, <a
     href="#installClient">installClient</a>, and <a
     href="#installWeb">installWeb</a> scripts used to actually install
-    the server and client software, and generates the makefiles and
-    configure.sh files used to customize the src tree for building on
-    your system.</p>
+    the server and client software.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -387,8 +385,7 @@
     Bourne shell script, located in the <code>bin</code> directory under the
     location where you installed the server using the <a
     href="#installServer">installServer</a> script. <font color="#ff0000"><code><b>runServer</b></code></font> runs the
-    Ganymede server and the RMI registry that the server depends
-    on.</p>
+    Ganymede server for you.</p>
 
     <p>If you look at the <font
     color="#ff0000"><code><b>runServer</b></code></font> script, you

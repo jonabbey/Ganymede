@@ -9,8 +9,11 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-This release of Ganymede includes full sources for everything.
-By default, the compiled classes for the Ganymede server,
+This release of Ganymede includes full sources for everything, with
+the exception of certain classes provided from the ANTLR and GNU
+regexp projects.
+
+By default, the Ganymede distribution  compiled classes for the Ganymede server,
 client, and admin console are held in the top-level jars directory.
 If you want to rebuild the jars from scratch, here's what you do.
 
@@ -21,10 +24,7 @@ If you want to rebuild the jars from scratch, here's what you do.
    can set your CLASSPATH to <install>/src/build/classes and run
    the Ganymede tools.
 
-   You shouldn't see any errors or warnings during the make, with
-   the exception of some deprecation warnings having to do with
-   the org.xml.sax classes Sun decided to bundle into the 1.4
-   JDK, if you compile under 1.4.
+   You shouldn't see any errors or warnings during the build.
 
 4. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.
