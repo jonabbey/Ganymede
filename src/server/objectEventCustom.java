@@ -5,7 +5,7 @@
    This file is a management class for object event-class records in Ganymede.
    
    Created: 9 July 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -110,28 +110,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
-   *
-   * If there is no caching key, this method will return null.
-   *
-   */
-
-  public Object obtainChoicesKey(DBField field)
-  {
-    if (field.getID() == SchemaConstants.ObjectEventMailList)
-      {
-	return null;
-      }
-
-    return super.obtainChoicesKey(field);
-  }
-
-  /**
-   *
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
    * choose from a choice provided by obtainChoiceList()
@@ -208,36 +186,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    if (field.getID() == SchemaConstants.ObjectEventMailList)	// mail list
-      {
-	QueryResult result;
-	GanymedeSession session = editset.getSession().getGSession();
-
-	/* -- */
-
-	result = session.query(new Query(SchemaConstants.UserBase));
-	
-	if (result == null)
-	  {
-	    result = session.query(new Query((short) 274));
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 274))); // email list
-	  }
-
-	if (result == null)
-	  {
-	    result = session.query(new Query((short) 275)); // email redirect
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 275))); // email redirect
-	  }
-
-	return result;
-      }
-
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
 	if (objectTypeList == null)

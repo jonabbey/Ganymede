@@ -5,7 +5,7 @@
    This file is a management class for event-class records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -71,76 +71,13 @@ public class eventCustom extends DBEditObject implements SchemaConstants {
   {
     // both fields defined in event are required
 
-    return true;
-  }
-
-  /**
-   *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
-   *
-   * If there is no caching key, this method will return null.
-   *
-   */
-
-  public Object obtainChoicesKey(DBField field)
-  {
-    if (field.getID() == 104)
+    switch (fieldid)
       {
-	return null;
+      case SchemaConstants.EventToken:
+      case SchemaConstants.EventName:
+	return true;
       }
 
-    return super.obtainChoicesKey(field);
-  }
-
-  /**
-   *
-   * This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
-   *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
-   * 
-   */
-
-  public QueryResult obtainChoiceList(DBField field)
-  {
-
-    if (field.getID() == 104)	// mail list
-      {
-	QueryResult result;
-	GanymedeSession session = editset.getSession().getGSession();
-
-	/* -- */
-
-	result = session.query(new Query(SchemaConstants.UserBase));
-	
-	if (result == null)
-	  {
-	    result = session.query(new Query((short) 274));
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 274))); // email list
-	  }
-
-	if (result == null)
-	  {
-	    result = session.query(new Query((short) 275)); // email redirect
-	  }
-	else
-	  {
-	    result.append(session.query(new Query((short) 275))); // email redirect
-	  }
-
-	return result;
-      }
-
-    return super.obtainChoiceList(field);
+    return false;
   }
 }
