@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -246,6 +246,11 @@ public class DBObjectBaseField {
 	    out.print(", type " + limit + " only");
 	  }
 	break;
+      }
+
+    if (namespace != null)
+      {
+	out.print(" <" + namespace.name + ">");
       }
 
     out.println();
