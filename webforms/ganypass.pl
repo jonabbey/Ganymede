@@ -95,6 +95,10 @@ sub make_xml
   $new_pass =~ s/&/&amp;/g;
   $old_pass =~ s/\"/&quot;/g;
   $new_pass =~ s/\"/&quot;/g;
+  $old_pass =~ s/</&lt;/g;
+  $new_pass =~ s/</&lt;/g;
+  $old_pass =~ s/>/&gt;/g;
+  $new_pass =~ s/>/&gt;/g;
   
   if (-f $filename) {
     die "Error, $filename already exists!";
