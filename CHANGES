@@ -1152,6 +1152,11 @@ of a newly created Permission Matrix in the log file.
 
 Fixed the xml parser's handling of permission matrix field objects.
 
+81. [SERVER] Redfined DBEditObject.canRemove() to allow dialog return
+
+Modified the canRemove() method in the DBEditObject class to allow
+a complete ReturnVal to be returned rather than the old boolean.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
