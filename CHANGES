@@ -160,6 +160,18 @@ rendering operations for them are handled on the GUI thread, which
 should help avoid some exception traces that were occasionally
 being thrown on the client.
 
+13. [GUI, SCHEMA EDITOR] Fixed a race condition in the tree node drag code
+
+The schema editor provides support for re-ordering fields within an
+object, or objects within an object category folder.  The tree GUI
+component had a race condition.  Depending on the rate at which the
+Java GUI thread produced mouse motion events and the rate at which the
+user moved the mouse, node dragging could result in the wrong node
+being dragged.  
+
+This of course, made the schema editor amazingly frustrating to try
+and use if conditions allowed this bug to be expressed.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
