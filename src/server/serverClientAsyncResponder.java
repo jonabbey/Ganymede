@@ -16,8 +16,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2003/09/05 00:51:24 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/09/09 02:49:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,11 +88,11 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.5 $ $Date: 2003/09/05 00:51:24 $
+ * @version $Revision: 1.6 $ $Date: 2003/09/09 02:49:06 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class serverClientAsyncResponder implements ClientAsyncResponder, Remote {
+public class serverClientAsyncResponder extends UnicastRemoteObject implements ClientAsyncResponder {
 
   /**
    * <p>Our queue of {@link arlut.csd.ganymede.clientAsyncMessage clientAsyncMessage} objects.</p>
@@ -149,8 +149,12 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 
   /* -- */
 
-  public serverClientAsyncResponder()
+  public serverClientAsyncResponder() throws RemoteException
   {
+    super();			// UnicastRemoteObject may throw RemoteException
+
+    /* -- */
+
     eventBuffer = new clientAsyncMessage[maxBufferSize];
     lookUp = new clientAsyncMessage[clientAsyncMessage.LAST - clientAsyncMessage.FIRST + 1];
   }

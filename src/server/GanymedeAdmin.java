@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2003/09/09 02:01:53 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2003/09/09 02:49:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.Util.VectorUtils;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.67 $ $Date: 2003/09/09 02:01:53 $
+ * @version $Revision: 1.68 $ $Date: 2003/09/09 02:49:05 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -893,7 +893,12 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public AdminAsyncResponder getAsyncPort() throws RemoteException
   {
-    return (AdminAsyncResponder) asyncPort;
+    // we need to create a temp variable defined in terms of the
+    // interface so that RMI won't freak out and try to serialize the
+    // serverAdminAsyncResponder.
+
+    AdminAsyncResponder myAsyncPort = (AdminAsyncResponder) asyncPort;
+    return myAsyncPort;
   }
 
   /**

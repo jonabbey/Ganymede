@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2003/09/09 01:41:46 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2003/09/09 02:49:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,8 +52,6 @@ package arlut.csd.ganymede;
 import java.util.*;
 import java.io.*;
 import java.rmi.*;
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -67,7 +65,7 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2003/09/09 01:41:46 $
+ * @version $Revision: 1.9 $ $Date: 2003/09/09 02:49:05 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
