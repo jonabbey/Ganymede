@@ -7,7 +7,7 @@
    depends on for administering default permissions.
    
    Created: 21 July 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,7 +106,7 @@ public interface SchemaConstants {
   /** an administrator privilege record */
   final static short PersonaBase = 1; 
 
-  /** what is this persona called? */
+  /** what is this descriptive tag for this persona, not including the user name? */
   final static short PersonaNameField = 100; 
 
   /** password for this admin account */
@@ -132,6 +132,13 @@ public interface SchemaConstants {
    * extracted from their user name.
    */
   final static short PersonaMailAddr = 107; 
+
+  /**
+   * string, a hidden label field.  Not usually directly editable, derived from
+   * PersonaNameField and PersonaAssocUser.
+   */
+  final static short PersonaLabelField = 108;
+
 
   /** Object number for a pre-defined object used by the server */
   final static short PersonaSupergashObj = 1;
