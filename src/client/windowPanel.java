@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -139,7 +139,12 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public void addWindow(db_object object)
   {
-    this.addWindow(object, false);
+    this.addWindow(object, false, null);
+  }
+
+  public void addWindow(db_object object, boolean editable)
+  {
+    this.addWindow(object, editable, null);
   }
 
   /**
@@ -152,7 +157,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
    *
    */
 
-  public void addWindow(db_object object, boolean editable)
+  public void addWindow(db_object object, boolean editable, String objectType)
   {
     String temp, title;
 
@@ -176,8 +181,14 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     
     try
       {
-	title = object.getLabel();
-	
+	if (objectType == null)
+	  {
+	    title = object.getLabel();
+	  }
+	else
+	  {
+	    title = objectType + " - " + object.getLabel();
+	  }
 	if (title == null)
 	  {
 	    title = new String("Null string");
@@ -191,6 +202,9 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  {
 	    title = "View: " + title;
 	  }
+	
+	System.out.println("Setting title to: " + title);
+
       }
     catch (RemoteException rx)
       {
@@ -230,10 +244,40 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     w.setLayer(new Integer(topLayer));
     
     add(w);
-    moveToFront(w);
+    setSelectedWindow(w);
+
     updateMenu();
     
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
+
+  public void setSelectedWindow(JInternalFrame window)
+  {
+    Enumeration windows = windowList.keys();
+    
+    while (windows.hasMoreElements())
+      {
+	JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
+	try
+	  {
+	    w.setSelected(false);
+	  }
+	catch (java.beans.PropertyVetoException e)
+	  {
+	    System.out.println("Could not set selected false.  sorry.");
+	  }
+      }
+
+
+    window.moveToFront();
+    try
+      {
+	window.setSelected(true);
+      }
+    catch (java.beans.PropertyVetoException e)
+      {
+	System.out.println("Could not set selected false.  sorry.");
+      }
   }
 
   public final void setStatus(String s)
@@ -317,7 +361,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  }
 	  
 	add(rt);
-	moveToFront(rt);
+	setSelectedWindow(rt);
+
 	updateMenu();
 	setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	setStatus("Done.");
@@ -343,11 +388,14 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     Windows.put(iconifyMI, w);
     iconifyMI.addActionListener(this);
 
-    JMenuItem closeMI = new JMenuItem("Close");
-    menuItems.put(closeMI , object);
-    Windows.put(closeMI, w);
-    closeMI.setEnabled(!editable);
-    closeMI.addActionListener(this);
+    JMenuItem closeMI = null;
+    if (!editable)
+      {
+	closeMI = new JMenuItem("Close");
+	menuItems.put(closeMI , object);
+	Windows.put(closeMI, w);
+	closeMI.addActionListener(this);
+      }
 
     JMenu deleteM = new JMenu("Delete");
     JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
@@ -357,37 +405,47 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     reallyDeleteMI.setActionCommand("ReallyDelete");
     reallyDeleteMI.addActionListener(this);
       
-    JMenuItem saveMI = new JMenuItem("Save");
-    Windows.put(saveMI, w);
-    menuItems.put(saveMI , object);
-    saveMI.setEnabled(false);
-    saveMI.addActionListener(this);
-
     JMenuItem inactivateMI = new JMenuItem("Inactivate");
     Windows.put(inactivateMI, w);
     menuItems.put(inactivateMI, object);
     inactivateMI.addActionListener(this);
-      
-    JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
-    Windows.put(setExpirationMI, w);
-    menuItems.put(setExpirationMI, object);
-    setExpirationMI.addActionListener(this);
 
-    JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
-    Windows.put(setRemovalMI, w);
-    menuItems.put(setRemovalMI, object);
-    setRemovalMI.addActionListener(this);
+    JMenuItem setExpirationMI = null;
+    JMenuItem setRemovalMI = null;
+    if (editable)
+      {
+	setExpirationMI = new JMenuItem("Set Expiration Date");
+	Windows.put(setExpirationMI, w);
+	menuItems.put(setExpirationMI, object);
+	setExpirationMI.addActionListener(this);
+	
+        setRemovalMI = new JMenuItem("Set Removal Date");
+	Windows.put(setRemovalMI, w);
+	menuItems.put(setRemovalMI, object);
+	setRemovalMI.addActionListener(this);
+      }
 
-    fileM.add(saveMI);
+    JMenuItem printMI = new JMenuItem("Print");
+    Windows.put(printMI, w);
+    menuItems.put(printMI, object);
+    printMI.addActionListener(this);
+
     fileM.add(inactivateMI);
     fileM.add(iconifyMI);
     fileM.add(deleteM);
-    fileM.addSeparator();
-    fileM.add(setExpirationMI);
-    fileM.add(setRemovalMI);
-    fileM.addSeparator();
-    fileM.add(closeMI);
-      
+    fileM.add(printMI);
+    if (editable)
+      {
+	fileM.addSeparator();
+	fileM.add(setExpirationMI);
+	fileM.add(setRemovalMI);
+      }
+    else
+      {
+	fileM.addSeparator();
+	fileM.add(closeMI);
+      }
+
     JMenuItem queryMI = new JMenuItem("Query");
     Windows.put(queryMI, w);
     queryMI.addActionListener(this);
@@ -400,6 +458,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     
     editM.add(queryMI);
     editM.add(editMI);
+
+    System.out.println("Returning menubar.");
     
     return menuBar;
   }
@@ -620,12 +680,14 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	obj = windowList.get(windows.nextElement());
 	MI = null;
 
-	if (obj instanceof JInternalFrame)
+	if (obj instanceof framePanel)
 	  {
-	    MI = new JMenuItem(((JInternalFrame)obj).getTitle());
+	    System.out.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+	    MI = new JMenuItem(((framePanel)obj).getTitle());
 	  }
 	else if (obj instanceof gResultTable)
 	  {
+	    System.out.println("Adding menu item: " + ((gResultTable)obj).getTitle());
 	    MI = new JMenuItem(((gResultTable)obj).getTitle());
 	  }
 
@@ -644,13 +706,38 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     Object obj = windowList.get(title);
 
-    if (obj instanceof JInternalFrame)
+    if (obj instanceof framePanel)
       {
-	((JInternalFrame)obj).moveToFront();
+	setSelectedWindow((framePanel)obj);
+	/*
+	((framePanel)obj).moveToFront();
+	try
+	  {
+	    ((framePanel)obj).setSelected(true);
+	  }
+	catch ( java.beans.PropertyVetoException e)
+	  {
+	    System.out.println("Couldn't select the window.");
+	  }
+	*/
       }
     else if (obj instanceof gResultTable)
       {
+	setSelectedWindow((gResultTable)obj);
+	/*
 	((gResultTable)obj).moveToFront();
+	try
+	  {
+	    ((gResultTable)obj).setSelected(true);
+	  }
+	catch ( java.beans.PropertyVetoException e)
+	  {
+	    System.out.println("Couldn't select the window.");
+	    }*/
+      }
+    else 
+      {
+	System.out.println("Hmm, don't know what kind of window this is.");
       }
   }
 
@@ -675,18 +762,18 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     if (e.getSource() instanceof MenuItem)
       {
-	if (e.getActionCommand().equals("showWindow"))
-	  {
-	    String label = ((MenuItem)e.getSource()).getLabel();
-	    showWindow(label);
-	  }
+	System.out.println("There shouldn't be any MenuItems (not J)");
       }
     else if (e.getSource() instanceof JMenuItem)
       {
 	System.out.println("Menu item action: " + e.getActionCommand());
-	
 	JMenuItem MI = (JMenuItem)e.getSource();
-	if (e.getActionCommand().equals("Edit"))
+
+	if (e.getActionCommand().equals("showWindow"))
+	  {
+	    showWindow(MI.getText());
+	  }
+	else if (e.getActionCommand().equals("Edit"))
 	  {
 	    if (debug)
 	      {
@@ -698,7 +785,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 		  {
 		    System.out.println("Opening new edit window");
 		  }
-		addWindow(gc.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
+		//addWindow(gc.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
+		gc.editObject(((db_object)menuItems.get(MI)).getInvid());
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -732,7 +820,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 		  {
 		    System.out.println("Deleting object");
 		  }
-		gc.session.remove_db_object(((db_object)menuItems.get(MI)).getInvid());
+		gc.deleteObject(((db_object)menuItems.get(MI)).getInvid());
 		try
 		  {
 		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
@@ -771,6 +859,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	      {
 		throw new RuntimeException("JInternalFrame will not close: " + ex);
 	      }
+	  }
+	else if (e.getActionCommand().equals("Print"))
+	  {
+	    ((framePanel)Windows.get(MI)).printObject();
 	  }
       	else if (e.getActionCommand().equals("Inactivate"))
 	  {
