@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1119,7 +1119,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   final PermEntry getPerm(short baseID, short fieldID)
   {
-    PermEntry result;
+    PermEntry result = null;
 
     /* -- */
 
@@ -1129,15 +1129,16 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
       {
 	result = personaPerms.getPerm(baseID, fieldID);
 	
+	// if we don't have a specific permissions entry for
+	// this field, inherit the one for the base	
+	
 	if (result == null)
 	  {
-	    return personaPerms.getPerm(baseID);
+	    result = personaPerms.getPerm(baseID);
 	  }
       }
-    else
-      {
-	return null;
-      }
+
+    return result;
   }
 
   final synchronized void updatePerms()
@@ -1220,8 +1221,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 		      {
 			Vector vals = idbf.getValues();
 
-			// loop over the owner groups this persona is a member of, see if it includes
-			// the supergash owner group
+			// calculate the union of all permission matrices in effect for this persona
 
 			PermissionMatrixDBField pmdbf;
 			DBObject pObj;
