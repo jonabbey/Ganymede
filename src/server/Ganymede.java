@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -553,6 +553,12 @@ class dumpTask implements Runnable {
 
      try
        {
+	 if (Ganymede.server.activeUsers.size() > 0)
+	   {
+	     Ganymede.debug("Deferring dump task - users logged in");
+	     return;
+	   }
+
 	 started = true;
 	 Ganymede.debug("Running dump task");
 
