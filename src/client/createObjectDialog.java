@@ -73,28 +73,34 @@ public class createObjectDialog extends JDialog implements ActionListener {
 	for (int i = 0; i < bases.size(); i++)
 	  {
 	    thisBase = (Base)bases.elementAt(i);
-	    String name = (String)baseNames.get(thisBase);
-	    
-	    // For some reason, baseNames.get is returning null sometimes.
-	    if (name == null)
-	      {
-		name = thisBase.getName();
-	      }
 
-	    if (name.startsWith("Embedded:"))
+	    // We don't want Admin Persona to show up in there.
+	    if (thisBase.getTypeID() != SchemaConstants.PersonaBase)
 	      {
-		if (debug)
+		String name = (String)baseNames.get(thisBase);
+		
+		// For some reason, baseNames.get is returning null sometimes.
+		if (name == null)
 		  {
-		    System.out.println("Skipping embedded field: " + name);
+		    name = thisBase.getName();
 		  }
+		
+		
+		if (name.startsWith("Embedded:"))
+		  {
+		    if (debug)
+		      {
+			System.out.println("Skipping embedded field: " + name);
+		      }
+		  }
+		else if (thisBase.canCreate(null))
+		  {
+		    listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
+		    listHandles.addElement(lh);
+		    
+		  }
+		
 	      }
-	    else if (thisBase.canCreate(null))
-	      {
-		listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
-		listHandles.addElement(lh);
-
-	      }
-
 	  }
       }
     catch (java.rmi.RemoteException rx)
@@ -104,7 +110,7 @@ public class createObjectDialog extends JDialog implements ActionListener {
 
     listHandles = gc.sortListHandleVector(listHandles);
     types = new JComboBox(listHandles);
-
+    types.setLightWeightPopupEnabled(false);
 
     JLabel l = new JLabel("Type of object:");
 
