@@ -225,6 +225,13 @@ written by Robert Harder (rob@iharder.net) and placed into the public
 domain as part of his 'xmlizable' package.  More information on this
 class may be found at http://iharder.net/xmlizable.
 
+The Ganymede client makes use of the Foxtrot project
+(http://foxtrot.sourceforge.net/), a very nifty GUI threading tool
+that allows us to synchronously decouple the client's GUI thread from
+certain kinds of long-standing network activity on the client while
+allowing the GUI thread to dispatch GUI events until the network
+activity is done.
+
 --
 
 Special thanks to authors of Ant and Subversion for high quality build
