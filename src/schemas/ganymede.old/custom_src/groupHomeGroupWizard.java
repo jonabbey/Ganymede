@@ -17,7 +17,6 @@ import java.util.*;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.JDataComponent.listHandle;
 
 public class groupHomeGroupWizard extends GanymediatorWizard implements groupSchema {
 
@@ -143,12 +142,14 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 	      } 
 	  }
 	
-	//newGroup = (Invid)((listHandle)returnHash.get("Home Group:")).getObject();
 	String gString = (String)returnHash.get("Home Group:");
+
 	// Now we have to do a query to find which group has this name.
+
 	QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, gString);
 	Query query = new Query(groupObject.getTypeID(), node);
 	QueryResult qr = session.query(query);
+
 	if (qr.size() == 1)
 	  {
 	    // this is what we want.
