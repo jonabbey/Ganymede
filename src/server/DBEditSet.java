@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -666,7 +666,11 @@ public class DBEditSet {
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
 
-	    retVal = eObj.checkRequiredFields();
+	    if ((eObj.getStatus() != DBEditObject.DELETING) &&
+		(eObj.getStatus() != DBEditObject.DROPPING))
+	      {
+		retVal = eObj.checkRequiredFields();
+	      }
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
