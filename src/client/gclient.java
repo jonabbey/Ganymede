@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -240,6 +240,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     statusBar.setLayout(new BorderLayout());
     statusLabel = new TextField();
     statusLabel.setEditable(false);
+    statusLabel.setBackground(Color.white);
     statusBar.add("West", new JLabel("Status:"));
     statusBar.add("Center", statusLabel);
     add("South", statusBar);
@@ -362,11 +363,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     /* -- */
 
-    base = node.getBase();
-
-
-  
-    
+    base = node.getBase();    
     Query _query = null;
     try
       {
@@ -396,9 +393,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      {
 		sorted_results = null;
 	      }
-	    if (unsorted_objects == null)
+	    if ((unsorted_objects == null) || (sorted_results == null))
 	      {
-		System.out.println("unsorted_objects == null");
+		System.out.println("unsorted_objects or sorted_results == null");
 	      }
 	    else
 	      {
@@ -407,6 +404,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		    //System.out.println("Adding " + (Result)unsorted_objects.elementAt(j));
 		    sorted_results[j] = (Result)unsorted_objects.elementAt(j);
 		  }
+
+		System.out.println("sorted_results.length == " + sorted_results.length);
 		
 		(new QuickSort(sorted_results, 
 			       new arlut.csd.Util.Compare() 
@@ -566,8 +565,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	{
 	  session.logout();
 	  this.dispose();
-	  _myglogin.connector.setEnabled(true);
-	  _myglogin._quitButton.setEnabled(true);
+	  _myglogin.enableButtons(true);
 	}
       catch (RemoteException rx)
 	{
@@ -575,6 +573,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	}
     }
 
+  /*
+   * This checks to see if anything has been changed.  Basically, if edit panels are
+   * open and have been changed in any way, then somethingChanged will be true and 
+   * the user will be warned.  If edit panels are open but have not been changed, then
+   * it will return true(it is ok to proceed)
+   */
   boolean OKToProceed()
     {
       if (somethingChanged)
@@ -675,6 +679,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      this.validate();
 	      this.repaint();
 	      this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	      setStatus("Done.");
 	    }
 	  catch (ClassNotFoundException ex)
 	    {
@@ -684,10 +689,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	}
       else if (event.getSource() == win95MI)
 	{
-	  setStatus("Switching to win95 look and feel");
+
 	  try
 	    {
+	      setStatus("Switching to win95 look and feel");
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	      UIManager.setUIFactory("com.sun.java.swing.basic.BasicFactory", this);
+	      this.invalidate();
+	      this.validate();
+	      this.repaint();
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	      setStatus("Done");
 	    }
 	  catch (ClassNotFoundException ex)
 	    {

@@ -146,7 +146,9 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       JPanel jpanel = new JPanel();
       jpanel.setLayout(new BorderLayout());
       panel = new JTitledPane();
-      panel.setLayout(new TableLayout(false));
+      TableLayout layout = new TableLayout(false);
+      layout.rowSpacing(5);
+      panel.setLayout(layout);
 
       // Get the list of fields
       db_field[] fields = null;
@@ -158,111 +160,161 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	{
 	  throw new RuntimeException("Could not get the fields: " + rx);
 	}
+      System.out.println("Entering big loop");
       if ((fields != null) && (fields.length > 0))
 	{
 	  for (int i = 0; i < fields.length ; i++)
 	    {
 	      short type = -1;
 	      String name = null;
+	      boolean isVector = false;
 	      try
 		{
 		  type = fields[i].getType();
-		  //System.out.println("Field type desc: " + type);
+		  
 		  name = fields[i].getName();
+		  System.out.println("Name: " + name + "Field type desc: " + type);		  
+		  isVector = fields[i].isVector();
 		}
 	      catch  (RemoteException rx)
 		{
 		  throw new RuntimeException("Could not get field info: " + rx);
 		}
-	      if (type == -1)
-		{
-		  System.err.println("Could not get field information");
-		}
-	      else if (type == FieldType.STRING)
-		{
-		  JstringField sf = new JstringField(20,
-						     19,
-						     new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.white),
-						     true,
-						     false,
-						     null,
-						     null);
-		  
-		  objectHash.put(sf, fields[i]);
-		  try
-		    {
-		      sf.setText((String)fields[i].getValue());
-		    }
-		  catch (RemoteException rx)
-		    {
-		      throw new RuntimeException("Could not get value for field: " + rx);
-		    }
 
-		  sf.setCallback(this);
-		  sf.setEditable(editable);
-
-		  try
-		    {
-		      sf.setToolTipText((String)fields[i].getComment());
-		      //System.out.println("Setting tool tip to " + (String)fields[i].getComment());
-		    }
-		  catch (RemoteException rx)
-		    {
-		      throw new RuntimeException("Could not get tool tip text: " + rx);
-		    }
-
-		  addRow(panel, sf, name, i);
-		}
-	      else if (type == FieldType.DATE)
+	      if (isVector)
 		{
-		  JdateField df = new JdateField();
-		  objectHash.put(df, fields[i]);
-		  df.setEditable(editable);
-		  df.setCallback(this);
-		  try
+		  System.out.println("Adding vector panel");
+		  if (fields[i] == null)
 		    {
-		      Date date = ((Date)fields[i].getValue());
-		      if (date != null)
-			{
-			  df.setDate(date);
-			}
+		      System.out.println("fields[i] is null");
 		    }
-		  catch (RemoteException rx)
+		  else
 		    {
-		      throw new RuntimeException("Could not get date: " + rx);
+		      vectorPanel vp = new vectorPanel(fields[i], this);
+		      addRow(panel, vp, name, i);
 		    }
-
-		  addRow(panel, df, name, i);
-		}
-	      else if (type == FieldType.BOOLEAN)
-		{
-		  //JcheckboxField cb = new JcheckboxField();
-		  JCheckbox cb = new JCheckbox();
-		  objectHash.put(cb, fields[i]);
-		  cb.setEnabled(editable);
-		  cb.addActionListener(this);
-		  //cb.setCallback(this);
-		  try
-		    {		 
-		      cb.setSelected(((Boolean)fields[i].getValue()).booleanValue());
-		    }
-		  catch (RemoteException rx)
-		    {
-		      throw new RuntimeException("Could not set checkbox value: " + rx);
-		    }
-		  catch (NullPointerException ex)
-		    {
-		      System.out.println("Null pointer: " + ex);
-		    }
-		  addRow(panel, cb, name, i);
 		}
 	      else
 		{
-		  JLabel label = new JLabel("Other type");
-		  addRow(panel, label, name, i);
+
+		  if (type == -1)
+		    {
+		      System.err.println("Could not get field information");
+		    }
+		  else if (type == FieldType.STRING)
+		    {
+		      JstringField sf = new JstringField(20,
+							 19,
+							 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.white),
+							 true,
+							 false,
+							 null,
+							 null);
+		  
+		      objectHash.put(sf, fields[i]);
+		      try
+			{
+			  sf.setText((String)fields[i].getValue());
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new RuntimeException("Could not get value for field: " + rx);
+			}
+		      
+		      sf.setCallback(this);
+		      sf.setEditable(editable);
+		      
+		      try
+			{
+			  sf.setToolTipText((String)fields[i].getComment());
+			  //System.out.println("Setting tool tip to " + (String)fields[i].getComment());
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new RuntimeException("Could not get tool tip text: " + rx);
+			}
+		      
+		      addRow(panel, sf, name, i);
+		    }
+		  else if (type == FieldType.PASSWORD)
+		    {
+		      JpassField pf = new JpassField(parent, true, 10, 8, editable);
+		      objectHash.put(pf, fields[i]);
+		      
+		      pf.setCallback(this);
+		      
+		      try
+			{
+			  pf.setToolTipText((String)fields[i].getComment());
+			  //System.out.println("Setting tool tip to " + (String)fields[i].getComment());
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new RuntimeException("Could not get tool tip text: " + rx);
+			}
+		      
+		      addRow(panel, pf, name, i);
+		    }
+		  else if (type == FieldType.DATE)
+		    {
+		      JdateField df = new JdateField();
+		      objectHash.put(df, fields[i]);
+		      df.setEditable(editable);
+		      df.setCallback(this);
+		      try
+			{
+			  Date date = ((Date)fields[i].getValue());
+			  if (date != null)
+			    {
+			      df.setDate(date);
+			    }
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new RuntimeException("Could not get date: " + rx);
+			}
+		      
+		      addRow(panel, df, name, i);
+		    }
+		  else if (type == FieldType.BOOLEAN)
+		    {
+		      //JcheckboxField cb = new JcheckboxField();
+		      JCheckbox cb = new JCheckbox();
+		      objectHash.put(cb, fields[i]);
+		      cb.setEnabled(editable);
+		      cb.addActionListener(this);
+		      //cb.setCallback(this);
+		      try
+			{		 
+			  cb.setSelected(((Boolean)fields[i].getValue()).booleanValue());
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new RuntimeException("Could not set checkbox value: " + rx);
+			}
+		      catch (NullPointerException ex)
+			{
+			  System.out.println("Null pointer: " + ex);
+			}
+		      addRow(panel, cb, name, i);
+		    }
+		  else if (type == FieldType.PERMISSIONMATRIX)
+		    {
+		      System.out.println("Adding perm matrix");
+		      perm_editor pe = new perm_editor(parent.session, (perm_field)fields[i], 
+						       editable, this);
+		      addRow(panel, pe, name, i);
+
+		    }
+		  else
+		    {
+		      JLabel label = new JLabel("Field type ID = " + type);
+		      addRow(panel, label, name, i);
+		    }
 		}
 	    }
 	}
+      System.out.println("Done with loop");
 
       //panel.setSize(500, 500);
 
@@ -293,11 +345,12 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       updateMenu();
       parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
-      parent.setStatus(" ");
+      parent.setStatus("Done.");
     }
 
   public void addTableWindow(Session session, Query query, Vector results, String title)
     {
+      parent.setStatus("Querying object types");
       parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       gResultTable rt = null;
       try
@@ -347,6 +400,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  lc.moveToFront(rt);
 	  updateMenu();
 	  parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	  parent.setStatus("Done.");
 	}
 
     }
@@ -495,6 +549,31 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	      throw new IllegalArgumentException("Could not set field value: " + rx);
 	    }
 	}
+      else if (v.getSource() instanceof JpassField)
+	{
+	  System.out.println((String)v.getValue());
+	  pass_field field = (pass_field)objectHash.get(v.getSource());
+	  try
+	    {
+	      System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	      if (field.setPlainTextPass((String)v.getValue()))
+		{
+		  parent.somethingChanged = true;
+		  return true;
+		}
+	      else
+		{
+		  System.err.println("Could not change field");
+		  return false;
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("Could not set field value: " + rx);
+	    }
+ 
+	}
+
       else if (v.getSource() instanceof JdateField)
 	{
 	  System.out.println("date field changed");
@@ -508,6 +587,11 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	    {
 	      throw new IllegalArgumentException("Could not set field value: " + rx);
 	    }
+	}
+      else if (v.getSource() instanceof vectorPanel)
+	{
+	  System.out.println("Something happened in the vector panel");
+
 	}
       else
 	{
@@ -618,8 +702,8 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
  void addRow(JComponent parent, Component comp,  String label, int row)
     {
       JLabel l = new JLabel(label);
-      parent.add("0 " + row + " lhwHW", l);
-      parent.add("1 " + row + " lhwHW", comp);
+      parent.add("0 " + row + " lthwHW", l);
+      parent.add("1 " + row + " lthwHW", comp);
       
     }
   
