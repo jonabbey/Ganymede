@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2002/10/09 02:38:22 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2004/02/27 23:07:15 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -875,7 +875,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
-		gc.wp.addTableWindow(gc.session, query, bufferRef, "Query Results");
+		gc.wp.addTableWindow(gc.session, query, bufferRef, "Query results: " + bufferRef.resultSize() + " entries");
 	      }
 	    });
 	  }

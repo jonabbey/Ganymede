@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2004/02/27 22:38:32 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2004/02/27 23:07:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,13 +91,13 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.34 $ $Date: 2004/02/27 22:38:32 $ $Name:  $
+ * @version $Revision: 1.35 $ $Date: 2004/02/27 23:07:14 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
   
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
@@ -155,8 +155,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException
   {
     super();			// JInternalFrame init
-
-    this.setTitle("Query Results");
 
     this.wp = wp;
     this.session = session;
@@ -383,18 +381,16 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     setStatus("Loading table", 0);
 
     headerVect = results.getHeaders();
-    rows = headerVect.size();
-    headers = new String[rows];
-    used = new boolean[rows];
-
-    this.setTitle("Query results: " + rows + " entries");
+    rows = results.resultSize();
+    headers = new String[headerVect.size()];
+    used = new boolean[headerVect.size()];
 
     if (debug)
       {
-	System.err.println("gResultTable: " + rows + " headers returned by query");
+	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
       }
     
-    for (int i = 0; i < rows; i++)
+    for (int i = 0; i < headerVect.size(); i++)
       {
 	headers[i] = (String) headerVect.elementAt(i);
 	used[i] = false;
