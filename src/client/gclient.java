@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -83,7 +83,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   MenuItem 
     createMI = null,
     viewMI = null,
-    queryMI = null;
+    queryMI = null,
+    menubarQueryMI = null;
 
   MenuBar 
     menubar;
@@ -140,6 +141,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     logoutMI.addActionListener(this);
     removeAllMI = new MenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
+
+    menubarQueryMI = new MenuItem("Query");
+    menubarQueryMI.addActionListener(this);
+
+    fileMenu.add(menubarQueryMI);
+    fileMenu.addSeparator();
     fileMenu.add(removeAllMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
@@ -735,6 +742,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    throw new RuntimeException("Could not commit transaction" + rx);
 	  }
       }
+    else if (event.getSource() == menubarQueryMI)
+      {
+	querybox box = new querybox(baseHash, this, "Query Panel");
+	box.myshow(true);
+      }
     else if (event.getSource() == removeAllMI)
       {
 	if (OKToProceed())
@@ -876,7 +888,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else if (event.getSource() ==  queryMI)
       {
-	System.out.println("queryMI");	
+	System.out.println("queryMI");
+
+	if (node instanceof BaseNode)
+	  {
+	    Base base = ((BaseNode) node).getBase();
+
+	    querybox box = new querybox(base, baseHash, this, "Query Panel");
+	    box.myshow(true);
+	  }
       }
     else if (event.getSource() == objViewMI)
       {
