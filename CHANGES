@@ -262,6 +262,39 @@ five years, I removed it.  If you are reading this out there in
 Internet land and decide that you've got to have it, let me know and
 I'll see about resurrecting it from Subversion.
 
+16. [XMLCLIENT] Massive speed-ups in the XML client, reversal of method calls
+
+Previously, when the xmlclient was used to extract data from the
+Ganymede server, the xmlclient would publish an RMI target and allow a
+thread on the server to repeatedly call the client, pushing XML data
+from the server.
+
+This had the disadvantage that the xmlclient could not be run on a
+system with a local firewall blocking incoming TCP connections.  With
+SSL support now added to the Ganymede server, this reverse flow of RMI
+method calls also meant that the xmlclient needed its own SSL
+certificates and key material, or else XML sent from the server to the
+client would be unprotected on the wire.
+
+Now that the xmlclient pulls data down from the server with iterative
+method calls, the XML is naturally protected with the existing SSL
+connection.
+
+In addition to this change of direction for the method calls, the
+arlut.csd.Util.BigPipedInputStream class has been fixed so that it
+actually will properly increase the size of the buffer used for
+internal pipes within the Ganymede server.  In the case of the pipes
+used to feed the xmlclient, this means that the server can now provide
+64kbyte chunks from the XMLWriter, rather than the default 1k chunks
+normally provided by PipedInputStream.  This has the effect of
+reducing the number of RMI calls required to transmit XML to the
+client by a factor of 64, resulting in a massive speed-up.
+
+In testing here, this change made the new code 5 times faster at
+wall-clock time in doing a system-local xmlclient dump to /dev/null,
+even with the overhead of SSL encryption included, relative to
+previous releases.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
