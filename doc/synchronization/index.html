@@ -6,9 +6,28 @@
   </head>
 
   <body>
-    <IMG SRC="../gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo"/>
+    <!--<IMG SRC="../gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo"/>
     <h1>Ganymede Synchronization Guide<br/>Release 2.0 dev - ? ? 2005<br/>$Rev$</h1>
-    <hr/>
+    <hr/>-->
+
+    <div id="header">
+      <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
+
+      <div id="title">
+        <h1>Ganymede Synchronization Guide</h1>
+        <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</p>
+      </div>
+
+      <div id="abstract">
+        <p>This guide will descibe how to take data from Ganymede and feed it into
+        your target directory services or databases.</p>
+        
+        <p>You'll learn about Ganymede's super-flexible
+        synchronization system; the sky's the limit!</p>
+      </div>
+
+      <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
+    </div>
 
     <h2>1. Ganymede, Synchronization, and You</h2>
 
@@ -203,9 +222,7 @@
     </table>
     </div>
 
-    <h3 id="buildertask">The GanymedeBuilderTask Synchronization Model</h3>
-
-    <h4 id="buildertask_explained">The GanymedeBuilderTask Model Explained</h4>
+    <h3 id="buildertask">3.1 The GanymedeBuilderTask Synchronization Model</h3>
 
     <p>The original Ganymede synchronization model is based around
     full state synchronization, and was designed in conjunction with
@@ -1005,7 +1022,7 @@ takes to run the average build for your network.</p>
 <p>If you want to reduce your average build time still further, you'll
 need to move to an incremental model for synchronization.</p>
 
-    <h3 id="xml_incrementals">The Sync Channel Incremental Model</h3>
+    <h3 id="xml_incrementals">3.2 The Sync Channel Incremental Model</h3>
 
     <h4 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h4>
 
@@ -1424,7 +1441,7 @@ need to move to an incremental model for synchronization.</p>
     as writing a callback Python function that takes data from the
     SyncUtils package and works with it from there.</p>
 
-    <h3 id="xml_full_state">The Sync Channel Full State Model</h3>
+    <h3 id="xml_full_state">3.3 The Sync Channel Full State Model</h3>
 
     <p>The Sync Channel Full State model is based on the <a
     href="#xml_incrementals">Sync Channel Incremental Model</a>.
