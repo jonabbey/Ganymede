@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -350,12 +350,12 @@ public abstract class DBField implements Cloneable, db_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (!isVector())
+    if (isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar");
+	throw new IllegalArgumentException("scalar accessor called on vector");
       }
 
-    return values.elementAt(index);
+    return value;
   }
 
   /**
