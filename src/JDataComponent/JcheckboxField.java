@@ -33,8 +33,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private JsetValueCallback callback = null;
 
-  private JcomponentAttr valueAttr = null;
-
   private boolean value;
   private boolean oldvalue;
   
@@ -52,18 +50,10 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    *
    * @param label the label to use for this JcheckboxField
    * @param state the state to which this JcheckboxField is to be set
-   * @param valueAttr JcomponentAttr object used to specify font/foreground/background values
    */
-  public JcheckboxField(String label,boolean state,JcomponentAttr valueAttr,boolean editable)
+  public JcheckboxField(String label,boolean state,boolean editable)
   {
     super(label);
-
-    if (valueAttr == null)
-      {
-	valueAttr = new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.gray);
-      }
-    
-    setValueAttr(valueAttr,true);
 
     value = state;
     oldvalue = state;
@@ -100,7 +90,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       */
 
     System.out.println("Creating new JcomponentAttr");
-    this.valueAttr = new JcomponentAttr(null,getFont(),getForeground(),getBackground());
     
     value = false;
     oldvalue = false;
@@ -121,9 +110,9 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * @param parent the component which can use the value of this JcheckboxField
    *
    */
-  public JcheckboxField(String label,boolean state,JcomponentAttr valueAttr,boolean editable,JsetValueCallback callback)
+  public JcheckboxField(String label,boolean state,boolean editable,JsetValueCallback callback)
     {
-      this(label,state,valueAttr,editable);
+      this(label,state,editable);
 
       setCallback(callback);
       
@@ -194,66 +183,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   }
 
   /**
-   * returns the JcomponentAttr object associated with this JcheckboxField
-   *
-   */
-  public JcomponentAttr getValueAttr()
-  {
-    return this.valueAttr;
-  }
-
- 
-  /**
-   * sets the background color for the JentryField
-   * and forces a repaint
-   *
-   * @param color the color which will be used
-   */
-  public void setBackground(Color color)
-  {
-    setValueBackColor(color,true);
-  }
-
-  
-  /**
-   * sets the background color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueBackColor(Color color,boolean repaint)
-  {
-    valueAttr.setBackground(color);
-    
-    setValueAttr(valueAttr,repaint);
-  }
-  
-  /**
-   * sets the attributes for the JentryField
-   *
-   * @param attrib the attributes which will be used
-   * @param repaint true if the label component needs to be repainted
-   */
-  public void setValueAttr(JcomponentAttr attributes,boolean repaint)
-  {
-    if (attributes == null)
-      {
-	throw new IllegalArgumentException("Invalid Parameter: attributes is null");
-      }
-
-    this.valueAttr = attributes;
-    
-    super.setFont(attributes.font);
-    super.setForeground(attributes.fg);
-    super.setBackground(attributes.bg);
-
-    if (repaint)
-      {
-	this.repaint();
-      }
-  }
-
-  /**
    * deprecated
    *
    */
@@ -278,11 +207,15 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   }
 
 
+  public void setSelected(boolean state)
+  {
+    setSelected(state, true);
+  }
 
   /**
    * sets the state of this JcheckboxField
    */
-  public void setSelected(boolean state)
+  public void setSelected(boolean state, boolean sendCallback)
   {
     if (value != state)
       {
@@ -290,65 +223,20 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
 
     this.value = state;
-    super.setSelected(state);
-  }
-
-  /**
-   *  sets the font for the JentryField and
-   *  forces a repaint
-   *
-   * @param f the font which will be used
-   */
-  public void setFont(Font f)
-  {
-    setValueFont(f,true);
-  }
-  
-  /**
-   *  sets the font for the JentryField
-   *
-   * @param f the font which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueFont(Font f,boolean repaint)
-  {
-    if (f != null)
+    if (sendCallback)
       {
-	valueAttr.setFont(f);
+	super.setSelected(state);
       }
-    
-    setValueAttr(valueAttr,repaint);
+    else
+      {
+	removeItemListener(this);
+	super.setSelected(state);
+	addItemListener(this);
+      }
+
+
   }
 
-  /**
-   * sets the foreground color for the JentryField
-   * and forces a repaint.
-   *
-   * @param color the color which will be used
-   */
-  public void setForeground(Color color)
-  {
-    setValueForeColor(color,true);    
-  }
-
-  /**
-   * sets the foreground color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueForeColor(Color color,boolean repaint)
-  {
-    valueAttr.setForeground(color);
-
-    setValueAttr(valueAttr,repaint);
-  } 
-
-  /**
-   * processes any mouse events generated by this component
-   *
-   * @param e the MouseEvent that needs to be processed
-   */
   protected void processMouseEvent(MouseEvent e)
   {
     // If this JcheckboxField is not editable, the event gets
