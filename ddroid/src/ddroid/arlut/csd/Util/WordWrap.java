@@ -6,9 +6,9 @@
    
    Created: 12 September 1997
 
-   Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
+   Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu

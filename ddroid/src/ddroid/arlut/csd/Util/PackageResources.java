@@ -9,9 +9,9 @@
    
    Created: 9 July 1997
 
-   Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
+   Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -71,7 +71,7 @@ import java.applet.*;
  * can load images and other resources from either CLASSPATH or a jar file,
  * depending on how the program using this class is run.</p>
  *
- * @version $Revision: 1.4 $ $Date$ $Name:  $
+ * @version $Id$
  * @author Jonathan Abbey
  */
 
