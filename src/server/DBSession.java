@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +30,7 @@ import java.util.*;
  * the database.. who holds what lock, what actions are performed
  * during a lock / transaction / session.</p>
  * 
- * */
+ */
 
 public class DBSession {
 
@@ -43,7 +43,9 @@ public class DBSession {
 
   GanymedeSession GSession;
   DBStore store;
-  DBLock lock;
+
+  Vector lockVect = new Vector();
+
   DBEditSet editSet;
   String lastError;
   String id = null;
@@ -87,7 +89,7 @@ public class DBSession {
 
   public synchronized void logout()
   {
-    releaseReadLock();
+    releaseAllReadLocks();
 
     if (editSet != null)
       {
@@ -201,8 +203,7 @@ public class DBSession {
    * The session has to have a transaction opened before it can pull
    * an object out for editing.
    *
-   * @param invid The invariant id of the object to be modified.  The objectBase
-   *              referenced in the invid must be locked in lock.
+   * @param invid The invariant id of the object to be modified.
    *
    * @see arlut.csd.ganymede.DBObjectBase 
    */
@@ -270,11 +271,9 @@ public class DBSession {
    * the checked out shadow of invid, if it has been checked out by this
    * transaction.
    *
-   * @param invid The invariant id of the object to be viewed.  The objectBase
-   *              referenced in the invid must be locked in lock.
+   * @param invid The invariant id of the object to be viewed.
    *
    * @see arlut.csd.ganymede.DBObjectBase
-   * @see arlut.csd.ganymede.DBLock
    *
    */
 
@@ -405,8 +404,9 @@ public class DBSession {
    * Remove an object from the database<br><br>
    *
    * This method method can only be called in the context of an open
-   * transaction and an open lock on the object's base.  This method
-   * will take an object out of the DBStore and add mark it as
+   * transaction. Because the object must be checked out (which is the only
+   * way to obtain a DBEditObject), no other locking is required. This method
+   * will take an object out of the DBStore and mark it as
    * deleted in the transaction.  When the transaction is committed, the
    * object will have its remove() method called to do cleanup, and the
    * editSet nulls the object's slot in the DBStore.  If the
@@ -444,9 +444,21 @@ public class DBSession {
    *
    */
 
-  public boolean isLocked()
+  public boolean isLocked(DBLock lockParam)
   {
-    return (lock != null && lock.isLocked());
+    if (lockParam == null)
+      {
+	throw new IllegalArgumentException("bad param to isLocked()");
+      }
+
+    if (!lockVect.contains(lockParam))
+      {
+	return false;
+      }
+    else
+      {
+	return (lockParam.isLocked());
+      }
   }
 
   /**
@@ -464,10 +476,19 @@ public class DBSession {
    * will be made to those ObjectBases until the read lock is released.
    */
 
-  public void openReadLock(Vector bases) throws InterruptedException
+  public synchronized DBReadLock openReadLock(Vector bases) throws InterruptedException
   {
+    DBReadLock lock;
+
+    /* -- */
+
     lock = new DBReadLock(store, bases);
+
+    lockVect.addElement(lock);
+
     lock.establish(this);
+
+    return lock;
   }
 
   /**
@@ -485,24 +506,55 @@ public class DBSession {
    * will be made to those ObjectBases until the read lock is released.
    */
 
-  public synchronized void openReadLock() throws InterruptedException
+  public synchronized DBReadLock openReadLock() throws InterruptedException
   {
+    DBReadLock lock;
+
+    /* -- */
+
     lock = new DBReadLock(store);
+    lockVect.addElement(lock);
+
     lock.establish(this);
+
+    return lock;
   }
 
   /**
-   * releaseReadLock releases the read lock held by this session.  If this
-   * session does not hold a read lock, this method is a no-op.
+   *
+   * releaseReadLock releases a read lock held by this session.
+   *
    */
 
-  public synchronized void releaseReadLock()
+  public synchronized void releaseReadLock(DBReadLock lock)
   {
-    if (lock != null && lock instanceof DBReadLock)
+    lock.release();
+    lockVect.removeElement(lock);
+    notifyAll();
+  }
+  
+  /**
+   *
+   * releaseAllReadLocks() releases all 
+   *
+   */
+
+  public synchronized void releaseAllReadLocks()
+  {
+    DBReadLock lock;
+    Enumeration enum = lockVect.elements();
+
+    /* -- */
+    
+    while (enum.hasMoreElements())
       {
-	lock.release();
-	lock = null;
+	lock = (DBReadLock) enum.nextElement();
+	lock.abort();
       }
+
+    lockVect.removeAllElements();
+
+    notifyAll();
   }
 
   /**
@@ -564,31 +616,27 @@ public class DBSession {
 	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
-    if (lock != null)
+    while (lockVect.size() != 0)
       {
-	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
+	Ganymede.debug("DBSession: commitTransaction waiting for read locks to be released");
+
+	try
+	  {
+	    wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("DBSession: commitTransaction got an interrupted exception waiting for read locks to be released." + ex);
+	  }
+
+	//	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
       }
-
-    Ganymede.debug("commitTransaction(): acquiring write lock");
-
-    lock = new DBWriteLock(store);
-
-    Ganymede.debug("commitTransaction(): got write lock");
-    Ganymede.debug(key + ": commitTransaction(): committing editSet");
 
     result = editSet.commit();
 
     Ganymede.debug(key + ": commitTransaction(): editset committed");
 
     editSet = null;
-
-    lock.release();
-
-    // remember that we've cleared our lock
-
-    lock = null;
-
-    Ganymede.debug("commitTransaction(): writeLock released");
 
     return result;
   }
@@ -614,9 +662,18 @@ public class DBSession {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
       }
 
-    if (lock != null)
+    while (lockVect.size() != 0)
       {
-	Ganymede.debug("warning: DBSession.abortTransaction() called with lock held");
+	Ganymede.debug("DBSession: abortTransaction waiting for read locks to be released");
+
+	try
+	  {
+	    wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("DBSession: abortTransaction got an interrupted exception waiting for read locks to be released." + ex);
+	  }
       }
 
     editSet.release();
