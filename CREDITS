@@ -192,3 +192,14 @@ accordance with his stated licensing terms.  See
 http://www.jclark.com/xml/xp/index.html for information on the XP
 parser.
 
+The Base64 encoder used by ARL custom code to generate binary LDIF for
+LDAP synchronization was written by Robert Harder, rharder@usa.net, as
+part of his 'xmlizable' package, and placed by him into the Public
+Domain.  More information on this class may be found at
+http://iharder.net/xmlizable.
+
+The Java UUID Generator code used by ARL custom code to generate RFC
+and DCE-compliant globally unique identifiers for our Macintosh LDAP
+synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
+and is included in Ganymede under the Lesser General Public License.
+See http://www.doomdark.org/doomdark/proj/jug/ for more information.
