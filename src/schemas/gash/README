@@ -1,0 +1,125 @@
+Ganymede Developer Release 3
+May 28, 1998
+GASH README
+----------------------------
+
+As of dev3, the GASH schema module is nearly fully functional to the
+level supported by GASH 1.03g, minus the ARL-specific features.
+
+In order to use the GASH schema, you will need a set of GASH datafiles
+to import through the loader code.  If you are not using GASH, you
+will probably find that the nisonly schema is easier to work with
+if you are just trying to figure out what Ganymede is all about.
+
+If you do have GASH files around, however, you should fairly quickly
+be able to implement Ganymede to manage both your NIS and DNS.
+
+--
+
+The schema classes and source code found in this directory implement a
+database definition for holding the information that the GASH program
+held.  This directory includes 4 main pieces:
+
+1) custom.jar
+
+   This java class archive contains all the custom code for a set
+   of plug-in objects that we have created to provide GASH-style
+   intelligence to the Ganymede database.  This includes the 
+   GASHBuilderTask class, which emits GASH-style source files for
+   use with the original GASH NIS/DNS make process.
+
+2) The source code for the plug-in classes that are contained in
+   custom.jar
+
+3) A ganymede.schema file in the custom_src directory.  This file
+   contains the object definitions for the GASH objects that
+   our GASH schema operates on.  This file was copied into
+   db/ganymede.db by the installServer.perl script at server install
+   time.
+
+4) A loader directory that contains the code necessary to load a
+   Ganymede database from a set of GASH files.
+
+   The following GASH files are supported:
+
+     user_info
+     group_info
+     admin_info
+     host_info
+     aliases_info
+     auto.vol
+     auto.home.*
+     netgroup
+     networks_by_room.cpp (the GASH networks_by_room file after
+                           being run through the C preprocessor)
+
+   Your copies of the above files should be placed in the input
+   directory.  You can then run the runDirectLoader script
+   to generate the file loader/db/loader.db.  This file will
+   contain all the information from your GASH files, including
+   automatic generation of admin logins.
+
+   You then can copy the loader.db file to the db directory
+   under the server install directory and start the server.
+
+Please see the file docs/privs.html for details on how ownership,
+permissions, and admin personae work in Ganymede.
+
+Installation Details
+--------------------
+
+The easiest way to use the GASH schema in Ganymede is to already
+be using GASH.  If you are using GASH already, you'll have the
+GASH build scripts configured for your network.. to interface
+Ganymede into GASH, you need to write a gashbuilder script
+that will copy the files emitted by Ganymede at build time
+into your GASH files directory and invoke the GASH makefile
+there.
+
+If you do this, however, be very sure to save your old GASH files so
+that you can revert to GASH if you need to.. as discussed below,
+Ganymede with the GASH schema is backwards compatible with GASH, but
+not vice versa.  Once you move to using Ganymede with the GASH schema,
+it becomes non-trivial to go back to GASH using files emitted by
+Ganymede.
+
+The buildscripts directory in this directory contain the scripts
+necessary to take the files emitted by Ganymede and push them out into
+NIS and DNS.  We provide these for motivated people to work with
+only.. we are not officially supporting the use of Ganymede with the
+GASH makefiles, and we have not attempted to automate the process of
+getting Ganymede working in a live NIS/DNS environment using the
+GASH build scripts.  If you try to put Ganymede into operation using
+the GASH schema, you will need to configure the build scripts and
+write your own gashbuilder script to get everything started.  See
+the GASH home page (refenced in doc/index.html) for what documentation
+we have on the process.
+
+Compatibility Notes
+-------------------
+
+The Ganymede GASH schema code has a very few notable restrictions
+and incompatibilites with respect to GASH.
+
+Firstly, Ganymede does not try to preserve the GASH ownership
+indicators in the files that the GASHBuilderTask emits.  It will
+properly assign ownership to everything when you import your data
+from GASH, but you won't be able to turn around and take the files
+that Ganymede emits for use with the GASH makefile and use them
+in GASH, as Ganymede's notion of ownership is more complex and
+generic than GASH's.
+
+Secondly, the DNS/System support in the Ganymede GASH schema does
+not support multi-interface systems in which one of the interfaces
+is given the same name as the top-level system.  In Ganymede, all
+interfaces attached to a system must either have no name (in the
+common single-interface host case), or a unique name in the
+multiple interface case.
+
+Thirdly, Ganymede with the GASH schema does not yet support automatic
+creation and/or renaming of user home directories, nor does it support
+some of the very specific mail messages that GASH sends out when
+certain volume operations are performed.  Some of this functioning
+could be implemented in the gashbuilder script, if an adopter is
+motivated to do that.
+
