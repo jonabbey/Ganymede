@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,10 +29,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
-
-  //
-  
-  boolean needToRescan = false;
 
   /**
    *
@@ -252,8 +248,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	      }
 	  }
 
-	needToRescan = true;
-
 	inv = (InvidDBField) getField(SchemaConstants.UserAdminPersonae);
 	
 	if (inv == null)
@@ -274,11 +268,12 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	    oldNames.addElement(oldName);
 	    suffix = oldName.substring(oldName.indexOf(':'));
 	    
-	    if (!sf.setValue(value + ":" + suffix))
+	    ReturnVal retVal = sf.setValue(value + ":" + suffix);
+
+	    if ((retVal != null) && (!retVal.didSucceed()))
 	      {
 		if (okay)
 		  {
-		    needToRescan = false;
 		    return false;
 		  }
 		else
@@ -295,7 +290,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 			sf.setValue(oldNames.elementAt(j));
 		      }
 
-		    needToRescan = false;
 		    return false;
 		  }
 	      }
@@ -311,32 +305,102 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
-   * <p>Returns true if the last field change peformed on this
-   * object necessitates the client rescanning this object to
-   * reveal previously invisible fields or to hide previously
-   * visible fields.</p>
+   * This is the hook that DBEditObject subclasses use to interpose wizards.
    *
-   * <p>Note that a non-editable DBObject never needs to be
-   * rescanned, this method only has an impact on DBEditObject
-   * and subclasses thereof.</p>
-   *
-   * <p>shouldRescan() should reset itself after returning
-   * true</p>
-   *
-   * @see arlut.csd.ganymede.db_object
    */
 
-  public synchronized boolean shouldRescan()
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (needToRescan)
+    userWizard wizard;
+
+    /* -- */
+
+    if ((field.getID() != SchemaConstants.UserUserName) ||
+	(operation != SETVAL))
       {
-	needToRescan = false;
-	return true;
+	return null;		// by default, we just ok whatever
+      }
+
+    // looks like we're renaming this user
+
+    if (gSession.isWizardActive() && gSession.getWizard() instanceof userWizard)
+      {
+	wizard = (userWizard) gSession.getWizard();
+
+	if ((wizard.getState() == wizard.DONE) &&
+	    (wizard.operation == wizard.USER_RENAME) &&
+	    (wizard.field == field) &&
+	    (wizard.object == this) &&
+	    (wizard.param == param1))
+	  {
+	    // ok, assume the wizard has taken care of getting everything prepped and
+	    // approved for us.  An active wizard has approved the operation
+		
+	    wizard.unregister();
+		
+	    return null;
+	  }
+	else
+	  {
+	    if (wizard.field != field)
+	      {
+		System.err.println("userCustom.wizardHook(): bad field");
+	      }
+
+	    if (wizard.operation != wizard.USER_RENAME)
+	      {
+		System.err.println("userCustom.wizardHook(): bad operation");
+	      }
+
+	    if (wizard.object != this)
+	      {
+		System.err.println("userCustom.wizardHook(): bad object");
+	      }
+
+	    if (wizard.param != param1)
+	      {
+		System.err.println("userCustom.wizardHook(): bad param");
+	      }
+
+	    if (wizard.getState() != wizard.DONE)
+	      {
+		System.err.println("userCustom.wizardHook(): bad state: " + wizard.getState());
+	      }
+
+	    wizard.unregister();
+	    return Ganymede.createErrorDialog("User Object Error",
+					      "The client is attempting to do an operation on " +
+					      "a user object with an active wizard.");
+	  }
       }
     else
       {
-	return false;
+	// there's no wizard active, and this operation has to be approved by one.  Go ahead
+	// and set up the wizard and let the client play with it.
+
+	try
+	  {
+	    wizard = new userWizard(this.gSession,
+				    userWizard.USER_RENAME,
+				    this,
+				    field,
+				    param1);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
+	  }
+	
+	// if we get here, the wizard was able to register itself.. go ahead
+	// and return the initial dialog for the wizard.  The ReturnVal code
+	// that wizard.getStartDialog() returns will have the success code
+	// set to false, so whatever triggered us will prematurely exit,
+	// returning the wizard's dialog.
+
+	return wizard.getStartDialog();
       }
   }
+
+
 
 }
