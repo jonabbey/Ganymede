@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -279,9 +279,44 @@ public class WordWrap {
     return (c == '\n' || c == ' ' || c == '\t');
   }
 
+  /**
+   * <p>This method takes the input String and strips tabs out of it,
+   * replacing them with appropriate spaces.</p>
+   */
+
+  public static String deTabify(String input)
+  {
+    StringBuffer result = new StringBuffer();
+    char characters[] = input.toCharArray();
+    int j = 0;
+
+    for (int i = 0; i < characters.length; i++)
+      {
+	if (characters[i] == '\t')
+	  {
+	    do
+	      {
+		result.append(" ");
+		j++;
+	      } while (j % 8 != 0);
+	  }
+	else
+	  {
+	    result.append(characters[i]);
+	    j++;
+	  }
+      }
+
+    return result.toString();
+  }
+
   public static void main (String args[])
   {
     System.err.println("Word Wrap 20 chars: ");
     System.err.println(wrap("Mynameisinigomontoyayoukilledmyfatherpreparetodieok?", 20));
+
+    System.err.println("Detabify test:");
+    String input = "	Tab A	B	C	D";
+    System.err.println(deTabify(input));
   }
 }
