@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import arlut.csd.JDialog.*;
  * Ganymede data store, including permissions and unique value handling.<br><br>
  *
  * An important note about synchronization: it is possible to encounter a
- * condition called a <b>nested monitor deadlock<b>, where a synchronized
+ * condition called a <b>nested monitor deadlock</b>, where a synchronized
  * method on a field can block trying to enter a synchronized method on
  * a DBSession, GanymedeSession, or DBEditObject object that is itself blocked
  * on another thread trying to call a synchronized method on the same field.<br><br>
