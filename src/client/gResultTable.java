@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -396,32 +396,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     if (event.getSource() == viewMI)
       {
-	try
-	  {
-	    wp.addWindow(session.view_db_object((Invid) key));
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("remote exception viewing table row " + ex);
-	  }
+	wp.getgclient().viewObject((Invid) key);
       }
     else if (event.getSource() == editMI)
       {
-	db_object eObj = null;
-
-	try
-	  {
-	    eObj = session.edit_db_object((Invid) key);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("remote exception editing table row " + ex);
-	  }
-	
-	if (eObj != null)
-	  {
-	    wp.addWindow(eObj,true);
-	  }
+	wp.getgclient().editObject((Invid)key);
       }
   }
 
