@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,6 +190,8 @@ public class Ganymede {
 				      null,
 				      null));
 
+    startupHook();
+
     if (debug)
       {
 	debug("Setup and bound server object OK");
@@ -299,5 +301,58 @@ public class Ganymede {
 	System.err.println(string);
       }
     GanymedeAdmin.setStatus(string);
+  }
+
+  static public void startupHook()
+  {
+    DBEditObject e_object;
+    Invid selfPermInv;
+    StringDBField s;
+    PermissionMatrixDBField pm;
+    
+    /* -- */
+
+    if (false)
+      {
+	// manually insert the root (supergash) admin object
+
+	internalSession.openTransaction("Ganymede startupHook");
+
+	selfPermInv = new Invid(SchemaConstants.PermBase,
+				SchemaConstants.PermSelfUserObj);
+
+	if (internalSession.session.viewDBObject(selfPermInv) == null)
+	  {
+	    System.err.println("Creating the PermSelfUserObj");
+
+	    // need to create the self perm object
+
+	    // create SchemaConstants.PermSelfUserObj
+
+	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, selfPermInv);
+	    
+	    s = (StringDBField) e_object.getField(SchemaConstants.PermName);
+	    s.setValue("Self Permissions");
+	
+	    // By default, users will be able to view themselves and all their fields, anything
+	    // else will have to be manually configured by the supergash administrator.
+	
+	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermMatrix);
+	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); 
+	  }
+	else
+	  {
+	    System.err.println("Not Creating the PermSelfUserObj");
+	  }
+    
+	if (internalSession.commitTransaction())
+	  {
+	    System.err.println("Ganymede.startupHook() succeeded");
+	  }
+	else
+	  {
+	    System.err.println("Ganymede.startupHook() did not succeed");
+	  }
+      }
   }
 }
