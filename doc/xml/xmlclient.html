@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>XML Client</title>
+  </head>
+
+  <BODY BGCOLOR="#FFFFFF">
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>The Ganymede XML Client</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>The Ganymede server and client suites include a text-mode <b>xmlclient</b>, which
+      can be used to load data and schema information into the Ganymede server, and
+      which may be used to dump data from the server to an XML file.</p>
+
+    <p>Usage:</p>
+
+    <pre>
+
+    xmlclient file.xml
+
+        This will cause the xmlclient to connect to the Ganymede server
+        and to submit the file.xml for processing.
+
+    xmlclient -dumpschema
+
+	This will cause the xmlclient to connect to the Ganymede server
+	and to dump a &lt;ganymede&gt; xml file to stdout that includes a
+	&lt;ganyschema&gt; section defining the current schema definition in
+	the Ganymede server.
+
+    xmlclient -dumpdata
+
+	This will cause the xmlclient to connect to the Ganymede server
+	and to generate a complete dump of the server's data objects
+	to stdout in xml format.
+
+    xmlclient -dump
+
+        This will cause the xmlclient to connect to the Ganymede server
+	and to generate a complete dump of the server's database,
+	both schema and data, to stdout in xml format.
+
+    Optional parameters:
+
+        username=&lt;persona name&gt;
+
+        password=&lt;password&gt;
+
+      Examples:
+
+        xmlclient username=jonhart:supergash -dumpschema > schema.xml
+
+        xmlclient username=broccol password=notReal changes.xml
+</pre>
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Wed Jun  6 13:32:19 CDT 2001 -->
+<!-- hhmts start -->
+Last modified: Wed Jun  6 14:52:26 CDT 2001
+<!-- hhmts end -->
+  </body>
+</html>

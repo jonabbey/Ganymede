@@ -4,7 +4,7 @@
     <title>Ganymede Schema Representation in XML</title>
   </head>
 
-  <body>
+  <BODY BGCOLOR="#FFFFFF">
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
@@ -424,13 +424,23 @@
       </tr>
       <tr>
 	<td></td><td>regexp</td>
-	<td><p>
-	    The <b>regexp</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string value which defines a Perl-style regular expression.
-	    If this optional element is defined in a string
-	    <b>typedef</b> element, fields of this type will only be allowed to
-	    contains strings which match this regular expression.</p></td>
-	<td>&lt;regexp val="^[a-z]+[a-z|\d]&$"/&gt;</td>
+	<td>
+	  <p>The <b>regexp</b> element is an optional empty element with a pair of attributes, one
+            mandatory and one optional.  The mandatory attribute is <b>val</b>,
+	    which contains a string value which defines a Perl-style regular expression.  The
+	    optional attribute is <b>desc</b>, which if present will be used as a textual
+	    description of the meaning of the regexp.  The desc attribute will be provided
+	    to the user in an error dialog if they enter a string in the client which
+	    does not match the regexp.  If no <b>desc</b> attribute is present,
+	    the user will be shown the regexp itself in the error message.</p>
+	  
+	  <p><b>regexp</b> is an optional element in the string <b>typedef</b>
+	    element.  If a <b>regexp</b> element is present, all strings entered
+	    into fields of this type will be checked against the regexp.  The
+	    regexp check is made in addition to any <b>okchars</b> and <b>badchars</b>
+	    constraints that are defined in the same <b>typedef</b>.</p>
+	</td>
+	<td>&lt;regexp val="^[a-z]+[a-z|\d]*$" desc="Usernames may contain letters and numbers, but must begin with a letter."/&gt;</td>
       </tr>
       <tr>
 	<td></td><td>multiline</td>
@@ -688,7 +698,7 @@
                 &lt;maxlength val="8"/&gt;
                 &lt;badchars val=" :"/&gt;
                 &lt;namespace val="username"/&gt;
-                &lt;regexp val="^[a-z]+[a-z|\d]*$"/&gt;
+                &lt;regexp val="^[a-z]+[a-z|\d]*$" desc="User names may consist of letters and numbers, but must begin with a letter"/&gt;
               &lt;/typedef&gt;
             &lt;/fielddef&gt;
             &lt;fielddef name="UID" id="256"&gt;
@@ -823,7 +833,7 @@ Limited to 16 for NFS.&lt;/comment&gt;
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:17:30 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Tue Jul 25 21:55:27 CDT 2000
+Last modified: Wed Jun  6 13:27:16 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>
