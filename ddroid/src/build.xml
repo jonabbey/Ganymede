@@ -193,10 +193,17 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
 
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
+
+      <!-- Ugh, we need the server-side GanymedeScheduler included, since the scheduleHandle
+           that we can transmit from the server to the admin console includes a GanymedeScheduler
+           reference variable. -->
+
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/GanymedeScheduler.class"/>
       
-      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/admin.jpg"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/admin/**.gif"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/admin/**.jpg"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/*.gif"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*.gif"/>
     </jar>
     
     <!-- Copy over the newly created jars -->
