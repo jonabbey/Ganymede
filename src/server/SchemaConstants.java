@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,7 +34,11 @@ public interface SchemaConstants {
   final static short OwnerListField = 0; // list of admin accounts with authority over this object
   final static short ExpirationField = 1; // date that this object will expire
   final static short RemovalField = 2; // date that this object will be removed.
-  final static short HistoryField = 3; // vector of history objects relating to this object
+  final static short NotesField = 3; // string field for notes for this object
+  final static short CreationDateField = 4; // date that this object was created
+  final static short CreatorField = 5; // string describing the creator of this object
+  final static short ModificationDateField = 6;	// date that this object was last modified
+  final static short ModifierField = 7;	// string describing the administrator who last modified this object
 
   /* all embedded objects have these fields */
 
@@ -68,11 +72,4 @@ public interface SchemaConstants {
   final static short UserPassword = 101; // password
   final static short UserAdminRole = 102; // pointer to associated admin account, if any
 
-  /* history trace */
-
-  final static short HistoryBase = 3;
-
-  final static short HistoryDescrip = 100; // the description of this event
-  final static short HistoryObjects = 101; // a vector of invid's for the objects involved in this event
-  final static short HistoryDate = 102;	// the time that this event happened
 }
