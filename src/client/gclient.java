@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.187 $
-   Last Mod Date: $Date: 2001/06/01 01:34:59 $
+   Version: $Revision: 1.188 $
+   Last Mod Date: $Date: 2001/07/26 16:59:54 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.187 $ $Date: 2001/06/01 01:34:59 $ $Name:  $
+ * @version $Revision: 1.188 $ $Date: 2001/07/26 16:59:54 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/06/01 01:34:59 $";
+  static String release_date = "$Date: 2001/07/26 16:59:54 $";
   static String release_number = null;
 
   /**
@@ -1513,27 +1513,36 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     buildingPhase1 = (status != null) && status.equals("building");
     buildingPhase2 = (status != null) && status.equals("building2");
 
-    // use SwingUtilities.invokeLater so that we play nice
-    // with the Java display thread
-    
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	if (buildingPhase1)
-	  {
-	    buildLabel.setIcon(buildIcon);
-	  }
-	else if (buildingPhase2)
-	  {
-	    buildLabel.setIcon(buildIcon2);
-	  }
-	else
-	  {
-	    buildLabel.setIcon(idleIcon);
-	  }
+    // we get called by an RMI callback, so we need to create
+    // a security laundering thread that will have permission to
+    // put something on the GUI thread's queue.
 
-	buildLabel.validate();
-      }
-    });
+    Thread securityLaunderer = new Thread(new Runnable() {
+      public void run() {
+	// use SwingUtilities.invokeLater so that we play nice
+	// with the Java display thread
+	
+	SwingUtilities.invokeLater(new Runnable() {
+	  public void run() {
+	    if (buildingPhase1)
+	      {
+		buildLabel.setIcon(buildIcon);
+	      }
+	    else if (buildingPhase2)
+	      {
+		buildLabel.setIcon(buildIcon2);
+	      }
+	    else
+	      {
+		buildLabel.setIcon(idleIcon);
+	      }
+	    
+	    buildLabel.validate();
+	  }
+	});	
+      }});
+    
+    securityLaunderer.start();
   }
 
   /**
