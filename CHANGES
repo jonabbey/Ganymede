@@ -194,6 +194,19 @@ I've audited all of the server code to insure that there are no
 remaining attempted dependencies on post-serialization initialization
 of transient fields.
 
+15. [SERVER XML] Fixed missing attribute error reporting in XML logic
+
+The Ganymede server's XML parsing code is designed to report
+to the xmlclient a record of the last 30 XML elements parsed prior
+to encountering an XML validity error (such as an invalid character,
+say).  Unfortunately, the class that represents XML entities
+(such as '<object type="I.P._Network" id="CSD - No Inet Access">')
+had a bug in it's toString() method that caused every other attribute
+to be skipped over when regenerating a string representation.
+
+This was a small bug, but made it maddeningly difficult to track
+down syntax errors in XML files created for use with Ganymede.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
