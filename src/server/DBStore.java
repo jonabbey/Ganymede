@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 1999/10/07 21:04:07 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 1999/10/09 01:01:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.92 $ %D%
+ * @version $Revision: 1.93 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2096,7 +2096,7 @@ public class DBStore {
 	
 	    eObj = (DBEditObject) retVal.getObject();
 	
-	    s = (StringDBField) eObj.getField("Name");
+	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
 	
 	    if (Ganymede.monitornameProperty != null)
 	      {
@@ -2107,7 +2107,7 @@ public class DBStore {
 		throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
 	      }
     
-	    p = (PasswordDBField) eObj.getField("Password");
+	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 	
 	    if (Ganymede.defaultmonitorpassProperty != null)
 	      {
