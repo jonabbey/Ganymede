@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,7 +54,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   DBObjectBaseField definition;
   boolean defined;
 
-  DBField next = null;
+  DBField next = null;		// required for use with DBFieldTable
   short fieldID = -1;
 
   /**
