@@ -535,7 +535,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && retVal.getDialog() != null)
 	  {
-	    resultBuf.append("\n\n");
+	    if (resultBuf.length() != 0)
+	      {
+		resultBuf.append("\n\n");
+	      }
+
 	    resultBuf.append(retVal.getDialog().getText());
 	
 	    problem = true;
@@ -608,7 +612,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
-		resultBuf.append("\n\n");
+		if (resultBuf.length() != 0)
+		  {
+		    resultBuf.append("\n\n");
+		  }
+
 		resultBuf.append(tmpVal.getDialog().getText());
 	    
 		problem = true;
@@ -670,7 +678,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		if (tmpVal != null && tmpVal.getDialog() != null)
 		  {
-		    resultBuf.append("\n\n");
+		    if (resultBuf.length() != 0)
+		      {
+			resultBuf.append("\n\n");
+		      }
+
 		    resultBuf.append(tmpVal.getDialog().getText());
 	    
 		    problem = true;
