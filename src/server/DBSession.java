@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -181,18 +181,32 @@ final public class DBSession {
 
     String ckp_label = "create" + e_object.toString();
 
-    checkpoint(ckp_label);
+    // we're only going to do the checkpoint here if
+    // oversight is enabled.. otherwise it would be far, far
+    // too expensive a burden during bulk loading.
+
+    if (GSession.enableOversight)
+      {
+	checkpoint(ckp_label);
+      }
+
+    // register the object as created	
 
     editSet.addObject(e_object);
 
-    // set any inital fields, register the object as created
+    // set any inital fields
 
     if (!e_object.initializeNewObject())
       {
-	rollback(ckp_label);
+	if (GSession.enableOversight)
+	  {
+	    rollback(ckp_label);
+	  }
+
 	return null;
       }
-    else
+
+    if (GSession.enableOversight)
       {
 	popCheckpoint(ckp_label);
       }
