@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/05/12 22:10:30 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2001/07/13 19:46:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.Execer;
 
 import java.util.*;
 import java.text.*;
@@ -351,9 +352,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    process = runtime.exec(buildScript);
-
-	    process.waitFor();
+	    Execer.exec(buildScript);
 	  }
 	catch (IOException ex)
 	  {
@@ -363,45 +362,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	catch (InterruptedException ex)
 	  {
 	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
-	  }
-	finally
-	  {
-	    // the following is mentioned as a work-around for the
-	    // fact that Process keeps its file descriptors open by
-	    // default until Garbage Collection
-
-	    try
-	      {
-		process.getInputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getOutputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getErrorStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
-	    catch (IOException ex)
-	      {
-	      }
 	  }
       }
     else

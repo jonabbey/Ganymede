@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2001/07/06 06:37:05 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2001/07/13 19:46:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.Execer;
 
 import java.util.*;
 import java.io.*;
@@ -2234,50 +2235,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	finally
 	  {
-	    // the following is mentioned as a work-around for the
-	    // fact that Process keeps its file descriptors open by
-	    // default until Garbage Collection
-
-	    try
-	      {
-		process.getInputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getOutputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getErrorStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    // maybe if we destroy the process explicitly we'll get better memory
-	    // usage characteristics?
-
-	    process.destroy();
+	    Execer.cleanup(process);
 	  }
       }
     else
@@ -2342,47 +2300,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	finally
 	  {
-	    // the following is mentioned as a work-around for the
-	    // fact that Process keeps its file descriptors open by
-	    // default until Garbage Collection
-
-	    try
-	      {
-		process.getInputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getOutputStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		process.getErrorStream().close();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    process.destroy();
+	    Execer.cleanup(process);
 	  }
       }
     else
@@ -2621,9 +2539,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    System.err.println("createUserExternals: running " + execLine);
 		  }
 
-		int result;
-		Process p = java.lang.Runtime.getRuntime().exec(execLine);
-
 		try
 		  {
 		    if (debug)
@@ -2631,14 +2546,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("createUserExternals: blocking ");
 		      }
 
-		    p.waitFor();
+		    int result = Execer.exec(execLine);
 
 		    if (debug)
 		      {
 			System.err.println("createUserExternals: done ");
 		      }
-
-		    result = p.exitValue();
 
 		    if (result != 0)
 		      {
@@ -2867,10 +2780,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void handleUserDelete(String name)
   {
-    boolean success = false;
-
-    /* -- */
-
     // if the system log is null, we're running in the direct loader, and we
     // don't want to create anything external.
 
@@ -2920,9 +2829,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    System.err.println("handleUserDelete: running " + execLine);
 		  }
 
-		int result;
-		Process p = java.lang.Runtime.getRuntime().exec(execLine);
-
 		try
 		  {
 		    if (debug)
@@ -2930,14 +2836,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("handleUserDelete: blocking");
 		      }
 
-		    p.waitFor();
+		    int result = Execer.exec(execLine);
 
 		    if (debug)
 		      {
 			System.err.println("handleUserDelete: done");
 		      }
-
-		    result = p.exitValue();
 
 		    if (result != 0)
 		      {
@@ -2945,18 +2849,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 				       "\n" + deleteFilename + 
 				       " returned a non-zero result: " + result);
 		      }
-
-		    success = true;
 		  }
 		catch (InterruptedException ex)
 		  {
-		    Ganymede.debug("Couldn't handle externals for deleting user " + name + 
+		    Ganymede.debug("Couldn't handle externals for deleting user " + name + ": " +
 				   ex.getMessage());
 		  }
 	      }
 	    catch (IOException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for deleting user " + name + 
+		Ganymede.debug("Couldn't handle externals for deleting user " + name + ": " +
 			       ex.getMessage());
 	      }
 	  }
@@ -3318,9 +3220,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    System.err.println("handleUserRename: running " + execLine);
 		  }
 
-		int result;
-		Process p = java.lang.Runtime.getRuntime().exec(execLine);
-
 		try
 		  {
 		    if (debug)
@@ -3328,14 +3227,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("handleUserRename: blocking");
 		      }
 
-		    p.waitFor();
+		    int result = Execer.exec(execLine);
 
 		    if (debug)
 		      {
 			System.err.println("handleUserRename: done");
 		      }
-
-		    result = p.exitValue();
 
 		    if (result != 0)
 		      {
@@ -3343,8 +3240,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 				       " to " + newname + "\n" + renameFilename + 
 				       " returned a non-zero result: " + result);
 		      }
-
-		    success = true;
+		    else
+		      {
+			success = true;
+		      }
 		  }
 		catch (InterruptedException ex)
 		  {
@@ -3399,6 +3298,4 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			 admin, adminName, objects, null);
       }
   }
-
-
 }

@@ -7,8 +7,8 @@
    
    Created: 3 April 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/04/04 05:17:41 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/07/13 19:46:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -250,6 +250,47 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
 		Ganymede.debug("Couldn't handle externals for deleting group " + name + 
 			       ex.getMessage());
 	      }
+	    finally
+	      {
+		// the following is mentioned as a work-around for the
+		// fact that Process keeps its file descriptors open by
+		// default until Garbage Collection
+		
+		try
+		  {
+		    p.getInputStream().close();
+		  }
+		catch (NullPointerException ex)
+		  {
+		  }
+		catch (IOException ex)
+		  {
+		  }
+		
+		try
+		  {
+		    p.getOutputStream().close();
+		  }
+		catch (NullPointerException ex)
+		  {
+		  }
+		catch (IOException ex)
+		  {
+		  }
+		
+		try
+		  {
+		    p.getErrorStream().close();
+		  }
+		catch (NullPointerException ex)
+		  {
+		  }
+		catch (IOException ex)
+		  {
+		  }
+
+		p.destroy();
+	      }
 	  }
 	catch (IOException ex)
 	  {
@@ -312,9 +353,6 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
 		System.err.println("handleGroupRename: running " + execLine);
 	      }
 
-	    int result;
-	    Process p = java.lang.Runtime.getRuntime().exec(execLine);
-
 	    try
 	      {
 		if (debug)
@@ -322,14 +360,12 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
 		    System.err.println("handleGroupRename: blocking");
 		  }
 
-		p.waitFor();
+		int result = Execer.exec(execLine);
 
 		if (debug)
 		  {
 		    System.err.println("handleGroupRename: done");
 		  }
-
-		result = p.exitValue();
 
 		if (result != 0)
 		  {
