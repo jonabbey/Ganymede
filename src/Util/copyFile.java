@@ -8,8 +8,8 @@
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/12/02 09:33:04 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/12/02 09:39:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ public class copyFile {
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(inputFileName));
     BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(outputFileName));
     byte buffer[] = new byte[32767];
-    int length;
+    int length = 0;
 
     /* -- */
 
@@ -117,18 +117,26 @@ public class copyFile {
 
   public static void main (String args[])
   {
+    boolean result = false;
     String inName = args[0];
     String outName = args[1];
 
     try
       {
-	copyFile(inName, outName);
+	result = copyFile(inName, outName);
       }
     catch (IOException ex)
       {
 	ex.printStackTrace();
       }
 
-    System.exit(0);
+    if (result)
+      {
+	System.exit(0);
+      }
+    else
+      {
+	System.exit(1);
+      }
   }
 }
