@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -683,6 +683,31 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   public final static short s2u(byte b)
   {
     return (short) (b + 128);
+  }
+
+  /**
+   *
+   * Hook to allow subclasses to grant ownership privileges to a given
+   * object.  If this method returns true on a given object, the Ganymede
+   * Permissions system will provide access to the object as owned with
+   * whatever permissions apply to objects owned by the persona active
+   * in gSession.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean grantOwnership(GanymedeSession gSession, DBObject object)
+  {
+    Invid userInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
+
+    if (userInvid != null &&
+	userInvid.equals(gSession.getUserInvid()))
+      {
+	return true;
+      }
+
+    return false;
   }
 
   /**
