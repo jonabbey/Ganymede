@@ -5,8 +5,8 @@
    This class defines a date input field object.
 
    Created: 28 June 2002
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2002/06/29 01:13:00 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2002/07/03 02:50:16 $
    Release: $Name:  $
 
    Module By: Navin Manohar
@@ -190,6 +190,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
       }
 
     _myCalendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
+    _myCalendar.setTime(my_date);
     
     if (islimited)
       {

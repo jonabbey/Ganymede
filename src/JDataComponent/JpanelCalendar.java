@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2002/02/02 22:01:19 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2002/07/03 02:50:17 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -123,11 +123,12 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   protected JdateButton _datebuttonArray[] = new JdateButton[37];
 
   private JMonthYearPanel monthYearPanel = null;
+  private JPanel calButtonPanel = null;
   private JPanel buttonPanel = null;
   private JTimePanel timePanel;
   
-  protected Font todayFont = new Font("sansserif", Font.BOLD, 12);
-  protected Font notTodayFont = new Font("serif", Font.PLAIN, 12);
+  protected Font todayFont = new Font("Monospaced", Font.BOLD, 12);
+  protected Font notTodayFont = new Font("Monospaced", Font.PLAIN, 12);
 
   /**
    * <p>If true, we will allow the calendar to be used to change the
@@ -314,6 +315,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbc.gridy = 1;
     JLabel sun = new JLabel("SUN");
     sun.setFont(todayFont);
+    sun.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 0;
     gbc.gridwidth = 1;
     gbl.setConstraints(sun, gbc);
@@ -321,42 +323,46 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     JLabel mon = new JLabel("MON");
     mon.setFont(todayFont);
+    mon.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 1;
     gbl.setConstraints(mon, gbc);
     centerPanel.add(mon);
 
     JLabel tue = new JLabel("TUE");
     tue.setFont(todayFont);
+    tue.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 2;
     gbl.setConstraints(tue, gbc);
     centerPanel.add(tue);
 
     JLabel wed = new JLabel("WED");
     wed.setFont(todayFont);
+    wed.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 3;
     gbl.setConstraints(wed, gbc);
     centerPanel.add(wed);
 
     JLabel thu = new JLabel("THU");
     thu.setFont(todayFont);
+    thu.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 4;
     gbl.setConstraints(thu, gbc);
     centerPanel.add(thu);
 
     JLabel fri = new JLabel("FRI");
     fri.setFont(todayFont);
+    fri.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 5;
     gbl.setConstraints(fri, gbc);
     centerPanel.add(fri);
 
     JLabel sat = new JLabel("SAT");
     sat.setFont(todayFont);
+    sat.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 6;
     gbl.setConstraints(sat, gbc);
     centerPanel.add(sat);
 
-    gbc.gridy = 2;
-    gbc.gridx = 0;
     gbc.ipadx = 0;
 
     for (int i=0;i<37;i++) 
@@ -913,6 +919,8 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     normalFG = Color.black,
     highlightFG = Color.darkGray,
     bg;
+
+  boolean active;
   
   /* -- */
 
@@ -950,13 +958,17 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     setBorderPainted(true);
     super.setForeground(normalFG);
+    super.setEnabled(true);
+    this.active = true;
   }
 
   public void hideYourself()
   {
-    setText("");
+    setText("  ");
     setBorderPainted(false);
     super.setForeground(getBackground());
+    super.setEnabled(false);
+    this.active = false;
   }
 
   public void setForeground(Color fg)
@@ -972,13 +984,15 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 	throw new NullPointerException("dateButton: null parent");
       }
 
-    my_parent.buttonPressed(this);
+    if (this.active)
+      {
+	my_parent.buttonPressed(this);
+      }
   }
 
   public void mouseClicked(MouseEvent e) {}
   public void mouseEntered(MouseEvent e)
   {
-    //super.setForeground(highlightFG);
     if (isBorderPainted())
       {
 	super.setBackground(Color.lightGray.brighter());

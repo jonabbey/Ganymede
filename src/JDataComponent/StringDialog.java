@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 2002/06/29 01:24:21 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 2002/07/03 02:50:17 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.56 $ $Date: 2002/06/29 01:24:21 $ $Name:  $
+ * @version $Revision: 1.57 $ $Date: 2002/07/03 02:50:17 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -423,7 +423,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  {
 	    if (debug)
 	      {
-		System.err.println("Adding date field(JdateField)");
+		System.err.println("Adding date field(JcalendarField)");
 	      }
 		    
 	    dateThing dt = (dateThing) element;
