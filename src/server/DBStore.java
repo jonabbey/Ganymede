@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,10 @@ import java.rmi.*;
  * A user can have any number of DBStore objects active, but there is probably
  * no good reason for doing so since a single DBStore can store and cross reference
  * up to 32k different kinds of objects.</p>
+ *
+ * IMPORTANT NOTE: All synchronized methods in this class must do a this.notifyAll()
+ * on exiting a synchronized block because the DBLock classes use DBStore as their
+ * synchronization object.  If any do not, then the server can deadlock.
  *
  */
 
@@ -283,7 +287,7 @@ public class DBStore {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
-	    
+
 	    throw new RuntimeException("couldn't load journal");
 	  }
       }
@@ -400,6 +404,7 @@ public class DBStore {
     catch (IOException ex)
       {
 	System.err.println("DBStore error dumping to " + filename);
+
 	throw ex;
       }
     finally
@@ -501,6 +506,7 @@ public class DBStore {
     try
       {
 	dbFile = new File(filename);
+
 	if (dbFile.isFile())
 	  {
 	    dbFile.renameTo(new File(filename + ".bak"));
@@ -616,6 +622,10 @@ public class DBStore {
 
   protected synchronized DBSession login(Object key)
   {
+    DBSession retVal;
+
+    /* -- */
+
     if (schemaEditInProgress)
       {
 	throw new RuntimeException("can't login, the server's in schema edit mode");
@@ -626,7 +636,9 @@ public class DBStore {
 	throw new RuntimeException("can't login, the server is performing an invid sweep");
       }
 
-    return new DBSession(this, null, key);
+    retVal = new DBSession(this, null, key);
+
+    return retVal;
   }
 
   /**
@@ -773,7 +785,7 @@ public class DBStore {
    *
    */
 
-  public DBBaseCategory getCategory(String pathName)
+  public synchronized DBBaseCategory getCategory(String pathName)
   {
     DBBaseCategory 
       bc;
