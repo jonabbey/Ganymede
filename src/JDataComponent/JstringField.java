@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -310,11 +310,6 @@ public class JstringField extends JentryField implements KeyListener{
 
   private final boolean isAllowed(char ch)
   {
-    if (getText().length() >= size)
-      {
-	return false;
-      }
-
     if (disallowedChars != null)
       {
 	if (disallowedChars.indexOf(ch) != -1)
