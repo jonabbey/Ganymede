@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -839,6 +839,45 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		shellChoiceStamp.setTime(System.currentTimeMillis());
 	      }
 	  }
+      }
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to
+   * override the default permissions mechanism for special
+   * purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the permissions specified by this method for access to the
+   * given field, and no further elaboration of the permission
+   * will be performed.  Note that this override capability does
+   * not apply to operations performed in supergash mode.<br><br>
+   *
+   * This method should be used very sparingly.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
+  {
+    if (fieldid != UID)
+      {
+	return null;
+      }
+
+    // we don't want to allow anyone other than supergash to change our
+    // uid once it is set.
+
+    if (object.getFieldValueLocal(UID) != null)
+      {
+	return new PermEntry(true, false, true, false);
+      }
+    else
+      {
+	return null;
       }
   }
 
