@@ -4,8 +4,8 @@
 
    Created: 16 November 2001
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2001/11/17 02:36:43 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2001/11/17 02:38:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ package arlut.csd.Util;
 public class CVSVersion {
 
   static String CVS_release_name = "$Name:  $";
-  static String CVS_release_date = "$Date: 2001/11/17 02:36:43 $";
+  static String CVS_release_date = "$Date: 2001/11/17 02:38:16 $";
   static String release_string = null;
 
   // ---
@@ -159,10 +159,5 @@ public class CVSVersion {
       }
 
     return release_number + " - " + CVS_release_date;
-  }
-
-  public static void main(String[] args)
-  {
-    System.err.println(parseRelease("$Name:  $", CVS_release_date));
   }
 }
