@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/09 17:09:52 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/03/09 17:20:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -300,6 +300,28 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public void startDocument() throws SAXException
   {
+    synchronized (buffer)
+      {
+	while (!done && buffer.size() >= bufferSize)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	  }
+	
+	buffer.addElement(new XMLStartDocument());
+	buffer.notifyAll();
+      }
   }
 
   /**
@@ -777,6 +799,24 @@ class XMLCloseElement extends XMLItem {
   public String getName()
   {
     return name;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                XMLStartDocument
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Document Open class for XML data held in the 
+ * {@link arlut.csd.Util.XMLReader XMLReader} class's buffer.</P>
+ */
+
+class XMLStartDocument extends XMLItem {
+
+  XMLStartDocument()
+  {
   }
 }
 
