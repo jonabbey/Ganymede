@@ -5,7 +5,7 @@
 
    Written by Robert Harder, rob@iharder.net
 
-   Added to Directory Droid source base: 28 April 2004
+   Added to Ganymede source base: 28 April 2004
 
    Last Revision Changed: $Rev$
    Last Changed By: $Author$

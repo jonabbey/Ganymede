@@ -39,7 +39,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -89,7 +89,7 @@ package arlut.csd.crypto;
  * static methods in this class perform the two hashes required for Samba's
  * encrypted password entries.  As such, this class and the other classes
  * in the broadly named arlut.csd.crypto package provide all the support
- * functions necessary to allow Directory Droid to manage Samba's password file.</p>
+ * functions necessary to allow Ganymede to manage Samba's password file.</p>
  *
  * <p>The following notes are from the original Samba source code for the
  * smbdes.c module, which this module is adapted from.</p>

@@ -9,7 +9,7 @@
    versions prevent us from using the SHA1 routines that are
    built-in in Java :-(
 
-   Adapted into Directory Droid source base as arlut.csd.crypto.SHA1
+   Adapted into Ganymede source base as arlut.csd.crypto.SHA1
    28 April 2004, no code changed otherwise.
 
    Last Revision Changed: $Rev$
