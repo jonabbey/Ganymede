@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,8 +14,10 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
+import java.beans.PropertyVetoException;
 
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
@@ -32,7 +34,7 @@ import arlut.csd.JDataComponent.*;
  * tabbed pane, and the creation of each of the panels in the window.
  */
 
-public class framePanel extends JInternalFrame implements ChangeListener, Runnable {
+public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener {
   
   // This will be loaded from gclient anyway.
   private boolean debug = true;
@@ -116,6 +118,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   windowPanel
     wp;
 
+  private gclient
+    gc;
+
   notesPanel
     my_notesPanel = null;
 
@@ -131,6 +136,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       this.wp = winP;
       this.object = object;
       this.editable = editable;
+      this.gc = winP.gc;
 
       debug = wp.gc.debug;
 
@@ -174,28 +180,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * The only panel created in run() is the general panel.
    *
    */
+
   public void run()
     {
       if (debug)
 	{
-	  System.out.println("Starting thread in framePanel");
+	  println("Starting thread in framePanel");
 	}
-
 
       // windowPanel wants to know if framePanel is changed
       // Maybe this should be replaced with InternalFrameListener?
       addPropertyChangeListener(getWindowPanel());
       
-      // This probably isn't a good idea, so I am commenting it out.
-      //setBackground(ClientColor.WindowBG);
-      
-      JMenuBar mb = wp.createMenuBar(editable, object, this);
-      setMenuBar(mb);
-
       // Now setup the framePanel layout
       pane = new JTabbedPane();
       
-      // Add the panels to the tabbedPane
+      // Add the panels to the tabbedPane (add just the panels that every object has.)
       general = new JScrollPane();
       pane.addTab("General", null, general);
       general_index = current++;
@@ -252,7 +252,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  admin_history_index = current++;
 	}
 
-      // Do we need to show expiration or removal dates?
+      // Only add the date panels if the date has been set.  In order
+      // to set the date, use the menu items.
 
       try
 	{
@@ -278,11 +279,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       pane.addChangeListener(this);
 
-      // Create all the panes
-
       createPanel(general_index);
       showTab(general_index);
       setContentPane(pane);
+
+
+      // Need to add the menubar at the end, so the user doesn't get
+      // into the menu items before the tabbed pane is all set up
+      JMenuBar mb = createMenuBar(editable);
+      setMenuBar(mb);
 
       pane.invalidate();
       validate();
@@ -303,21 +308,35 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   {
     if (debug)
       {
-	System.out.println("Stopping all the containerPAnels.");
+	println("Stopping all the containerPAnels.");
       }
 
-    for (int i = 0; i < containerPanels.size(); i++)
-      {
-	if (debug)
+    final Vector finalCPS = containerPanels;
+
+    Runnable r = new Runnable() {
+      public void run() {
+	for (int i = 0; i < containerPanels.size(); i++)
 	  {
-	    System.out.println("Telling a containerPanel to stop loading.");
+	    if (debug)
+	      {
+		println("Telling a containerPanel to stop loading.");
+	      }
+	    
+	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+	    cp.stopLoading();
 	  }
+      }};
 
-	containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-	cp.stopLoading();
-      }
+    Thread t = new Thread(r);
+    t.start();
   }
 
+  /**
+   */
+  public boolean isEditable()
+  {
+    return editable;
+  }
 
   /**
    * Return the invid of the object contained in this frame panel.
@@ -360,8 +379,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * Refresh the tab that is showing.
    *
    * Currently, this only refreshes the general panel.  Other panels
-   * will generate a nice dialog.
+   * will generate a nice dialog telling the user to go away.
    */
+
   public void refresh()
   {
     Component c = pane.getSelectedComponent();
@@ -393,7 +413,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     if (j == null)
       {
-	System.out.println("Cancelled");
+	println("Cancelled");
 	return;
       }
 
@@ -402,12 +422,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     int index = pane.getSelectedIndex();
     if (index < 0)
       {
-	System.out.println("No pane selected?");
+	println("No pane selected?");
       }
     else
       {
-	System.out.println("Printing " + index);
-	pane.getComponentAt(index).print(page);
+	println("Printing " + index);
+
+	// The thinking here is that some components other than the
+	// scrollpane might be a little bit smarter about what they
+	// should be printing.
+
+	if (pane.getComponentAt(index) instanceof JScrollPane)
+	  {
+	    if (debug)
+	      {
+		println("Printing out the contents of the ScrollPane.");
+	      }
+
+	    JScrollPane sp = (JScrollPane)pane.getComponentAt(index);
+	    sp.getViewport().getView().print(page);
+	  }
+	else if (debug)
+	  {
+	    println("The selected index is not a scrollpane.");
+	    showErrorMessage("The current selection cannot be printed.");
+	  }
       }
 
     page.dispose();
@@ -420,12 +459,92 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     return wp.getWaitImage();
   }
 
+  /* Private stuff */
+  JMenuBar createMenuBar(boolean editable)
+  {
+    // Adding a menu bar, checking it out
+    JMenuBar menuBar = new JMenuBar();
+    menuBar.setBorderPainted(true);
+    //menuBar.setBackground(ClientColor.WindowBG.darker());
+    
+    JMenu fileM = new JMenu("File");
+    JMenu editM = new JMenu("Edit");
+    menuBar.add(fileM);
+    menuBar.add(editM);
+    
+    JMenuItem iconifyMI = new JMenuItem("Iconify");
+    iconifyMI.addActionListener(this);
+
+    JMenuItem closeMI = null;
+    closeMI = new JMenuItem("Close");
+    closeMI.addActionListener(this);
+
+    JMenu deleteM = new JMenu("Delete");
+    JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
+    deleteM.add(reallyDeleteMI);
+    reallyDeleteMI.setActionCommand("ReallyDelete");
+    reallyDeleteMI.addActionListener(this);
+      
+    JMenuItem inactivateMI = new JMenuItem("Inactivate");
+    inactivateMI.addActionListener(this);
+
+    JMenuItem refreshMI = new JMenuItem("Refresh");
+    refreshMI.addActionListener(this);
+
+    JMenuItem setExpirationMI = null;
+    JMenuItem setRemovalMI = null;
+    if (editable)
+      {
+	setExpirationMI = new JMenuItem("Set Expiration Date");
+	setExpirationMI.addActionListener(this);
+	
+        setRemovalMI = new JMenuItem("Set Removal Date");
+	setRemovalMI.addActionListener(this);
+      }
+
+    JMenuItem printMI = new JMenuItem("Print");
+    printMI.addActionListener(this);
+
+    fileM.add(inactivateMI);
+    fileM.add(deleteM);
+    fileM.add(printMI);
+    fileM.add(refreshMI);
+    if (editable)
+      {
+	fileM.addSeparator();
+	fileM.add(setExpirationMI);
+	fileM.add(setRemovalMI);
+      }
+
+    fileM.addSeparator();
+    fileM.add(iconifyMI);
+    fileM.add(closeMI);
+
+    JMenuItem queryMI = new JMenuItem("Query");
+    queryMI.addActionListener(this);
+    JMenuItem editMI = new JMenuItem("Edit");
+    editMI.setEnabled(!editable);
+    editMI.addActionListener(this);
+    
+    editM.add(queryMI);
+    editM.add(editMI);
+
+    if (debug)
+      {
+	println("Returning menubar.");
+      }
+    
+    return menuBar;
+  }
+
+
+
   //This need to be changed to show the progress bar
   void create_general_panel()
     {
       if (debug)
 	{
-	  System.out.println("Creating general panel");
+	  println("Creating general panel");
 	}
       
       containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false);
@@ -445,7 +564,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating date panel");
+	  println("Creating date panel");
 	}
 
       if (exp_field == null)
@@ -473,7 +592,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating removal date panel");
+	  println("Creating removal date panel");
 	}
 
       if (rem_field == null)
@@ -504,7 +623,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating owner panel");
+	  println("Creating owner panel");
 	}
 
       try
@@ -558,7 +677,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating notes panel");
+	  println("Creating notes panel");
 	}
 
       try
@@ -591,7 +710,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating ownership panel");
+	  println("Creating ownership panel");
 	}
 
       invid_field oo = null;
@@ -628,7 +747,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Creating personae panel()");
+	  println("Creating personae panel()");
 	}
 
       invid_field p = null;
@@ -662,7 +781,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (debug)
 	    {
-	      System.out.println("Adding date tabs");
+	      println("Adding date tabs");
 	    }
 	  expiration_date = new JScrollPane();
 	  pane.addTab("Expiration", null, expiration_date);
@@ -675,7 +794,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  if (debug)
 	    {
-	      System.out.println("Adding removal date tabs");
+	      println("Adding removal date tabs");
 	    }
 	  
 	  removal_date = new JScrollPane();
@@ -688,7 +807,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       if (debug)
 	{
-	  System.out.println("Adding notes tab");
+	  println("Adding notes tab");
 	}
       pane.addTab("Notes", null, notes);
       notes_index = current++;
@@ -702,7 +821,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		{
 		  if (debug)
 		    {
-		      System.out.println("Setting notes test to *" + notesText + "*.");
+		      println("Setting notes test to *" + notesText + "*.");
 		    }
 
 		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
@@ -711,7 +830,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		}
 	      else if (debug)
 		{
-		  System.out.println("Empty notes");
+		  println("Empty notes");
 		}
 	    }
 	  else if (debug)
@@ -739,9 +858,132 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   {
     if (index == -1)
       {
-	System.out.println("This tab has not been added to the pane yet.");
+	println("This tab has not been added to the pane yet.");
       }
     pane.setSelectedIndex(index);
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    if (debug)
+      {
+	println("Menu item action: " + e.getActionCommand());
+      }
+    
+    JMenuItem MI = (JMenuItem)e.getSource();
+    
+    if (e.getActionCommand().equals("Edit"))
+      {
+	if (debug)
+	  {
+	    println("edit button clicked");
+	  }
+
+	gc.editObject(getObjectInvid());
+      }
+
+    // There is no clone.  If there ever is, this would be useful.  But there isn't
+    else if (e.getActionCommand().equals("Clone"))
+      {
+
+	if (debug)
+	  {
+	    println("Opening new edit window on the cloned object");
+	  }
+	showErrorMessage("Sorry", "Clone is not implemented");
+      }
+    else if (e.getActionCommand().equals("ReallyDelete"))
+      {
+	if (debug)
+	  {
+	    println("Deleting object");
+	  }
+
+	if (gc.deleteObject(getObjectInvid()))
+	  {
+	    try
+	      {
+		setClosed(true);
+		
+	      }
+	    catch (PropertyVetoException ex)
+	      {
+		throw new RuntimeException("JInternalFrame will not close: " + ex);
+	      }
+	  }
+	else
+	  {
+	    showErrorMessage("Error", "Could not delete object.");
+	  }
+      }
+    else if (e.getActionCommand().equals("Close"))
+      {
+	try
+	  {
+	    setClosed(true);
+	    
+	  }
+	catch (PropertyVetoException ex)
+	  {
+	    throw new RuntimeException("JInternalFrame will not close: " + ex);
+	  }
+      }
+    else if (e.getActionCommand().equals("Iconify"))
+      {
+	try
+	  {
+	    setIcon(true);
+	  }
+	catch (PropertyVetoException ex)
+	  {
+	    throw new RuntimeException("JInternalFrame will not change icon: " + ex);
+	  }
+      }
+    else if (e.getActionCommand().equals("Print"))
+      {
+	printObject();
+      }
+    else if (e.getActionCommand().equals("Refresh"))
+      {
+	refresh();
+      }
+    else if (e.getActionCommand().equals("Inactivate"))
+      {
+	boolean success = gc.inactivateObject(getObjectInvid());
+	
+	if (success)
+	  {
+	    try
+	      {
+		setClosed(true);
+		
+	      }
+	    catch (PropertyVetoException ex)
+	      {
+		throw new RuntimeException("JInternalFrame will not close: " + ex);
+	      }		
+	  }
+	else
+	  {
+	    showErrorMessage("Could not inactivate object.");
+	  }
+
+      }
+    else if (e.getActionCommand().equals("Query"))
+      {
+	println("Not sure what a query should do");
+      }
+    else if (e.getActionCommand().equals("Set Expiration Date"))
+      {
+	addExpirationDatePanel();
+	showTab(expiration_date_index);
+      }
+    else if (e.getActionCommand().equals("Set Removal Date"))
+      {
+	addRemovalDatePanel();
+	showTab(removal_date_index);
+      }
+
   }
 
   // For the ChangeListener
@@ -751,7 +993,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       if (!createdList.contains(new Integer(index)))
 	{
-	  System.out.println("Creating a new pane. in stateChanged");
+	  println("Creating a new pane. in stateChanged");
 	  createPanel(index);
 	}
     }
@@ -765,7 +1007,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       wp.gc.setWaitCursor();
       if (debug)
 	{
-	  System.out.println("index = " + index + " general_index= " + general_index);
+	  println("index = " + index + " general_index= " + general_index);
 	}
 	
       if (index == general_index)
@@ -837,5 +1079,28 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       wp.gc.setStatus(status);
     }
+
+  /* 
+   * Use this instead of System.out.println, in case we want to direct
+   * that stuff somewhere else sometime.  Plus, it is easier to type.  
+   */
+  
+  private void println(String s)
+  {
+    System.out.println(s);
+  }
+
+  /*
+   * Give the gclient an error message.
+   */
+  private void showErrorMessage(String message)
+  {
+    showErrorMessage("Error", message);
+  }
+
+  private void showErrorMessage(String title, String message)
+  {
+    gc.showErrorMessage(title, message);
+  }
+
 }
-	
