@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/10/29 16:12:23 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/10/29 18:43:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.31 $ $Date: 1999/10/29 16:12:23 $ $Name:  $
+ * @version $Revision: 1.32 $ $Date: 1999/10/29 18:43:16 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -140,6 +140,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   JMenuItem editMI;
   JMenuItem deleteMI;
   JMenuItem inactivateMI;
+  JMenuItem cloneMI;
 
   JToolBar toolbar;
 
@@ -164,11 +165,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     popMenu = new JPopupMenu();
     viewMI = new JMenuItem("View Entry");
     editMI = new JMenuItem("Edit Entry");
+    cloneMI = new JMenuItem("Clone Entry");
     deleteMI = new JMenuItem("Delete Entry");
     inactivateMI = new JMenuItem("Inactivate Entry");
 
     popMenu.add(viewMI);
     popMenu.add(editMI);
+    popMenu.add(cloneMI);
     popMenu.add(deleteMI);
     popMenu.add(inactivateMI);
 
@@ -529,6 +532,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     else if (event.getSource() == inactivateMI)
       {
 	wp.getgclient().inactivateObject((Invid)key);
+      }
+    else if (event.getSource() == cloneMI)
+      {
+	wp.getgclient().cloneObject((Invid)key);
       }
   }
 
