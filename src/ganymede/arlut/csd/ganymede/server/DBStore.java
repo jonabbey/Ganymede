@@ -2294,6 +2294,19 @@ public final class DBStore implements JythonMap {
 	    bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
 	    taskBase.addFieldToEnd(bf);
 	  }
+
+	// and this last check is for the old ARL database, which
+	// somehow did not get namespace constrained on the task name
+	// field
+
+	bf = (DBObjectBaseField) taskBase.getField(SchemaConstants.TaskName);
+
+	if (bf.getNameSpace() == null)
+	  {
+	    Ganymede.debug("Applying namespace constraint to task name");
+
+	    bf.setNameSpace("buildertask");
+	  }
       }
     catch (RemoteException ex)
       {
