@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,10 @@ public class userCustom extends DBEditObject implements SchemaConstants {
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
+
+  // ---
+
+  QueryResult groupChoices = null;
 
   /**
    *
@@ -340,17 +344,16 @@ public class userCustom extends DBEditObject implements SchemaConstants {
       }
     else  // interactive, but not called by wizard
       {
-	userWizard theWiz;
+	userInactivateWizard theWiz;
 
 	try
 	  {
 	    System.err.println("userCustom: creating inactivation wizard");
 
-	    theWiz = new userWizard(this.gSession,
-				    userWizard.USER_INACTIVATE,
-				    this,
-				    null,
-				    null);
+	    theWiz = new userInactivateWizard(this.gSession,
+					      this,
+					      null,
+					      null);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -399,7 +402,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal reactivate()
   {
-    userWizard theWiz;
+    userReactivateWizard theWiz;
 
     /* -- */
 
@@ -407,11 +410,10 @@ public class userCustom extends DBEditObject implements SchemaConstants {
       {
 	System.err.println("userCustom: creating reactivation wizard");
 	
-	theWiz = new userWizard(this.gSession,
-				userWizard.USER_REACTIVATE,
-				this,
-				null,
-				null);
+	theWiz = new userReactivateWizard(this.gSession,
+					  this,
+					  null,
+					  null);
       }
     catch (RemoteException ex)
       {
@@ -423,7 +425,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
     return theWiz.getStartDialog();
   }
 
-  public ReturnVal reactivate(userWizard reactivateWizard)
+  public ReturnVal reactivate(userReactivateWizard reactivateWizard)
   {
     ReturnVal retVal = null;
     StringDBField stringfield;
@@ -525,6 +527,30 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * This method returns a key that can be used by the client
+   * to cache the value returned by choices().  If the client
+   * already has the key cached on the client side, it
+   * can provide the choice list from its cache rather than
+   * calling choices() on this object again.
+   *
+   * If there is no caching key, this method will return null.
+   *
+   */
+
+  public Object obtainChoicesKey(DBField field)
+  {
+    if (field.getID() == 265)
+      {
+	return null;
+      }
+    else
+      {
+	return super.obtainChoicesKey(field);
+      }
+  }
+
+  /**
+   *
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
    * choose from a choice provided by obtainChoiceList()
@@ -550,7 +576,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public synchronized QueryResult obtainChoiceList(DBField field)
   {
     switch (field.getID())
       {
@@ -565,6 +591,11 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	return shellChoices;
 
+      case 265:			// home group
+
+	updateGroupChoiceList();
+	return groupChoices;
+	
       case 268:			// signature alias
 
 	QueryResult result = new QueryResult();
@@ -607,6 +638,24 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	
       default:
 	return super.obtainChoiceList(field);
+      }
+  }
+
+  void updateGroupChoiceList()
+  {
+    if (groupChoices == null)
+      {
+	groupChoices = new QueryResult();
+	
+	Vector invids = getFieldValuesLocal((short) 264); // groups list
+	Invid invid;
+	
+	for (int i = 0; i < invids.size(); i++)
+	  {
+	    invid = (Invid) invids.elementAt(i);
+	    
+	    groupChoices.addRow(invid, gSession.viewObjectLabel(invid), true); // must be editable because the client cares
+	  }
       }
   }
 
@@ -765,9 +814,120 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    userWizard wizard;
-
+    userHomeGroupDelWizard groupWizard = null;
+    userRenameWizard renameWizard = null;
+    ReturnVal result;
+    
     /* -- */
+
+    // if the groups field is being changed, we may need to intervene
+
+    System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+
+    if (field.getID() == 264)
+      {
+	switch (operation)
+	  {
+	  case ADDELEMENT:
+
+	    // ok, no big deal, but we will need to have the client
+	    // rescan the choice list for the home group field
+
+	    result = new ReturnVal(true);
+	    result.addRescanField((short) 265);
+	    groupChoices = null;
+	    return result;
+
+	  case DELELEMENT:
+
+	    // ok, this is more of a big deal.. first, see if the value
+	    // being deleted is the home group.  If not, still no big
+	    // deal.
+
+	    int index = ((Integer) param1).intValue();
+
+	    Vector valueAry = getFieldValuesLocal((short) 264);
+	    Invid delVal = (Invid) valueAry.elementAt(index);
+
+	    System.err.println("userCustom: deleting group element " + getGSession().viewObjectLabel(delVal));
+
+	    if (!delVal.equals(getFieldValueLocal((short) 265)))
+	      {
+		// whew, no big deal.. they are not removing the
+		// home group.  The client will need to rescan,
+		// but no biggie.
+
+		System.err.println("userCustom: I don't think " + getGSession().viewObjectLabel(delVal) + 
+				   " is the home group");
+
+		result = new ReturnVal(true);
+		result.addRescanField((short) 265);
+		groupChoices = null;
+		return result;
+	      }
+
+	    if (gSession.isWizardActive() && gSession.getWizard() instanceof userHomeGroupDelWizard)
+	      {
+		groupWizard = (userHomeGroupDelWizard) gSession.getWizard();
+		
+		if (groupWizard.getState() == groupWizard.DONE)
+		  {
+		    // ok, assume the wizard has taken care of getting everything prepped and
+		    // approved for us.  An active wizard has approved the operation
+		
+		    groupWizard.unregister();
+		
+		    return null;
+		  }
+		else
+		  {
+		    if (groupWizard.object != this)
+		      {
+			System.err.println("userCustom.wizardHook(): bad object");
+		      }
+		    
+		    if (groupWizard.getState() != groupWizard.DONE)
+		      {
+			System.err.println("userCustom.wizardHook(): bad state: " + groupWizard.getState());
+		      }
+
+		    groupWizard.unregister();
+
+		    return Ganymede.createErrorDialog("User Object Error",
+						      "The client is attempting to do an operation on " +
+						      "a user object with an active wizard.");
+		  }
+	      }
+	    else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userHomeGroupDelWizard))
+	      {
+		return Ganymede.createErrorDialog("User Object Error",
+						  "The client is attempting to do an operation on " +
+						  "a user object with mismatched active wizard.");
+	      }
+
+	    // eek.  they are deleting the home group.  Why Lord, why?!
+
+	    try
+	      {
+		groupWizard = new userHomeGroupDelWizard(this.gSession,
+							 this,
+							 field,
+							 param1);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
+	      }
+
+	    // if we get here, the wizard was able to register itself.. go ahead
+	    // and return the initial dialog for the wizard.  The ReturnVal code
+	    // that wizard.getStartDialog() returns will have the success code
+	    // set to false, so whatever triggered us will prematurely exit,
+	    // returning the wizard's dialog.
+	    
+	    return groupWizard.getStartDialog();
+	  }
+      }
 
     if ((field.getID() != SchemaConstants.UserUserName) ||
 	(operation != SETVAL))
@@ -787,55 +947,55 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
     // looks like we're renaming this user
 
-    if (gSession.isWizardActive() && gSession.getWizard() instanceof userWizard)
+    if (gSession.isWizardActive() && gSession.getWizard() instanceof userRenameWizard)
       {
-	wizard = (userWizard) gSession.getWizard();
+	renameWizard = (userRenameWizard) gSession.getWizard();
 
-	if ((wizard.getState() == wizard.DONE) &&
-	    (wizard.operation == wizard.USER_RENAME) &&
-	    (wizard.field == field) &&
-	    (wizard.object == this) &&
-	    (wizard.param == param1))
+	if ((renameWizard.getState() == renameWizard.DONE) &&
+	    (renameWizard.field == field) &&
+	    (renameWizard.object == this) &&
+	    (renameWizard.param == param1))
 	  {
 	    // ok, assume the wizard has taken care of getting everything prepped and
 	    // approved for us.  An active wizard has approved the operation
 		
-	    wizard.unregister();
+	    renameWizard.unregister();
 		
 	    return null;
 	  }
 	else
 	  {
-	    if (wizard.field != field)
+	    if (renameWizard.field != field)
 	      {
 		System.err.println("userCustom.wizardHook(): bad field");
 	      }
 
-	    if (wizard.operation != wizard.USER_RENAME)
-	      {
-		System.err.println("userCustom.wizardHook(): bad operation");
-	      }
-
-	    if (wizard.object != this)
+	    if (renameWizard.object != this)
 	      {
 		System.err.println("userCustom.wizardHook(): bad object");
 	      }
 
-	    if (wizard.param != param1)
+	    if (renameWizard.param != param1)
 	      {
 		System.err.println("userCustom.wizardHook(): bad param");
 	      }
 
-	    if (wizard.getState() != wizard.DONE)
+	    if (renameWizard.getState() != renameWizard.DONE)
 	      {
-		System.err.println("userCustom.wizardHook(): bad state: " + wizard.getState());
+		System.err.println("userCustom.wizardHook(): bad state: " + renameWizard.getState());
 	      }
 
-	    wizard.unregister();
+	    renameWizard.unregister();
 	    return Ganymede.createErrorDialog("User Object Error",
 					      "The client is attempting to do an operation on " +
 					      "a user object with an active wizard.");
 	  }
+      }
+    else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userRenameWizard))
+      {
+	return Ganymede.createErrorDialog("User Object Error",
+					  "The client is attempting to do an operation on " +
+					  "a user object with mismatched active wizard.");
       }
     else
       {
@@ -852,11 +1012,10 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	try
 	  {
-	    wizard = new userWizard(this.gSession,
-				    userWizard.USER_RENAME,
-				    this,
-				    field,
-				    param1);
+	    renameWizard = new userRenameWizard(this.gSession,
+						this,
+						field,
+						param1);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -869,7 +1028,12 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	// set to false, so whatever triggered us will prematurely exit,
 	// returning the wizard's dialog.
 
-	return wizard.getStartDialog();
+	return renameWizard.getStartDialog();
       }
+  }
+
+  GanymedeSession getGSession()
+  {
+    return gSession;
   }
 }
