@@ -160,7 +160,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   JLabel image = null;
   JTextField username = null;
   JPasswordField password = null;
-  JButton quitButton;
+  JButton quitButton = null;
   JButton loginButton= null;
 
   Image errorImage = null;
@@ -633,7 +633,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	username.setText("");
 	password.setText("");
-	quitButton.setEnabled(false);
+
+	if (quitButton != null)
+	  {
+	    quitButton.setEnabled(false);
+	  }
+
 	loginButton.setEnabled(false);
 
 	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), applet); // "Ganymede Admin Console"
