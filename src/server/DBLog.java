@@ -2,11 +2,16 @@
 
    DBLog.java
 
-   This class manages recording events in the system log and generating
-   reports from the system log based on specific criteria.
+   This class manages recording events in the system log and
+   generating reports from the system log based on specific criteria.
+
+   Most of the methods in this class must be synchronized, both to
+   keep the logfile itself orderly, and to allow the various
+   log-processing methods iin DBLogEvent to re-use the 'multibuffer'
+   StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +35,11 @@ import arlut.csd.Util.*;
 /**
  *
  * This class manages recording events in the system log and generating
- * reports from the system log based on specific criteria.
+ * reports from the system log based on specific criteria.<br><br>
+ *
+ * Most of the methods in this class must be synchronized, both to keep the
+ * logfile itself orderly, and to allow the various log-processing methods
+ * in DBLogEvent to re-use the 'multibuffer' StringBuffer.
  *
  */
 
@@ -76,7 +85,7 @@ public class DBLog {
    * 
    */
 
-  StringBuffer multibuffer = new StringBuffer();
+  SharedStringBuffer multibuffer = new SharedStringBuffer();
 
   /* -- */
 
@@ -522,7 +531,7 @@ public class DBLog {
 
     BufferedReader in = new BufferedReader(reader);
     StringBuffer buffer = new StringBuffer();
-    DBLogEvent event;
+    DBLogEvent event = null;
     String line;
     String transactionID = null;
 
@@ -576,7 +585,14 @@ public class DBLog {
 		  }
 	      }
 
-	    event = new DBLogEvent(line);
+	    if (event == null)
+	      {
+		event = new DBLogEvent(line);
+	      }
+	    else
+	      {
+		event.loadLine(line);
+	      }
 
 	    boolean found = false;
 
