@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,16 +46,18 @@ public interface Base extends CategoryNode, Remote {
    * This method returns a list of field definitions used by this
    * object type.  If includeBuiltIns is false, common fields (such
    * as last modification date, etc.) will be not be included in the
-   * list.
+   * list.  The list is sorted by field display order.
    *
    */
 
   public Vector getFields(boolean includeBuiltIns) throws RemoteException;
 
   /**
-   * This method returns a list of field definitions used by this
-   * object type, including builtins.
    *
+   * This method returns a list of field definitions used by this
+   * object type, including builtins. The list is sorted by field
+   * display order.
+   * 
    */
 
   public Vector getFields() throws RemoteException;
