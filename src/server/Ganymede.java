@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 2003/02/22 03:58:24 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 2003/03/10 23:11:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -494,12 +494,22 @@ public class Ganymede {
 
     try
       {
-	log = new DBLog(new DBLogFileController(logProperty), 
-			new DBLogFileController(mailLogProperty), 
-			internalSession);
+	if (mailLogProperty != null && !mailLogProperty.equals(""))
+	  {
+	    log = new DBLog(new DBLogFileController(logProperty), 
+			    new DBLogFileController(mailLogProperty), 
+			    internalSession);
+	  }
+	else
+	  {
+	    log = new DBLog(new DBLogFileController(logProperty), 
+			    null,
+			    internalSession);
+	  }
       }
     catch (IOException ex)
       {
+	ex.printStackTrace();
 	throw new RuntimeException("Couldn't initialize log file");
       }
 
