@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.217 $
-   Last Mod Date: $Date: 2000/12/07 23:03:26 $
+   Version: $Revision: 1.218 $
+   Last Mod Date: $Date: 2000/12/12 23:47:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.217 $ $Date: 2000/12/07 23:03:26 $
+ * @version $Revision: 1.218 $ $Date: 2000/12/12 23:47:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3326,6 +3326,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     try
       {
+	// with the new DBObjectBase.iterationSet support, we no
+	// longer need to use a DBReadLock to lock the database unless
+	// we are needing to do a composite query over more than one
+	// base, as when doing a query that includes embedded types.
+	// If our baseLock vector only has one base, we can just do a
+	// direct iteration over the base's iterationSet snapshot, and
+	// avoid doing locking entirely.
+
 	if (extantLock != null) 
 	  {
 	    // check to make sure that the lock we were passed in has everything
@@ -3339,7 +3347,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    rLock = extantLock;
 	  }
-	else
+	else if (baseLock.size() > 1)
 	  {
 	    try
 	      {
@@ -3352,9 +3360,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	if (debug)
+	if (rLock != null)
 	  {
-	    System.err.println("Query: " + username + " : got read lock");
+	    if (debug)
+	      {
+		System.err.println("Query: " + username + " : got read lock");
+	      }
+
+	    enum = base.objectTable.elements();
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("Query: " + username + 
+				   " : skipping read lock, iterating over iterationSet snapshot");
+	      }
+
+	    enum = base.getIterationSet().elements();
 	  }
 
 	// iterate over the objects in the base we're searching on,
@@ -3366,9 +3389,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// could well have our lock revoked during execution
 	// of a query, so we'll check that as well.
 
-	enum = base.objectTable.elements();
-
-	while (logged_in && session.isLocked(rLock) && enum.hasMoreElements())
+	while (logged_in && (rLock == null || session.isLocked(rLock)) && enum.hasMoreElements())
 	  {
 	    obj = (DBObject) enum.nextElement();
 
@@ -3403,7 +3424,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				       "GanymedeSession logged out during processing"); 
 	  }
 
-	if (!session.isLocked(rLock))
+	if (rLock != null && !session.isLocked(rLock))
 	  {
 	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
 				       "Read lock released during processing"); 
@@ -3435,6 +3456,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		System.err.println("Query: " + username +
 				   " : scanning intratransaction objects");
 	      }
+
+	    // by synchronizing on our editset, we get a clean shot at our
+	    // editset's in-process transactional object set
 
 	    synchronized (session.editSet)
 	      {
@@ -3526,7 +3550,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 
 	// now handle any linked queries, return the results to the
-	// user.
+	// user.  this is safe to do outside of the synchronization on
+	// the editset because we require a read lock to do queries on
+	// more than one base at a time.
 
 	return intersectQueries(query, result, rLock);
       }
@@ -5019,52 +5045,89 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <P>This is only a server-side method.  getObjects() does
    * not do anything to check access permissions.</P>
    *
+   * <P>It is the responsiblity of the code that gets a Vector
+   * back from this method not to modify the Vector returned
+   * in any way, as it may be shared by other threads.</P>
+   *
+   * <P>Any objects returned by getObjects() will reflect the
+   * state of that object in this session's transaction, if a
+   * transaction is open.</P>
+   *
    * @return a Vector of DBObject references.
    */
 
   public Vector getObjects(short baseid)
   {
-    Vector bases = new Vector();
-    Vector results = new Vector();
-    DBLock readLock = null;
     DBObjectBase base;
-    Enumeration enum;
 
     /* -- */
 
     checklogin();
 
     base = Ganymede.db.getObjectBase(baseid);
-    bases.addElement(base);
 
-    try
+    if (!session.isTransactionOpen())
       {
-	readLock = session.openReadLock(bases);
-      }
-    catch (InterruptedException ex)
-      {
-      }
+	// return a snapshot reference to the base's iteration set
 
-    if (readLock == null || !readLock.isLocked())
-      {
-	return null;
+	return base.getIterationSet();
       }
-
-    try
+    else
       {
-	enum = base.objectTable.elements();
-	
-	while (enum.hasMoreElements() && readLock.isLocked())
+	Vector iterationSet;
+	Hashtable objects;
+
+	synchronized (session.editSet)
 	  {
-	    results.addElement(enum.nextElement());
-	  }
-      }
-    finally
-      {
-	session.releaseLock(readLock);
-      }
+	    // grab a snapshot of the objects checked into the database
 
-    return results;
+	    iterationSet = base.getIterationSet();
+
+	    // grab a snapshot copy of the objects checked out in this transaction
+	    
+	    objects = (Hashtable) session.editSet.objects.clone();
+	  }
+
+	// and generate our list
+
+	Vector results = new Vector(objects.size(), 100);
+	
+	for (int i = 0; i < iterationSet.size(); i++)
+	  {
+	    DBObject obj = (DBObject) iterationSet.elementAt(i);
+	    
+	    if (objects.containsKey(obj.getInvid()))
+	      {
+		results.addElement(objects.get(obj.getInvid()));
+	      }
+	    else
+	      {
+		results.addElement(obj);
+	      }
+	  }
+
+	// drop our reference to the iterationSet
+
+	iterationSet = null;
+	
+	// we've recorded any objects that are in the database.. now
+	// look to see if there are any objects that are newly created
+	// in our transaction's object list and add them as well.
+	    
+	Enumeration enum = objects.elements();
+	    
+	while (enum.hasMoreElements())
+	  {
+	    DBEditObject eObj = (DBEditObject) enum.nextElement();
+	    
+	    if (eObj.getStatus() == ObjectStatus.CREATING)
+	      {
+		results.addElement(eObj);
+	      }
+	  }
+	
+	return results;
+      }
   }
 
   /**

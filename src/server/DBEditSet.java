@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/10/09 09:19:13 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/12/12 23:47:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1165,11 +1165,13 @@ public class DBEditSet {
 		// anything that's going back into the DBStore needs
 		// to have the transient fields cleared away
 
+		/*
 		if (eObj.getStatus() == DBEditObject.EDITING ||
 		    eObj.getStatus() == DBEditObject.CREATING)
 		  {
 		    eObj.clearTransientFields();
 		  }
+		*/
 
 		// we'll want to log the before/after state of any objects
 		// edited by this transaction
@@ -1519,6 +1521,13 @@ public class DBEditSet {
 	      }
 
 	    base.updateTimeStamp();
+
+	    if (debug)
+	      {
+		Ganymede.debug("DBEditSet.commit(): Updating " + base + "'s iteration set");
+	      }
+
+	    base.updateIterationSet();
 	  }
 
 	releaseWriteLock("successful commit");

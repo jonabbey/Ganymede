@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2000/11/29 02:56:19 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2000/12/12 23:47:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.107 $ $Date: 2000/11/29 02:56:19 $
+ * @version $Revision: 1.108 $ $Date: 2000/12/12 23:47:19 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -309,10 +309,6 @@ public class DBObject implements db_object, FieldType, Remote {
 	  {
 	    field.setOwner(this); // this will make the field non-editable
 	    fields.putNoSyncNoRemove(field);
-	  }
-	else
-	  {
-	    Ganymede.debug("DBObject check-in: rejecting undefined field " + field.getName());
 	  }
       }
 
@@ -772,27 +768,12 @@ public class DBObject implements db_object, FieldType, Remote {
       {
 	field = (DBField) enum.nextElement();
 
-	// We should never see an undefined field in our field table
-	// at this point.  There used to be a condition that would
-	// allow an undefined field to get here if the schema for a
-	// field had been changed by the schema editor while the
-	// database contained instances of that field, but that
-	// shouldn't be the case anymore.
+	// We may see undefined fields at this point, as the
+	// DBEditSet.commit() logic now abstains from doing a
+	// clearTransientFields() to allow threads to do arbitrary
+	// read operations while commits are being processed.
 
-	if (debugEmit)
-	  {
-	    if (field.isDefined())
-	      {
-		out.writeShort(field.getID());
-		field.emit(out);
-	      }
-	    else
-	      {
-		Ganymede.debug("**** DBObject.emit(): " + getTypeName() + ":" + 
-			       getLabel() + " has an undefined field " + field.getName());
-	      }
-	  }
-	else
+	if (field.isDefined())
 	  {
 	    out.writeShort(field.getID());
 	    field.emit(out);

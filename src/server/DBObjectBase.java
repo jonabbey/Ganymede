@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2000/12/06 09:59:39 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2000/12/12 23:47:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -340,6 +340,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   DBSchemaEdit editor;
 
+  /**
+   * <P>This Vector holds the current collection of {@link
+   * arlut.csd.ganymede.DBObject DBObject} objects in this
+   * DBObjectBase, for enumeration access.  The GanymedeSession query
+   * logic iterates over this Vector so that querying on single bases
+   * can proceed while commits are under way.</P>
+   *
+   * <P>This is practicable because assignment to this variable is
+   * an inherently atomic event in the Java spec, so we just wait
+   * to assign a new Vector here until we have a new one composed.  We
+   * just have to depend on all code that accesses this vector to grab
+   * its own reference to this vector and then not modify it, and to
+   * drop reference to it when the iteration is complete.</P>
+   */
+
+  private Vector iterationSet;
+
   // Customization Management Object
 
   /**
@@ -409,6 +426,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     readerList = new Vector();
     dumperList = new Vector();
     dumpLockList = new Vector();
+    iterationSet = new Vector();
 
     object_name = "";
     classname = "";
@@ -517,6 +535,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	// commits this copy
 
 	objectTable = original.objectTable;
+	iterationSet = original.iterationSet; // this is safe to do only in the schema editing context
 
 	maxid = original.maxid;
     
@@ -744,6 +763,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
       }
 
+    Vector tmpIterationSet = new Vector(object_count);
+
     temp_val = (object_count > 0) ? (object_count * 2 + 1) : 4000;
 
     objectTable = new DBObjectTable(temp_val, (float) 1.0);
@@ -762,9 +783,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    maxid = tempObject.getID();
 	  }
 
+	tmpIterationSet.addElement(tempObject);
 	objectTable.putNoSyncNoRemove(tempObject);
 	tempObject.setBackPointers(); // register anonymous invid fields
       }
+    
+    // and switch it in
+
+    this.iterationSet = tmpIterationSet;
 
     if (debug)
       {
@@ -2606,6 +2632,52 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	  }
       }
+  }
+
+  /**
+   * <p>This method is used by the DBEditSet commit logic to
+   * replace this DBObjectBase's iterationSet with a new
+   * Vector with the current objectTable's values.  This
+   * method should only be called within the context
+   * of a DBWriteLock being established on this DBObjectBase,
+   * in the DBEditSet.commitTransaction() logic.</p>
+   */
+
+  void updateIterationSet()
+  {
+    Enumeration enum;
+    Vector newIterationSet;
+
+    /* -- */
+
+    synchronized (objectTable)
+      {
+	newIterationSet = new Vector(objectTable.size());
+
+	enum = objectTable.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    newIterationSet.addElement(enum.nextElement());
+	  }
+      }
+
+    // and we do the big swap
+
+    this.iterationSet = newIterationSet;
+  }
+
+  /**
+   * <P>This method returns a vector containing references to all
+   * objects in this DBObjectBase at the time the vector reference
+   * is accessed.  The vector returned *must not* be modified
+   * by the caller, or else other threads iterating on that copy
+   * of the vector will be disrupted.</P>
+   */
+
+  Vector getIterationSet()
+  {
+    return iterationSet;
   }
 
   /**
