@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/16 23:04:11 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/03/17 00:21:12 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -189,9 +189,16 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
 
       else {
 	// Clicking OK hides the dialog
-
-	setVisible(false);
+	setHidden(true);
       }
+    }
+
+  public void setHidden(boolean bool)
+    {
+      bool = !bool;
+      login.setEnabled(bool);
+      password.setEnabled(bool);
+      this.setVisible(bool);
     }
 
   public void layout(int width, int height)
