@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,6 +55,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   treeNode
     objects, namespaces;
+  treeNode
+    currentNode = null;
 
   MenuItem
     createObjectMI = null,
@@ -63,6 +65,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     deleteNameMI = null,
     createFieldMI = null,
     deleteFieldMI = null;
+  
+  YesNoDialog 
+    deleteNameDialog = null;
 
   PopupMenu
     baseMenu = null,
@@ -215,6 +220,11 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     namespaceObjectMenu = new PopupMenu();
     deleteNameMI = new MenuItem("Delete Namespace");
     namespaceObjectMenu.add(deleteNameMI);
+
+    deleteNameDialog = new YesNoDialog(this,
+    				       "Confirm Name Space deletion",
+    				       "Are you sure you want to delete the name space?",
+    				       this);
 
     Box leftBox = new Box(tree, "Schema Objects");
 
@@ -579,11 +589,12 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     
     for (int i = 0; i < spaces.length ; i++)
       {
+	System.out.println("Times through loop: " + i);
 	try 
 	  {
 	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
 					      null, false, 2, 2, namespaceObjectMenu);
-	    tree.insertNode(newNode, false);
+	    tree.insertNode(newNode, true);
 	  }
 	catch (RemoteException e)
 	  {
@@ -690,6 +701,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 				    java.awt.event.ActionEvent event)
   {
     String nodeText;
+
+    currentNode = node;
 
     nodeText = node.getText();
 
@@ -831,7 +844,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       {
 	System.out.println("deleting Namespace");
 	treeNode tNode = (treeNode)node;
-	try
+	/*try
 	  {
 	    editor.deleteNameSpace(tNode.getText());
 	  }
@@ -840,7 +853,10 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	    throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
 	  }
 	refreshNamespaces();
-
+	*/
+	
+	deleteNameDialog.setVisible(true);
+	
 	if (showingField)
 	  {
 	    fe.refreshFieldEdit();
@@ -927,11 +943,12 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       {
 	System.err.println("deleting field node");
 
+	
 	try
 	  {
 	    FieldNode fNode = (FieldNode) node;
 	    BaseNode bNode = (BaseNode) node.getParent();
-
+	    
 	    if (!bNode.getBase().fieldInUse(fNode.getField()))
 	      {
 		bNode.getBase().deleteField(fNode.getField());
@@ -940,7 +957,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	    else
 	      {
 		// field in use
-
+		
 		System.err.println("Couldn't delete field.. field in use");
 	      }
 	  }
@@ -948,6 +965,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	  {
 	    System.err.println("couldn't delete field" + ex);
 	  }
+	
       }
   }
 
@@ -955,7 +973,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   public void actionPerformed(ActionEvent event)
   {
-    //    System.out.println("event: " + event);
+        System.out.println("event: " + event);
 
     if (event.getSource() == okButton)
       {
@@ -980,6 +998,43 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
 	setVisible(false);
+      }
+    else if (event.getSource() == deleteNameDialog)
+      {
+	if (deleteNameDialog.answeredYes())
+	  {
+	    if (currentNode == null)
+	      System.err.println("currentNode is null");
+	    else
+	      {
+		treeNode tNode = (treeNode)currentNode;
+		System.out.println("deleting Namespace " + tNode.getText());
+		try
+		  {
+		    editor.deleteNameSpace(tNode.getText());
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
+		  }
+		refreshNamespaces();
+	
+		if (showingField)
+		  {
+		    fe.refreshFieldEdit();
+		  }
+		
+	      }
+	  }
+	else
+	  {
+	    System.out.println("Not deleting Name Space");
+	  }
+
+      }
+    else
+      {
+	System.err.println("Unknown Action Performed in GASHSchema");
       }
   }
 }
