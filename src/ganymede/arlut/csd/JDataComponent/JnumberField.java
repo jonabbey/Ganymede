@@ -417,7 +417,7 @@ public class JnumberField extends JentryField {
 
 	    try
 	      {
-		success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
+		success = my_parent.setValuePerformed(new JSetValueObject(this,currentValue));
 	      }
 	    catch (java.rmi.RemoteException re)
 	      {

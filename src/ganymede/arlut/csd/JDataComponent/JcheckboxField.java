@@ -290,7 +290,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
 	try 
 	  {
-	    b = callback.setValuePerformed(new JValueObject(this,bval));
+	    b = callback.setValuePerformed(new JSetValueObject(this,bval));
 	  }
 	catch (java.rmi.RemoteException ex) 
 	  {

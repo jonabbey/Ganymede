@@ -374,7 +374,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 		    System.out.println("setValuePerformed called by Calendar --- passing up to container");
 		  }
 
-		retval=callback.setValuePerformed(new JValueObject(this,my_date));
+		retval=callback.setValuePerformed(new JSetValueObject(this,my_date));
 		changed = false;
 	      }
 	    catch (java.rmi.RemoteException re) 

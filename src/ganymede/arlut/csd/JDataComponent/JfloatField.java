@@ -403,7 +403,7 @@ public class JfloatField extends JentryField {
 
 	try
 	  {
-	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this,currentValue)))
+	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this,currentValue)))
 	      {
 		// good to go.  We've already got the text set in the text
 		// field, the user did that for us.  Remember the value of
