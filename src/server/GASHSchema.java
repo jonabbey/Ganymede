@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,8 @@ import com.sun.java.swing.*;
 ------------------------------------------------------------------------------*/
 
 public class GASHSchema extends Frame implements treeCallback, treeDragDropCallback, ActionListener {
+
+  public static final boolean debug = false;
 
   SchemaEdit 
     editor;
@@ -1449,13 +1451,23 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 		base.setDisplayOrder(0);
 
+		System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
+
 		oldCategory.removeNode(base.getName());
+
+		System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
+
 		newCategory.addNode((CategoryNode) base, false, true);
 
 		BaseNode newNode = new BaseNode(targetNode, base.getName(), base,
 						null, true, 2, 2, baseMenu);
 
+		System.err.println("Deleting dragNode: " + dragNode.getText());
+
 		tree.deleteNode(dragNode, false);
+
+		System.err.println("Inserting newNode: " + newNode.getText());
+
 		tree.insertNode(newNode, false);
 
 		refreshFields(newNode, true);
@@ -1769,7 +1781,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		previousNode = aboveNode.getParent();
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("New Category = " + newCategory.getPath());
 		System.err.println("new parent = " + newParent.getText());
@@ -1782,7 +1794,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 	    if (newCategory.equals(oldCategory))
 	      {
-		if (false)
+		if (debug)
 		  {
 		    System.err.println("Moving within the same category");
 		  }
@@ -1793,7 +1805,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		  }
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("new displayOrder = " + displayOrder);
 	      }
@@ -1801,7 +1813,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    oldCategory.removeNode(base.getName());
 
 	    base.setDisplayOrder(displayOrder);
-	    newCategory.addNode((CategoryNode) base, true, true);
+	    newCategory.addNode((CategoryNode) base, false, true);
 
 	    tree.deleteNode(dragNode, false);
 
@@ -1817,7 +1829,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		be.baseNode = newNode;
 	      }
 
-	    if (false)
+	    if (debug)
 	      {
 		System.err.println("Reinserted base " + base.getName());
 		System.err.println("reinserted order = " + base.getDisplayOrder());
