@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 1999/08/19 00:41:02 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 1999/10/07 17:37:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.109 $ %D%
+ * @version $Revision: 1.110 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2053,7 +2053,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (target == null)
 	      {
-		Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object located: " + 
+		Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object " + temp + " located: " + 
 			       objectName + " in field " + getName());
 		result = false;
 

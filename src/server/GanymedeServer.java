@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 1999/07/30 16:15:49 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 1999/10/07 17:37:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * the GanymedeServer object for statistics and for the admin
    * console's monitoring support.</P>
    * 
-   * @see arlut.csd.ganymede.Server */
+   * @see arlut.csd.ganymede.Server 
+   */
 
   public synchronized Session login(Client client) throws RemoteException
   {

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.150 $
-   Last Mod Date: $Date: 1999/10/04 18:10:50 $
+   Version: $Revision: 1.151 $
+   Last Mod Date: $Date: 1999/10/07 17:37:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.150 $ %D%
+ * @version $Revision: 1.151 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1458,6 +1458,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
+	if (debug)
+	  {
+	    System.err.println("getCategoryTree(): returning system's complete category tree");
+	  }
+
 	return Ganymede.catTransport;
       }
     else
@@ -1469,6 +1474,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	synchronized (Ganymede.db)
 	  {
 	    transport = new CategoryTransport(Ganymede.db.rootCategory, this);
+
+	    if (debug)
+	      {
+		System.err.println("getCategoryTree(): generated custom category tree");
+	      }
+
 	    Ganymede.db.notifyAll(); // in case of locks
 	  }
 

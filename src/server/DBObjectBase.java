@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 1999/08/14 00:49:04 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 1999/10/07 17:37:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1069,10 +1069,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     object_count = in.readInt();
 
-    //    if (debug)
-    //      {
-    //	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
-    //      }
+    if (debug)
+      {
+    	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
+      }
 
     temp_val = (object_count > 0) ? object_count : 4000;
 

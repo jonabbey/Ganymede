@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 1999/09/22 22:27:56 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 1999/10/07 17:37:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -356,7 +356,9 @@ public class Ganymede {
 
     try
       {
-	Naming.lookup("rmi://localhost:" + registryPortProperty + "/ganymede.server");
+	Naming.lookup("rmi://" + 
+		      java.net.InetAddress.getLocalHost().getHostName() + ":" + 
+		      registryPortProperty + "/ganymede.server");
       }
     catch (NotBoundException ex)
       {
@@ -366,7 +368,7 @@ public class Ganymede {
       {
 	System.out.println("MalformedURL:" + ex);
       }
-    catch (UnknownHostException ex)
+    catch (java.net.UnknownHostException ex)
       {
 	System.out.println("UnknownHost:" + ex);
       }
@@ -784,11 +786,8 @@ public class Ganymede {
     resetadmin = true;
     startupHook();
 
-    if (debug)
-      {
-	debug("Sweeping invid links");
-	server.sweepInvids();
-      }
+    debug("Sweeping invid links");
+    server.sweepInvids();
 
     if (debug)
       {
@@ -885,7 +884,7 @@ public class Ganymede {
 	v_object = internalSession.session.viewDBObject(supergashinvid);
 	p = (PasswordDBField) v_object.getField("Password");
 
-	if (!p.matchPlainText(Ganymede.defaultrootpassProperty))
+	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
 	  {
 	    System.out.println("Resetting supergash password.");
 

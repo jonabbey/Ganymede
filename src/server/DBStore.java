@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 1999/09/22 22:27:56 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 1999/10/07 17:37:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.90 $ %D%
+ * @version $Revision: 1.91 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -552,7 +552,7 @@ public class DBStore {
       {
 	if (schemaEditInProgress)
 	  {
-	    Ganymede.debug("DBStore.dumpSchema(): schema being edited, dump aborted");
+	    Ganymede.debug("DBStore.dump(): schema being edited, dump aborted");
 	  }
 
 	File dbFile = null;

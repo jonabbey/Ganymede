@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 1999/08/14 00:49:03 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 1999/10/07 17:37:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.77 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.78 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -716,23 +716,23 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    *
-   * The partialEmit() method is used when the server is doing
+   * <p>The partialEmit() method is used when the server is doing
    * a limited schema dump.  partialEmit() will look at the
    * type of the object represented by this DBObject object and
    * will choose how to restrict the fields emitted in order
    * to not leave spare invid links in place that are typically
-   * not to be emitted in a schema dump.<br><br>
+   * not to be emitted in a schema dump.</p>
    *
-   * This method is really of a piece with DBObjectBase.partialEmit().<br><br>
+   * <p>This method is really of a piece with DBObjectBase.partialEmit().</p>
    *
-   * And, this method is really a hack.  I intend to ditch this as
+   * <p>And, this method is really a hack.  I intend to ditch this as
    * soon as possible and replace it with a separate cleaner executable
    * which will load a schema file and delete any invid's that refer
    * to objects not present in the schema file.  Even that would be
    * something of a hack, given that we could have some other object
    * deletion tasks that would logically need to be carried out, but
    * I'm not yet ready to commit to having the schema dump routine
-   * actually delete all objects not desired for the schema dump.
+   * actually delete all objects not desired for the schema dump.</p>
    * 
    * @param out A DBStore writing stream.
    * 
@@ -773,6 +773,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminConsole));
 	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminPower));
 	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaLabelField));
+	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaGroupsField));
       }
     else
       {
@@ -837,8 +838,8 @@ public class DBObject implements db_object, FieldType, Remote {
 		      {
 			invF.values = new Vector();
 
-			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 0)); // 0 is supergash
-			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 1)); // 1 monitor
+			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 1)); // 1 is supergash
+			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 2)); // 2 monitor
 
 			invF.emit(out);
 		      }
