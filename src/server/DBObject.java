@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2001/01/12 01:47:40 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2001/01/13 07:36:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.112 $ $Date: 2001/01/12 01:47:40 $
+ * @version $Revision: 1.113 $ $Date: 2001/01/13 07:36:12 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -323,6 +323,11 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (field != null && field.isDefined())
 	  {
+	    // make sure that the field points to the right owner, so
+	    // that we don't maintain a lingering pointer to the
+	    // DBEditObject
+
+	    field.owner = this;
 	    saveField(field);
 	  }
       }

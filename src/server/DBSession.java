@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2001/01/12 08:38:05 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2001/01/13 07:36:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.96 $ %D%
+ * @version $Revision: 1.97 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -979,6 +979,9 @@ final public class DBSession {
       {
 	// ok, go ahead and finalize.. the finalizeRemove method will
 	// handle doing a rollback or popCheckpoint if necessary
+
+	// it is essential that we do this call, or else we might
+	// leave namespace handles referencing this object
 
 	retVal2 = eObj.finalizeRemove(true);
 
