@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 1999/07/14 21:52:00 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 1999/07/15 01:07:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.70 $ %D%
+ * @version $Revision: 1.71 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1218,6 +1218,11 @@ final public class DBSession {
     Enumeration enum = lockVect.elements();
 
     /* -- */
+
+    if (debug)
+      {
+	System.err.println(key + ": releasing all locks");
+      }
     
     while (enum.hasMoreElements())
       {
@@ -1315,6 +1320,11 @@ final public class DBSession {
 	  }
 
 	//	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
+      }
+
+    if (debug)
+      {
+	System.err.println(key + ": commiting editset");
       }
 
     retVal = editSet.commit();

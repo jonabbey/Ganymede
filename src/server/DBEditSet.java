@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/07/14 21:51:59 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/07/15 01:07:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -763,7 +763,6 @@ public class DBEditSet {
     try
       {
 	wLock = session.openWriteLock(baseSet);	// wait for write lock
-	wLock.establish(session.key);	
       }
     catch (InterruptedException ex)
       {
@@ -778,6 +777,11 @@ public class DBEditSet {
 
 	return Ganymede.createErrorDialog("Commit failure",
 					  "Couldn't commit transaction, our write lock was denied.. server going down?");
+      }
+
+    if (debug)
+      {
+	System.err.println(session.key + ": DBEditSet.commit(): write lock established");
       }
 
     // we don't want to have any chance of leaving commit with the
