@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -211,6 +211,15 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public boolean canSeeField(DBSession session, DBField field)
   {
+    // session will be null if we are being checked outside of an
+    // editable context.  If we are not being edited, we don't
+    // care.. if the fields are there, they can see them.
+
+    if (session == null)
+      {
+	return true;
+      }
+
     // if we only have a single interface in this system, we don't
     // want the name field to be visible
 
@@ -218,14 +227,15 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	(field.getID() == interfaceSchema.ALIASES))
       {
 	interfaceCustom iObj;
+	DBObject owner = field.getOwner();
 
-	if (field.getOwner() instanceof interfaceCustom)
+	if (owner instanceof interfaceCustom)
 	  {
-	    iObj = (interfaceCustom) field.getOwner();
+	    iObj = (interfaceCustom) owner;
 	  }
 	else
 	  {
-	    iObj = (interfaceCustom) session.editDBObject(field.getOwner().getInvid());
+	    iObj = (interfaceCustom) session.editDBObject(owner.getInvid());
 	  }
 
 	Vector siblings = iObj.getSiblingInvids();
