@@ -3,8 +3,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:00 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/08/05 22:05:46 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -69,6 +69,8 @@ public class JstringArea extends JTextArea implements FocusListener{
 
   protected JsetValueCallback my_parent = null;
 
+  private boolean processingCallback = false;
+
   String
     value = null,
     allowedChars = null,
@@ -113,7 +115,6 @@ public class JstringArea extends JTextArea implements FocusListener{
     return changed;
   }
 
-
   public void setAllowedChars(String s)
   {
     allowedChars = s;
@@ -122,6 +123,17 @@ public class JstringArea extends JTextArea implements FocusListener{
   public void setDisallowedChars(String s)
   {
     disallowedChars = s;
+  }
+
+  public void setEditable(boolean val)
+  {
+    if (!val)
+      {
+	allowCallback = false;
+	my_parent = null;
+      }
+
+    super.setEditable(val);
   }
 
   /**
@@ -145,115 +157,131 @@ public class JstringArea extends JTextArea implements FocusListener{
    * sendCallback is called when focus is lost.
    */
 
-  public  void sendCallback()
+  public void sendCallback()
   {
     String str;
-
+    
     /* -- */
 
-    // if nothing in the JstringField has changed,
-    // we don't need to worry about this event.
-    
-    str = getText();
-    
-    if (value != null)
+    synchronized (this)
       {
-	if (debug)
+	if (processingCallback)
 	  {
-	    System.err.println("JstringArea.sendCallback: old value != null");
+	    return;
 	  }
 	
-	changed = !value.equals(str);
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringArea.sendCallback: old value == null");
-	  }
-	
-	changed = true;
+	processingCallback = true;
       }
 
-    if (debug)
+    try
       {
-	System.err.println("JstringArea.sendCallback(): str == " + str);
-      }
+	// if nothing in the JstringField has changed,
+	// we don't need to worry about this event.
     
-    if (!changed)
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringArea.sendCallback: no change, ignoring");
-	  }
-	
-	return;
-      }
+	str = getText();
     
-    if (!allowCallback) 
-      {
-	value = str;
-	return;
-      }
-
-    boolean b = false;
-	  
-    try 
-      {
-	if (debug)
+	if (value != null)
 	  {
-	    System.err.println("JstringArea.sendCallback: making callback");
-	  }
-	
-	b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
-      }
-    catch (RemoteException re)
-      {
-      }
-
-    // If the setValuePerformed callback failed, we'll revert the value to our last
-    // approved value
-    
-    if (!b) 
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringArea.sendCallback: setValue rejected");
-		
-	    if (value == null)
+	    if (debug)
 	      {
-		System.err.println("JstringArea.sendCallback: resetting to empty string");
+		System.err.println("JstringArea.sendCallback: old value != null");
 	      }
-	    else
-	      {
-		System.err.println("JstringArea.sendCallback: resetting to " + value);
-	      }
-	  }
-	    
-	if (value == null)
-	  {
-	    super.setText("");
+	
+	    changed = !value.equals(str);
 	  }
 	else
 	  {
-	    super.setText(value);
-	  }
-	    
-	changed = false;
-      }
-    else 
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringArea.sendCallback: setValue accepted");
+	    if (debug)
+	      {
+		System.err.println("JstringArea.sendCallback: old value == null");
+	      }
+	
+	    changed = true;
 	  }
 
-	value = str;
-		
-	changed = false;
-      }
-    }
+	if (debug)
+	  {
+	    System.err.println("JstringArea.sendCallback(): str == " + str);
+	  }
     
+	if (!changed)
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.sendCallback: no change, ignoring");
+	      }
+	
+	    return;
+	  }
+    
+	if (!allowCallback) 
+	  {
+	    value = str;
+	    return;
+	  }
+
+	boolean b = false;
+	  
+	try 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.sendCallback: making callback");
+	      }
+	
+	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	  }
+	catch (RemoteException re)
+	  {
+	  }
+
+	// If the setValuePerformed callback failed, we'll revert the value to our last
+	// approved value
+    
+	if (!b) 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.sendCallback: setValue rejected");
+		
+		if (value == null)
+		  {
+		    System.err.println("JstringArea.sendCallback: resetting to empty string");
+		  }
+		else
+		  {
+		    System.err.println("JstringArea.sendCallback: resetting to " + value);
+		  }
+	      }
+	    
+	    if (value == null)
+	      {
+		super.setText("");
+	      }
+	    else
+	      {
+		super.setText(value);
+	      }
+	    
+	    changed = false;
+	  }
+	else 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.sendCallback: setValue accepted");
+	      }
+
+	    value = str;
+		
+	    changed = false;
+	  }
+      }
+    finally
+      {
+	processingCallback = false;
+      }
+  }
 
   /**
    *  Stub function that is overriden is subclasses of JentryField
