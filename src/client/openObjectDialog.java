@@ -19,9 +19,10 @@ import java.util.Hashtable;
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.VecQuickSort;
+import arlut.csd.JDialog.JCenterDialog;
 
 //public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
-public class openObjectDialog extends JDialog implements ActionListener, MouseListener{
+public class openObjectDialog extends JCenterDialog implements ActionListener, MouseListener{
   private final static boolean debug = false;
 
   boolean 
