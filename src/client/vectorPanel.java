@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.20 $ %D%
+  Version: $Revision: 1.21 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -47,7 +47,7 @@ import com.sun.java.swing.border.*;
  *
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener {
 
   private final static boolean debug = true;
 
@@ -78,7 +78,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     type;
 
   JPanel
-    bottomPanel,
     centerPanel;
 
   boolean 
@@ -147,8 +146,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     this.parent = parent;
     this.container = container;
 
-    bottomPanel = new JPanel(false);
-    bottomPanel.setLayout(new BorderLayout());
     centerPanel = new JPanel(false);
 
     //centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
@@ -163,17 +160,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	throw new RuntimeException("Cannot get field type: " + rx);
       }
-    try
-      {
-	if (editable && my_field.isEditable())
-	  {
-	    addMouseListener(this);
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Can't check if field is editable: " + rx);
-      }
+
     
     setLayout(new BorderLayout());
 
@@ -192,10 +179,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
     setBorder(cb);
 
+    addB = new JButton("Add Element");
+    addB.addActionListener(this);
+
     //setBackground(container.frame.getVectorBG());
 
-    //add("South", addB);
-    
     compVector = new Vector();
     ewHash = new Hashtable();
 
@@ -223,95 +211,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new RuntimeException("Can't tell if field is vector" + rx);
       }
 
-    if (my_field instanceof date_field)
-      {
-	if (debug)
-	  {
-	    System.out.println("Adding date vector field");
-	  }
-
-	try
-	  {
-	    date_field datefield = (date_field)my_field;
-	    
-	    for (int i=0;i<datefield.size();i++) 
-	      {
-		if (editable)
-		  {
-		    JdateField df = new JdateField((Date)(datefield.getElement(i)),
-						   datefield.isEditable(),
-						   datefield.limited(),
-						   datefield.minDate(),
-						   datefield.maxDate(),
-						   ca,
-						   this);
-		    addElement(df);
-		  }
-		else
-		  {
-		    JdateField df = new JdateField((Date)(datefield.getElement(i)),
-						   false,
-						   false,
-						   null,
-						   null,
-						   ca);
-		    addElement(df);
-		  }
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Can't make checkbox field: " + rx);
-	  }
-	
-      }
-    else if (my_field instanceof num_field)
-      {
-	if (debug)
-	  {
-	    System.out.println("Adding vector number field");
-	  }
-	  
-	try
-	  {
-	    num_field numfield = (num_field)my_field;
-	    
-	    for (int i=0;i<numfield.size();i++) 
-	      {
-
-		/*
-		JnumberField nf = new JnumberField(15,
-						   ca,
-						   numfield.isEditable() && editable,
-						   numfield.limited(),
-						   numfield.getMinValue(),
-						   numfield.getMaxValue(),
-						   this);
-						   */
-		
-		JstringField sf = new JstringField(12,
-						   64,
-						   ca,
-						   (editable && numfield.isEditable()),
-						   false,
-						   null,
-						   null,
-						   this);
-		    
-		sf.setText(((Integer)numfield.getElement(i)).toString());
-		addElement(sf);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Can't make num field: " + rx);
-	  }
-      }
-    else if (my_field instanceof string_field)
-      {
-	System.out.println("string_field!?!  Use the stringSelector");
-      }
-    else if (my_field instanceof ip_field)
+    if (my_field instanceof ip_field)
       {
 	if (debug)
 	  {
@@ -350,7 +250,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	try
 	  {
-	    invid_field invidfield = (invid_field)my_field;
+	    invid_field invidfield = (invid_field) my_field;
 
 	    if (isEditInPlace)
 	      {
@@ -358,7 +258,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  {
 		    System.out.println("Adding edit in place invid vector, size = " + invidfield.size());
 		  }
-		
 
 		for (int i=0; i < invidfield.size() ; i++)
 		  {
@@ -386,13 +285,18 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      {
 		System.out.println("*** Error - should not handle non edit-in-place Invid's in vector panel ***");
 	      }	
-
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new IllegalArgumentException("Can't make invid field: " + rx);
 	  }
       }
+    else
+      {
+	System.out.println("\n*** Error - inappropriate field type passed to vectorPanel constructor");
+      }
+
+    // do it
 
     try
       {
@@ -402,7 +306,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      {
 		System.out.println("Adding add button");
 	      }
-	    //add("South", addB);
+
+	    Panel addPanel = new Panel();
+	    addPanel.setLayout(new BorderLayout());
+	    addPanel.add("East", addB);
+
+	    add("South", addPanel);
 	  }
 	else
 	  {
@@ -453,43 +362,19 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      {
 		Invid invid = ((invid_field)my_field).createNewEmbedded();
 		db_object object = parent.parent.getSession().edit_db_object(invid);
+
 		containerPanel cp = new containerPanel(object,
 						       my_field.isEditable() && editable,
 						       parent.parent,
 						       parent, container.frame);
+
 		cp.setBorder(new LineBorder(Color.black));
+
 		addElement("New Element", cp, true);
 	      }
 	    catch (RemoteException rx)
 	      {
 		throw new RuntimeException("Could not create new containerPanel: " + rx);
-	      }
-
-	  }
-	else if (my_field instanceof date_field)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Adding new date type");
-	      }
-	    
-	    date_field datefield = (date_field)my_field;
-
-	    try
-	      {
-		JdateField df = new JdateField(null,
-					       true,
-					       datefield.limited(),
-					       datefield.minDate(),
-					       datefield.maxDate(),
-					       ca,
-					       this);
-			
-		addElement(df);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get datefield information: " + rx);
 	      }
 	  }
 	else if (my_field instanceof ip_field)
@@ -516,52 +401,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		throw new RuntimeException("Could not make new ip field: " + rx);
 	      }
 	  }
-	else if (my_field instanceof num_field) 
-	  {
-	    if (debug)
-	      {
-		System.out.println("Adding new num_field");
-	      }
-	    
-	    try
-	      {
-		num_field numfield = (num_field)my_field;
-		/*		  JnumberField nf = new JnumberField(10,
-				  ca,
-				  true,
-				  numfield.limited(),
-				  numfield.getMinValue(),
-				  numfield.getMaxValue(),
-				  this);*/
-		if (debug)
-		  {
-		    if (numfield.limited())
-		      {
-			System.out.println("It is limited");
-		      }
-		    else
-		      {
-			System.out.println("NOT limited");
-		      }
-		  }
-		JstringField sf = new JstringField(10,
-						   64,
-						   ca,
-						   true,
-						   false,
-						   null,
-						   null,
-						   this);
-
-						     
-		  
-		addElement(sf);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get number field information: " + rx);
-	      }
-	  }
 	else
 	  {
 	    System.out.println("This type is not supported yet.");
@@ -570,29 +409,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     }
 
   
-  /** 
-   * Paint method draws a little plus box on the bottom right.
-   *
-   */
-  public void paint(Graphics g)
-  {
-    super.paint(g);
-    
-    Color color = g.getColor();
-    g.setColor(Color.black);
-    
-    Rectangle bounds = getBounds();
-    
-    // horizontal
-    g.drawLine(8, bounds.height - 15, 8, bounds.height - 5);
-    // vertical
-    g.drawLine(3, bounds.height - 10, 13, bounds.height - 10);
-    
-    
-    g.setColor(color);
-  }
-
-
   public void addElement(Component c)
   {
     addElement(null, c, false);
@@ -617,7 +433,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	System.out.println("Index of element: " + compVector.size());
       }
 
-    //Don't add the buttons for an non-editable field
+    // Don't add the buttons for an non-editable field
 
     if (!centerPanelAdded)
       {
@@ -635,9 +451,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	centerPanel.add(c);
       }
+
     invalidate();
-    //container.invalidate();
-    //container.frame.validate();
     container.frame.validate_general();
   }
   
@@ -731,58 +546,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	deleteElement(v.getSource());
       }
-    else if (v.getSource() instanceof JstringField)
-      {
-	if (debug)
-	  {
-	    System.out.println("Stringfield changed.");
-	  }
-	short index = (short)compVector.indexOf(v.getSource());
-	System.out.println(" index = " + index);
-
-	try
-	  {
-	    if (my_field instanceof string_field)
-	      {
-		returnValue = changeElement((String)v.getValue(), index);
-	      }
-	    else if (my_field instanceof num_field)
-	      {
-		try
-		  {
-		    returnValue = changeElement( new Integer((String)v.getValue()), index);
-		  }
-		catch (NumberFormatException ex)
-		  {
-		    System.err.println("That's not a number!");
-		    returnValue = false;
-		  }
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not set value: " + rx);
-	  }
-      }
-    else if (v.getSource() instanceof JdateField)
-      {
-	if (debug)
-	  {
-	    System.out.println("Date field changed");
-	  }
-
-	short index = (short)compVector.indexOf(v.getSource());
-	System.out.println(" index = " + index);
-
-	try
-	  {
-	    returnValue = changeElement((Date)v.getValue(), index);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not set value of date field: " + rx);
-	  }
-      }
     else if (v.getSource() instanceof JIPField)
       {
 	if (debug)
@@ -827,6 +590,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   /*
    * This changes an element after a ValueCallback.
    */
+
   public boolean changeElement(Object obj, short index) throws RemoteException
   {
     if (index >= my_field.size())
@@ -892,42 +656,5 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	c = c.getParent();
       }
   }
-
-  // Mouse listener stuff
-
-  public void mouseClicked(MouseEvent e)
-    {
-
-      Rectangle bounds = getBounds();
-      int x = e.getX();
-      int y = e.getY();
-
-      System.out.println("Mouse clicked-> " + e.getPoint() + " bounds.height = " + bounds.height);
-
-
-      if ((x > 0) && (x < 13) && (y > bounds.height - 15) && (y < bounds.height))
-	{
-	  if (debug)
-	    {
-	      System.out.println("Adding new element");
-	    }
-
-	  addNewElement();
-	}
-      else
-	{
-	  if (debug)
-	    {
-	      System.out.println("Miss!");
-	    }
-	}
-
-    }
-
-  public void mouseEntered(MouseEvent e) {}
-  public void mouseExited(MouseEvent e) {}
-  public void mousePressed(MouseEvent e) {}
-  public void mouseReleased(MouseEvent e) {}
-
 }
 
