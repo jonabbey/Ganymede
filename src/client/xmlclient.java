@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/06/15 05:20:44 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/06/15 05:27:53 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.16 $ $Date: 2000/06/15 05:20:44 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 2000/06/15 05:27:53 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -568,7 +568,7 @@ public class xmlclient implements ClientListener {
 
     try
       {
-	System.out.println("Reading object data");
+	System.out.print("Reading object data");
 
 	item = getNextItem();
 
