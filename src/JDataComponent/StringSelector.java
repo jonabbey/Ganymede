@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/07/02 19:41:43 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/07/03 04:32:19 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.42 $ $Date: 2001/07/02 19:41:43 $ $Name:  $
+ * @version $Revision: 1.43 $ $Date: 2001/07/03 04:32:19 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -358,10 +358,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setLayout(new BorderLayout());
 
     inPanel.add("Center", new JScrollPane(in));
+
     inTitle.setText( org_in.concat(" : " + inVector.size()) );
     inTitle.setHorizontalAlignment( SwingConstants.LEFT );
     inTitle.setMargin( new Insets(0,0,0,0) );
-    inTitle.addActionListener(this);// new SelectAllListener( in, out ) );
+    inTitle.addActionListener(this);
 
     inPanel.add("North", inTitle);
 
@@ -454,7 +455,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.addActionListener(this);
 
 	out = new JstringListBox();
-	outTitle.addActionListener(this); // ( new SelectAllListener( out, in ) );
+	outTitle.addActionListener(this);
 	out.registerPopupMenu(outPopup);
 	out.load(outVector, rowWidth, true, null);
 	out.setCallback(this);
@@ -842,7 +843,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (e.getSource() == inTitle)
       {
 	in.setSelectionInterval( 0, in.getModel().getSize()-1 );
-	out.clearSelection();
+
+	if (out != null)
+	  {
+	    out.clearSelection();
+	  }
       }
 
     if (e.getSource() == outTitle)
