@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.189 $
-   Last Mod Date: $Date: 2000/07/12 23:48:56 $
+   Version: $Revision: 1.190 $
+   Last Mod Date: $Date: 2000/07/13 00:01:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.189 $ $Date: 2000/07/12 23:48:56 $
+ * @version $Revision: 1.190 $ $Date: 2000/07/13 00:01:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2536,6 +2536,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public Invid findLabeledObject(String name, short type)
   {
+    Invid value;
+
+    /* -- */
+
     checklogin();
 
     Query localquery = new Query(type,
@@ -2551,7 +2555,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Result tmp = (Result) results.elementAt(0);
 
-    return tmp.getInvid();
+    value = tmp.getInvid();
+
+    // make sure we've got the right kind of object back.. this is a
+    // debugging assertion to make sure that we're always handling
+    // embedded objects properly.
+
+    if (value.getType() != type)
+      {
+	throw new RuntimeException("findLabeledObject(): Error in query processing," + 
+				   " didn't get back right kind of object");
+      }
+
+    return value;
   }
 
   /**
@@ -2910,6 +2926,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	base = Ganymede.db.getObjectBase(query.objectName); // *sync* DBStore
       }
 
+    if (base == null)
+      {
+	setLastError("No such base");
+	return null;
+      }
+
     if (query.returnType != -1)
       {
 	containingBase = Ganymede.db.getObjectBase(query.returnType);
@@ -2919,21 +2941,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	containingBase = Ganymede.db.getObjectBase(query.returnName); // *sync* DBStore
       }
 
-    if (query.objectType != query.returnType)
-      {
-	returnContainingObject = true;
-      }
-
-    if (base == null)
-      {
-	setLastError("No such base");
-	return null;
-      }
-
     if (containingBase == null)
       {
 	setLastError("No such return type");
 	return null;
+      }
+
+    // the client can do searches for a top-level object based on the
+    // contents of a field in an embedded object.. if the requested
+    // containingBase does not equal the type of base we are searching
+    // on, we'll be sure and return results citing the containing
+    // object
+
+    if (containingBase != base)
+      {
+	returnContainingObject = true;
       }
 
     if (debug)
