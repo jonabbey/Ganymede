@@ -547,7 +547,7 @@ public class Ganymede {
       }
     catch (Exception ex)
       {
-	debug(ts.l("main.error_fail_server") + ex);
+	debug(ts.l("main.error_fail_server") + Ganymede.stackTrace(ex));
 	throw new RuntimeException(ex.getMessage());
       }
 

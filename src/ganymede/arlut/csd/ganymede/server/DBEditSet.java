@@ -1460,7 +1460,7 @@ public class DBEditSet {
     // possible, to make it possible to handle bigger single
     // transactions without running out of memory
 
-    Iterator iter = objects.keySet().iterator();
+    Iterator iter = objects.values().iterator();
 
     while (iter.hasNext())
       {
@@ -1885,12 +1885,24 @@ public class DBEditSet {
     String responsibleName;
 
     /* -- */
-    
+
     if (Ganymede.log == null)
       {
+	// if our log is null, as it is with DBStore bootstrap, then
+	// we don't need to do any logging.. just go ahead and
+	// integrate the objects and return
+
+	Iterator iter = objects.values().iterator();
+
+	while (iter.hasNext())
+	  {
+	    commit_replace_object((DBEditObject) iter.next());
+	    iter.remove();
+	  }
+
 	return;
       }
-    
+
     if (getGSession() != null)
       {
 	responsibleName = getGSession().username;
@@ -1911,11 +1923,11 @@ public class DBEditSet {
     // transaction for the start transaction log record
 
     Vector invids = new Vector(objects.size());
-    Iterator iter = objects.values().iterator();
+    Iterator iter = objects.keySet().iterator();
 
     while (iter.hasNext())
       {
-	invids.add(((DBEditObject) iter.next()).getInvid());
+	invids.add((Invid) iter.next());
       }
 
     synchronized (Ganymede.log)
