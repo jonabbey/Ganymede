@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.91 $ %D%
+   Version: $Revision: 1.92 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1952,7 +1952,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    enum = base.objectHash.elements();
+    enum = base.objectTable.elements();
 
     while (enum.hasMoreElements() && readLock.isLocked())
       {
@@ -2302,7 +2302,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	System.err.println("Query: " + username + " : got read lock");
       }
 
-    enum = base.objectHash.elements();
+    enum = base.objectTable.elements();
 
     // need to check in here to see if we've had the lock yanked
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,8 +69,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 				// this hash to determine whether a proposed name
 				// is acceptable.
   
-  Hashtable fieldHash;		// field dictionary
-  Hashtable objectHash;		// objects in our objectBase
+  DBBaseFieldTable fieldTable;		// field dictionary
+  DBObjectTable objectTable;		// objects in our objectBase
   int object_count;
   int maxid;			// highest invid to date
   Date lastChange;
@@ -123,8 +123,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     label_id = -1;
     category = null;
     sortedFields = new Vector();
-    fieldHash = new Hashtable();
-    objectHash = new Hashtable(4000);
+    fieldTable = new DBBaseFieldTable(20, (float) 1.0);
+    objectTable = new DBObjectTable(4000, (float) 1.0);
     maxid = 0;
     lastChange = new Date();
 
@@ -152,7 +152,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.array = false;
 	bf.visibility = false;	// we don't want the client to show the owner link
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 8 field, the backlinks field */
 
@@ -170,7 +170,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.array = true;
 	bf.visibility = false;	// we don't want the client to show the backlinks field
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	// note that we won't have an expiration date or removal date
 	// for an embedded object
@@ -192,7 +192,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.builtIn = true;	// this isn't optional
 	bf.array = true;
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 1 field, the expiration date. */
 
@@ -206,7 +206,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 2 field, the expiration date. */
 
@@ -220,7 +220,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 3 field, the notes field */
 
@@ -234,7 +234,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	// And our 4 field, the creation date field */
 
@@ -248,7 +248,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 5 field, the Creator field */
 
@@ -262,7 +262,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	// And our 6 field, the modification date field */
 
@@ -276,7 +276,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 7 field, the Modifier field */
 
@@ -290,7 +290,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;	
 	bf.builtIn = true;	// this isn't optional
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
 
 	/* And our 8 field, the backlinks field */
 
@@ -308,7 +308,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.array = true;
 	bf.visibility = false;	// we don't want the client to show the backlinks field
 
-	fieldHash.put(new Short(bf.field_code), bf);
+	fieldTable.put(bf);
       }
 
     objectHook = this.createHook();
@@ -380,14 +380,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	Enumeration enum;
 	DBObjectBaseField field;
     
-	enum = original.fieldHash.elements();
+	enum = original.fieldTable.elements();
 
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBObjectBaseField) enum.nextElement();
 	    bf = new DBObjectBaseField(field, editor); // copy this base field
 	    bf.base = this;
-	    fieldHash.put(field.getKey(), bf);
+	    fieldTable.put(bf);
 
 	    sortedFields.addElement(field);
 	  }
@@ -399,7 +399,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	// take care of that when and if the DBSchemaEdit base editing session
 	// commits this copy
 
-	objectHash = original.objectHash;
+	objectTable = original.objectTable;
 
 	maxid = original.maxid;
     
@@ -431,11 +431,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    size = fieldHash.size();
+    size = fieldTable.size();
 
     out.writeShort((short) size); // should have no more than 32k fields
 
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
@@ -483,7 +483,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	int counter = 0;
 	DBObject personaObj;
 
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
@@ -500,7 +500,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	out.writeInt(counter);
 
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
@@ -520,7 +520,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	int counter = 0;
 	DBObject ownerObj;
 
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
@@ -536,7 +536,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	out.writeInt(counter);
 
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
@@ -550,9 +550,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     else  // just write everything in this base out
       {
-	out.writeInt(objectHash.size());
+	out.writeInt(objectTable.size());
 	
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 	
 	while (baseEnum.hasMoreElements())
 	  {
@@ -573,11 +573,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    size = fieldHash.size();
+    size = fieldTable.size();
 
     out.writeShort((short) size); // should have no more than 32k fields
 
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
@@ -613,9 +613,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (dumpObjects)
       {
-	out.writeInt(objectHash.size());
+	out.writeInt(objectTable.size());
    
-	baseEnum = objectHash.elements();
+	baseEnum = objectTable.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
@@ -667,11 +667,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (size > 0)
       {
-	fieldHash = new Hashtable(size);
+	fieldTable = new DBBaseFieldTable(size, (float) 1.0);
       }
     else
       {
-	fieldHash = new Hashtable();
+	fieldTable = new DBBaseFieldTable();
       }
 
     // read in the field dictionary for this object
@@ -679,7 +679,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     for (int i = 0; i < size; i++)
       {
 	field = new DBObjectBaseField(in, this);
-	fieldHash.put(new Short(field.field_code), field);
+	fieldTable.put(field);
 
 	sortedFields.addElement(field);
       }
@@ -760,7 +760,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     temp_val = (object_count > 0) ? object_count : 4000;
 
-    objectHash = new Hashtable(temp_val, (float) 0.5);
+    objectTable = new DBObjectTable(temp_val, (float) 1.0);
 
     for (int i = 0; i < object_count; i++)
       {
@@ -776,7 +776,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    maxid = tempObject.id;
 	  }
 
-	objectHash.put(new Integer(tempObject.id), tempObject);
+	objectTable.putNoSyncNoRemove(tempObject);
       }
 
     if (debug)
@@ -975,7 +975,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: bad type");
 	  }
 
-	if (objectHash.containsKey(new Integer(chosenSlot.getNum())))
+	if (objectTable.containsKey(chosenSlot.getNum()))
 	  {
 	    throw new IllegalArgumentException("bad chosen_slot passed into createNewObject: num already taken");
 	  }
@@ -1182,7 +1182,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     out.println(indent + object_name + "(" + type_code + ")");
     
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
@@ -1456,7 +1456,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     /* -- */
 
     result = new Vector();
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
     
     while (enum.hasMoreElements())
       {
@@ -1482,9 +1482,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public BaseField getField(short id)
   {
-    Short ID = new Short(id);
-
-    return (BaseField) fieldHash.get(ID);
+    return fieldTable.get(id);
   }
 
   /**
@@ -1503,7 +1501,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
     
     while (enum.hasMoreElements())
       {
@@ -1662,7 +1660,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // and set it up in our field hash
 
-    fieldHash.put(new Short(id), field);
+    fieldTable.put(field);
 
     // go ahead and add this to the sorted fields vector, but we won't
     // resort.  We'll leave that to
@@ -1733,7 +1731,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // and set it up in our field hash
 
-    fieldHash.put(new Short(id), field);
+    fieldTable.put(field);
 
     return field;
   }
@@ -1753,7 +1751,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     DBObjectBaseField field = null;
     short id = -1;
-    Short Id = null;
 
     /* -- */
 
@@ -1771,9 +1768,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new RuntimeException("couldn't remove field due to remote error: " + ex);
       }
     
-    Id = new Short(id);
-
-    field = (DBObjectBaseField) fieldHash.get(Id);
+    field = (DBObjectBaseField) fieldTable.get(id);
 
     if (field == null)
       {
@@ -1782,7 +1777,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return false;
       }
 
-    fieldHash.remove(Id);
+    fieldTable.remove(id);
     sortedFields.removeElement(field);
 
     Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
@@ -1811,7 +1806,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     try
       {
-	enum = objectHash.elements();
+	enum = objectTable.elements();
 	
 	while (enum.hasMoreElements())
 	  {
@@ -1893,7 +1888,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	id = 256;  // reserve 256 field slots for built-in types
       }
 
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
@@ -1932,7 +1927,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     
     this.editor = null;
 
-    enum = fieldHash.elements();
+    enum = fieldTable.elements();
 
     while (enum.hasMoreElements())
       {
@@ -1959,7 +1954,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    enum = objectHash.elements();
+    enum = objectTable.elements();
 
     while (enum.hasMoreElements())
       {

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.70 $ %D%
+   Version: $Revision: 1.71 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -132,9 +132,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     Enumeration 
       enum = null;
 
-    Object 
-      key = null;
-
     DBObjectBaseField 
       fieldDef;
 
@@ -143,17 +140,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    fields = new Hashtable();
+    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
 
     synchronized (objectBase)
       {
-	enum = objectBase.fieldHash.keys();
+	enum = objectBase.fieldTable.elements();
 	
 	while (enum.hasMoreElements())
 	  {
-	    key = enum.nextElement();
-	    
-	    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
 
 	    // check for permission to create a particular field
 
@@ -199,7 +194,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (tmp != null)
 	      {
-		fields.put(key, tmp);
+		fields.putNoSyncNoRemove(tmp);
 	      }
 	  }
       }
@@ -219,15 +214,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     Enumeration 
       enum;
 
-    Object 
-      key;
-
     DBObjectBaseField 
       fieldDef;
 
     DBField 
       field, 
       tmp = null;
+
+    Short key;
 
     /* -- */
 
@@ -237,7 +231,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     stored = true;
     status = EDITING;
 
-    fields = new Hashtable();
+    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
 
     gSession = getSession().getGSession();
 
@@ -261,7 +255,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBField) enum.nextElement();
-	    key = new Short(field.getID());
 
 	    switch (field.getType())
 	      {
@@ -300,7 +293,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (tmp != null)
 	      {
-		fields.put(key, tmp);
+		fields.putNoSyncNoRemove(tmp);
 	      }
 	  }
       }
@@ -310,16 +303,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     synchronized (objectBase)
       {
-	enum = objectBase.fieldHash.keys();
+	enum = objectBase.fieldTable.elements();
 	
 	while (enum.hasMoreElements())
 	  {
-	    key = enum.nextElement();
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
 	    
-	    if (!fields.containsKey(key))
+	    if (!fields.containsKey(fieldDef.getID()))
 	      {
-		fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
-
 		if (!checkNewField(fieldDef.getID()))
 		  {
 		    continue;
@@ -361,7 +352,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		  }
 
-		fields.put(key, tmp);
+		fields.putNoSyncNoRemove(tmp);
 	      }
 	  }
       }
@@ -462,17 +453,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     Enumeration enum;
     DBField field;
     Vector removeList;
-    Object key;
     
     /* -- */
 
     removeList = new Vector();
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
-	field = (DBField) fields.get(key);
+	field = (DBField) enum.nextElement();
 
 	// we don't want to emit fields that don't have anything in them..
 	// DBField.defined is supposed to be a flag that keeps track of that,
@@ -485,7 +474,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    ((field.value == null) && 
 	     ((field.values == null) || (field.values.size() == 0)))))
 	  {
-	    removeList.addElement(key);
+	    removeList.addElement(field);
 
 	    if (false)
 	      {
@@ -498,7 +487,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     while (enum.hasMoreElements())
       {
-	fields.remove(enum.nextElement());
+	field = (DBField) enum.nextElement();
+	fields.remove(field.getID());
       }
   }
 
@@ -639,7 +629,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final synchronized ReturnVal checkRequiredFields()
   {
-    Vector fields = new Vector();
+    Vector localFields = new Vector();
     DBObjectBaseField fieldDef;
     DBField field;
     StringBuffer errorBuf = new StringBuffer();
@@ -668,14 +658,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (field == null || !field.isDefined())
 	      {
-		fields.addElement(fieldDef.getName());
+		localFields.addElement(fieldDef.getName());
 	      }
 	  }
       }
 
     // if all required fields checked out, return success
 
-    if (fields.size() == 0)
+    if (localFields.size() == 0)
       {
 	return null;
       }
@@ -687,9 +677,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     errorBuf.append(" has not been completely filled out.  The following fields need ");
     errorBuf.append("to be filled in before this transaction can be committed:\n\n");
     
-    for (int i = 0; i < fields.size(); i++)
+    for (int i = 0; i < localFields.size(); i++)
       {
-	errorBuf.append((String) fields.elementAt(i));
+	errorBuf.append((String) localFields.elementAt(i));
 	errorBuf.append("\n");
       }
 
@@ -2121,14 +2111,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
-	
-	field = (DBField) fields.get(key);
-
+	field = (DBField) enum.nextElement();
+	key = new Short(field.getID());
 	value = field.checkpoint();
 
 	if (value != null)
@@ -2150,7 +2138,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   synchronized void rollback(Hashtable ckpoint)
   {
     Enumeration enum;
-    Object key, value;
+    Short key;
+    Object value;
     Hashtable result = new Hashtable();
     DBField field;
 
@@ -2160,9 +2149,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
+	key = (Short) enum.nextElement();
 
-	field = (DBField) fields.get(key);
+	field = fields.get(key.shortValue());
 
 	value = ckpoint.get(key);
 

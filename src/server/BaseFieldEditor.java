@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,9 +92,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     targetC,			// invid
     fieldC;			// invid
 
-  JcomponentAttr 
-    ca;
-
   Hashtable
     rowHash;			// to keep track of field labels
 
@@ -131,9 +128,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     editPanel = new JPanel();
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setLayout(new TableLayout(false));
-    
-    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
-			    java.awt.Color.black, java.awt.Color.white);
     
     idN = new JnumberField(20,  false, false, 0, 0);
     idN.setCallback(this);

@@ -7,7 +7,7 @@
    world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.
    
    Created: 17 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -171,7 +171,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
 
-    return base.objectHash.elements();
+    return base.objectTable.elements();
   }
 
   /**

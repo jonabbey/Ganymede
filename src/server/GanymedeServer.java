@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -456,7 +456,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	// loop 2: iterate over the objects in the current object base
 
-	enum2 = base.objectHash.elements();
+	enum2 = base.objectTable.elements();
 
 	while (enum2.hasMoreElements())
 	  {
@@ -543,7 +543,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    for (int i = 0; i < removeVector.size(); i++)
 	      {
-		object.fields.remove(removeVector.elementAt(i));
+		object.fields.remove(((Short) removeVector.elementAt(i)).shortValue());
 
 		Ganymede.debug("Undefining (now) empty field: " + 
 			       removeVector.elementAt(i) +
@@ -636,7 +636,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	Ganymede.debug("Testing invid links for objects of type " + base.getName());
 	
-	enum2 = base.objectHash.elements();
+	enum2 = base.objectTable.elements();
 
 	while (enum2.hasMoreElements())
 	  {

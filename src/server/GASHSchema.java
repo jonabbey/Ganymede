@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2444,7 +2444,6 @@ class NameSpaceEditor extends JPanel implements ActionListener {
   JList spaceL;
   JCheckBox caseCB;
   JPanel nameJPanel;
-  JcomponentAttr ca;
   GASHSchema owner;
   String currentNameSpaceLabel = null;
   
@@ -2467,9 +2466,6 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     nameJPanel = new JInsetPanel(10,10,10,10);
     nameJPanel.setLayout(new TableLayout(false));
 
-    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
-			   java.awt.Color.black, java.awt.Color.white);
-      
     nameS = new JstringField(20, 100, false, false, null, null);
     addRow(nameJPanel, nameS, "Namespace:", 0);
       
@@ -2630,10 +2626,6 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
 
   CategoryEditor(GASHSchema owner)
   {
-    JcomponentAttr ca;
-
-    /* -- */
-
     if (owner == null)
       {
 	throw new IllegalArgumentException("owner must not be null");
@@ -2648,9 +2640,6 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     
     catJPanel = new JInsetPanel(10,10,10,10);
     catJPanel.setLayout(new TableLayout(false));
-    
-    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
-			   java.awt.Color.black, java.awt.Color.white);
     
     catNameS = new JstringField(20, 100, true, false, null, null, this);
     addRow(catJPanel, catNameS, "Category Label:", 0);

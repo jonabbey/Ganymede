@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -963,7 +963,7 @@ public class DBEditSet {
 		// Create a read-only version of eObj, with all fields
 		// reset to checked-in status, put it into our object hash
 
-		base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+		base.objectTable.putNoSync(new DBObject(eObj)); // noSync ok, since we are write-locked
 		base.store.checkIn(); // update checkout count
 	      }
 	    catch (RemoteException ex)
@@ -984,7 +984,7 @@ public class DBEditSet {
 	    // last one allocated in that base, which is unlikely
 	    // enough that we don't worry about it here.
 
-	    base.objectHash.remove(new Integer(eObj.id));
+	    base.objectTable.removeNoSync(eObj.id); // noSync ok, since we are write-locked
 	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 

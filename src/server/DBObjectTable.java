@@ -6,7 +6,7 @@
    tuned for use as Ganymede's object hashes.
    
    Created: 9 June 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -150,7 +150,7 @@ public class DBObjectTable {
 	throw new NullPointerException();
       }
 
-    return containsKey(value.getInvid().getNum());
+    return containsKey(value.hashCode());
   }
 
   /**
@@ -288,7 +288,7 @@ public class DBObjectTable {
     int hash = value.hashCode();
     int index = (hash & 0x7FFFFFFF) % tab.length;
 
-    if (count >= threshold) 
+    if (count > threshold) 
       {
 	rehash();
 	putNoSync(value);
@@ -325,7 +325,7 @@ public class DBObjectTable {
     
     removeNoSync(value.hashCode());
 
-    if (count >= threshold) 
+    if (count > threshold) 
       {
 	rehash();
       }
@@ -365,7 +365,7 @@ public class DBObjectTable {
     int hash = value.hashCode();
     int index = (hash & 0x7FFFFFFF) % tab.length;
 
-    if (count >= threshold) 
+    if (count > threshold) 
       {
 	rehash();
 	putNoSync(value);

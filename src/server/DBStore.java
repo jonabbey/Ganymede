@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1084,7 +1084,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "The name of this ownership group";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.OwnerMembersField;
@@ -1096,7 +1096,7 @@ public class DBStore {
 	bf.allowedTarget = SchemaConstants.PersonaBase;
 	bf.targetField = SchemaConstants.PersonaGroupsField;
 	bf.comment = "List of admin personae that are members of this owner set";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.OwnerObjectsOwned;
@@ -1108,7 +1108,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What objects are owned by this owner set";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.OwnerMailList;
@@ -1120,7 +1120,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What email addresses should be notified of changes to objects owned?";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.OwnerNameField);
 
@@ -1146,7 +1146,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "The unique name for this admin persona";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.PersonaPasswordField;
@@ -1158,7 +1158,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.crypted = true;
 	bf.comment = "Persona password";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PersonaGroupsField;
@@ -1170,7 +1170,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What owner sets are this persona members of?";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PersonaAssocUser;
@@ -1182,7 +1182,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.array = false;
 	bf.comment = "What user is this admin persona associated with?";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PersonaPrivs;
@@ -1194,7 +1194,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "What permission matrices are this admin persona associated with?";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminConsole;
@@ -1204,7 +1204,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, this persona can be used to access the admin console";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminPower;
@@ -1214,7 +1214,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, this persona can kill users and edit the schema";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.PersonaNameField);
 
@@ -1239,7 +1239,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "The name of this permission matrix";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PermMatrix;
@@ -1248,7 +1248,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Access bits, by object type for objects owned by admins using this permission object";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PermDefaultMatrix;
@@ -1257,7 +1257,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Access bits, by object type for all objects on the part of admins using this permission object";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.PermPersonae;
@@ -1269,7 +1269,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "What personae are using this permission matrix?";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.PermName);
 
@@ -1301,7 +1301,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserPassword;
@@ -1314,7 +1314,7 @@ public class DBStore {
 	bf.crypted = true;
 	bf.isCrypted();
 	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserAdminPersonae;
@@ -1327,7 +1327,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.array = true;
 	bf.comment = "A list of admin personae this user can assume";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
     
@@ -1354,7 +1354,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Single-word token to identify this event type in Ganymede source code";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventName;
@@ -1365,7 +1365,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Short name for this event class, suitable for an email message title";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventDescription;
@@ -1376,7 +1376,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Fuller description for this event class, suitable for an email message body";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.EventMailBoolean;
@@ -1386,7 +1386,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, occurrences of this event will be emailed";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventMailList;
@@ -1399,7 +1399,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "List of email addresses to always send events of this type to";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.EventMailToSelf;
@@ -1410,7 +1410,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
     
@@ -1436,7 +1436,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Name of this plug-in builder task";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.BuilderTaskClass;
@@ -1447,7 +1447,7 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
-	b.fieldHash.put(new Short(bf.field_code), bf);
+	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.BuilderTaskName);
     

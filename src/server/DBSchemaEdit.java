@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -955,7 +955,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      }
 
 	    newFieldDef.setBase(base);
-	    base.fieldHash.put(new Short(newFieldDef.getID()), newFieldDef);
+	    base.fieldTable.put(newFieldDef);
 	  }
       }
 
@@ -1020,7 +1020,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      }
 
 	    newFieldDef.setBase(base);
-	    base.fieldHash.put(new Short(newFieldDef.getID()), newFieldDef);
+	    base.fieldTable.put(newFieldDef);
 	  }
       }
 

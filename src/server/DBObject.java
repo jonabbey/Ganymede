@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.51 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.52 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -71,7 +71,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   protected DBObjectBase objectBase;
   protected int id;			// 32 bit id - the object's invariant id
-  protected Hashtable fields;
+  protected DBFieldTable fields;
 
   DBEditObject shadowObject;	// if this object is being edited or removed, this points
 				// to the shadow that manages the changes
@@ -83,6 +83,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 				      // Ganymede Session, we record that here
 
   Invid myInvid = null;
+
+  DBObject next = null;		// used by the DBObjectTable logic
 
   /* -- */
 
@@ -171,7 +173,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   {
     Enumeration enum;
     DBField field;
-    Object key;
 
     /* -- */
 
@@ -182,22 +183,21 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     shadowObject = null;
     editset = null;
 
-    fields = new Hashtable();
+    fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
 
     // put any defined fields into the object we're going
     // to commit back into our DBStore
 
-    enum = eObj.fields.keys();
+    enum = eObj.fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
-	field = (DBField) eObj.fields.get(key);
+	field = (DBField) enum.nextElement();
 
 	if (field.isDefined())
 	  {
 	    field.setOwner(this); // this will make the field non-editable
-	    fields.put(key, field);
+	    fields.putNoSyncNoRemove(field);
 	  }
 	else
 	  {
@@ -221,7 +221,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   {
     Enumeration enum;
     DBField field, copy;
-    Object key;
 
     /* -- */
 
@@ -232,17 +231,16 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     shadowObject = null;
     editset = null;
 
-    fields = new Hashtable();
+    fields = new DBFieldTable(original.fields.size(), (float) 1.0);
 
     // put any defined fields into the object we're going
     // to commit back into our DBStore
 
-    enum = original.fields.keys();
+    enum = original.fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
-	field = (DBField) original.fields.get(key);
+	field = (DBField) enum.nextElement();
 
 	switch (field.getType())
 	  {
@@ -250,7 +248,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new BooleanDBField(this, (BooleanDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -258,7 +256,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new NumericDBField(this, (NumericDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -266,7 +264,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new DateDBField(this, (DateDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -274,7 +272,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new StringDBField(this, (StringDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -282,7 +280,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new InvidDBField(this, (InvidDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -290,7 +288,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 	    
@@ -298,7 +296,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new PasswordDBField(this, (PasswordDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 
@@ -306,13 +304,18 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    copy = new IPDBField(this, (IPDBField) field);
 
 	    copy.setOwner(this);
-	    fields.put(key, copy);
+	    fields.putNoSyncNoRemove(copy);
 
 	    break;
 	  }
       }
 
     this.gSession = gSession;
+  }
+
+  public final int hashCode()
+  {
+    return id;
   }
 
   /**
@@ -537,6 +540,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   {
     Enumeration enum;
     Short key;
+    short keynum;
+    DBField field;
 
     int counter = 0;
     Vector fieldsToEmit = new Vector();
@@ -555,11 +560,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	// omit OwnerObjectsOwned
       }
 
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = (Short) enum.nextElement();
+	field = (DBField) enum.nextElement();
+	key = new Short(field.getID());
 
 	if (fieldsToEmit.contains(key))
 	  {
@@ -571,11 +577,13 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     //    System.err.println("emitting fields");
    
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = (Short) enum.nextElement();
+	field = (DBField) enum.nextElement();
+	keynum = field.getID();
+	key = new Short(keynum);
 
 	if (fieldsToEmit.contains(key))
 	  {
@@ -586,12 +594,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 		// only want to emit the persona objects we're keeping,
 		// which would be supergash and monitor
 
-		DBField oldF = (DBField) fields.get(key);
+		DBField oldF = (DBField) fields.get(keynum);
 
 		if (!(oldF instanceof InvidDBField))
 		  {
 		    Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be invidfield");
-		    ((DBField) fields.get(key)).emit(out);
+		    ((DBField) fields.get(keynum)).emit(out);
 		  }
 		else
 		  {
@@ -600,7 +608,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 		    if (!invF.isVector())
 		      {
 			Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be vector");
-			((DBField) fields.get(key)).emit(out);
+			((DBField) fields.get(keynum)).emit(out);
 		      }
 		    else
 		      {
@@ -615,7 +623,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	      }
 	    else
 	      {
-		((DBField) fields.get(key)).emit(out);
+		((DBField) fields.get(keynum)).emit(out);
 	      }
 	  }
       }
@@ -634,7 +642,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   synchronized void emit(DataOutput out) throws IOException
   {
     Enumeration enum;
-    Short key;
+    DBField field;
 
     /* -- */
 
@@ -651,16 +659,13 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     //    System.err.println("emitting fields");
    
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = (Short) enum.nextElement();
-
-	//	System.err.println("field:" + key);
-
-	out.writeShort(key.shortValue());
-	((DBField) fields.get(key)).emit(out);
+	field = (DBField) enum.nextElement();
+	out.writeShort(field.getID());
+	field.emit(out);
       }
   }
 
@@ -684,9 +689,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       fieldcode,
       type;
 
-    Short
-      key;
-
     int 
       tmp_count;
 
@@ -708,11 +710,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     if (tmp_count > 0)
       {
-	fields = new Hashtable(tmp_count);
+	fields = new DBFieldTable(tmp_count, (float) 1.0);
       }
     else
       {
-	fields = new Hashtable(); 
+	fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
       }
 
     for (int i = 0; i < tmp_count; i++)
@@ -721,13 +723,12 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	// DBObjectBase
 
 	fieldcode = in.readShort();
-	key = new Short(fieldcode);
-
-	definition = (DBObjectBaseField) objectBase.fieldHash.get(key);
+	definition = objectBase.fieldTable.get(fieldcode);
 
 	if (definition == null)
 	  {
-	    System.err.println("What the heck?  Null definition for " + objectBase.getName() + ", key = " + key);
+	    System.err.println("What the heck?  Null definition for " + 
+			       objectBase.getName() + ", fieldcode = " + fieldcode);
 	  }
 
 	type = definition.getType();
@@ -804,8 +805,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	      }
 	  }
 	
-	// now add the field to our fields hash
-	fields.put(key, tmp);
+	// now add the field to our fields table
+
+	fields.putNoSyncNoRemove(tmp);
       }
   }
 
@@ -1048,7 +1050,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   {
     db_field f;
 
-    f = (DBField) fields.get(new Short(id));
+    f = fields.get(id);
 
     return f;
   }
@@ -1438,22 +1440,20 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public synchronized void print(PrintStream out)
   {
     Enumeration enum;
-    Object key;
     DBField field;
 
     /* -- */
 
     out.println("Invid: <" + objectBase.object_name + ":" + id + ">");
    
-    enum = fields.keys();
+    enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	key = enum.nextElement();
-	out.print(((DBObjectBaseField) objectBase.fieldHash.get(key)).field_name);
-	out.print(" : ");
+	field = (DBField) enum.nextElement();
 
-	field = (DBField) fields.get(key);
+	out.print(field.getName());
+	out.print(" : ");
 
 	if (field.isVector())
 	  {
@@ -1473,7 +1473,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	  }
 	else
 	  {
-	    out.println(field.key());
+	    out.println(field.getID());
 	  }
       }    
   }

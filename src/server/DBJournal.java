@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -337,7 +337,7 @@ public class DBJournal implements ObjectStatus {
 
 		    obj = new DBObject(base, jFile, true);
 
-		    if (!base.objectHash.containsKey(new Integer(obj.id)))
+		    if (!base.objectTable.containsKey(obj.id))
 		      {
 			System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
 		      }
@@ -628,7 +628,7 @@ class JournalEntry {
       {
 	// delete the object
 	
-	badObj = (DBObject) base.objectHash.get(new Integer(id));
+	badObj = base.objectTable.get(id);
 
 	if (badObj == null)
 	  {
@@ -690,7 +690,7 @@ class JournalEntry {
 	      }
 	  }
 
-	base.objectHash.remove(new Integer(id));
+	base.objectTable.remove(id);
       }
     else
       {
@@ -736,7 +736,7 @@ class JournalEntry {
 	      }
 	  }
 
-	base.objectHash.put(new Integer(id), obj);
+	base.objectTable.put(obj);
 
 	// keep our base's maxid up to date for
 	// any newly created objects in the journal

@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -469,7 +469,6 @@ final public class DBSession {
       }
 
     baseKey = new Short(baseID);
-    objKey = new Integer(objectID);
 
     base = Ganymede.db.getObjectBase(baseKey); // store may not be set at this point if this object is not checked out
 
@@ -478,9 +477,9 @@ final public class DBSession {
 	return null;
       }
 
-    // depend on the objectHash's thread synchronization here
+    // depend on the objectTable's thread synchronization here
 
-    obj = (DBObject) base.objectHash.get(objKey);
+    obj = base.objectTable.get(objectID);
 
     // do we want to do any kind of logging here?
 
