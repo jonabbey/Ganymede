@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/01/22 18:04:12 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/07/14 01:47:18 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -111,8 +111,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   protected GregorianCalendar 
     my_Calendar;
 
-  protected SimpleTimeZone
-    _myTimeZone = (SimpleTimeZone)(SimpleTimeZone.getDefault());
+  protected TimeZone
+    _myTimeZone = SimpleTimeZone.getDefault();
 
   SimpleDateFormat
     dateformat,
