@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1679,13 +1679,13 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	    DBObjectBase refBase;
 
 	    refBase = base.store.getObjectBase(allowedTarget);
-	    result += ", -->" + refBase.getName();
+	    result += ", --> [" + refBase.getName() + "] ";
 
 	    if (targetField != -1)
 	      {
 		try
 		  {
-		    result += ", <--" + refBase.getField(targetField).getName();
+		    result += ", <-- [" + refBase.getField(targetField).getName() + "] ";
 		  }
 		catch (RemoteException ex)
 		  {
@@ -1695,11 +1695,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	  }
 	else if (allowedTarget == -1)
 	  {
-	    result += ", -->any";
+	    result += ", --> [any]";
 	  }
 	else if (allowedTarget == -2)
 	  {
-	    result += ", -->any";
+	    result += ", --> [any]";
 
 	    // if allowed Target == -2 and targetField != -1, we assume
 	    // that we've got a field that's guaranteed to be present in
@@ -1709,7 +1709,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	      {
 		try
 		  {
-		    result += ", <--" + base.getField(targetField).getName();
+		    result += ", <-- [" + base.getField(targetField).getName() + "] ";
 		  }
 		catch (RemoteException ex)
 		  {
