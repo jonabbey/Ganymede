@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.173 $
-   Last Mod Date: $Date: 2000/06/30 04:24:42 $
+   Version: $Revision: 1.174 $
+   Last Mod Date: $Date: 2000/09/14 23:18:22 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.173 $ $Date: 2000/06/30 04:24:42 $ $Name:  $
+ * @version $Revision: 1.174 $ $Date: 2000/09/14 23:18:22 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/06/30 04:24:42 $";
+  static String release_date = "$Date: 2000/09/14 23:18:22 $";
   static String release_number = null;
 
   // ---
@@ -3426,17 +3426,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     return ok;
   }
 
-  /** <p>Reactivates an object that was previously inactivated. The
+  /**
+   * <p>Reactivates an object that was previously inactivated. The
    * object's status will not actually be changed in the database
    * until the transaction is committed.  Note that the reactivation
    * request will typically cause a dialog to come back from the
    * server requesting the user fill in parameters describing how the
-   * object is to be reactivated. </p>
+   * object is to be reactivated.</p>
    *
    * <p>Typically reactivating an object involves clearing the removal
-   * date from  I think you should
-   * call this from the expiration date panel if the date is cleared.
-   * 
+   * date from I think you should call this from the expiration date
+   * panel if the date is cleared.</p>
    */
 
   public boolean reactivateObject(Invid invid)
