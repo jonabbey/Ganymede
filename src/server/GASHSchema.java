@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -96,6 +96,10 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
   Base[] bases;
 
+  Hashtable
+    baseHash,
+    fieldHash;
+
   /* -- */
 
   public GASHSchema(String title, SchemaEdit editor)
@@ -177,7 +181,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 			   null);
 
     PopupMenu objectMenu = new PopupMenu();
-    createObjectMI = new MenuItem("Create Object");
+    createObjectMI = new MenuItem("Create Object Type");
     objectMenu.add(createObjectMI);
 
     objects = new treeNode(null, "Object Types", null, true, 0, 1, objectMenu);
@@ -228,9 +232,14 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     add("South", buttonPane);
 
     this.editor = editor;
-    deleteObjectMI = new MenuItem("Delete Object");
-    
+
+    deleteObjectMI = new MenuItem("Delete Object Type");
     createFieldMI = new MenuItem("Create Field");
+    deleteFieldMI = new MenuItem("Delete Field");
+
+    fieldHash = new Hashtable();
+    baseHash = new Hashtable();
+
     objectsRefresh();
 
     pack();
@@ -281,20 +290,33 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
   void objectsRefresh()
   {
+    try
+      {
+	refreshBases();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't refresh bases" + ex);
+      }
+
+    refreshNamespaces();
+    tree.refresh();
+  }
+
+  void refreshBases() throws RemoteException
+  {
     Base base;
-    treeNode parentNode, oldNode, newNode;
-    boolean wasOpen;
+    BaseNode bNode, oldNode, newNode;
+    treeNode parentNode;
     String baseName = null;
     PopupMenu menu;
-
+    int i;
+    
     /* -- */
 
-    menu = new PopupMenu(baseName);
+    menu = new PopupMenu("Base Menu");
     menu.add(createFieldMI);
     menu.add(deleteObjectMI);
-
-    wasOpen = objects.isOpen();
-    tree.removeChildren(objects, false);
 
     try
       {
@@ -302,7 +324,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
       }
     catch (RemoteException ex)
       {
-	System.err.println("GASHSchema: objectsRefresh(): couldn't get bases");
+	System.err.println("GASHSchema: refreshBases(): couldn't get bases");
 	System.err.println(ex.toString());
 
 	throw new RuntimeException("couldn't get bases" + ex);
@@ -313,51 +335,172 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
     (new QuickSort(bases,  this)).sort();
 
+    // now that we've got our bases in order, we need to go
+    // through our basenodes in the tree in order, inserting
+    // any bases that aren't in the tree into the tree in 
+    // the proper place.  We'll go ahead and call setText()
+    // on the existent nodes to make sure that we've caught
+    // a base rename.
+
     parentNode = objects;
     oldNode = null;
+    bNode = (BaseNode) parentNode.getChild();
+    i = 0;
 
-    for (int i = 0; i < bases.length; i++)
+    while (i < bases.length)
       {
 	base = bases[i];
+
+	if ((bNode == null) ||
+	    (base.getTypeID() > bNode.getBase().getTypeID()))
+	  {
+	    // insert a new base node 
+
+	    newNode = new BaseNode(parentNode, base.getName(), base,
+				   oldNode, true, 0, 1, menu);
+
+	    tree.insertNode(newNode, false);
+	    baseHash.put(base, newNode);
+
+	    refreshFields(newNode, false);
+
+	    oldNode = newNode;
+	    bNode = (BaseNode) oldNode.getNextSibling();
+	  }
+	else if (base.getTypeID() < bNode.getBase().getTypeID())
+	  {
+	    // delete a base node
+
+	    bNode = (BaseNode) bNode.getNextSibling();
+	    baseHash.remove(bNode.getBase());
+
+	    tree.deleteNode(bNode.getPrevSibling(), false);
+	  }
+	else
+	  {
+	    bNode.setText(base.getName());
+	    refreshFields(bNode, false);
+
+	    oldNode = bNode;
+	    bNode = (BaseNode) oldNode.getNextSibling();
+	  }
 	
-	try
-	  {
-	    baseName = base.getName();
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("GASHSchema: objectsRefresh(): couldn't get base name");
-	    System.err.println(ex.toString());
-
-	    throw new RuntimeException("couldn't get base name" + ex);
-	  }
-	catch (Exception ex)
-	  {
-	    System.err.println("i = " + i + ", bases.length = " + bases.length + ", ex = " + ex);
-	  }
-
-	if (baseName == null)
-	  {
-	    throw new NullPointerException("baseName == null");
-	  }
-
-	newNode = new treeNode(parentNode, baseName, oldNode,
-			       true, 0, 1, menu);
-
-	tree.insertNode(newNode, false);
-	
-	oldNode = newNode;
+	i++;
       }
-
-    if (wasOpen)
-      {
-	tree.expandNode(objects, false);
-      }
-
-    tree.refresh();
   }
 
-  void namespacesRefresh()
+  void refreshFields(BaseNode node, boolean doRefresh) throws RemoteException
+  {
+    Base base;
+    BaseField field, fields[];
+    Vector vect;
+    BaseNode parentNode;
+    FieldNode oldNode, newNode, fNode;
+    PopupMenu menu;
+    int i;
+
+    /* -- */
+
+    base = node.getBase();
+
+    vect = base.getFields();
+
+    menu = new PopupMenu(base.getName() + " Field Menu");
+    menu.add(deleteFieldMI);
+    
+    fields = new BaseField[vect.size()];
+    
+    for (i = 0; i < fields.length; i++)
+      {
+	fields[i] = (BaseField) vect.elementAt(i);
+      }
+    
+    // Sort the fields by ID, using a funky anonymous
+    // class
+    
+    (new QuickSort(fields, 
+		   new arlut.csd.Util.Compare() 
+		   {
+		     public int compare(Object a, Object b) 
+		       {
+			 BaseField aF, bF;
+      
+			 aF = (BaseField) a;
+			 bF = (BaseField) b;
+	
+			 try
+			   {
+			     if (aF.getID() < bF.getID())
+			       {
+				 return -1;
+			       }
+			     else if (aF.getID() > bF.getID())
+			       {
+				 return 1;
+			       }
+			     else
+			       {
+				 return 0;
+			       }
+			   }
+			 catch (RemoteException ex)
+			   {
+			     throw new RuntimeException("couldn't compare base fields " + ex);
+			   }
+		       }
+		   }
+		   )).sort();
+
+    parentNode = node;
+    oldNode = null;
+    fNode = (FieldNode) node.getChild();
+    i = 0;
+	
+    while (i < fields.length)
+      {
+	field = fields[i];
+
+	if ((fNode == null) ||
+	    (field.getID() > fNode.getField().getID()))
+	  {
+	    // insert a new field node
+
+	    newNode = new FieldNode(parentNode, field.getName(), field,
+				    oldNode, false, 2, 2, menu);
+
+	    tree.insertNode(newNode, false);
+	    fieldHash.put(field, newNode);
+
+	    oldNode = newNode;
+	    fNode = (FieldNode) oldNode.getNextSibling();
+	  }
+	else if (field.getID() < fNode.getField().getID())
+	  {
+	    // delete a field node
+
+	    fNode = (FieldNode) fNode.getNextSibling();
+	    baseHash.remove(fNode.getField());
+
+	    tree.deleteNode(fNode.getPrevSibling(), false);
+	  }
+	else
+	  {
+	    fNode.setText(field.getName());
+
+	    oldNode = fNode;
+	    fNode = (FieldNode) oldNode.getNextSibling();
+	  }
+
+	i++;
+      }
+  }
+
+  void refreshFields(Base base, boolean doRefresh) throws RemoteException
+  {
+    refreshFields((BaseNode) baseHash.get(base), doRefresh);
+  }
+
+  void refreshNamespaces()
   {
     // tree.removeChildren(namespaces, false);
   }
@@ -410,49 +553,18 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 	throw new IllegalArgumentException("null node");
       }
 
-    n = node.getParent();
-
-    while (n != null && n != objects && n!= namespaces)
+    if (node instanceof BaseNode)
       {
-	n = n.getParent();
+	Base base = ((BaseNode) node).getBase();
+	editBase(base);
       }
-
-    if (n == objects)
+    else if (node instanceof FieldNode)
       {
-	a = node.getText();
-
-	System.out.println("object node " + a + " selected");
-
-	objectsRefresh();
-
-	if (bases != null)
-	  {
-	    System.err.println("Searching for matching base");
-
-	    try
-	      {
-		for (int i = 0; i < bases.length; i++)
-		  {
-		    b = bases[i].getName();
-
-		    System.err.println("comparing vs i=" + i + "(" + b + ")");
-		    if (b.equals(a))
-		      {
-			editBase(bases[i]);
-			return;
-		      }
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote exception getting base match for " + 
-					   node.getText() + ", " + ex);
-	      }
-	  }
-	else
-	  {
-	    System.err.println("null bases");
-	  }
+	BaseField field = ((FieldNode) node).getField();
+	editField(field);
+      }
+    else
+      {
       }
   }
 
@@ -1098,93 +1210,126 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   public boolean setValuePerformed(ValueObject v)
   {
     Component comp = v.getSource();
-    if (comp == nameS)
+
+    try
       {
-	System.out.println("nameS");
-      }
-    else if (comp == classS)
-      {
-	System.out.println("classS");
-      }
-    else if (comp == idN)
-      {
-	System.out.println("idN");
-      }
-    else if (comp == maxArrayN)
-      {
-	System.out.println("maxArrayN");
-      }
-    else if (comp == vectorCF)
-      {
-	//setRowVisible(maxArrayN, vectorCF.getState());
-	System.out.println("vectorCF");
-	try
+	if (comp == nameS)
 	  {
+	    System.out.println("nameS");
+	    fieldDef.setName((String) v.getValue());
+	  }
+	else if (comp == classS)
+	  {
+	    System.out.println("classS");
+	    fieldDef.setClassName((String) v.getValue());
+	  }
+	else if (comp == idN)
+	  {
+	    System.out.println("idN");
+	    fieldDef.setID(((Integer)v.getValue()).shortValue());
+	  }
+	else if (comp == maxArrayN)
+	  {
+	    System.out.println("maxArrayN");
+	    fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue());
+	  }
+	else if (comp == vectorCF)
+	  {
+	    //setRowVisible(maxArrayN, vectorCF.getState());
+	    System.out.println("vectorCF");
 	    fieldDef.setArray(vectorCF.getState());
+	    checkVisibility();
 	  }
-	catch (RemoteException ex)
+	else if (comp == typeC)
 	  {
-	    System.err.println("remote exception in FieldEditor.setValuePerformed: " + ex);
+	    System.out.println("typeC");
+
+	    String typename = (String) v.getValue();
+
+	    if (typename.equals("Boolean"))
+	      {
+		fieldDef.setType(FieldType.BOOLEAN);
+	      }
+	    else if (typename.equals("Numeric"))
+	      {
+		fieldDef.setType(FieldType.NUMERIC);
+	      }
+	    else if (typename.equals("Date"))
+	      {
+		fieldDef.setType(FieldType.DATE);
+	      }
+	    else if (typename.equals("String"))
+	      {
+		fieldDef.setType(FieldType.STRING);
+	      }
+	    else if (typename.equals("Object Reference"))
+	      {
+		fieldDef.setType(FieldType.INVID);
+	      }
 	  }
-	checkVisibility();
-      }
-    else if (comp == typeC)
-      {
-	System.out.println("typeC");
-      }
-    else if (comp == OKCharS)
-      {
-	System.out.println("OkCharS");
-      }
-    else if (comp == BadCharS)
-      {
-	System.out.println("BadCharS");
-      }
-    else if (comp == minLengthN)
-      {
-	System.out.println("minLengthN");
-      }
-    else if (comp == maxLengthN)
-      {
-	System.out.println("maxLengthN");
-      }
-    else if (comp == namespaceC)
-      {
-	System.out.println("namespaceC");
-      }
-    else if (comp == trueLabelS)
-      {
-	System.out.println("trueLabelS");
-      }
-    else if (comp == falseLabelS)
-      {
-	System.out.println("falseLabelS");
-      }
-    else if (comp == labeledCF)
-      {
-	System.out.println("labeledCF");
-	checkVisibility();
-      }
-    else if (comp == targetLimitCF)
-      {
-	System.out.println("targetLimitCF");
-	checkVisibility();
-      }
-    else if (comp == symmetryCF)
-      {
-	System.out.println("symmetryCF");
-	checkVisibility();
-      }
-    else if (comp == targetC)
-      {
-	System.out.println("targetC");
-      }
-    else if (comp == fieldC)
-      { 
-	System.out.println("fieldC");
-      }
+	else if (comp == OKCharS)
+	  {
+	    System.out.println("OkCharS");
+	    fieldDef.setOKChars((String) v.getValue());
+	  }
+	else if (comp == BadCharS)
+	  {
+	    System.out.println("BadCharS");
+	    fieldDef.setBadChars((String) v.getValue());
+	  }
+	else if (comp == minLengthN)
+	  {
+	    System.out.println("minLengthN");
+	  }
+	else if (comp == maxLengthN)
+	  {
+	    System.out.println("maxLengthN");
+	  }
+	else if (comp == namespaceC)
+	  {
+	    System.out.println("namespaceC");
+	    fieldDef.setNameSpace((String) v.getValue());
+	  }
+	else if (comp == trueLabelS)
+	  {
+	    System.out.println("trueLabelS");
+	    fieldDef.setTrueLabel((String) v.getValue());
+	  }
+	else if (comp == falseLabelS)
+	  {
+	    System.out.println("falseLabelS");
+	    fieldDef.setFalseLabel((String) v.getValue());
+	  }
+	else if (comp == labeledCF)
+	  {
+	    System.out.println("labeledCF");
+	    checkVisibility();
+	  }
+	else if (comp == targetLimitCF)
+	  {
+	    System.out.println("targetLimitCF");
+	    checkVisibility();
+	  }
+	else if (comp == symmetryCF)
+	  {
+	    System.out.println("symmetryCF");
+	    checkVisibility();
+	  }
+	else if (comp == targetC)
+	  {
+	    System.out.println("targetC");
+	  }
+	else if (comp == fieldC)
+	  { 
+	    System.out.println("fieldC");
+	  }
     
-    return true;
+	return true;
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote exception in setting field value " + ex);
+      }
   }
 
   // for choice fields
