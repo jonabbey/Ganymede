@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 1999/03/19 05:52:27 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 1999/03/19 06:15:21 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -1623,14 +1623,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	pce.getOldValue().equals(Boolean.FALSE) &&
 	pce.getNewValue().equals(Boolean.TRUE))
       {
-	if (!closingApproved)
+	if (!closingApproved && editable)
 	  {
 	    StringDialog okToKill;
 	    
 	    if (isCreating)
 	      {
 		okToKill = new StringDialog(gclient.client, 
-					    "Ok to discard object?",
+					    "Ok to discard " + getTitle() + "?",
 					    "If you close this newly created window before committing this " +
 					    "transaction, this newly created object will be forgotten and " +
 					    "abandoned on commit.",
@@ -1641,7 +1641,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    else
 	      {
 		okToKill = new StringDialog(gclient.client, 
-					    "Ok to hide this window?",
+					    "Ok to hide " + getTitle() + "?",
 					    "Closing this window will not undo changes made to it, nor will it make " +
 					    "this object available to other Ganymede users to edit. If you want to " +
 					    "undo changes to this object, you will have to either manually undo them " +
