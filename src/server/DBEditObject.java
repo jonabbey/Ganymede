@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -635,11 +635,52 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 
   /**
    *
+   * This method provides a hook that can be used to indicate that a
+   * particular field's value should be filtered by a particular
+   * subclass of DBEditObject.  This is intended to allow, for instance,
+   * that the Admin object's name field, if null, can have the owning
+   * user's name interposed.
+   *
+   */
+
+  public static boolean virtualizeField(short fieldID)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method provides a hook to return interposed values for
+   * fields that have their data massaged by a DBEditObject
+   * subclass.
+   *
+   */
+
+  public Object getVirtualValue(DBField field)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * This method provides a hook to return interposed values for
+   * fields that have their data massaged by a DBEditObject
+   * subclass.
+   *
+   */
+
+  public static Object getVirtualValue(DBObject object, DBField field)
+  {
+    return null;
+  }
+
+  /**
+   *
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
    * obtainChoiceList() method to get a list of valid choices.
-   *
+   * 
    */
 
   public Vector obtainChoiceList(DBField field)
