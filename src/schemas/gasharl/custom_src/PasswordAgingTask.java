@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/06/14 23:36:28 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/06/15 15:41:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,7 @@ import arlut.csd.ganymede.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -98,7 +99,7 @@ public class PasswordAgingTask implements Runnable {
 
     Ganymede.debug("Password Aging Task: Starting");
 
-    String error = GanymedeServer.lSemaphore.checkEnabled();
+    String error = GanymedeServer.checkEnabled();
 	
     if (error != null)
       {
@@ -141,9 +142,7 @@ public class PasswordAgingTask implements Runnable {
 	
 	// do the stuff
 
-	warnOldPasswords();
-
-	inactivateUsers();
+	handlePasswords();
 
 	retVal = mySession.commitTransaction();
 
@@ -183,7 +182,7 @@ public class PasswordAgingTask implements Runnable {
       }
   }
 
-  private void warnOldPasswords()
+  private void handlePasswords() throws InterruptedException
   {
     Query q;
     Vector results;
@@ -217,7 +216,7 @@ public class PasswordAgingTask implements Runnable {
 
 	invid = result.getInvid();
 
-	object = mySession.view_db_object(invid);
+	object = mySession.getSession().viewDBObject(invid);
 
 	// get the password expiration threshold for this user, if any
 
@@ -244,7 +243,7 @@ public class PasswordAgingTask implements Runnable {
 	upperBound.setTime(currentTime);
 	upperBound.add(Calendar.MONTH, 1);
 
-	if (passwordTime.after(lowerBound) && passwordTime.before(upperBound))
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
 	    warnUpcomingPasswordExpire(object);
 	    continue;
@@ -257,7 +256,7 @@ public class PasswordAgingTask implements Runnable {
 	upperBound.setTime(currentTime);
 	upperBound.add(Calendar.WEEK_OF_MONTH, 2);
 
-	if (passwordTime.after(lowerBound) && passwordTime.before(upperBound))
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
 	    warnUpcomingPasswordExpire(object);
 	    continue;
@@ -270,7 +269,18 @@ public class PasswordAgingTask implements Runnable {
 	upperBound.setTime(currentTime);
 	upperBound.add(Calendar.WEEK_OF_MONTH, 1);
 
-	if (passwordTime.after(lowerBound) && passwordTime.before(upperBound))
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
+	  {
+	    warnRealSoonNowPasswordExpire(object);
+	    continue;
+	  }
+
+	lowerBound.setTime(currentTime);
+	lowerBound.add(Calendar.DATE, -1);
+
+	upperBound.setTime(currentTime);
+
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
 	    warnRealSoonNowPasswordExpire(object);
 	    continue;
@@ -281,92 +291,140 @@ public class PasswordAgingTask implements Runnable {
 	upperBound.setTime(currentTime);
 	upperBound.add(Calendar.DATE, 1);
 
-	if (passwordTime.after(lowerBound) && passwordTime.before(upperBound))
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
-	    warnRealSoonNowPasswordExpire(object);
+	    warnOvertimePassword(object);
 	    continue;
 	  }
 
-	// call object.getEmailTargets()
+	lowerBound.setTime(currentTime);
+	lowerBound.add(Calendar.DATE, 1);
 
-	// we'll also want to get the owner groups for this user
-	// and send a warning message to the owners
+	upperBound.setTime(currentTime);
+	upperBound.add(Calendar.DATE, 2);
+
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
+	  {
+	    warnOvertimePassword(object);
+	    continue;
+	  }
+
+	lowerBound.setTime(currentTime);
+	lowerBound.add(Calendar.DATE, 2);
+
+	upperBound.setTime(currentTime);
+	upperBound.add(Calendar.DATE, 3);
+
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
+	  {
+	    warnOvertimePassword(object);
+	    continue;
+	  }
+
+	lowerBound.setTime(currentTime);
+	lowerBound.add(Calendar.DATE, 3);
+
+	upperBound.setTime(currentTime);
+	upperBound.add(Calendar.DATE, 4);
+
+	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
+	  {
+	    warnOvertimePassword(object);
+	    continue;
+	  }
+
+	upperBound.setTime(currentTime);
+	upperBound.add(Calendar.DATE, 5);
+
+	if (passwordTime.before(upperBound.getTime()))
+	  {
+	    ReturnVal retVal = mySession.inactivate_db_object(invid);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		Ganymede.debug("PasswordAging task was not able to inactivate user " + 
+			       result.toString());
+	      }
+	    else
+	      {
+		Ganymede.debug("PasswordAging task inactivated user " + 
+			       result.toString());
+	      }
+	  }
       }
   }
+
+  /**
+   * <p>Send out a warning that the password is going to expire, to the user's
+   * email addresses only.</p>
+   */
 
   private void warnUpcomingPasswordExpire(DBObject userObject)
   {
+    Date passwordChangeTime = (Date) userObject.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
+
+    Vector objVect = new Vector();
+
+    objVect.addElement(userObject);
+
+    String titleString = "Password Expiring Soon For User " + userObject.toString();
+
+    String messageString = "The password for user account " + userObject.toString() + 
+      " will expire soon.  You will need to change your password before " + passwordChangeTime +
+      " or else your user account will be inactivated.\n\n" +
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
+
+    Ganymede.log.sendMail(titleString, messageString, true, false, objVect);
   }
+
+  /**
+   * <p>Send out a warning that the password is going to expire soon, to the user's
+   * and admin groups' email addresses.</p>
+   */
 
   private void warnRealSoonNowPasswordExpire(DBObject userObject)
   {
+    Date passwordChangeTime = (Date) userObject.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
+
+    Vector objVect = new Vector();
+
+    objVect.addElement(userObject);
+
+    String titleString = "Password Expiring Very Soon For User " + userObject.toString();
+
+    String messageString = "The password for user account " + userObject.toString() + 
+      " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
+      " or else the account will be inactivated.\n\n" +
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
+      "or CSD.";
+
+    Ganymede.log.sendMail(titleString, messageString, true, true, objVect);
   }
+
+  /**
+   * <p>Send out a very urgent warning that the password is past its
+   * expiration date, to the user's and admin groups' email
+   * addresses.</p>
+   */
 
   private void warnOvertimePassword(DBObject userObject)
   {
-  }
+    Date passwordChangeTime = (Date) userObject.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
 
-  private void inactivateUsers()
-  {
-    Query q;
-    Vector results;
-    Result result;
-    Invid invid;
-    Enumeration enum;
+    Vector objVect = new Vector();
 
-    /* -- */
+    objVect.addElement(userObject);
 
-    // if the 'PASSWORDCHANGETIME' field's value is earlier than five days
-    // ago, it's time to inactivate the account
+    String titleString = "Password Has Expired For User " + userObject.toString();
 
-    Calendar myCal = new GregorianCalendar();
-    myCal.add(Calendar.DAY_OF_MONTH, -5);
-    Date gracePeriodEnd = new Date();
+    String messageString = "The password for user account " + userObject.toString() + 
+      " expired at " + passwordChangeTime + ".  The password for this user account *must* be changed immediately, or else" +
+      " the account will be inactivated.  If this account is inactivated, extension of the password" +
+      " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
+      " this account.\n\n" +
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
+      "or CSD.";
 
-    QueryDataNode agedNode = new QueryDataNode(userSchema.PASSWORDCHANGETIME,
-					       QueryDataNode.LESSEQ,
-					       gracePeriodEnd);
-    
-    q = new Query(SchemaConstants.UserBase, agedNode, false);
-    
-    results = mySession.internalQuery(q);
-    
-    enum = results.elements();
-    
-    while (enum.hasMoreElements())
-      {
-	if (currentThread.isInterrupted())
-	  {
-	    throw new InterruptedException("scheduler ordering shutdown");
-	  }
-	    
-	result = (Result) enum.nextElement();
-
-	invid = result.getInvid();
-
-	if (debug)
-	  {
-	    Ganymede.debug("Need to inactivate object " + base.getName() + ":" + 
-			   result.toString());
-	  }
-
-	retVal = mySession.inactivate_db_object(invid);
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    Ganymede.debug("PasswordAging task was not able to inactivate user " + 
-			   result.toString());
-	  }
-	else
-	  {
-	    Ganymede.debug("PasswordAging task inactivated user " + 
-			   result.toString());
-	  }
-      }
-  }
-
-  public static void main(String argv[])
-  {
-    new PasswordAgingTask().run();
+    Ganymede.log.sendMail(titleString, messageString, true, true, objVect);
   }
 }
