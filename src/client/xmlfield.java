@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/05/26 19:39:09 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/05/27 03:14:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.rmi.server.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2000/05/26 19:39:09 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2000/05/27 03:14:39 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -775,21 +775,55 @@ public class xmlfield implements FieldType {
 	    xPassword xp = (xPassword) value;
 	    pass_field field = (pass_field) owner.objref.getField(fieldDef.getID());
 
-	    result = field.setPlainTextPass(xp.plaintext);
+	    // set anything we can.. note that if we transmit null for
+	    // any of the three password options, it will null the
+	    // password out entirely, so we don't want to transmit
+	    // null unless all three password options are all null.
 
-	    if (result != null && !result.didSucceed())
+	    if (xp.plaintext != null)
 	      {
-		return result;
+		result = field.setPlainTextPass(xp.plaintext);
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
 	      }
 
-	    result = field.setCryptPass(xp.crypttext);
-
-	    if (result != null && !result.didSucceed())
+	    if (xp.crypttext != null)
 	      {
-		return result;
+		result = field.setCryptPass(xp.crypttext);
+		
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
 	      }
 
-	    return field.setMD5CryptedPass(xp.md5text);
+	    if (xp.md5text != null)
+	      {
+		result = field.setMD5CryptedPass(xp.md5text);
+		
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
+	      }
+
+	    if (xp.plaintext == null && xp.crypttext == null && xp.md5text == null)
+	      {
+		result = field.setPlainTextPass(null);
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
+	      }
+
+	    // we'll never get here, but the java compiler isn't smart enough to detect
+	    // that
+
+	    return null;
 	  }
 	else if (fieldDef.isInvid())
 	  {
@@ -1033,7 +1067,7 @@ public class xmlfield implements FieldType {
 	else if (addValues != null)
 	  {
 	    result.append(", addValues = \"");
-	    result.append(arlut.csd.Util.VectorUtils.vectorString(delValues));
+	    result.append(arlut.csd.Util.VectorUtils.vectorString(addValues));
 	    result.append("\"");
 	  }
       }

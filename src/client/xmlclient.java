@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/05/27 00:30:27 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/05/27 03:14:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,11 +80,13 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2000/05/27 00:30:27 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2000/05/27 03:14:39 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlclient implements ClientListener {
+
+  public static final boolean debug = false;
 
   /**
    * <p>This major version number is compared with the "major"
@@ -561,7 +563,10 @@ public class xmlclient implements ClientListener {
 
     /* -- */
 
-    System.err.println("processData");
+    if (debug)
+      {
+	System.err.println("processData");
+      }
 
     System.err.println("Connecting to server");
 
@@ -684,12 +689,18 @@ public class xmlclient implements ClientListener {
     // create one and start it running so that it will talk to the
     // server and download type and mapping information from the
     // server, in the background
-    
-    System.err.println("Creating loader");
+
+    if (debug)
+      {
+	System.err.println("Creating loader");
+      }
 
     loader = new Loader(session, false);
 
-    System.err.println("Starting loader thread");
+    if (debug)
+      {
+	System.err.println("Starting loader thread");
+      }
 
     loader.start();
 
@@ -719,7 +730,10 @@ public class xmlclient implements ClientListener {
 	objectTypes.put(base.getName(), fieldHash);
       }
 
-    System.err.println("Finished downloading object type information from server.");
+    if (debug)
+      {
+	System.err.println("Finished downloading object type information from server.");
+      }
   }
 
   /**
@@ -797,7 +811,7 @@ public class xmlclient implements ClientListener {
       {
 	if (element instanceof xmlobject)
 	  {
-	    invid = ((xmlobject) element).invid;
+	    invid = ((xmlobject) element).getInvid();
 
 	    // if invid is null at this point, this object hasn't been
 	    // created or edited yet on the server, so we can't do
