@@ -1,30 +1,26 @@
-Ganymede Release 1.0 prerelease beta 4
-October 10, 2000
+Ganymede Release 1.0 prerelease beta 5
+December 13, 2000
 README.first
 ---------------------------------------------
 
-This distribution of Ganymede is an interim code drop released to
-allow people working with Ganymede to use the very latest code from
-our development efforts.  This release, like all of our releases, is
-thought to be the most reliable release we have ever put out.  It is
-certainly faster, more stable, and much more full-featured than the
-0.99.9 release, but it does not yet have all of the features and
-documentation that I want to achieve for 1.0.  
+This distribution of Ganymede is being put out to gather feedback
+before putting out an official Ganymede 1.0p1.  All that I expect to
+do before 1.0p1 is to gather feedback and to buff up the documentation
+a bit with a deployment guide.
 
-At the present time, I am expecting to release a 1.0 pre-release 1,
-modelled after the current distribution configuration.  Once that is
-out, I intend to rework how Ganymede schema kits are packaged and
-integrated with the Ganymede server, using the new xmlclient to load a
-customized schema definition and data into a vanilla Ganymede server.
+There have been a number of fairly deep changes in this distribution,
+relative to 1.0p1b4, and all others prior.  The manner in which schema
+kits are distributed and installed has been revised, to make it
+possible to maintain and distribute schema kits separate from the main
+Ganymede distribution.  The old linux, bsd, and nisonly schema kits
+have been wiped out, in favor of a new 'userKit' which is distributed
+as a separate archive (at ftp://ftp.arlut.utexas.edu/pub/ganymede) and
+which uses the xmlclient for all schema and data loading.
 
-This is not yet 1.0 pre-release 1, but it will be coming out soon, and
-your feedback on this code drop will be helpful.  We have bugzilla
-running on the Ganymede web site at http://www.arlut.utexas.edu/gash2,
-and any bugs you find should be reported there, along with a note to
-the Ganymede discussion mailing list at ganymede@arlut.utexas.edu.
-
-It's been almost 5 years, but we're in the home stretch with Ganymede,
-thanks for taking a look.
+The older gash and gasharl schema kits are still included in the
+src/schemas directory, but you play with them at your own initiative,
+at this point.  See the README file in those directories for
+instructions on how to build and install those schemas.
 
 Jonathan Abbey
 jonabbey@arlut.utexas.edu

@@ -1,5 +1,5 @@
 Ganymede Release 1.0 prerelease beta 4
-October 10, 2000
+December 13, 2000
 README.xml
 ---------------------------------------------
 
@@ -20,8 +20,14 @@ not yet documented elsewhere.  This includes the following:
   xmlclient -dumpdata
 
 	This will cause the xmlclient to connect to the Ganymede server
-	and to generate a complete dump to stdout in xml format
-	of the Ganymede server's database, both schema and data.
+	and to generate a complete dump of the server's data objects
+	to stdout in xml format.
+
+  xmlclient -dump
+
+	This will cause the xmlclient to connect to the Ganymede server
+	and to generate a complete dump of the server's database,
+	both schema and data, to stdout in xml format.
 
   Both of these options require a supergash-level account name and
   password in order to work, and both cause the server to lock out
@@ -32,9 +38,3 @@ not yet documented elsewhere.  This includes the following:
 Otherwise, if you run xmlclient by itself on the command line, it will
 present the command line options that it supports for xml bulk edits.
 
-In this distribution there is a sample perl script packaged with the
-Linux schema kit which can process the Linux password, group, and
-shadow files and produce an xml file compatible with the xmlclient
-when using the Linux schema kit.  You may find this script,
-src/schemas/linux/loader/linux2xml.pl, helpful in learning how to
-generate xml content for the Ganymede server.

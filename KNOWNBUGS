@@ -1,98 +1,17 @@
-Ganymede Developer 1.0 prerelease beta 3
-October 5, 2000
+Ganymede Developer 1.0 prerelease beta 5
+December 13, 2000
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 1.0p1b3 requires Swing 1.1 or later, as it is built
+Ganymede release 1.0p1b5 requires Swing 1.1 or later, as it is built
 to expect the Swing libraries to be in the package javax.swing, rather
 than com.sun.java.swing, as it was in prior versions.  Use of Java JRE
 1.3 for the clients is highly recommended, as many Swing bugs are
 fixed in this release.
 
-Sun has just released Swing 1.1.1, which has lots and lots of bugs
-fixed relative to Swing 1.1.  If you are running the Ganymede clients
-with JDK 1.1 on a UNIX system, be sure and get and install Swing
-1.1.1.  If you are running the Ganymede clients on Windows through
-your web browser, be sure to use the latest version of the Java
-Runtime Environment/Plug-in.
-
 --
 
-0) The server has support for within-transaction checkpoint and
-rollback.  Elements of the server can do checkpointing when creating,
-inactivating, and deleting objects and when doing cross-object
-linking.
-
-The bug here is that if and when a rollback is done, it reverts the
-entire transaction to the state it was in at the checkpoint, which
-might cause problems if there is more than one thread making changes
-on objects in that transaction.  One thread could trigger a rollback
-which would put the database in a state that another thread wasn't
-expecting.
-
-In general this doesn't cause problems, because it is not possible for
-multiple clients to be making changes in one transaction, but it may
-be possible for a client to be written in a too-aggressively
-multithreaded fashion, such that multiple threads from a single client
-attempt to interleave actions and run afoul of a rollback on one of
-the threads.
-
-The Ganymede server is designed to prevent multiple client threads
-from interleaving checkpoint operations, so operations performed
-between a checkpoint and a popCheckpoint or rollback are safe from
-this problem, but any non-checkpointed operations can fall victim to a
-rollback in another thread.  The checkpoint serialization makes object
-linking robust, so rollbacks should never foul the database's
-consistency, but a rollback could certainly surprise a thread that
-thinks it has accomplished certain edits.
-
-This doesn't need to be fixed right away, given that it is easy to
-avoid this problem (and I don't know how to fix it properly at the
-moment), but it is something to be aware of if you are writing a
-Ganymede client.. you multithread object edits on the server at your
-own risk.  Querying and viewing should always be ok, though.
-
-1) When using a pre-existing schema (gash/nisonly/bsd), the monitor
-account name/ password is not properly reset.  It is, instead, user:
-monitor, password: display.  If you start a new ganymede.db file
-from scratch, the monitor account should be configured properly.
-
-2) The gash and gasharl schemas are provided in 1.0p1b3 is intended to
-enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
-are, however, a relatively small number of functions that are not
-performed by Ganymede with the gash schemas.  These include the
-automatic creation of users' home directories on user creation, and
-the renaming of user's home directories and /var/mail mailboxes on
-user rename.  Also, moving a user's home directory from automounter
-volume to automounter volume does not yet trigger a specialized mail
-message to be sent to the managers responsible for those volumes.
-
-The logic to do these things has been sketched out in the
-userCustom.java file in the schemas/{gash|gasharl}/custom_src
-directory, but it is not yet complete to the point of calling external
-scripts for these actions and, in fact, has been disabled in this
-release.
-
-See the README file in the schema directory if you choose to run
-either of the gash schemas.
-
-3) The 'Reload Custom Classes' menu item in the admin console doesn't
-actually do anything very useful.  You need to stop and restart the
-server if you have recompiled any plug-in classes.  It may be useful
-if you have just used the schema editor to attach a plug-in class to
-an object type, but it can't actually reload classes that were
-previously loaded.
-
-4) The bsd and linux schemas are preliminary.. it works, but the
-larger assumptions embodied by the bsd schema code is still modeled
-closely on the GASH model.  For instance, if you have users in the
-master.passwd file whose gid references a group in the group file for
-which that group does not have an explicit reference to the user.  All
-of the wizards and schema logic embodied in the bsd schema still
-assume that there won't be any purely implicit group membership
-references in the user's gid field.
-
-5) The Ganymede admin console will fail with security exceptions when
+0) The Ganymede admin console will fail with security exceptions when
 run in a browser with any Java 1.2 plugin prior to version 1.2.2, due
 to a bug in thread permission allocations in early 1.2 JDK's.  If you
 see problems with the Ganymede admin console, try the latest 1.3

@@ -1038,6 +1038,21 @@ which was leading to swift lockups when running the admin console on
 the Linux 1.3 JDK.  I fixed this, the admin console should run fine
 in any Java environment now.
 
+74. [SERVER] Reworked query engine to increase concurrency
+
+The Ganymede server no longer has to block threads from doing most
+queries on the server while a transaction has portions of the database
+locked for updates.  The Ganymede server will now only lock the
+database on a standard GanymedeSession query if the query spans
+more than one object type.
+
+In practice, this means that unless you or your code attempts to do a
+query that involves embedded object values (as in searching for a
+system using a give i.p. address held in an embedded interface
+object), the query will never block.  For this reason, it is now safe
+to take advantage of the Ganymede query mechanisms during all stages
+of transaction commit in DBEditObject subclasses.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

@@ -1,51 +1,25 @@
-Ganymede Developer Release 1.0 pre 3
-October 5, 2000
+Ganymede Developer Release 1.0 pre 5
+December 13, 2000
 THINGSTODO
 ---------------------------------------------
 
-0) Schema Kit Separation, Upgrade Support
+0) Database rework to support full history tracking
 
-I've done some more thinking about separating out schema
-kits from the Ganymede distribution to allow people to build
-and distribute schema kits separate from the Ganymede server,
-but I keep running into issues with upgrades.
+Right now, the Ganymede server maintains in its database
+only the current state of the server's data.  No historical
+information is retained in a form which would allow the
+builder tasks to easily handle the reporting of
+differentials to external processes.
 
-What comes to mind is that it would be nice to allow database schemas
-to be updated and then folded into adopters' existing ganymede.db
-files.  I'm thinking that with a nice XML parser, I could provide
-support for taking an existing ganymede.db file and a new schema file
-(ganymede.schema.xml?) and have the Ganymede server take a look at the
-new schema description and integrate the changes into the existing
-ganymede.db file if the changes were not incompatible.
-
-This is an awfully big change to pull (putting xml support into the
-ganymede server and schema editor), and at this point I don't have any
-work done towards it.  There were enough performance and stability
-changes queued up that I thought I'd go ahead and release 0.99.9
-without doing anything on schema kit separation, but I still believe
-this needs to be done.  Somehow.
-
-..
-
-I keep putting off doing this, but I really do need to rework
-the way schema kits are packaged and distributed with Ganymede,
-to make it easier for people to do schema kit maintenance.
-
-I'm going to really try to make this the focus for 0.99.9.
-
-..
-
-For 0.99.8 I'm planning on reworking how schema kits are packaged and
-installed, to make it possible to maintain and distribute schema kits
-separate from the main Ganymede distribution.  This will involve
-changes to various elements of the distribution.  The most likely
-outcome of these changes will be that schema kit developers will write
-a custom Perl5 module that will get invoked by the installServer
-script to tie the schema kit's configuration and installation into the
-standard server install process.  Alternately, a free-standing and
-standard installSchema script will be able to use the same
-customization module to install a new schema kit into a pre-existing
-server installation.
+That is, we would like to have Ganymede be able to write out a file
+that says something like 'since the last time this builder process was
+run, 3 new users were created, one user was added to group labusers, 2
+groups were deleted, and one user was renamed', rather than simply
+dumping out the current state of the database and just expecting that
+to be bulk-loaded into the environment.  Things like LDAP and NT
+maintenance could be supported a lot better if Ganymede was able to
+provide limited delta records rather than forcing a complete reload
+from the Ganymede server's state.
 
 1) DNS Support
 
@@ -104,19 +78,7 @@ we don't have the HTML help web written.  Given our resources and
 priorities, it isn't clear that we'll be able to do this ourselves
 anytime soon, but it really should be done.
 
-4) Schema kit code
-
-All of the loader code for the included shema kits is pretty
-unpleasant.  We recently incorporated GNU regexp into the server, and
-the NIS/GASH loader code should probably take advantage of it.
-
-- 18 June 1999 -
-
-Actually, I did try to do the passwd/group/etc. file parsing using
-GNU regexp in the loader code, but it was far too slow for bulk
-loading.  I may revisit this if gnu.regexp changes much.
-
-5) Internationalization
+4) Internationalization
 
 It would be a really good thing for the client and server to be
 internationalized.  After getting the Ganymede announce posted in
@@ -127,17 +89,7 @@ sort of pretend I'd never heard of seems to be evaporating.  I don't
 think I'll be able to dedicate time to it anytime in the foreseeable
 future, but someone is going to have to at some point.
 
-6) Schema Editor improvements
-
-The schema editing code in the server is one of the more fragile
-pieces of code in the server.  It is adequate, but has a tendency to
-cause problems if people try to delete or incompatibly change fields
-in the database that are currently holding data.  There also seems to
-be a persistent error someplace that can sometimes make fields appear
-out of order despite dragging them into proper position in the schema
-editor.
-
-7) Two phase commit for client access
+5) Two phase commit for client access
 
 The Ganymede server internally uses a two-phase commit protocol for
 handling its transactions, but it does not provide a two-phase

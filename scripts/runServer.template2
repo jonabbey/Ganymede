@@ -55,7 +55,21 @@ echo
 # to give the Ganymede server access to its configuration file.
 #
 # The optional -resetadmin parameter forces the Ganymede server to
-# reset the supergash and monitor passwords from the properties file.
+# reset the root-privileged supergash and the monitor passwords from
+# the properties file.  If you forget the supergash password, the only
+# way you can change it is to edit the ganymede.properties file in the
+# server install directory and set the ganymede.defaultrootpass
+# property to what you want the new supergash password to be, and to
+# include -resetadmin on the java invocation line so that the Ganymede
+# server will reset its password.
+#
+# You'll want to see a line that looks like this:
+#
+# ganymede.defaultrootpass=myNewSekretPassword
+#
+# It is perfectly reasonable to remove this line from the ganymede.properties
+# file once you have the server started with the password you want,
+# but if you ever forget..
 #
 # The optional debug=<debug_filename> parameter causes the Ganymede
 # server to log all RMI calls made to it, as well as any exceptions
@@ -64,11 +78,7 @@ echo
 # client or with the admin console, the RMI debug log will capture
 # the exception's stack trace.
 #
-# The optional -doXML parameter causes the Ganymede server to dump
-# out the entire contents of ganymede.db to a ganymede.db.xml file,
-# according to the xml document format discussed in doc/xml.html.
-#
-# The -resetadmin, -doXML, and debug=XXX parameters should be placed
+# The -resetadmin, and debug=XXX parameters should be placed
 # on the invocation line after arlut.csd.ganymede.Ganymede.
 #
 # Other options included below include the -Xms32m and -Xmx128m jvm

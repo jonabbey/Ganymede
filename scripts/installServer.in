@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.33 $
-# $Date: 2000/12/10 23:05:58 $
+# $Revision: 1.34 $
+# $Date: 2000/12/15 04:54:54 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -167,7 +167,7 @@ if (!-e $vars{"JVM"}."/java") {
 # can we make the server install directory?
 
 if (!-d $vars{"SERVERINSTALL"}) {
-  mkdir($vars{"SERVERINSTALL"}, 0750) or die "*Couldn't make the server install directory*\n"; 
+  mkdir($vars{"SERVERINSTALL"}, 0700) or die "*Couldn't make the server install directory*\n"; 
   print "Made the server install directory ok\n";
 } else {
   print "Found the server install directory ok\n";
@@ -191,7 +191,7 @@ $installdir = $vars{"SERVERINSTALL"};
 
 &makedir("$installdir/bin", 0750); print ".";
 &makedir("$installdir/db", 0700); print ".";
-&makedir("$installdir/db/text", 0750); print ".";
+&makedir("$installdir/db/text", 0700); print ".";
 &makedir("$installdir/backups", 0700); print ".";
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/html", 0750); print ".";

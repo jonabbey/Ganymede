@@ -41,6 +41,7 @@
       <li><a href="#runServer">runServer</a></li>
       <li><a href="#stopServer">stopServer</a></li>
       <li><a href="#xmlclient">xmlclient</a></li>
+      <li><a href="#logscan">logscan.pl</a></li>
       </ul></li>
 
       <li><a href="#clientfiles">Client Files</a>
@@ -362,8 +363,7 @@
     contains any custom classes included with the installed schema kit
     needed by the <a href="#runServer">Ganymede server</a>.  It is
     located in the <code>schema</code> sub-directory of the Ganymede
-    server installation directory, with a symlink in the
-    <code>jars</code> sub-directory.</p>
+    server installation directory.</p>
 
     <p>See the <a href="customization/index.html">Customization Guide</a> for details on the contents
     and construction of <font color="#ff0000"><code><b>custom.jar</b></code></font>.</p>
@@ -502,13 +502,16 @@
     creating, deleting, inactivating and editing objects on the
     Ganymede server.</p>
 
-    <p>At this point, the <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> is only
-    useful for doing bulk data operations into the Ganymede server.
-    Ultimately, the <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> will provide
-    support for querying the Ganymede server and for initializing the
-    Ganymede server's schema.</p>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="logscan"><b>logscan.pl</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>logscan.pl</b></code></font> is
+    a Perl script that is used to accelerate log searches on behalf of
+    clients.  The Ganymede server uses <font
+    color="#ff0000"><code><b>logscan.pl</b></code></font> to quickly
+    scan through the Ganymede <a href="#log">log</a> file, filtering
+    out lines in the <a href="#log">log</a> file that do not match what the server is looking for.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -678,18 +681,10 @@
     creating, deleting, inactivating and editing objects on the
     Ganymede server.</p>
 
-    <p>At this point, the <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> is only
-    useful for doing bulk data operations into the Ganymede server.
-    Ultimately, the <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> will provide
-    support for querying the Ganymede server and for initializing the
-    Ganymede server's schema.</p>
-
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Mon Oct  9 23:54:04 CDT 2000
+Last modified: Thu Dec 14 20:37:35 CST 2000
 <!-- hhmts end -->
   </body>
 </html>
