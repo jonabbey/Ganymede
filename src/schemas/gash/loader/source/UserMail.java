@@ -6,7 +6,7 @@
    represented in an user's email ref base in the server.
    
    Created: 1 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,10 +70,12 @@ public class UserMail {
       {
 	if (tokens.ttype == ',')
 	  {
+	    token = tokens.nextToken();
 	    continue;
 	  }
 
 	aliases.addElement(tokens.sval);
+	token = tokens.nextToken();
       }
 
     // ok, we should be at : -- get our target list
@@ -112,15 +114,41 @@ public class UserMail {
 
     if (tokens.ttype == StreamTokenizer.TT_WORD)
       {
-	if (debug)
-	  {
-	    System.err.println("returning native word");
-	  }
 	return tokens.sval;
       }
 
     return null;
   }
 
+  public String toString()
+  {
+    String result;
+
+    result = userName + ":";
+    
+    for (int i = 0; i < aliases.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result = result + ",";
+	  }
+
+	result = result + aliases.elementAt(i).toString();
+      }
+
+    result = result + ":";
+
+    for (int i = 0; i < targets.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result = result + ",";
+	  }
+
+	result = result + targets.elementAt(i).toString();
+      }
+
+    return result;
+  }
 }
 

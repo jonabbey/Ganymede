@@ -6,7 +6,7 @@
    GASH auto.vol file
    
    Created: 4 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,7 @@ public class Volume {
 
   /* -- */
 
-  public Volume(String line) throws IOException
+  public Volume(String line)
   {
     int startMHindex;
     int startPath;
@@ -102,7 +102,7 @@ public class Volume {
 	throw new RuntimeException("parse error 4: null host component");
       }
 
-    hostName = line.substring(startHost, startPath);
+    hostName = line.substring(startHost, startPath-1);
 
     if (startHost > startMHindex)
       {

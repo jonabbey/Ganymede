@@ -6,7 +6,7 @@
    represented in a Email List base in the server.
    
    Created: 1 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,15 +92,29 @@ public class MailGroup {
 
     if (tokens.ttype == StreamTokenizer.TT_WORD)
       {
-	if (debug)
-	  {
-	    System.err.println("returning native word");
-	  }
 	return tokens.sval;
       }
 
     return null;
   }
 
+  public String toString()
+  {
+    String result;
+
+    result = ":" + ownerCode + ":" + listName + ":";
+    
+    for (int i = 0; i < targets.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result = result + ",";
+	  }
+
+	result = result + targets.elementAt(i).toString();
+      }
+
+    return result;
+  }
 }
 
