@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.117 $ %D%
+   Version: $Revision: 1.118 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.117 $ %D%
+ * @version $Revision: 1.118 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2427,7 +2427,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    *
    * This method is the primary Query engine for the Ganymede
-   * databases.<br><br>
+   * databases.  It is used by dump(), query(), and internalQuery().<br><br>
    *
    * This method is partially synchronized to prevent deadlock problems when
    * extantLock is null.
