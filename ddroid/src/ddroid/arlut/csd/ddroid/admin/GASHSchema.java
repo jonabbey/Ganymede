@@ -1522,10 +1522,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     this.rootCategory = null;
     this.objects = null;
 
-    this.tree.clearTree();	// let's ditch the fucking RMI
-				// references in the tree's nodes,
-				// please
+    /*
+      let's ditch the fucking RMI references in the tree's nodes,
+      please
+    */
 
+    this.tree.destroyTree();
     this.tree = null;
 
     this.editor = null;
