@@ -2509,6 +2509,21 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     
     session.enableWizards(false); // we're not interactive, don't give us no wizards
 
+    // go through all of our 'possibly created' objects and do the
+    // Invid lookups on them before we do any edits, so that we can
+    // resolve the labels with the pre-edit names in place
+
+    for (int i = 0; i < createdObjects.size(); i++)
+      {
+	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+
+	newObject.getInvid();
+      }
+
+    // now that we've made sure to resolve all Invids for the
+    // possibly-newly-created objects, we can go ahead and create
+    // those that we really couldn't find for editing.
+
     for (int i = 0; success && i < createdObjects.size(); i++)
       {
 	boolean newlyCreated = false;

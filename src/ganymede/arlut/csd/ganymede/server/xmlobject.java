@@ -510,7 +510,12 @@ public class xmlobject {
 
   /**
    * <p>This method returns an invid for this xmlobject record,
-   * performing a lookup on the server if necessary.</p> 
+   * performing a lookup on the server if necessary.</p>
+   *
+   * <p>The first time getInvid() is called, we'll try to find the
+   * Invid from the DBStore by doing a look-up of the xml object's
+   * label (if we're not given a num attribute).  getInvid() stores
+   * the Invid upon first lookup as a side effect.</p>
    */
 
   public Invid getInvid() throws NotLoggedInException
