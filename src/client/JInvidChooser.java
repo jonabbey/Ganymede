@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import java.util.Vector;
 
 public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
 
-  private final static boolean debug = false;
+  private final static boolean debug = true;
 
   JMenuItem
     view,
@@ -124,8 +124,8 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	    if (debug)
 	      {
 		System.out.println("taking out <none>");
-
 	      }
+
 	    try
 	      {
 		getCombo().removeItem(noneHandle);
@@ -262,18 +262,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 		catch (ArrayIndexOutOfBoundsException ae)
 		  {
 		    // noneHAndle wasn't in there.
-		    if (debug)
-		      {
-			System.out.println("ArrayIndexOutOfBoundsException: must not be in there.");
-		      }
+		    System.out.println("ArrayIndexOutOfBoundsException: must not be in there.");
 		  }
 		catch (IllegalArgumentException asdf)
 		  {
 		    // why does Swing throw this?  To be difficult, I think.
-		    if (debug)
-		      {
-			System.out.println("IllegalArgumentException: must not be in there.");
-		      }
+		    System.out.println("IllegalArgumentException: must not be in there.  Or Swing's screwing with us.");
 		  }
 		
 		getCombo().removeItemListener(this);
