@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2000/10/09 05:51:50 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2000/11/02 02:41:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.47 $ $Date: 2000/10/09 05:51:50 $
+ * @version $Revision: 1.48 $ $Date: 2000/11/02 02:41:21 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -754,7 +754,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     try
       {
-	Ganymede.db.dumpSchema(Ganymede.schemaProperty, true); // release the lock when the dump is complete
+	Ganymede.db.dumpXML(Ganymede.schemaProperty, false);
       }
     catch (IOException ex)
       {

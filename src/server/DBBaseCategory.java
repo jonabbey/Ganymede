@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/10/31 09:20:44 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/11/02 02:41:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -451,54 +451,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    out.writeBoolean(true); // it's a base
 	    ((DBObjectBase) element).emit(out, true);
-	  }
-      }
-  }
-
-  /**
-   * <p>Limited recursive category dump, used for schema dumping.</p>
-   */
-
-  synchronized void partialEmit(DataOutput out) throws IOException
-  {
-    Object element;
-
-    /* -- */
-
-    out.writeUTF(this.getPath());
-    out.writeInt(contents.size());
-    
-    for (int i = 0; i < contents.size(); i++)
-      {
-	element = contents.elementAt(i);
-	
-	if (element instanceof DBObjectBase)
-	  {
-	    out.writeBoolean(true); // it's a base
-
-	    DBObjectBase base = (DBObjectBase) element;
-
-	    if (base.type_code == SchemaConstants.OwnerBase ||
-		base.type_code == SchemaConstants.PersonaBase ||
-		base.type_code == SchemaConstants.RoleBase ||
-		base.type_code == SchemaConstants.EventBase)
-	      {
-		base.partialEmit(out); // gotta retain admin login ability
-	      }
-	    else if (base.type_code == SchemaConstants.TaskBase)
-	      {
-		base.emit(out, true); // save the builder information
-	      }
-	    else
-	      {
-		base.emit(out, false); // just write out the schema info
-	      }
-	  }
-	else if (element instanceof DBBaseCategory)
-	  {
-	    out.writeBoolean(false); // it's a category
-
-	    ((DBBaseCategory) element).partialEmit(out);
 	  }
       }
   }

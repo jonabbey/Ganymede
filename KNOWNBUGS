@@ -11,12 +11,46 @@ fixed in this release.
 
 Sun has just released Swing 1.1.1, which has lots and lots of bugs
 fixed relative to Swing 1.1.  If you are running the Ganymede clients
-on a UNIX system, be sure and get and install Swing 1.1.1.  If you are
-running the Ganymede clients on Windows through your web browser, be
-sure to use the latest version of the Java Runtime
-Environment/Plug-in.
+with JDK 1.1 on a UNIX system, be sure and get and install Swing
+1.1.1.  If you are running the Ganymede clients on Windows through
+your web browser, be sure to use the latest version of the Java
+Runtime Environment/Plug-in.
 
 --
+
+0) The server has support for within-transaction checkpoint and
+rollback.  Elements of the server can do checkpointing when creating,
+inactivating, and deleting objects and when doing cross-object
+linking.
+
+The bug here is that if and when a rollback is done, it reverts the
+entire transaction to the state it was in at the checkpoint, which
+might cause problems if there is more than one thread making changes
+on objects in that transaction.  One thread could trigger a rollback
+which would put the database in a state that another thread wasn't
+expecting.
+
+In general this doesn't cause problems, because it is not possible for
+multiple clients to be making changes in one transaction, but it may
+be possible for a client to be written in a too-aggressively
+multithreaded fashion, such that multiple threads from a single client
+attempt to interleave actions and run afoul of a rollback on one of
+the threads.
+
+The Ganymede server is designed to prevent multiple client threads
+from interleaving checkpoint operations, so operations performed
+between a checkpoint and a popCheckpoint or rollback are safe from
+this problem, but any non-checkpointed operations can fall victim to a
+rollback in another thread.  The checkpoint serialization makes object
+linking robust, so rollbacks should never foul the database's
+consistency, but a rollback could certainly surprise a thread that
+thinks it has accomplished certain edits.
+
+This doesn't need to be fixed right away, given that it is easy to
+avoid this problem (and I don't know how to fix it properly at the
+moment), but it is something to be aware of if you are writing a
+Ganymede client.. you multithread object edits on the server at your
+own risk.  Querying and viewing should always be ok, though.
 
 1) When using a pre-existing schema (gash/nisonly/bsd), the monitor
 account name/ password is not properly reset.  It is, instead, user:

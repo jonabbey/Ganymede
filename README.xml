@@ -7,8 +7,8 @@ In this code drop, installClient will install an xmlclient, which is
 capable of transmitting data in bulk into an installed Ganymede
 server.  The xml file format used is documented in doc/xml.html.
 
-The xmlclient itself has a couple ofcommand line option which are not
-yet documented elsewhere.  This includes the following:
+The xmlclient itself has a couple of command line options which are
+not yet documented elsewhere.  This includes the following:
 
   xmlclient -dumpschema
 

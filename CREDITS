@@ -3,10 +3,10 @@ October 10, 2000
 CREDITS
 ---------------------------------------------
 
-Ganymede has been under development for over 3 years now, in both
-planning and execution.  The work has primarily been performed in
-the Computer Science Division of The Applied Research Laboratories,
-The University of Texas at Austin, with support from CSD and ARL
+Ganymede has been under development for over 5 years now, in both
+planning and execution.  The work has primarily been performed in the
+Computer Science Division of The Applied Research Laboratories, The
+University of Texas at Austin, with support from CSD and ARL
 management.
 
 The development of Ganymede has benefited from the direct development
@@ -14,15 +14,25 @@ contributions of the following individuals:
 
 --
 
- Navin Manohar, navin.manohar@ac.com
+ Jonathan Abbey, jonabbey@arlut.utexas.edu
 
- Navin worked on Ganymede from its inception in late 1995 through his
-departure from the lab in April of 1997.  Navin contributed to initial
-architecture design decisions during this time, as well as the initial
-development of the client, including the basic framework within which
-the client was developed.  He developed the excellent calendar GUI
-component that is used in the client, as well as the more unobtrusive
-but vital GUI components that the client uses for data entry.
+Primary architect and coder on the project.  Developed the Ganymede
+server and admin console, the table and tree GUI components used in
+both the admin console and the primary client, the great bulk of the
+project documentation (or lack thereof) as well as all of the CVS and
+build script work.
+
+--
+
+ Mike Mulvaney, mike@mulvaney.com
+
+ Mike worked on Ganymede during his year and a half at the lab, from
+February of 1997 through September of 1998, before moving to the
+Washington D.C. area.  The client as it currently stands is primarily
+Mike's work.  In addition to the large bulk of client-side coding,
+Mike contributed significantly to the design of the system
+architecture as a whole.  Ganymede would be a far, far poorer thing
+were it not for Mike.
 
 --
 
@@ -41,35 +51,25 @@ will be incorporated into a Ganymede schema kit sometime during 2001.
 
 --
 
+ Navin Manohar, navin.manohar@ac.com
+
+ Navin worked on Ganymede from its inception in late 1995 through his
+departure from the lab in April of 1997.  Navin contributed to initial
+architecture design decisions during this time, as well as the initial
+development of the client, including the basic framework within which
+the client was developed.  He developed the excellent calendar GUI
+component that is used in the client, as well as the more unobtrusive
+but vital GUI components that the client uses for data entry, back
+in the Java 1.0 days.
+
+--
+
  Erik Grostic, butcher@auschron.com
 
  Erik worked on Ganymede from mid 1997 through his departure from the
 lab in December of 1997.  Erik developed the GUI code for the
 permissions editor and the query submission dialog,
 helping bring the client into fruition.
-
---
-
- Mike Mulvaney, mike@mulvaney.com
-
- Mike worked on Ganymede during his year and a half at the lab, from
-February of 1997 through September of 1998, before moving to the
-Washington D.C. area.  The client as it currently stands is primarily
-Mike's work.  In addition to the large bulk of client-side coding,
-Mike contributed significantly to the design of the system
-architecture as a whole.  Ganymede would be a far, far poorer thing
-were it not for Mike.
-
---
-
- Jonathan Abbey, jonabbey@arlut.utexas.edu
-
- Jon initiated the Ganymede project with support from CSD and lab
-management after shortcomings in the GASH system became apparent.  Jon
-has been the primary architect and coder on the project, developing
-the Ganymede server and admin console, and well as contributing the
-table and tree GUI components used in both the admin console and
-the primary client, as well as all of the CVS and build script work.
 
 --
 
@@ -93,8 +93,9 @@ distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
 Gramann, Andrew Helyer, Richard Mach, and others made helpful reports
 on gaps and problems with Ganymede.
 
-John Knutson has provided bug reports and code contributions the
+John Knutson has provided bug reports and code contributions in the
 course of evaluating the Ganymede code for use on an SGL project.
+Ganymede's support of floating point data fields came from John.
 
 A lot of Ganymede is based on the experience and design work that went
 into GASH.  In addition to the aforementioned names, Dean Kennedy and

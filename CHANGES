@@ -985,6 +985,32 @@ menu is being applied to.
 
 He was right, and I so fixed it.
 
+68. [SERVER SECURITY] Fixed a loophole in the object permission system
+
+The Ganymede system allows admins and users to be given editing
+privileges to objects that are not considered to be owned by the admin
+or user.  This is an unusual circumstance, usually only done when the
+customizer wants objects to appear in the client's object tree but
+doesn't want to allow certain (or even any) fields to be modified.
+
+The problem was that the built-in fields, including the owner list
+field, do not typically have their own access permissions tracked,
+independently from the object's access permissions.  This allowed
+any user who could edit an object to grant themselves ownership
+of the object, which is bad.
+
+The server now refuses to grant edit privilege to an object's owner
+list field unless the user already owns the object, or is running with
+supergash-level privileges.
+
+69. [SERVER, XMLCLIENT] Added XML-based schema editing through the xmlclient
+
+The xmlclient can now be used to perform schema edits on a running
+Ganymede server (so long as no users are logged in, and as long as the
+schema edits do not result in an incompatibility that will break
+loaded data).  This makes is possible to get rid of the old
+directLoader crud in the schema kits.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

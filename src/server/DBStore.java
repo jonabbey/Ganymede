@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2000/10/31 09:20:47 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2000/11/02 02:41:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.130 $ %D%
+ * @version $Revision: 1.131 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -775,146 +775,6 @@ public final class DBStore {
 						   null,
 						   null,
 						   null));
-      }
-  }
-
-  /**
-   * <p>Dump the schema to disk</p>
-   *
-   * <p>This method dumps the entire database to disk, minus any actual objects.</p>
-   *
-   * <p>The thread that calls the dump method will be suspended until
-   * there are no threads performing update writes to the in-memory
-   * database.  In practice this will likely never be a long interval.</p>
-   *
-   * @param filename Name of the database file to emit
-   * @param releaseLock boolean.  If releaseLock==false, dump() will not release
-   *                              the dump lock when it is done with the dump.  This
-   *                              is intended to allow for a clean shut down.  For
-   *                              non-terminal dumps, releaseLock should be true.
-   *
-   * @see arlut.csd.ganymede.DBEditSet
-   * @see arlut.csd.ganymede.DBJournal
-   * @see arlut.csd.ganymede.adminSession
-   */
-
-  public synchronized void dumpSchema(String filename, boolean releaseLock) throws IOException
-  {
-    File dbFile = null;
-    FileOutputStream outStream = null;
-    BufferedOutputStream bufStream = null;
-    DataOutputStream out = null;
-    
-    FileOutputStream textOutStream = null;
-    PrintWriter textOut = null;
-    Enumeration basesEnum;
-    short baseCount, namespaceCount, categoryCount;
-    DBDumpLock lock = null;
-    DBNameSpace ns;
-    DBBaseCategory bc;
-    DBObjectBase base;
-    
-    /* -- */
-    
-    if (debug)
-      {
-	System.err.println("DBStore: Dumping");
-      }
-    
-    lock = new DBDumpLock(this);
-
-    try
-      {
-	lock.establish("System");	// wait until we get our lock 
-      }
-    catch (InterruptedException ex)
-      {
-	Ganymede.debug("DBStore.dumpSchema(): dump lock establish interrupted, schema not dumped");
-	return;
-      }
-    
-    // Move the old version of the file to a backup
-    
-    try
-      {
-	dbFile = new File(filename);
-
-	if (dbFile.isFile())
-	  {
-	    dbFile.renameTo(new File(filename + ".bak"));
-	  }
-
-	// and dump the whole thing
-
-	outStream = new FileOutputStream(filename);
-	bufStream = new BufferedOutputStream(outStream);
-	out = new DataOutputStream(bufStream);
-
-	out.writeUTF(id_string);
-	out.writeByte(major_version);
-	out.writeByte(minor_version);
-
-	namespaceCount = (short) nameSpaces.size();
-
-	out.writeShort(namespaceCount);
-
-	for (int i = 0; i < namespaceCount; i++)
-	  {
-	    ns = (DBNameSpace) nameSpaces.elementAt(i);
-	    ns.emit(out);
-	  }
-
-	rootCategory.partialEmit(out); // limited subset dump
-
-	// and dump the schema out in a human readable form
-	
-	if (Ganymede.htmlProperty != null)
-	  {
-	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
-	    textOut = new PrintWriter(textOutStream);
-		
-	    printCategoryTreeHTML(textOut);
-	  }
-      }
-    catch (IOException ex)
-      {
-	System.err.println("DBStore error dumping schema to " + filename);
-	throw ex;
-      }
-    finally
-      {
-	if (releaseLock)
-	  {
-	    if (lock != null)
-	      {
-		lock.release();
-	      }
-	  }
-
-	if (out != null)
-	  {
-	    out.close();
-	  }
-
-	if (bufStream != null)
-	  {
-	    bufStream.close();
-	  }
-	   
-	if (outStream != null)
-	  {
-	    outStream.close();
-	  }
-
-	if (textOut != null)
-	  {
-	    textOut.close();
-	  }
-
-	if (textOutStream != null)
-	  {
-	    textOutStream.close();
-	  }
       }
   }
 

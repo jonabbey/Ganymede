@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2000/08/25 21:54:10 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2000/11/02 02:41:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.103 $ $Date: 2000/08/25 21:54:10 $
+ * @version $Revision: 1.104 $ $Date: 2000/11/02 02:41:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -738,169 +738,6 @@ public class DBObject implements db_object, FieldType, Remote {
     return objectBase.object_name;
   }
 
-  /**
-   *
-   * <p>The partialEmit() method is used when the server is doing
-   * a limited schema dump.  partialEmit() will look at the
-   * type of the object represented by this DBObject object and
-   * will choose how to restrict the fields emitted in order
-   * to not leave spare invid links in place that are typically
-   * not to be emitted in a schema dump.</p>
-   *
-   * <p>This method is really of a piece with DBObjectBase.partialEmit().</p>
-   *
-   * <p>And, this method is really a hack.  I intend to ditch this as
-   * soon as possible and replace it with a separate cleaner executable
-   * which will load a schema file and delete any invid's that refer
-   * to objects not present in the schema file.  Even that would be
-   * something of a hack, given that we could have some other object
-   * deletion tasks that would logically need to be carried out, but
-   * I'm not yet ready to commit to having the schema dump routine
-   * actually delete all objects not desired for the schema dump.</p>
-   * 
-   * @param out A DBStore writing stream.
-   * 
-   */
-
-  synchronized void partialEmit(DataOutput out) throws IOException
-  {
-    Enumeration enum;
-    Short key;
-    short keynum;
-    DBField field;
-
-    int counter = 0;
-    Vector fieldsToEmit = new Vector();
-
-    /* -- */
-
-    //    System.err.println("Partial Emitting " + objectBase.getName() + " <" + id + ">");
-
-    out.writeInt(getID());
-
-    if (objectBase.getTypeID() == SchemaConstants.OwnerBase)
-      {
-	fieldsToEmit.addElement(new Short(SchemaConstants.OwnerNameField));
-	fieldsToEmit.addElement(new Short(SchemaConstants.OwnerMembersField));
-
-	// omit OwnerObjectsOwned
-      }
-    else if (objectBase.getTypeID() == SchemaConstants.PersonaBase)
-      {
-	// in a partial emit, we're only going to write out the definitions
-	// for supergash (whatever it's called) and monitor, so we don't need
-	// to write out the user and email fields.. likewise, we don't need
-	// to write out the privs field, since supergash always has all privs
-	// and monitor should never have any.
-
-	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaNameField));
-	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminConsole));
-	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaAdminPower));
-	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaLabelField));
-	fieldsToEmit.addElement(new Short(SchemaConstants.PersonaGroupsField));
-      }
-    else
-      {
-	throw new RuntimeException("Error, partialEmit() called on an object that is not a persona or owner group.");
-      }
-
-    // count the fields we're actually going to write out
-
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
-      {
-	field = (DBField) enum.nextElement();
-	key = new Short(field.getID());
-
-	if (fieldsToEmit.contains(key))
-	  {
-	    counter++;
-	  }
-      }
-
-    // and write them out
-
-    //    System.err.println("emitting fields");
-    
-    out.writeShort(counter);    
-
-    enum = fields.elements();
-
-    while (enum.hasMoreElements())
-      {
-	field = (DBField) enum.nextElement();
-	keynum = field.getID();
-	key = new Short(keynum);
-
-	if (fieldsToEmit.contains(key))
-	  {
-	    out.writeShort(key.shortValue());
-
-	    // If we're writing out the members field of an owner
-	    // group object, we only want to include links to the
-	    // persona objects we're keeping, which would be supergash
-	    // and monitor
-
-	    if (objectBase.getTypeID() == SchemaConstants.OwnerBase &&
-		key.shortValue() == SchemaConstants.OwnerMembersField)
-	      {
-		DBField oldF = (DBField) fields.get(keynum);
-
-		if (!(oldF instanceof InvidDBField))
-		  {
-		    Ganymede.debug("Error in DBObject.partialEmit(): expected " +
-				   "SchemaConstants.OwnerMembersField to be invidfield");
-		    ((DBField) fields.get(keynum)).emit(out);
-		  }
-		else
-		  {
-		    InvidDBField invF = new InvidDBField(this, (InvidDBField) oldF);
-
-		    if (!invF.isVector())
-		      {
-			Ganymede.debug("Error in DBObject.partialEmit(): expected " +
-				       "SchemaConstants.OwnerMembersField to be vector");
-			((DBField) fields.get(keynum)).emit(out);
-		      }
-		    else
-		      {
-			Vector temp = new Vector();
-
-			Invid supergash = new Invid(SchemaConstants.PersonaBase, 
-						    SchemaConstants.PersonaSupergashObj);
-			Invid monitor = new Invid(SchemaConstants.PersonaBase, 
-						  SchemaConstants.PersonaMonitorObj);
-
-			// we're keeping supergash and monitor, so if
-			// we see references to either of those
-			// personae, emit them.  Else we're going to
-			// emit an empty member list.
-
-			if (invF.containsElementLocal(supergash))
-			  {
-			    temp.addElement(supergash);
-			  }
-
-			if (invF.containsElementLocal(monitor))
-			  {
-			    temp.addElement(monitor);
-			  }
-
-			invF.value = temp;
-
-			invF.emit(out);
-		      }
-		  }
-	      }
-	    else
-	      {
-		((DBField) fields.get(keynum)).emit(out);
-	      }
-	  }
-      }
-  }
-  
   /**
    * <p>The emit() method is part of the process of dumping the DBStore
    * to disk.  emit() dumps an object in its entirety to the
