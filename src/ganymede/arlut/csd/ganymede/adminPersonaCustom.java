@@ -465,8 +465,6 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
   public ReturnVal consistencyCheck(DBObject object)
   {
-    DBEditObject checkObj = (DBEditObject) object;
-
     // we want to return a failure if there is no role set and if the
     // persona is not a member of the supergash owner set, which would
     // make roles superfluous
