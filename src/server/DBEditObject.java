@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -379,10 +379,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Returns a code indicating whether this object
    * is being created, edited, or deleted.
    *
-   * @see #CREATING
-   * @see #EDITING
-   * @see #DELETING
-   * @see #DROPPING
+   * @see arlut.csd.ganymede.ObjectStatus#CREATING
+   * @see arlut.csd.ganymede.ObjectStatus#EDITING
+   * @see arlut.csd.ganymede.ObjectStatus#DELETING
+   * @see arlut.csd.ganymede.ObjectStatus#DROPPING
    *
    */
 
@@ -395,10 +395,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * Sets this object's status code
    *
-   * @see #CREATING
-   * @see #EDITING
-   * @see #DELETING
-   * @see #DROPPING
+   * @see arlut.csd.ganymede.ObjectStatus#CREATING
+   * @see arlut.csd.ganymede.ObjectStatus#EDITING
+   * @see arlut.csd.ganymede.ObjectStatus#DELETING
+   * @see arlut.csd.ganymede.ObjectStatus#DROPPING
    *
    */
 

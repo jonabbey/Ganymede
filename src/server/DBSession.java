@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -736,7 +736,7 @@ final public class DBSession {
    *
    * Convenience pass-through method
    * 
-   * @see arlut.csd.ganymede.DBEditSet.checkpoint()
+   * @see arlut.csd.ganymede.DBEditSet#checkpoint()
    *
    */
 
@@ -752,7 +752,7 @@ final public class DBSession {
    *
    * Convenience pass-through method
    * 
-   * @see arlut.csd.ganymede.DBEditSet.rollback()
+   * @see arlut.csd.ganymede.DBEditSet#rollback()
    *
    */
 
