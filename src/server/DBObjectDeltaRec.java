@@ -9,7 +9,7 @@
    changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -158,94 +158,10 @@ public class DBObjectDeltaRec implements FieldType {
 	    continue;
 	  }
 
-	// ok.. at this point, we've got a vector and we need to
-	// compute what has been added and what has been taken away
-	// from the original vector... best way to do that is to use a
-	// couple of hashes so we can do this in linear time
+	// it's a vector.. use the DBField.getVectorDiff() method
+	// to generate a vector diff.
 
-	fieldDeltaRec deltaRec = new fieldDeltaRec(fieldDef.getID());
-
-	Vector oldValues = origField.values;
-	Vector newValues = currentField.values;
-	Object compareValue;
-
-	Hashtable oldHash = new Hashtable(oldValues.size()+1, 1.0f);
-
-	for (int i = 0; i < oldValues.size(); i++)
-	  {
-	    compareValue = oldValues.elementAt(i);
-
-	    if (compareValue instanceof Byte[])
-	      {
-		compareValue = new IPwrap((Byte[]) compareValue);
-	      }
-
-	    oldHash.put(compareValue, compareValue);
-	  }
-
-	Hashtable newHash = new Hashtable(newValues.size()+1, 1.0f);
-
-	for (int i = 0; i < newValues.size(); i++)
-	  {
-	    compareValue = newValues.elementAt(i);
-
-	    if (compareValue instanceof Byte[])
-	      {
-		compareValue = new IPwrap((Byte[]) compareValue);
-	      }
-
-	    newHash.put(compareValue, compareValue);
-	  }
-
-	// and do the compare
-
-	int deletions = 0;
-
-	for (int i = 0; i < oldValues.size(); i++)
-	  {
-	    compareValue = oldValues.elementAt(i);
-
-	    if (compareValue instanceof Byte[])
-	      {
-		compareValue = new IPwrap((Byte[]) compareValue);
-	      }
-
-	    if (!newHash.containsKey(compareValue))
-	      {
-		deltaRec.delValue(compareValue);
-		deletions++;
-	      }
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("XX>> Added " + deletions + " deletion elements for this delta rec");
-	  }
-
-	int additions = 0;
-
-	for (int i = 0; i < newValues.size(); i++)
-	  {
-	    compareValue = newValues.elementAt(i);
-
-	    if (compareValue instanceof Byte[])
-	      {
-		compareValue = new IPwrap((Byte[]) compareValue);
-	      }
-	    
-	    if (!oldHash.containsKey(compareValue))
-	      {
-		deltaRec.addValue(compareValue);
-		additions++;
-	      }
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("XX>> Added " + additions + " addition elements for this delta rec");
-	  }
-
-	fieldRecs.addElement(deltaRec);
+	fieldRecs.addElement(currentField.getVectorDiff(origField));
       }
   }
 
@@ -854,111 +770,4 @@ public class DBObjectDeltaRec implements FieldType {
 
     return copy;
   }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                   fieldDeltaRec
-
-------------------------------------------------------------------------------*/
-
-/**
- *
- * The fieldDeltaRec class is used to record the changes that have been made
- * to a particular field in a DBObject.  A DBObjectDeltaRec consists mainly
- * of a Vector of fieldDeltaRec's.
- *
- */
-
-class fieldDeltaRec {
-
-  short fieldcode;
-  boolean vector;
-  DBField scalarValue = null;
-  Vector addValues = null;
-  Vector delValues = null;
-
-  /* -- */
-
-  /**
-   * Scalar value constructor.  This constructor may actually be used
-   * for vector fields when those vector fields are newly defined.. in
-   * this case, we are actually doing a complete definition of the
-   * field, rather than just a vector add/remove record.<br><br>
-   *
-   * If &lt;scalar&gt; is null, this fieldDeltaRec is recording the
-   * deletion of a field.
-   * 
-   */
-
-  fieldDeltaRec(short fieldcode, DBField scalar)
-  {
-    this.fieldcode = fieldcode;
-    this.scalarValue = scalar;
-    vector = false;
-  }
-
-  /**
-   *
-   * Vector constructor.  This constructor is used when we are doing a
-   * vector differential record.
-   *
-   */
-
-  fieldDeltaRec(short fieldcode)
-  {
-    this.fieldcode = fieldcode;
-    vector = true;
-    addValues = new Vector();
-    delValues = new Vector();
-  }
-
-  /**
-   *
-   * This method is used to record a value that has been added
-   * to this vector field.
-   * 
-   */
-
-  void addValue(Object value)
-  {
-    if (value instanceof Byte[])
-      {
-	value = new IPwrap((Byte []) value);
-      }
-
-    if (delValues.contains(value))
-      {
-	delValues.removeElement(value);
-      }
-    else if (!addValues.contains(value))
-      {
-	addValues.addElement(value);
-      }
-  }
-
-  /**
-   *
-   * This method is used to record a value that has been removed
-   * from this vector field.
-   * 
-   */
-
-  void delValue(Object value)
-  {
-    if (value instanceof Byte[])
-      {
-	value = new IPwrap((Byte []) value);
-      }
-
-    if (addValues.contains(value))
-      {
-	addValues.removeElement(value);
-      }
-    else if (!delValues.contains(value))
-      {
-	delValues.addElement(value);
-      }
-  }
-
 }
