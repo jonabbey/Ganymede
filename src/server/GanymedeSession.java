@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.76 $ %D%
+   Version: $Revision: 1.77 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1049,13 +1049,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    *
    * Returns a serialized representation of the basic category
-   * and base structure on the server.
+   * and base structure on the server.<br><br>
+   *
+   * This method is synchronized to avoid any possible deadlock
+   * between DBStore and GanymedeSession, as the CategoryTransport
+   * constructor calls other synchronized methods on GanymedeSession
    *
    * @see arlut.csd.ganymede.Category
    * @see arlut.csd.ganymede.Session
    */
 
-  public CategoryTransport getCategoryTree()
+  public synchronized CategoryTransport getCategoryTree()
   {
     checklogin();
 
@@ -1063,13 +1067,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (Ganymede.catTransport == null)
 	  {
-	    synchronized (Ganymede.db)
+	    synchronized (Ganymede.db) // *sync* on DBStore
 	      {
 		// pass Ganymede.internalSession so that the master
 		// CategoryTransport object will correctly grant
 		// object creation privs for all object types
 
-		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory, Ganymede.internalSession);
+		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory, 
+							      Ganymede.internalSession); // *sync* possible on this
 		Ganymede.db.notifyAll(); // in case of locks
 	      }
 	  }
@@ -1098,13 +1103,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * defined on the server.  This BaseListTransport object
    * will not include field information.  The client is
    * obliged to call getFieldTemplateVector() on any
-   * bases that it needs field information for.
+   * bases that it needs field information for.<br><br>
+   *
+   * This method is synchronized to avoid any possible deadlock
+   * between DBStore and GanymedeSession, as the BaseListTransport
+   * constructor calls other synchronized methods on GanymedeSession
    *
    * @see arlut.csd.ganymede.BaseListTransport
    * @see arlut.csd.ganymede.Session
    */
 
-  public BaseListTransport getBaseList()
+  public synchronized BaseListTransport getBaseList()
   {
     checklogin();
 
@@ -1114,7 +1123,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	return new BaseListTransport(this);
+	return new BaseListTransport(this); // *sync* on DBStore, this GanymedeSession
       }
   }
 
@@ -1341,7 +1350,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     this.status = "";
     setLastEvent("abortTransaction");
 
-    return session.abortTransaction();
+    return session.abortTransaction(); // *sync* DBSession 
   }
 
   /**
