@@ -9,8 +9,8 @@
    
    Created: 16 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/03/27 12:27:41 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/05/11 00:14:33 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -68,9 +68,13 @@ import arlut.csd.ganymede.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * Each object in a vector panel is wrapped in an elementWrapper.  This class
- * controls the expanding of the element, and the creation of the containerPanel
- * inside.
+ * <p>This GUI class is used in the Ganymede client to wrap embedded objects
+ * in an expandable panel for inclusion in a presentation in a {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
+ * </p>
+ *
+ * <p>Typically, elementWrapper objects contain
+ * {@link arlut.csd.ganymede.client.containerPanel containerPanels}, which
+ * themselves contain GUI elements from embedded objects.</p>
  */
 
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
@@ -131,7 +135,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       }
     
     setLayout(new BorderLayout());
-
       
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);

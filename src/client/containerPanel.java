@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2001/03/29 08:34:39 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2001/05/11 00:14:32 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.119 $ $Date: 2001/03/29 08:34:39 $ $Name:  $
+ * @version $Revision: 1.120 $ $Date: 2001/05/11 00:14:32 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2893,7 +2893,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	int maxLength = fieldTemplate.getMaxLength();
 
-	sf = new JstringField(40 > maxLength ? maxLength + 1 : 40,
+	sf = new JstringField(30 > maxLength ? maxLength + 1 : 30,
 			      maxLength,
 			      editable && fieldInfo.isEditable(),
 			      false,
@@ -2964,7 +2964,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     else
       {
 	int maxLength = fieldTemplate.getMaxLength();
-	sf = new JstringField(40 > maxLength ? maxLength + 1 : 40,
+	sf = new JstringField(30 > maxLength ? maxLength + 1 : 30,
 			      maxLength,
 			      true,
 			      false,
