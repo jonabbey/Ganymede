@@ -17,7 +17,7 @@
     structure of an <a href="introtoxml.html">XML</a> file for Ganymede looks like this:</p>
 
     <pre>
-      &lt;ganymede major="1" minor="0"&gt;
+      &lt;ganymede major="1" minor="0" persona="**name**" password="**pass**" &gt;
         <a href="schema.html">&lt;ganyschema&gt;</a>
            -- Optional Ganymede Schema Definition Section Here --
         <a href="schema.html">&lt;/ganyschema&gt;</a>
@@ -28,9 +28,14 @@
     </pre>
 
     <p>The <b>ganymede</b> element is the <a href="introtoxml.html">XML</a> file's <b>Document
-    Element</b>, and has two attributes, <b>major</b> and
+    Element</b>, and has two mandatory attributes, <b>major</b> and
     <b>minor</b>, which specify the major and minor version numbers of
-    the Ganymede <a href="introtoxml.html">XML</a> file format the file adheres to.</p>
+    the Ganymede <a href="introtoxml.html">XML</a> file format the file adheres to,
+      and two
+      optional attributes, <b>persona</b> and <b>password</b>, which
+      may be used to specify the username and password for the xmlclient
+      to use in attempting to log into the server to apply the changes
+      in the file.</p>
 
     <p>The <b><a href="schema.html">ganyschema</a></b> element contains the schema definition
     for the Ganymede database.  This section contains definitions of
@@ -55,7 +60,7 @@
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:35:03 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Wed Jun  6 13:27:50 CDT 2001
+Last modified: Wed Jun  6 20:14:02 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>
