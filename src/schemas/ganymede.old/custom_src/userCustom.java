@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -355,10 +355,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    System.err.println("userCustom: creating inactivation wizard");
 
-	    theWiz = new userInactivateWizard(this.gSession,
-					      this,
-					      null,
-					      null);
+	    theWiz = new userInactivateWizard(this.gSession, this);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -401,8 +398,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * any external actions related to object reactivation when
    * the transaction is committed..
    *
-   * @see #commitPhase1()
-   * @see #commitPhase2() 
+   * @see arlut.csd.ganymede.DBEditObject#commitPhase1()
+   * @see arlut.csd.ganymede.DBEditObject#commitPhase2()
    */
 
   public ReturnVal reactivate()
@@ -415,10 +412,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	System.err.println("userCustom: creating reactivation wizard");
 	
-	theWiz = new userReactivateWizard(this.gSession,
-					  this,
-					  null,
-					  null);
+	theWiz = new userReactivateWizard(this.gSession, this);
       }
     catch (RemoteException ex)
       {
@@ -429,6 +423,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     
     return theWiz.getStartDialog();
   }
+
+  /**
+   * This method is called by the userReactivateWizard on successfully
+   * obtaining the necessary information from the client on a
+   * reactivate operation.  We then do the actual work to reactivate
+   * the user in this method.
+   * 
+   * @see arlutc.csd.ganymede.custom.userReactivateWizard
+   *
+   */
 
   public ReturnVal reactivate(userReactivateWizard reactivateWizard)
   {
@@ -536,10 +540,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.<br><br>
    *
-   * If there is no caching key, this method will return null.
+   * If there is no caching key, this method will return null.<br><br>
    *
+   * We don't want the HOMEGROUP field's choice list to be cached on
+   * the client because it is dynamically generated for this
+   * context, and doesn't make sense in other contexts.
+   * 
    */
 
   public Object obtainChoicesKey(DBField field)
