@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,6 +48,7 @@ import java.util.*;
 public class GanymedeScheduler extends Thread {
 
   static final int minsPerDay = 1440;
+  static final boolean debug = false;
   
   Date nextAction = null;
   private Vector currentlyScheduled = new Vector();
@@ -57,13 +58,54 @@ public class GanymedeScheduler extends Thread {
 
   /**
    *
-   *
+   * Debug rig
    *
    */
+
+  public static void main(String[] argv)
+  {
+    GanymedeScheduler scheduler = new GanymedeScheduler();
+    new Thread(scheduler).start();
+
+    Date time, currentTime;
+    Calendar cal = Calendar.getInstance();
+
+    currentTime = new Date();
+
+    cal.setTime(currentTime);
+
+    cal.add(Calendar.MINUTE, 1);
+
+    scheduler.addAction(cal.getTime(), 
+			new sampleTask("sample task 1"), 
+			"sample task 1");
+
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR), 
+				cal.get(Calendar.MINUTE), 1,
+				new sampleTask("sample task 2"), "sample task 2");
+
+    cal.add(Calendar.MINUTE, 1);
+
+    scheduler.addAction(cal.getTime(), 
+			new sampleTask("sample task 3"),
+			"sample task 3");
+
+    cal.add(Calendar.MINUTE, 1);
+
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR), 
+				cal.get(Calendar.MINUTE), 1,
+				new sampleTask("sample task 4"), "sample task 4");
+  }
 
   public GanymedeScheduler()
   {
   }
+
+  /**
+   *
+   * This method is used to add an action to be run once, at a specific time.
+   *
+   */
 
   public synchronized void addAction(Date time, 
 				     Runnable task,
@@ -80,7 +122,15 @@ public class GanymedeScheduler extends Thread {
 
     handle = new scheduleHandle(this, time, 0, task, name == null ? "" : name);
     scheduleTask(handle);
+    
+    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
   }
+
+  /**
+   *
+   * This method is used to add an action to be run every day at a specific time.
+   *
+   */
 
   public synchronized void addDailyAction(int hour, int minute, 
 					  Runnable task,
@@ -115,7 +165,18 @@ public class GanymedeScheduler extends Thread {
 
     handle = new scheduleHandle(this, time, minsPerDay, task, name == null ? "" : name);
     scheduleTask(handle);
+
+    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
   }
+
+  /**
+   * This method is used to add an action to be run at a specific
+   * initial time, and every <intervalMinutes> thereafter.  
+   *
+   * The scheduler will not reschedule a task until the last scheduled
+   * instance of the task has completed.
+   *
+   */
 
   public synchronized void addPeriodicAction(int hour, int minute, 
 					     int intervalMinutes, 
@@ -152,6 +213,9 @@ public class GanymedeScheduler extends Thread {
     handle = new scheduleHandle(this, time, intervalMinutes, task, name == null ? "" : name);
 
     scheduleTask(handle);
+
+    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + time);
+    System.err.println("                    Task will repeat every " + intervalMinutes + " minutes");
   }
   
   /**
@@ -175,27 +239,42 @@ public class GanymedeScheduler extends Thread {
 
     try
       {
+	System.err.println("Ganymede Scheduler: scheduling task started");
+
 	while (true)
 	  {
+	    if (debug)
+	      {
+		System.err.println("loop");
+	      }
+
 	    if (nextAction == null)
 	      {
 		try
 		  {
+		    if (debug)
+		      {
+			System.err.println("*** snooze");
+		      }
+
 		    wait();
 		  }
 		catch (InterruptedException ex)
 		  {
-		    System.err.println("Scheduler caught interruption.. exiting");
-		    cleanUp();
-		    System.err.println("Ganymede Scheduler exited");
-		    return;
+		    System.err.println("Scheduler interrupted");
+		    return;	// jump to finally, then return
+		  }
+
+		if (debug)
+		  {
+		    System.err.println("*** snort?");
 		  }
 	      }
 	    else
 	      {
 		currentTime = System.currentTimeMillis();
 
-		if (currentTime > nextAction.getTime())
+		if (currentTime < nextAction.getTime())
 		  {
 		    sleepTime = nextAction.getTime() - currentTime;
 
@@ -203,30 +282,69 @@ public class GanymedeScheduler extends Thread {
 		      {
 			try
 			  {
+			    if (debug)
+			      {
+				System.err.println("*** snooze");
+			      }
+
 			    wait(sleepTime);
 			  }
 			catch (InterruptedException ex)
 			  {
-			    System.err.println("Scheduler caught interruption.. exiting");
-			    cleanUp();
-			    System.err.println("Ganymede Scheduler exited");
-			    return;
+			    System.err.println("Scheduler interrupted");
+			    return; // jump to finally, then return
+			  }
+
+			if (debug)
+			  {
+			    System.err.println("*** snort?");
+			  }
+		      }
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.err.println("XX: Next action was scheduled at " + nextAction);
+			System.err.println("XX: Processing current actions");
+		      }
+		  }
+
+		currentTime = System.currentTimeMillis();
+		
+		if (currentTime >= nextAction.getTime())
+		  {
+		    Vector toRun = new Vector();
+		    Date nextRun = null;
+
+		    for (int i = 0; i < currentlyScheduled.size(); i++)
+		      {
+			handle = (scheduleHandle) currentlyScheduled.elementAt(i);
+			
+			if (handle.startTime.getTime() <= currentTime)
+			  {
+			    toRun.addElement(handle);
+			  }
+			else
+			  {
+			    if (nextRun == null)
+			      {
+				nextRun = new Date(handle.startTime.getTime());
+			      }
+			    else if (handle.startTime.before(nextRun))
+			      {
+				nextRun.setTime(handle.startTime.getTime());
+			      }
 			  }
 		      }
 
-		    currentTime = System.currentTimeMillis();
+		    nextAction = nextRun;
 
-		    if (currentTime >= nextAction.getTime())
+		    for (int i = 0; i < toRun.size(); i++)
 		      {
-			for (int i = 0; i < currentlyScheduled.size(); i++)
-			  {
-			    handle = (scheduleHandle) currentlyScheduled.elementAt(i);
-			
-			    if (handle.startTime.getTime() <= currentTime)
-			      {
-				runTask(handle);
-			      }
-			  }
+			handle = (scheduleHandle) toRun.elementAt(i);
+
+			runTask(handle);
 		      }
 		  }
 	      }
@@ -244,6 +362,8 @@ public class GanymedeScheduler extends Thread {
   {
     if (currentlyScheduled.removeElement(handle))
       {
+	System.err.println("Ganymede Scheduler: running " + handle.name);
+
 	currentlyRunning.addElement(handle);
 	handle.runTask();
       }
@@ -253,10 +373,18 @@ public class GanymedeScheduler extends Thread {
   {
     if (currentlyRunning.removeElement(handle))
       {
+	System.err.println("Ganymede Scheduler: " + handle.name + " completed");
+
 	if (handle.reschedule())
 	  {
+	    System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
+
 	    scheduleTask(handle);
 	  }
+      }
+    else
+      {
+	System.err.println("Ganymede Scheduler: confusion! Couldn't find task " + handle.name + " on the runnng list");
       }
   }
 
@@ -270,6 +398,19 @@ public class GanymedeScheduler extends Thread {
   private synchronized void scheduleTask(scheduleHandle handle)
   {
     currentlyScheduled.addElement(handle);
+
+    if (debug)
+      {
+	System.err.println("Ganymede Scheduler: scheduled task " + handle.name + 
+			   " for initial execution at " + handle.startTime);
+      }
+
+    if (nextAction == null)
+      {
+	nextAction = new Date(handle.startTime.getTime());
+	notify();
+	return;
+      }
 
     if (handle.startTime.getTime() < nextAction.getTime())
       {
@@ -301,6 +442,8 @@ public class GanymedeScheduler extends Thread {
 
 class scheduleHandle {
 
+  static final boolean debug = false;
+
   Date startTime;
   int interval;			// 0 if this is a one-shot, otherwise, the count in minutes
   Runnable task;
@@ -311,8 +454,14 @@ class scheduleHandle {
   /* -- */
 
   public scheduleHandle(GanymedeScheduler scheduler,
-			Date time, int interval, Runnable task, String name)
+			Date time, int interval, 
+			Runnable task, String name)
   {
+    if (time == null)
+      {
+	throw new IllegalArgumentException("can't schedule a task without a start time");
+      }
+
     this.scheduler = scheduler;
     this.startTime = time;
     this.interval = interval;
@@ -323,6 +472,11 @@ class scheduleHandle {
   synchronized void runTask()
   {
     // start our task
+
+    if (debug)
+      {
+	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
+      }
 
     thread = new Thread(task, name);
     thread.start();
@@ -354,7 +508,7 @@ class scheduleHandle {
       }
     else
       {
-	startTime = new Date(startTime.getTime() + (long) (1000 * interval));
+	startTime.setTime(startTime.getTime() + (long) (60000 * interval));
 	return true;
       }
   }
@@ -364,7 +518,6 @@ class scheduleHandle {
     monitor.stop();
     thread.stop();
   }
-
 }
 
 /*------------------------------------------------------------------------------
@@ -399,5 +552,36 @@ class taskMonitor implements Runnable {
 
     handle.notifyCompletion(); // tell the scheduler it has completed
   }
+}
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      sampleTask
+
+------------------------------------------------------------------------------*/
+
+class sampleTask implements Runnable {
+
+  String name;
+
+  /* -- */
+
+  public sampleTask(String name)
+  {
+    this.name = name;
+  }
+
+  public synchronized void run()
+  {
+    System.err.println(name + " reporting in: " + new Date());
+
+    try
+      {
+	wait(1000);
+      }
+    catch (InterruptedException ex)
+      {
+	return;
+      }
+  }
 }
