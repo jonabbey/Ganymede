@@ -6,8 +6,8 @@
 
    Created: 16 September 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/09/17 06:38:10 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/09/17 07:52:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,21 +65,24 @@ import java.rmi.*;
 
 public interface FileReceiver extends Remote {
 
-    /**
-     * <p>This method is used to send chunks of a file, in order, to the
-     * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
-     * if it doesn't want to stop receiving the file.  A null return value
-     * indicates success, keep sending.</p>
-     */
-
-    public ReturnVal sendBytes(byte[] bytes) throws RemoteException;
-
-    /**
-     * <p>This method is called to notify the FileReceiver that no more
-     * of the file will be transmitted.  The boolean parameter will
-     * be true if the file was completely sent, or false if the transmission
-     * is being aborted by the sender for some reason.</p>
-     */
-
-    public void end(boolean completed) throws RemoteException;
+  /**
+   * <p>This method is used to send chunks of a file, in order, to the
+   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
+   * if it doesn't want to stop receiving the file.  A null return value
+   * indicates success, keep sending.</p>
+   */
+  
+  public ReturnVal sendBytes(byte[] bytes) throws RemoteException;
+  
+  /**
+   * <p>This method is called to notify the FileReceiver that no more
+   * of the file will be transmitted.  The boolean parameter will
+   * be true if the file was completely sent, or false if the transmission
+   * is being aborted by the sender for some reason.</p>
+   *
+   * @return Returns true if the FileReceiver successfully received
+   * the file in its entirety.
+   */
+  
+  public ReturnVal end(boolean completed) throws RemoteException;
 }

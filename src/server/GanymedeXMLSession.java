@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/09/14 23:15:37 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/09/17 07:52:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -319,21 +319,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.</p>
-   *
-   * <p>This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.</p>
-   *
-   * @see java.rmi.server.Unreferenced
-   */
-
-  public void unreferenced()
-  {
-    session.unreferenced();
-  }
-
-  /**
    * <p>This method is for use on the server, and is called by the
    * GanymedeSession to let us know if the server is forcing our login
    * off.</p>
@@ -367,6 +352,138 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	reader.close();		// this will cause the XML Reader to halt
       }
+  }
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump
+   * of the server's schema definition in XML format.  The
+   * FileReceiver referenced passed as a parameter to this method
+   * will be used to send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete schema
+   * definition in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   */
+
+  public ReturnVal getSchema(FileReceiver receiver)
+  {
+    try
+      {
+	final PipedOutputStream outpipe = new PipedOutputStream();
+	final BigPipedInputStream inpipe = new BigPipedInputStream(outpipe);
+
+	/* -- */
+
+	// we need to get a thread to dump the XML schema in the
+	// background to our pipe
+
+	Thread dumpThread = new Thread(new Runnable() {
+	  public void run() {
+	    try
+	      {
+		Ganymede.db.dumpXML(outpipe, false);
+	      }
+	    catch (IOException ex)
+	      {
+		// dumpXML will close outpipe on any exception,
+		// nothing we can productively do here, go
+		// ahead and show it for debug purposes
+
+		ex.printStackTrace();
+	      }
+	  }}, "XMLSession Schema Dump Thread");
+
+	// and set it running
+
+	dumpThread.start();
+
+	// okay, now we can spin on our input thread, reading
+	// from our pipe and sending the xml file down to the
+	// xmlclient's FileReceiver.
+
+	ReturnVal retVal = null;
+	byte[] data = null;
+	int oldavail = 0;
+	int avail = inpipe.available();
+
+	while (avail > 0)
+	  {
+	    if (avail > 65536)
+	      {
+		avail = 65536;
+	      }
+
+	    if (oldavail != avail)
+	      {
+		data = new byte[avail];
+	      }
+
+	    inpipe.read(data);	// we may block waiting for the schema dump thread here
+
+	    try
+	      {
+		retVal = receiver.sendBytes(data);
+
+		if (retVal != null)
+		  {
+		    if (!retVal.didSucceed())
+		      {
+			receiver.end(false);
+			return Ganymede.createErrorDialog("xml transmission error",
+							  "Error, couldn't successfully send XML schema to xmlclient");
+		      }
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		return Ganymede.createErrorDialog("xml transmission error",
+						  "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
+						  ex.getMessage());
+	      }
+
+	    // and round and round we go
+
+	    avail = inpipe.available();
+	  }
+
+	try
+	  {
+	    return receiver.end(true);
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+
+	    return Ganymede.createErrorDialog("xml transmission error",
+					      "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
+					      ex.getMessage());
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+
+	return Ganymede.createErrorDialog("xml transmission error",
+					  "Error, couldn't successfully send XML schema to xmlclient due to IOException:" +
+					  ex.getMessage());
+      }
+  }
+
+  /**
+   * <p>This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.</p>
+   *
+   * <p>This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.</p>
+   *
+   * @see java.rmi.server.Unreferenced
+   */
+
+  public void unreferenced()
+  {
+    session.unreferenced();
   }
 
   /**
