@@ -3,8 +3,8 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.11 $ %D%
-   Module By: Navin Manohar, Jonathan Abbey
+   Version: $Revision: 1.12 $ %D%
+   Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 */
 
@@ -263,7 +263,6 @@ public class JnumberField extends JentryField {
 
     minSize = n;
   }
-
 
   /**
    * returns true if there is a bound on the range of values that
