@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2001/06/15 21:55:08 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/06/15 22:32:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -247,6 +247,8 @@ public class PasswordAgingTask implements Runnable {
 	    continue;
 	  }
 
+	// then two weeks
+
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.WEEK_OF_MONTH, 2);
 	lowerBound.add(Calendar.DATE, -1);
@@ -259,6 +261,8 @@ public class PasswordAgingTask implements Runnable {
 	    warnUpcomingPasswordExpire(object);
 	    continue;
 	  }
+
+	// then one week
 
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.WEEK_OF_MONTH, 1);
@@ -273,6 +277,8 @@ public class PasswordAgingTask implements Runnable {
 	    continue;
 	  }
 
+	// then one day
+
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, -1);
 
@@ -284,6 +290,8 @@ public class PasswordAgingTask implements Runnable {
 	    continue;
 	  }
 
+	// then day one of the grace period
+
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, -1);
 
@@ -294,6 +302,8 @@ public class PasswordAgingTask implements Runnable {
 	    warnOvertimePassword(object);
 	    continue;
 	  }
+
+	// then day two of the grace period
 
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, -2);
@@ -307,6 +317,8 @@ public class PasswordAgingTask implements Runnable {
 	    continue;
 	  }
 
+	// then day three of the grace period
+
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, -3);
 
@@ -318,6 +330,8 @@ public class PasswordAgingTask implements Runnable {
 	    warnOvertimePassword(object);
 	    continue;
 	  }
+
+	// then we blow it away
 
 	upperBound.setTime(currentTime);
 	upperBound.add(Calendar.DATE, -4);
