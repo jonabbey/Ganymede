@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/07/04 01:06:37 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/07/05 22:24:49 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.39 $ $Date: 2001/07/04 01:06:37 $ $Name:  $
+ * @version $Revision: 1.40 $ $Date: 2001/07/05 22:24:49 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -294,15 +294,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     finally
       {
 	setModel(model);
-	
-	if (width > 0)
-	  {
-	    setFixedCellWidth(width);
-	  }
-	else if (width == 0)
-	  {
-	    setPrototypeCellValue(maxWidthString);
-	  }
       }
   }
 
@@ -316,12 +307,26 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (width > 0)
       {
+	if (debug)
+	  {
+	    System.err.println("JstringListBox: setting fixed cell width to " + width);
+	  }
+
 	setFixedCellWidth(width);
       }
     else if (width == 0)
       {
 	setPrototypeCellValue(maxWidthString);
       }
+  }
+
+  /**
+   * <p>This method sets the default cell width for this list.</p>
+   */
+
+  public void setCellWidth(String template)
+  {
+    setPrototypeCellValue(template);
   }
 
   /**

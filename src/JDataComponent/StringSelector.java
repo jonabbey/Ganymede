@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/07/04 01:13:16 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/07/05 22:24:49 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.46 $ $Date: 2001/07/04 01:13:16 $ $Name:  $
+ * @version $Revision: 1.47 $ $Date: 2001/07/05 22:24:49 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -404,6 +404,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add("South", customP);
       }
 
+    // provide a small default width
+
+    setCellWidth(50);
+
     invalidate();
     parent.validate();
 
@@ -436,6 +440,26 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>This method sets the width of the in and out rows.</p>
+   *
+   * @param template A string to use as the required size of the cells
+   * in the in and out boxes.
+   */
+
+  public void setCellWidth(String template)
+  {
+    in.setCellWidth(template);
+
+    if (out != null)
+      {
+	out.setCellWidth(template);
+      }
+
+    invalidate();
+    parent.validate();
+  }
+
+  /**
    * <p>This method sets the titles for the in and out boxes.  The
    * StringSelector will show these titles, followed by a colon and
    * the current count of elements in the in and/or out boxes.</p>
@@ -445,6 +469,26 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     org_in = inString;
     org_out = outString;
+  }
+
+  /**
+   * <p>This method attaches popup menus to the in box and out
+   * box.</p>
+   */
+
+  public void setPopups(JPopupMenu inPopup, JPopupMenu outPopup)
+  {
+    if (inPopup != null && inPopup == outPopup)
+      {
+	throw new IllegalArgumentException("Need two different JPopupMenus");
+      }
+
+    in.registerPopupMenu(inPopup);
+
+    if (out != null)
+      {
+	out.registerPopupMenu(outPopup);
+      }
   }
 
   /**
@@ -500,9 +544,19 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	try
 	  {
 	    out.load(available, -1, sortAvailable, availComparator);
+
+	    if (available != null)
+	      {
+		outTitle.setText(org_out.concat(": " + available.size()));
+	      }
+	    else
+	      {
+		outTitle.setText(org_out.concat(": 0"));
+	      }
 	  }
 	catch (Exception e)
 	  {
+	    e.printStackTrace();
 	    throw new RuntimeException("Got an exception in out.reload: " + e);
 	  }
       }
@@ -510,9 +564,19 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     try
       {
 	in.load(chosen, -1, sortChosen, chosenComparator);
+
+	if (chosen != null)
+	  {
+	    inTitle.setText(org_in.concat(": " + chosen.size()));
+	  }
+	else
+	  {
+	    inTitle.setText(org_in.concat(": 0"));
+	  }
       }
     catch (Exception e)
       {
+	e.printStackTrace();
 	throw new RuntimeException("Got an exception in in.reload: " + e);
       }
   }
@@ -613,36 +677,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   public void setCallback(JsetValueCallback parent)
   {
     my_callback = parent;
-  }
-
-  /**
-   * <P>Sets the data for the out box.</P>
-   *
-   * <P>I'm not sure if this will work well.</P>
-   */
-
-  public void setAvailableData(Vector available)
-  {
-    for (int i = 0; i < available.size(); i++)
-      {
-	if (in.containsItem(available.elementAt(i)))
-	  {
-	    available.removeElementAt(i);
-	  }
-      }
-
-    out.setListData(available);
-  }
-
-  /**
-   * <P>Sets the data for the in box.</P>
-   *
-   * <P>Use with caution, it might not work at all.</P>
-   */
-  
-  public void setChosenData(Vector chosen)
-  {
-    in.setListData(chosen);
   }
 
   /**
@@ -756,26 +790,29 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 		else  //It's not in the outbox.
 		  {
-		    try
+		    if (my_callback != null)
 		      {
-			if (out == null)
+			try
 			  {
-			    my_callback.setValuePerformed(new JValueObject(this, 
-									 0,  
-									 JValueObject.ERROR,
-									 "You can't choose stuff for this vector.  Sorry."));
+			    if (out == null)
+			      {
+				my_callback.setValuePerformed(new JValueObject(this, 
+									       0,  
+									       JValueObject.ERROR,
+									       "You can't choose stuff for this vector.  Sorry."));
+			      }
+			    else
+			      {
+				my_callback.setValuePerformed(new JValueObject(this, 
+									       0,  
+									       JValueObject.ERROR,
+									       "That choice is not appropriate.  Please choose from the list."));
+			      }
 			  }
-			else
+			catch (RemoteException rx)
 			  {
-			    my_callback.setValuePerformed(new JValueObject(this, 
-									 0,  
-									 JValueObject.ERROR,
-									 "That choice is not appropriate.  Please choose from the list."));
+			    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
 			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not tell parent what is wrong: " + rx);
 		      }
 		  }
 	      }
