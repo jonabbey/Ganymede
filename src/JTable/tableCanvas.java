@@ -4,7 +4,8 @@
 
   A JDK 1.1 table AWT component.
 
-  Copyright (C) 1997, 1998, 1999  The University of Texas at Austin.
+  Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002
+  The University of Texas at Austin.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,8 +22,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 15 May 1999
-  Version: $Revision: 1.3 $
-  Last Mod Date: $Date: 2000/12/13 18:24:06 $
+  Version: $Revision: 1.4 $
+  Last Mod Date: $Date: 2002/03/01 22:54:43 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -242,19 +243,23 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     if (backing == null) 
       {
+	int width = getBounds().width;
+	int height = getBounds().height;
+
+	if (width <= 0 || height <= 0)
+	  {
+	    return;
+	  }
+
 	if (debug)
 	  {
 	    System.err.println("creating backing image");
 
-	    System.err.println("width = " + getBounds().width);
-	    System.err.println("height = " + getBounds().height);
+	    System.err.println("width = " + width);
+	    System.err.println("height = " + height);
 	  }
 
-	backing_rect = new Rectangle(0, 0, getBounds().width, 
-				     getBounds().height);
-
-	int width = getBounds().width;
-	int height = getBounds().height;
+	backing_rect = new Rectangle(0, 0, width, height);
 
 	if (debug)
 	  {
