@@ -41,6 +41,11 @@ public class listHandle {
     return label;
   }
 
+  public String toString()
+  {
+    return label;
+  }
+
   public void setLabel(String label)
   {
     this.label = label;
