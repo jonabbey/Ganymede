@@ -436,8 +436,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     // persona is not a member of the supergash owner set, which would
     // make roles superfluous
 
-    Vector roles = checkObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
-    Vector ownerSets = checkObj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
+    Vector roles = object.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
+    Vector ownerSets = object.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
     Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
 
