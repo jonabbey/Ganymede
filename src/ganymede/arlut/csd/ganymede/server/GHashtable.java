@@ -200,7 +200,7 @@ public class GHashtable extends Hashtable {
 	      }
 	    else
 	      {
-		temp.put(key, java.lang.Boolean.TRUE); // we don't really care about value, just key
+		temp.put(key, this.get(key));
 	      }
 	  }
 
