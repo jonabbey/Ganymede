@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/09/15 08:48:35 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/11/24 05:41:37 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -61,9 +61,6 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
-import arlut.csd.JTable.*;
-import arlut.csd.Util.PackageResources;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   StringSelector
@@ -96,7 +93,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.28 $ $Date: 2000/09/15 08:48:35 $ $Name:  $
+ * @version $Revision: 1.29 $ $Date: 2000/11/24 05:41:37 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
