@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1120,7 +1120,9 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public synchronized void setTargetBase(short val)
   {
-    // should we check that this is a valid target code?
+    Base b;
+
+    /* -- */
 
     if (editor == null)
       {
@@ -1132,7 +1134,65 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not an invid field");
       }
     
-    allowedTarget = val;
+    b = base.editor.getBase(val);
+
+    if (b != null)
+      {
+	allowedTarget = val;
+      }
+    else
+      {
+	throw new IllegalArgumentException("not a valid base id");
+      }
+  }
+
+  /**
+   *
+   * Sets the allowed target object code of this invid field to <baseName>.
+   * If val is null, this invid field can point to objects of any type.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setTargetBase(String baseName)
+  {
+    Base b;
+
+    /* -- */
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isInvid())
+      {
+	throw new IllegalArgumentException("not an invid field");
+      }
+
+    if (baseName == null)
+      {
+	allowedTarget = -1;
+	return;
+      }
+
+    b = base.editor.getBase(baseName);
+
+    try
+      {
+	if (b != null)
+	  {
+	    allowedTarget = b.getTypeID();
+	  }
+	else
+	  {
+	    throw new IllegalArgumentException("not a valid base name");
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote except: " + ex);
+      }
   }
 
   /**
@@ -1207,6 +1267,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public synchronized void setTargetField(short val)
   {
+    Base b;
+    BaseField bF;
+
+    /* -- */
+
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
@@ -1217,7 +1282,90 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not an invid field");
       }
 
+    if (allowedTarget == -1)
+      {
+	throw new IllegalArgumentException("not a symmetry maintained field");
+      }
+
+    try
+      {
+	b = editor.getBase(allowedTarget);
+
+	if (b == null)
+	  {
+	    throw new IllegalArgumentException("invalid target base");
+	  }
+	
+	bF = b.getField(val);
+
+	if (bF == null)
+	  {
+	    throw new IllegalArgumentException("invalid target field in base " + b.getName());
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote: " + ex);
+      }
+
     targetField = val;
+  }
+
+  /**
+   * 
+   * Sets the field of the target object of this invid field that should
+   * be managed in the symmetry relationship if isSymmetric().
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setTargetField(String fieldName)
+  {
+    Base b;
+    BaseField bF;
+
+    /* -- */
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isInvid())
+      {
+	throw new IllegalArgumentException("not an invid field");
+      }
+
+    // look for fieldName in the base currently specified in
+    // allowedTarget
+
+    if (allowedTarget == -1)
+      {
+	throw new IllegalArgumentException("not a symmetry maintained field");
+      }
+
+    b = editor.getBase(allowedTarget);
+
+    try
+      {
+	if (b == null)
+	  {
+	    throw new IllegalArgumentException("invalid target base");
+	  }
+	
+	bF = b.getField(fieldName);
+
+	if (bF == null)
+	  {
+	    throw new IllegalArgumentException("invalid target field in base " + b.getName());
+	  }
+
+	targetField = bF.getID();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote: " + ex);
+      }
   }
 
   // general convenience methods
