@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.4 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.5 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -63,9 +63,11 @@ public interface db_object extends java.rmi.Remote {
    *
    * <p>Get list of DBFields contained in this object.</p>
    *
+   * @param customOnly If true, listFields will not include built-in fields
+   *
    */
 
-  public db_field[] listFields() throws RemoteException;
+  public db_field[] listFields(boolean customOnly) throws RemoteException;
 
   /**
    *
