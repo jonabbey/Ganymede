@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.4 $
-# $Date: 1999/01/21 00:44:22 $
+# $Revision: 1.5 $
+# $Date: 1999/01/21 01:21:15 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -35,11 +35,11 @@ system("rm -rf *");
 
 # Now the class families that we need to finish up
 
-print "Attempting to link classes\n";
+print "\nLinking admin classes from arlut.csd.ganymede\n\n";
 
 foreach $family (@ganymede_classes) {
   opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
-  @classes = grep /^$family[\$\.].*\.class$/, readdir SOURCEDIR;
+  @classes = grep /^$family[\$\.].*\.?class$/, readdir SOURCEDIR;
   closedir SOURCEDIR;
   
   foreach $file (@classes) {
@@ -55,7 +55,7 @@ foreach $family (@ganymede_classes) {
 
 # Now we need to link in any stub classes
 
-print "Attempting to link stubs\n";
+print "\nAttempting to link admin stubs\n\n";
 
 opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
@@ -73,7 +73,7 @@ foreach $file (@stubs) {
 
 # Now we need to link in any Skel classes
 
-print "Attempting to link skels\n";
+print "\nAttempting to link admin skels\n\n";
 
 opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Skel/, readdir SOURCEDIR;
@@ -95,7 +95,7 @@ link("<#CLASSDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
 
 # Now we need to link in any gif files
 
-print "Attempting to link gifs\n";
+print "\nAttempting to link admin gifs\n\n";
 
 opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @gifs = grep /\.gif/, readdir SOURCEDIR;
@@ -111,4 +111,4 @@ foreach $file (@gifs) {
   }
 }
 
-print "Done.\n";
+print "\nDone sync'ing admin_classes tree.\n\n";

@@ -13,6 +13,8 @@
 $sourcedir = "<#CLASSDIR#>/arlut/csd/ganymede";
 $targetdir = "<#CLASSDIR#>/server_classes/arlut/csd/ganymede";
 
+print "\nLinking server classes\n\n";
+
 # What directory are we handling?
 
 chdir($targetdir);
@@ -20,6 +22,8 @@ chdir($targetdir);
 # Clean it out
 
 system("rm -rf *");
+
+print "Linking client stub class\n\n";
 
 mkdir("client", 0770);
 symlink("$sourcedir/client/ClientBase_Stub.class", "client/ClientBase_Stub.class");
@@ -41,6 +45,8 @@ closedir SOURCEDIR;
 
 # And link em.
 
+print "\nLinking individual classes in arlut.csd.ganymede to server_classes.\n\n";
+
 foreach $file (@classes) {
 
   # Peel off the sourcedir prefix to get the simple file name
@@ -57,4 +63,4 @@ foreach $file (@classes) {
   }
 }
 
-print "Done.\n";
+print "\nDone sync'ing server_classes tree.\n";

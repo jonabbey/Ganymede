@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.2 $
-# $Date: 1999/01/21 00:44:22 $
+# $Revision: 1.3 $
+# $Date: 1999/01/21 01:21:16 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -58,25 +58,39 @@ system("rm -rf *");
 
 # Now link in all the base classes we need
 
+print "\nLinking client classes from arlut.csd.ganymede\n\n";
+
 foreach $family (@ganymede_classes) {
-  opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
-  @classes = grep /^$family[\$\.].*\.class$/, readdir SOURCEDIR;
-  closedir SOURCEDIR;
+
+#    print "Linking family $family\n";
+
+    opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
+    @classes = grep /^$family[\$\.].*\.?class$/, readdir SOURCEDIR;
+    closedir SOURCEDIR;
   
-  foreach $file (@classes) {
-    print "Linking " . $file . "\n";
-    
-    $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
-    
-    if (!$result){
-      print "$! -- $file\n";
+    foreach $file (@classes) {
+
+	if ($file =~ /_Stub\.class$/) {
+	    next;
+	}
+	
+	if ($file =~ /_Skel\.class$/) {
+	    next;
+	}
+	
+	print "Linking " . $file . "\n";
+	
+	$result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
+	
+	if (!$result){
+	    print "$! -- $file\n";
+	}
     }
-  }
 }
 
 # Now we need to link in any stub classes
 
-print "Attempting to link stubs\n";
+print "\nAttempting to link stubs\n\n";
 
 opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
@@ -91,7 +105,7 @@ foreach $file (@stubs) {
   }
 }
 
-print "Attaching client dir\n";
+print "\nAttaching client dir\n\n";
 
 $clientdir="<#CLASSDIR#>/client_classes/arlut/csd/ganymede/client";
 $sourcedir="<#CLASSDIR#>/arlut/csd/ganymede/client";
@@ -122,4 +136,4 @@ foreach $file (@files) {
   }
 }
 
-print "Done.\n";
+print "\nDone sync'ing client_classes tree.\n\n";
