@@ -1,7 +1,73 @@
-Ganymede Release 1.0.11
-December 9, 2002
+Ganymede Release 1.0.12
+? ?, 2003
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.11 to 1.0.12 -------------------
+
+RELEASE DATE: ? ?, 2003
+
+1. [CLIENT] Properly update StringSelector count display on manual item entry
+
+The StringSelector widget used to manipulate vectors of strings and
+object references in the client was not properly updating the item
+count when an item was manually entered through the text box.
+
+2. [SERVER] Fixed regression in object event label display
+
+I had neglected to edit the objectEventCustom.java class to cohere
+with the change described in CHANGES 1.0.11#8.
+
+3. [SERVER] Fixed exception vulnerability in admin console, scheduler code
+
+We had an occasion in which the Ganymede scheduler terminated during
+the server's normal operations, as a result of cascading failure in
+the admin console notification system.  The changeStatus() method in
+serverAdminProxy was not properly checking the done flag, so a
+NullPointerException was thrown where the GanymedeAdmin code was only
+expecting the possibility of a RemoteException.  The
+NullPointerException was being thrown up through the Ganymede.debug()
+call frame, which led to the scheduler being killed.
+
+I have fixed the serverAdminProxy.changeStatus() method so that the
+NullPointerException will not re-occur, and I have fixed the Ganymede
+scheduler so that nothing but an actual interrupt on the scheduler
+thread will cause the scheduler to terminate.
+
+4. [SERVER] Turned off extraneous debug output from XML processing logic
+
+I had accidentally left the debug flag enabled in the xmlobject and
+xmlfield classes, which caused a lot of extra output to be displayed
+when processing XML files through the xmlclient.
+
+5. [SERVER] Removed 1.4-only StringBuffer method usage from DBEditObject.java
+
+It turns out that java.lang.StringBuffer gains a method overload that
+executes special code in the event that the parameter passed to append
+is itself a StringBuffer.  When I compiled the Ganymede code with a
+1.4.1 JDK, code that previously was interpreted to have an implicit
+toString() method call now uses the optimized StringBuffer call, which
+doesn't exist in JDK 1.3 and earlier.  Putting the toString() in
+explicitly forces javac to use the String parameter method, which is
+present in all versions of the JDK.
+
+This fix should make it possible to run the Ganymede server on JDK
+1.3.1 or earlier again.
+
+Thanks to Maura Mathieu (maura.mathieu@sdis66.fr) and Kent Wick
+(kent.wick@mhmr.state.tx.us) for reporting this.
+
+6. [SERVER] Preparations for logging to PostGreSQL
+
+The Ganymede log classes have been reworked in preparation for
+supporting SQL databases for log event storage and retrieval.  1.0.12
+is not SQL-ready, quite, but I've done some refactoring to allow for a
+variety of DBLogController implementations.  I've implemented a
+DBLogPostGreSQLController class for logging to PostGreSQL with an
+appropriate schema, but I'm not including the appropriate support
+files necessary for initializing the database and what-not.
+
+Next release if all works out well.
 
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
