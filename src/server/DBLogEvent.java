@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,14 +21,14 @@ import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                      DBLog.java
+                                                                 DBLogEvent.java
 
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class defines the data to be recorded in a log/mail record.
- *
+ * This class stores a complete record of a single sub-transactional event,
+ * to be emitted to the DBLog log file, or sent to a set of users via
+ * email..
  */
 
 public class DBLogEvent {
