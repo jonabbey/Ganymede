@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.3 $
-# $Date: 1999/01/15 21:41:48 $
+# $Revision: 1.4 $
+# $Date: 1999/01/15 21:58:03 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -205,8 +205,6 @@ $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
 
-print "Hi, I'm your perl friend.  My perl is $perlname, my root is $rootdir\n";
-
 @configs=("$rootdir/src/Util", "Ganymede Utility Classes",
 	  "$rootdir/src/JCalendar", "Ganymede Calendar Classes",
 	  "$rootdir/src/JDialog", "Ganymede Dialog Classes",
@@ -222,7 +220,9 @@ print "Hi, I'm your perl friend.  My perl is $perlname, my root is $rootdir\n";
 	  "$rootdir/src/schemas/nisonly", "NIS Schema Classes",
 	  "$rootdir/src/schemas/ganymede.old", "Old Ganymede Schema Classes");
 
-while ($#configs) {
+print "Generating config.sh files in source directories.";
+
+while ($#configs > 0) {
     write_config(shift @configs, shift @configs);
 }
 
@@ -235,7 +235,9 @@ while ($#configs) {
 	   "$rootdir/src/schemas/nisonly/custom_src", "arlut/csd/ganymede/custom",
 	   "$rootdir/src/schemas/ganymede.old/custom_src", "arlut/csd/ganymede/custom");
 
-while ($#rebuilds) {
+print "Generating rebuild files in source directories.";
+
+while ($#rebuilds > 0) {
     write_rebuild(shift @rebuilds, shift @rebuilds);
 }
 
