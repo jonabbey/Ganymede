@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,28 +112,41 @@ public class PasswordDBField extends DBField implements pass_field {
 
   void emit(DataOutput out) throws IOException
   {
-    if (cryptedPass == null)
-      {
-	out.writeUTF("");
-      }
-    else
-      {
-	out.writeUTF(cryptedPass);
-      }
+    // note that we never save unencrypted passwords if we have
+    // a crypted copy.  We'll keep unencrypted passwords around
+    // in memory
 
-    if (uncryptedPass == null)
+    if (definition.isCrypted())
       {
-	out.writeUTF("");
+	if (cryptedPass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(cryptedPass);
+	  }
       }
     else
       {
-	out.writeUTF(uncryptedPass);
+	if (uncryptedPass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(uncryptedPass);
+	  }
       }
   }
 
   void receive(DataInput in) throws IOException
   {
-    if ((Ganymede.db.file_major > 1) || (Ganymede.db.file_minor >= 10))
+    // at file format 1.10, we were keeping both crypted and unecrypted
+    // passwords on disk.  Since then, we have decided to only write
+    // out encrypted passwords if we are using them.
+
+    if ((Ganymede.db.file_major == 1) || (Ganymede.db.file_minor == 10))
       {
 	cryptedPass = in.readUTF();
 
