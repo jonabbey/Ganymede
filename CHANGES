@@ -1,11 +1,11 @@
 Ganymede Release 1.04
-July ??, 2001
+July 9, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.03 to 1.04 -------------------
 
-RELEASE DATE: July ??, 2001
+RELEASE DATE: July 9, 2001
 
 1. [SERVER] Fixed NullPointerException thrown in XML Login path
 
