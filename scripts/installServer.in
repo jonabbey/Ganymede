@@ -1,0 +1,752 @@
+#!/opt/bin/perl5
+#
+# Install script for Ganymede developer release 1
+#
+# 19 March 1998
+#
+# Jonathan Abbey - jonabbey@arlut.utexas.edu
+#
+############################################################
+
+use File::Copy;
+use English;
+
+# This script needs to get a several pieces of information from
+# the user, including:
+#
+# Where is the jvm (java command)?
+# Where should the server tree be placed?
+# What system is the server to run on?
+# What return address should the server put on outgoing mail?
+# What superuser name is desired?
+# What password is desired?
+# What monitor account name is desired?
+# What monitor account password is desired?
+# Where is the root of the help web?
+# Which schema package does the user want to use?
+#
+# Everything else can be reasonably derived from the above.
+
+@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","MAILHOST",
+	  "RETURNADDR", "SUPERNAME", "SUPERPASS",
+	  "MONITORNAME", "MONITORPASS", "SCHEMA");
+
+@gashsteps = ("DNSDOMAIN", "MAILSUFFIX", "HOMEDIRPREFIX");
+@nisonlysteps = ("HOMEDIRPREFIX");
+
+%vars = ("JVM" => "/opt/bin",
+         "SERVERINSTALL" => "",
+         "SYSTEMNAME" => "",
+	 "MAILHOST" => "",
+         "RETURNADDR" => "",
+	 "MAILSUFFIX" => "\@arlut.utexas.edu",
+	 "HOMEDIRPREFIX" => "/home/",
+         "SUPERNAME" => "supergash",
+         "SUPERPASS" => "newpass",
+         "MONITORNAME" => "monitor",
+         "MONITORPASS" => "monitor",
+	 "SCHEMA" => "",
+	 "DNSDOMAIN" => "",
+         "HELPWEB" => "http://www.arlut.utexas.edu/~mulvaney/ganymede/");
+
+%descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
+            "SERVERINSTALL" => "Where should the server tree be installed?",
+	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
+	    "MAILHOST" => "What mailhost should Ganymede use to send out diagnostic mail?",
+	    "RETURNADDR" => "What email address should Ganymede sign on email that it sends out?",
+	    "MAILSUFFIX" => "What suffix should be tacked onto users' names for their default mail delivery?",
+	    "HOMEDIRPREFIX" => "What prefix should be prepended to the user's name for their UNIX home directory?",
+	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?",
+	    "SUPERPASS" => "What password do you want the superuser account to have?",
+	    "MONITORNAME" => "What name do you want the Ganymede monitor account to have?",
+	    "MONITORPASS" => "What password do you want the monitor account to have?",
+	    "SCHEMA" => "What schema do you want to initialize the database with? (gash,nisonly,bsd,linux,gasharl)",
+	    "DNSDOMAIN" => "What single DNS domain do you want the GASH Schema to manage?",
+	    "HELPWEB" => "What URL is the Ganymede help web at (leave default for now)?");
+
+$template = "scripts/server.properties.template";
+
+####################
+
+# We don't want to hold back stdout
+
+$| = 1;
+
+print <<ENDINTRO;
+
+Ganymede Server Install Script
+------------------------------
+
+ENDINTRO
+
+# Make sure we're running from the right directory
+
+open TEST, $template or $failure = 1;
+
+if (!$failure) {
+  close TEST;
+} else {
+  print "*error* couldn't find server properties template.  not run from install directory?\n";
+  exit;
+}
+
+# Read the information from the user
+
+$vars{"SYSTEMNAME"} = `hostname`; # default hostname
+chop $vars{"SYSTEMNAME"}; # take off trailing newline
+$vars{"MAILHOST"} = $vars{"SYSTEMNAME"};
+
+foreach $step (@steps) {
+
+  $success = 0;
+
+  while (!$success) {
+    print $descrip{$step};
+    print " [$vars{$step}] ";
+
+    $inp = <>;
+
+    chop $inp; # cut off newline
+
+    if ($inp ne "") {
+      $vars{$step} = $inp;
+    }
+
+    # We won't force the user to specify one of our schemas but
+    # everything else they've gotta give us something
+
+    if ($step ne "SCHEMA") {
+      if ($vars{$step}eq "") {
+        $success = 0;
+        print "*You must provide a value for this field*\n";
+      } else {
+        $success = 1;
+      }
+    } else {
+      $success = 1;
+    }
+
+    if (($step eq "SERVERINSTALL") ||
+	($step eq "JVM")) {
+
+      if ($vars{$step} !~ /^\//) {
+	print "*Relative pathnames not allowed, please enter a full path.\n";
+	$success = 0;
+      }
+    }
+  }
+}
+
+# If they chose the gash schema, get the gash-specific variables
+
+if (($vars{"SCHEMA"} eq "gash")|| ($vars{"SCHEMA"} eq "gasharl")) {
+  
+  foreach $step (@gashsteps) {
+    
+    $success = 0;
+    
+    while (!$success) {
+      print $descrip{$step};
+      print " [$vars{$step}] ";
+      
+      $inp = <>;
+      
+      chop $inp;		# cut off newline
+      
+      if ($inp ne "") {
+	$vars{$step} = $inp;
+      }
+      
+      if ($vars{$step}eq "") {
+	$success = 0;
+	print "*You must provide a value for this field*\n";
+      } else {
+	$success = 1;
+      }
+    }
+  }
+} elsif (($vars{"SCHEMA"} eq "nisonly") ||
+	 ($vars{"SCHEMA"} eq "bsd") ||
+	 ($vars{"SCHEMA"} eq "linux")) {
+
+  foreach $step (@nisonlysteps) {
+    
+    $success = 0;
+    
+    while (!$success) {
+      print $descrip{$step};
+      print " [$vars{$step}] ";
+      
+      $inp = <>;
+      
+      chop $inp;		# cut off newline
+      
+      if ($inp ne "") {
+	$vars{$step} = $inp;
+      }
+      
+      if ($vars{$step}eq "") {
+	$success = 0;
+	print "*You must provide a value for this field*\n";
+      } else {
+	$success = 1;
+      }
+    }
+  }
+}
+
+# Ok, we've got everything
+
+print <<ENDCONFIG;
+
+Testing configuration information
+
+ENDCONFIG
+
+$success = 1; # Assume success until we find out otherwise
+
+# java command found ok?
+
+if (!-e $vars{"JVM"}."/java") {
+  die "*Can't find the java command*\n\nAborting..";
+  $success = 0;
+} else {
+  print "Found the java command ok\n";
+}
+
+# can we make the server install directory?
+
+if (!-d $vars{"SERVERINSTALL"}) {
+  &removelastslash($vars{"SERVERINSTALL"});
+  mkdir($vars{"SERVERINSTALL"}, 0750) or die "*Couldn't make the server install directory*\n"; 
+  print "Made the server install directory ok\n";
+} else {
+  print "Found the server install directory ok\n";
+}
+
+# assume we've got the system name ok
+
+# Make sure the return address is fully qualified
+
+if ($vars{"RETURNADDR"} !~ /@/) {
+  $vars{"RETURNADDR"}.="@".$vars{"MAILHOST"};
+
+  print "** No machine/domain name specified in return address..\n";
+  print "** Set return address to " . $vars{"RETURNADDR"} . "\n";
+}
+
+print "\nConfiguration seems to check out.\n\n";
+print "Installing";
+
+$installdir = $vars{"SERVERINSTALL"};
+
+&makedir("$installdir/bin", 0750); print ".";
+&makedir("$installdir/db", 0750); print ".";
+&makedir("$installdir/db/out", 0750); print ".";
+&makedir("$installdir/db/text", 0750); print ".";
+&makedir("$installdir/jars", 0750); print ".";
+&makedir("$installdir/html", 0750); print ".";
+&copydir("doc", "$installdir/doc"); print ".";
+copy("README", "$installdir/README"); print ".";
+copy("INSTALL", "$installdir/INSTALL"); print ".";
+copy("CHANGES", "$installdir/CHANGES"); print ".";
+copy("CREDITS", "$installdir/CREDITS"); print ".";
+copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
+copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
+
+copy("jars/ganymedeServer.jar", "$installdir/jars/ganymedeServer.jar"); print ".";
+copy("password/password.jar", "$installdir/jars/password.jar"); print ".";
+
+copy("scripts/motd.html", "$installdir/db/text/motd.html"); print ".";
+copy("scripts/motd.txt", "$installdir/db/text/motd.txt"); print ".";
+
+# Identify the schema directory to copy
+
+if (($vars{"SCHEMA"} eq "gash") ||
+    ($vars{"SCHEMA"} eq "nisonly") ||
+    ($vars{"SCHEMA"} eq "bsd") ||
+    ($vars{"SCHEMA"} eq "gasharl") ||
+    ($vars{"SCHEMA"} eq "linux")) {
+
+  $schemadir = $vars{"SCHEMA"};
+  
+  # and copy the pre-configured schema into place
+
+  copy("schemas/$schemadir/loader/ganymede.schema", "$installdir/db/ganymede.db"); print ".";  
+} else {
+
+  print "\nNo predefined schema chosen.  Installing a template schema.\n";
+  $schemadir = "template";
+}
+
+&copydir("schemas/$schemadir/", "$installdir/schema"); print ".";
+symlink "../schema/custom.jar", "$installdir/jars/custom.jar";
+$schemainstalled = 1;
+
+# Copy the signature file
+
+copy("scripts/signature", "$installdir/db/signature"); print ".";
+
+# copydir doesn't preserve permissions.. make sure the schema build
+# scripts are executable
+
+if ($schemainstalled) {
+  chmod 0750, "$installdir/schema/custom_src/build";
+  chmod 0750, "$installdir/schema/custom_src/rebuild";
+  chmod 0750, "$installdir/schema/custom_src/buildCustomJar";
+  chmod 0750, "$installdir/schema/loader/source/build";
+}
+
+# Copy and process the properties file into place
+
+%propconvert = ("ganymede.database" => "$installdir/db/ganymede.db",
+		"ganymede.log" => "$installdir/db/log",
+		"ganymede.journal" => "$installdir/db/journal",
+		"ganymede.schemadump" => "$installdir/db/ganymede.schema",
+		"ganymede.htmldump" => "$installdir/html/schemadump.html",
+		"ganymede.signaturefile" => "$installdir/db/signature",
+		"ganymede.messageDirectory" => "$installdir/db/text",
+		"ganymede.mailhost" => $vars{"MAILHOST"},
+		"ganymede.returnaddr" => $vars{"RETURNADDR"},
+		"ganymede.defaultmailsuffix" => $vars{"MAILSUFFIX"},
+		"ganymede.homedirprefix" => $vars{"HOMEDIRPREFIX"},
+		"ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		"ganymede.rootname" => $vars{"SUPERNAME"},
+		"ganymede.defaultrootpass" => $vars{"SUPERPASS"},
+		"ganymede.monitorname" => $vars{"MONITORNAME"},
+		"ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
+		"ganymede.helpbase" => $vars{"HELPWEB"},
+		"ganymede.builder.output" => "$installdir/db/out",
+	        "ganymede.gash.dnsdomain" => $vars{"DNSDOMAIN"});
+
+open INPUT, $template or die "Couldn't open properties template!";
+open OUTPUT, ">$installdir/ganymede.properties" or die "Couldn't write ganymede.properties";
+
+print "\nCustomizing ganymede.properties\n";
+
+while (<INPUT>) {
+
+  if (!/^([^\#=]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $propconvert{$1}) {
+    print OUTPUT "$1=$propconvert{$1}\n";
+  } else {
+    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+# Copy and process the runServer script into place
+
+print "\nCustomizing ganymede runServer script\n";
+
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
+               "PROPERTIES" => "$installdir/ganymede.properties",
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/custom.jar");
+
+open INPUT, "scripts/runServer.template" or die "Couldn't open runServer template!";
+open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";
+
+while (<INPUT>) {
+
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/runServer";
+
+# Configure the schema build scripts
+
+if ($schemainstalled) {
+
+  print "\nCustomizing ganymede schema build scripts\n";
+
+  %buildconvert = ("JAVAC" => $vars{"JVM"}."/javac",
+		   "JAR" => $vars{"JVM"}."/jar",
+		   "SOURCE" => "$installdir/schema/custom_src",
+		   "CLASSDIR" => "$installdir/schema/custom_src/classes",
+		   "JARDIR" => "$installdir/jars",
+		   "CUSTOMDIR" => "$installdir/schema",
+		   "TARGETJAR" => "$installdir/schema/custom.jar");
+
+  open INPUT, "scripts/buildschemaconfig.sh.template" or die "Couldn't open schema build config template!";
+  open OUTPUT, ">$installdir/schema/custom_src/config.sh" or die "Couldn't write schema build config";
+
+  while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $buildconvert{$1}) {
+      print OUTPUT "$1=$buildconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+}
+
+# Configure the schema loader build scripts
+
+if ($schemainstalled) {
+
+  print "\nCustomizing ganymede schema loader build scripts\n";
+
+  %loaderconvert = ("JAVAC" => $vars{"JVM"}."/javac",
+		    "RMIC" => $vars{"JVM"}."/rmic",
+		    "JAR" => $vars{"JVM"}."/jar",
+		    "SOURCE" => "$installdir/schema/loader/source",
+		    "CLASSDIR" => "$installdir/schema/loader/classes",
+		    "CUSTOMDIR" => "$installdir/jars",
+		    "JARDIR" => "$installdir/jars");
+
+  open INPUT, "scripts/loaderschemaconfig.sh.template" or die "Couldn't open schema loader build template!";
+  open OUTPUT, ">$installdir/schema/loader/source/config.sh" or die "Couldn't write schema loader config";
+
+  while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $loaderconvert{$1}) {
+      print OUTPUT "$1=$loaderconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+
+  print "\nCustomizing ganymede schema loader run script\n";
+
+  %runloaderconvert = ("JAVA" => $vars{"JVM"}."/java",
+		       "JARPATH" => "$installdir/jars",
+		       "LOADERDIR" => "$installdir/schema/loader");
+
+  open INPUT, "scripts/runDirectLoader.template" or die "Couldn't open schema loader template!";
+  open OUTPUT, ">$installdir/schema/loader/runDirectLoader" or die "Couldn't write schema loader";
+
+  while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $runloaderconvert{$1}) {
+      print OUTPUT "$1=$runloaderconvert{$1}\n";
+    } else {
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+
+  chmod 0750, "$installdir/schema/loader/runDirectLoader";
+
+  print "\nCustomizing ganymede schema loader properties\n";
+
+  # Copy and process the loader properties file into place
+
+  %lpropconvert = ("ganymede.database" => "$installdir/schema/loader/db/ganymede.db",
+		   "ganymede.log" => "$installdir/schema/loader/db/log",
+		   "ganymede.journal" => "$installdir/schema/loader/db/journal",
+		   "ganymede.schemadump" => "$installdir/schema/loader/db/ganymede.schemadump",
+		   "ganymede.htmldump" => "$installdir/schema/schemadump.html",
+		   "ganymede.signaturefile" => "$installdir/schema/loader/db/signature",
+		   "ganymede.messageDirectory" => "$installdir/db/text",
+		   "ganymede.mailhost" => $vars{"MAILHOST"},
+		   "ganymede.returnaddr" => $vars{"RETURNADDR"},
+		   "ganymede.homedirprefix" => $vars{"HOMEDIRPREFIX"},
+		   "ganymede.defaultmailsuffix" => $vars{"MAILSUFFIX"},
+		   "ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		   "ganymede.rootname" => $vars{"SUPERNAME"},
+		   "ganymede.defaultrootpass" => $vars{"SUPERPASS"},
+		   "ganymede.monitorname" => $vars{"MONITORNAME"},
+		   "ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
+		   "ganymede.helpbase" => $vars{"HELPWEB"});
+
+  open INPUT, "scripts/loader.properties.template" or die "Couldn't open loader properties template!";
+  open OUTPUT, ">$installdir/schema/loader/ganymede.properties" or die "Couldn't write loader's ganymede.properties";
+  
+  print "\nCustomizing loader's ganymede.properties\n";
+  
+  while (<INPUT>) {
+    
+    if (!/^([^\#=]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $lpropconvert{$1}) {
+      print OUTPUT "$1=$lpropconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+}
+
+if ($vars{"SCHEMA"} eq "linux") {
+
+print <<ENDLINUX;
+
+------------------------------
+
+The Ganymede Server was successfully installed in $vars{"SERVERINSTALL"}.
+
+In order to get started with Ganymede, you need to do the following:
+
+1. Run the data loader to create a ganymede.db file from your passwd and group files.
+
+  a.   cd $vars{"SERVERINSTALL"}/schema/loader
+  b.   cp /etc/passwd /etc/group $vars{"SERVERINSTALL"}/schema/loader/input
+  c.   Run ./runDirectLoader
+  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
+       $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db
+  e.   cp $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db $vars{"SERVERINSTALL"}/db
+
+2. [OPTIONAL] Create a linux_builder script in $vars{"SERVERINSTALL"}/db/out.
+
+  If you want Ganymede to actually update your passwd and group files in /etc,
+  you can copy $vars{"SERVERINSTALL"}/schema/linux_builder.sample to
+  $vars{"SERVERINSTALL"}/db/out/linux_builder.  If you do this, the Ganymede
+  server will copy the passwd and group files generated by changes in
+  Ganymede to /etc.  Take a look at the linux_builder.sample script before
+  doing this, and make back-up copies of your original /etc/passwd and /etc/group
+  files, just in case.  These shouldn't be called /etc/passwd.old and /etc/group.old,
+  as Ganymede will overwrite these.
+
+2. Start the server up with your new ganymede.db file.
+
+  a.   cd $vars{"SERVERINSTALL"}/bin
+  b.   Run ./runServer
+
+Your Ganymede server should now be running and ready to accept
+connections from the client and/or the admin console.
+
+------------------------------
+ENDLINUX
+
+} elsif ($vars{"SCHEMA"} eq "bsd") {
+
+print <<ENDBSD;
+
+------------------------------
+
+The Ganymede Server was successfully installed in $vars{"SERVERINSTALL"}.
+
+In order to get started with Ganymede, you need to do the following:
+
+1. Run the data loader to create a ganymede.db file from your passwd and group files.
+
+  a.   cd $vars{"SERVERINSTALL"}/schema/loader
+  b.   cp /etc/master.passwd /etc/group $vars{"SERVERINSTALL"}/schema/loader/input
+  c.   Run ./runDirectLoader
+  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
+       $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db
+  e.   cp $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db $vars{"SERVERINSTALL"}/db
+
+2. [OPTIONAL] Create a bsd_builder script in $vars{"SERVERINSTALL"}/db/out.
+
+  If you want Ganymede to actually update your passwd and group files
+  in /etc, you can copy $vars{"SERVERINSTALL"}/schema/bsd_builder.sample to
+  $vars{"SERVERINSTALL"}/db/out/bsd_builder.  If you do this, the
+  Ganymede server will copy the passwd, master.passwd, and group files
+  generated by changes in Ganymede to /etc.  Take a look at the
+  bsd_builder.sample script before doing this, and make back-up copies
+  of your original /etc/master.passwd, /etc/passwd, and /etc/group
+  files, just in case.  These shouldn't be called /etc/master.passwd.old,
+  /etc/passwd.old, and /etc/group.old, as Ganymede will overwrite these.
+
+2. Start the server up with your new ganymede.db file.
+
+  a.   cd $vars{"SERVERINSTALL"}/bin
+  b.   Run ./runServer
+
+Your Ganymede server should now be running and ready to accept
+connections from the client and/or the admin console.
+
+------------------------------
+ENDBSD
+
+} elsif (($vars{"SCHEMA"} eq "gash")||($vars{"SCHEMA"} eq "gasharl")) {
+
+print <<ENDGASH;
+
+------------------------------
+
+The Ganymede Server was successfully installed in $vars{"SERVERINSTALL"}.
+
+In order to get started with Ganymede, you need to do the following:
+
+1. Run the data loader to create a ganymede.db file from your passwd and group files.
+
+  a.   cd $vars{"SERVERINSTALL"}/schema/loader
+  b.   Copy your GASH files, including networks_by_room.cpp to $vars{"SERVERINSTALL"}/schema/loader/input
+  c.   Run ./runDirectLoader
+  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
+       $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db
+  e.   cp $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db $vars{"SERVERINSTALL"}/db
+
+2. [OPTIONAL] Create a gashbuilder script in $vars{"SERVERINSTALL"}/db/out.
+
+  If you want Ganymede to actually update your passwd and group maps,
+  you need to have a builder script, $vars{"SERVERINSTALL"}/db/out/gashbuilder.
+
+  This gashbuilder script would be equivalent to running the GASH make process.
+  We don't yet include this script, but we will get one out in a subsequent
+  release.
+
+2. Start the server up with your new ganymede.db file.
+
+  a.   cd $vars{"SERVERINSTALL"}/bin
+  b.   Run ./runServer
+
+Your Ganymede server should now be running and ready to accept
+connections from the client and/or the admin console.
+
+------------------------------
+ENDGASH
+
+} elsif ($vars{"SCHEMA"} eq "nisonly") {
+
+print <<ENDNIS;
+
+------------------------------
+
+The Ganymede Server was successfully installed in $vars{"SERVERINSTALL"}.
+
+In order to get started with Ganymede, you need to do the following:
+
+1. Run the data loader to create a ganymede.db file from your passwd and group files.
+
+  a.   cd $vars{"SERVERINSTALL"}/schema/loader
+  b.   Copy your passwd and group NIS source files to $vars{"SERVERINSTALL"}/schema/loader/input
+  c.   Run ./runDirectLoader
+  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
+       $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db
+  e.   cp $vars{"SERVERINSTALL"}/schema/loader/db/ganymede.db $vars{"SERVERINSTALL"}/db
+
+2. [OPTIONAL] Create a nisbuilder script in $vars{"SERVERINSTALL"}/db/out.
+
+  If you want Ganymede to actually update your passwd and group maps,
+  you need to have a builder script, $vars{"SERVERINSTALL"}/db/out/nisbuilder.
+  This script should copy the passwd and group files emitted by Ganymede into
+  your NIS map directory, and then run the NIS make.
+
+2. Start the server up with your new ganymede.db file.
+
+  a.   cd $vars{"SERVERINSTALL"}/bin
+  b.   Run ./runServer
+
+Your Ganymede server should now be running and ready to accept
+connections from the client and/or the admin console.
+
+------------------------------
+ENDNIS
+
+} else {
+
+print <<ENDNOSCHEMA;
+
+------------------------------
+
+The Ganymede Server was successfully installed in
+$vars{"SERVERINSTALL"}.  Because you did not select a schema to be
+installed, no data loading scripts have been installed.  At this
+point, about all you can do is to
+
+  a.   cd $vars{"SERVERINSTALL"}/bin
+  b.   Run ./runServer
+
+Your Ganymede server should now be running and ready to accept
+connections from the client and/or the admin console.
+
+------------------------------
+ENDNOSCHEMA
+}
+
+print "\nDone\n";
+
+######################################################################### 
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+######################################################################### 
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+}
+
+######################################################################### 
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+######################################################################### 
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0750);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      copy("$source/$file", "$target/$file");
+    }
+  }
+}
+
+######################################################################### 
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name 
+# input
+#
+######################################################################### 
+sub removelastslash{
+    if ($_[0] =~ /\/$/) {
+	chop $_[0];
+    }
+}

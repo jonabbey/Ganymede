@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Ganymede Server Run Script
+# 
+############################
+
+## This section is customized by the server install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installServer.perl
+# script
+
+JAVA=/usr/bin/java
+RMIREGISTRY=/usr/bin/rmiregistry
+PROPERTIES=ganymede.properties
+CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jars/password.jar
+
+
+############################################### 
+
+trap "echo Aborted" 2
+
+echo "Running Ganymede Server"
+
+export CLASSPATH
+
+# Run the RMI registry to provide remote name lookup for the server
+
+$RMIREGISTRY &
+
+# The -resetadmin parameter forces the Ganymede server to reset the supergash and
+# monitor passwords from the properties file
+
+# If you want to run the server in debug mode, be sure that the JAVA command specified
+# above is not JIT'ed and add debug=/path/debug.log to the line below.  That will
+# cause the server to record all RMI calls made to it, and will let you examine
+# exception traces that occur while the server is servicing a client request.
+
+$JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin properties=$PROPERTIES

@@ -1,0 +1,28 @@
+#
+# ganymede.properties
+#
+# This file specifies basic configuration information for the Ganymede
+# client and admin console.  
+#
+# Further configuration information is stored in the Ganymede database.
+#
+# ----------------------------------------------------------------------
+
+# ganymede.serverhost
+#
+# The name of the system that the Ganymede server is being run on.
+#
+# Used by the client and admin console
+
+ganymede.serverhost=www.arlut.utexas.edu
+
+
+# ganymede.rootname
+#
+# The name of the root-privileged account.
+#
+# Used by the server and admin console
+
+ganymede.rootname=supergash
+
+

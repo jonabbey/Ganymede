@@ -1,0 +1,483 @@
+#!/opt/bin/perl5
+#
+# Install script for Ganymede developer release 6
+#
+# 9 November 1998
+#
+# Jonathan Abbey - jonabbey@arlut.utexas.edu
+#
+############################################################
+
+use File::Copy;
+
+# This script needs to get a several pieces of information from
+# the user, including:
+#
+# Where is the jvm (java command)?
+# Where is Swing installed at?
+# Where should the client tree be placed?
+# What system is the server running on?
+# What superuser name is desired?
+#
+# Everything else can be reasonably derived from the above.
+
+@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
+
+%vars = ("JVM" => "/opt/bin",
+	 "SWINGJARS" => "/opt/depot/swing-1.1beta3",
+         "SYSTEMNAME" => "",
+         "CLIENTINSTALL" => "",
+         "SUPERNAME" => "supergash");
+
+%descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
+	    "SWINGJARS" => "Where are the Swing 1.1 beta3+ jar files installed at?",
+	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
+            "CLIENTINSTALL" => "Where should the client binaries be installed?",
+	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");
+
+$template = "scripts/client.properties.template";
+
+####################
+
+# We don't want to hold back stdout
+
+$| = 1;
+
+print <<ENDINTRO;
+
+Ganymede Client Install Script
+------------------------------
+
+ENDINTRO
+
+# Make sure we're running from the right directory
+
+open TEST, $template or $failure = 1;
+
+if (!$failure) {
+  close TEST;
+} else {
+  print "*error* couldn't find client properties template.  not run from install directory?\n";
+  exit;
+}
+
+# Read the information from the user
+
+$vars{"SYSTEMNAME"} = `hostname`; # default hostname
+chop $vars{"SYSTEMNAME"}; # take off trailing newline
+
+foreach $step (@steps) {
+
+  $success = 0;
+
+  while (!$success) {
+    print $descrip{$step};
+    print " [$vars{$step}] ";
+
+    $inp = <>;
+
+    chop $inp; # cut off newline
+
+    if ($inp ne "") {
+      $vars{$step} = $inp;
+    }
+
+    if ($vars{$step}eq "") {
+      if ($step eq "SWINGJARS") {
+	print "*No location provided for Swing Jars.. can't install command-line scripts.*\n";
+      } else {
+	$success = 0;
+	print "*You must provide a value for this field*\n";
+      }
+    } else {
+      $success = 1;
+    }
+
+    if (($step eq "CLIENTINSTALL") ||
+	($step eq "SWINGJARS") ||
+	($step eq "JVM")) {
+
+      if ($vars{$step} !~ /^\//) {
+	print "*Relative pathnames not allowed, please enter a full path.\n";
+	$success = 0;
+      }
+    }
+  }
+}
+
+# Ok, we've got everything
+
+print <<ENDCONFIG;
+
+Testing configuration information
+
+ENDCONFIG
+
+$success = 1; # Assume success until we find out otherwise
+
+# java command found ok?
+
+if (!-e $vars{"JVM"}."/java") {
+  die "*Can't find the java command*\n\nAborting..";
+  $success = 0;
+} else {
+  print "Found the java command ok\n";
+}
+
+# swing jars found?
+
+if (!-e $vars{"SWINGJARS"}."/swingall.jar") {
+  print "*Can't find the swingall jar*\n";
+  print $vars{"SWINGJARS"}."/swingall.jar";
+  $swingfound = 0;
+} else {
+  print "Found the swing jar ok\n";
+  $swingfound = 1;
+}
+
+# can we make the client install directory?
+
+if (!-d $vars{"CLIENTINSTALL"}) {
+  &removelastslash($vars{"CLIENTINSTALL"});
+  mkdir($vars{"CLIENTINSTALL"}, 0750) or die "*Couldn't make the client install directory*\n"; 
+  print "Made the client install directory ok\n";
+} else {
+  print "Found the client install directory ok\n";
+}
+
+print "\nConfiguration seems to check out.\n\n";
+print "Installing";
+
+$installdir = $vars{"CLIENTINSTALL"};
+
+if ($swingfound) {
+  &makedir("$installdir/bin", 0750); print ".";
+}
+&makedir("$installdir/jars", 0750); print ".";
+&makedir("$installdir/html", 0750); print ".";
+&makedir("$installdir/html/activator", 0750); print ".";
+&makedir("$installdir/html/hotjava", 0750); print ".";
+&makedir("$installdir/password", 0750); print ".";
+
+copy("jars/ganymede.jar", "$installdir/jars/ganymede.jar"); print ".";
+link("$installdir/jars/ganymede.jar", "$installdir/html/activator/ganymede.jar"); print ".";
+link("$installdir/jars/ganymede.jar", "$installdir/html/hotjava/ganymede.jar"); print ".";
+copy("jars/ganymedeAdmin.jar", "$installdir/jars/ganymedeAdmin.jar"); print ".";
+link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/activator/ganymedeAdmin.jar"); print ".";
+link("$installdir/jars/ganymedeAdmin.jar", "$installdir/html/hotjava/ganymedeAdmin.jar"); print ".";
+copy("password/password.jar", "$installdir/jars/password.jar"); print ".";
+link("$installdir/jars/password.jar", "$installdir/html/activator/password.jar"); print ".";
+link("$installdir/jars/password.jar", "$installdir/html/hotjava/password.jar"); print ".";
+copydir("password", "$installdir/password"); print ".";
+
+if ($swingfound) {
+  copy($vars{"SWINGJARS"}."/swingall.jar", "$installdir/html/hotjava/swingall.jar"); print ".";
+}
+
+# Copy and process the properties file into place
+
+if ($swingfound) {
+  %clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		    "ganymede.rootname" => $vars{"SUPERNAME"});
+
+  open INPUT, $template or die "Couldn't open client properties template!";
+  open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";
+
+  print "\nCustomizing client.properties\n";
+
+  while (<INPUT>) {
+    
+    if (!/^([^\#=]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $clientconvert{$1}) {
+      print OUTPUT "$1=$clientconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+
+  # Copy and process the ganymede script into place
+
+  print "\nCustomizing ganymede script\n";
+  
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => "$installdir/client.properties",
+		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
+  
+  open INPUT, "scripts/ganymede.template" or die "Couldn't open ganymede template!";
+  open OUTPUT, ">$installdir/bin/ganymede" or die "Couldn't write ganymede";
+  
+  while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+      print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+
+  close INPUT;
+  close OUTPUT;
+
+  chmod 0750, "$installdir/bin/ganymede";
+
+  # Copy and process the ganymedeAdmin script into place
+
+  print "\nCustomizing ganymedeAdmin script\n";
+
+  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
+		 "PROPERTIES" => "$installdir/client.properties",
+		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymedeAdmin.jar");
+
+  open INPUT, "scripts/ganymedeAdmin.template" or die "Couldn't open ganymedeAdmin template!";
+  open OUTPUT, ">$installdir/bin/ganymedeAdmin" or die "Couldn't write ganymedeAdmin";
+
+  while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+      print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+      print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+      print "Error.. unrecognized template entry $1 - copying template value\n";
+      print OUTPUT $_;
+    }
+  }
+  
+  close INPUT;
+  close OUTPUT;
+
+  chmod 0750, "$installdir/bin/ganymedeAdmin";
+} # end if ($swingfound)			
+
+# Copy and process the changePassword script into place
+
+print "\nCustomizing changePassword script\n";
+
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "JARDIR" => "$installdir/jars");
+
+open INPUT, "scripts/changePassword.template" or die "Couldn't open changePassword template!";
+open OUTPUT, ">$installdir/bin/changePassword" or die "Couldn't write changePassword";
+
+while (<INPUT>) {
+  
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/changePassword";
+
+# Make sure we have the configured changePassword in the password dir
+
+unlink("$installdir/password/changePassword");
+link("$installdir/bin/changePassword", "$installdir/password/changePassword");
+
+# Copy and process the Password build script into place
+
+print "\nCustomizing password client build scripts\n";
+
+%buildconvert = ("JAVAC" => $vars{"JVM"}."/javac",
+		 "RMIC" => $vars{"JVM"}."/rmic",
+		 "JAR" => $vars{"JVM"}."/jar",
+		 "SOURCE" => "$installdir/password",
+		 "CLASSDIR" => "$installdir/password/classes",
+		 "JARDIR" => "$installdir/jars",
+		 "TARGETJAR" => "$installdir/password/password.jar");
+
+open INPUT, "scripts/passwordconfig.sh.template" or die "Couldn't open password build config template!";
+open OUTPUT, ">$installdir/password/config.sh" or die "Couldn't write password build config";
+
+while (<INPUT>) {
+  
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $buildconvert{$1}) {
+    print OUTPUT "$1=$buildconvert{$1}\n";
+  } else {
+    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/password/build";
+
+# Write out the client web pages
+
+# First, the activator form of the client
+
+$systemname = $vars{"SYSTEMNAME"};
+
+open INPUT, "webforms/clientActivator.html" or die "Couldn't open clientActivator web template!";
+open OUTPUT, ">$installdir/html/activator/client.html" or die "Couldn't write activator client.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the hotjava form of the client
+
+open INPUT, "webforms/clientHotJava.html" or die "Couldn't open clientActivator web template!";
+open OUTPUT, ">$installdir/html/hotjava/client.html" or die "Couldn't write activator client.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the admin console
+
+# Activator version
+
+open INPUT, "webforms/consoleActivator.html" or die "Couldn't open consoleActivator web template!";
+open OUTPUT, ">$installdir/html/activator/console.html" or die "Couldn't write activator console.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/supergash/$vars{"SUPERNAME"}/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# HotJava version
+
+open INPUT, "webforms/consoleHotJava.html" or die "Couldn't open consoleHotJava web template!";
+open OUTPUT, ">$installdir/html/hotjava/console.html" or die "Couldn't write hotjava console.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/supergash/$vars{"SUPERNAME"}/g;
+  print OUTPUT $_;
+}
+
+
+close INPUT;
+close OUTPUT;
+
+# And the password client
+
+# Activator
+
+$systemname = $vars{"SYSTEMNAME"};
+
+open INPUT, "webforms/passwordActivator.html" or die "Couldn't open password Activator web template!";
+open OUTPUT, ">$installdir/html/activator/password.html" or die "Couldn't write activator password.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+# Now, the hotjava form of the password client
+
+open INPUT, "webforms/passwordHotJava.html" or die "Couldn't open passwordHotJava web template!";
+open OUTPUT, ">$installdir/html/hotjava/password.html" or die "Couldn't write activator password.html!";
+
+while (<INPUT>) {
+  s/www\.arlut\.utexas\.edu/$systemname/g;
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+print "\nDone\n";
+
+######################################################################### 
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+######################################################################### 
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+}
+
+######################################################################### 
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+######################################################################### 
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0750);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      copy("$source/$file", "$target/$file");
+    }
+  }
+}
+
+######################################################################### 
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name 
+# input
+#
+######################################################################### 
+sub removelastslash{
+    if ($_[0] =~ /\/$/) {
+	chop $_[0];
+    }
+}

@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Ganymede build configure variables
+#
+###################################
+
+JAVAC=/opt/bin/javac
+JAR=/opt/bin/jar
+SOURCE=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gash/custom_src
+CLASSDIR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gash/custom_src/classes
+JARDIR=/home/broccol/gash2/releases/latest/jars
+TARGETJAR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gash/custom.jar
+CUSTOMDIR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gash
