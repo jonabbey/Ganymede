@@ -38,7 +38,7 @@
   }
 
   img.screenshot {
-    float: right;  page-break-inside: avoid;
+    float: right;
   }
   
  p.address { font-family: Arial, Helvetica; font-style: italic; }
