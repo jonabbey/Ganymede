@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -512,7 +512,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (name != null)
 	  {
-	    result.addRow(null, name);
+	    result.addRow(null, name, false);
 	  }
 	else
 	  {
@@ -520,7 +520,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	    if (name != null)
 	      {
-		result.addRow(null, name);
+		result.addRow(null, name, false);
 	      }
 	  }
 
@@ -530,7 +530,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    result.addRow(null, (String) values.elementAt(i));
+	    result.addRow(null, (String) values.elementAt(i), false);
 	  }
 
 	return result;
@@ -542,8 +542,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   void updateShellChoiceList()
   {
-
-
     synchronized (shellChoices)
       {
 	DBObjectBase base = Ganymede.db.getObjectBase("Shell Choice");
@@ -568,7 +566,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	
 	    for (int i = 0; i < results.size(); i++)
 	      {
-		shellChoices.addRow(null, results.elementAt(i).toString()); // no invid
+		shellChoices.addRow(null, results.elementAt(i).toString(), false); // no invid
 	      }
 
 	    if (shellChoiceStamp == null)
