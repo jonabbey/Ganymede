@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/05/24 00:48:34 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/05/24 22:53:31 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.6 $ $Date: 2000/05/24 00:48:34 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2000/05/24 22:53:31 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -953,8 +953,7 @@ public class xmlclient implements ClientListener {
 		return;
 	      }
 
-	    session.enableWizards(false);
-	    session.setDefaultOwner(new Vector()); // XXXX this will need to change
+	    session.enableWizards(false); // we're not interactive, don't give us no wizards
 	  }
 	catch (RemoteException ex)
 	  {
