@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/09/14 23:18:34 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/09/17 08:14:52 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.23 $ $Date: 2000/09/14 23:18:34 $ $Name:  $
+ * @version $Revision: 1.24 $ $Date: 2000/09/17 08:14:52 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -109,6 +109,7 @@ public final class xmlclient implements ClientListener {
   public String xmlFilename = null;
   public String username = null;
   public String password = null;
+  private boolean dumpSchema = false;
 
   /**
    * RMI reference to a Ganymede server
@@ -155,6 +156,14 @@ public final class xmlclient implements ClientListener {
 
     try
       {
+	if (xc.dumpSchema)
+	  {
+	    if (xc.doSchemaDump(true))
+	      {
+		System.exit(0);
+	      }
+	  }
+
 	if (xc.doEverything(true))
 	  {
 	    System.exit(0);
@@ -223,6 +232,12 @@ public final class xmlclient implements ClientListener {
 	  }
       }
 
+    if (ParseArgs.switchExists("dumpschema", argv))
+      {
+	dumpSchema = true;
+	return;
+      }
+
     xmlFilename = argv[argv.length-1];
 
     xmlFile = new File(xmlFilename);
@@ -238,6 +253,68 @@ public final class xmlclient implements ClientListener {
  	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
+  }
+
+  public boolean doSchemaDump(boolean commandLine) throws RemoteException
+  {
+    // now we should have the username and password if we are going to
+    // get them, but do what we can here..
+
+    if (username == null)
+      {
+	// we would prompt for the username here, but java gives us no
+	// portable way to turn character echo on and off.. the script
+	// that runs us has character echo off so that we can prompt
+	// for the user's password, but since it is off, we can't
+	// really prompt for a missing user name here.
+
+	username = "supergash";
+      }
+
+    if (password == null)
+      {
+	if (commandLine)
+	  {
+	    java.io.BufferedReader in;
+	    
+	    // get an input stream so we can get the password from the user if we have to
+	    
+	    in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+	    
+	    try
+	      {
+		System.err.print("Password for \"" + username + "\":");
+		password = in.readLine();
+		System.err.println();
+	      }
+	    catch (java.io.IOException ex)
+	      {
+		throw new RuntimeException("Exception getting input: " + ex.getMessage());
+	      }
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+
+    // find the server
+
+    ClientBase client = new ClientBase(server_url, this);
+
+    XMLSession xSession = client.xmlLogin(username, password);
+
+    if (xSession == null)
+      {
+	System.err.println("Error, couldn't log in to server.. bad username or password?");
+	return false;
+      }
+
+    // now do what we came for
+
+    ReturnVal retVal = xSession.getSchema(new FileReceiverBase(new xmlclientPrintReceiver()));
+
+    return (retVal == null || retVal.didSucceed());
   }
 
   /**
@@ -626,5 +703,44 @@ public final class xmlclient implements ClientListener {
   {
     System.err.println(e.getMessage());
     System.exit(1);
+  }
+}
+
+/**
+ * This class is used to act as a receiver of server-transmitted XML materials
+ * by the XML client.
+ */
+
+class xmlclientPrintReceiver implements FileReceiver {
+
+  /**
+   * <p>This method is used to send chunks of a file, in order, to the
+   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
+   * if it doesn't want to stop receiving the file.  A null return value
+   * indicates success, keep sending.</p>
+   */
+  
+  public ReturnVal sendBytes(byte[] bytes)
+  {
+    System.out.print(bytes);
+
+    return null;
+  }
+  
+  /**
+   * <p>This method is called to notify the FileReceiver that no more
+   * of the file will be transmitted.  The boolean parameter will
+   * be true if the file was completely sent, or false if the transmission
+   * is being aborted by the sender for some reason.</p>
+   *
+   * @return Returns true if the FileReceiver successfully received
+   * the file in its entirety.
+   */
+  
+  public ReturnVal end(boolean completed)
+  {
+    System.out.println();
+
+    return null;
   }
 }
