@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1169,7 +1169,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // create a volume entry for the user.
 
 	    InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
-	    Invid invid = invf.createNewEmbedded(true);
+	    result = invf.createNewEmbedded(true);
+
+	    if (result == null)
+	      {
+		return Ganymede.createErrorDialog("Couldn't create embedded volume",
+						  "Error in the Ganymede userCustom object code?");
+	      }
+	    else if (!result.didSucceed())
+	      {
+		return result;
+	      }
+	    
+	    Invid invid = result.getInvid();
 
 	    // find the auto.home.default map, if we can.
 
