@@ -7,8 +7,8 @@
    
    Created: 1 August 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/08/02 00:15:14 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/08/02 02:34:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,8 +65,9 @@ import java.rmi.*;
 
 /**
  *
- * This task is a simple one-shot intended to convert all systems on an
- * ISL network to the corresponding SPL network.
+ * This task is a simple one-shot intended to convert erase all Social Security
+ * fields in all users in Ganymede so that I can remove them from the Ganymede
+ * schema definition.
  *
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
