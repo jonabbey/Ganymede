@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2000/03/01 05:03:06 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2000/03/15 03:32:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1031,6 +1031,89 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     indentLevel--;
     XMLUtils.indent(xmlOut, indentLevel);
     xmlOut.endElement("objectdef");
+  }
+
+  /**
+   * <P>This method is used to read the definition for this
+   * DBObjectBase from an XMLReader stream.  When this method is
+   * called, the <objectdef> open element should be the very next item
+   * in the reader stream.  This method will consume every element in
+   * the reader stream up to and including the matching </objectdef>
+   * element.</P>
+   *
+   * <P>If important expectations about the state of the XML stream
+   * are not met, an IllegalArgumentException will be thrown, and
+   * the stream will be left in an indeterminate state.</P>
+   */
+
+  synchronized void receiveXML(XMLReader reader)
+  {
+    XMLItem item, nextItem;
+    Integer idInt;
+    DBObjectBaseField newField;
+
+    /* -- */
+
+    item = reader.getNextItem(true);
+
+    if (item == null || !item.matches("objectdef"))
+      {
+	throw new IllegalArgumentException("DBObjectBase.receiveXML(): next element != open objectdef: " + item);
+      }
+
+    object_name = item.getAttrStr("name");
+    idInt = item.getAttrInt("id");
+
+    if (idInt == null)
+      {
+	throw new IllegalArgumentException("DBObjectBase.receiveXML(): objectdef missing id attribute: " + item);
+      }
+
+    type_code = idInt.shortValue();
+
+    item = reader.getNextItem(true);
+
+    while (item != null && !item.matchesClose("objectdef"))
+      {
+	if (item.matches("classdef"))
+	  {
+	    classname = item.getAttrStr("name");
+	  }
+	else if (item.matches("embedded"))
+	  {
+	    embedded = true;
+	  }
+	else if (item.matches("fielddef"))
+	  {
+	    reader.pushbackItem(item);
+
+	    try
+	      {
+		newField = new DBObjectBaseField(this);
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
+	      }
+
+	    newField.receiveXML(reader);
+
+	    addFieldToEnd(newField);
+	  }
+	else
+	  {
+	    System.err.println("DBObjectBase.receiveXML(): unrecognized XML item in objectdef: " + 
+			       item);
+	  }
+	
+	item = reader.getNextItem(true);
+      }
+
+    if (item == null)
+      {
+	throw new IllegalArgumentException("DBObjectBase.receiveXML(): unexpected eof in XML stream");
+      }
   }
 
   /**

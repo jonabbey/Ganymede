@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2000/03/03 02:05:00 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2000/03/15 03:32:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -207,6 +207,27 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   short allowedTarget = -1;	// no target restrictions
   short targetField = -1;	// no field symmetry.. we use the DBStore backPointers structure by default
 
+  /**
+   * If this is not null, then we have gotten information on this
+   * Invid DBObjectBaseField pointing to a type of object from an XML
+   * file, and we'll need to do type resolution once the schema is
+   * completely loaded from an XML stream.  Once this happens,
+   * allowedTarget will be set properly, and allowedTargetStr will be
+   * set to null.
+   */
+
+  String allowedTargetStr = null;
+
+  /**
+   * If this is not null, then we have gotten information on this
+   * Invid DBObjectBaseField linked to a field from an XML file, and
+   * we'll need to do type resolution once the schema is completely
+   * loaded from an XML stream.  Once this happens, targetField will
+   * be set properly, and targetFieldStr will be set to null.  
+   */
+
+  String targetFieldStr = null;
+
   // password attributes
 
   boolean crypted = true;	// UNIX encryption is the default.
@@ -217,8 +238,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    * If we are being edited, this will point to an instance
-   * of a server-side schema editing class.
-   */
+   * of a server-side schema editing class.  */
 
   DBSchemaEdit editor;
 
@@ -905,18 +925,62 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	if (allowedTarget != -1)
 	  {
+	    DBObjectBase targetObjectBase = null;
 	    nonEmpty = true;
 
 	    XMLUtils.indent(xmlOut, indentLevel);
 	    xmlOut.startElement("targetobject");
-	    xmlOut.attribute("val", java.lang.Short.toString(allowedTarget));
+
+	    if (allowedTarget == -2)
+	      {
+		xmlOut.attribute("name", "*any*");
+	      }
+	    else
+	      {
+		String targetObjectName = null;
+		targetObjectBase = base.store.getObjectBase(allowedTarget);
+
+		if (targetObjectBase != null)
+		  {
+		    targetObjectName = targetObjectBase.getName();
+		  }
+
+		if (targetObjectName != null)
+		  {
+		    xmlOut.attribute("name", targetObjectName);
+		  }
+		else
+		  {
+		    xmlOut.attribute("id", java.lang.Short.toString(allowedTarget));
+		  }
+	      }
+
 	    xmlOut.endElement("targetobject");
 
 	    if (targetField != -1 && targetField != SchemaConstants.BackLinksField)
 	      {
+		boolean wroteLabel = false;
+
 		XMLUtils.indent(xmlOut, indentLevel);
+
 		xmlOut.startElement("targetfield");
-		xmlOut.attribute("val", java.lang.Short.toString(targetField));
+
+		if (targetObjectBase != null)
+		  {
+		    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
+
+		    if (targetFieldDef != null)
+		      {
+			xmlOut.attribute("name", targetFieldDef.getName());
+			wroteLabel = true;
+		      }
+		  }
+
+		if (!wroteLabel)
+		  {
+		    xmlOut.attribute("id", java.lang.Short.toString(targetField));
+		  }
+
 		xmlOut.endElement("targetfield");
 	      }
 
@@ -992,6 +1056,280 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     indentLevel--;
     XMLUtils.indent(xmlOut, indentLevel);
     xmlOut.endElement("fielddef");
+  }
+
+  /**
+   * <P>This method is used to read the definition for this
+   * DBObjectBaseField from an XMLReader stream.  When this method is
+   * called, the <fielddef> open element should be the very next item
+   * in the reader stream.  This method will consume every element in
+   * the reader stream up to and including the matching </fielddef>
+   * element.</P>
+   *
+   * <P>If important expectations about the state of the XML stream
+   * are not met, an IllegalArgumentException will be thrown, and
+   * the stream will be left in an indeterminate state.</P>
+   */
+
+  synchronized void receiveXML(XMLReader reader)
+  {
+    XMLItem item, nextItem;
+    Integer field_codeInt;
+
+    /* -- */
+
+    item = reader.getNextItem(true);
+
+    if (item == null || !item.matches("fielddef"))
+      {
+	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): next element != open fielddef: " +
+					   item);
+      }
+
+    // neither of these should be null
+
+    field_name = item.getAttrStr("name");
+    field_codeInt = item.getAttrInt("id");
+
+    if (field_name == null)
+      {
+	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): fielddef does not define name attr.: " +
+					   item);
+      }
+
+    if (field_codeInt == null)
+      {
+	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): fielddef does not define id attr.: " +
+					   item);
+      }
+
+    // extract the short
+
+    field_code = field_codeInt.shortValue();
+
+    // and loop until we get to the fielddef close or eof
+
+    item = reader.getNextItem(true);
+
+    while (item != null && !item.matchesClose("fielddef"))
+      {
+	if (item.matches("classname"))
+	  {
+	    classname = item.getAttrStr("name");
+	  }
+	else if (item.matches("comment"))
+	  {
+	    comment = reader.getFollowingString(item, true);
+	  }
+	else if (item.matches("invisible"))
+	  {
+	    visibility = false;
+	  }
+	else if (item.matches("typedef"))
+	  {
+	    if (item.getAttrStr("type") == null)
+	      {
+		throw new IllegalArgumentException("typedef tag does not contain type attribute: " + 
+						   item);
+	      }
+
+	    if (item.getAttrStr("type").equals("boolean"))
+	      {
+		field_type = FieldType.BOOLEAN;
+	      }
+	    else if (item.getAttrStr("type").equals("numeric"))
+	      {
+		field_type = FieldType.NUMERIC;
+	      }
+	    else if (item.getAttrStr("type").equals("float"))
+	      {
+		field_type = FieldType.FLOAT;
+	      }
+	    else if (item.getAttrStr("type").equals("date"))
+	      {
+		field_type = FieldType.DATE;
+	      }
+	    else if (item.getAttrStr("type").equals("string"))
+	      {
+		field_type = FieldType.STRING;
+	      }
+	    else if (item.getAttrStr("type").equals("invid"))
+	      {
+		field_type = FieldType.INVID;
+	      }
+	    else if (item.getAttrStr("type").equals("permmatrix"))
+	      {
+		field_type = FieldType.PERMISSIONMATRIX;
+	      }
+	    else if (item.getAttrStr("type").equals("password"))
+	      {
+		field_type = FieldType.PASSWORD;
+	      }
+	    else if (item.getAttrStr("type").equals("ip"))
+	      {
+		field_type = FieldType.IP;
+	      }
+	    else
+	      {
+		throw new IllegalArgumentException("typedef tag does not contain type attribute: " +
+						   item);
+	      }
+
+	    item = reader.getNextItem(true);
+
+	    while (item != null && !item.matchesClose("typedef"))
+	      {
+		if (item.matches("vector"))
+		  {
+		    if (!isString() && !isInvid() && !isIP())
+		      {
+			// need to flesh out this error handling 
+
+			System.err.println("Ignoring vector element.. not a string, invid, or ip field.");
+		      }
+		    else
+		      {
+			Integer vectSize = item.getAttrInt("maxSize");
+
+			if (vectSize == null)
+			  {
+			    throw new IllegalArgumentException("vector tag does not contain maxSize attribute");
+			  }
+
+			limit = vectSize.shortValue();
+		      }
+		  }
+		else if (item.matches("labeled") && isBoolean())
+		  {
+		    trueLabel = item.getAttrStr("true");
+		    falseLabel = item.getAttrStr("false");
+		  }
+		else if (item.matches("minlength") && 
+			 (isString() || isPassword()))
+		  {
+		    Integer val = item.getAttrInt("val");
+
+		    if (val == null)
+		      {
+			System.err.println("minlength tag unexpectedly missing val attribute");
+		      }
+
+		    minLength = val.shortValue();
+		  }
+		else if (item.matches("maxlength") && 
+			 (isString() || isPassword()))
+		  {
+		    Integer val = item.getAttrInt("val");
+
+		    if (val == null)
+		      {
+			System.err.println("maxlength tag unexpectedly missing val attribute");
+		      }
+
+		    maxLength = val.shortValue();
+		  }
+		else if (item.matches("okchars") && 
+			 (isString() || isPassword()))
+		  {
+		    okChars = item.getAttrStr("val");
+		  }
+		else if (item.matches("badchars") && 
+			 (isString() || isPassword()))
+		  {
+		    badChars = item.getAttrStr("val");
+		  }
+		else if (item.matches("regexp") && isString())
+		  {
+		    regexpPat = item.getAttrStr("val");
+		  }
+		else if (item.matches("multiline") && isString())
+		  {
+		    multiLine = true;
+		  }
+		else if (item.matches("namespace") && 
+			 (isString() || isNumeric() || isIP()))
+		  {
+		    String nameSpaceId = item.getAttrStr("val");
+
+		    if (nameSpaceId != null && !nameSpaceId.equals(""))
+		      {
+			setNameSpace(nameSpaceId);
+		      }
+		  }
+		else if (item.matches("targetobject") && isInvid())
+		  {
+		    allowedTargetStr = item.getAttrStr("name");
+		    Integer targetInt = item.getAttrInt("id");
+
+		    if (allowedTargetStr == null && targetInt != null)
+		      {
+			allowedTarget = targetInt.shortValue();
+		      }
+		    else if (allowedTargetStr == null && targetInt == null)
+		      {
+			System.err.println("DBObjectBaseField.receiveXML(): missing required attrs in <targetobject>: " +
+					   item);
+		      }
+
+		    // else we've got allowedTargetStr defined and we'll
+		    // go back through and do the resolution when the
+		    // schema is fully loaded
+		  }
+		else if (item.matches("targetfield") && isInvid())
+		  {
+		    targetFieldStr = item.getAttrStr("name");
+		    Integer targetInt = item.getAttrInt("id");
+
+		    if (targetFieldStr == null && targetInt != null)
+		      {
+			targetField = targetInt.shortValue();
+		      }
+		    else if (targetFieldStr == null && targetInt == null)
+		      {
+			System.err.println("DBObjectBaseField.receiveXML(): missing required attrs in <targetfield>: " +
+					   item);
+		      }
+
+		    // else we've got targetFieldStr defined and we'll
+		    // go back through and do the resolution when the
+		    // schema is fully loaded
+		  }
+		else if (item.matches("embedded") && isInvid())
+		  {
+		    editInPlace = true;
+		  }
+		else if (item.matches("crypted") && isPassword())
+		  {
+		    crypted = true;
+		  }
+		else if (item.matches("md5crypted") && isPassword())
+		  {
+		    md5crypted = true;
+		  }
+		else if (item.matches("plaintext") && isPassword())
+		  {
+		    storePlaintext = true;
+		  }
+		else
+		  {
+		    System.err.println("DBObjectBaseField.receiveXML(): unrecognized XML item inside typedef: " + 
+				       item);
+		  }
+	      }
+	  }
+	else
+	  {
+	    System.err.println("DBObjectBaseField.receiveXML(): unrecognized XML item inside fielddef: " +
+			       item);
+	  }
+	
+	item = reader.getNextItem(true);
+      }
+
+    if (item == null)
+      {
+	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): hit end of stream prior to </fielddef>");
+      }
   }
 
   // ----------------------------------------------------------------------

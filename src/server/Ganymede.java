@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2000/03/03 02:18:39 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2000/03/15 03:32:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -453,6 +453,9 @@ public class Ganymede {
 	    ex.printStackTrace();
 	    debug("IOException dumping XML schema: " + ex.getMessage());
 	  }
+
+	
+	db.importXML(dbFilename + ".xml", false);
       }
 
     // if debug=<filename> was specified on the command line, tell the
