@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.18 $ %D%
+  Version: $Revision: 1.19 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.18 $ %D% 
+ * @version $Revision: 1.19 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -134,6 +134,47 @@ public class rowTable extends baseTable implements ActionListener {
 
     index = new Hashtable();
     crossref = new Vector();
+  }
+
+  /**
+   * Constructor with default fonts, justification, and behavior
+   *
+   * @param colWidths  array of initial column widths
+   * @param headers    array of column header titles, must be same size as colWidths
+   * @param callback    reference to an object that implements the rowSelectCallback interface
+   * @param horizLines draw horizontal lines between rows?
+   * @param menu  reference to a popup menu to be associated with rows in this table
+   *
+   */
+
+  public rowTable(int[] colWidths, String[] headers, 
+		  rowSelectCallback callback, 
+		  boolean horizLines,
+		  PopupMenu menu)
+  {
+    this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
+		       Color.white, Color.blue, tableAttr.JUST_CENTER),
+	 new tableAttr(null, new Font("Helvetica", Font.PLAIN, 12),
+		       Color.black, Color.white, tableAttr.JUST_LEFT),
+	 (tableAttr[]) null,
+	 colWidths, 
+	 Color.black,
+	 Color.black,
+	 Color.black,
+	 Color.black,
+	 headers,
+	 horizLines, true, true, false, callback, menu);
+
+    // we couldn't pass this to the baseTableConstructors
+    // above, so we set it directly here, then force metrics
+    // calculation
+
+    headerAttrib.c = this;
+    headerAttrib.calculateMetrics();
+    tableAttrib.c = this;
+    tableAttrib.calculateMetrics();
+
+    calcFonts();
   }
 
   /**
@@ -299,6 +340,24 @@ public class rowTable extends baseTable implements ActionListener {
       }
 
     refreshTable();
+  }
+
+  public Object getSelectedRow()
+  {
+    if (selectedRow == -1)
+      {
+	return null;
+      }
+
+    for (int i = 0; i < crossref.size(); i++)
+      {
+	if (((rowHandle) crossref.elementAt(i)).rownum == selectedRow)
+	  {
+	    return ((rowHandle) crossref.elementAt(i)).key;
+	  }
+      }
+
+    return null;
   }
 
   /**
