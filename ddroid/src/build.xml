@@ -9,7 +9,7 @@
     Deepak Giridharagopal, deepak@arlut.utexas.edu
 -->
 
-<project name="ddroid" default="all" basedir=".">
+<project name="ddroid" default="build" basedir=".">
 
   <!-- 
     Project-wide settings. All directories are relative to the project
@@ -43,14 +43,16 @@
     </fileset>
   </path>
 
+  <!-- === Targets ahoy ===  -->
 
   <target name="help">
     <echo>ant rules
 ---------
 
-all           - Prepares build tree and compiles everything
+build         - Prepares build tree and compiles everything
 jars          - Produces the jar files for the server, client, and admin console
 javadoc       - Builds the java doc tree
+dist          - Does build, jars, and javadoc, without cleaning
 
 validate      - Cross-checks all Directory Droid .java source files against
                 default localizations.  This depends on the use of a specific
@@ -67,6 +69,7 @@ total         - Complete strip and rebuild
 </echo>
   </target>
 
+
   <target name="prepare">
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${build.lib}"/>
@@ -75,9 +78,20 @@ total         - Complete strip and rebuild
     <echo message="${TSTAMP}"/>
   </target>
 
-  <target name="all" depends="main"/>
+
+  <target name="build" depends="main">
+    <echo>
+Class files rebuilt.  Don't forget to run 'ant jars' if you want to
+refresh the jar files.
+</echo>
+  </target>
+
 
   <target name="main" depends="prepare">
+    <!-- main is intended as an unadvertised target, so that we can provide
+         the user with the 'don't forget the jars' advice if they run ant
+         or ant build. -->
+
     <mkdir dir="${build.classes}"/>
     
     <javac destdir="${build.classes}"
@@ -118,12 +132,8 @@ total         - Complete strip and rebuild
       
       <include name="arlut/csd/ddroid/client/FileReceiverBase.class"/>
     </rmic>
-
-    <echo>
-Class files rebuilt.  Don't forget to run 'ant jars' if you want to
-refresh the jar files.
-</echo>
   </target>
+
 
   <target name ="validate">
     <echo>Validating localization resources
@@ -131,8 +141,8 @@ refresh the jar files.
     <exec executable="verification/resource_validator.pl" failonerror="true">
       <arg file="."/>
     </exec>
-
   </target>
+
 
   <target name="jars" depends="main">
     <!-- Copy over any jars used in the build -->
@@ -232,7 +242,6 @@ refresh the jar files.
     </copy>
   </target>
   
-
   
   <target name="clean">
     <delete includeemptydirs="true" failonerror="false">
@@ -240,7 +249,6 @@ refresh the jar files.
       <fileset dir="${build.lib}" includes="*.jar"/>
     </delete>
   </target>
-
 
   
   <target name="javadoc_clean">
@@ -260,6 +268,10 @@ refresh the jar files.
   
   <target name="veryclean" depends="javadoc_clean,clean,dist_clean"/>
   
+
   <target name="total" depends="veryclean,main,jars,javadoc"/>
+
+
+  <target name="dist" depends="main,jars,javadoc"/>
   
 </project>
