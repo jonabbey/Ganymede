@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,7 +81,6 @@ public class JIPField extends JentryField {
 
     JcomponentAttr.setAttr(this,valueAttr);
 
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
   
@@ -191,140 +190,128 @@ public class JIPField extends JentryField {
    * the value in the JIPField need to be propogated to the
    * server.  This method will handle that functionality.
    *
-   * @param e the FocusEvent that needs to be process
    */
 
-  public synchronized void processFocusEvent(FocusEvent e)
+  public void sendCallback()
   {
     String str;
     Byte[] bytes;
 
-    /* -- */
 
-    super.processFocusEvent(e);
-
-    if (debug)
+    // if nothing in the JIPField has changed,
+    // we don't need to worry about this event.
+    
+    str = getText();
+    
+    if (value == null || !value.equals(str))
       {
-	System.err.println("JIPField.processFocusEvent: entering");
-      }
-
-    if (e.getID() == FocusEvent.FOCUS_LOST)
-      {
-	// if nothing in the JIPField has changed,
-	// we don't need to worry about this event.
-
-	str = getText();
-
-	if (value == null || !value.equals(str))
+	try
 	  {
-	    try
+	    if (str.indexOf(':') != -1)
 	      {
-		if (str.indexOf(':') != -1)
+		if (allowV6)
 		  {
-		    if (allowV6)
-		      {
-			bytes = genIPV6bytes(str);
-		      }
-		    else
-		      {
-			throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
-		      }
+		    bytes = genIPV6bytes(str);
 		  }
 		else
 		  {
-		    bytes = genIPV4bytes(str);
+		    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
 		  }
 	      }
-	    catch (IllegalArgumentException ex)
+	    else
 	      {
-		reportError(ex.getMessage());
-		return;
+		bytes = genIPV4bytes(str);
 	      }
 	  }
-	else
+	catch (IllegalArgumentException ex)
+	  {
+	    reportError(ex.getMessage());
+	    return;
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("JIPField.processFocusEvent: no change, ignoring");
+	  }
+	
+	return;
+      }
+    
+    if (allowCallback) 
+      {
+	boolean b = false;
+	
+	try 
 	  {
 	    if (debug)
 	      {
-		System.err.println("JIPField.processFocusEvent: no change, ignoring");
-	      }
-
-	    return;
-	  }
-	
-	if (allowCallback) 
-	  {
-	    boolean b = false;
-	  
-	    try 
-	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: making callback");
-		  }
-
-		b = my_parent.setValuePerformed(new JValueObject(this, bytes));
-	      }
-	    catch (RemoteException re)
-	      {
-		throw new RuntimeException("failure in callback dispatch: " + re); 
+		System.err.println("JIPField.processFocusEvent: making callback");
 	      }
 	    
-	    if (!b) 
+	    b = my_parent.setValuePerformed(new JValueObject(this, bytes));
+	  }
+	catch (RemoteException re)
+	  {
+	    throw new RuntimeException("failure in callback dispatch: " + re); 
+	  }
+	
+	if (!b) 
+	  {
+	    if (debug)
 	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: setValue rejected");
-
-		    if (value == null)
-		      {
-			System.err.println("JIPField.processFocusEvent: resetting to empty string");
-		      }
-		    else
-		      {
-			System.err.println("JIPField.processFocusEvent: resetting to " + value);
-		      }
-		  }
+		System.err.println("JIPField.processFocusEvent: setValue rejected");
 		
 		if (value == null)
 		  {
-		    setText("");
+		    System.err.println("JIPField.processFocusEvent: resetting to empty string");
 		  }
 		else
 		  {
-		    setText(value);
+		    System.err.println("JIPField.processFocusEvent: resetting to " + value);
 		  }
-
-		changed = false;
 	      }
-	    else 
+	    
+	    if (value == null)
 	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: setValue accepted");
-		  }
-
-		if (bytes == null)
-		  {
-		    value = "";
-		    setText(value);
-		  }
-		else if (bytes.length == 4)
-		  {
-		    value = genIPV4string(bytes);
-		    setText(value);
-		  }
-		else if (bytes.length == 16)
-		  {
-		    value = genIPV6string(bytes);
-		    setText(value);
-		  }
-		else
-		  {
-		    throw new RuntimeException("JIPField: bad bytes calculated");
-		  }
-		
-		changed = true;
+		setText("");
 	      }
+	    else
+	      {
+		setText(value);
+	      }
+	    
+	    changed = false;
+	  }
+	else 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JIPField.processFocusEvent: setValue accepted");
+	      }
+	    
+	    if (bytes == null)
+	      {
+		value = "";
+		setText(value);
+	      }
+	    else if (bytes.length == 4)
+	      {
+		value = genIPV4string(bytes);
+		setText(value);
+	      }
+	    else if (bytes.length == 16)
+	      {
+		value = genIPV6string(bytes);
+		setText(value);
+	      }
+	    else
+	      {
+		throw new RuntimeException("JIPField: bad bytes calculated");
+	      }
+	    
+	    changed = true;
 	  }
       }
   }
