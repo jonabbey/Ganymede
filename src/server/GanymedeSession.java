@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -68,6 +68,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   DBObjectBase personaBase = null;
   Date personaTimeStamp;
   DBObject personaObj;		// our current persona object
+  String personaName;
 
   DBObjectBase permBase = null;
   Date permTimeStamp;
@@ -173,6 +174,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (personaObject != null)
       {
 	personaInvid = personaObject.getInvid();
+	personaName = personaObject.getLabel();
       }
     else
       {
@@ -506,6 +508,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaObject = null;
 	personaInvid = null;
 	personaTimeStamp = null;
+	personaName = null;
 	updatePerms();
 	setLastEvent("selectPersona: " + persona);
 	return true;
@@ -524,10 +527,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (personaObject.getLabel().equals(persona))
 	  {
+	    personaName = personaObject.getLabel();
 	    break;
 	  }
-
-	personaObject = null;
+	else
+	  {
+	    personaObject = null;
+	  }
       }
 
     if (personaObject == null)
@@ -980,6 +986,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized ReturnVal commitTransaction()
   {
+    ReturnVal retVal;
+
+    /* -- */
+
     if (session.editSet == null)
       {
 	return Ganymede.createErrorDialog("Server: Error in commitTransaction()",
@@ -989,7 +999,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     this.status = "";
     setLastEvent("commitTransaction");
 
-    return session.commitTransaction();
+    retVal = session.commitTransaction();
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	Ganymede.runBuilderTasks();
+      }
+
+    return retVal;
   }
 
   /**
@@ -2052,14 +2069,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
 	      {
-		inf.addElement(newObjectOwnerInvids.elementAt(i));
+		inf.addElementLocal(newObjectOwnerInvids.elementAt(i));
 	      }
 	  }
 	else
 	  {
 	    InvidDBField inf = (InvidDBField) newObj.getField(SchemaConstants.OwnerListField);
 
-	    inf.addElement(ownerList.getInvid(0));
+	    inf.addElementLocal(ownerList.getInvid(0));
 	  }
       }
     else
