@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -536,8 +536,10 @@ public class InvidDBField extends DBField implements invid_field {
 	
     if (oldRef == null)
       {
-	setLastError("couldn't check out old invid " + remote + " for symmetry maintenance");
-	return false;
+	return true;		// it's not there, so we are certainly unbound, no?
+
+	//	setLastError("couldn't check out old invid " + remote + " for symmetry maintenance");
+	//	return false;
       }
     
     try
@@ -796,10 +798,17 @@ public class InvidDBField extends DBField implements invid_field {
 
     // try to do the binding
 
-    if (!bind(oldRemote, newRemote))
+    if (newRemote != null)
       {
-	setLastError("InvidDBField setValue: couldn't bind");
-	return false;
+	if (!bind(oldRemote, newRemote))
+	  {
+	    setLastError("InvidDBField setValue: couldn't bind");
+	    return false;
+	  }
+      }
+    else
+      {
+	unbind(oldRemote);
       }
 
     // check our owner, do it.  Checking our owner should
@@ -1198,6 +1207,19 @@ public class InvidDBField extends DBField implements invid_field {
 
   /**
    *
+   * This method returns true if this invid field should not
+   * show any choices that are currently selected in field
+   * x, where x is another field in this db_object.
+   *
+   */
+
+  public boolean excludeSelected(db_field x)
+  {
+    return ((DBEditObject) owner).excludeSelected(x, this);    
+  }
+
+  /**
+   *
    * Returns a StringBuffer encoded list of acceptable invid values
    * for this field.
    *
@@ -1219,6 +1241,23 @@ public class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) owner;
 
     return eObj.obtainChoiceList(this);
+  }
+
+  /**
+   *
+   * This method returns a key that can be used by the client
+   * to cache the value returned by choices().  If the client
+   * already has the key cached on the client side, it
+   * can provide the choice list from its cache rather than
+   * calling choices() on this object again.
+   *
+   * If there is no caching key, this method will return null.
+   *
+   */
+
+  public Object choicesKey()
+  {
+    return ((DBEditObject) owner).obtainChoicesKey(this);
   }
 
   // ****
