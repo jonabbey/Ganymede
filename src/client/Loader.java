@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/05/30 05:53:36 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/05/30 06:05:52 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.21 $ $Date: 2000/05/30 05:53:36 $ $Name:  $
+ * @version $Revision: 1.22 $ $Date: 2000/05/30 06:05:52 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -196,7 +196,9 @@ public class Loader extends Thread {
 
   /**
    *
-   * Clear out all the information in the loader.
+   * Clear out all the information in the loader, and spawn
+   * a new loader thread to download new information from
+   * the server.
    *
    */
 
