@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/02/02 19:54:39 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/02/02 19:57:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.13 $ $Date: 2000/02/02 19:54:39 $
+ * @version $Revision: 1.14 $ $Date: 2000/02/02 19:57:54 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -158,6 +158,11 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void shutdown()
   {
+    if (done)
+      {
+	return;
+      }
+
     synchronized (eventBuffer)
       {
 	this.done = true;
