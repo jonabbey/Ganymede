@@ -190,6 +190,14 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
 ganymede.builder.output=/home/broccol/gash2/code/arlut/csd/ganymede/db/out
 
+# ganymede.builder.scriptlocation
+#
+# The directory that Ganymede's build tasks will look to in order to run
+# the appropriate build script(s).
+#
+# Used by the server
+
+ganymede.builder.scriptlocation=/home/broccol/gash2/code/arlut/csd/ganymede/db/
 
 # ------------------------------------------------------------
 #

@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.3 $
-# $Date: 1999/01/29 05:07:58 $
+# $Revision: 1.4 $
+# $Date: 1999/02/16 19:14:23 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -322,6 +322,7 @@ if ($schemainstalled) {
 		"ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
 		"ganymede.helpbase" => $vars{"HELPWEB"},
 		"ganymede.builder.output" => "$installdir/db/out",
+		"ganymede.builder.scriptlocation" => "$installdir/db",
 	        "ganymede.gash.dnsdomain" => $vars{"DNSDOMAIN"});
 
 open INPUT, $template or die "Couldn't open properties template!";
