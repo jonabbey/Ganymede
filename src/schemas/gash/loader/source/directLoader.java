@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2139,15 +2139,15 @@ public class directLoader {
 
 	    ogRec = (OwnerGroup) adminUsers.get(u);
 
-	    // we don't want to add a system to the supergash owner group
-
-	    if (ogRec.prefix.equals("super"))
-	      {
-		continue;
-	      }
-
 	    if (ogRec != null)
 	      {
+		// we don't want to add a system to the supergash owner group
+
+		if (ogRec.prefix.equals("super"))
+		  {
+		    continue;
+		  }
+
 		if (owners.get(ogRec.getInvid()) == null)
 		  {
 		    // we haven't put the system into this owner group yet
