@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.83 $ %D%
+   Version: $Revision: 1.84 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1417,10 +1417,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		      {
 			if (debug)
 			  {
-			    System.out.println("Found container panel for " + invid);
+			    System.out.println("  Found container panel for " + invid + ": " + cp.frame.getTitle());
+			    
 			  }
-				    
-			cp.checkReturnValForRescan((ReturnVal)rescan.get(invid));
+			
+			if (retVal.rescanAll(invid))
+			  {
+			    cp.updateAll();
+			  }
+			else
+			  {
+			    cp.update(retVal.getRescanList(invid));
+			  }
 
 				// Don't break the loop, because there
 				// might be multiple containerPanels
