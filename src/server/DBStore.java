@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 1999/02/02 23:40:00 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 1999/02/04 22:01:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,7 +51,10 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.util.text.*;
 import java.rmi.*;
+
+import arlut.csd.Util.zipIt;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -332,9 +335,12 @@ public class DBStore {
 		// go ahead and consolidate the journal into the DBStore
 		// before we really get under way.
 
+		// Notice that we are going to archive a copy of the
+		// existing db file each time we start up the server
+
 		if (!journal.clean())
 		  {
-		    dump(filename, true);
+		    dump(filename, true, true);
 		  }
 	      }
 	  }
@@ -367,13 +373,16 @@ public class DBStore {
    *                              the dump lock when it is done with the dump.  This
    *                              is intended to allow for a clean shut down.  For
    *                              non-terminal dumps, releaseLock should be true.
+   * @param archiveIt If true, dump will create a zipped copy of the previously existing
+   *                  ganymede.db file in an 'old' directory under the location where
+   *                  ganymede.db is held.
    *
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
    *
    */
 
-  public synchronized void dump(String filename, boolean releaseLock) throws IOException
+  public synchronized void dump(String filename, boolean releaseLock, boolean archiveIt) throws IOException
   {
     try
       {
@@ -417,9 +426,39 @@ public class DBStore {
 	  {
 	    dbFile = new File(filename);
 
-	    if (dbFile.isFile())
+	    if (dbFile.exists())
 	      {
-		dbFile.renameTo(new File(filename + ".bak"));
+		if (archiveIt)
+		  {
+		    File directory = new File(dbFile.getPath());
+
+		    if (!directory.isDirectory())
+		      {
+			throw new IOException("Error, couldn't find output directory to backup.");
+		      }
+
+		    File oldDirectory = new File(dbFile.getPath() + File.separator + "old");
+		    
+		    if (!oldDirectory.exists())
+		      {
+			oldDirectory.mkdir();
+		      }
+
+		    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
+								java.util.Locale.US);
+		    String label = formatter.format(new Date());
+
+		    String zipFileName = dbFile.getPath() + File.separator + "old" + File.separator + label + "db.zip";
+
+		    Vector fileNameVect = new Vector();
+		    fileNameVect.addElement(filename);
+
+		    zipIt.createZipFile(zipFileName, fileNameVect);
+		  }
+		else
+		  {
+		    dbFile.renameTo(new File(filename + ".bak"));
+		  }
 	      }
 
 	    movedFile = true;

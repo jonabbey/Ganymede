@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/02/02 23:40:00 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/02/04 22:01:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -236,7 +236,7 @@ public class DBJournal implements ObjectStatus {
 
     File file = new File(filename);
 
-    newname = filename + new Date();
+    newname = filename + ".old";
 
     if (debug)
       {

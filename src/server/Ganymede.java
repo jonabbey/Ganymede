@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/01/27 23:04:34 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/02/04 22:01:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -289,7 +289,11 @@ public class Ganymede {
 	firstrun = false;
       }
 
-    if (false)			// hurt me harder, 1.2b4!
+    // Java 2 makes it a real pain to change out security
+    // managers.. since we don't need to do classfile transfer, we
+    // just don't bother with it.
+
+    if (false)
       {
 	debug("Initializing Security Manager");
 
@@ -297,7 +301,7 @@ public class Ganymede {
       }
     else
       {
-	debug("Not Initializing RMI Security Manager");
+	debug("Not Initializing RMI Security Manager.. not supporting classfile transfer");
       }
 
     if (debugFilename != null)
@@ -412,6 +416,8 @@ public class Ganymede {
     scheduler.addDailyAction(12, 0, new GanymedeWarningTask(), "Warning Task");
 
     scheduler.addActionOnDemand(new GanymedeValidationTask(), "Database Consistency Check");
+
+    scheduler.addActionOnDemand(new dumpAndArchiveTask(), "Archive Task");
 
     // and install the builder tasks listed in the database
 
@@ -632,6 +638,9 @@ public class Ganymede {
 	      }
 	  }
       }
+
+    // this bit was used to evolve the constant schema portions at
+    // one point.. of strictly historical interest now
 
     if (false)
       {
@@ -966,7 +975,7 @@ class dumpTask implements Runnable {
 
 	try
 	  {
-	    Ganymede.db.dump(Ganymede.dbFilename, true);
+	    Ganymede.db.dump(Ganymede.dbFilename, true, false);
 	  }
 	catch (IOException ex)
 	  {
@@ -985,6 +994,74 @@ class dumpTask implements Runnable {
 	if (started && !completed)
 	  {
 	    Ganymede.debug("dumpTask forced to stop");
+	  }
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                              dumpAndArchiveTask
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * Runnable class to do a journal sync.  Issued by the GanymedeScheduler.
+ *
+ */
+
+class dumpAndArchiveTask implements Runnable {
+
+  public dumpTask()
+  {
+  }
+
+  public void run()
+  {
+    boolean started = false;
+    boolean completed = false;
+
+    /* -- */
+
+    try
+      {
+	if (Ganymede.server.activeUsers.size() > 0)
+	  {
+	    Ganymede.debug("Deferring dump/archive task - users logged in");
+	    return;
+	  }
+
+	if (Ganymede.db.schemaEditInProgress)
+	  {
+	    Ganymede.debug("Deferring dump/archive task - schema being edited");
+	    return;
+	  }
+
+	started = true;
+	Ganymede.debug("Running dump/archive task");
+
+	try
+	  {
+	    Ganymede.db.dump(Ganymede.dbFilename, true, true);
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("dump/archive could not succeed.. IO error " + ex.getMessage());
+	  }
+
+	Ganymede.debug("Completed dump/archive task");
+	completed = true;
+      }
+    finally
+      {
+	// we'll go through here if our task was stopped
+	// note that the DBStore dump code will handle
+	// thread death ok.
+
+	if (started && !completed)
+	  {
+	    Ganymede.debug("dumpAndArchiveTask forced to stop");
 	  }
       }
   }
