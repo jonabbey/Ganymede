@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.3 $ %D%
+ * @version $Revision: 1.4 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -1142,6 +1142,8 @@ public class baseTable extends Panel implements AdjustmentListener {
 	    cell.attr = null;
 	  }
       }
+
+    rows = new Vector();
 
     reShape();
     refreshTable();
