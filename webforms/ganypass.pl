@@ -18,7 +18,7 @@ use CGI;
 
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
-$xmlclient = $xml_path . "/xmlclient";
+$xmlclient = $xml_path . "bin/xmlclient";
 $tmpdir = "/tmp";
 
 #If this script is run from a different location from where the
