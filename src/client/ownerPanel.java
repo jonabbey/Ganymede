@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,15 +35,16 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     field;
 
   framePanel
-   parent;
+   fp;
 
-  public ownerPanel(invid_field field, boolean editable, framePanel parent)
+  public ownerPanel(invid_field field, boolean editable, framePanel fp)
     {
       if (debug)
 	{
 	  System.out.println("Adding ownerPanel");
 	}
 
+      /*
       if (field != null)
 	{
 	  try
@@ -58,10 +59,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	      throw new RuntimeException("Could not get type in ownerPanel constuctor: " + rx);
 	    }
 	}
+	*/
 
       this.editable = editable;
       this.field = field;
-      this.parent = parent;
+      this.fp = fp;
 
       setLayout(new BorderLayout());
 
@@ -106,14 +108,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
       {
 	Object key = field.choicesKey();
 	
-	if ((key != null) && (parent.parent.parent.cachedLists.containsKey(key)))
+	if ((key != null) && (fp.getgclient().cachedLists.containsKey(key)))
 	  {
 	    if (debug)
 	      {
 		System.out.println("Using cached copy...");
 	      }
 	    
-	    availableOwners = (Vector)parent.parent.parent.cachedLists.get(key);
+	    availableOwners = (Vector)fp.getgclient().cachedLists.get(key);
 	  }
 	else
 	  {
@@ -130,7 +132,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 		    System.out.println("Saving this under key: " + key);
 		  }
 		
-		parent.parent.parent.cachedLists.put(key, availableOwners);
+		fp.getgclient().cachedLists.put(key, availableOwners);
 	      }
 	  }
 	
@@ -156,7 +158,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	{
 	  if (o.getOperationType() == JValueObject.ERROR)
 	    {
-	      parent.getgclient().setStatus((String)o.getValue());
+	      fp.getgclient().setStatus((String)o.getValue());
 	    }
 	  else if (o.getValue() instanceof Invid)
 	    {
@@ -186,7 +188,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
       if (returnValue)
 	{
-	  parent.parent.getgclient().somethingChanged = true;
+	  fp.getgclient().somethingChanged = true;
 	}
 
       return returnValue;
