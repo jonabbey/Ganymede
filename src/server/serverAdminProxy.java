@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/02/01 04:04:17 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/02/01 04:10:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,7 +74,9 @@ import java.rmi.server.Unreferenced;
  * Ganymede server's operations to be asynchronous with respect to admin
  * console updates.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2000/02/01 04:04:17 $
+ * @see arlut.csd.ganymede.adminEvent
+ *
+ * @version $Revision: 1.2 $ $Date: 2000/02/01 04:10:32 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -565,6 +567,17 @@ class serverAdminProxy implements Admin, Runnable {
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>The adminEvent class is used on the Ganymede server by the
+ * {@link arlut.csd.ganymede.serverAdminProxy serverAdminProxy} class, which
+ * uses it to queue up method calls to a remote admin console.</p>
+ *
+ * <p>adminEvent objects are never sent to a remote admin console. rather,
+ * they are queued up in the Ganymede server by the serverAdminProxy class so
+ * that a background communications thread can read adminEvents off of a queue
+ * and make the appropriate RMI calls to an attached admin console.</p>
+ */
+
 class adminEvent {
 
   static final byte FIRST = 0;
@@ -582,13 +595,30 @@ class adminEvent {
 
   /* --- */
 
+  /**
+   * <p>Identifies what RMI call is going to need to be made to the
+   * remote admin console.</p>
+   */
+
   byte method;
+
+  /**
+   * <p>Generic RMI call parameter to be sent to the remote admin console.  If
+   * an RMI call normally takes more than one parameter, param should be a Vector
+   * which contains the parameters internally.</p>
+   */
+
   Object param;
 
   /* -- */
 
   public adminEvent(byte method, Object param)
   {
+    if (method < FIRST || method > LAST)
+      {
+	throw new IllegalArgumentException("bad method code: " + method);
+      }
+
     this.method = method;
     this.param = param;
   }
