@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -264,13 +264,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    if (isInactivated())
+    if (object.isInactivated())
       {
 	switch (fieldid)
 	  {
@@ -306,7 +308,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * Customization method to verify whether this object type has an inactivation
    * mechanism.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -323,7 +327,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * sensitive check to see if this object feels like being
    * available for inactivating by the client.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -891,7 +897,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    * This method should be used very sparingly.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1493,7 +1501,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    newSize = 0;
+	    newSize = 4;
 	  }
 
 	if (oldEntries != null)
@@ -1502,7 +1510,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    oldSize = 0;
+	    oldSize = 4;
 	  }
 
 	Hashtable newVolumes = new Hashtable(newSize, 1.0f);
