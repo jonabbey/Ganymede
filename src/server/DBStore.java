@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.142 $
-   Last Mod Date: $Date: 2001/05/21 07:21:44 $
+   Version: $Revision: 1.143 $
+   Last Mod Date: $Date: 2001/06/03 09:55:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.142 $ %D%
+ * @version $Revision: 1.143 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -618,7 +618,7 @@ public final class DBStore {
 	      {
 		if (debug)
 		  {
-		    System.err.println("DBStore: ziping old db");
+		    System.err.println("DBStore: zipping old db");
 		  }
 
 		String directoryName = dbFile.getParent();
