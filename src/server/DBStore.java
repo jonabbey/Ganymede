@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1557,15 +1557,8 @@ public class DBStore {
 
   void checkOut()
   {
-    try
-      {
-	objectsCheckedOut++;
-	GanymedeAdmin.updateCheckedOut();
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    objectsCheckedOut++;
+    GanymedeAdmin.updateCheckedOut();
   }
 
   /**
@@ -1576,15 +1569,8 @@ public class DBStore {
 
   void checkIn()
   {
-    try
-      {
-	objectsCheckedOut--;
-	GanymedeAdmin.updateCheckedOut();
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    objectsCheckedOut--;
+    GanymedeAdmin.updateCheckedOut();
   }
 
   /**
@@ -1595,15 +1581,8 @@ public class DBStore {
 
   void addLock()
   {
-    try
-      {
-	locksHeld++;
-	GanymedeAdmin.updateLocksHeld();
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    locksHeld++;
+    GanymedeAdmin.updateLocksHeld();
   }
 
   /**
@@ -1614,15 +1593,8 @@ public class DBStore {
 
   void removeLock()
   {
-    try
-      {
-	locksHeld--;
-	GanymedeAdmin.updateLocksHeld();
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    locksHeld--;
+    GanymedeAdmin.updateLocksHeld();
   }
 
 }
