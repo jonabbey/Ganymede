@@ -4,15 +4,18 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.26 $
-# $Date: 1999/01/21 19:53:17 $
+# $Revision: 1.27 $
+# $Date: 1999/01/21 20:01:07 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
 #
 ############################################################
 
+die "We require Perl 5.003 or greater to install Ganymede." if $] < 5.003;
+
 use Cwd;
+use English;
 
 #########################################################################
 #
