@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.207 $
-   Last Mod Date: $Date: 2002/03/16 02:58:47 $
+   Version: $Revision: 1.208 $
+   Last Mod Date: $Date: 2002/10/05 06:56:13 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.207 $ $Date: 2002/03/16 02:58:47 $ $Name:  $
+ * @version $Revision: 1.208 $ $Date: 2002/10/05 06:56:13 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -4524,16 +4524,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else if ((source == menubarQueryMI) || (command.equals("compose a query")))
       {
-	if (my_querybox == null)
-	  {
-	    my_querybox = new querybox(this, this, "Query Panel");
-	  }
-	else if (my_querybox.isVisible())
-	  {
-	    return;
-	  }
-
-	my_querybox.myshow();
+	postQuery(null);
       }
     else if (source == clearTreeMI)
       {
@@ -4627,6 +4618,29 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	System.err.println("Unknown action event generated");
       }
+  }
+
+  /**
+   * <p>Pop up the query box</p>
+   */
+
+  void postQuery(BaseDump base)
+  {
+    if (my_querybox == null)
+      {
+	my_querybox = new querybox(base, this, this, "Query Panel");
+      }
+    else if (my_querybox.isVisible())
+      {
+	return;
+      }
+    
+    if (base != null)
+      {
+	my_querybox.selectBase(base);
+      }
+
+    my_querybox.myshow();
   }
 
   /**
@@ -4943,12 +4957,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    setWaitCursor();
 	    BaseDump base = (BaseDump)((BaseNode) node).getBase();
-
-	    querybox box = new querybox(base, this,  this, "Query Panel");
-
 	    setNormalCursor();
 
-	    box.myshow();
+	    postQuery(base);
 	  }
       }
     else if (event.getActionCommand().equals("Show Non-Editables"))

@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2002/10/05 05:47:41 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2002/10/05 06:56:14 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -23,7 +23,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -144,7 +144,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     Rows = new Vector(),	// store the QueryRows
     fields;			// FieldTemplates for the selectedBase
 
-  BaseDump selectedBase;
+  BaseDump selectedBase = null;
 
   String baseName;
 
@@ -206,7 +206,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // Main constructor for the querybox window
     
     this.gc = gc;
-    this.selectedBase = defaultBase;
 
     // - Define the main window
     
@@ -284,22 +283,19 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	baseChoice.addItem((String) baseNames.elementAt(i));
       }
       
-    if (selectedBase != null)
+    // set the selected base in the baseChoice before we add the item
+    // listener
+
+    if (defaultBase != null)
       {
-	baseChoice.setSelectedItem(selectedBase.getName());
-	this.baseName = selectedBase.getName();
+	baseChoice.setSelectedItem(defaultBase.getName());
       }
     else 
       { 
-	// no default given. pick the one that's there.
+	// no default given. take whatever the choice control picked
 	
-	this.selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
-	this.baseName = selectedBase.getName();
+	defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
       }
-
-    // preload our field cache
-    
-    mapBaseNamesToTemplates(selectedBase.getTypeID());
 
     baseChoice.addItemListener(this);
 
@@ -354,8 +350,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     query_panel.add("Center", titledPanel);
     titledPanel.add("North", returnedPanel);
 
-    resetFieldChoices();
-    addRow();
+    // switch to the defaultBase
+
+    selectBase(defaultBase);
 
     optionsPanel = new OptionsPanel(this);
 
@@ -986,29 +983,43 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    System.out.println("Base selected");
 	  }
 
-	// First, change the base
-	  
-	selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
-
-	this.baseName = selectedBase.getName();
-
-	// update field name map
-	
-	mapBaseNamesToTemplates(selectedBase.getTypeID());
-
-	// update the fieldChoices vector
-
-	resetFieldChoices();
-	  
-	// remove all rows in vector of component arrays
-
-	while (Rows.size() > 0)
-	  {
-	    removeRow();
-	  }
-
-	addRow();
+	selectBase(getBaseFromName((String) baseChoice.getSelectedItem()));
       }
+  }
+
+  /**
+   * <p>This method causes the query box to present itself for
+   * queries on the given object type.</p>
+   */
+
+  public void selectBase(BaseDump base)
+  {
+    if (base == null)
+      {
+	throw new IllegalArgumentException();
+      }
+
+    if (selectedBase == base)
+      {
+	return;
+      }
+
+    selectedBase = base;
+
+    mapBaseNamesToTemplates(selectedBase.getTypeID());
+    
+    // update the fieldChoices vector
+    
+    resetFieldChoices();
+
+    // remove all rows in vector of component arrays
+    
+    while (Rows.size() > 0)
+      {
+	removeRow();
+      }
+    
+    addRow();
   }
 
   // ***

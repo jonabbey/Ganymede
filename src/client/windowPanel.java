@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2002/02/27 22:47:17 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2002/10/05 06:56:14 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -64,6 +64,7 @@ import java.util.*;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.StringDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -83,7 +84,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.79 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
+ * @version $Revision: 1.80 $ $Date: 2002/10/05 06:56:14 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -558,8 +559,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (results.resultSize() == 0)
       {
-	gc.showErrorMessage("Query Result",
-			    "No results were found to match your query.");
+	final gclient my_gc = gc;
+	
+	SwingUtilities.invokeLater(new Runnable() 
+				   {
+				     public void run()
+				       {
+					 StringDialog d = new StringDialog(my_gc, "Query Result",
+									   "No results were found to match your query.",
+									   "Try Again", "Cancel");
+					 if (d.DialogShow() != null)
+					   {
+					     my_gc.postQuery(null);
+					   }
+				       }
+				   });
 	return;
       }
 
