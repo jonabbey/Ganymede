@@ -75,8 +75,11 @@ import java.rmi.server.Unreferenced;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -101,9 +104,11 @@ import arlut.csd.ddroid.common.PermMatrix;
 import arlut.csd.ddroid.common.Query;
 import arlut.csd.ddroid.common.QueryDataNode;
 import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.QueryResultContainer;
 import arlut.csd.ddroid.common.Result;
 import arlut.csd.ddroid.common.ReturnVal;
 import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.BaseField;
 import arlut.csd.ddroid.rmi.Category;
 import arlut.csd.ddroid.rmi.ClientAsyncResponder;
 import arlut.csd.ddroid.rmi.FileReceiver;
@@ -2809,7 +2814,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		  }
 	      }
 	  }
-	else if (query.permitList.get(field.getKey()) != null)
+	else if (query.permitList.contains(field.getKey()))
 	  {
 	    if (supergashMode)
 	      {
@@ -2967,6 +2972,80 @@ final public class GanymedeSession implements Session, Unreferenced {
     checklogin();
 
     return queryDispatch(query, false, true, null, perspectiveObject);
+  }
+
+  public QueryResultContainer testQuery(String queryString) throws NotLoggedInException, DDParseException
+  {
+    checklogin();
+
+    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    Query q = transmuter.transmuteQueryString(queryString);
+    QueryResult qr = queryDispatch(q, false, true, null, null); 
+    QueryResultContainer qrc = new QueryResultContainer();
+
+    /* Get the list of fields the user wants returned */
+    List fieldIDs = q.permitList;
+    
+    /* Now add them to the result container */
+    String fieldName;
+    Short fieldID;
+    DBObjectBaseField field;
+    Map prototypeMap = new HashMap(fieldIDs.size());
+    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
+      {
+      	fieldID = (Short) iter.next();
+      	field = (DBObjectBaseField) Ganymede.db.getObjectBase(q.objectName).getField(fieldID.shortValue());
+      	fieldName = field.getName();
+      	prototypeMap.put(fieldName, null);
+      	qrc.addField(fieldName, fieldID);
+      } 
+
+    /* Now we'll add a row for each matching object */
+    List invids = qr.getInvids();
+    Invid invid;
+    DBObject object;
+    PermEntry perm;
+    boolean editable;
+    Map rowMap;
+    for (Iterator iter = invids.iterator(); iter.hasNext();)
+      {
+        invid = (Invid) iter.next();
+        object = Ganymede.db.getObject(invid);
+
+        if (supergashMode)
+          {
+            perm = PermEntry.fullPerms;
+          }
+        else
+          {
+            perm = getPerm(object);
+          }
+
+        if ((perm == null) || (q.editableOnly && !perm.isEditable())
+            || (!perm.isVisible()))
+          {
+            editable = false;
+          }
+        else
+          {
+            editable = perm.isEditable();
+          }
+
+        rowMap = new HashMap(prototypeMap);
+        String key;
+        Object value;
+        for (Iterator keyIter = rowMap.keySet().iterator(); keyIter.hasNext();)
+          {
+            key = (String) keyIter.next();
+            value = ((DBField) object.get(key)).getValueLocal();
+            rowMap.put(key, value);
+          }
+
+        qrc.addRow(invid, object.getLabel(), rowMap, object.isInactivated(), object
+            .willExpire(), object.willBeRemoved(), editable);
+      }
+
+    return qrc;
   }
 
   /**

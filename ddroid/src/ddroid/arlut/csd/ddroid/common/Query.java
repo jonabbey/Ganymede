@@ -55,7 +55,9 @@
 
 package arlut.csd.ddroid.common;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -139,7 +141,7 @@ public class Query implements java.io.Serializable {
    * will be returned.</p>
    */
 
-  public Hashtable permitList = null;
+  public List permitList = null;
 
   /* -- */
 
@@ -282,10 +284,10 @@ public class Query implements java.io.Serializable {
   {
     if (permitList == null)
       {
-	permitList = new Hashtable();
+	permitList = new ArrayList();
       }
 
-    permitList.put(new Short(id), this);
+    permitList.add(new Short(id));
   }
 
   public String toString()
