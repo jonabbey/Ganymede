@@ -82,6 +82,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JnumberField;
 import arlut.csd.JDataComponent.JsetValueCallback;
@@ -824,7 +825,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	    // we're going to count on our parent doing an error dialog display if
 	    // needed.
 
-	    if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
+	    if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
 	      {
 		if (debug)
 		  {
@@ -887,7 +888,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     try 
       {
-	if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
+	if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
 	  {
 	    // constructing a JErrorDialog causes it to be shown.
 	    

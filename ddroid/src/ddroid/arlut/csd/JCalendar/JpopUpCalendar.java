@@ -56,6 +56,7 @@ import java.util.GregorianCalendar;
 
 import javax.swing.JFrame;
 
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 
@@ -102,7 +103,7 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
     try 
       {
-	b = parent.setValuePerformed(new JValueObject(this,(Date)(vObj.getValue())));
+	b = parent.setValuePerformed(new JSetValueObject(this,(Date)(vObj.getValue())));
       }
     catch (java.rmi.RemoteException e) 
       {
