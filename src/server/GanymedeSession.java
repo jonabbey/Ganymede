@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.269 $
-   Last Mod Date: $Date: 2003/09/05 21:09:39 $
+   Version: $Revision: 1.270 $
+   Last Mod Date: $Date: 2003/09/09 01:53:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.269 $ $Date: 2003/09/05 21:09:39 $
+ * @version $Revision: 1.270 $ $Date: 2003/09/09 01:53:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -143,7 +143,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * Async responder for sending async messages to the client.
    */
 
-  private serverClientAsyncResponder asyncPort = null;
+  private ClientAsyncResponder asyncPort = null;
 
   /**
    * if this session is on the GanymedeServer's lSemaphore, this boolean
