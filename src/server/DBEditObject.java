@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -497,6 +497,38 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
      per-DBObjectBase instance.
 
      */
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   */
+
+  public boolean anonymousLinkOK(short fieldID)
+  {
+    // assume that anonymous linking is not ok by default
+
+    return false;
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * rescind a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   */
+
+  public boolean anonymousUnlinkOK(short fieldID)
+  {
+    // assume that unlinking is ok by default
+
+    return true;
+  }
 
   /**
    *
