@@ -5,7 +5,7 @@
    This file is a management class for NFS volume objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -72,6 +72,50 @@ public class volumeCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * This method returns a key that can be used by the client
+   * to cache the value returned by choices().  If the client
+   * already has the key cached on the client side, it
+   * can provide the choice list from its cache rather than
+   * calling choices() on this object again.
+   *
+   * If there is no caching key, this method will return null.
+   *
+   */
+
+  public Object obtainChoicesKey(DBField field)
+  {
+    if (field.getID() == 257)
+      {
+	return null;
+      }
+
+    return super.obtainChoicesKey(field);
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.
+   *
+   * This method will provide a reasonable default for targetted
+   * invid fields.
+   * 
+   */
+
+  public QueryResult obtainChoiceList(DBField field)
+  {
+    if (field.getID() == 257)
+      {
+	return null;	// no choices for imbeddeds
+      }
+
+    return super.obtainChoiceList(field);
+  }
+
+  /**
+   *
    * This method is used to provide a hook to allow different
    * objects to generate different labels for a given object
    * based on their perspective.  This is used to sort
@@ -128,7 +172,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants {
 	    userName = tmpInvid.toString();
 	  }
 
-	return mapName + " - " + userName;
+	return mapName + ":" + userName;
       }
     else
       {
