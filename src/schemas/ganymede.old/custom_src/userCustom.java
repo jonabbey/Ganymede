@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -262,6 +262,45 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     return field.getFieldDef().isVisible(); 
   }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    switch (fieldid)
+      {
+      case userSchema.USERNAME:
+      case userSchema.PERSON:
+      case userSchema.PASSWORD:
+      case userSchema.SIGNATURE:
+      case userSchema.EMAILTARGET:
+	return true;
+      }
+
+    Boolean bool = (Boolean) object.getFieldValueLocal(userSchema.UNIX);
+
+    if (bool != null && bool.booleanValue())
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.UID:
+	  case userSchema.LOGINSHELL:
+	  case userSchema.HOMEDIR:
+	  case userSchema.VOLUMES:
+	    return true;
+	  }
+      }
+
+    return false;
+  }
+
 
   /**
    *
@@ -898,10 +937,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	  }
 
+	// update the home directory location.. we assume that if
+	// the user has permission to rename the user, they can
+	// automatically execute this change to the home directory.
+
 	sf = (StringDBField) getField(HOMEDIR);
 
 	sf.setValueLocal("/home/" + (String) value);	// ** ARL
 
+	// update the email target field.  We want to look for
+	// oldName@arlut.utexas.edu and replace it if we find it.
+
+	sf = (StringDBField) getField(EMAILTARGET);
+
+	String oldMail = oldName + "@arlut.utexas.edu";
+
+	if (sf.containsElement(oldMail))
+	  {
+	    sf.deleteElement(oldMail);
+	    sf.addElement(value + "@arlut.utexas.edu");
+	  }
+	else if (sf.size() == 0)
+	  {
+	    sf.addElement(value + "@arlut.utexas.edu");
+	  }
+	
 	inv = (InvidDBField) getField(PERSONAE);
 	
 	if (inv == null)
@@ -1095,7 +1155,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (debug)
 	      {
-		System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
+		System.err.println("userCustom: deleting group element " + 
+				   gSession.viewObjectLabel(delVal));
 	      }
 
 	    if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
@@ -1189,7 +1250,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
       {
-	return null;
+	result = new ReturnVal(true, true); // have setValue() do the right thing
+
+	result.addRescanField(userSchema.HOMEDIR);
+	result.addRescanField(userSchema.ALIASES);
+	result.addRescanField(userSchema.SIGNATURE);
+	result.addRescanField(userSchema.VOLUMES);
+	result.addRescanField(userSchema.EMAILTARGET);
+
+	return result;
       }
 
     if (!gSession.enableWizards)
