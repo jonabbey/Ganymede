@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/01/08 06:07:10 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/01/11 23:36:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -105,7 +105,7 @@ public class NumericDBField extends DBField implements num_field {
   NumericDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     value = null;
   }
@@ -119,7 +119,7 @@ public class NumericDBField extends DBField implements num_field {
   public NumericDBField(DBObject owner, NumericDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     value = field.value;
   }
@@ -133,7 +133,7 @@ public class NumericDBField extends DBField implements num_field {
   public NumericDBField(DBObject owner, int value, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     this.value = new Integer(value);
   }
 

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2000/12/15 23:23:44 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2001/01/11 23:35:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -840,13 +840,13 @@ public class Ganymede {
 		// else will have to be manually configured by the supergash administrator.
 		
 		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleMatrix);
-		pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); 
+		pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(true, false, false, false)); 
 		
 		// By default, users will not be able to view, create, or edit anything.  The supergash
 		// administrator is free to reconfigure this.
 		
 		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleDefaultMatrix);
-		pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false, false)); 
+		pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(false, false, false, false)); 
 	      }
 	  }
 	else

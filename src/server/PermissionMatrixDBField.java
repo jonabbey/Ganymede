@@ -7,15 +7,15 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2000/09/09 00:29:26 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/01/11 23:36:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -458,7 +458,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -477,7 +477,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     matrix = new Hashtable();
     defined = false;
@@ -504,7 +504,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	System.err.println("PermissionMatrixDBField: Copy constructor");
       }
 
-    this.definition = field.definition;
+    this.fieldcode = field.getID();
     this.owner = owner;
     this.matrix = new Hashtable(field.matrix.size());
 
@@ -532,7 +532,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	      }
 	  }
 
-	entry = new PermEntry((PermEntry) field.matrix.get(key));
+	entry = (PermEntry) field.matrix.get(key);
 
 	if (debug)
 	  {
@@ -774,7 +774,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     for (int i = 0; i < tableSize; i++)
       {
 	key = in.readUTF();
-	pe = new PermEntry(in);
+	pe = PermEntry.getPermEntry(in);
 	matrix.put(key, pe);
       }
 
@@ -1566,16 +1566,13 @@ class PermMatrixCkPoint {
   {
     Enumeration enum = field.matrix.keys();
     Object key;
-    PermEntry val;
 
     /* -- */
 
     while (enum.hasMoreElements())
       {
 	key = enum.nextElement();
-	val = (PermEntry) field.matrix.get(key);
-
-	matrix.put(key, new PermEntry(val));
+	matrix.put(key, field.matrix.get(key));
       }
   }
 }

@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2001/01/11 13:54:07 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2001/01/11 23:35:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.110 $ $Date: 2001/01/11 13:54:07 $
+ * @version $Revision: 1.111 $ $Date: 2001/01/11 23:35:56 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -171,6 +171,13 @@ public class DBObject implements db_object, FieldType, Remote {
    */
 
   protected DBField[] fieldAry;
+
+  /**
+   * Permission cache for our fields, hashed into an array
+   * using the same indexing as fieldAry.
+   */
+
+  protected PermEntry[] permCacheAry;
 
   /**
    *
@@ -232,6 +239,7 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     this.objectBase = objectBase;
     fieldAry = null;
+    permCacheAry = null;
 
     shadowObject = null;
 
@@ -546,6 +554,61 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   *
+   * Returns the field definition for the given field code, or
+   * null if that field code is not registered with this object
+   * type.
+   *
+   */
+
+  public final DBObjectBaseField getFieldDef(short fieldcode)
+  {
+    return (DBObjectBaseField) objectBase.getField(fieldcode);
+  }
+
+  public final synchronized PermEntry getFieldPerm(short fieldcode)
+  {
+    PermEntry result = null;
+
+    /* -- */
+
+    if (gSession == null)
+      {
+	return PermEntry.fullPerms; // assume supergash if we have no session
+      }
+
+    short index = findField(fieldcode);
+
+    if (index == -1)
+      {
+	throw new IllegalArgumentException("Unrecognized fieldcode: + fieldcode");
+      }
+
+    if (permCacheAry == null)
+      {
+	permCacheAry = new PermEntry[fieldAry.length];
+      }
+    else
+      {
+	result = permCacheAry[index];
+      }
+
+    if (result == null)
+      {
+	result = gSession.getPerm(this, fieldcode);
+
+	if (result == null)
+	  {
+	    result = gSession.getPerm(this);
+	  }
+      }
+
+    permCacheAry[index] = result;
+
+    return result;
+  }
+
+  /**
    * <p>Returns the GanymedeSession that this object is checked out in
    * care of.</p>
    */
@@ -846,6 +909,7 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     fieldAry = new DBField[tmp_count];
+    permCacheAry = null;	// okay in synchronized block
 
     for (int i = 0; i < tmp_count; i++)
       {
@@ -1314,13 +1378,13 @@ public class DBObject implements db_object, FieldType, Remote {
 	    throw new IllegalArgumentException("null value passed to saveField");
 	  }
 	
-	short hashindex = (short) ((field.getID()& 0x7FFF) % fieldAry.length);
-	
+	short hashindex = (short) ((field.getID() & 0x7FFF) % fieldAry.length);
+
 	short index = hashindex;
-	
+
 	while (fieldAry[index] != null)
 	  {
-	    if (index++ >= fieldAry.length)
+	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
 	      }
@@ -1339,7 +1403,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    * <p>This method places a DBField into a slot in this object's
-   * fieldAry DBField array.  saveField() uses a hashing algorithm to
+   * fieldAry DBField array.  replaceField() uses a hashing algorithm to
    * try and speed up field save and retrieving, but we are optimizing
    * for low memory usage rather than O(1) saving and retrieving.
    * Hash collisions are saved directly in the fieldAry, meaning that
@@ -1366,7 +1430,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
-	    if (index++ >= fieldAry.length)
+	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
 	      }
@@ -1380,6 +1444,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 
 	fieldAry[index] = field;
+
+	if (permCacheAry != null)
+	  {
+	    permCacheAry[index] = null;
+	  }
       }
   }
 
@@ -1405,7 +1474,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
-	    if (index++ >= fieldAry.length)
+	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
 	      }
@@ -1419,6 +1488,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 
 	fieldAry[index] = null;
+
+	if (permCacheAry != null)
+	  {
+	    permCacheAry[index] = null;
+	  }
       }
   }
 
@@ -1439,7 +1513,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
-	    if (index++ >= fieldAry.length)
+	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
 	      }
@@ -1453,6 +1527,38 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 
 	return fieldAry[index];
+      }
+  }
+
+  /**
+   * <p>This method finds the index for the given field id in this object's
+   * fieldAry and permCacheAry tables.</p>
+   */
+
+  public final short findField(short id)
+  {
+    synchronized (fieldAry)
+      {
+	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+
+	short index = hashindex;
+
+	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	  {
+	    if (++index >= fieldAry.length)
+	      {
+		index = 0;
+	      }
+
+	    if (index == hashindex)
+	      {
+		// couldn't find it
+
+		return -1;
+	      }
+	  }
+
+	return index;
       }
   }
 
@@ -2051,16 +2157,14 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>This method is used to correct this object's base and basefield
-   * pointers when the base changes.  This happens when the schema is
-   * edited.. this method is called on all objects under a
-   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} to make the
-   * object point and its fields point to the
-   * new version of the DBObjectBase and
-   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseFields}.  This
-   * method also takes care of cleaning out any fields that have become
-   * undefined due to a change in the schema for the field, as in a
-   * change from a vector to a scalar field, or vice-versa.</p>
+   * <p>This method is used to correct this object's base pointers
+   * when the base changes.  This happens when the schema is
+   * edited.. this method is called on all objects under a {@link
+   * arlut.csd.ganymede.DBObjectBase DBObjectBase} to make the object
+   * point to the new version of the DBObjectBase.  This method also
+   * takes care of cleaning out any fields that have become undefined
+   * due to a change in the schema for the field, as in a change from
+   * a vector to a scalar field, or vice-versa.</p>
    */
 
   synchronized void updateBaseRefs(DBObjectBase newBase)
@@ -2093,6 +2197,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	DBField oldAry[] = fieldAry;
 
 	fieldAry = new DBField[count];
+	permCacheAry = null;	// okay in synchronized block
 
 	for (int i = 0; i < oldAry.length; i++)
 	  {
@@ -2103,15 +2208,13 @@ public class DBObject implements db_object, FieldType, Remote {
 		continue;
 	      }
 
-	    field.definition = (DBObjectBaseField) newBase.getField(field.getID());
-
-	    if (field.definition != null && field.isDefined())
+	    if (newBase.getField(field.getID()) != null && field.isDefined())
 	      {
 		saveField(field);
 	      }
 	    else
 	      {
-		System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getName());
+		System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getID());
 	      }
 	  }
       }

@@ -7,15 +7,15 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/08/25 21:54:13 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2001/01/11 23:36:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -102,7 +102,7 @@ public class IPDBField extends DBField implements ip_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -121,7 +121,7 @@ public class IPDBField extends DBField implements ip_field {
   IPDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     if (isVector())
       {
@@ -142,7 +142,7 @@ public class IPDBField extends DBField implements ip_field {
   public IPDBField(DBObject owner, IPDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     if (isVector())
       {
@@ -168,7 +168,7 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     this.value = value;
   }
 
@@ -186,7 +186,7 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
 
     if (values == null)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/01/08 06:07:09 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/01/11 23:35:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -105,7 +105,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   BooleanDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     value = null;
   }
@@ -119,7 +119,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   public BooleanDBField(DBObject owner, BooleanDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     value = field.value;
   }
@@ -133,7 +133,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     this.value = new Boolean(value);
   }
 
@@ -335,7 +335,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public boolean labeled()
   {
-    return definition.isLabeled();
+    return getFieldDef().isLabeled();
   }
 
   /**
@@ -348,7 +348,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public String trueLabel()
   {
-    return definition.getTrueLabel();
+    return getFieldDef().getTrueLabel();
   }
 
   /**
@@ -361,7 +361,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public String falseLabel()
   {
-    return definition.getFalseLabel();
+    return getFieldDef().getFalseLabel();
   }
 
   // ****

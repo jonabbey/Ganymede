@@ -6,15 +6,16 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2001/01/11 13:54:09 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2001/01/11 23:36:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -57,10 +58,10 @@ import java.io.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable permissions entry object, used to store and transmit permissions
- * for a specific {@link arlut.csd.ganymede.DBObjectBase
- * DBObjectBase} and {@link arlut.csd.ganymede.DBObjectBaseField
- * DBObjectBaseField}.</P>
+ * <P>Serializable and immutable permissions entry object, used to
+ * store and transmit permissions for a specific {@link
+ * arlut.csd.ganymede.DBObjectBase DBObjectBase} and {@link
+ * arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}.</P>
  *
  * <P>Used in conjunction with
  * {@link arlut.csd.ganymede.PermissionMatrixDBField PermissionMatrixDBField}
@@ -70,18 +71,123 @@ import java.io.*;
 
 public class PermEntry implements java.io.Serializable {
 
+  static private PermEntry[] permObs;
+  static public final PermEntry fullPerms;
+  static public final PermEntry noPerms;
+  static public final PermEntry viewPerms;
+
+  static
+    {
+      permObs = new PermEntry[16];
+
+      permObs[0] = new PermEntry(false, false, false, false);
+      permObs[1] = new PermEntry(true, false, false, false);
+      permObs[2] = new PermEntry(false, true, false, false);
+      permObs[3] = new PermEntry(true, true, false, false);
+      permObs[4] = new PermEntry(false, false, true, false);
+      permObs[5] = new PermEntry(true, false, true, false);
+      permObs[6] = new PermEntry(false, true, true, false);
+      permObs[7] = new PermEntry(true, true, true, false);
+      permObs[8] = new PermEntry(false, false, false, true);
+      permObs[9] = new PermEntry(true, false, false, true);
+      permObs[10] = new PermEntry(false, true, false, true);
+      permObs[11] = new PermEntry(true, true, false, true);
+      permObs[12] = new PermEntry(false, false, true, true);
+      permObs[13] = new PermEntry(true, false, true, true);
+      permObs[14] = new PermEntry(false, true, true, true);
+      permObs[15] = new PermEntry(true, true, true, true);
+
+      fullPerms = permObs[15];
+      noPerms = permObs[0];
+      viewPerms = permObs[1];
+    }
+
   static final long serialVersionUID = 1595596943430809895L;
 
-  static public final PermEntry fullPerms = new PermEntry(true, true, true, true);
-  static public final PermEntry noPerms = new PermEntry(false, false, false, false);
-  static public final PermEntry viewPerms = new PermEntry(true, false, false, false);
+  /**
+   * <p>This static method returns a reference to an immutable PermEntry
+   * object with the requested privilege bits set.</p>
+   */
+
+  public static PermEntry getPermEntry(boolean visible, boolean editable, boolean create, boolean delete)
+  {
+    byte result = 0;
+
+    /* -- */
+
+    if (visible)
+      {
+	result++;
+      }
+
+    if (editable)
+      {
+	result += 2;
+      }
+
+    if (create)
+      {
+	result += 4;
+      }
+
+    if (delete)
+      {
+	result += 8;
+      }
+
+    return permObs[result];
+  }
+
+  /**
+   * <p>This static method returns a reference to an immutable PermEntry
+   * object with the requested privilege bits set.</p>
+   */
+
+  public static PermEntry getPermEntry(byte index)
+  {
+    return permObs[index];
+  }
+
+  /**
+   * <p>This static method reads a PermEntry object from the given DataInput
+   * stream and returns an immutable PermEntry with the appropriate bits
+   * set.</p>
+   */
+
+  public static PermEntry getPermEntry(DataInput in) throws IOException
+  {
+    boolean visible, editable, create, delete;
+    short entrySize;
+
+    /* -- */
+
+    entrySize = in.readShort();
+    
+    // we'll only worry about entrySize if we add perm bools later
+
+    visible = in.readBoolean();
+    editable = in.readBoolean();
+    create = in.readBoolean();
+
+    if (entrySize >= 4)
+      {
+	delete = in.readBoolean();
+      }
+    else
+      {
+	delete = false;
+      }
+
+    return getPermEntry(visible, editable, create, delete);
+  }
   
   // ---
 
-  boolean visible;
-  boolean editable;
-  boolean create;
-  boolean delete;
+  private boolean visible;
+  private boolean editable;
+  private boolean create;
+  private boolean delete;
+  private transient byte index = -1;
 
   /* -- */
 
@@ -91,6 +197,8 @@ public class PermEntry implements java.io.Serializable {
     this.editable = editable;
     this.create = create;
     this.delete = delete;
+
+    calcIndex();
   }
 
   public PermEntry(DataInput in) throws IOException
@@ -104,6 +212,8 @@ public class PermEntry implements java.io.Serializable {
     this.editable = orig.editable;
     this.create = orig.create;
     this.delete = orig.delete;
+
+    calcIndex();
   }
 
   public boolean equals(Object obj)
@@ -161,6 +271,8 @@ public class PermEntry implements java.io.Serializable {
       {
 	delete = false;
       }
+
+    calcIndex();
   }
 
   /**
@@ -215,25 +327,47 @@ public class PermEntry implements java.io.Serializable {
     return delete;
   }
 
+  /**
+   * <p>This method returns a bit coded byte value representing the
+   * permission bits set in this PermEntry object.  This byte may
+   * be used to access a pre-allocated PermEntry object using the
+   * static getPermEntry() method.</p>
+   */
+
+  public byte indexNum()
+  {
+    if (index == -1)
+      {
+	calcIndex();
+      }
+
+    return index;
+  }
+
+  /**
+   * <p>This method returns an immutable PermEntry that allows all
+   * permissions allowed by the logical union of this PermEntry and
+   * p.</p>
+   */
+
   public final PermEntry union(PermEntry p)
   {
-    if (p == null || (visible && editable && create && delete))
+    if (p == null)
       {
 	return this;
       }
-    else if ((p.visible || visible) && (p.editable || editable) && 
-	     (p.create || create) && (p.delete || delete))
-      {
-	return PermEntry.fullPerms;
-      }
-    else
-      {
-	return new PermEntry(p.visible || visible,
-			     p.editable || editable,
-			     p.create || create,
-			     p.delete || delete);
-      }
+
+    byte val = p.indexNum();
+    byte myVal = indexNum();
+
+    return permObs[p.indexNum() | indexNum()];
   }
+
+  /**
+   * <p>This method returns an immutable PermEntry that allows all
+   * permissions allowed by the logical intersection of this PermEntry and
+   * p.</p>
+   */
 
   public final PermEntry intersection(PermEntry p)
   {
@@ -241,24 +375,16 @@ public class PermEntry implements java.io.Serializable {
       {
 	return PermEntry.noPerms;
       }
-    else if (!((p.visible && visible) || (p.editable && editable) || 
-	       (p.create && create) || (p.delete && delete)))
-      {
-	return PermEntry.noPerms;
-      }
-    else
-      {
-	return new PermEntry(p.visible && visible,
-			     p.editable && editable,
-			     p.create && create,
-			     p.delete && delete);
-      }
+
+    byte val = p.indexNum();
+    byte myVal = indexNum();
+
+    return permObs[p.indexNum() & indexNum()];
   }
 
   /**
    * <P>This method returns a textual description
-   * of the changes between this PermEntry and &lt;p&gt;</P>
-   */
+   * of the changes between this PermEntry and &lt;p&gt;</P> */
 
   public final String difference(PermEntry p)
   {
@@ -375,5 +501,30 @@ public class PermEntry implements java.io.Serializable {
       }
 
     return result.toString();
+  }
+
+  private void calcIndex()
+  {
+    index = 0;
+    
+    if (visible)
+      {
+	index++;
+      }
+
+    if (editable)
+      {
+	index += 2;
+      }
+
+    if (create)
+      {
+	index += 4;
+      }
+
+    if (delete)
+      {
+	index += 8;
+      }
   }
 }

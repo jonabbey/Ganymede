@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.147 $
-   Last Mod Date: $Date: 2000/11/07 09:20:51 $
+   Version: $Revision: 1.148 $
+   Last Mod Date: $Date: 2001/01/11 23:36:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.147 $ %D%
+ * @version $Revision: 1.148 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -139,7 +139,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -158,7 +158,7 @@ public final class InvidDBField extends DBField implements invid_field {
   InvidDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     if (isVector())
       {
@@ -179,7 +179,7 @@ public final class InvidDBField extends DBField implements invid_field {
   public InvidDBField(DBObject owner, InvidDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     if (isVector())
       {
@@ -206,7 +206,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     this.owner = owner;
-    this.definition = null;
+    this.fieldcode = definition.getID();
     this.value = value;
   }
 
@@ -225,7 +225,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     if (values == null)
       {
@@ -3243,7 +3243,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public short getTargetBase()
   {
-    return definition.getTargetBase();
+    return getFieldDef().getTargetBase();
   }
 
   /**
@@ -3261,7 +3261,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;
       }
 
-    return definition.base.getStore().getObjectBase(targetBaseType);
+    return getFieldDef().base.getStore().getObjectBase(targetBaseType);
   }
 
   /**
@@ -3273,7 +3273,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public short getTargetField()
   {
-    return definition.getTargetField();
+    return getFieldDef().getTargetField();
   }
 
   /**
@@ -3287,7 +3287,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // if we're not pointing to a symmetric field,
     // return null
 
-    if (!definition.isSymmetric())
+    if (!getFieldDef().isSymmetric())
       {
 	return null;
       }
@@ -3725,7 +3725,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public boolean limited()
   {
-    return definition.isTargetRestricted();
+    return getFieldDef().isTargetRestricted();
   }
 
   /**

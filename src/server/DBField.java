@@ -6,15 +6,15 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2001/01/11 13:54:06 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2001/01/11 23:35:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -72,14 +72,17 @@ import arlut.csd.Util.*;
  * Ganymede {@link arlut.csd.ganymede.DBStore DBStore},
  * including permissions and unique value handling.</P>
  *
- * <P>DBFields are the actual carriers of field value in the Ganymede server.  Each
- * {@link arlut.csd.ganymede.DBObject DBObject} holds a set of DBFields in
- * a {@link arlut.csd.ganymede.DBFieldTable DBFieldTable}.  Each DBField is
- * associated with a {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
- * field definition (see {@link arlut.csd.ganymede.DBField#getFieldDef() getFieldDef()})
- * which defines the type of the field as well as various generic and type-specific
- * attributes for the field.  The DBObjectBaseField information is created and
- * edited with the Ganymede schema editor.</P>
+ * <P>DBFields are the actual carriers of field value in the Ganymede
+ * server.  Each {@link arlut.csd.ganymede.DBObject DBObject} holds a
+ * set of DBFields in a {@link arlut.csd.ganymede.DBFieldTable
+ * DBFieldTable}.  Each DBField is associated with a {@link
+ * arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} field
+ * definition (see {@link arlut.csd.ganymede.DBField#getFieldDef()
+ * getFieldDef()}) by way of its owner's type and it's own field code,
+ * which defines the type of the field as well as various generic and
+ * type-specific attributes for the field.  The DBObjectBaseField
+ * information is created and edited with the Ganymede schema
+ * editor.</P>
  *
  * <P>DBField is an abstract class.  There is a different subclass of DBField
  * for each kind of data that can be held in the Ganymede server, as follows:</P>
@@ -149,7 +152,7 @@ import arlut.csd.Util.*;
  * on another thread trying to call a synchronized method on the same field.</P>
  *
  * <P>To avoid this condition, no field methods that call synchronized methods on
- * other objects should themselves be synchronized in any fashion.</P> 
+ * other objects should themselves be synchronized in any fashion.</P>
  */
 
 public abstract class DBField implements Remote, db_field {
@@ -168,29 +171,17 @@ public abstract class DBField implements Remote, db_field {
   DBObject owner;
 
   /**
-   * <P>Link to the field definition for this field</P>
+   * <p>The identifying field number for this field within the
+   * owning object.  This number is an index into the
+   * owning object type's field dictionary.</p>
    */
 
-  DBObjectBaseField definition;
-  
-  /**
-   * <P>Permissions record for this field in the current
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} context,
-   * used when an object has been checked out for viewing or editing
-   * by GanymedeSession to avoid redundant synchronized calls on GanymedeSession,
-   * both for dead lock prevention and for speed-ups.</P>
-   *
-   * <P>Doing a permissions look-up in GanymedeSession is a relatively expensive
-   * operation, after all.</P>
-   */
-
-  PermEntry permCache = null;
+  short fieldcode;
 
   /* -- */
 
   public DBField()
   {
-    permCache = null;
   }
 
   /**
@@ -497,7 +488,7 @@ public abstract class DBField implements Remote, db_field {
 
   public final short getID()
   {
-    return getFieldDef().getID();
+    return fieldcode;
   }
 
   /**
@@ -801,7 +792,7 @@ public abstract class DBField implements Remote, db_field {
 
   public final DBObjectBaseField getFieldDef()
   {
-    return definition;
+    return owner.getFieldDef(fieldcode);
   }
 
   /**
@@ -2487,7 +2478,6 @@ public abstract class DBField implements Remote, db_field {
   synchronized void setOwner(DBObject owner)
   {
     this.owner = owner;
-    permCache = null;
   }
 
   // ****
@@ -2705,27 +2695,19 @@ public abstract class DBField implements Remote, db_field {
 
    public boolean verifyReadPermission()
    {
-     GanymedeSession gSession;
-     PermEntry perm1, perm2;
-
-     /* -- */
-
      if (owner.getGSession() == null)
        {
 	 return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
-     synchronized (this)
+     PermEntry pe = owner.getFieldPerm(getID());
+
+     if (pe == null)
        {
-	 updatePermCache();		// *sync* this GanymedeSession
-	 
-	 if (permCache == null)
-	   {
-	     return false;
-	   }
-	 
-	 return permCache.isVisible();
+	 return false;
        }
+
+     return pe.isVisible();
    }
 
   /**
@@ -2738,17 +2720,14 @@ public abstract class DBField implements Remote, db_field {
   {
     if (owner instanceof DBEditObject)
       {
-	synchronized (this)
-	  {
-	    updatePermCache();	// *sync* this GanymedeSession
+	PermEntry pe = owner.getFieldPerm(getID());
 
-	    if (permCache == null)
-	      {
-		return false;
-	      }
-	    
-	    return permCache.isEditable();
+	if (pe == null)
+	  {
+	    return false;
 	  }
+
+	return pe.isEditable();
       }
     else
       {
@@ -2770,52 +2749,6 @@ public abstract class DBField implements Remote, db_field {
   public int indexOfValue(Object value)
   {
     return getVectVal().indexOf(value);
-  }
-
-  /**
-   * This method clears this field's permCache.
-   */
-
-  public synchronized void clearPermCache()
-  {
-    permCache = null;
-  }
-
-  /**
-   * <P>This method is a deadlock hazard, due to its
-   * calling synchronized methods on 
-   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession},
-   * but since it caches permissions, the window
-   * of vulnerability is significantly reduced.</P>
-   */
-
-  synchronized private void updatePermCache()
-  {
-    GanymedeSession gSession;
-
-    /* -- */
-
-    if (permCache != null)
-      {
-	return;
-      }
-
-    gSession = owner.getGSession();
-
-    if (gSession == null)
-      {
-	return;			// can't update
-      }
-
-    permCache = gSession.getPerm(owner, getID()); // *sync* on gSession
-
-    // If we don't specifically have a permission record for this
-    // field, inherit the permissions for our owner
-
-    if (permCache == null)
-      {
-	permCache = gSession.getPerm(owner); // *sync* on gSession
-      }
   }
 
   /** 

@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 2000/11/30 03:23:08 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 2001/01/11 23:35:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.138 $ %D%
+ * @version $Revision: 1.139 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2107,7 +2107,10 @@ public final class DBStore {
 	    // what can users do with objects they own?  Includes users themselves
 	
 	    pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
-	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); // view self, nothing else
+
+	    // view self, nothing else
+
+	    pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(true, false, false, false));
 	  }
 
 	createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
@@ -2199,6 +2202,10 @@ public final class DBStore {
 	      {
 		session.abortTransaction();
 	      }
+	    catch (Throwable ex)
+	      {
+		ex.printStackTrace();
+	      }
 	    finally
 	      {
 		success=true;	// true enough, anyway
@@ -2208,6 +2215,10 @@ public final class DBStore {
 
 	gSession.logout();
 	success = true;
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
       }
     finally
       {

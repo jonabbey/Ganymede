@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/01/08 06:07:11 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/01/11 23:36:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2001/01/08 06:07:11 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2001/01/11 23:36:04 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1886,7 +1886,7 @@ class xPerm {
 
   public PermEntry getPermEntry()
   {
-    return new PermEntry(view, edit, create, delete);
+    return PermEntry.getPermEntry(view, edit, create, delete);
   }
 
   private GanymedeXMLSession getXSession()

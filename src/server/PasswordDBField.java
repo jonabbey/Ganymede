@@ -7,15 +7,15 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2000/08/25 21:54:14 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/01/11 23:36:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -147,7 +147,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -166,7 +166,7 @@ public class PasswordDBField extends DBField implements pass_field {
   PasswordDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     value = null;
   }
@@ -178,7 +178,7 @@ public class PasswordDBField extends DBField implements pass_field {
   public PasswordDBField(DBObject owner, PasswordDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
 
     cryptedPass = field.cryptedPass;
     md5CryptPass = field.md5CryptPass;
@@ -281,7 +281,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public Object key()
   {
-    if (definition.isCrypted())
+    if (getFieldDef().isCrypted())
       {
 	return cryptedPass;
       }
@@ -302,7 +302,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // a crypted copy.  We'll keep unencrypted passwords around
     // in memory
 
-    if (definition.isCrypted())
+    if (getFieldDef().isCrypted())
       {
 	if (cryptedPass == null)
 	  {
@@ -317,7 +317,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // at file version 1.16 we replaced the old md5pass with md5CryptPass
     // at file version 1.16 we add md5CryptPass
 
-    if (definition.isMD5Crypted())
+    if (getFieldDef().isMD5Crypted())
       {
 	if (md5CryptPass == null)
 	  {
@@ -331,7 +331,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // only write out plaintext if we have no crypttext
 
-    if (!definition.isCrypted() && !definition.isMD5Crypted())
+    if (!getFieldDef().isCrypted() && !getFieldDef().isMD5Crypted())
       {
 	if (uncryptedPass == null)
 	  {
@@ -368,7 +368,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
     else
       {
-	if (definition.isCrypted())
+	if (getFieldDef().isCrypted())
 	  {
 	    cryptedPass = in.readUTF();
 
@@ -386,7 +386,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	
 	if ((Ganymede.db.file_major >= 1) || (Ganymede.db.file_minor >= 16))
 	  {
-	    if (definition.isMD5Crypted())
+	    if (getFieldDef().isMD5Crypted())
 	      {
 		md5CryptPass = in.readUTF();
 		
@@ -401,7 +401,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 	  }
 
-	if (definition.isCrypted() || definition.isMD5Crypted())
+	if (getFieldDef().isCrypted() || getFieldDef().isMD5Crypted())
 	  {
 	    uncryptedPass = null;
 	  }
@@ -581,7 +581,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public int maxSize()
   {
-    return definition.getMaxLength();
+    return getFieldDef().getMaxLength();
   }
 
   /**
@@ -593,7 +593,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public int minSize()
   {
-    return definition.getMinLength();
+    return getFieldDef().getMinLength();
   }
 
   /**
@@ -607,7 +607,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String allowedChars()
   {
-    return definition.getOKChars();
+    return getFieldDef().getOKChars();
   }
 
   /**
@@ -621,7 +621,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String disallowedChars()
   {
-    return definition.getBadChars();
+    return getFieldDef().getBadChars();
   }
 
   /**
@@ -654,7 +654,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean crypted()
   {
-    return (definition.isCrypted());
+    return (getFieldDef().isCrypted());
   }
 
   /**
@@ -710,7 +710,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // to it (assuming that the schema is set up to have the user's
 	    // password field keep a plaintext copy.)
 
-	    if (definition.isPlainText())
+	    if (getFieldDef().isPlainText())
 	      {
 		uncryptedPass = text;
 	      }
@@ -718,7 +718,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // likewise, remember the MD5 version in case someone is going
 	    // to want it
 
-	    if (definition.isMD5Crypted() && (md5CryptPass == null))
+	    if (getFieldDef().isMD5Crypted() && (md5CryptPass == null))
 	      {
 		md5CryptPass = MD5Crypt.crypt(text);
 	      }
@@ -759,7 +759,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // to it (assuming that the schema is set up to have the user's
 	    // password field keep a plaintext copy.)
 
-	    if (definition.isPlainText())
+	    if (getFieldDef().isPlainText())
 	      {
 		uncryptedPass = text;
 	      }
@@ -767,7 +767,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // likewise, remember the crypt() version in case someone
 	    // is going to want it.
 
-	    if (definition.isCrypted())
+	    if (getFieldDef().isCrypted())
 	      {
 		cryptedPass = jcrypt.crypt(text);
 	      }
@@ -800,7 +800,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean matchCryptText(String text)
   {
-    if (!definition.isCrypted() || cryptedPass == null)
+    if (!getFieldDef().isCrypted() || cryptedPass == null)
       {
 	return false;
       }
@@ -894,7 +894,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getMD5CryptText()
   {
-    if (definition.isMD5Crypted() && md5CryptPass != null)
+    if (getFieldDef().isMD5Crypted() && md5CryptPass != null)
       {
 	return md5CryptPass;
       }
@@ -935,7 +935,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getSalt()
   {
-    if (definition.isCrypted() && cryptedPass != null)
+    if (getFieldDef().isCrypted() && cryptedPass != null)
       {
 	return cryptedPass.substring(0,2);
       }
@@ -959,7 +959,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getMD5Salt()
   {
-    if (definition.isMD5Crypted() && md5CryptPass != null)
+    if (getFieldDef().isMD5Crypted() && md5CryptPass != null)
       {
 	String salt = md5CryptPass;
 	String magic = "$1$";
@@ -1045,7 +1045,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // store a UNIX-crypted version, and store a naive MD5 hash version
     
-    if (definition.isCrypted())
+    if (getFieldDef().isCrypted())
       {
 	try
 	  {
@@ -1056,7 +1056,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // see whether the schema editor has us trying to save
 	    // plain text
 		    
-	    if (definition.isPlainText())
+	    if (getFieldDef().isPlainText())
 	      {
 		uncryptedPass = text;
 	      }
@@ -1084,7 +1084,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // if they want an OpenBSD-style md5crypt() password generated/saved, do that
 
-    if (definition.isMD5Crypted())
+    if (getFieldDef().isMD5Crypted())
       {
 	try
 	  {
@@ -1095,7 +1095,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // see whether the schema editor has us trying to save
 	    // plain text
 		    
-	    if (definition.isPlainText())
+	    if (getFieldDef().isPlainText())
 	      {
 		uncryptedPass = text;
 	      }
@@ -1151,7 +1151,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					  " in object " + owner.getLabel());
       }
 
-    if (!definition.isCrypted())
+    if (!getFieldDef().isCrypted())
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
 					  "Can't set a pre-crypted value into a plaintext-only password field");
@@ -1201,7 +1201,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					  " in object " + owner.getLabel());
       }
 
-    if (!definition.isMD5Crypted())
+    if (!getFieldDef().isMD5Crypted())
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setMD5CryptTextPass()",
 					  "Can't set a pre-crypted MD5Crypt value into a non-MD5Crypted password field");

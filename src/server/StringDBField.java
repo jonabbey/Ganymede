@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/08/25 21:54:16 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2001/01/11 23:36:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -86,7 +86,7 @@ public class StringDBField extends DBField implements string_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -105,7 +105,7 @@ public class StringDBField extends DBField implements string_field {
   StringDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     if (isVector())
       {
@@ -126,7 +126,7 @@ public class StringDBField extends DBField implements string_field {
   public StringDBField(DBObject owner, StringDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     if (isVector())
       {
@@ -152,7 +152,7 @@ public class StringDBField extends DBField implements string_field {
       }
 
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     this.value = value;
   }
 
@@ -170,7 +170,7 @@ public class StringDBField extends DBField implements string_field {
       }
 
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
 
     if (values == null)
       {
@@ -599,7 +599,7 @@ public class StringDBField extends DBField implements string_field {
 
   public int maxSize()
   {
-    return definition.getMaxLength();
+    return getFieldDef().getMaxLength();
   }
 
   /**
@@ -613,7 +613,7 @@ public class StringDBField extends DBField implements string_field {
 
   public int minSize()
   {
-    return definition.getMinLength();
+    return getFieldDef().getMinLength();
   }
 
   /**
@@ -742,7 +742,7 @@ public class StringDBField extends DBField implements string_field {
 
   public String allowedChars()
   {
-    return definition.getOKChars();
+    return getFieldDef().getOKChars();
   }
 
   /**
@@ -756,7 +756,7 @@ public class StringDBField extends DBField implements string_field {
 
   public String disallowedChars()
   {
-    return definition.getBadChars();
+    return getFieldDef().getBadChars();
   }
 
   /**
@@ -850,9 +850,9 @@ public class StringDBField extends DBField implements string_field {
 					  minSize());
       }
 
-    if (definition.regexp != null)
+    if (getFieldDef().regexp != null)
       {
-	gnu.regexp.REMatch match = definition.regexp.getMatch(s);
+	gnu.regexp.REMatch match = getFieldDef().regexp.getMatch(s);
 
 	if (match == null)
 	  {
@@ -862,7 +862,7 @@ public class StringDBField extends DBField implements string_field {
 					      "for this string field.\n\n" +
 					      "This string field only accepts strings matching the " +
 					      "following regular expression:\n\n\"" +
-					      definition.getRegexpPat() + "\"");
+					      getFieldDef().getRegexpPat() + "\"");
 	  }
       }
 

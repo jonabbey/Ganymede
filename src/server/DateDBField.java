@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/01/01 18:05:03 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/01/11 23:35:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -97,7 +97,7 @@ public class DateDBField extends DBField implements date_field {
   {
     value = null;
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     receive(in);
   }
 
@@ -116,7 +116,7 @@ public class DateDBField extends DBField implements date_field {
   DateDBField(DBObject owner, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     
     value = null;
   }
@@ -130,7 +130,7 @@ public class DateDBField extends DBField implements date_field {
   public DateDBField(DBObject owner, DateDBField field)
   {
     this.owner = owner;
-    definition = field.definition;
+    this.fieldcode = field.getID();
     
     value = field.value;
   }
@@ -144,7 +144,7 @@ public class DateDBField extends DBField implements date_field {
   public DateDBField(DBObject owner, Date value, DBObjectBaseField definition)
   {
     this.owner = owner;
-    this.definition = definition;
+    this.fieldcode = definition.getID();
     this.value = value;
   }
 
