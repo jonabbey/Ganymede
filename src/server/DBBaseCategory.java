@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/02/22 07:21:22 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/02/29 09:35:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,18 +82,71 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   private final static boolean debug = false;
 
+  private static arlut.csd.Util.Compare comparator =
+    new arlut.csd.Util.Compare() {
+    public int compare(Object a, Object b) 
+      {
+	int valA, valB;
+
+	if (a instanceof DBBaseCategory)
+	  {
+	    valA = ((DBBaseCategory) a).tmp_displayOrder;
+	  }
+	else
+	  {
+	    valA = ((DBObjectBase) a).tmp_displayOrder;
+	  }
+
+	if (b instanceof DBBaseCategory)
+	  {
+	    valB = ((DBBaseCategory) b).tmp_displayOrder;
+	  }
+	else
+	  {
+	    valB = ((DBObjectBase) b).tmp_displayOrder;
+	  }
+
+	if (valA < valB)
+	  {
+	    return -1;
+	  }
+	else if (valB > valA)
+	  { 
+	    return 1;
+	  } 
+	else
+	  { 
+	    return 0;
+	  }
+      }
+  };
+
   //
 
   private String name;
-  private int displayOrder;
   private DBBaseCategory parent;
   private DBStore store;
+
+  /**
+   * The actual members of this category.  Each member will be either
+   * a {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} or another
+   * {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}.
+   */
+
   private Vector contents;
+
+  /**
+   * In order to keep compatibility with versions 1.17 and previous of
+   * the ganymede.db file format, we'll keep this field so we can do a
+   * sort after loading when reading an old file.
+   */
+
+  int tmp_displayOrder = -1;
 
   /**
    *
    * We use this baseHash to keep a map of DBObjectBase.getKey() to
-   * instances of DBObjectBase.  addNode() uses this to find a
+   * instances of DBObjectBase.  addNodeAfter() uses this to find a
    * server-local DBObjectBase from a remote Base reference passed
    * us by the schema editor on the client.
    *
@@ -205,7 +258,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     this.baseHash = baseHash;
 
     setName(rootCategory.getName());
-    setDisplayOrder(rootCategory.getDisplayOrder());
     
     recurseDown(rootCategory, baseHash, editor);
   }
@@ -250,17 +302,13 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    newBase = new DBObjectBase(oldBase, editor); 
 	    baseHash.put(newBase.getKey(), newBase);
 
-	    // let the base know what hash to check for name collisions
-
-	    newBase.setContainingHash(baseHash);
-
 	    if (debug)
 	      {
 		Ganymede.debug("Created newBase " + newBase.getName() + 
 			       " in recursive category tree duplication");
 	      }
 
-	    addNode(newBase, false, false);
+	    addNodeAfter(newBase, null);
 
 	    if (debug)
 	      {
@@ -354,7 +402,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * @param showAll if true, show built-in field types
    */
 
-  public synchronized void print(PrintWriter out, String indent, boolean showAll)
+  public synchronized void print(PrintWriter out, String indent)
   {
     out.println(indent + getName());
 
@@ -362,11 +410,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       {
 	if (contents.elementAt(i) instanceof DBBaseCategory)
 	  {
-	    ((DBBaseCategory) contents.elementAt(i)).print(out, indent + "  ", showAll);
+	    ((DBBaseCategory) contents.elementAt(i)).print(out, indent + "  ");
 	  }
 	else if (contents.elementAt(i) instanceof DBObjectBase)
 	  {
-	    ((DBObjectBase) contents.elementAt(i)).print(out, indent + "  ", showAll);
+	    ((DBObjectBase) contents.elementAt(i)).print(out, indent + "  ");
 	  }
       }
   }
@@ -378,29 +426,77 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   synchronized void emit(DataOutput out) throws IOException
   {
-    int count = 0;
-    DBBaseCategory bc;
+    Object element;
 
     /* -- */
 
+    out.writeUTF(this.getPath());
+    out.writeInt(contents.size());
+
     for (int i = 0; i < contents.size(); i++)
       {
-	if (contents.elementAt(i) instanceof DBBaseCategory)
+	element = contents.elementAt(i);
+
+	// in DBStore 2.0 and later, we emit all bases during our
+	// DBBaseCategory dump.
+
+	if (element instanceof DBBaseCategory)
 	  {
-	    count++;
+	    out.writeBoolean(false); // it's a category
+	    ((DBBaseCategory) element).emit(out);
+	  }
+	else if (element instanceof DBObjectBase)
+	  {
+	    out.writeBoolean(true); // it's a base
+	    ((DBObjectBase) element).emit(out, true);
 	  }
       }
+  }
+
+  /**
+   * <p>Limited recursive category dump, used for schema dumping.</p>
+   */
+
+  synchronized void partialEmit(DataOutput out) throws IOException
+  {
+    Object element;
+
+    /* -- */
 
     out.writeUTF(this.getPath());
-    out.writeInt(displayOrder);
-    out.writeInt(count);
+    out.writeInt(contents.size());
     
     for (int i = 0; i < contents.size(); i++)
       {
-	if (contents.elementAt(i) instanceof DBBaseCategory)
+	element = contents.elementAt(i);
+	
+	if (element instanceof DBObjectBase)
 	  {
-	    bc = (DBBaseCategory) contents.elementAt(i);
-	    bc.emit(out);
+	    out.writeBoolean(true); // it's a base
+
+	    DBObjectBase base = (DBObjectBase) element;
+
+	    if (base.type_code == SchemaConstants.OwnerBase ||
+		base.type_code == SchemaConstants.PersonaBase ||
+		base.type_code == SchemaConstants.RoleBase ||
+		base.type_code == SchemaConstants.EventBase)
+	      {
+		base.partialEmit(out); // gotta retain admin login ability
+	      }
+	    else if (base.type_code == SchemaConstants.TaskBase)
+	      {
+		base.emit(out, true); // save the builder information
+	      }
+	    else
+	      {
+		base.emit(out, false); // just write out the schema info
+	      }
+	  }
+	else if (element instanceof DBBaseCategory)
+	  {
+	    out.writeBoolean(false); // it's a category
+
+	    ((DBBaseCategory) element).partialEmit(out);
 	  }
       }
   }
@@ -423,7 +519,18 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     /* -- */
 
     pathName = in.readUTF();
-    displayOrder = in.readInt();
+
+    // we stopped using an explicitly stored display order field at
+    // DBStore 2.0
+    
+    if ((store.file_major == 1) && (store.file_minor <= 17))
+      {
+	tmp_displayOrder = in.readInt();
+      }
+    else
+      {
+	tmp_displayOrder = -1;
+      }
 
     // now parse our path name to get our path
 
@@ -442,15 +549,42 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     if (false)
       {
-	System.err.println("DBBaseCategory.receive(): reading in " + count + " subcategories");
+	System.err.println("DBBaseCategory.receive(): reading in " + count + 
+			   " subcategories and bases");
       }
 
     for (int i = 0; i < count; i++)
       {
-	addNode(new DBBaseCategory(store, in), false, false);
+	// starting at 2.0, we started reading DBObjectBases in during
+	// category reading.
+
+	if (store.file_major > 1)
+	  {
+	    if (in.readBoolean())
+	      {
+		addNodeAfter(new DBObjectBase(in, store, true), null);
+	      }
+	    else
+	      {
+		addNodeAfter(new DBBaseCategory(store, in), null);
+	      }
+	  }
+	else
+	  {
+	    // we're reading an old file, and we'll never see a
+	    // DBObjectBase here
+
+	    addNodeAfter(new DBBaseCategory(store, in), null);
+	  }
       }
-    
-    resort();
+
+    // sort contents by display order if we are reading an old file.
+    // A 2.x file will have the contents sorted in the on-disk file.
+
+    if (store.file_major == 1)
+      {
+	new VecQuickSort(contents, comparator).sort();
+      }
   }
 
   /**
@@ -530,17 +664,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   * Gets the order of this node in the containing category
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   */
-
-  public int getDisplayOrder()
-  {
-    return displayOrder;
-  }
-
-  /**
    * Sets the name of this node.  The name must not include a '/'
    * character, but all other characters are acceptable.
    *
@@ -573,18 +696,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     this.name = newName;
 
     return true;
-  }
-
-  /**
-   *
-   *
-   * @see arlut.csd.ganymede.Category
-   *
-   */
-
-  public void setDisplayOrder(int val)
-  {
-    displayOrder = val;
   }
 
   /**
@@ -665,72 +776,19 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * sort the elements according to display order
-   *
-   */
-
-  synchronized void resort()
-  {
-    new VecQuickSort(contents, 
-		     new arlut.csd.Util.Compare()
-		     {
-		       public int compare(Object a, Object b)
-			 {
-			   CategoryNode aN, bN;
-
-			   aN = (CategoryNode) a;
-			   bN = (CategoryNode) b;
-
-			   try
-			     {
-			       if (aN.getDisplayOrder() < bN.getDisplayOrder())
-				 {
-				   return -1;
-				 }
-			       else if (aN.getDisplayOrder() > bN.getDisplayOrder())
-				 {
-				   return 1;
-				 }
-			       else
-				 {
-				   return 0;
-				 }
-			     }
-			   catch (RemoteException ex)
-			     {
-			       throw new RuntimeException("caught remote exception " + ex);
-			     }
-			 }
-		     }
-		     ).sort();
-  }
-
-  /**
-   * <p>This method is used to place a Category Node under us.  The node
-   * will be placed according to the node's displayOrder value, if resort
-   * and/or adjustNodes are true.</p>
-   *
-   * <p>addNode() places the new node in the list according to the node's
-   * displayOrder value.</p>
+   * <p>This method is used to place a Category Node under us.  This method
+   * adds a new node into this category, after prevNodeName if prevNodeName
+   * is not null, or at the end of the category if it is.</p>
    *
    * @param node Node to place under this category
-   * @param sort If true, the nodes under this category will be resorted after insertion
-   * @param adjustNodes If true, the nodes under this category will have their displayOrder recalculated.
-   * this should not be done lightly, and not at all if any more nodes with precalculated or saved
-   * displayOrder's are to be later inserted.
+   * @param prevNodeName the name of the node that the new node is to be added after,
+   * must not be path-qualified.
    *
    * @see arlut.csd.ganymede.Category
    */
 
-  public synchronized void addNode(CategoryNode node, boolean sort, boolean adjustNodes)
+  public synchronized void addNodeAfter(CategoryNode node, String prevNodeName)
   {
-    int
-      i,
-      index = -1;
-
-    boolean found = false;
-
     CategoryNode
       cNode;
 
@@ -738,8 +796,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     if (debug)
       {
-	System.err.println("DBBaseCategory<" + getName() + ">.addNode(" + 
-			   node + "," + sort + "," + adjustNodes +")");
+	System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
+			   node + "," + prevNodeName +")");
       }
 
     if (node == null)
@@ -747,26 +805,14 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	throw new IllegalArgumentException("Can't add a null node");
       }
 
-    try
-      {
-	if (this.contains(node.getName()))
-	  {
-	    throw new IllegalArgumentException("Can't add this node.. name already registered " + node.getName());
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote " + ex);
-      } 
-
     // find our insertion point
 
     if (debug)
       {
-	System.err.println("DBBaseCategory.addNode(): searching to see if node is already in this category");
+	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
       }
 
-    for (i = 0; !found && i < contents.size(); i++)
+    for (int i = 0; i < contents.size(); i++)
       {
 	cNode = (CategoryNode) contents.elementAt(i);
 
@@ -774,7 +820,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    if (cNode.getName().equals(node.getName()))
 	      {
-		found = true;
+		throw new IllegalArgumentException("can't add a node that's already in the category");
 	      }
 	  }
 	catch (RemoteException ex)
@@ -783,195 +829,40 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
 
-    if (found)
+    // make sure we've got a local reference if we're being given a
+    // Base
+
+    if ((node instanceof Base) && !(node instanceof DBObjectBase))
       {
-	throw new IllegalArgumentException("can't add a node that's already in the category");
+	node = getBaseFromBase((Base) node);
       }
 
     // put our node into our content list
 
-    // if adjustNodes is false, we're just going to add this node to the
-    // end of our category list.
+    // if prevNodeName is null, we're just going to add this node to
+    // the end of our category list.
 
-    if (!adjustNodes)
+    if (prevNodeName == null)
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNode(): adjustNodes is false");
-	  }
-
-	// note that we *don't* want to put in a rmi stub here for Bases
-	// here.. we'd much rather have the full-access local object so
-	// that we can do full direct DBObjectBase operations as the
-	// category tree is managed by the Schema editor.
-
-	if (node instanceof Base)
-	  {
-	    if (debug)
-	      {
-		System.err.println("DBBaseCategory.addNode(): inserting base");
-	      }
-
-	    DBObjectBase testBase = getBaseFromBase((Base) node);
-
-	    if (testBase != null)
-	      {
-		node = testBase;
-	      }
-	    else
-	      {
-		// node should always be DBObjectBase, since the RMI
-		// system converts a remote ref back into a local
-		// ref.. of some kind.. ;-(
-
-		if (debug)
-		  {
-		    System.err.println("DBBaseCategory.addNode(1): couldn't find base in hash.. casting ?remote?");
-		  }
-
-		if (node instanceof DBObjectBase)
-		  {
-		    testBase = (DBObjectBase) node;
-		  }
-	      }
-
-	    if (debug)
-	      {
-		if (testBase.editor == null)
-		  {
-		    System.err.println("DBBaseCategory(" + getName() + 
-				       ").addNode(1): hey!  node " + testBase.getName() + " is a null-editor!");
-		  }
-	      }
-
-	    if (node != null)
-	      {
-		contents.addElement(node);
-	      }
-	  }
-	else
-	  {
-	    // something else.. presumably a Category
-
-	    contents.addElement(node);
-	  }
+	contents.addElement(node);
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNode(): adjustNodes is true");
-	  }
-
-	try
-	  {
-	    if (node instanceof Base)
-	      {
-		if (debug)
-		  {
-		    System.err.println("DBBaseCategory.addNode(): inserting base");
-		  }
-	    
-		DBObjectBase newBase = getBaseFromBase((Base) node);
-
-		if (newBase == null)
-		  {
-		    if (debug)
-		      {
-			System.err.println("DBBaseCategory.addNode(2): couldn't find base in hash.. casting ?remote?");
-		      }
-
-		    newBase = (DBObjectBase) node;
-		  }
-
-		if (newBase == null)
-		  {
-		    throw new NullPointerException("null newBase in addNode! " + 
-						   ((editor == null) ? "local" : "remote"));
-		  }
-
-		if (contents == null)
-		  {
-		    throw new NullPointerException("null contents in addNode!");
-		  }
-
-		if (debug)
-		  {
-		    if (newBase.editor == null)
-		      {
-			System.err.println("DBBaseCategory(" + getName() + 
-					   ").addNode(2): hey!  node " + newBase.getName() + " is a null-editor!");
-		      }
-		  }
-
-		if (newBase.getDisplayOrder() >= contents.size())
-		  {
-		    contents.addElement(newBase);
-		  }
-		else
-		  {
-		    contents.insertElementAt(newBase, newBase.getDisplayOrder());
-		  }
-	      }
-	    else if (node instanceof Category)
-	      {
-		if (debug)
-		  {
-		    System.err.println("DBBaseCategory.addNode(): inserting Category");
-		  }
-	    
-		// presumably we've got a Category here..
-
-		if (node.getDisplayOrder() >= contents.size())
-		  {
-		    contents.addElement(node);
-		  }
-		else
-		  {
-		    contents.insertElementAt(node, node.getDisplayOrder());
-		  }
-	      }
-	    else
-	      {
-		throw new IllegalArgumentException("don't recognize node");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("couldn't get node display order for in-order insertion: " + ex);
-	  }
-      }
-
-    // sort the elements according to display order
-
-    if (sort)
-      {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNode(): resorting category nodes");
-	  }
-
-	resort();
-      }
-
-    if (adjustNodes)
-      {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNode(): adjusting category node display orders");
-	  }
-
-	for (i = 0; i < contents.size(); i++)
+	for (int i = 0; i < contents.size(); i++)
 	  {
 	    cNode = (CategoryNode) contents.elementAt(i);
 
 	    try
 	      {
-		cNode.setDisplayOrder(i);
+		if (cNode.getName().equals(prevNodeName))
+		  {
+		    contents.insertElementAt(node, i+1);
+		    break;
+		  }
 	      }
 	    catch (RemoteException ex)
 	      {
-		throw new RuntimeException("this should not happen " + ex);
+		throw new RuntimeException(ex.getMessage());
 	      }
 	  }
       }
@@ -982,7 +873,116 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       {
 	if (debug)
 	  {
-	    System.err.println("DBBaseCategory.addNode(): setting category for node");
+	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
+	  }
+
+	node.setCategory(this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote exception " + ex);
+      }
+  }
+
+  /**
+   * <p>This method is used to place a Category Node under us.  This method
+   * adds a new node into this category, before nextNodeName if nextNodeName
+   * is not null, or at the beginning of the category if it is.</p>
+   *
+   * @param node Node to place under this category
+   * @param nextNodeName the name of the node that the new node is to be added before,
+   * must not be path-qualified.
+   *
+   * @see arlut.csd.ganymede.Category
+   */
+
+  public synchronized void addNodeBefore(CategoryNode node, String nextNodeName)
+  {
+    CategoryNode
+      cNode;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
+			   node + "," + nextNodeName +")");
+      }
+
+    if (node == null)
+      {
+	throw new IllegalArgumentException("Can't add a null node");
+      }
+
+    // find our insertion point
+
+    if (debug)
+      {
+	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
+      }
+
+    for (int i = 0; i < contents.size(); i++)
+      {
+	cNode = (CategoryNode) contents.elementAt(i);
+
+	try
+	  {
+	    if (cNode.getName().equals(node.getName()))
+	      {
+		throw new IllegalArgumentException("can't add a node that's already in the category");
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't check node name: " + ex);
+	  }
+      }
+
+    // make sure we've got a local reference if we're being given a
+    // Base
+
+    if ((node instanceof Base) && !(node instanceof DBObjectBase))
+      {
+	node = getBaseFromBase((Base) node);
+      }
+
+    // put our node into our content list
+
+    // if nextNodeName is null, we're just going to add this node to
+    // the end of our category list.
+
+    if (nextNodeName == null)
+      {
+	contents.insertElementAt(node, 0);
+      }
+    else
+      {
+	for (int i = 0; i < contents.size(); i++)
+	  {
+	    cNode = (CategoryNode) contents.elementAt(i);
+
+	    try
+	      {
+		if (cNode.getName().equals(nextNodeName))
+		  {
+		    contents.insertElementAt(node, i);
+		    break;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException(ex.getMessage());
+	      }
+	  }
+      }
+
+    // tell the node who's its daddy
+
+    try
+      {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
 	  }
 
 	node.setCategory(this);
@@ -999,19 +999,20 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * this Category.</p>
    *
    * @param catPath the fully specified path of the node to be moved
-   * @param displayOrder where to place this node within this category.
+   * @param prevNodeName the name of the node that the catPath node is
+   * to be placed after in this category.
    *
    * @see arlut.csd.ganymede.Category 
    */
 
-  public synchronized void moveCategoryNode(String catPath, int displayOrder)
+  public synchronized void moveCategoryNode(String catPath, String prevNodeName)
   {
     DBBaseCategory categoryNode = editor.getCategory(catPath);
     DBBaseCategory oldCategory = (DBBaseCategory) categoryNode.getCategory();
 
     if (debug)
       {
-	System.err.println("DBBaseCategory.moveNode(" + catPath + "," + displayOrder + ")");
+	System.err.println("DBBaseCategory.moveNode(" + catPath + "," + prevNodeName + ")");
       }
 
     if (oldCategory == this)
@@ -1043,43 +1044,37 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     categoryNode.setCategory(this);
 
-    if (displayOrder >= contents.size())
+    if (prevNodeName == null)
       {
-	contents.addElement(categoryNode);
+	contents.insertElementAt(categoryNode, 0);
       }
     else
       {
-	contents.insertElementAt(categoryNode, displayOrder);
-      }
+	for (int i = 0; i < contents.size(); i++)
+	  {
+	    CategoryNode cNode = (CategoryNode) contents.elementAt(i);
 
-    if (debug)
-      {
-	System.err.println("DBBaseCategory.moveNode(): adjusting category node display orders");
-      }
-    
-    for (int i = 0; i < contents.size(); i++)
-      {
-	CategoryNode cNode = (CategoryNode) contents.elementAt(i);
-	
-	try
-	  {
-	    cNode.setDisplayOrder(i);
+	    try
+	      {
+		if (cNode.getName().equals(prevNodeName))
+		  {
+		    contents.insertElementAt(categoryNode, i+1);
+		    break;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
 	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("this should not happen " + ex);
-	  }
+
+	throw new RuntimeException("Couldn't move category node " + catPath +
+				   " after non-existent " +
+				   prevNodeName);
       }
   }
 
   /**
    * <p>This method is used to remove a Category Node from under us.</p>
-   *
-   * <p>Note that removeNode assumes that it can recalculate the
-   * displayOrder values for other nodes in this category.  This
-   * method should not be called if other nodes with prefixed
-   * displayOrder values are still to be added to this category, as
-   * from the {@link arlut.csd.ganymede.DBStore DBStore} file.</p>
    *
    * @see arlut.csd.ganymede.Category
    */
@@ -1126,19 +1121,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     contents.removeElementAt(index);
 
-    // now pull up the other nodes.. note that we assume that when
-    // removeNode is called, no nodes will be added with stored
-    // displayOrder's from a DBStore file, say.
-
-    for (i = index; i < contents.size(); i++)
-      {
-	( (CategoryNode) contents.elementAt(i)).setDisplayOrder(i);
-      }
-
-    // tell our node what it's display order is.
-
-    node.setDisplayOrder(0);
-
     if (debug)
       {
 	if (node instanceof DBObjectBase)
@@ -1163,12 +1145,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   /**
    * <p>This method is used to remove a Category Node from under us.</p>
-   *
-   * <p>Note that removeNode assumes that it can recalculate the
-   * displayOrder values for other nodes in this category.  This
-   * method should not be called if other nodes with prefixed
-   * displayOrder values are still to be added to this category, as
-   * from the {@link arlut.csd.ganymede.DBStore DBStore} file.</p>
    *
    * @see arlut.csd.ganymede.Category
    */
@@ -1251,21 +1227,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     // remove our node from our content list
 
     contents.removeElementAt(index);
-
-    // now pull up the other nodes.. note that we assume that when
-    // removeNode is called, no nodes will be added with stored
-    // displayOrder's from a DBStore file, say.
-
-    for (i = index; i < contents.size(); i++)
-      {
-	((CategoryNode) contents.elementAt(i)).setDisplayOrder(i);
-      }
-
-    // tell our node what it's display order is.
-
-    // XXX why?
-
-    node.setDisplayOrder(0);
 
     if (debug)
       {
@@ -1353,12 +1314,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	return null;
       }
 
-    bc.setDisplayOrder(contents.size() + 1);
-    addNode(bc, false, true);
+    addNodeAfter(bc, null);
 
     return bc;
   }
-
 
   /**
    * <p>This creates a new subcategory under this category,
@@ -1382,7 +1341,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     i = 2;
 
-    while (getNode(name) != null)
+    while (this.contains(name))
       {
 	name = "New Category " + i++;
       }
@@ -1396,8 +1355,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	return null;
       }
 
-    bc.setDisplayOrder(contents.size() + 1);
-    addNode(bc, false, true);
+    addNodeAfter(bc, null);
 
     return bc;
   }

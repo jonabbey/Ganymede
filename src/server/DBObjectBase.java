@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2000/02/22 07:21:23 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2000/02/29 09:35:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,6 +59,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import com.jclark.xml.output.*;
 import arlut.csd.Util.*;
+import arlut.csd.JDialog.JDialogBuff;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -104,6 +105,11 @@ import arlut.csd.Util.*;
 public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
 
   static boolean debug = true;
+
+  /**
+   * <P>More debugging.</P>
+   */
+
   final static boolean debug2 = false;
 
   public static void setDebug(boolean val)
@@ -111,6 +117,30 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     System.err.println("DBObjectBase.setDebug(): " + val);
     debug = val;
   }
+
+  private static arlut.csd.Util.Compare comparator =
+    new arlut.csd.Util.Compare() {
+    public int compare(Object a, Object b) 
+      {
+	DBObjectBaseField aF, bF;
+
+	aF = (DBObjectBaseField) a;
+	bF = (DBObjectBaseField) b;
+
+	if (aF.tmp_displayOrder < bF.tmp_displayOrder)
+	  {
+	    return -1;
+	  }
+	else if (bF.tmp_displayOrder > aF.tmp_displayOrder)
+	  { 
+	    return 1;
+	  } 
+	else
+	  { 
+	    return 0;
+	  }
+      }
+  };
 
   /* - */
 
@@ -159,19 +189,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   short label_id;
 
   /**
-   * what type of object is this?
+   * what category is this object in?
    */
 
   Category category;
-
-  /**
-   * <P>What order will this object type appear in the client's
-   * object tree?  This ordering number applies within the
-   * {@link arlut.csd.ganymede.Category Category} containing
-   * this DBObjectBase.</P>
-   */
-
-  int displayOrder = 0;
 
   /**
    * <P>If true, this type of object is used as a target for an
@@ -184,19 +205,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   // runtime data
 
   /**
-   * field dictionary, sorted in displayOrder */
-
-  Vector sortedFields;
-
-  /**
-   * <P>The hash listing us by object type
-   * id.. we can iterate over the elements of
-   * this hash to determine whether a proposed name
-   * is acceptable.  This is a hack used in schema
-   * editing.  I really need to clean this up.</P>
+   * Custom field dictionary sorted in display order.
+   * This Vector does *not* include any built-in fields.
    */
 
-  Hashtable containingHash;	
+  Vector customFields;
+
+  /**
+   * <P>Cached template vector</P>
+   */
+
+  Vector templateVector;
   
   /**
    * field dictionary
@@ -215,6 +234,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    */
 
   int maxid;
+
+  /**
+   * used only during loading of pre-2.0 format ganymede.db files
+   */
+
+  int tmp_displayOrder = -1;
 
   /**
    * <P>Timestamp for the last time this DBObjectBase was
@@ -317,24 +342,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   DBSchemaEdit editor;
 
-  /**
-   * Used to keep track of schema editing
-   */
-
-  DBObjectBase original;
-
-  /**
-   * Used to keep track of schema editing
-   */
-
-  boolean save;
-
-  /**
-   * Used to keep track of schema editing
-   */
-
-  boolean changed;
-
   // Customization Management Object
 
   /**
@@ -396,14 +403,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     super();			// initialize UnicastRemoteObject
 
-    DBObjectBaseField bf;
-
-    /* -- */
-
     debug = Ganymede.debug;
 
     this.store = store;
-    this.containingHash = store.objectBases;
 
     writerList = new Vector();
     readerList = new Vector();
@@ -415,164 +417,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     type_code = 0;
     label_id = -1;
     category = null;
-    sortedFields = new Vector();
+    customFields = new Vector();
     fieldTable = new DBBaseFieldTable(20, (float) 1.0);
     objectTable = new DBObjectTable(4000, (float) 1.0);
     maxid = 0;
     lastChange = new Date();
 
     editor = null;
-    original = null;
-    save = true;		// by default, we'll want to keep this
-    changed = false;
 
     this.embedded = embedded;
 
     if (createFields)
       {
-	if (embedded)
-	  {
-	    /* Set up our 0 field, the containing object owning us */
-
-	    bf = new DBObjectBaseField(this);
-
-	    // notice that we don't mark this field as builtin, because
-	    // that only applies to fields present in all non-embedded
-	    // objects.
-
-	    bf.field_name = "Containing Object";
-	    bf.field_code = SchemaConstants.ContainerField;
-	    bf.field_type = FieldType.INVID;
-	    bf.field_order = bf.field_code;
-	    bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
-	    bf.targetField = -1;	// procedure for handling deletion and what not..
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.array = false;
-	    bf.visibility = false;	// we don't want the client to show the owner link
-
-	    addField(bf);
-
-	    // note that we won't have an expiration date or removal date
-	    // for an embedded object
-	  }
-	else
-	  {
-	    /* Set up our 0 field, the owner list. */
-
-	    bf = new DBObjectBaseField(this);
-
-	    bf.field_name = "Owner list";
-	    bf.field_code = SchemaConstants.OwnerListField;
-	    bf.field_type = FieldType.INVID;
-	    bf.field_order = 0;
-	    bf.allowedTarget = SchemaConstants.OwnerBase;
-	    bf.targetField = SchemaConstants.OwnerObjectsOwned;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-	    bf.array = true;
-
-	    addField(bf);
-
-	    /* And our 1 field, the expiration date. */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Expiration Date";
-	    bf.field_code = SchemaConstants.ExpirationField;
-	    bf.field_type = FieldType.DATE;
-	    bf.field_order = 1;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    /* And our 2 field, the expiration date. */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Removal Date";
-	    bf.field_code = SchemaConstants.RemovalField;
-	    bf.field_type = FieldType.DATE;
-	    bf.field_order = 2;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    /* And our 3 field, the notes field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Notes";
-	    bf.field_code = SchemaConstants.NotesField;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_order = 3;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    // And our 4 field, the creation date field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Creation Date";
-	    bf.field_code = SchemaConstants.CreationDateField;
-	    bf.field_type = FieldType.DATE;
-	    bf.field_order = 4;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    /* And our 5 field, the Creator field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Creator Info";
-	    bf.field_code = SchemaConstants.CreatorField;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_order = 5;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    // And our 6 field, the modification date field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Modification Date";
-	    bf.field_code = SchemaConstants.ModificationDateField;
-	    bf.field_type = FieldType.DATE;
-	    bf.field_order = 6;
-	    bf.editable = false;
-	    bf.removable = false;
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-
-	    /* And our 7 field, the Modifier field */
-
-	    bf = new DBObjectBaseField(this);
-    
-	    bf.field_name = "Modifier Info";
-	    bf.field_code = SchemaConstants.ModifierField;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_order = 7;
-	    bf.editable = false;
-	    bf.removable = false;	
-	    bf.builtIn = true;	// this isn't optional
-
-	    addField(bf);
-	  }
+	createBuiltIns(embedded);
       }
 
     objectHook = this.createHook();
@@ -603,11 +460,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DataInput in, DBStore store, boolean reallyLoad) throws IOException, RemoteException
   {
-    /* assume not embedded, we'll correct that in receive()
-       if we have to
-
-       we don't want to add in the built-in fields.. we assume that they
-       are properly registered on disk. */
+    // create an empty object base without creating the built in
+    // fields.. we'll load fields and create the system standard
+    // fields once we know whether the newly loaded object definition
+    // is for an embedded object or not.
 
     this(store, false, false);
 
@@ -641,7 +497,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
   {
-    this(original.store, original.embedded, false);
+    this(original.store, original.embedded, true);
     this.editor = editor;
 
     DBObjectBaseField bf;
@@ -654,17 +510,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	type_code = original.type_code;
 	label_id = original.label_id;
 	category = original.category;
-	displayOrder = original.displayOrder;
 	embedded = original.embedded;
     
-	// make copies of all the old field definitions
-	// for this object type, and save them into our
-	// own field hash.
+	// make copies of all the custom field definitions for this
+	// object type, and save them into our own field hash.
     
 	Enumeration enum;
 	DBObjectBaseField field;
     
-	enum = original.fieldTable.elements();
+	enum = original.customFields.elements();
 
 	while (enum.hasMoreElements())
 	  {
@@ -672,10 +526,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf = new DBObjectBaseField(field, editor); // copy this base field
 	    bf.base = this;
 
-	    addField(bf);
+	    addFieldToEnd(bf);
 	  }
-
-	sortFields();
 
 	// remember the objects.. note that we don't at this point notify
 	// the objects that this new DBObjectBase is their owner.. we'll
@@ -686,20 +538,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	maxid = original.maxid;
     
-	changed = false;
-	this.original = original; // remember that we are a copy
-
-	// in case our classdef was set during the copy.
-
-	objectHook = this.createHook();
+	objectHook = original.objectHook;
 
 	lastChange = new Date();
       }
-  }
-
-  void setContainingHash(Hashtable ht)
-  {
-    this.containingHash = ht;
   }
 
   /**
@@ -712,8 +554,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   synchronized void partialEmit(DataOutput out) throws IOException
   {
-    int size;
-    Enumeration enum;
     Enumeration baseEnum;
 
     /* -- */
@@ -722,76 +562,27 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    // calculate what fields we want to emit.  We're going to
-    // skip any backlinks field we see, since we stopped using
-    // those fields as of file version 1.17.
+    out.writeShort((short) customFields.size()); // should have no more than 32k fields
 
-    Vector fieldsToEmit = new Vector();
+    // and write out the field definitions, in order
 
-    enum = fieldTable.elements();
-
-    while (enum.hasMoreElements())
+    for (int i = 0; i < customFields.size(); i++)
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) enum.nextElement();
-
-	if (fieldDef.getID() != SchemaConstants.BackLinksField)
-	  {
-	    fieldsToEmit.addElement(fieldDef);
-	  }
-      }
-    
-    // okay, we have the field definitions we're actually going to
-    // write.  put out the field count
-
-    size = fieldsToEmit.size();
-
-    out.writeShort((short) size); // should have no more than 32k fields
-
-    // and write out the field definitions
-
-    for (int i = 0; i < fieldsToEmit.size(); i++)
-      {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) fieldsToEmit.elementAt(i);
+	DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 
 	fieldDef.emit(out);
       }
 
-    if ((store.major_version >= 1) && (store.minor_version >= 1))
-      {
-	out.writeShort(label_id);	// added at file version 1.1
-      }
+    out.writeShort(label_id);	// added at file version 1.1
 
-    if ((store.major_version >= 1) && (store.minor_version >= 3))
-      {
-	if (category.getPath() == null)
-	  {
-	    out.writeUTF(store.rootCategory.getPath());
-	  }
-	else
-	  {
-	    out.writeUTF(category.getPath()); // added at file version 1.3
-	  }
-      }
-
-    if ((store.major_version >= 1) && (store.minor_version >= 4))
-      {
-	out.writeInt(displayOrder);	// added at file version 1.4
-      }
-
-    if ((store.major_version >= 1) && (store.minor_version >= 5))
-      {
-	out.writeBoolean(embedded);	// added at file version 1.5
-      }
+    out.writeBoolean(embedded);	// added at file version 1.5
 
     // since we're doing a partial emit for a schema dump, we won't
     // record an explicit maxid.. our receive method will still keep
     // the maxid for this base at a safe high-water mark.. we don't
     // want to uniquely preserve Invid's across a schema dump
 
-    if ((store.major_version >= 1) && (store.minor_version >= 12))
-      {
-	out.writeInt(0);	// added at file version 1.12
-      }
+    out.writeInt(0);	// added at file version 1.12
 
     // now, we're doing a partial emit.. if we're SchemaConstants.PersonaBase,
     // we only want to emit the 'constant' personae.. those that aren't associated
@@ -893,8 +684,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
   {
-    int size;
-    Enumeration enum;
     Enumeration baseEnum;
 
     /* -- */
@@ -903,73 +692,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.writeUTF(classname);
     out.writeShort(type_code);
 
-    // calculate what fields we want to emit.  We're going to
-    // skip any backlinks field we see, since we stopped using
-    // those fields as of file version 1.17.
+    out.writeShort((short) customFields.size()); // should have no more than 32k fields
 
-    Vector fieldsToEmit = new Vector();
+    // and write out the field definitions, in order
 
-    enum = fieldTable.elements();
-
-    while (enum.hasMoreElements())
+    for (int i = 0; i < customFields.size(); i++)
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) enum.nextElement();
-
-	if (fieldDef.getID() != SchemaConstants.BackLinksField)
-	  {
-	    fieldsToEmit.addElement(fieldDef);
-	  }
-      }
-    
-    // okay, we have the field definitions we're actually going to
-    // write.  put out the field count
-
-    size = fieldsToEmit.size();
-
-    out.writeShort((short) size); // should have no more than 32k fields
-
-    // and write out the field definitions
-
-    for (int i = 0; i < fieldsToEmit.size(); i++)
-      {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) fieldsToEmit.elementAt(i);
+	DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 
 	fieldDef.emit(out);
       }
     
-    if ((store.major_version >= 1) && (store.minor_version >= 1))
-      {
-	out.writeShort(label_id);	// added at file version 1.1
-      }
+    out.writeShort(label_id);	// added at file version 1.1
 
-    if ((store.major_version >= 1) && (store.minor_version >= 3))
-      {
-	if (category.getPath() == null)
-	  {
-	    out.writeUTF(store.rootCategory.getPath());
-	  }
-	else
-	  {
-	    out.writeUTF(category.getPath()); // added at file version 1.3
-	  }
-      }
-
-    if ((store.major_version >= 1) && (store.minor_version >= 4))
-      {
-	out.writeInt(displayOrder);	// added at file version 1.4
-      }
-
-    if ((store.major_version >= 1) && (store.minor_version >= 5))
-      {
-	out.writeBoolean(embedded);	// added at file version 1.5
-      }
+    out.writeBoolean(embedded);	// added at file version 1.5
 
     if (dumpObjects)
       {
-	if ((store.major_version >= 1) && (store.minor_version >= 12))
-	  {
-	    out.writeInt(maxid);	// added at file version 1.12
-	  }
+	out.writeInt(maxid);	// added at file version 1.12
 
 	out.writeInt(objectTable.size());
    
@@ -982,12 +722,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     else
       {
-	if ((store.major_version >= 1) && (store.minor_version >= 12))
-	  {
-	    out.writeInt(0);	// added at file version 1.12
-	  }
+	out.writeInt(0);	// maxid added at file version 1.12
 
-	out.writeInt(0);
+	out.writeInt(0);	// table size
       }
   }
 
@@ -1022,6 +759,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     type_code = in.readShort();	// read our index for the DBStore's objectbase hash
 
+    // how many field definitions?
+
     size = in.readShort();
 
     if (debug)
@@ -1029,34 +768,39 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	System.err.println("DBObjectBase.receive(): " + size + " fields in dictionary");
       }
 
-    if (size > 0)
-      {
-	fieldTable = new DBBaseFieldTable(size, (float) 1.0);
-      }
-    else
-      {
-	fieldTable = new DBBaseFieldTable();
-      }
-
-    // read in the field dictionary for this object
+    // read in the custom field dictionary for this object
 
     for (int i = 0; i < size; i++)
       {
 	field = new DBObjectBaseField(in, this);
+
+	// skip any system standard field definitions, which will
+	// be created in the field table separately
+
+	if (field.getID() <= SchemaConstants.FinalSystemField)
+	  {
+	    continue;		// don't save the db's version of a system standard field
+	  }
 
 	if (debug2)
 	  {
 	    System.err.println("DBObjectBaseField.receive(): " + field);
 	  }
 
-	addField(field);
+	addFieldToEnd(field);
       }
 
-    sortFields();
+    // if we're reading an old ganymede.db file, sort the customFields
+    // for 2.0 the customFields will have been read in sort order
+
+    if (store.file_major == 1)
+      {
+	new VecQuickSort(customFields, comparator).sort();
+      }
 
     // at file version 1.1, we introduced label_id's.
 
-    if ((store.file_major >= 1) && (store.file_minor >= 1))
+    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 1))
       {
 	label_id = in.readShort();
       }
@@ -1071,53 +815,49 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     // at file version 1.3, we introduced object base categories's.
+    // at file version 2.0, we took the category specification out of
+    // the DBObjectBase block in favor of having it defined by context
+    // of the DBBaseCategory this DBObjectBase was read in.
 
-    if ((store.file_major >= 1) && (store.file_minor >= 3))
+    if (store.file_major == 1 && 
+	store.file_minor >= 3)
       {
-	String pathName = in.readUTF();
+	String categoryName = in.readUTF();
 
-	if (debug)
-	  {
-	    System.err.println("DBObjectBase.receive(): category is " + pathName);
-	  }
-
-	// and get our parent
-	
-	category = store.getCategory(pathName);
-
-	if (debug)
-	  {
-	    if (category == null)
-	      {
-		System.err.println("DBObjectBase.receive(): category is null");
-	      }
-	  }
-      }
-    else
-      {
-	category = null;
-      }
-
-    if ((store.file_major >= 1) && (store.file_minor >= 4))
-      {
-	displayOrder = in.readInt();	// added at file version 1.4
+	category = store.getCategory(categoryName);
 
 	if (category != null)
 	  {
-	    category.addNode(this, true, false);
+	    category.addNodeAfter(this, null); // add to end of category
 	  }
+      }
+
+    // if we're reading an old ganymede.db file, read in the display
+    // order for this base.  if we're at 2.0 or later, the
+    // DBObjectBase will be read in order within its category from the
+    // file.
+
+    if (store.file_major == 1 && 
+	store.file_minor >= 4)
+      {
+	tmp_displayOrder = in.readInt();
       }
     else
       {
-	displayOrder = 0;
+	tmp_displayOrder = -1;
       }
 
-    if ((store.file_major >= 1) && (store.file_minor >= 5))
+    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 5))
       {
 	embedded = in.readBoolean(); // added at file version 1.5
       }
 
-    if ((store.file_major >= 1) && (store.file_minor >= 12))
+    // create the system standard fields for this object definition
+    // now that we know whether the object is embedded or not
+
+    createBuiltIns(embedded);
+
+    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 12))
       {
 	maxid = in.readInt(); // added at file version 1.12
       }
@@ -1131,7 +871,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
       }
 
-    temp_val = (object_count > 0) ? object_count : 4000;
+    temp_val = (object_count > 0) ? (object_count * 2 + 1) : 4000;
 
     objectTable = new DBObjectTable(temp_val, (float) 1.0);
 
@@ -1152,13 +892,81 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	if (reallyLoading)
 	  {
 	    objectTable.putNoSyncNoRemove(tempObject);
-	    tempObject.setBackPointers();
+	    tempObject.setBackPointers(); // register anonymous invid fields
 	  }
       }
 
     if (debug)
       {
 	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
+      }
+  }
+
+  /**
+   * <P>This method is used to instantiate the system default fields in a newly
+   * created or loaded DBObjectBase.</P>
+   */
+
+  private synchronized void createBuiltIns(boolean embedded)
+  {
+    DBObjectBaseField bf;
+
+    /* -- */
+
+    if (embedded)
+      {
+	/* Set up our 0 field, the containing object owning us */
+
+	bf = addSystemField("Containing Object",
+			    SchemaConstants.ContainerField,
+			    FieldType.INVID);
+
+	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
+	bf.targetField = -1;	// procedure for handling deletion and what not..
+	bf.visibility = false;	// we don't want the client to show the owner link
+
+	// note that we won't have an expiration date or removal date
+	// for an embedded object
+      }
+    else
+      {
+	/* Set up our 0 field, the owner list. */
+
+	bf = addSystemField("Owner list",
+			    SchemaConstants.OwnerListField,
+			    FieldType.INVID);
+
+	bf.allowedTarget = SchemaConstants.OwnerBase;
+	bf.targetField = SchemaConstants.OwnerObjectsOwned;
+	bf.array = true;
+
+	addSystemField("Expiration Date",
+		       SchemaConstants.ExpirationField,
+		       FieldType.DATE);
+
+	addSystemField("Removal Date",
+		       SchemaConstants.RemovalField,
+		       FieldType.DATE);
+
+	addSystemField("Notes",
+		       SchemaConstants.NotesField,
+		       FieldType.STRING);
+
+	addSystemField("Creation Date",
+		       SchemaConstants.CreationDateField,
+		       FieldType.DATE);
+
+	addSystemField("Creator Info",
+		       SchemaConstants.CreatorField,
+		       FieldType.STRING);
+
+	addSystemField("Modification Date",
+		       SchemaConstants.ModificationDateField,
+		       FieldType.DATE);
+
+	addSystemField("Modifier Info",
+		       SchemaConstants.ModifierField,
+		       FieldType.STRING);
       }
   }
 
@@ -1190,18 +998,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	xmlOut.endElement("embedded");
       }
 
-    // calculate what custom fields we want to emit.
-
-    synchronized (sortedFields)
+    synchronized (customFields)
       {
-	for (int i = 0; i < sortedFields.size(); i++)
+	for (int i = 0; i < customFields.size(); i++)
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) sortedFields.elementAt(i);
-
-	    if (fieldDef.isBuiltIn())
-	      {
-		continue;
-	      }
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 
 	    fieldDef.emitXML(xmlOut, indentLevel);
 	  }
@@ -1210,36 +1011,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     indentLevel--;
     XMLUtils.indent(xmlOut, indentLevel);
     xmlOut.endElement("objectdef");
-  }
-
-  /**
-   * <P>This method writes out the built-in field definitions</P>
-   */
-
-  synchronized void emitXMLBuiltInFields(XMLWriter xmlOut, int indentLevel) throws IOException
-  {
-    XMLUtils.indent(xmlOut, indentLevel);
-    xmlOut.startElement("builtin_fields");
-    indentLevel++;
-
-    synchronized (sortedFields)
-      {
-	for (int i = 0; i < sortedFields.size(); i++)
-	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) sortedFields.elementAt(i);
-
-	    if (!fieldDef.isBuiltIn())
-	      {
-		continue;
-	      }
-
-	    fieldDef.emitXML(xmlOut, indentLevel);
-	  }
-      }
-
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
-    xmlOut.endElement("builtin_fields");
   }
 
   /**
@@ -1539,7 +1310,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Print a debugging summary of the type information encoded
+   * <p>Print a debugging summary of the custom type information encoded
    * in this objectbase to a PrintWriter.</p>
    *
    * @param out PrintWriter to print to.
@@ -1562,57 +1333,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     out.println("</H3><p>");
 
-    // we don't want to include the built-ins normally, as they should
-    // be the same in all non-embedded bases.. but we may want to
-    // check it out for debugging reasons sometime.
-
-    if (false)
-      {
-	out.println("<h4>Built-in fields</h4>");
-	out.println("<table border>");
-	out.println("<tr>");
-	out.println("<th>Field Name</th> <th>Field ID</th> <th>Field Type</th>");
-	out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
-	out.println("</tr>");
-	
-	enum = sortedFields.elements();
-	
-	while (enum.hasMoreElements())
-	  {
-	    bf = (DBObjectBaseField) enum.nextElement();
-
-	    if (bf.isBuiltIn())
-	      {
-		out.println("<tr>");
-		bf.printHTML(out);
-		out.println("</tr>");
-	      }
-	  }
-
-	out.println("</table>");
-	out.println("<br>");
-
-	out.println("<h4>Custom fields</h4>");
-      }
-
     out.println("<table border>");
     out.println("<tr>");
     out.println("<th>Field Name</th> <th>Field ID</th> <th>Field Type</th>");
     out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
     out.println("</tr>");
 
-    enum = sortedFields.elements();
+    enum = customFields.elements();
 
     while (enum.hasMoreElements())
       {
 	bf = (DBObjectBaseField) enum.nextElement();
 
-	if (!bf.isBuiltIn())
-	  {
-	    out.println("<tr>");
-	    bf.printHTML(out);
-	    out.println("</tr>");
-	  }
+	out.println("<tr>");
+	bf.printHTML(out);
+	out.println("</tr>");
       }
 
     out.println("</table>");
@@ -1620,13 +1355,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Print a debugging summary of the type information encoded
+   * <p>Print a debugging summary of the custom type information encoded
    * in this objectbase to a PrintWriter.</p>
    *
    * @param out PrintWriter to print to.
    */
 
-  public synchronized void print(PrintWriter out, String indent, boolean showAll)
+  public synchronized void print(PrintWriter out, String indent)
   {
     Enumeration enum;
     DBObjectBaseField fieldDef;
@@ -1635,16 +1370,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     out.println(indent + object_name + "(" + type_code + ")");
     
-    enum = sortedFields.elements();
+    enum = customFields.elements();
 
     while (enum.hasMoreElements())
       {
 	fieldDef = (DBObjectBaseField) enum.nextElement();
 
-	if (showAll || !fieldDef.isBuiltIn())
-	  {
-	    fieldDef.print(out, indent + "\t");
-	  }
+	fieldDef.print(out, indent + "\t");
       }
   }
 
@@ -1658,7 +1390,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns the name of this object type</p>
+   * <p>Returns the name of this object type. Guaranteed
+   * to be unique in the Ganymede server. </p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1668,6 +1401,22 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return object_name;
   }
 
+  /**
+   * Returns the name and category path of this object type.
+   * Guaranteed to be unique in the Ganymede server.
+   */
+
+  public String getPathedName()
+  {
+    try
+      {
+	return category.getPath() + "/" + object_name;
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
+  }
 
   /**
    * <p>Sets the name for this object type</p>
@@ -1679,11 +1428,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized boolean setName(String newName)
+  public synchronized ReturnVal setName(String newName)
   {
     String myNewName;
 
     /* -- */
+
+    if (!store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not in an schema editing context");
+      }
 
     if (isEmbedded() && !newName.startsWith("Embedded: "))
       {
@@ -1694,35 +1448,33 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	myNewName = newName;
       }
 
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException("not in an schema editing context");
-      }
-
     // check to make sure another object type isn't using the proposed
     // new name
 
-    synchronized (containingHash)
+    if (this.editor != null)
       {
-	Enumeration enum = containingHash.elements();
-
-	while (enum.hasMoreElements())
+	if (this.editor.getBase(myNewName) != null)
 	  {
-	    DBObjectBase base = (DBObjectBase) enum.nextElement();
-
-	    if (!base.equals(this) && base.object_name.equals(myNewName))
-	      {
-		return false;
-	      }
+	    return Ganymede.createErrorDialog("Schema Editing Error",
+					      "Can't rename base " + object_name + 
+					      " to " + myNewName + ", that name is already taken.");
+	  }
+      }
+    else
+      {
+	if (this.store.getObjectBase(myNewName) != null)
+	  {
+	    return Ganymede.createErrorDialog("Schema Editing Error",
+					      "Can't rename base " + object_name + 
+					      " to " + myNewName + ", that name is already taken.");
 	  }
       }
 
     // ok, go for it
 
     object_name = myNewName;
-    changed = true;
 
-    return true;
+    return null;
   }
 
   /**
@@ -1747,7 +1499,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized void setClassName(String newName)
+  public synchronized ReturnVal setClassName(String newName)
   {
     if (!store.loading && editor == null)
       {
@@ -1756,16 +1508,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // return if no changes
 
-    if (newName.equals(classname))
+    if (newName == classname || newName.equals(classname))
       {
-	return;
+	return null;
       }
 
     classname = newName;
 
     if (newName.equals(""))
       {
-	return;
+	classdef = null;
+	objectHook = null;
+	return null;
       }
 
     // try to load the proposed class.. if we can't, no big deal,
@@ -1780,6 +1534,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	Ganymede.debug("class definition " + classname + " could not be found: " + ex);
 	classdef = null;
+
+	ReturnVal retVal = new ReturnVal(true);	// success, but...
+	retVal.setDialog(new JDialogBuff("Schema Editor Warning",
+					 "Couldn't find class " + classname +
+					 " in the server's CLASSPATH.  This probably means that " +
+					 "you have not yet rebuilt the custom.jar file with this class " +
+					 "added.\n\nThis classname has been set for object type " + getName() +
+					 " in " +
+					 "the server, but will not take effect until the server is restarted " +
+					 "with this class available to the server.",
+					 "Ok",
+					 null,
+					 "error.gif"));
+
+	return retVal;
       }
     catch (RemoteException ex)
       {
@@ -1787,7 +1556,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	objectHook = null;
       }
 
-    changed = true;
+    return null;
   }
 
   /**
@@ -1797,6 +1566,102 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   public Class getClassDef()
   {
     return classdef;
+  }
+
+  /**
+   * <p>This method is used to adjust the ordering of a custom field
+   * in this Base.</p>
+   *
+   * @param fieldName The name of the field to move
+   * @param previousFieldName The name of the field that fieldName is going to
+   * be put after, or null if fieldName is to be the first field displayed
+   * in this object type.
+   */
+
+  public synchronized ReturnVal moveFieldAfter(String fieldName, String previousFieldName)
+  {
+    DBObjectBaseField oldField, prevField;
+
+    /* -- */
+
+    oldField = (DBObjectBaseField) getField(fieldName);
+
+    if (oldField == null)
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Error, can't move field " + fieldName +
+					  ", no such field in object type.");
+      }
+
+    if (previousFieldName == null || previousFieldName.equals(""))
+      {
+	customFields.removeElement(oldField);
+	customFields.insertElementAt(oldField, 0);
+	return null;
+      }
+
+    prevField = (DBObjectBaseField) getField(previousFieldName);
+
+    if (prevField == null || !customFields.contains(prevField))
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Error, can't move field " + fieldName +
+					  " after " + previousFieldName +
+					  ", no such field in object type.");
+      }
+
+    customFields.removeElement(oldField);
+    customFields.insertElementAt(oldField, customFields.indexOf(prevField) + 1);
+
+    return null;
+  }
+
+  /**
+   * <p>This method is used to adjust the ordering of a custom field
+   * in this Base.</p>
+   *
+   * @param fieldName The name of the field to move
+   * @param nextFieldName The name of the field that fieldName is going to
+   * be put before, or null if fieldName is to be the last field displayed
+   * in this object type.
+   */
+
+  public synchronized ReturnVal moveFieldBefore(String fieldName, String nextFieldName)
+  {
+    DBObjectBaseField oldField, nextField;
+
+    /* -- */
+
+    oldField = (DBObjectBaseField) getField(fieldName);
+
+    if (oldField == null)
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Error, can't move field " + fieldName +
+					  ", no such field in object type.");
+      }
+
+    if (nextFieldName == null || nextFieldName.equals(""))
+      {
+	customFields.removeElement(oldField);
+	customFields.addElement(oldField);
+	return null;
+      }
+
+    nextField = (DBObjectBaseField) getField(nextFieldName);
+
+    if (nextField == null || !customFields.contains(nextField))
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Error, can't move field " + fieldName +
+					  " before " + nextFieldName +
+					  ", no such field in object type.");
+      }
+
+    customFields.removeElement(oldField);
+    customFields.insertElementAt(oldField, customFields.indexOf(nextField));
+
+    return null;
   }
 
   /**
@@ -1894,8 +1759,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
-   * base field definitions for objects of this type.</p>
+   * <p>Returns all {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * base field definitions for objects of this type, in random order.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1907,10 +1772,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
-   * base field definitions for objects of this type, sorted by field
-   * display order..</p>
+   * base field definitions for objects of this type.
    *
-   * @see arlut.csd.ganymede.Base
+   * <P>If includeBuiltIns is false, the fields returned will be the
+   * custom fields defined for this object type, and they will be
+   * returned in display order.  If includeBuiltIns is true, all
+   * fields defined on this object type will be returned (including
+   * things like owner list, last modification date, etc.), in random
+   * order.</P>
+   *
+   * @see arlut.csd.ganymede.Base 
    */
 
   public synchronized Vector getFields(boolean includeBuiltIns)
@@ -1923,14 +1794,25 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     result = new Vector();
 
-    enum = sortedFields.elements();
-    
-    while (enum.hasMoreElements())
+    if (includeBuiltIns)
       {
-	field = (DBObjectBaseField) enum.nextElement();
+	enum = fieldTable.elements();
 
-	if (includeBuiltIns || !field.isBuiltIn())
+	while (enum.hasMoreElements())
 	  {
+	    field = (DBObjectBaseField) enum.nextElement();
+	    
+	    result.addElement(field);
+	  }
+      }
+    else
+      {
+	enum = customFields.elements();
+    
+	while (enum.hasMoreElements())
+	  {
+	    field = (DBObjectBaseField) enum.nextElement();
+	    
 	    result.addElement(field);
 	  }
       }
@@ -2002,7 +1884,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public void setLabelField(String fieldName)
+  public ReturnVal setLabelField(String fieldName)
   {
     BaseField bF;
 
@@ -2016,14 +1898,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (fieldName == null)
       {
 	label_id = -1;
-	return;
+	return null;
       }
 
     bF = getField(fieldName);
 
     if (bF == null)
       {
-	throw new IllegalArgumentException("unrecognized field name");
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "setLabelField() called with an unrecognized field name.");
       }
 
     try
@@ -2034,6 +1917,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	throw new RuntimeException("runtime except: " + ex);
       }
+
+    return null;
   }
 
   /**
@@ -2050,7 +1935,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public void setLabelField(short fieldID)
+  public ReturnVal setLabelField(short fieldID)
   {
     if (!store.loading && editor == null)
       {
@@ -2059,10 +1944,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if ((fieldID != -1) && (null == getField(fieldID)))
       {
-	throw new IllegalArgumentException("invalid fieldID");
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "setLabelField() called with an unrecognized field id.");
       }
 
     label_id = fieldID;
+
+    return null;
   }
 
   /**
@@ -2107,9 +1995,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * <p>Creates a new base field, inserts it into the DBObjectBase
    * field definitions hash, and returns a reference to it. </p>
    *
-   * <p>If lowRange is true, the field's id will start at 100 and go up,
-   * other wise it will start at 256 and go up.</p>
-   *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
    * by the Ganymede schema editor.</p>
@@ -2117,7 +2002,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
   
-  public synchronized BaseField createNewField(boolean lowRange)
+  public synchronized BaseField createNewField()
   {
     short id;
     DBObjectBaseField field;
@@ -2129,7 +2014,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
-    id = getNextFieldID(lowRange);
+    id = getNextFieldID();
 
     try
       {
@@ -2142,76 +2027,25 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // set its id
 
-    field.setID(id);
+    field.field_code = id;
+
+    // give it an initial, unique name
+
+    String newName = "New Field";
+
+    int i = 2;
+
+    while (getField(newName) != null)
+      {
+	newName = "New Field " + i++;
+      }
+
+    field.field_name = newName;
 
     // and set it up in our field hash and add this to the sorted
-    // fields vector, but we won't resort.  We'll leave that to
-    // DBObjectBaseField.setDisplayOrder().
+    // fields vector
 
-    addField(field);
-
-    return field;
-  }
-
-  /**
-   * <p>This method is used to create a new builtIn field.  This
-   * method should *only* be called from DBSchemaEdit, which
-   * will insure that the new field will be created with a
-   * proper field id, and that before the schema edit transaction
-   * is finalized, all non-embedded object types will have an
-   * identical built-in field registered.</p>
-   *
-   * <p>Typically, the DBSchemaEdit code will create a new built-in on
-   * the SchemaConstants.UserBase objectbase, and then depend on
-   * DBSchemaEdit.synchronizeBuiltInFields() to replicate the
-   * new field into all the non-embedded bases.</p>
-   *
-   * <p>Once again, DBSchemaEdit developMode is *only* to be used when
-   * the built-in field types are being modified by a Ganymede developer.</p>
-   *
-   * <p>Such an action should never be taken lightly, as it *is* necessary
-   * to edit the DBObjectBase() constructor afterwards to keep the
-   * system consistent for newly created object types.</p>
-   */
-  
-  synchronized DBObjectBaseField createNewBuiltIn(short id)
-  {
-    DBObjectBaseField field;
-
-    /* -- */
-
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException("can't call in a non-edit context");
-      }
-
-    if (!editor.isDevelopMode())
-      {
-	throw new IllegalArgumentException("error.. createBuiltIn can only be called when the editor is in developMode");
-      }
-
-    if (isEmbedded())
-      {
-	throw new IllegalArgumentException("error.. schema editing built-ins is only supported for non-embedded objects");
-      }
-
-    try
-      {
-	field = new DBObjectBaseField(this, editor);
-	field.builtIn = true;
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't create field due to initialization error: " + ex);
-      }
-
-    // set its id
-
-    field.setID(id);
-
-    // and set it up in our field hash
-
-    addField(field);
+    addFieldToEnd(field);
 
     return field;
   }
@@ -2226,7 +2060,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized boolean deleteField(BaseField bF)
+  public synchronized ReturnVal deleteField(String fieldName)
   {
     DBObjectBaseField field = null;
     short id = -1;
@@ -2238,33 +2072,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
-    // since we can be called remotely, we need to convert to a local id
-
-    try
-      {
-	id = bF.getID();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't remove field due to remote error: " + ex);
-      }
-    
-    field = (DBObjectBaseField) fieldTable.get(id);
+    field = (DBObjectBaseField) getField(fieldName);
 
     if (field == null)
       {
-	// no such field.
-
-	try
-	  {
-	    Ganymede.debug("DBObjectBase.deleteField(): couldn't really delete " + getName() + ":" + bF.getName());
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("couldn't remove field due to remote error: " + ex);
-	  }
-
-	return false;
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "deleteField() called on object type " + getName() + 
+					  " with an unrecognized field name ( " + fieldName + ").");
       }
 
     removeField(field);
@@ -2279,7 +2093,38 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	label_id = -1;
       }
 
-    return true;
+    return null;
+  }
+
+  /**
+   * <p>This method is used by the SchemaEditor to detect whether any
+   * objects are using a field definition.</p>
+   *
+   * <p>Server-side only.</p>
+   */
+
+  public boolean fieldInUse(DBObjectBaseField bF)
+  {
+    Enumeration enum;
+
+    /* -- */
+
+    synchronized (objectTable)
+      {
+	enum = objectTable.elements();
+	    
+	while (enum.hasMoreElements())
+	  {
+	    DBObject obj = (DBObject) enum.nextElement();
+	    
+	    if (obj.getField(bF.getID()) != null)
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    return false;
   }
 
   /**
@@ -2289,56 +2134,36 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized boolean fieldInUse(BaseField bF)
+  public boolean fieldInUse(String fieldName)
   {
     Enumeration enum;
+    short id;
 
-    /* -- */
+    DBObjectBaseField fieldDef = (DBObjectBaseField) getField(fieldName);
 
-    try
+    if (fieldDef == null)
+      {
+	throw new RuntimeException("can't check for non-existent field: " + fieldName);
+      }
+
+    id = fieldDef.getID();
+
+    synchronized (objectTable)
       {
 	enum = objectTable.elements();
-	
+	    
 	while (enum.hasMoreElements())
 	  {
 	    DBObject obj = (DBObject) enum.nextElement();
-
-	    if (obj.getField(bF.getID()) != null)
+	    
+	    if (obj.getField(id) != null)
 	      {
 		return true;
 	      }
 	  }
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("shouldn't happen: " + ex);
-      }
 
     return false;
-  }
-
-  /**
-   * <p>Returns the display order of this Base within the containing
-   * category.</p>
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   */
-
-  public int getDisplayOrder()
-  {
-    return displayOrder;
-  }
-
-  /**
-   * <p>Sets the display order of this Base within the containing
-   * category.</p>
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   */
-
-  public void setDisplayOrder(int displayOrder)
-  {
-    this.displayOrder = displayOrder;
   }
 
   /**
@@ -2364,25 +2189,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Get the next available field id for a new field.</p>
+   * <p>Get the next available field id for a new custom field.</p>
    */
 
-  synchronized short getNextFieldID(boolean lowRange)
+  synchronized short getNextFieldID()
   {
-    short id;
+    short id = 256;		// below 256 reserved for future server-mandatory fields
     Enumeration enum;
     DBObjectBaseField fieldDef;
 
     /* -- */
-
-    if (lowRange)
-      {
-	id = 100;
-      }
-    else
-      {
-	id = 256;  // reserve 256 field slots for built-in types
-      }
 
     enum = fieldTable.elements();
 
@@ -2402,11 +2218,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   /**
    * <p>Clear the editing flag.  This disables the DBObjectBase set
    * methods on this ObjectBase and all dependent field definitions.
-   * This method also updates the FieldTemplate for each field and 
-   * resorts the field index.</p>
+   * This method also updates the FieldTemplate for each field in this
+   * object base.</p>
    */
   
-  synchronized void clearEditor(DBSchemaEdit editor)
+  synchronized void clearEditor()
   {
     Enumeration enum;
     DBObjectBaseField fieldDef;
@@ -2418,42 +2234,28 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	Ganymede.debug("DBObjectBase.clearEditor(): clearing editor for " + getName());
       }
 
-    if (this.editor != editor)
+    if (this.editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
     
     this.editor = null;
+    this.templateVector = null;
 
-    if (debug2)
+    this.updateBaseRefs();
+
+    synchronized (fieldTable)
       {
-	System.err.println("DBObjectBase.clearEditor(): before sort:");
-
-	displayFieldOrder();
+	enum = fieldTable.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef.editor = null;
+	    
+	    fieldDef.template = new FieldTemplate(fieldDef);
+	  }
       }
-
-    enum = fieldTable.elements();
-
-    while (enum.hasMoreElements())
-      {
-	fieldDef = (DBObjectBaseField) enum.nextElement();
-	fieldDef.editor = null;
-	fieldDef.template = new FieldTemplate(fieldDef);
-      }
-
-    // the fields may have been re-ordered.. make sure our
-    // sortedFields field is still in order.
-
-    sortFields();
-
-    if (debug2)
-      {
-	System.err.println("DBObjectBase.clearEditor(): after sort:");
-
-	displayFieldOrder();
-      }
-
-    original = null;
   }
 
   /**
@@ -2462,20 +2264,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * SchemaEditor.</p>
    */
 
-  synchronized void updateBaseRefs()
+  private void updateBaseRefs()
   {
     Enumeration enum;
     DBObject obj;
 
     /* -- */
 
-    enum = objectTable.elements();
-
-    while (enum.hasMoreElements())
+    synchronized (objectTable)
       {
-	obj = (DBObject) enum.nextElement();
+	enum = objectTable.elements();
 	
-	obj.updateBaseRefs(this);
+	while (enum.hasMoreElements())
+	  {
+	    obj = (DBObject) enum.nextElement();
+	    
+	    obj.updateBaseRefs(this);
+	  }
       }
   }
 
@@ -2491,7 +2296,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   void updateTimeStamp()
   {
-    lastChange.setTime(System.currentTimeMillis());
+    lastChange = new Date();
   }
 
   /**
@@ -2682,29 +2487,123 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>A debug tool, to show how field definitions are currently ordered
-   * in this base.</p>
+   * <p>Returns a vector of field definition templates, in display order.</p>
+   *
+   * @see arlut.csd.ganymede.FieldTemplate
+   * @see arlut.csd.ganymede.Session
    */
 
-  synchronized void displayFieldOrder()
+  public synchronized Vector getFieldTemplateVector()
   {
-    for (int i = 0; i < sortedFields.size(); i++)
+    if (templateVector == null)
       {
-	DBObjectBaseField bf = (DBObjectBaseField) sortedFields.elementAt(i);
+	templateVector = new Vector();
+	Enumeration enum;
+	DBObjectBaseField fieldDef;
 
-	System.err.println("displayFieldOrder(): field " + bf.getName() + " has order " + bf.getDisplayOrder());
+	// first load our system fields
+
+	enum = fieldTable.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	    if (!fieldDef.isBuiltIn())
+	      {
+		continue;
+	      }
+	
+	    templateVector.addElement(fieldDef.template);
+	  }
+
+	// then load our custom fields
+    
+	enum = customFields.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	
+	    templateVector.addElement(fieldDef.template);
+	  }
       }
+
+    return templateVector;
   }
 
   /**
-   * <p>This method is used to put a new field into both the hashed field
-   * table and the sortedFields vector.</p>
+   * <p>This method is used to put a new user field into both the hashed field
+   * table and the customFields vector.</p>
    */
 
-  synchronized void addField(DBObjectBaseField field)
+  synchronized void addFieldToStart(DBObjectBaseField field)
   {
+    if (field.getID() <= SchemaConstants.FinalSystemField)
+      {
+	throw new IllegalArgumentException("Error, attempted to add a system field using addFieldToStart().");
+      }
+
     fieldTable.put(field);
-    sortedFields.addElement(field);
+
+    customFields.insertElementAt(field,0);
+  }
+
+  /**
+   * <p>This method is used to put a new user field into both the hashed field
+   * table and the customFields vector.</p>
+   */
+
+  synchronized void addFieldToEnd(DBObjectBaseField field)
+  {
+    if (field.getID() <= SchemaConstants.FinalSystemField)
+      {
+	throw new IllegalArgumentException("Error, attempted to add a system field using addFieldToEnd().");
+      }
+
+    fieldTable.put(field);
+
+    customFields.addElement(field);
+  }
+
+  /**
+   * <p>This method is used to instantiate a mandatory system field in this object.</p>
+   */
+
+  synchronized DBObjectBaseField addSystemField(String name, short id, short type)
+  {
+    DBObjectBaseField bf;
+
+    try
+      {
+	bf = new DBObjectBaseField(this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
+
+    bf.field_name = name;
+    bf.field_code = id;
+    bf.field_type = type;
+
+    addSystemField(bf);
+
+    return bf;
+  }
+
+  /**
+   * <p>This method is used to store a system field.</p>
+   */
+
+  synchronized void addSystemField(DBObjectBaseField field)
+  {
+    if (field.getID() > SchemaConstants.FinalSystemField)
+      {
+	throw new IllegalArgumentException("Error, attempted to add a non-system field using addSystemField().");
+      }
+
+    fieldTable.put(field);
   }
 
   /**
@@ -2716,46 +2615,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     fieldTable.remove(field.getID());
 
-    if (!sortedFields.removeElement(field))
+    if (field.getID() < SchemaConstants.FinalSystemField)
       {
-	Ganymede.debug("DBObject.removeField(): Couldn't find field " + field.getName());
+	customFields.removeElement(field);
       }
-  }
-
-  /**
-   * <p>This method reshuffles the fields in keeping with the fields'
-   * display order.  Note that there's no guarantee that the field
-   * orders will be unique.. the schema editor will keep the
-   * non-builtin fields' displayOrder unique, which is what we really
-   * care about.</p>
-   */
-
-  synchronized void sortFields()
-  {
-    new VecQuickSort(sortedFields, 
-		     new arlut.csd.Util.Compare()
-		     {
-		       public int compare(Object a, Object b)
-			 {
-			   DBObjectBaseField aN, bN;
-
-			   aN = (DBObjectBaseField) a;
-			   bN = (DBObjectBaseField) b;
-
-			   if (aN.getDisplayOrder() < bN.getDisplayOrder())
-			     {
-			       return -1;
-			     }
-			   else if (aN.getDisplayOrder() > bN.getDisplayOrder())
-			     {
-			       return 1;
-			     }
-			   else
-			     {
-			       return 0;
-			     }
-			 }
-		     }
-		     ).sort();
   }
 }

@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/11/05 00:31:34 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/02/29 09:35:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,16 +70,11 @@ import java.rmi.*;
 public interface BaseField extends Remote {
 
   /**
-   * <p>This method returns true if this field definition can be edited
-   * in the schema editor.</p>
-   *
-   * <p>This method will return always true if the DBSchemaEdit class is configured
-   * with developMode set to true.  Otherwise, this method will return false
-   * for the built-in field types that the server is dependent on for its
-   * own functioning.</p>
+   * <p>This method returns true if this field is one of the
+   * system fields present in all objects.</p>
    */
 
-  public boolean isEditable() throws RemoteException;
+  public boolean isBuiltIn() throws RemoteException;
 
   /**
    * <p>This method returns true if this field definition can be removed
@@ -89,20 +84,21 @@ public interface BaseField extends Remote {
   public boolean isRemovable() throws RemoteException;
 
   /**
-   * <p>This method returns true if this field definition is designated
-   * as a built-in.  built-in fields are fields that are present in
-   * all object types held in the database.</p>
-   */
-
-  public boolean isBuiltIn() throws RemoteException;
-
-  /**
    * <p>This method returns true if this field
    * is intended to be visible to the client normally,
    * false otherwise.</p>
    */
 
   public boolean isVisible() throws RemoteException;
+
+  /**
+   * <P>This method returns true if there are any fields of this type
+   * in the database.  The schema editing system uses this method to
+   * prevent incompatible modifications to fields that are in use
+   * in the database.</P>
+   */
+
+  public boolean isInUse() throws RemoteException;
 
   // general
 
@@ -141,14 +137,6 @@ public interface BaseField extends Remote {
 
   public short getID() throws RemoteException;
 
-  /**
-   * <p>Returns the order of this field within the containing
-   * base.  Used to determine the layout order of object
-   * viewing panels.</p>
-   */
-
-  public short getDisplayOrder() throws RemoteException;
-
   // all of the setter methods below can only be called when a SchemaEdit
   // is in progress.
 
@@ -156,45 +144,19 @@ public interface BaseField extends Remote {
    * <p>Sets the name of this field</p>
    */
 
-  public void setName(String name) throws RemoteException;
+  public ReturnVal setName(String name) throws RemoteException;
 
   /**
    * <p>Sets the name of the class managing instances of this field</p>
    */
 
-  public void setClassName(String name) throws RemoteException;
+  public ReturnVal setClassName(String name) throws RemoteException;
 
   /**
    * <p>Sets the comment defined in the schema for this field</p>
    */
 
-  public void setComment(String s) throws RemoteException;
-
-  /**
-   * <p>Set the identifying code for this field.</p>
-   *
-   * <p>This is an incompatible change.  In fact, it
-   * is so incompatible that it only makes sense in
-   * the context of creating a new field in a particular
-   * DBObjectBase.. otherwise we would wind up indexed
-   * improperly if we don't somehow move ourselves to
-   * a different key slot in the DBObjectBase fieldHash.</p>
-   */
-
-  public void setID(short id) throws RemoteException;
-
-  /**
-   * <p>Set the display order of this field in the SchemaEditor's
-   * tree, and in the object display panels in the client.</p>
-   *
-   * <p>Note that this method does not check to make sure that fields
-   * don't have duplicated order values.. the schema editor needs
-   * to do the proper logic to make sure that all fields have a
-   * reasonable order after any field creation, deletion, or 
-   * re-ordering.</p>
-   */
-
-  public void setDisplayOrder(short order) throws RemoteException;
+  public ReturnVal setComment(String s) throws RemoteException;
 
   // type info
 
@@ -286,7 +248,7 @@ public interface BaseField extends Remote {
    * will be made a scalar field.</p>
    */
 
-  public void setType(short type) throws RemoteException;
+  public ReturnVal setType(short type) throws RemoteException;
 
   // vector info
 
@@ -315,13 +277,13 @@ public interface BaseField extends Remote {
    * change.</p>
    */
 
-  public void setArray(boolean b) throws RemoteException;
+  public ReturnVal setArray(boolean b) throws RemoteException;
 
   /**
    * <p>Set the maximum number of values allowed in this vector field.</p>
    */
 
-  public void setMaxArraySize(short limit) throws RemoteException;
+  public ReturnVal setMaxArraySize(short limit) throws RemoteException;
 
   // boolean
 
@@ -356,7 +318,7 @@ public interface BaseField extends Remote {
    * this field definition is not a boolean type.</p>
    */
 
-  public void setLabeled(boolean b) throws RemoteException;
+  public ReturnVal setLabeled(boolean b) throws RemoteException;
 
   /**
    * <p>Sets the label associated with the true choice for this
@@ -366,7 +328,7 @@ public interface BaseField extends Remote {
    * this field definition is not a labeled boolean type.</p>
    */
 
-  public void setTrueLabel(String label) throws RemoteException;
+  public ReturnVal setTrueLabel(String label) throws RemoteException;
 
   /**
    * <p>Sets the label associated with the false choice for this
@@ -376,7 +338,7 @@ public interface BaseField extends Remote {
    * this field definition is not a labeled boolean type.</p>
    */
 
-  public void setFalseLabel(String label) throws RemoteException;
+  public ReturnVal setFalseLabel(String label) throws RemoteException;
 
   // string
 
@@ -436,7 +398,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string or password type.</p>
    */
 
-  public void setMinLength(short val) throws RemoteException;
+  public ReturnVal setMinLength(short val) throws RemoteException;
 
   /** 
    * <p>Sets the maximum acceptable length for this string or
@@ -446,7 +408,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string or password type.</p>
    */
 
-  public void setMaxLength(short val) throws RemoteException;
+  public ReturnVal setMaxLength(short val) throws RemoteException;
 
   /**
    * <p>Sets the set of characters that are allowed in this string or 
@@ -457,7 +419,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string or password type.</p>
    */
 
-  public void setOKChars(String s) throws RemoteException;
+  public ReturnVal setOKChars(String s) throws RemoteException;
 
   /**
    * <p>Sets the set of characters that are specifically disallowed in
@@ -469,7 +431,7 @@ public interface BaseField extends Remote {
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public void setBadChars(String s) throws RemoteException;
+  public ReturnVal setBadChars(String s) throws RemoteException;
 
   /**
    * <p>Sets whether or not this string field should be presented as a
@@ -479,7 +441,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string type.</p>
    */
 
-  public void setMultiLine(boolean b) throws RemoteException;
+  public ReturnVal setMultiLine(boolean b) throws RemoteException;
 
   /**
    * <p>Returns the regexp pattern string constraining this string
@@ -498,7 +460,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string type.</p>
    */
 
-  public boolean setRegexpPat(String s) throws RemoteException;
+  public ReturnVal setRegexpPat(String s) throws RemoteException;
 
   // these two apply to strings, numbers, and IP addresses
 
@@ -520,7 +482,7 @@ public interface BaseField extends Remote {
    * this field definition is not a string, numeric, or IP type.</p>
    */
 
-  public void setNameSpace(String s) throws RemoteException;
+  public ReturnVal setNameSpace(String s) throws RemoteException;
   
   // invid
 
@@ -539,7 +501,7 @@ public interface BaseField extends Remote {
    * this field definition is not an invid type.</p>
    */
 
-  public void setEditInPlace(boolean b) throws RemoteException;
+  public ReturnVal setEditInPlace(boolean b) throws RemoteException;
 
   /**
    * <p>Returns true if this is a target restricted invid field</p>
@@ -592,7 +554,7 @@ public interface BaseField extends Remote {
    * this field definition is not an invid type.</p>
    */
 
-  public void setTargetBase(short val) throws RemoteException;
+  public ReturnVal setTargetBase(short val) throws RemoteException;
 
   /**
    * <p>Sets the allowed target object code of this invid field to &lt;baseName&gt;.
@@ -602,7 +564,7 @@ public interface BaseField extends Remote {
    * this field definition is not an invid type.</p>
    */
 
-  public void setTargetBase(String baseName) throws RemoteException;
+  public ReturnVal setTargetBase(String baseName) throws RemoteException;
 
   /**
    * <p>Sets the field of the target object of this invid field that should
@@ -614,7 +576,7 @@ public interface BaseField extends Remote {
    * this field definition is not an invid type.</p>
    */
 
-  public void setTargetField(short val) throws RemoteException;
+  public ReturnVal setTargetField(short val) throws RemoteException;
 
   /**
    * <p>Sets the field of the target object of this invid field that should
@@ -625,7 +587,7 @@ public interface BaseField extends Remote {
    * this field definition is not an invid type.</p>
    */
 
-  public void setTargetField(String fieldName) throws RemoteException;
+  public ReturnVal setTargetField(String fieldName) throws RemoteException;
 
   // password
 
@@ -649,7 +611,7 @@ public interface BaseField extends Remote {
    * this field definition is not a password type.</p>
    */
 
-  public void setCrypted(boolean b) throws RemoteException;
+  public ReturnVal setCrypted(boolean b) throws RemoteException;
 
   /** 
    * <p>This method returns true if this is a password field that
@@ -671,7 +633,7 @@ public interface BaseField extends Remote {
    * this field definition is not a password type.</p>
    */
 
-  public void setMD5Crypted(boolean b) throws RemoteException;
+  public ReturnVal setMD5Crypted(boolean b) throws RemoteException;
 
   /**
    * <p>This method returns true if this is a password field that
@@ -696,7 +658,7 @@ public interface BaseField extends Remote {
    * this field definition is not a password type.</p>
    */
 
-  public void setPlainText(boolean b) throws RemoteException;
+  public ReturnVal setPlainText(boolean b) throws RemoteException;
   
   // convenience methods
 

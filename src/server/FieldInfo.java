@@ -7,18 +7,20 @@
    
    Created: 4 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/04/01 22:17:49 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/02/29 09:35:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -66,7 +68,7 @@ package arlut.csd.ganymede;
  * the invariant (during the client's connection) type information associated
  * with the field generically across all objects of the type containing this field.</p>
  *
- * @version $Revision: 1.8 $ $Date: 1999/04/01 22:17:49 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/02/29 09:35:15 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -75,8 +77,6 @@ public class FieldInfo implements java.io.Serializable {
   static final long serialVersionUID = -3986768111784239002L;
 
   // ---
-
-  transient short displayOrder = 0;
 
   db_field
     field;
@@ -112,8 +112,6 @@ public class FieldInfo implements java.io.Serializable {
     visible = field.isVisible();
 
     ID = field.getID();
-
-    displayOrder = field.getDisplayOrder();
   }
 
   public db_field getField()

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2000/02/11 07:16:58 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2000/02/29 09:35:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -533,19 +533,6 @@ public abstract class DBField implements Remote, db_field {
 
   /**
    *
-   * Returns the display order for this field from the schema.
-   *
-   * @see arlut.csd.ganymede.db_field
-   *
-   */
-
-  public final short getDisplayOrder()
-  {
-    return getFieldDef().getDisplayOrder();
-  }
-
-  /**
-   *
    * Returns a String representing the value of this field.
    *
    * @see arlut.csd.ganymede.db_field
@@ -729,11 +716,8 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
-   *
-   * Returns true if this field is a built-in field, common
-   * to all non-embedded objects.
-   *
-   * @see arlut.csd.ganymede.db_field
+   * <p>This method returns true if this field is one of the
+   * system fields present in all objects.</p>
    */
 
   public final boolean isBuiltIn()

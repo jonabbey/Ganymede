@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/01/29 02:32:54 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/02/29 09:35:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -135,7 +136,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.86 $ $Date: 2000/01/29 02:32:54 $
+ * @version $Revision: 1.87 $ $Date: 2000/02/29 09:35:10 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1266,66 +1267,30 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>Get read-only list of DBFields contained in this object.</p>
+   * <p>Get read-only list of custom DBFields contained in this object.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public Vector getFieldInfoVector(boolean customOnly)
+  synchronized public Vector getFieldInfoVector()
   {
     Vector results = new Vector();
     Enumeration enum;
     DBField field;
 
     /* -- */
-
-    enum = fields.elements();
     
-    while (enum.hasMoreElements())
+    for (int i = 0; i < objectBase.customFields.size(); i++)
       {
-	field = (DBField) enum.nextElement();
+	DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
 
-	if (!(field.isBuiltIn() && customOnly))
+	field = fields.get(fieldDef.getID());
+	
+	if (field != null)
 	  {
-	    try
-	      {
-		results.addElement(new FieldInfo(field));
-	      }
-	    catch (IllegalArgumentException ex)
-	      {
-		// oops, we don't have permission to view this field..
-		// skip it.
-	      }
+	    results.addElement(new FieldInfo(field));
 	  }
       }
-
-    // sort by display order
-
-    (new VecQuickSort(results,
-		      new arlut.csd.Util.Compare()
-		      {
-			public int compare(Object a, Object b)
-			  {
-			    FieldInfo aF, bF;
-
-			    aF = (FieldInfo) a;
-			    bF = (FieldInfo) b;
-
-			    if (aF.displayOrder < bF.displayOrder)
-			      {
-				return -1;
-			      }
-			    else if (aF.displayOrder > bF.displayOrder)
-			      {
-				return 1;
-			      }
-			    else
-			      {
-				return 0;
-			      }
-		       }
-		   }
-		   )).sort();
 
     return results;
   }
@@ -1397,7 +1362,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>Get read-only list of DBFields contained in this object.</p>
+   * <p>Get complete list of DBFields contained in this object.
+   * The list returned will appear in unsorted order.</p>
    *
    * This method needs to be synchronized to avoid conflict with
    * {@link arlut.csd.ganymede.DBEditObject#clearTransientFields() DBEditObject.clearTransientFields()}.</p>
@@ -1405,95 +1371,27 @@ public class DBObject implements db_object, FieldType, Remote {
    * @see arlut.csd.ganymede.db_object
    */
 
-  public synchronized db_field[] listFields(boolean customOnly)
+  public synchronized db_field[] listFields()
   {
     db_field[] results;
     Enumeration enum;
     int count = 0;
-    DBField localField;
 
     /* -- */
 
-    if (customOnly)
-      {
-	enum = fields.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    if (!((DBField) enum.nextElement()).isBuiltIn())
-	      {
-		count++;
-	      }
-	  }
-      }
-    else
-      {
-	count = fields.size();
-      }
-    
-    results = new db_field[count];
-
-    // note that a hash doesn't keep the fields in any particular
-    // order..
+    results = new db_field[fields.size()];
 
     enum = fields.elements();
 
     while (enum.hasMoreElements())
       {
-	if (customOnly)
-	  {
-	    localField = (DBField) enum.nextElement();
-
-	    if (!localField.isBuiltIn())
-	      {
-		results[--count] = localField;
-	      }
-	  }
-	else
-	  {
-	    results[--count] = (db_field) enum.nextElement();
-	  }
+	results[--count] = (db_field) enum.nextElement();
       }
 
     if (count != 0)
       {
 	throw new RuntimeException("synchronization error, fields hash modified");
       }
-
-    // sort by display order
-
-    (new QuickSort(results,  
-		   new arlut.csd.Util.Compare()
-		   {
-		     public int compare(Object a, Object b) 
-		       {
-			 db_field aF, bF;
-			 
-			 aF = (db_field) a;
-			 bF = (db_field) b;
-			 
-			 try
-			   {
-			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
-			       {
-				 return -1;
-			       }
-			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
-			       {
-				 return 1;
-			       }
-			     else
-			       {
-				 return 0;
-			       }
-			   }
-			 catch (RemoteException ex)
-			   {
-			     throw new RuntimeException("couldn't get field ID in sort" + ex);
-			   }
-		       }
-		   }
-		   )).sort();
 
     return results;
   }
@@ -1560,22 +1458,13 @@ public class DBObject implements db_object, FieldType, Remote {
 
     /* -- */
 
-    // assume that the sortedFields will not be changed
-    // at a time when this method is called.  A reasonable
-    // assumption, as sortedFields is only altered when
-    // the schema is being edited.
+    // assume that the customFields will not be changed at a time when
+    // this method is called.  A reasonable assumption, as
+    // customFields is only altered when the schema is being edited.
 
-    for (int i = 0; i < objectBase.sortedFields.size(); i++)
+    for (int i = 0; i < objectBase.customFields.size(); i++)
       {
-	fieldDef = (DBObjectBaseField) objectBase.sortedFields.elementAt(i);
-
-	// we don't care about built in fields.. the transaction and
-	// editing logic will take care of them
-
-	if (fieldDef.isBuiltIn())
-	  {
-	    continue;
-	  }
+	fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
 
 	try
 	  {
@@ -1884,53 +1773,33 @@ public class DBObject implements db_object, FieldType, Remote {
 
     /* -- */
 
-    enum = fields.elements();
-    
-    while (enum.hasMoreElements())
+    if (customOnly)
       {
-	field = (DBField) enum.nextElement();
+	// return the custom fields only, in display order
 
-	if (!(field.isBuiltIn() && customOnly))
+	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
-	    try
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    
+	    field = fields.get(fieldDef.getID());
+	    
+	    if (field != null)
 	      {
 		results.addElement(field);
 	      }
-	    catch (IllegalArgumentException ex)
-	      {
-		// oops, we don't have permission to view this field..
-		// skip it.
-	      }
 	  }
       }
-
-    // sort by display order
-
-    (new VecQuickSort(results,
-		      new arlut.csd.Util.Compare()
-		      {
-			public int compare(Object a, Object b)
-			  {
-			    DBField aF, bF;
-
-			    aF = (DBField) a;
-			    bF = (DBField) b;
-
-			    if (aF.getDisplayOrder() < bF.getDisplayOrder())
-			      {
-				return -1;
-			      }
-			    else if (aF.getDisplayOrder() > bF.getDisplayOrder())
-			      {
-				return 1;
-			      }
-			    else
-			      {
-				return 0;
-			      }
-		       }
-		   }
-		   )).sort();
+    else			// all fields in this object
+      {
+	enum = fields.elements();
+    
+	while (enum.hasMoreElements())
+	  {
+	    field = (DBField) enum.nextElement();
+	    
+	    results.addElement(field);
+	  }
+      }
 
     return results;
   }

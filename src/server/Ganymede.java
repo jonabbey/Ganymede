@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2000/02/22 07:21:25 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2000/02/29 09:35:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -145,15 +145,6 @@ public class Ganymede {
    */
 
   public static String debugFilename = null;
-
-  /**
-   * <p>If true, the server's schema editing code will allow
-   * the admin console's schema editor to change the definitions
-   * of object and field types that the server depends on for
-   * its operations.</p>
-   */
-
-  public static boolean developSchema = false;
 
   /**
    * <p>If true, {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
@@ -300,11 +291,7 @@ public class Ganymede {
 	  }
 	else
 	  {
-	    //	    databaseReport(dbFilename, ParseArgs.switchExists("showall", argv),
-	    //			   ParseArgs.switchExists("perms", argv));
-
-	    databaseReport(dbFilename, ParseArgs.switchExists("showall", argv),
-			   true);
+	    databaseReport(dbFilename, true);
 	    System.exit(0);
 	  }
       }
@@ -343,13 +330,6 @@ public class Ganymede {
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
 
-    developSchema = ParseArgs.switchExists("developschema", argv);
-
-    if (developSchema)
-      {
-	System.out.println("Fundamental object types open for schema editing (-developschema)"); 
-      }
-    
     if (!loadProperties(propFilename))
       {
 	System.out.println("Error, couldn't successfully load properties from file " + propFilename + ".");
@@ -613,8 +593,7 @@ public class Ganymede {
    * purposes of doing a schema report on it.</p>
    */
 
-  public static void databaseReport(String dbFilename, boolean showBuiltins,
-				    boolean showPerms)
+  public static void databaseReport(String dbFilename, boolean showPerms)
   {
     File dataFile;
 
@@ -637,7 +616,7 @@ public class Ganymede {
 	StringWriter outString = new StringWriter();
 	PrintWriter out = new PrintWriter(outString);
 	
-	db.printCategoryTree(out, showBuiltins);
+	db.printCategoryTree(out);
 
 	System.out.println(outString);
 

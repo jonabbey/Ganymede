@@ -14,18 +14,20 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/02/11 07:16:58 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/02/29 09:35:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -82,7 +84,7 @@ import java.util.*;
  * remote access.  Thus, we are not extending UnicastRemoteObject
  * as we would if we were truly a remote object.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2000/02/11 07:16:58 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2000/02/29 09:35:03 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -91,13 +93,13 @@ public class BaseDump implements Base, CategoryNode {
   CategoryDump parent;
 
   String name;
+  String pathedName;
   short type_code;
   short label_id;
   String labelFieldName;
   boolean canInactivate;
   boolean canCreate;
   boolean isEmbedded;
-  int displayOrder;
 
   private int lastIndex = -1;
 
@@ -122,6 +124,8 @@ public class BaseDump implements Base, CategoryNode {
 
     // getChunk() updates lastIndex for us
 
+    this.pathedName = getChunk(src, lastIndex);
+
     try
       {
 	this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
@@ -147,15 +151,6 @@ public class BaseDump implements Base, CategoryNode {
     this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
 
     this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
-    try
-      {
-	this.displayOrder = Integer.valueOf(getChunk(src, lastIndex)).intValue();
-      }
-    catch (NumberFormatException ex)
-      {
-	throw new RuntimeException("couldn't parse display order chunk " + ex);
-      }
   }
 
   /**
@@ -174,6 +169,7 @@ public class BaseDump implements Base, CategoryNode {
 
     this.parent = null;
     this.name = getChunk(src, index);
+    this.pathedName = getChunk(src, lastIndex);
 
     // getChunk() updates lastIndex for us
 
@@ -202,15 +198,6 @@ public class BaseDump implements Base, CategoryNode {
     this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
 
     this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
-    try
-      {
-	this.displayOrder = Integer.valueOf(getChunk(src, lastIndex)).intValue();
-      }
-    catch (NumberFormatException ex)
-      {
-	throw new RuntimeException("couldn't parse display order chunk " + ex);
-      }
   }
 
   public int getLastIndex()
@@ -223,30 +210,6 @@ public class BaseDump implements Base, CategoryNode {
   // CategoryNode methods
   //
   // ***
-
-  /**
-   *
-   * Returns the display order of this Base within the containing
-   * category.
-   *
-   */
-
-  public int getDisplayOrder()
-  {
-    return displayOrder;
-  }
-
-  /**
-   *
-   * Sets the display order of this Base within the containing
-   * category.
-   *
-   */
-
-  public void setDisplayOrder(int order)
-  {
-    throw new RuntimeException("this method not supported in BaseDump");
-  }
 
   /**
    *
@@ -280,6 +243,11 @@ public class BaseDump implements Base, CategoryNode {
   {
     return name;
   }  
+
+  public String getPathedName()
+  {
+    return pathedName;
+  }
 
   public String getClassName() 
   {
@@ -341,22 +309,32 @@ public class BaseDump implements Base, CategoryNode {
   // the following methods are only valid when the Base reference
   // is obtained from a SchemaEdit reference.
 
-  public boolean setName(String newName) 
+  public ReturnVal setName(String newName) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }  
 
-  public void setClassName(String newName) 
+  public ReturnVal setClassName(String newName) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
-  public void setLabelField(String fieldName) 
+  public ReturnVal moveFieldAfter(String fieldName, String previousFieldName)
+  {
+    throw new RuntimeException("this method not supported in BaseDump");
+  }
+
+  public ReturnVal moveFieldBefore(String fieldName, String nextFieldName)
+  {
+    throw new RuntimeException("this method not supported in BaseDump");
+  }
+
+  public ReturnVal setLabelField(String fieldName) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   } 
 
-  public void setLabelField(short fieldID) 
+  public ReturnVal setLabelField(short fieldID) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   } 
@@ -366,24 +344,17 @@ public class BaseDump implements Base, CategoryNode {
     return parent;
   }
 
-  /**
-   *
-   * If lowRange is true, the field's id will start at 100 and go up,
-   * other wise it will start at 256 and go up.
-   *
-   */
-
-  public BaseField createNewField(boolean lowRange) 
+  public BaseField createNewField() 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }  
 
-  public boolean deleteField(BaseField bF) 
+  public ReturnVal deleteField(String baseName) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
-  public boolean fieldInUse(BaseField bF) 
+  public boolean fieldInUse(String baseName)
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }

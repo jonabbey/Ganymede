@@ -6,18 +6,20 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/24 03:29:48 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/29 09:35:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -112,23 +114,34 @@ public interface Category extends Remote {
    * and/or adjustNodes are true.
    *
    * @param node Node to place under this category
-   * @param sort If true, the nodes under this category will be resorted after insertion
-   * @param adjustNodes If true, the nodes under this category will have their displayOrder recalculated.
-   * this should not be done lightly, and not at all if any more nodes with precalculated or saved
-   * displayOrder's are to be later inserted.
+   * @param previousNodeName The name of the node to place node after,
+   * must not be path-qualified.
    */
 
-  public void addNode(CategoryNode node, boolean resort, boolean adjustNodes) throws RemoteException;
+  public void addNodeAfter(CategoryNode node, String previousNodeName) throws RemoteException;
+
+  /**
+   * <p>This method is used to place a Category Node under us.  This method
+   * adds a new node into this category, before nextNodeName if nextNodeName
+   * is not null, or at the beginning of the category if it is.</p>
+   *
+   * @param node Node to place under this category
+   * @param prevNodeName the name of the node that the new node is to be added before,
+   * must not be path-qualified
+   */
+
+  public void addNodeBefore(CategoryNode node, String nextNodeName) throws RemoteException;
 
   /**
    * This method can be used to move a Category from another Category to this Category,
    * or to move a Category around within this Category.
    *
    * @param catPath the fully specified path of the node to be moved
-   * @param displayOrder where to place this node within this category.
+   * @param previousNodeName The name of the node to place node after,
+   * must be fully path-qualified.
    */
 
-  public void moveCategoryNode(String catPath, int displayOrder) throws RemoteException;
+  public void moveCategoryNode(String catPath, String previousNodeName) throws RemoteException;
 
   /**
    * <p>This method is used to remove a Category Node from under us.</p>
@@ -170,22 +183,5 @@ public interface Category extends Remote {
    */
 
   public boolean isUnder(Category cat) throws RemoteException;
-
-  /**
-   * Gets the order of this node in the containing category
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   */
-
-  public int getDisplayOrder() throws RemoteException;
-
-  /**
-   * Sets the order of this node in the containing category
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   */
-
-  public void setDisplayOrder(int order) throws RemoteException;
-
 }
 

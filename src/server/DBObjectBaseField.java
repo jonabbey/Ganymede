@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2000/02/22 07:36:22 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2000/02/29 09:35:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,6 +59,7 @@ import java.rmi.server.UnicastRemoteObject;
 import gnu.regexp.*;
 import com.jclark.xml.output.*;
 import arlut.csd.Util.*;
+import arlut.csd.JDialog.JDialogBuff;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,6 +93,9 @@ import arlut.csd.Util.*;
 
 public final class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
 
+  static final ReturnVal warning1 = genWarning1();
+  static final ReturnVal warning2 = genWarning2();
+
   /**
    * Object type definition for the database object class we are member of
    */
@@ -117,29 +121,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   short field_type;
 
   /**
-   * display order for this field, used to display fields in order on the
-   * client.
-   */
-
-  short field_order;
-
-  /**
-   * Can this field be edited in the schema editor?  Will be false for
-   * fields that are required for the server's own functioning in the
-   * mandatory object types.
-   */
-
-  boolean editable = true;
-
-  /** 
-   * Can this field be removed from the owning Base in the schema
-   * editor?  Will be false for fields that are required for the
-   * server's own functioning in the mandatory object types.  
-   */
-
-  boolean removable = true;
-
-  /**
    * Should this field be displayed to the client?  May be false for
    * some fields intended for 'scratch-pad' use, as in serving as
    * anchors for compound namespace use.  (i.e., the case where two
@@ -152,13 +133,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    */
 
   boolean visibility = true;
-
-  /** 
-   * is this field a built-in universal field, applicable to all
-   * (nonembedded) object types?
-   */
-
-  boolean builtIn = false;
 
   /**
    * name of class to manage user interactions with this field
@@ -247,7 +221,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    */
 
   DBSchemaEdit editor;
-  boolean changed;
 
   /**
    * Downloadable FieldTemplate representing the constant field type
@@ -261,6 +234,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // for DBBaseFieldTable
 
   DBObjectBaseField next = null;
+
+  /**
+   * <P>A three state flag used by isInUse() to report whether or
+   * not a particular field is in use in the loaded database.</P>
+   */
+
+  Boolean inUseCache = null;
+
+  /**
+   * This field is used to handle field order sorting when
+   * we read an old (pre-2.0) ganymede.db file.
+   */
+
+  int tmp_displayOrder = -1;
 
   /* -- */
 
@@ -276,16 +263,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     field_name = "";
     classname = "";
     comment = "";
-    trueLabel = "";
-    falseLabel = "";
-    //    okChars = "";
-    //    badChars = "";
     
     field_code = 0;
     field_type = 0;
-    field_order = 0;
     editor = null;
-    changed = false;
   }
 
   /**
@@ -299,6 +280,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     this(base);
     this.editor = editor;
+    inUseCache = new Boolean(false);
   }
 
   /**
@@ -328,12 +310,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     field_name = original.field_name; // name of this field
     field_code = original.field_code; // id of this field in the current object
     field_type = original.field_type; // data type contained herein
-    field_order = original.field_order;	// display order
 
-    editable = original.editable;
-    removable = original.removable;
     visibility = original.visibility;
-    builtIn = original.builtIn;
 
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
@@ -362,6 +340,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     md5crypted = original.md5crypted;
     storePlaintext = original.storePlaintext;
 
+    inUseCache = null;
+
     // We'll just re-use the original's FieldTemplate for the time
     // being.. when the SchemaEditor is done, it will call
     // clearEditor() on our DBObjectBase, which will create a new
@@ -369,7 +349,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     template = original.template;
     this.editor = editor;
-    changed = false;
   }
 
   /**
@@ -384,22 +363,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     out.writeShort(field_type);
     out.writeUTF(classname);
     out.writeUTF(comment);
-    out.writeBoolean(editable);
-    out.writeBoolean(removable);
 
     if ((base.store.major_version >= 1) || (base.store.minor_version >= 6))
       {
 	out.writeBoolean(visibility); // added at file version 1.6
-      }
-
-    if ((base.store.major_version >= 1) || (base.store.minor_version >= 7))
-      {
-	out.writeBoolean(builtIn); // added at file version 1.7
-      }
-
-    if ((base.store.major_version >= 1) || (base.store.minor_version >= 1))
-      {
-	out.writeShort(field_order); // added at file version 1.1
       }
 
     out.writeBoolean(array);
@@ -552,8 +519,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     comment = in.readUTF();
 
-    editable = in.readBoolean();
-    removable = in.readBoolean();
+    // we stopped keeping the editable and removable flags in
+    // the ganymede.db file at 1.18
+
+    if (base.store.file_major == 1 && base.store.file_minor <= 17)
+      {
+	in.readBoolean();	// skip editable
+	in.readBoolean();	// skip removable
+      }
 
     // at file version 1.6, we introduced field visibility
 
@@ -567,25 +540,27 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     // at file version 1.7, we introduced an explicit built-in flag
+    // we took it out at 1.18
 
-    if ((base.store.file_major > 1) || (base.store.file_minor >= 7))
+    if (base.store.file_major == 1 && 
+	base.store.file_minor >= 7 && 
+	base.store.file_minor <= 17)
       {
-	builtIn = in.readBoolean();
+	in.readBoolean();	// skip builtIn
+      }
+
+    // between file versions 1.1 and 1.17, we had a field_order
+    // field
+
+    if (base.store.file_major == 1 && 
+	base.store.file_minor >= 1 && 
+	base.store.file_minor <= 17)
+      {
+	tmp_displayOrder = in.readShort();		// skip field_order
       }
     else
       {
-	builtIn = !base.isEmbedded() && field_code < 100;
-      }
-
-    // at file version 1.1, we introduced field_order
-
-    if ((base.store.file_major > 1) || (base.store.file_minor >= 1))
-      {
-	field_order = in.readShort();
-      }
-    else
-      {
-	field_order = 0;
+	tmp_displayOrder = -1;
       }
 
     array = in.readBoolean();
@@ -791,25 +766,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	xmlOut.endElement("comment");
       }
 
-    if (!editable || !removable || !visibility)
-      {
-	XMLUtils.indent(xmlOut, indentLevel);
-      }
-
-    if (!editable)
-      {
-	xmlOut.startElement("noneditable");
-	xmlOut.endElement("noneditable");
-      }
-
-    if (!removable)
-      {
-	xmlOut.startElement("nonremovable");
-	xmlOut.endElement("nonremovable");
-      }
-
     if (!visibility)
       {
+	XMLUtils.indent(xmlOut, indentLevel);
 	xmlOut.startElement("invisible");
 	xmlOut.endElement("invisible");
       }
@@ -1049,19 +1008,27 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * <p>This method returns true if this field definition can be edited
    * in the schema editor.</p>
    *
-   * <p>This method will return always true if the DBSchemaEdit class is configured
-   * with developMode set to true.  Otherwise, this method will return false
-   * for the built-in field types that the server is dependent on for its
-   * own functioning.</p>
+   * <p>This method will return false for the built-in field types
+   * that the server is dependent on for its own functioning.</p>
    *
-   * @see arlut.csd.ganymede.BaseField
+   * @see arlut.csd.ganymede.BaseField 
    */
 
   public boolean isEditable()
   {
-    return editable || (editor != null && editor.developMode);
+    return true;
   }
 
+  /**
+   * <p>This method returns true if this field is one of the
+   * system fields present in all objects.</p>
+   */
+
+  public boolean isBuiltIn()
+  {
+    return this.getID() < 100;
+  }
+  
   /**
    * <p>This method returns true if this field definition can be removed
    * by the schema editor.</p>
@@ -1071,20 +1038,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public boolean isRemovable()
   {
-    return removable;
-  }
-
-  /**
-   * <p>This method returns true if this field definition is designated
-   * as a built-in.  built-in fields are fields that are present in
-   * all object types held in the database.</p>
-   *
-   * @see arlut.csd.ganymede.BaseField
-   */
-
-  public boolean isBuiltIn()
-  {
-    return builtIn;
+    return this.getID() >= 256;	// fields with id's below 256 are server-essential
   }
 
   /**
@@ -1098,6 +1052,25 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   public boolean isVisible()
   {
     return visibility;
+  }
+
+  /**
+   * <P>This method returns true if there are any fields of this type
+   * in the database.  The schema editing system uses this method to
+   * prevent incompatible modifications to fields that are in use
+   * in the database.</P>
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isInUse()
+  {
+    if (inUseCache == null)
+      {
+	inUseCache = new Boolean(((DBObjectBase) this.getBase()).fieldInUse(this));
+      }
+
+    return inUseCache.booleanValue();
   }
 
   /**
@@ -1128,14 +1101,39 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setName(String name)
+  public synchronized ReturnVal setName(String name)
   {
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
     
+    if (name == null || name.equals(""))
+      {
+	throw new IllegalArgumentException("can't have a null or empty name");
+      }
+
+    if (name.equals(field_name))
+      {
+	return null;
+      }
+
+    try
+      {
+	if (getBase().getField(name) != null)
+	  {
+	    return Ganymede.createErrorDialog("Schema Editing Error",
+					      "That name is already taken.");
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
+
     field_name = name;
+
+    return null;
   }
 
   /**
@@ -1155,7 +1153,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setClassName(String name)
+  public synchronized ReturnVal setClassName(String name)
   {
     Class newclassdef;
 
@@ -1180,8 +1178,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    System.err.println("DBObjectBaseField.setClassName(): class definition could not be found: " + ex);
 	  }
       }
-    
-    changed = true;
+
+    return null;
   }
 
   /**
@@ -1210,7 +1208,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setComment(String s)
+  public synchronized ReturnVal setComment(String s)
   {
     if (editor == null)
       {
@@ -1218,6 +1216,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     comment = s;
+    
+    return null;
   }      
 
   /**
@@ -1262,11 +1262,23 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setType(short type)
+  public synchronized ReturnVal setType(short type)
   {
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (isInUse())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a field which is in use in the database.");
+      }
+
+    if (isInvid())
+      {
+	// need to check to make sure no other invid field definitions are
+	// pointing to this field somehow
       }
 
     if (type < FIRSTFIELD || type > LASTFIELD)
@@ -1282,6 +1294,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	array = false;
       }
+
+    return null;
   }
 
   // type identification convenience methods
@@ -1411,11 +1425,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setArray(boolean b)
+  public synchronized ReturnVal setArray(boolean b)
   {
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (isInUse())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "can't change the vector status of a field in use.");
       }
 
     if (b && !(isString() || isInvid() || isIP()))
@@ -1424,6 +1444,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     array = b;
+
+    return null;
   }
 
   /**
@@ -1443,19 +1465,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * <p>Returns the order of this field within the containing
-   * base.  Used to determine the layout order of object
-   * viewing panels.</p>
-   *
-   * @see arlut.csd.ganymede.BaseField
-   */
-
-  public short getDisplayOrder()
-  {
-    return field_order;
-  }
-
-  /**
    * <p>Returns the type id for this field definition as
    * a Short, suitable for use in a hash.</p>
    */
@@ -1463,54 +1472,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   public Short getKey()
   {
     return new Short(field_code);
-  }
-
-  /**
-   * <p>Set the identifying code for this field.</p>
-   *
-   * <p>This is an incompatible change.  In fact, it
-   * is so incompatible that it only makes sense in
-   * the context of creating a new field in a particular
-   * DBObjectBase.. otherwise we would wind up indexed
-   * improperly if we don't somehow move ourselves to
-   * a different key slot in the DBObjectBase fieldHash.</p>
-   *
-   * @see arlut.csd.ganymede.BaseField 
-   */
-
-  public synchronized void setID(short id)
-  {
-    if (editor == null)
-      {
-	throw new IllegalArgumentException("not editing");
-      }
-
-    field_code = id;
-  }
-
-  /**
-   * <p>Set the display order of this field in the SchemaEditor's
-   * tree, and in the object display panels in the client.</p>
-   *
-   * <p>Note that this method does not check to make sure that fields
-   * don't have duplicated order values.. the schema editor needs
-   * to do the proper logic to make sure that all fields have a
-   * reasonable order after any field creation, deletion, or 
-   * re-ordering.</p>
-   *
-   * @see arlut.csd.ganymede.BaseField 
-   */
-
-  public synchronized void setDisplayOrder(short order)
-  {
-    if (editor == null)
-      {
-	throw new IllegalArgumentException("not editing");
-      }
-
-    field_order = order;
-
-    base.sortFields();
   }
 
   /**
@@ -1522,7 +1483,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     return base;
   }
 
-  synchronized void setBase(DBObjectBase base)
+  synchronized ReturnVal setBase(DBObjectBase base)
   {
     if (editor == null)
       {
@@ -1530,6 +1491,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     this.base = base;
+
+    return null;
   }
 
   // **
@@ -1558,7 +1521,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setMaxArraySize(short limit)
+  public synchronized ReturnVal setMaxArraySize(short limit)
   {
     if (editor == null)
       {
@@ -1571,6 +1534,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     this.limit = limit;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   // **
@@ -1602,7 +1574,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setLabeled(boolean b)
+  public synchronized ReturnVal setLabeled(boolean b)
   {
     if (editor == null)
       {
@@ -1615,6 +1587,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
     
     labeled = b;
+
+    return null;
   }
 
   /**
@@ -1646,7 +1620,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setTrueLabel(String label)
+  public synchronized ReturnVal setTrueLabel(String label)
   {
     if (editor == null)
       {
@@ -1657,8 +1631,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	trueLabel = label;
       }
+    else
+      {
+	throw new IllegalArgumentException("not a labeled boolean field");
+      }
 
-    throw new IllegalArgumentException("not a labeled boolean field");
+    return null;
   }
 
   /**
@@ -1690,7 +1668,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setFalseLabel(String label)
+  public synchronized ReturnVal setFalseLabel(String label)
   {
     if (editor == null)
       {
@@ -1701,8 +1679,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	falseLabel = label;
       }
+    else
+      {
+	throw new IllegalArgumentException("not a labeled boolean field");
+      }
 
-    throw new IllegalArgumentException("not a labeled boolean field");
+    return null;
   }
 
   // **
@@ -1738,7 +1720,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setMinLength(short val)
+  public synchronized ReturnVal setMinLength(short val)
   {
     if (editor == null)
       {
@@ -1751,6 +1733,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
     
     minLength = val;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -1783,7 +1774,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setMaxLength(short val)
+  public synchronized ReturnVal setMaxLength(short val)
   {
     if (editor == null)
       {
@@ -1796,6 +1787,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
     
     maxLength = val;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -1828,7 +1828,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setOKChars(String s)
+  public synchronized ReturnVal setOKChars(String s)
   {
     if (editor == null)
       {
@@ -1841,6 +1841,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     okChars = s;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -1860,6 +1869,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not a string field");
       }
 
+
     return badChars;
   }
 
@@ -1873,7 +1883,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setBadChars(String s)
+  public synchronized ReturnVal setBadChars(String s)
   {
     if (editor == null)
       {
@@ -1886,6 +1896,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     badChars = s;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -1918,7 +1937,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setMultiLine(boolean b)
+  public synchronized ReturnVal setMultiLine(boolean b)
   {
     if (editor == null)
       {
@@ -1931,6 +1950,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     multiLine = b;
+
+    return null;
   }
 
   /**
@@ -1962,7 +1983,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized boolean setRegexpPat(String s)
+  public synchronized ReturnVal setRegexpPat(String s)
   {
     if (editor == null && !loading)
       {
@@ -1979,7 +2000,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	regexpPat = null;
 	regexp = null;
 
-	return true;
+	return null;
       }
     else
       {
@@ -1989,11 +2010,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 	catch (gnu.regexp.REException ex)
 	  {
-	    return false;	// bad regexp syntax?
+	    return Ganymede.createErrorDialog("Schema Editing Error",
+					      "Bad regexp syntax.");
 	  }
 
 	regexpPat = s;
-	return true;
+
+	if (isInUse())
+	  {
+	    return warning1;
+	  }
+	else
+	  {
+	    return null;
+	  }
       }
   }
 
@@ -2047,7 +2077,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setNameSpace(String nameSpaceId)
+  public synchronized ReturnVal setNameSpace(String nameSpaceId)
   {
     if (editor == null && !loading)
       {
@@ -2093,10 +2123,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (namespace == null)
 	  {
-	    // throw new IllegalArgumentException("Unknown namespace id specified for field");
-	    System.err.println("**** Unknown namespace id <" + nameSpaceId + "> specified for field " + 
-			       base.toString() + ", field: " + toString());
+	    return Ganymede.createErrorDialog("Schema Editing Error",
+					      "**** Unknown namespace id <" + 
+					      nameSpaceId + "> specified for field " + 
+					      base.toString() + ", field: " + toString());
 	  }
+      }
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
       }
   }
 
@@ -2111,7 +2151,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * this field definition is not a string, numeric, or IP type.</p>
    */
 
-  void setNameSpace(DBNameSpace namespace)
+  ReturnVal setNameSpace(DBNameSpace namespace)
   {
     if (!isString() && !isNumeric() && !isIP())
       {
@@ -2119,6 +2159,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     this.namespace = namespace;
+
+    if (isInUse())
+      {
+	return warning1;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   // **
@@ -2147,7 +2196,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public void setEditInPlace(boolean b)
+  public ReturnVal setEditInPlace(boolean b)
   {
     if (!isInvid())
       {
@@ -2155,8 +2204,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
     else
       {
+	if (isInUse())
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Can't change the editInPlace status type of an " +
+					      "invid field which is in use in the database.");
+	  }
+
 	editInPlace = b;
       }
+
+    return null;
   }
 
   /**
@@ -2211,7 +2269,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setTargetBase(short val)
+  public synchronized ReturnVal setTargetBase(short val)
   {
     Base b;
 
@@ -2230,7 +2288,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (val < 0)
       {
 	allowedTarget = val;
-	return;
+	return null;
       }
     
     b = base.editor.getBase(val);
@@ -2242,6 +2300,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     else
       {
 	throw new IllegalArgumentException("not a valid base id");
+      }
+
+    if (isInUse())
+      {
+	return warning2;
+      }
+    else
+      {
+	return null;
       }
   }
 
@@ -2255,7 +2322,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public synchronized void setTargetBase(String baseName)
+  public synchronized ReturnVal setTargetBase(String baseName)
   {
     Base b;
 
@@ -2274,7 +2341,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (baseName == null)
       {
 	allowedTarget = -1;
-	return;
+	return null;
       }
 
     b = editor.getBase(baseName);
@@ -2293,6 +2360,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     catch (RemoteException ex)
       {
 	throw new RuntimeException("caught remote except: " + ex);
+      }
+
+    if (isInUse())
+      {
+	return warning2;
+      }
+    else
+      {
+	return null;
       }
   }
 
@@ -2349,7 +2425,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setTargetField(short val)
+  public synchronized ReturnVal setTargetField(short val)
   {
     Base b;
     BaseField bF;
@@ -2369,7 +2445,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (val < 0)
       {
 	targetField = val;
-	return;
+	return null;
       }
 
     if (allowedTarget == -1)
@@ -2399,6 +2475,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     targetField = val;
+
+    if (isInUse())
+      {
+	return warning2;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -2412,7 +2497,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setTargetField(String fieldName)
+  public synchronized ReturnVal setTargetField(String fieldName)
   {
     Base b;
     BaseField bF;
@@ -2432,7 +2517,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (fieldName == null)
       {
 	targetField = -1;
-	return;
+	return null;
       }
 
     // look for fieldName in the base currently specified in
@@ -2465,6 +2550,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
+
+    if (isInUse())
+      {
+	return warning2;
+      }
+    else
+      {
+	return null;
+      }
   }
 
   /**
@@ -2494,7 +2588,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public void setCrypted(boolean b)
+  public ReturnVal setCrypted(boolean b)
   {    
     if (editor == null)
       {
@@ -2507,6 +2601,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     crypted = b;
+
+    return null;
   }
 
   /** 
@@ -2536,7 +2632,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField 
    */
 
-  public void setMD5Crypted(boolean b)
+  public ReturnVal setMD5Crypted(boolean b)
   {    
     if (editor == null)
       {
@@ -2549,6 +2645,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     md5crypted = b;
+
+    return null;
   }
 
   /**
@@ -2581,7 +2679,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public void setPlainText(boolean b)
+  public ReturnVal setPlainText(boolean b)
   {    
     if (editor == null)
       {
@@ -2590,10 +2688,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalArgumentException("not a password field");
       }
 
     storePlaintext = b;
+
+    return null;
   }
 
   // general convenience methods
@@ -2993,6 +3093,44 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public String toString()
   {
-    return field_name;
+    return base.getName() + ":" + field_name;
+  }
+
+  private static ReturnVal genWarning1()
+  {
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setDialog(new JDialogBuff("Schema Editor",
+				     "The requested change in this field's " +
+				     "allowed options has been made " +
+				     "and will be put into effect if you commit " +
+				     "your schema change.\n\n" +
+				     "This schema change will only affect new values " +
+				     "entered into this field in the database.  Pre-existing " +
+				     "fields of this kind in the database may or may not " +
+				     "satisfy your new constraint.",
+				     "OK",
+				     null,
+				     "ok.gif"));
+
+    return retVal;
+  }
+
+  private static ReturnVal genWarning2()
+  {
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setDialog(new JDialogBuff("Schema Editor",
+				     "The requested change in this field's " +
+				     "allowed options has been made " +
+				     "and will be put into effect if you commit " +
+				     "your schema change.\n\n" +
+				     "Because this schema change is being made while " +
+				     "there are fields of this type active in the database, there " +
+				     "may be a chance that this change will affect database " +
+				     "consistency.",
+				     "OK",
+				     null,
+				     "ok.gif"));
+
+    return retVal;
   }
 }

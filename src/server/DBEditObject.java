@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2000/02/10 04:35:34 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2000/02/29 09:35:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.126 $ $Date: 2000/02/10 04:35:34 $ $Name:  $
+ * @version $Revision: 1.127 $ $Date: 2000/02/29 09:35:08 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1310,7 +1310,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // don't clone the built-in fields, but do clone
     // anything else
 
-    return !field.getFieldDef().isBuiltIn();
+    return field.getID() > SchemaConstants.FinalSystemField;
   }
 
 
@@ -1581,7 +1581,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					  "Can't clone an object of the wrong type.  This is an internal error.");
       }
 
-    origFields = origObj.getFieldVector(true);
+    origFields = origObj.getFieldVector(true); // don't clone system fields
 
     for (int i = 0; i < origFields.size(); i++)
       {
@@ -3266,7 +3266,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    // algorithm: iterate over base.sortedFields to find all fields
+    // algorithm: iterate over base.fieldTable to find all fields
     // possibly contained in the object.. for each field, check to
     // see if the value has changed.  if so, emit a before and after
     // diff.  if one has a field and the other does not, indicate
@@ -3285,7 +3285,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	System.err.println("Entering diff for object " + getLabel());
       }
 
-    Enumeration enum = objectBase.sortedFields.elements();
+    Enumeration enum = objectBase.fieldTable.elements();
 
     while (enum.hasMoreElements())
       {

@@ -5,8 +5,8 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/10/29 16:14:03 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/02/29 09:35:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -389,7 +389,9 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
       {
 	if (source == nameS)
 	  {
-	    if (base.setName(val))
+	    ReturnVal retVal = owner.handleReturnVal(base.setName(val));
+
+	    if (retVal == null || retVal.didSucceed())
 	      {
 		baseNode.setText(base.getName());
 		nameS.setText(baseNode.getText());
@@ -402,7 +404,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	  }
 	else if (source == classS)
 	  {
-	    base.setClassName(val);
+	    owner.handleReturnVal(base.setClassName(val));
 	  }
       }
     catch (RemoteException ex)

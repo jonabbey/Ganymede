@@ -8,18 +8,20 @@
    
    Created: 2 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:27 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/29 09:35:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -150,13 +152,13 @@ public class BaseListTransport implements java.io.Serializable {
   {
     addChunk("base");
     addChunk(node.getName());
+    addChunk(node.getPathedName());
     addChunk(String.valueOf(node.getTypeID()));
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());
     addChunk(String.valueOf(node.canInactivate()));
     addChunk(String.valueOf(node.canCreate(((GanymedeSession) session))));
     addChunk(String.valueOf(node.isEmbedded()));
-    addChunk(String.valueOf(node.getDisplayOrder()));
   }
 
   private void addChunk(String text)

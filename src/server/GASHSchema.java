@@ -6,10 +6,9 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2000/02/03 04:59:33 $
    Release: $Name:  $
-
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/02/29 09:35:16 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -21,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -86,8 +86,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   // --
 
-  boolean developMode;	// if this is true, we can mangle otherwise inviolable bases/fields
-
   SchemaEdit 
     editor;
 
@@ -106,28 +104,23 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   treeNode
     nodeAfterCategories,
-    namespaces,			// top-level node for namespace listing
-    builtIns;			// top-level node for (non-embedded) built-in field defs
+    namespaces;			// top-level node for namespace listing
 
   java.awt.MenuItem
     createCategoryMI = null,
     deleteCategoryMI = null,
     createObjectMI = null,
     createInternalObjectMI = null,
-    createLowObjectMI = null,
     deleteObjectMI = null,
     createNameMI = null,
     deleteNameMI = null,
     createFieldMI = null,
-    createLowFieldMI = null,
-    deleteFieldMI = null,
-    createBuiltInMI = null;
+    deleteFieldMI = null;
   
   treeMenu
     categoryMenu = null,
     baseMenu = null,
     fieldMenu = null,
-    builtInMenu = null,
     nameSpaceMenu = null,
     nameSpaceObjectMenu = null;
 
@@ -191,15 +184,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     super(title);
 
     this.editor = editor;
-
-    try
-      {
-	developMode = editor.isDevelopMode();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't determine develop mode. " + ex);
-      }
 
     questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
 
@@ -361,24 +345,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     deleteCategoryMI = new java.awt.MenuItem("Delete Category");
     createObjectMI = new java.awt.MenuItem("Create Object Type");
     createInternalObjectMI = new java.awt.MenuItem("Create Embedded Object Type");
-    createLowObjectMI = new java.awt.MenuItem("Create Low Range Object Type");
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
     categoryMenu.add(createObjectMI);
     categoryMenu.add(createInternalObjectMI);
-
-    if (developMode)
-      {
-	categoryMenu.add(createLowObjectMI);
-      }
-
-    // builtIn menu
-
-    createBuiltInMI = new java.awt.MenuItem("Create Built-in Field");
-
-    builtInMenu = new treeMenu("Built-in Fields");
-    builtInMenu.add(createBuiltInMI);
 
     // namespace menu
 
@@ -397,14 +368,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     baseMenu = new treeMenu("Base Menu");
     deleteObjectMI = new java.awt.MenuItem("Delete Object Type");
     createFieldMI = new java.awt.MenuItem("Create Field");
-    createLowFieldMI = new java.awt.MenuItem("Create low-range Field");
 
     baseMenu.add(createFieldMI);
-
-    if (developMode)
-      {
-	baseMenu.add(createLowFieldMI);
-      }
 
     baseMenu.add(deleteObjectMI);
 
@@ -439,30 +404,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     tree.setRoot(objects);
 
-    // create builtIn node
-
-    if (developMode)
-      {
-	builtIns = new treeNode(null, "Built-In Fields", objects, true, 0, 1, builtInMenu);
-	tree.insertNode(builtIns, false);
-
-	// create namespaces node
+    // create namespaces node
 	
-	namespaces = new treeNode(null, "Namespaces", builtIns, true, 0, 1, nameSpaceMenu);
-	tree.insertNode(namespaces, false);
-	
-	nodeAfterCategories = builtIns;
-      }
-    else
-      {
-	// create namespaces node
-	
-	namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
-	tree.insertNode(namespaces, false);
-	
-	nodeAfterCategories = namespaces;
-      }
-
+    namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
+    tree.insertNode(namespaces, false);
+    
+    nodeAfterCategories = namespaces;
 
     // and initialize tree
 
@@ -501,18 +448,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     catch (RemoteException ex)
       {
 	throw new RuntimeException("couldn't refresh categories" + ex);
-      }
-
-    if (developMode)
-      {
-	try
-	  {
-	    refreshBuiltIns();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("couldn't refresh built-ins" + ex);
-	  }
       }
 
     refreshNamespaces();
@@ -710,159 +645,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	tree.refresh();
       }
-  }
-
-  void refreshBuiltIns() throws RemoteException
-  {
-    Base base;
-    BaseField field, fields[];
-    Vector vect, vect2;
-    FieldNode oldNode, newNode, fNode;
-    int i;
-
-    /* -- */
-
-    boolean isOpen = builtIns.isOpen();
-    
-    tree.removeChildren(builtIns, false);
-
-    // we assume that we can rely on the user base having
-    // a full complement of built in fields.
-
-    base = editor.getBase(SchemaConstants.UserBase);
-
-    // get the list of fields we want to display
-    // note that we do want to show built-in fields
-
-    vect = base.getFields(true);
-
-    // make a copy of all the fields that are built-in
-
-    vect2 = new Vector();
-    
-    for (i = 0; i < vect.size(); i++)
-      {
-	field = (BaseField) vect.elementAt(i);
-
-	if (field.isBuiltIn())
-	  {
-	    vect2.addElement(field);
-	  }
-      }
-
-    // put em in an array, sort em.
-
-    fields = new BaseField[vect2.size()];
-    
-    for (i = 0; i < fields.length; i++)
-      {
-	fields[i] = (BaseField) vect2.elementAt(i);
-      }
-    
-    // Sort the fields by ID, using a funky anonymous
-    // class
-    
-    (new QuickSort(fields, 
-		   new arlut.csd.Util.Compare() 
-		   {
-		     public int compare(Object a, Object b) 
-		       {
-			 BaseField aF, bF;
-      
-			 aF = (BaseField) a;
-			 bF = (BaseField) b;
-	
-			 try
-			   {
-			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
-			       {
-				 return -1;
-			       }
-			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
-			       {
-				 return 1;
-			       }
-			     else
-			       {
-				 return 0;
-			       }
-			   }
-			 catch (RemoteException ex)
-			   {
-			     throw new RuntimeException("couldn't compare base fields " + ex);
-			   }
-		       }
-		   }
-		   )).sort();
-
-    oldNode = null;
-    fNode = (FieldNode) builtIns.getChild();
-    i = 0;
-
-    // this loop here is intended to do a minimum-work updating
-    // of a field list
-	
-    while ((i < fields.length) || (fNode != null))
-      {
-	if (i < fields.length)
-	  {
-	    field = fields[i];
-	  }
-	else
-	  {
-	    field = null;
-	  }
-
-	if ((fNode == null) ||
-	    ((field != null) && 
-	     (field.getID() < fNode.getField().getID())))
-	  {
-	    // insert a new field node
-
-	    newNode = new FieldNode(builtIns, field.getName(), field,
-				    oldNode, false, 3, 3, fieldMenu);
-
-	    tree.insertNode(newNode, true);
-
-	    oldNode = newNode;
-	    fNode = (FieldNode) oldNode.getNextSibling();
-
-	    i++;
-	  }
-	else if ((field == null) ||
-		 (field.getID() > fNode.getField().getID()))
-	  {
-	    // delete a field node
-
-	    if (showingField && (fe.fieldDef == fNode.getField()))
-	      {
-		card.show(attribCardPane, "empty");
-	      }
-
-	    // System.err.println("Deleting: " + fNode.getText());
-	    newNode = (FieldNode) fNode.getNextSibling();
-	    tree.deleteNode(fNode, false);
-
-	    fNode = newNode;
-	  }
-	else
-	  {
-	    fNode.setText(field.getName());
-	    // System.err.println("Setting: " + field.getName());
-
-	    oldNode = fNode;
-	    fNode = (FieldNode) oldNode.getNextSibling();
-
-	    i++;
-	  }
-      }
-
-    if (isOpen)
-      {
-	tree.expandNode(builtIns, false);
-      }
-
-    tree.refresh();
   }
 
   void refreshNamespaces()
@@ -1095,28 +877,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    // we want to insert at the bottom of the base
 
 	    treeNode n = node.getChild();
-	    short order = 0;
-	    
+
 	    if (n != null)
 	      {
 		while (n.getNextSibling() != null)
 		  {
-		    try
-		      {
-			if (n instanceof BaseNode)
-			  {
-			    order = (short) (((BaseNode) n).getBase().getDisplayOrder() + 1);
-			  }
-			else
-			  {
-			    order = (short) (((CatTreeNode) n).getCategory().getDisplayOrder() + 1);
-			  }
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("couldn't get display order for " + n);
-		      }
-
 		    n = n.getNextSibling();
 		  }
 	      }
@@ -1205,30 +970,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	catch (RemoteException ex)
 	  {
 	    System.err.println("couldn't create new base." + ex);
-	  }
-      }
-    else if (event.getSource() == createLowObjectMI)
-      {
-	try
-	  {
-	    CatTreeNode cNode = (CatTreeNode) node;
-	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category, false, true);
-	    
-	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, false, 2, 2, baseMenu);
-
-	    tree.insertNode(newNode, false);
-
-	    tree.expandNode(node, false);
-
-	    refreshFields(newNode, true);
-
-	    editBase(newNode);
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new low-range base." + ex);
 	  }
       }
     else if (event.getSource() == createInternalObjectMI)
@@ -1466,7 +1207,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new IllegalArgumentException("exception in isRemovalbe(): " + rx);
 	  }
 
-	if (isRemovable || developMode)
+	if (isRemovable)
 	  {
 	    if (new StringDialog(this,
 				 "Confirm deletion of Object",
@@ -1487,7 +1228,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		      {
 			System.err.println("Deleting base " + b.getName());
 		      }
-		    editor.deleteBase(b);
+
+		    editor.deleteBase(b.getName());
 		  }
 		catch (RemoteException ex)
 		  {
@@ -1506,8 +1248,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			     null).DialogShow();
 	  }
       }
-    else if ((event.getSource() == createFieldMI) ||
-	     (event.getSource() == createLowFieldMI))
+    else if (event.getSource() == createFieldMI)
       {
 	// find the base that asked for the field
 
@@ -1522,78 +1263,27 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    // create a name for the new field
 
-	    BaseField bF, bF2;
-	    Base b;
+	    BaseField bF;
+	    Base b = bNode.getBase();
 
-	    String newname = "New Field";
-	    int j;
-	    boolean done;
+	    bF = b.createNewField(); // the server picks a new default field name
 
-	    b = bNode.getBase();
-	    Vector fieldVect = b.getFields();
+	    String name = bF.getName();
 
-	    done = false;
-
-	    j = 0;
-
-	    while (!done)
-	      {
-		if (j > 0)
-		  {
-		    newname = "New Field " + (j + 1);
-		  }
-
-		done = true;
-
-		for (int i = 0; done && i < fieldVect.size(); i++)
-		  {
-		    bF2 = (BaseField) fieldVect.elementAt(i);
-		    
-		    if (bF2.getName().equals(newname))
-		      {
-			done = false;
-		      }
-		  }
-
-		j++;
-	      }
-
-	    bF = b.createNewField((event.getSource() == createLowFieldMI));
-	    bF.setName(newname);
-
-	    // we want to insert the child's field node
-	    // at the bottom of the base
+	    // we want to insert the child's field node at the bottom
+	    // of the base, which is where createNewField() places it.
 
 	    treeNode n = node.getChild();
-	    short order = 0;
 	    
 	    if (n != null)
 	      {
 		while (n.getNextSibling() != null)
 		  {
-		    try
-		      {
-			order = (short) (((FieldNode) n).getField().getDisplayOrder() + 1);
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("couldn't get display order for " + n);
-		      }
-
 		    n = n.getNextSibling();
 		  }
 	      }
 
-	    try
-	      {
-		bF.setDisplayOrder(order);
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("couldn't set display order for " + bF);
-	      }
-
-	    FieldNode newNode = new FieldNode(node, newname, bF, n,
+	    FieldNode newNode = new FieldNode(node, name, bF, n,
 					      false, 3, 3, fieldMenu);
 	    tree.insertNode(newNode, false);
 	    tree.expandNode(node, true);
@@ -1618,7 +1308,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	String label = fNode.getText();
 	String parentLabel = fNode.getParent().getText();
 
-	boolean isEditable = false;
 	boolean isRemovable = false;
 
 	try
@@ -1630,91 +1319,53 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new IllegalArgumentException("Can't get isRemoveable, assuming false: " +rx);
 	  }
 
-	if (isRemovable || developMode)
+	if (isRemovable)
 	  {
-	    try
+	    if (debug)
 	      {
-		isEditable = field.isEditable();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("can't tell if field is editable, assuming false: " + rx);
+		System.err.println("deleting field node");
 	      }
 
-	    if (isEditable || developMode)
+	    DialogRsrc dialogResource = new DialogRsrc(this,
+						       "Confirm Field Deletion",
+						       "Ok to delete field " + label + 
+						       "from object type " + parentLabel + "?",
+						       "Delete", "Cancel",
+						       questionImage);
+
+	    Hashtable results = new StringDialog(dialogResource).DialogShow();
+
+	    if (results != null)
 	      {
-		if (debug)
+		if (node.getParent() instanceof BaseNode)
 		  {
-		    System.err.println("deleting field node");
-		  }
+		    BaseNode bNode = (BaseNode) node.getParent();
 
-		DialogRsrc dialogResource = new DialogRsrc(this,
-							   "Confirm Field Deletion",
-							   "Ok to delete field " + label + 
-							   "from object type " + parentLabel + "?",
-							   "Delete", "Cancel",
-							   questionImage);
-
-		Hashtable results = new StringDialog(dialogResource).DialogShow();
-
-		if (results != null)
-		  {
-		    if (node.getParent() instanceof BaseNode)
+		    try
 		      {
-			BaseNode bNode = (BaseNode) node.getParent();
-
-			try
+			if (!bNode.getBase().fieldInUse(fNode.getText()))
 			  {
-			    if (!bNode.getBase().fieldInUse(fNode.getField()))
-			      {
-				bNode.getBase().deleteField(fNode.getField());
-				refreshFields(bNode, true);
-				ne.refreshSpaceList();
-				be.refreshLabelChoice();
-			      }
-			    else
-			      {
+			    bNode.getBase().deleteField(fNode.getText());
+			    refreshFields(bNode, true);
+			    ne.refreshSpaceList();
+			    be.refreshLabelChoice();
+			  }
+			else
+			  {
 				// field in use
 				
-				new JErrorDialog(this,
-						 "Couldn't delete field " + label,
-						 "Couldn't delete field.. field " + label + " is in use");
-			      }
-			  }
-			catch (RemoteException ex)
-			  {
 			    new JErrorDialog(this,
-					     "Couldn't delete field",
-					     "Caught an exception from the server trying to delete field.. " + ex);
+					     "Couldn't delete field " + label,
+					     "Couldn't delete field.. field " + label + " is in use");
 			  }
 		      }
-		    else if (developMode)
+		    catch (RemoteException ex)
 		      {
-			// assume we're deleting a built-in field
-
-			try
-			  {
-			    editor.getBase(SchemaConstants.UserBase).deleteField(fNode.getField());
-			    refreshBuiltIns();
-			  }
-			catch (RemoteException ex)
-			  {
-			    throw new RuntimeException("danger will robinson! couldn't delete built-in field! " + ex);
-			  }
-
-			ne.refreshSpaceList();
-			be.refreshLabelChoice();
+			new JErrorDialog(this,
+					 "Couldn't delete field",
+					 "Caught an exception from the server trying to delete field.. " + ex);
 		      }
 		  }
-	      }
-	    else
-	      {
-		new StringDialog(this, 
-				 "Error: field not editable",
-				 "Field " + label + " in object type " + parentLabel + 
-				 " is not editable.  You cannot delete it.",
-				 "Ok",
-				 null).DialogShow();
 	      }
 	  }
 	else
@@ -1725,38 +1376,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			     " is not removable.",
 			     "Ok",
 			     null).DialogShow();
-	  }
-      }
-    else if (event.getSource() == createBuiltInMI)
-      {
-	// find the base that asked for the field
-
-	try
-	  {
-	    // create a name for the new field
-
-	    BaseField bF;
-
-	    bF = editor.createNewBuiltIn();
-
-	    // we'll go ahead and insert the new node at the top of
-	    // the Built-In Fields subtree
-
-	    FieldNode newNode = new FieldNode(node, bF.getName(), bF, null,
-					      false, 3, 3, fieldMenu);
-	    tree.insertNode(newNode, false);
-	    tree.expandNode(node, true);
-
-	    editField(newNode);
-
-	    if (debug)
-	      {
-		System.err.println("Called editField");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new field" + ex);
 	  }
       }
   }
@@ -1816,23 +1435,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public boolean startDrag(treeNode dragNode)
   {
-    if (dragNode instanceof FieldNode)
-      {
-	FieldNode fN = (FieldNode) dragNode;
-
-	try
-	  {
-	    if (fN.getField().isBuiltIn())
-	      {
-		return false;	// we don't allow reordering of built-ins
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote exception when checking field for drag start:" + ex);
-	  }
-      }
-
     return ((dragNode instanceof FieldNode) ||
 	    (dragNode instanceof BaseNode) ||
 	    (dragNode instanceof CatTreeNode &&
@@ -1952,8 +1554,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				       oldCategory.getName() + " onto " + newCategory.getName());
 		  }
 
-		base.setDisplayOrder(0);
-
 		if (debug)
 		  {
 		    System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
@@ -1966,7 +1566,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
 		  }
 
-		newCategory.addNode(base, false, true);
+		newCategory.addNodeBefore(base, null);
 
 		BaseNode newNode = (BaseNode) tree.moveNode(dragNode, targetNode, null, true);
 
@@ -2009,7 +1609,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				       oldCategory.getName() + " onto " + newCategory.getName());
 		  }
 
-		newCategory.moveCategoryNode(category.getPath(), 0);
+		newCategory.moveCategoryNode(category.getPath(), null);
 
 		CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, targetNode, null, true);
 
@@ -2166,6 +1766,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	FieldNode oldNode = (FieldNode)dragNode;
 	BaseNode parentNode = (BaseNode)oldNode.getParent();
+	Base base = parentNode.getBase();
 
 	if (debug)
 	  {
@@ -2176,7 +1777,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    if (aboveNode != dragNode)
 	      {
-		//Insert below the aboveNode
+		// Insert below the aboveNode
+
+		try
+		  {
+		    base.moveFieldAfter(dragNode.getText(), aboveNode.getText());
+		  }
+		catch (RemoteException ex)
+		  {
+		    ex.printStackTrace();
+		    throw new RuntimeException(ex.getMessage());
+		  }
 
 		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, aboveNode, true);
 
@@ -2194,7 +1805,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    if (belowNode != dragNode)
 	      {
-		//First node, insert below parent
+		// First node, insert below parent
+
+		try
+		  {
+		    base.moveFieldAfter(dragNode.getText(), null);
+		  }
+		catch (RemoteException ex)
+		  {
+		    ex.printStackTrace();
+		    throw new RuntimeException(ex.getMessage());
+		  }
 
 		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, null, true);
 
@@ -2211,70 +1832,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	else
 	  {
 	    System.err.println("Dropped away from FieldNodes, shouldn't happen");
-	  }
-	
-	// Ok, that mostly works, plugging ahead
-
-	// Renumber the fields of this parent.
-	
-	FieldNode currentNode = (FieldNode) parentNode.getChild();
-
-	if (currentNode != null)
-	  {
-	    try
-	      {
-		short i = 0;
-
-		while (currentNode != null)
-		  {
-		    i++;
-
-		    if (debug)
-		      {
-			System.out.println("Setting field " + currentNode.getText() + " to order " + i);
-		      }
-
-		    currentNode.getField().setDisplayOrder(i);
-
-		    if (debug)
-		      {
-			System.out.println("Field " + currentNode.getText() + "'s order is now " + 
-					   currentNode.getField().getDisplayOrder());
-		      }
-
-		    currentNode = (FieldNode) currentNode.getNextSibling();
-		  }
-
-		if (debug)
-		  {
-		    System.out.println("Reordered " + i + " fields.. rescanning order");
-
-		    currentNode = (FieldNode) parentNode.getChild();
-
-		    i = 0;
-
-		    while (currentNode != null)
-		      {
-			i++;
-		   
-			if (debug)
-			  {
-			    System.out.println("Field " + currentNode.getText() + "'s order is now " + 
-					       currentNode.getField().getDisplayOrder());
-			  }
-			
-			currentNode = (FieldNode) currentNode.getNextSibling(); 
-		      }
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception reordering fields: " + rx);
-	      }
-	  }
-	else
-	  {
-	    System.err.println("No children to renumber, something not right");
 	  }
       }
     else if (dragNode instanceof BaseNode)
@@ -2293,7 +1850,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Category newCategory = null;
 	    CatTreeNode newParent = null;
 	    treeNode previousNode = null;
-	    int displayOrder = 0;
 
 	    if (aboveNode instanceof CatTreeNode)
 	      {
@@ -2302,7 +1858,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    newCategory = rootCategory;
 		    newParent = (CatTreeNode) aboveNode;
 		    previousNode = null;
-		    displayOrder = 0;
 		  }
 		else
 		  {
@@ -2311,14 +1866,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			newCategory = ((CatTreeNode) aboveNode).getCategory();
 			newParent = (CatTreeNode) aboveNode;
 			previousNode = null;
-			displayOrder = 0;
 		      }
 		    else
 		      {
 			newParent = (CatTreeNode) aboveNode.getParent();
 			newCategory = newParent.getCategory();
 			previousNode = aboveNode;
-			displayOrder = ((CatTreeNode) aboveNode).getCategory().getDisplayOrder() + 1;
 		      }
 		  }
 	      }
@@ -2326,7 +1879,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
 		newParent = (CatTreeNode) aboveNode.getParent();
-		displayOrder = ((BaseNode) aboveNode).getBase().getDisplayOrder() + 1;
 
 		previousNode = aboveNode;
 	      }
@@ -2334,7 +1886,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
 		newParent = (CatTreeNode) aboveNode.getParent().getParent();
-		displayOrder = ((FieldNode) aboveNode).getField().getBase().getDisplayOrder() + 1;
 		previousNode = aboveNode.getParent();
 	      }
 
@@ -2349,29 +1900,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 	      }
 
-	    if (newCategory.equals(oldCategory))
+	    if (previousNode != null)
 	      {
-		if (debug)
-		  {
-		    System.err.println("Moving within the same category");
-		  }
-
-		if (base.getDisplayOrder() < displayOrder)
-		  {
-		    displayOrder--;
-		  }
+		newCategory.moveCategoryNode(base.getName(), previousNode.getText());
 	      }
-
-	    if (debug)
+	    else
 	      {
-		System.err.println("new displayOrder = " + displayOrder);
+		newCategory.moveCategoryNode(base.getName(), null);
 	      }
-
-	    oldCategory.removeNode(base.getName());
-
-	    base.setDisplayOrder(displayOrder);
-
-	    newCategory.addNode((CategoryNode) base, false, true);
 
 	    BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
@@ -2385,7 +1921,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (debug)
 	      {
 		System.err.println("Reinserted base " + base.getName());
-		System.err.println("reinserted order = " + base.getDisplayOrder());
 		System.err.println("reinserted category = " + base.getCategory().getName());
 	      }
 
@@ -2412,7 +1947,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Category newCategory = null;
 	    CatTreeNode newParent = null;
 	    treeNode previousNode = null;
-	    int displayOrder = 0;
 
 	    if (aboveNode instanceof CatTreeNode)
 	      {
@@ -2421,7 +1955,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    newCategory = rootCategory;
 		    newParent = (CatTreeNode) aboveNode;
 		    previousNode = null;
-		    displayOrder = 0;
 		  }
 		else
 		  {
@@ -2430,14 +1963,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			newCategory = ((CatTreeNode) aboveNode).getCategory();
 			newParent = (CatTreeNode) aboveNode;
 			previousNode = null;
-			displayOrder = 0;
 		      }
 		    else
 		      {
 			newParent = (CatTreeNode) aboveNode.getParent();
 			newCategory = newParent.getCategory();
 			previousNode = aboveNode;
-			displayOrder = ((CatTreeNode) aboveNode).getCategory().getDisplayOrder() + 1;
 		      }
 		  }
 	      }
@@ -2445,7 +1976,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
 		newParent = (CatTreeNode) aboveNode.getParent();
-		displayOrder = ((BaseNode) aboveNode).getBase().getDisplayOrder() + 1;
 
 		previousNode = aboveNode;
 	      }
@@ -2453,7 +1983,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
 		newParent = (CatTreeNode) aboveNode.getParent().getParent();
-		displayOrder = ((FieldNode) aboveNode).getField().getBase().getDisplayOrder() + 1;
 		previousNode = aboveNode.getParent();
 	      }
 
@@ -2471,15 +2000,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (debug)
 	      {
 		System.err.println("Moving category " + category.getPath() +
-				   ", displayOrder = " + category.getDisplayOrder());
+				   ", previous node = " + previousNode.getText());
 	      }
 	    
-	    newCategory.moveCategoryNode(category.getPath(), displayOrder);
+	    newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
 
 	    if (debug)
 	      {
-		System.err.println("Moved category " + category.getPath() +
-				   ", displayOrder = " + category.getDisplayOrder());
+		System.err.println("Moved category " + category.getPath());
 	      }
 	    
 
@@ -2493,7 +2021,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (debug)
 	      {
 		System.err.println("Reinserted category " + category.getName());
-		System.err.println("reinserted order = " + category.getDisplayOrder());
 		System.err.println("reinserted category = " + category.getCategory().getName());
 	      }
 
@@ -2504,6 +2031,129 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  }
 
       }
+  }
+
+  /**
+   * <p>This method takes a ReturnVal object from the server and, if necessary,
+   * runs through a wizard interaction sequence, possibly displaying several
+   * dialogs before finally returning a final result code.</p>
+   *
+   * <p>Use the ReturnVal returned from this function after this function is
+   * called to determine the ultimate success or failure of any operation
+   * which returns ReturnVal, because a wizard sequence may determine the
+   * ultimate result.</p>
+   *
+   * <p>This method should not be synchronized, since handleReturnVal
+   * may pop up modal (thread-blocking) dialogs, and if we we
+   * synchronize this, some Swing or AWT code seems to block on our
+   * synchronization when we do pop-up dialogs.  It's not any of my
+   * code, so I assume that AWT tries to synchronize on the frame when
+   * parenting a new dialog.</p> 
+   */
+
+  public ReturnVal handleReturnVal(ReturnVal retVal)
+  {
+    Hashtable dialogResults;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("GASHSchema.handleReturnVal(): Entering");
+      }
+
+    while ((retVal != null) && (retVal.getDialog() != null))
+      {
+	if (debug)
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): retrieving dialog");
+	  }
+
+	JDialogBuff jdialog = retVal.getDialog();
+
+	if (debug)
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): extracting dialog");
+	  }
+
+	DialogRsrc resource = jdialog.extractDialogRsrc(this);
+
+	if (debug)
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): constructing dialog");
+	  }
+
+	StringDialog dialog = new StringDialog(resource);
+
+	if (debug)
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): displaying dialog");
+	  }
+
+	// display the Dialog sent to us by the server, get the
+	// result of the user's interaction with it.
+	    
+	dialogResults = dialog.DialogShow();
+
+	if (debug)
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): dialog done");
+	  }
+
+	if (retVal.getCallback() != null)
+	  {
+	    try
+	      {
+		if (debug)
+		  {
+		    System.err.println("GASHSchema.handleReturnVal(): Sending result to callback: " + dialogResults);
+		  }
+
+		// send the dialog results to the server
+
+		retVal = retVal.getCallback().respond(dialogResults);
+
+		if (debug)
+		  {
+		    System.err.println("GASHSchema.handleReturnVal(): Received result from callback.");
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("GASHSchema.handleReturnVal(): No callback, breaking");
+	      }
+
+	    break;		// we're done
+	  }
+      }
+
+    if (debug)
+      {
+	if (retVal != null)
+	  {
+	    if (retVal.didSucceed())
+	      {
+		System.err.println("GASHSchema.handleReturnVal(): returning success code");
+	      }
+	    else
+	      {
+		System.err.println("GASHSchema.handleReturnVal(): returning failure code");
+	      }
+	  }
+	else
+	  {
+	    System.err.println("GASHSchema.handleReturnVal(): returning null retVal (success)");
+	  }
+      }
+
+    return retVal;
   }
 }
 

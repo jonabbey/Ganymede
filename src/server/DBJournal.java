@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/02/15 05:55:26 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/02/29 09:35:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -745,7 +745,7 @@ class JournalEntry {
 
 	    badObj.unsetBackPointers();
 
-	    db_field[] tempFields = badObj.listFields(false);
+	    db_field[] tempFields = badObj.listFields();
 	    fields = new DBField[tempFields.length];
 
 	    for (int i = 0; i < fields.length; i++)
@@ -809,7 +809,7 @@ class JournalEntry {
 	// values freed by object deletion or changes, then going through and allocating
 	// new values.  We may still wind up doing this. 
 
-	db_field[] tempFields = obj.listFields(false);
+	db_field[] tempFields = obj.listFields();
 	fields = new DBField[tempFields.length];
 
 	for (int i = 0; i < fields.length; i++)

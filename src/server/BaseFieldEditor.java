@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/02/22 07:21:21 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2000/02/29 09:35:05 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -121,7 +121,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     maxLengthN;			// string
 
   JcheckboxField
-    vectorCF,			// all but password, boolean
+    vectorCF,			// invid, string, ip
     labeledCF,			// boolean
     editInPlaceCF,		// invid
     cryptedCF,			// password
@@ -131,7 +131,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
   JComboBox
     typeC,			// all
-    namespaceC,			// string
+    namespaceC,			// string, numeric, ip
     targetC,			// invid
     fieldC;			// invid
 
@@ -182,7 +182,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     int rowcount = 0;
     
     idN = new JnumberField(20,  false, false, 0, 0);
-    idN.setCallback(this);
     addRow(editPanel, idN, "Field ID:", rowcount++);
     
     nameS = new JstringField(20, 100,  true, false, null, null);
@@ -220,6 +219,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     typeC.addItemListener(this);
 
     //choose the one that is the default
+
     changeTypeChoice("Boolean");
 
     addRow(editPanel, typeC, "Field Type:", rowcount++);
@@ -372,15 +372,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	System.out.println(" Checking visibility");
       }
 
-    if (passwordShowing || booleanShowing || numericShowing || dateShowing || floatShowing)
-      {
-	setRowVisible(vectorCF, false);
-	setRowVisible(maxArrayN, false);
-      }
-    else			// strings, ip fields, invid fields
+    if (stringShowing || ipShowing || referenceShowing)
       {
 	setRowVisible(vectorCF, true);
 	setRowVisible(maxArrayN, vectorCF.isSelected());
+      }
+    else			// anything else can't be vector
+      {
+	setRowVisible(vectorCF, false);
+	setRowVisible(maxArrayN, false);
       }
 
     if (passwordShowing)
@@ -718,62 +718,146 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
   void changeTypeChoice(String selectedItem)
   {
-    booleanShowing = false;
-    numericShowing = false;
-    floatShowing = false;
-    dateShowing = false;
-    stringShowing = false;
-    referenceShowing = false;
-    passwordShowing = false;
-    ipShowing = false;
-    permissionShowing = false;
+    ReturnVal retVal;
+
+    /* -- */
 
     try
       {
 	if (selectedItem.equalsIgnoreCase("Boolean"))
 	  {
-	    booleanShowing = true;
-	    fieldDef.setType(FieldType.BOOLEAN);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.BOOLEAN));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		booleanShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Numeric"))
 	  {
-	    numericShowing = true;
-	    fieldDef.setType(FieldType.NUMERIC);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.NUMERIC));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		numericShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Float"))
 	  {
-	    floatShowing = true;
-	    fieldDef.setType(FieldType.FLOAT);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.FLOAT));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		floatShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Date"))
 	  {
-	    dateShowing = true;
-	    fieldDef.setType(FieldType.DATE);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.DATE));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		dateShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("String"))
 	  {
-	    stringShowing = true;
-	    fieldDef.setType(FieldType.STRING);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.STRING));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		stringShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Object Reference"))
 	  {
-	    referenceShowing = true;
-	    fieldDef.setType(FieldType.INVID);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.INVID));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		referenceShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Password"))
 	  {
-	    passwordShowing = true;
-	    fieldDef.setType(FieldType.PASSWORD);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.PASSWORD));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		passwordShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("I.P."))
 	  {
-	    ipShowing = true;
-	    fieldDef.setType(FieldType.IP);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.IP));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		ipShowing = true;
+	      }
 	  }
 	else if (selectedItem.equalsIgnoreCase("Permission Matrix"))
 	  {
-	    permissionShowing = true;
-	    fieldDef.setType(FieldType.PERMISSIONMATRIX);
+	    retVal = owner.handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX));
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		permissionShowing = true;
+	      }
 	  }
       }
     catch (RemoteException ex)
@@ -785,6 +869,31 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	// we don't have fieldDef set yet.  Just ignore.
       }
   }
+
+  /**
+   * <p>Helper method for changeTypeChoice().</p>
+   */
+
+  private void clearTypeChoice()
+  {
+    booleanShowing = false;
+    numericShowing = false;
+    floatShowing = false;
+    dateShowing = false;
+    stringShowing = false;
+    referenceShowing = false;
+    passwordShowing = false;
+    ipShowing = false;
+    permissionShowing = false;
+  }
+
+  /**
+   *
+   * Edit the given field.  This method prepares the BaseFieldEditor
+   * for display, initializing all items in the BaseFieldEditor panel
+   * with the contents of fieldDef.
+   *
+   */
 
   void editField(FieldNode fieldNode, boolean forceRefresh)
   {
@@ -806,7 +915,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	System.err.println(" -in FieldEditor.editField()");
       }
 
-    listenToCallbacks = false;
+    listenToCallbacks = false;	// so we don't get confused by programmatic edits
     owner.setWaitCursor();
 
     clearFields();
@@ -819,30 +928,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     this.fieldNode = fieldNode;
 
     this.fieldDef = fieldNode.getField();
-
-    // Check to see if this field is editable.
-    // Assume it is not, then ask server.
-    // Each field will be set to editable depending on this variable.
-
-    boolean isEditable = false;
-
-    try
-      {
-	isEditable = fieldDef.isEditable();
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("exception: isEditable in editField: " + rx);
-      }
-
-    // if we are in testing and development mode, we want to be able
-    // to edit fields regardless of what the server reports for its
-    // preference
-
-    if (owner.developMode)
-      {
-	isEditable = true;
-      }
 
     booleanShowing = false;
     numericShowing = false;
@@ -996,7 +1081,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    if (fieldDef.isEditInPlace())
 	      {
 		vectorCF.setSelected(true, false);
-		fieldDef.setArray(true);
+		owner.handleReturnVal(fieldDef.setArray(true));
 	      }
 
 	    // important.. we want to avoid mucking with the targetC GUI combobox if
@@ -1068,7 +1153,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			    
 			try
 			  {
-			    fieldDef.setTargetBase(null);
+			    owner.handleReturnVal(fieldDef.setTargetBase(null));
 			  }
 			catch (RemoteException rx)
 			  {
@@ -1159,7 +1244,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			
 			try
 			  {
-			    fieldDef.setTargetField(null);
+			    owner.handleReturnVal(fieldDef.setTargetField(null));
 			  }
 			catch (RemoteException rx)
 			  {
@@ -1225,27 +1310,22 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	// Here is where the editability is checked.
 
-	if (debug)
-	  {
-	    System.out.println("+Setting enabled to: " + isEditable);
-	  }
+	commentT.setEditable(true);
+	nameS.setEditable(true);
+	classS.setEditable(true);
+	trueLabelS.setEditable(true);
+	falseLabelS.setEditable(true);
+	regexpS.setEditable(true);
+	OKCharS.setEditable(true);
+	BadCharS.setEditable(true);
+	maxArrayN.setEditable(true);
+	minLengthN.setEditable(true);
+	maxLengthN.setEditable(true);
+	idN.setEditable(false);
 
-	commentT.setEditable(isEditable);
-	nameS.setEditable(isEditable);
-	classS.setEditable(isEditable);
-	trueLabelS.setEditable(isEditable);
-	falseLabelS.setEditable(isEditable);
-	regexpS.setEditable(isEditable);
-	OKCharS.setEditable(isEditable);
-	BadCharS.setEditable(isEditable);
-	idN.setEditable(isEditable);
-	maxArrayN.setEditable(isEditable);
-	minLengthN.setEditable(isEditable);
-	maxLengthN.setEditable(isEditable);
-
-	multiLineCF.setEnabled(isEditable);
-	cryptedCF.setEnabled(isEditable);
-	md5cryptedCF.setEnabled(isEditable);
+	multiLineCF.setEnabled(true);
+	cryptedCF.setEnabled(true);
+	md5cryptedCF.setEnabled(true);
 
 	if (passwordShowing)
 	  {
@@ -1260,17 +1340,17 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  }
 	else
 	  {
-	    plainTextCF.setEnabled(isEditable);
+	    plainTextCF.setEnabled(true);
 	  }
 
-	vectorCF.setEnabled(isEditable);
-	labeledCF.setEnabled(isEditable);
-	editInPlaceCF.setEnabled(isEditable);
+	vectorCF.setEnabled(true);
+	labeledCF.setEnabled(true);
+	editInPlaceCF.setEnabled(true);
 
-	typeC.setEnabled(isEditable);
-	namespaceC.setEnabled(isEditable);
-	targetC.setEnabled(isEditable);
-	fieldC.setEnabled(isEditable);
+	typeC.setEnabled(true);
+	namespaceC.setEnabled(true);
+	targetC.setEnabled(true);
+	fieldC.setEnabled(true);
 
 	if (debug)
 	  {
@@ -1338,7 +1418,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("nameS");
 	      }
 
-	    fieldDef.setName((String) v.getValue());
+	    owner.handleReturnVal(fieldDef.setName((String) v.getValue()));
 	    fieldNode.setText((String) v.getValue());
 	    owner.tree.refresh();
 	  }
@@ -1349,16 +1429,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("classS");
 	      }
 
-	    fieldDef.setClassName((String) v.getValue());
-	  }
-	else if (comp == idN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("idN");
-	      }
-
-	    fieldDef.setID(((Integer)v.getValue()).shortValue());
+	    owner.handleReturnVal(fieldDef.setClassName((String) v.getValue()));
 	  }
 	else if (comp == maxArrayN)
 	  {
@@ -1367,7 +1438,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("maxArrayN");
 	      }
 
-	    fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue());
+	    owner.handleReturnVal(fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue()));
 	  }
 	else if (comp == vectorCF)
 	  {
@@ -1378,7 +1449,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("vectorCF");
 	      }
 
-	    fieldDef.setArray(vectorCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setArray(vectorCF.isSelected()));
 	    checkVisibility();
 	  }
 	else if (comp == regexpS)
@@ -1391,7 +1462,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    // setting a regexp can fail if it can't be properly
 	    // parsed
 
-	    if (!fieldDef.setRegexpPat((String) v.getValue()))
+	    ReturnVal retVal = fieldDef.setRegexpPat((String) v.getValue());
+
+	    retVal = owner.handleReturnVal(retVal);
+
+	    if (retVal != null && !retVal.didSucceed())
 	      {
 		regexpS.setText(fieldDef.getRegexpPat());
 	      }
@@ -1403,7 +1478,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("OkCharS");
 	      }
 
-	    fieldDef.setOKChars((String) v.getValue());
+	    owner.handleReturnVal(fieldDef.setOKChars((String) v.getValue()));
 	  }
 	else if (comp == BadCharS)
 	  {
@@ -1412,7 +1487,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("BadCharS");
 	      }
 
-	    fieldDef.setBadChars((String) v.getValue());
+	    owner.handleReturnVal(fieldDef.setBadChars((String) v.getValue()));
 	  }
 	else if (comp == minLengthN)
 	  {
@@ -1421,7 +1496,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("minLengthN");
 	      }
 
-	    fieldDef.setMinLength(((Integer)v.getValue()).shortValue());
+	    owner.handleReturnVal(fieldDef.setMinLength(((Integer)v.getValue()).shortValue()));
 	  }
 	else if (comp == maxLengthN)
 	  {
@@ -1430,7 +1505,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("maxLengthN");
 	      }
 
-	    fieldDef.setMaxLength(((Integer)v.getValue()).shortValue());
+	    owner.handleReturnVal(fieldDef.setMaxLength(((Integer)v.getValue()).shortValue()));
 	  }
 	else if (comp == trueLabelS)
 	  {
@@ -1439,7 +1514,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("trueLabelS");
 	      }
 
-	    fieldDef.setTrueLabel((String) v.getValue());
+	    owner.handleReturnVal(fieldDef.setTrueLabel((String) v.getValue()));
 	  }
 	else if (comp == falseLabelS)
 	  {
@@ -1448,7 +1523,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("falseLabelS");
 	      }
 
-	    fieldDef.setFalseLabel((String) v.getValue());
+	    owner.handleReturnVal(fieldDef.setFalseLabel((String) v.getValue()));
 	  }
 	else if (comp == labeledCF)
 	  {
@@ -1457,7 +1532,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("labeledCF");
 	      }
 
-	    fieldDef.setLabeled(labeledCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setLabeled(labeledCF.isSelected()));
 	    checkVisibility();
 	  }
 	else if (comp == editInPlaceCF)
@@ -1467,7 +1542,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("editInPlaceCF");
 	      }
 
-	    fieldDef.setEditInPlace(editInPlaceCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
 	    editField(fieldNode, true);	// force full recalc and refresh
 	  }
 	else if (comp == cryptedCF)
@@ -1477,7 +1552,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("cryptedCF");
 	      }
 
-	    fieldDef.setCrypted(cryptedCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setCrypted(cryptedCF.isSelected()));
 
 	    // a password field has to have plaintext stored if it
 	    // is not to store the password in crypted form.
@@ -1494,7 +1569,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(fieldDef.isEditable() || owner.developMode);
+		plainTextCF.setEnabled(true);
 	      }
 	  }
 	else if (comp == md5cryptedCF)
@@ -1504,7 +1579,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("md5cryptedCF");
 	      }
 
-	    fieldDef.setMD5Crypted((md5cryptedCF.isSelected()));
+	    owner.handleReturnVal(fieldDef.setMD5Crypted((md5cryptedCF.isSelected())));
 
 	    // a password field has to have plaintext stored if it
 	    // is not to store the password in crypted form.
@@ -1521,7 +1596,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      }
 	    else
 	      {
-		plainTextCF.setEnabled(fieldDef.isEditable() || owner.developMode);
+		plainTextCF.setEnabled(true);
 	      }
 	  }
 	else if (comp == plainTextCF)
@@ -1531,7 +1606,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("plainTextCF");
 	      }
 
-	    fieldDef.setPlainText(plainTextCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setPlainText(plainTextCF.isSelected()));
 	  }
 	else if (comp == multiLineCF)
 	  {
@@ -1540,7 +1615,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		System.out.println("multiLineCF: " + multiLineCF.isSelected());
 	      }
 
-	    fieldDef.setMultiLine(multiLineCF.isSelected());
+	    owner.handleReturnVal(fieldDef.setMultiLine(multiLineCF.isSelected()));
 	  }
 	return true;
       }
@@ -1632,7 +1707,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			  {
 			    System.out.println(" clicked ok");
 			  }
-			currentBase.setLabelField(null); // we're making this field unacceptable as a label
+
+			// we're making this field unacceptable as a label
+
+			owner.handleReturnVal(currentBase.setLabelField(null));
 		      }
 		    catch (RemoteException rx)
 		      {
@@ -1645,6 +1723,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		      {
 			System.out.println(" Canceled, not changing field type");
 		      }
+
 		    okToChange = false;
 
 		    try 
@@ -1698,11 +1777,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    if (item.equalsIgnoreCase("<none>"))
 	      {
-		fieldDef.setNameSpace(null);
+		owner.handleReturnVal(fieldDef.setNameSpace(null));
 	      }
 	    else
 	      {
-		fieldDef.setNameSpace(item);
+		owner.handleReturnVal(fieldDef.setNameSpace(item));
 	      }
 	  }
 	catch (RemoteException rx)
@@ -1733,7 +1812,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    try
 	      {
-		fieldDef.setTargetBase(null);
+		owner.handleReturnVal(fieldDef.setTargetBase(null));
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1764,7 +1843,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			System.out.println("Setting target base to " + item);
 		      }
 
-		    fieldDef.setTargetBase(item);
+		    owner.handleReturnVal(fieldDef.setTargetBase(item));
 
 		    // if we've changed our target base, clear out the
 		    // target field to avoid accidental confusion if our
@@ -1773,7 +1852,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		    
 		    if ((oldBaseName != null) && !oldBaseName.equals(item))
 		      {
-			fieldDef.setTargetField(null);
+			owner.handleReturnVal(fieldDef.setTargetField(null));
 		      }
 		  }
 		catch (RemoteException rx)
@@ -1799,11 +1878,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    if (item.equals("<none>"))
 	      {
-		fieldDef.setTargetField(null);
+		owner.handleReturnVal(fieldDef.setTargetField(null));
 	      }
 	    else
 	      {
-		fieldDef.setTargetField(item);
+		owner.handleReturnVal(fieldDef.setTargetField(item));
 	      } 
 	  }
 	catch (RemoteException rx)
@@ -1829,7 +1908,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	try
 	  {
-	    fieldDef.setComment(text.getText());
+	    owner.handleReturnVal(fieldDef.setComment(text.getText()));
 	  }
 	catch (RemoteException rx)
 	  {

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2000/02/10 04:35:38 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2000/02/29 09:35:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.79 $ %D%
+ * @version $Revision: 1.80 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -460,7 +460,7 @@ final public class DBSession {
 	try
 	  {
 	    Ganymede.debug("Created new object : " + e_object.getLabel() + ", invid = " + e_object.getInvid());
-	    db_field[] fields = e_object.listFields(false);
+	    db_field[] fields = e_object.listFields();
 	    
 	    for (int i = 0; i < fields.length; i++)
 	      {

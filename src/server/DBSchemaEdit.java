@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/01/27 06:03:18 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/02/29 09:35:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -19,6 +19,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -86,17 +87,19 @@ import java.io.*;
  * {@link arlut.csd.ganymede.DBStore DBStore} with the modified set that was
  * created and modified by DBSchemaEdit.</P>
  *
- * <P>Note that the schema editing system doesn't support changing the field type
- * of existing fields very gracefully, nor are background tasks suspended while
- * the server is in schema editing mode.  Generally speaking, you should be
- * using the schema editor to define new fields, or to change field definitions
- * for fields that are not yet in use in the database, not to try to redefine
- * parts of the database that are in actual use and which hold actual data.</P>
+ * <P>The schema editing code in the server currently has only a
+ * limited ability to verify that changes made in the schema editor
+ * will not break the database's consistency constraints in some
+ * fashion.  Generally speaking, you should be using the schema editor
+ * to define new fields, or to change field definitions for fields
+ * that are not yet in use in the database, not to try to redefine
+ * parts of the database that are in actual use and which hold actual
+ * data.</P>
  *
  * <P>The schema editing system is really the most fragile
  * thing in the Ganymede server.  It generally works, but it is not as robust
  * as it ought to be.  It's always a good idea to make a backup copy of your
- * ganymede.db file before going in and editing your database schema.</P>
+ * ganymede.db file before going in and editing your database schema.</P> 
  */
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
@@ -104,14 +107,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   private final static boolean debug = true;
 
   // ---
-
-  /**
-   * CAUTION!! Should be false unless the schema elements that the
-   * Ganymede server's internal logic depends on are being
-   * deliberately altered!
-   */
-
-  boolean developMode = false;
 
   /**
    * if true, this DBSchemaEdit object has already been
@@ -174,24 +169,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public DBSchemaEdit(Admin console) throws RemoteException
   {
-    Enumeration enum;
-    DBObjectBase base;
-    DBNameSpace ns;
-
-    /* -- */
-
     if (debug)
       {
 	System.err.println("DBSchemaEdit constructor entered");
-      }
-
-    // if we haven't been forced into schema development mode, check
-    // with the Ganymede class to see whether the command line parameter
-    // set developMode on.
-
-    if (!developMode)
-      {
-	developMode = Ganymede.developSchema;
       }
 
     // the GanymedeAdmin editSchema() method should have disabled the
@@ -243,7 +223,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      }
 	  }
 
-	// make a shallow copy of our namespaces vector.. note that we
+	// make a shallow copy of our namespaces vector.. note that
 	// since DBNameSpace's are immutable once created, we don't
 	// need to worry about creating new ones, or about correcting
 	// the DBNameSpace references in the duplicated
@@ -259,90 +239,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     
 	for (int i=0; i < store.nameSpaces.size(); i++)
 	  {
-	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
 	    oldNameSpaces.addElement(ns);
 	  }
       } // end synchronized (store)
-  }
-
-  /**
-   * <P>Returns true if the schema editor is allowing
-   * the 'constant' fields to be edited.  This is
-   * provided solely so the Ganymede developers can
-   * make incompatible changes to the 'constant' schema
-   * items during development.</P>
-   *
-   * @see arlut.csd.ganymede.SchemaEdit
-   */
-
-  public boolean isDevelopMode()
-  {
-    return developMode;
-  }
-
-  /**
-   * <P>When the server is in develop mode, it is possible to create new
-   * built-in fields, or fields that can be relied on by the server
-   * code to exist in every non-embedded object type defined.</P>
-   *
-   * @see arlut.csd.ganymede.SchemaEdit
-   */
-
-  public BaseField createNewBuiltIn()
-  {
-    DBObjectBaseField field = null;
-
-    /* -- */
-
-    if (!developMode)
-      {
-	throw new IllegalArgumentException("can't create new built-ins when developMode is false");
-      }
-
-    // We use the userbase as our model for the built-ins.. when we
-    // commit, we'll make all non-embedded bases have the same
-    // built-in fields as userbase
-
-    synchronized(store)
-      {
-	DBObjectBase base = (DBObjectBase) getBase(SchemaConstants.UserBase);
-	Vector fields = base.getFields();
-	short nextId = 9;	// remember SchemaConstants.BackLinksField(8) is a pariah
-
-	/* -- */
-
-	// identify the id for the next new built-in field
-
-	for (int i = 0; i < fields.size(); i++)
-	  {
-	    field = (DBObjectBaseField) fields.elementAt(i);
-
-	    if (field.isBuiltIn() && field.getID() >= nextId)
-	      {
-		nextId = (short) (field.getID() + 1);
-	      }
-	  }
-
-	if (nextId > 99)
-	  {
-	    throw new IllegalArgumentException("Error, we have no more room to create built-in fields");
-	  }
-
-	field = base.createNewBuiltIn(nextId);
-
-	String template = "New Built-In Field";
-	String newName = template;
-	int i = 2;
-
-	while (base.getField(newName) != null)
-	  {
-	    newName = template + (i++);
-	  }
-
-	field.setName(newName);
-      }
-
-    return (BaseField) field;
   }
 
   /**
@@ -602,7 +502,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit 
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded, boolean builtIn)
+  public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
   {
     DBObjectBase base;
     DBBaseCategory localCat = null;
@@ -622,7 +522,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    if (builtIn)
+    if (lowRange)
       {
 	Enumeration enum = store.objectBases.elements();
 
@@ -666,7 +566,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
 
     base.setName(newName);
-    base.setDisplayOrder(0);
 
     try
       {
@@ -674,7 +573,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("should never happen " + ex);
+	ex.printStackTrace();
+	throw new RuntimeException("should never happen " + ex.getMessage());
       }
 
     if (debug)
@@ -691,7 +591,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
 
     // newBases is the same as the baseHash variables used in the category
-    // tree.. we load it up here so that the addNode() will be able to find
+    // tree.. we load it up here so that the addNodeAfter() will be able to find
     // it when goes through the RMI stub->local object getBaseFromBase()
     // operation.
 
@@ -705,13 +605,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  }
       }
 
-    localCat.addNode(base, false, true);
+    localCat.addNodeAfter(base, null);
 
     if (debug)
       {
 	if (base.editor == null)
 	  {
-	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after addNode()");
+	    throw new RuntimeException("DBSchemaEdit.createNewBase(): base's editor field is null after addNodeAfter()");
 	  }
 	else
 	  {
@@ -719,7 +619,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	    if (testbase.editor == null)
 	      {
-		throw new RuntimeException("DBSchemaEdit.createNewBase(): testbase's editor field is null after addNode()");
+		throw new RuntimeException("DBSchemaEdit.createNewBase(): testbase's editor field is null after addNodeAfter()");
 	      }
 	  }
 	
@@ -742,26 +642,27 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public void deleteBase(Base b) throws RemoteException
+  public ReturnVal deleteBase(String baseName) throws RemoteException
   {
-    DBObjectBase base;
+    DBObjectBase base, tmpBase;
     Category parent;
     short id;
 
     /* -- */
 
-    try
+    base = (DBObjectBase) getBase(baseName);
+
+    if (base == null)
       {
-	id = b.getTypeID();
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Base " + baseName + " not found in DBStore, can't delete.");
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("remote " + ex);
-      }
+
+    id = base.getTypeID();
 
     if (debug)
       {
-	System.err.println("Calling deleteBase on base " + b.getName());
+	System.err.println("Calling deleteBase on base " + base.getName());
       }
 
     if (!locked)
@@ -770,18 +671,21 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
     
-    base = (DBObjectBase) newBases.get(new Short(id));
+    tmpBase = (DBObjectBase) newBases.get(new Short(id));
 
     if (base != null)
       {
-	parent = base.getCategory();
-	parent.removeNode(base);
+	parent = tmpBase.getCategory();
+	parent.removeNode(tmpBase);
 	newBases.remove(new Short(id));
       }
     else
       {
-	throw new IllegalArgumentException("couldn't delete base " + b.getName() + ", not in newBases");
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Base " + baseName + " not found in DBStore, consistency error.");
       }
+
+    return null;
   }
 
   /**
@@ -910,9 +814,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public synchronized boolean deleteNameSpace(String name)
+  public synchronized ReturnVal deleteNameSpace(String name)
   {
-    DBNameSpace ns;
+    DBNameSpace ns = null;
+    int index = 0;
 
     /* -- */
 
@@ -921,21 +826,52 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    synchronized (store)
+    for (index = 0; index < store.nameSpaces.size(); index++)
       {
-	for (int i = 0; i < store.nameSpaces.size(); i++)
+	ns = (DBNameSpace) store.nameSpaces.elementAt(index);
+	
+	if (ns.getName().equals(name))
 	  {
-	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+	    break;
+	  }
+	else
+	  {
+	    ns = null;
+	  }
+      }
 
-	    if (ns.getName().equals(name))
+    if (ns == null)
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "Can't remove namespace " + name + ", that namespace was not found.");
+      }
+
+    // check to make sure this namespace isn't tied to a field still
+
+    Enumeration enum = newBases.elements();
+
+    while (enum.hasMoreElements())
+      {
+	DBObjectBase base = (DBObjectBase) enum.nextElement();
+
+	Vector fieldDefs = base.getFields();
+
+	for (int i = 0; i < fieldDefs.size(); i++)
+	  {
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+
+	    if (fieldDef.getNameSpace() == ns)
 	      {
-		store.nameSpaces.removeElementAt(i);
-		return true;
+		return Ganymede.createErrorDialog("Schema Editing Error",
+						  "Can't remove namespae " + name +
+						  ", that namespace is still tied to " + fieldDef);
 	      }
 	  }
       }
 
-    return false;
+    store.nameSpaces.removeElementAt(index);
+
+    return null;
   }
 
   /**
@@ -949,7 +885,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   {
     Enumeration enum;
     DBObjectBase base;
-    DBNameSpace ns;
 
     /* -- */
 
@@ -971,20 +906,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    Ganymede.debug("DBSchemaEdit: entered synchronized block");
 	  }
 
-	// yeah, this is cheesy.. if we can't synchronize the built in
-	// fields due to a name conflict, we're just going to release
-	// the changes.. this wouldn't be adequate if we expected
-	// end-users or even end administrators to mess with the built
-	// in fields, but this is just for we, the developers of
-	// Ganymede, while we're getting things worked out.
-
-	if (developMode && !synchronizeBuiltInFields())
-	  {
-	    release();
-	    Ganymede.debug("DBSchemaEdit: couldn't synchronize built-in fields.. abandoning commit.");
-	    return;
-	  }
-
 	enum = newBases.elements();
 
 	if (debug)
@@ -995,23 +916,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	while (enum.hasMoreElements())
 	  {
 	    base = (DBObjectBase) enum.nextElement();
-
-	    if (false)		// debug
-	      {
-		// hm, why do i have such a strange test here?  What was I thinking?
-
-		if (base != null)
-		  {
-		    Ganymede.debug("got base");
-		  }
-		else
-		  {
-		    Ganymede.debug("did not got base.. this shouldn't happen");
-		  }
-	      }
-
-	    base.clearEditor(this);
-	    base.updateBaseRefs();
+	    base.clearEditor();
 	  }
 
 	// ** need to unlink old objectBases / rootCategory for GC here? **
@@ -1047,166 +952,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   * <P>The schema editor edits built-in fields by editing the set of
-   * built-in fields associated with base SchemaConstants.UserBase
-   * (which is chosen randomly as a representative non-embedded
-   * object).  This method replicates the builtin fields from
-   * SchemaConstants.UserBase into the rest of the non-embedded object
-   * types defined in th server.</P>
-   *
-   * <P>IMPORTANT NOTE: This is only to be used when the Schema Editing rig
-   * is being used to alter the basic built-in fields that the Ganymede
-   * schema depends on.  As such, it is critical that built-ins only
-   * be modified with great caution.  Note also that DBObjectBase()'s
-   * constructor is responsible for implementing built-ins for newly
-   * created object base types.  DBObjectBase.java should be edited
-   * before any new bases are created after any editing of the built-in
-   * fields.</P>
-   */
-
-  private boolean synchronizeBuiltInFields()
-  {
-    DBObjectBase 
-      userBase,
-      base;
-
-    Vector
-      fields,
-      builtInFields = new Vector();
-
-    DBObjectBaseField
-      fieldDef,
-      newFieldDef;
-
-    Base[] bases;
-
-    /* -- */
-
-    // assemble a list of built-in fields specified in the user base
-
-    userBase = (DBObjectBase) getBase(SchemaConstants.UserBase);
-
-    fields = userBase.getFields();
-
-    for (int i = 0; i < fields.size(); i++)
-      {
-	fieldDef = (DBObjectBaseField) fields.elementAt(i);
-
-	if (fieldDef.isBuiltIn())
-	  {
-	    //	    Ganymede.debug("Builtins " + i + ": " + fieldDef);
-	    builtInFields.addElement(fieldDef);
-	  }
-      }
-
-    bases = getBases(false);	// only want to mess with the non-embedded types
-    
-    for (int i = 0; i < bases.length; i++)
-      {
-	base = (DBObjectBase) bases[i];
-
-	// we're using the userBase as our canonical source of
-	// built-in field definitions.
-
-	if (base == userBase)
-	  {
-	    continue;
-	  }
-
-	// now we need to make sure that base has just those built-in
-	// field definitions that were in userBase.. delete the built-in
-	// fields currently registered for this base
-
-	fields = base.getFields();
-
-	for (int j = 0; j < fields.size(); j++)
-	  {
-	    fieldDef = (DBObjectBaseField) fields.elementAt(j);
-	    
-	    if (fieldDef.isBuiltIn())
-	      {
-		if (false)
-		  {
-		    Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): deleting field " + 
-				   fieldDef.getName() + " in " + base.getName());
-		    
-		    Ganymede.debug("*** before delete:");
-		    
-		    Enumeration nowFields = base.fieldTable.elements();
-		    
-		    while (nowFields.hasMoreElements())
-		      {
-			Ganymede.debug("* " + nowFields.nextElement());
-		      }
-		  }
-
-		base.deleteField(fieldDef);
-
-		if (false)
-		  {
-		    Ganymede.debug("*** after delete:");
-		    
-		    Enumeration nowFields = base.fieldTable.elements();
-		    
-		    while (nowFields.hasMoreElements())
-		      {
-			Ganymede.debug("* " + nowFields.nextElement());
-		      }
-		    
-		    Ganymede.debug("*** that's it:");
-		  }
-	      }
-	    else if (false)
-	      {
-		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): not deleting field " + fieldDef.getName() +
-			       " in " + base.getName());
-	      }
-	  }
-
-	// now add in copies of the (possibly revised) built-in field
-	// definitions
-
-	for (int j = 0; j < builtInFields.size(); j++)
-	  {
-	    fieldDef = (DBObjectBaseField) builtInFields.elementAt(j);
-
-	    // make sure that the base doesn't already have a field with
-	    // the same name
-
-	    if (false)
-	      {
-		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): adding back built-in " + j +
-			       ", " + fieldDef.getName());
-	      }
-
-	    if (base.getField(fieldDef.getName()) != null)
-	      {
-		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): already have a " + fieldDef.getName() +
-			       " field in " + base.getName());
-
-		return false;
-	      }
-	    
-	    // copy it
-
-	    try
-	      {
-		newFieldDef = new DBObjectBaseField(fieldDef, this);
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("bizarre remote exception: " + ex);
-	      }
-
-	    newFieldDef.setBase(base);
-	    base.addField(newFieldDef);
-	  }
-      }
-
-    return true;
-  }
-
-  /**
    * <P>Abort this schema edit, return the schema to its prior state.</P>
    *
    * <P>It is an error to attempt any schema editing operations after this
@@ -1226,18 +971,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    // tell all the bases who they should look at for
-    // future name change validations
-
-    Enumeration enum = store.objectBases.elements();
-
-    while (enum.hasMoreElements())
-      {
-	base = (DBObjectBase) enum.nextElement();
-
-	base.setContainingHash(store.objectBases);
-      }
-
     synchronized (store)
       {
 	// restore the namespace vector
@@ -1252,6 +985,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     GanymedeAdmin.setState("Normal Operation");
 
     locked = false;
+
+    // speed gc
+
+    newBases.clear();
+    newBases = null;
+
+    oldNameSpaces.setSize(0);
+    oldNameSpaces = null;
 
     GanymedeServer.lSemaphore.enable("schema edit");
 

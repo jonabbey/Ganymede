@@ -6,18 +6,20 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/06/09 03:33:35 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/02/29 09:35:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -66,7 +68,7 @@ import java.util.*;
  * <P>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
  * the client and schema editor's work with object types.</P>
  *
- * @version $Revision: 1.17 $ $Date: 1999/06/09 03:33:35 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 2000/02/29 09:35:03 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -94,10 +96,18 @@ public interface Base extends CategoryNode, Remote {
   public boolean isEmbedded() throws RemoteException;
 
   /**
-   * Returns the name of this object type
+   * Returns the name of this object type.  Guaranteed
+   * to be unique in the Ganymede server.
    */
 
   public String getName() throws RemoteException;
+
+  /**
+   * Returns the name and category path of this object type.
+   * Guaranteed to be unique in the Ganymede server.
+   */
+
+  public String getPathedName() throws RemoteException;
 
   /**
    * Returns the name of the class managing this object type
@@ -129,21 +139,25 @@ public interface Base extends CategoryNode, Remote {
   public String getLabelFieldName() throws RemoteException;
 
   /**
-   * <p>This method returns a list of 
-   * {@link arlut.csd.ganymede.BaseField BaseField} references for the
-   * fields defined by this object type.</p>
-   * 
-   * <p>If includeBuiltIns is false, common fields (such
-   * as last modification date, etc.) will be not be included in the
-   * list.  The list is sorted by field display order.</p>
+   * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * base field definitions for objects of this type.
+   *
+   * <P>If includeBuiltIns is false, the fields returned will be the
+   * custom fields defined for this object type, and they will be
+   * returned in display order.  If includeBuiltIns is true, all
+   * fields defined on this object type will be returned (including
+   * things like owner list, last modification date, etc.), in random
+   * order.</P>
+   *
+   * @see arlut.csd.ganymede.Base 
    */
 
   public Vector getFields(boolean includeBuiltIns) throws RemoteException;
 
   /**
-   * <p>This method returns a list of 
+   * <p>This method returns a list of all
    * {@link arlut.csd.ganymede.BaseField BaseField} references for the
-   * fields defined by this object type.</p>
+   * fields defined by this object type, in random order.</p>
    */
 
   public Vector getFields() throws RemoteException;
@@ -188,7 +202,7 @@ public interface Base extends CategoryNode, Remote {
    * by the Ganymede schema editor.</p>
    */
 
-  public boolean setName(String newName) throws RemoteException;
+  public ReturnVal setName(String newName) throws RemoteException;
 
   /**
    * <p>Sets the fully qualified classname of the class 
@@ -199,7 +213,31 @@ public interface Base extends CategoryNode, Remote {
    * by the Ganymede schema editor.</p>
    */
 
-  public void setClassName(String newName) throws RemoteException;
+  public ReturnVal setClassName(String newName) throws RemoteException;
+
+  /**
+   * <p>This method is used to adjust the ordering of a custom field
+   * in this Base.</p>
+   *
+   * @param fieldName The name of the field to move
+   * @param previousFieldName The name of the field that fieldName is going to
+   * be put after, or null if fieldName is to be the first field displayed
+   * in this object type.
+   */
+
+  public ReturnVal moveFieldAfter(String fieldName, String previousFieldName) throws RemoteException;
+
+  /**
+   * <p>This method is used to adjust the ordering of a custom field
+   * in this Base.</p>
+   *
+   * @param fieldName The name of the field to move
+   * @param nextFieldName The name of the field that fieldName is going to
+   * be put before, or null if fieldName is to be the last field displayed
+   * in this object type.
+   */
+
+  public ReturnVal moveFieldBefore(String fieldName, String nextFieldName) throws RemoteException;
 
   /**
    * <p>Choose what field will serve as this objectBase's label.  A fieldName
@@ -213,7 +251,7 @@ public interface Base extends CategoryNode, Remote {
    * by the Ganymede schema editor.</p>
    */
 
-  public void setLabelField(String fieldName) throws RemoteException;
+  public ReturnVal setLabelField(String fieldName) throws RemoteException;
 
   /**
    * <p>Choose what field will serve as this objectBase's label.  A fieldID
@@ -227,7 +265,7 @@ public interface Base extends CategoryNode, Remote {
    * by the Ganymede schema editor.</p>
    */
 
-  public void setLabelField(short fieldID) throws RemoteException;
+  public ReturnVal setLabelField(short fieldID) throws RemoteException;
 
   /**
    * <p>Get the parent Category for this object type.  This is used by the
@@ -243,17 +281,16 @@ public interface Base extends CategoryNode, Remote {
 
   /**
    * <p>Creates a new base field and inserts it
-   * into the DBObjectBase field definitions hash.</p>
-   *
-   * <p>If lowRange is true, the field's id will start at 100 and go up,
-   * other wise it will start at 256 and go up.</p>
+   * into the DBObjectBase field definitions hash.  The newly created
+   * field will the first short id code value available at or above
+   * 256.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
    * by the Ganymede schema editor.</p>
    */
 
-  public BaseField createNewField(boolean lowRange) throws RemoteException;
+  public BaseField createNewField() throws RemoteException;
 
   /**
    * <p>This method is used to remove a field definition from 
@@ -269,7 +306,7 @@ public interface Base extends CategoryNode, Remote {
    * @see arlut.csd.ganymede.Base
    */
 
-  public boolean deleteField(BaseField bF) throws RemoteException;
+  public ReturnVal deleteField(String fieldName) throws RemoteException;
 
   /**
    * This method is used by the SchemaEditor to detect whether any
@@ -280,5 +317,5 @@ public interface Base extends CategoryNode, Remote {
    * @see arlut.csd.ganymede.Base
    */
 
-  public boolean fieldInUse(BaseField bF) throws RemoteException;
+  public boolean fieldInUse(String fieldName) throws RemoteException;
 }

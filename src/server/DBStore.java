@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2000/02/22 07:21:24 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2000/02/29 09:35:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.105 $ %D%
+ * @version $Revision: 1.106 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -126,14 +126,14 @@ public class DBStore {
    * after id_string
    */
 
-  static final byte major_version = 1;
+  static final byte major_version = 2;
 
   /**
    * Minor file version id.. will be second byte in ganymede.db/ganymede.schema
    * after id_string
    */
 
-  static final byte minor_version = 17;
+  static final byte minor_version = 0;
 
   /**
    * XML version major id
@@ -145,7 +145,7 @@ public class DBStore {
    * XML version minor id
    */
 
-  static final byte minor_xml_version = 1;
+  static final byte minor_xml_version = 0;
 
   /**
    * Enable/disable debug in the DBStore methods
@@ -178,7 +178,7 @@ public class DBStore {
    * given Invid.</p>
    *
    * <p>That is, backPointers.get(anInvid) returns a hashtable whose keys
-   * are the Invid's that point to an Invid via an asymmetric link.</p>
+   * are the Invid's that point to that Invid via an asymmetric link.</p>
    */
 
   Hashtable backPointers;
@@ -364,13 +364,13 @@ public class DBStore {
 	    System.err.println("DBStore load(): file version " + file_major + "." + file_minor);
 	  }
 
-	if (file_major != major_version)
+	if (file_major > major_version)
 	  {
 	    System.err.println("DBStore initialization error: major version mismatch");
 	    throw new Error("DBStore initialization error (" + filename + ")");
 	  }
 
-	if (file_minor > minor_version)
+	if (file_major == major_version && file_minor > minor_version)
 	  {
 	    System.err.println("*** Error, this ganymede.db file is too new for this version of the Ganymede server.");
 	    System.err.println("*** There may be errors in loading the data.");
@@ -402,38 +402,44 @@ public class DBStore {
 	    rootCategory = new DBBaseCategory(this, in);
 	  }
 	
-	baseCount = in.readShort();
+	// previous to 2.0, we wrote out the DBObjectBase structures
+	// to ganymede.db as a separate step from the category loading
 
-	if (debug)
+	if (file_major == 1)
 	  {
-	    System.err.println("DBStore load(): loading " + baseCount + " bases");
-	  }
-
-	if (baseCount > 0)
-	  {
-	    objectBases = new Hashtable(baseCount);
-	  }
-	else
-	  {
-	    objectBases = new Hashtable();	
-	  }
-
-	// Actually read in the object bases
-	
-	for (short i = 0; i < baseCount; i++)
-	  {
-	    tempBase = new DBObjectBase(in, this, reallyLoad);
-	    
-	    setBase(tempBase);
+	    baseCount = in.readShort();
 
 	    if (debug)
 	      {
-		System.err.println("loaded base " + tempBase.getTypeID());
+		System.err.println("DBStore load(): loading " + baseCount + " bases");
 	      }
 
-	    if (tempBase.getTypeID() > maxBaseId)
+	    if (baseCount > 0)
 	      {
-		maxBaseId = tempBase.getTypeID();
+		objectBases = new Hashtable(baseCount);
+	      }
+	    else
+	      {
+		objectBases = new Hashtable();	
+	      }
+
+	    // Actually read in the object bases
+	
+	    for (short i = 0; i < baseCount; i++)
+	      {
+		tempBase = new DBObjectBase(in, this, reallyLoad);
+	    
+		setBase(tempBase);
+
+		if (debug)
+		  {
+		    System.err.println("loaded base " + tempBase.getTypeID());
+		  }
+
+		if (tempBase.getTypeID() > maxBaseId)
+		  {
+		    maxBaseId = tempBase.getTypeID();
+		  }
 	      }
 	  }
       }
@@ -468,8 +474,6 @@ public class DBStore {
 	      }
 	  }
       }
-
-    lockSync.resetLockHash(baseCount);
 
     if (loadJournal)
       {
@@ -561,7 +565,6 @@ public class DBStore {
     FileOutputStream textOutStream = null;
     PrintWriter textOut = null;
     
-    Enumeration basesEnum;
     short baseCount, namespaceCount, categoryCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
@@ -648,21 +651,7 @@ public class DBStore {
 	    ns.emit(out);
 	  }
 
-	if (major_version >= 1 && minor_version >= 3)
-	  {
-	    rootCategory.emit(out);
-	  }
-
-	baseCount = (short) objectBases.size();
-
-	out.writeShort(baseCount);
-	
-	basesEnum = objectBases.elements();
-
-	while (basesEnum.hasMoreElements())
-	  {
-	    ((DBObjectBase) basesEnum.nextElement()).emit(out, true);
-	  } 
+	rootCategory.emit(out);	// writes out categories and bases
 
 	out.close();
 	out = null;
@@ -848,37 +837,7 @@ public class DBStore {
 	    ns.emit(out);
 	  }
 
-	if (major_version >= 1 && minor_version >= 3)
-	  {
-	    rootCategory.emit(out);
-	  }
-
-	baseCount = (short) objectBases.size();
-
-	out.writeShort(baseCount);
-	
-	basesEnum = objectBases.elements();
-
-	while (basesEnum.hasMoreElements())
-	  {
-	    base = (DBObjectBase) basesEnum.nextElement();
-
-	    if (base.type_code == SchemaConstants.OwnerBase ||
-		base.type_code == SchemaConstants.PersonaBase ||
-		base.type_code == SchemaConstants.RoleBase ||
-		base.type_code == SchemaConstants.EventBase)
-	      {
-		base.partialEmit(out); // gotta retain admin login ability
-	      }
-	    else if (base.type_code == SchemaConstants.TaskBase)
-	      {
-		base.emit(out, true); // save the builder information
-	      }
-	    else
-	      {
-		base.emit(out, false); // just write out the schema info
-	      }
-	  } 
+	rootCategory.partialEmit(out); // limited subset dump
 
 	// and dump the schema out in a human readable form
 	
@@ -1011,10 +970,6 @@ public class DBStore {
 	XMLUtils.indent(xmlOut, 2);
 	xmlOut.endElement("namespaces");
 
-	// write out the built-in fields common to all object definitions
-
-	((DBObjectBase) objectBases.get(new Short(SchemaConstants.UserBase))).emitXMLBuiltInFields(xmlOut, 2);
-
 	// write out our category tree
 
 	XMLUtils.indent(xmlOut, 0); // newline
@@ -1101,7 +1056,7 @@ public class DBStore {
 	  {
 	    DBSession session = (DBSession) sessions.elementAt(i);
 	
-	    if (true)
+	    if (debug)
 	      {
 		System.err.println("DBStore.okToDelete() checking session " + session);
 	      }
@@ -1112,7 +1067,7 @@ public class DBStore {
 	
 	    if (session == mySession)
 	      {
-		if (true)
+		if (debug)
 		  {
 		    System.err.println("DBStore.okToDelete() skipping session " + session);
 		  }
@@ -1123,14 +1078,14 @@ public class DBStore {
 	      {
 		DBEditSet editSet = session.editSet;
 
-		if (editSet == null)
+		if (debug && editSet == null)
 		  {
 		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
 		  }
 
 		if (editSet != null && !editSet.canDelete(invid))
 		  {
-		    if (true)
+		    if (debug)
 		      {
 			System.err.println("DBStore.okToDelete() refusing delete");
 		      }
@@ -1141,7 +1096,7 @@ public class DBStore {
 	  }
       }
 
-    if (true)
+    if (debug)
       {
 	System.err.println("DBStore.okToDelete() okaying delete");
       }
@@ -1176,12 +1131,11 @@ public class DBStore {
    * {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}.</p>
    *
    * @param out PrintStream to print to 
-   * @param showBuiltIns If false, don't display built-in field definitions
    */
 
-  public synchronized void printCategoryTree(PrintWriter out, boolean showBuiltIns)
+  public synchronized void printCategoryTree(PrintWriter out)
   {
-    rootCategory.print(out, "", showBuiltIns);
+    rootCategory.print(out, "");
   }
 
   /**
@@ -1190,17 +1144,20 @@ public class DBStore {
    * @param out PrintStream to print to
    */
 
-  public synchronized void printBases(PrintWriter out)
+  public void printBases(PrintWriter out)
   {
     Enumeration enum;
 
     /* -- */
 
-    enum = objectBases.elements();
-    
-    while (enum.hasMoreElements())
+    synchronized (objectBases)
       {
-	((DBObjectBase) enum.nextElement()).print(out, "", true);
+	enum = objectBases.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    ((DBObjectBase) enum.nextElement()).print(out, "");
+	  }
       }
   }
 
@@ -1209,18 +1166,21 @@ public class DBStore {
    * defined in this DBStore.
    */
 
-  public synchronized Vector getBaseNameList()
+  public Vector getBaseNameList()
   {
     Vector result = new Vector();
     Enumeration enum;
 
     /* -- */
 
-    enum = objectBases.elements();
-    
-    while (enum.hasMoreElements())
+    synchronized (objectBases)
       {
-	result.addElement(((DBObjectBase) enum.nextElement()).getName());
+	enum = objectBases.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    result.addElement(((DBObjectBase) enum.nextElement()).getName());
+	  }
       }
     
     return result;
@@ -1231,18 +1191,21 @@ public class DBStore {
    * defined in this DBStore.
    */
 
-  public synchronized Vector getBases()
+  public Vector getBases()
   {
     Vector result = new Vector();
     Enumeration enum;
 
     /* -- */
 
-    enum = objectBases.elements();
-    
-    while (enum.hasMoreElements())
+    synchronized (objectBases)
       {
-	result.addElement(enum.nextElement());
+	enum = objectBases.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    result.addElement(enum.nextElement());
+	  }
       }
     
     return result;
@@ -1344,19 +1307,22 @@ public class DBStore {
    *
    */
 
-  public synchronized DBNameSpace getNameSpace(String name)
+  public DBNameSpace getNameSpace(String name)
   {
     DBNameSpace namespace;
 
     /* -- */
 
-    for (int i = 0; i < nameSpaces.size(); i++)
+    synchronized (nameSpaces)
       {
-	namespace = (DBNameSpace) nameSpaces.elementAt(i);
-	    
-	if (namespace.name.equals(name))
+	for (int i = 0; i < nameSpaces.size(); i++)
 	  {
-	    return namespace;
+	    namespace = (DBNameSpace) nameSpaces.elementAt(i);
+	    
+	    if (namespace.name.equals(name))
+	      {
+		return namespace;
+	      }
 	  }
       }
 	
@@ -1471,7 +1437,7 @@ public class DBStore {
     try
       {
 	DBBaseCategory adminCategory = new DBBaseCategory(this, "Admin-Level Objects", rootCategory);
-	rootCategory.addNode(adminCategory, false, false);
+	rootCategory.addNodeAfter(adminCategory, null);
 
 	ns = new DBNameSpace("ownerbase", true);
 	nameSpaces.addElement(ns);
@@ -1492,7 +1458,7 @@ public class DBStore {
 	nameSpaces.addElement(ns);
 
 	DBBaseCategory permCategory = new DBBaseCategory(this, "Permissions", adminCategory);
-	adminCategory.addNode(permCategory, false, false);
+	adminCategory.addNodeAfter(permCategory, null);
 
 	// create owner base
 
@@ -1500,71 +1466,54 @@ public class DBStore {
 	b.object_name = "Owner Group";
 	b.classname = "arlut.csd.ganymede.custom.ownerCustom";
 	b.type_code = (short) SchemaConstants.OwnerBase; // 0
-	b.displayOrder = b.type_code;
 
-	permCategory.addNode(b, false, false);
+	permCategory.addNodeAfter(b, null);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerNameField;
-	bf.field_order = 1;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
 	bf.setNameSpace("ownerbase");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "The name of this ownership group";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerMembersField;
-	bf.field_order = 2;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Members";
 	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
 	bf.allowedTarget = SchemaConstants.PersonaBase;
 	bf.targetField = SchemaConstants.PersonaGroupsField;
 	bf.comment = "List of admin personae that are members of this owner set";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerCcAdmins;
-	bf.field_order = 3;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: All Admins";
-	bf.loading = true;
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If checked, mail to this owner group will be sent to the admins";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerExternalMail;
-	bf.field_order = 4;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "External Mail List";
-	bf.removable = false;
-	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What external email addresses should be notified of changes to objects owned?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerObjectsOwned;
-	bf.field_order = 999;	// the custom class makes this a hidden field
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
 	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
-	bf.removable = false;
-	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What objects are owned by this owner set";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.OwnerNameField);
 
@@ -1582,100 +1531,81 @@ public class DBStore {
 	b.object_name = "Admin Persona";
 	b.classname = "arlut.csd.ganymede.custom.adminPersonaCustom";
 	b.type_code = (short) SchemaConstants.PersonaBase; // 1
-	b.displayOrder = b.type_code;
 
-	permCategory.addNode(b, false, false); // add it to the end is ok
+	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.PersonaNameField;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
-	bf.field_order = 0;
 	bf.loading = true;
 	bf.setNameSpace("persona");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "The unique name for this admin persona";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.PersonaPasswordField;
 	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
 	bf.maxLength = 32;
-	bf.field_order = 1;
-	bf.removable = false;
-	bf.editable = false;
 	bf.crypted = true;
 	bf.comment = "Persona password";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaGroupsField;
+	bf.field_code = SchemaConstants.PersonaGroupsField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Owner Sets";
 	bf.allowedTarget = SchemaConstants.OwnerBase;	// any
 	bf.targetField = SchemaConstants.OwnerMembersField;	// owner list field
-	bf.removable = false;
-	bf.editable = false;
 	bf.array = true;
 	bf.comment = "What owner sets are this persona members of?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaAssocUser;
+	bf.field_code = SchemaConstants.PersonaAssocUser;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "User";
 	bf.allowedTarget = SchemaConstants.UserBase;	// any
 	bf.targetField = SchemaConstants.UserAdminPersonae;	// owner list field
-	bf.removable = false;
-	bf.editable = false;
 	bf.array = false;
 	bf.comment = "What user is this admin persona associated with?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaPrivs;
+	bf.field_code = SchemaConstants.PersonaPrivs;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Privilege Sets";
 	bf.allowedTarget = SchemaConstants.RoleBase;
 	bf.targetField = SchemaConstants.RolePersonae;
 	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "What permission matrices are this admin persona associated with?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminConsole;
+	bf.field_code = SchemaConstants.PersonaAdminConsole;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Admin Console";
 	bf.array = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, this persona can be used to access the admin console";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminPower;
+	bf.field_code = SchemaConstants.PersonaAdminPower;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Full Console";
 	bf.array = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, this persona can kill users and edit the schema";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PersonaMailAddr;
+	bf.field_code = SchemaConstants.PersonaMailAddr;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Email Address";
 	bf.array = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Where email to this administrator should be sent";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.PersonaNameField);
 
@@ -1693,65 +1623,49 @@ public class DBStore {
 	b.object_name = "Role";
 	b.classname = "arlut.csd.ganymede.custom.permCustom";
 	b.type_code = (short) SchemaConstants.RoleBase; // 2
-	b.displayOrder = b.type_code;
 
-	permCategory.addNode(b, false, false); // add it to the end is ok
+	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RoleName;
-	bf.field_order = 1;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
 	bf.setNameSpace("access");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "The name of this permission matrix";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RoleDelegatable;
-	bf.field_order = 2;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Delegatable Role?";
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, this role can be granted to admins created/edited by Personae with this role.";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RoleMatrix;
-	bf.field_order = 3;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Objects Owned Access Bits";
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Access bits, by object type for objects owned by admins using this permission object";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RoleDefaultMatrix;
-	bf.field_order = 4;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Default Access Bits";
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Access bits, by object type for all objects on the part of admins using this permission object";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.RolePersonae;
-	bf.field_order = 5;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Persona entities";
 	bf.allowedTarget = SchemaConstants.PersonaBase;
 	bf.targetField = SchemaConstants.PersonaPrivs;
 	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "What personae are using this permission matrix?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.RoleName);
 
@@ -1766,73 +1680,56 @@ public class DBStore {
 	// create System Events base
 
 	DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
-	adminCategory.addNode(eventCategory, false, false);
+	adminCategory.addNodeAfter(eventCategory, null);
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "System Event";
 	b.classname = "arlut.csd.ganymede.custom.eventCustom";
 	b.type_code = (short) SchemaConstants.EventBase;  
-	b.displayOrder = b.type_code;
 
-	eventCategory.addNode(b, false, false); // add it to the end is ok
+	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventToken;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Token";
 	bf.badChars = " :";
-	bf.field_order = 1;
 	bf.loading = true;
 	bf.setNameSpace("eventtoken");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Single-word token to identify this event type in Ganymede source code";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Name";
 	bf.badChars = ":";
-	bf.field_order = 2;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Short name for this event class, suitable for an email message title";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventDescription;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Description";
 	bf.badChars = ":";
-	bf.field_order = 3;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Fuller description for this event class, suitable for an email message body";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.EventMailBoolean;
+	bf.field_code = SchemaConstants.EventMailBoolean;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Send Mail?";
-	bf.field_order = 4;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, occurrences of this event will be emailed";
-	b.fieldTable.put(bf);
-
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.EventMailToSelf;
+	bf.field_code = SchemaConstants.EventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: Admin?";
-	bf.field_order = 6;
 
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
     
@@ -1850,97 +1747,72 @@ public class DBStore {
 	b.object_name = "Object Event";
 	b.classname = "arlut.csd.ganymede.custom.objectEventCustom";
 	b.type_code = (short) SchemaConstants.ObjectEventBase;  
-	b.displayOrder = b.type_code;
 
-	eventCategory.addNode(b, false, false); // add it to the end is ok
+	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventToken;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Token";
 	bf.badChars = " :";
-	bf.field_order = 1;
 	bf.loading = true;
 	bf.setNameSpace("eventtoken");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Single-word token to identify this event type in Ganymede source code";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventObjectName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Object Type Name";
-	bf.field_order = 2;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "The name of the object that this event is tracking";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Name";
 	bf.badChars = ":";
-	bf.field_order = 3;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Short name for this event class, suitable for an email message title";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventDescription;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Description";
 	bf.badChars = ":";
-	bf.field_order = 4;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Fuller description for this event class, suitable for an email message body";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailToSelf;
+	bf.field_code = SchemaConstants.ObjectEventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: Admin?";
-	bf.field_order = 6;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailOwners;
+	bf.field_code = SchemaConstants.ObjectEventMailOwners;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: Owner Groups?";
-	bf.field_order = 7;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, mail for this event will always be cc'ed to the owner groups owning the object";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventExternalMail;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "External Email";
-	bf.field_order = 8;
 	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Email addresses not stored in Ganymede";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.ObjectEventObjectType;
+	bf.field_code = SchemaConstants.ObjectEventObjectType;
 	bf.field_type = FieldType.NUMERIC;
 	bf.field_name = "Object Type ID";
-	bf.removable = false;
-	bf.editable = false;
 	bf.visibility = false;	// we don't want this to be seen by the client
 	bf.comment = "The type code of the object that this event is tracking";
-	b.fieldTable.put(bf);
-
+	b.addFieldToEnd(bf);
 
 	// link in the class we specified
 
@@ -1953,14 +1825,13 @@ public class DBStore {
 	// create user base
 
 	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
-	rootCategory.addNode(userCategory, false, false);
+	rootCategory.addNodeAfter(userCategory, null);
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "User";
 	b.type_code = (short) SchemaConstants.UserBase; // 2
-	b.displayOrder = b.type_code;
 
-	userCategory.addNode(b, false, false); // add it to the end is ok
+	userCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserUserName;
@@ -1969,27 +1840,21 @@ public class DBStore {
 	bf.minLength = 2;
 	bf.maxLength = 8;
 	bf.badChars = " :=><|+[]\\/*;:.,?\""; // See p.252, teach yourself WinNT Server 4 in 14 days
-	bf.field_order = 2;
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserPassword;
 	bf.field_type = FieldType.PASSWORD;
 	bf.field_name = "Password";
 	bf.maxLength = 32;
-	bf.field_order = 3;
-	bf.removable = false;
-	bf.editable = false;
 	bf.crypted = true;
 	bf.isCrypted();
 	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserAdminPersonae;
@@ -1997,12 +1862,9 @@ public class DBStore {
 	bf.allowedTarget = SchemaConstants.PersonaBase;
 	bf.targetField = SchemaConstants.PersonaAssocUser;
 	bf.field_name = "Admin Personae";
-	bf.field_order = bf.field_code;
-	bf.removable = false;
-	bf.editable = false;
 	bf.array = true;
 	bf.comment = "A list of admin personae this user can assume";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
     
@@ -2014,83 +1876,61 @@ public class DBStore {
 	b.object_name = "Task";
 	b.classname = "arlut.csd.ganymede.custom.taskCustom";
 	b.type_code = (short) SchemaConstants.TaskBase; // 5
-	b.displayOrder = b.type_code;
 
-	adminCategory.addNode(b, false, false); // add it to the end is ok
+	adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Task Name";
-	bf.field_order = 1;
 	bf.loading = true;
 	bf.setNameSpace("buildertask");
 	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Name of this task, as shown in task monitor";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskClass;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Task Class";
 	bf.badChars = "/:";
-	bf.field_order = 2;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskRunOnCommit;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Run On Transaction Commit";
-	bf.field_order = 3;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, this task will be run on transaction commit";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskRunPeriodically;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Run Periodically";
-	bf.field_order = 4;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "If true, this task will be scheduled for periodic execution";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskPeriodUnit;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Period Unit";
-	bf.field_order = 5;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "What is the unit of time we're using?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskPeriodCount;
 	bf.field_type = FieldType.NUMERIC;
 	bf.field_name = "Period Count";
-	bf.field_order = 6;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "How many time units between task runs?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskPeriodAnchor;
 	bf.field_type = FieldType.DATE;
 	bf.field_name = "Period Anchor";
-	bf.field_order = 7;
-	bf.removable = false;
-	bf.editable = false;
 	bf.comment = "When do we start counting period intervals from?";
-	b.fieldTable.put(bf);
+	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.TaskName);
     

@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/02/10 04:35:41 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/02/29 09:35:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,7 +63,7 @@ import java.util.*;
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
  *
- * @version $Revision: 1.19 $ $Date: 2000/02/10 04:35:41 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 2000/02/29 09:35:20 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -86,6 +86,9 @@ public interface db_field extends java.rmi.Remote {
    */
 
   String getName() throws RemoteException;
+
+
+  public boolean isBuiltIn() throws RemoteException;
 
   /**
    * Returns the field # for this field.
@@ -113,12 +116,6 @@ public interface db_field extends java.rmi.Remote {
    */
 
   short getType() throws RemoteException;
-
-  /**
-   * Returns the display order for this field from the schema.
-   */
-
-  short getDisplayOrder() throws RemoteException;
 
   /**
    * Returns a String representing the value of this field.
@@ -164,13 +161,6 @@ public interface db_field extends java.rmi.Remote {
    */
 
   boolean isVisible() throws RemoteException;
-
-  /**
-   * Returns true if this field is a built-in field, common
-   * to all non-embedded objects.
-   */
-
-  boolean isBuiltIn() throws RemoteException;
 
   /**
    * Returns true if this field is edit in place.

@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/02/22 07:21:26 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/02/29 09:35:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -221,6 +221,11 @@ public interface SchemaConstants {
    */
   final static short BackLinksField = 8; 
 
+  /**
+   * in case we add more system fields to objects
+   */
+
+  final static short FinalSystemField = 8;
   //
   //  /* all embedded objects have these fields */
   //

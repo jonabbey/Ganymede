@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/01/08 03:28:57 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/02/29 09:35:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public class DBObjectDeltaRec implements FieldType {
 
     /* -- */
 
-    // algorithm: iterate over base.sortedFields to find all fields
+    // algorithm: iterate over base.fieldTable to find all fields
     // possibly contained in the object.. for each field, check to
     // see if the value has changed.  if so, create a fieldDeltaRec
     // for it.
@@ -131,7 +131,7 @@ public class DBObjectDeltaRec implements FieldType {
 			   oldObj.getLabel() + " and " + newObj.getLabel());
       }
 
-    Enumeration enum = objectBase.sortedFields.elements();
+    Enumeration enum = objectBase.fieldTable.elements();
 
     while (enum.hasMoreElements())
       {

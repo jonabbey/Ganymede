@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.173 $
-   Last Mod Date: $Date: 2000/02/21 22:34:09 $
+   Version: $Revision: 1.174 $
+   Last Mod Date: $Date: 2000/02/29 09:35:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.173 $ $Date: 2000/02/21 22:34:09 $
+ * @version $Revision: 1.174 $ $Date: 2000/02/29 09:35:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1822,29 +1822,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     checklogin();
 
     /* - */
-
-    Vector results = new Vector();
-    Enumeration enum;
-    DBObjectBaseField fieldDef;
-    DBObjectBase base;
-
-    /* -- */
-
-    base = Ganymede.db.getObjectBase(baseId);
-
-    synchronized (base)
-      {
-	enum = base.sortedFields.elements();
-	
-	while (enum.hasMoreElements())
-	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
-
-	    results.addElement(fieldDef.template);
-	  }
-      }
-
-    return results;
+    
+    DBObjectBase base = Ganymede.db.getObjectBase(baseId);
+    return base.getFieldTemplateVector();
   }
 
   /**
@@ -2629,9 +2609,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
 
-    for (int i = 0; i < containingBase.sortedFields.size(); i++)
+    for (int i = 0; i < containingBase.customFields.size(); i++)
       {
-	field = (DBObjectBaseField) containingBase.sortedFields.elementAt(i);
+	field = (DBObjectBaseField) containingBase.customFields.elementAt(i);
 	
 	if (query.permitList == null)
 	  {
@@ -2642,8 +2622,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // listed.  If they really, really want to see them, let
 	    // them say so explicitly.
 
-	    if (!field.isBuiltIn() && 
-		!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
+	    if (!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
 		  field.getID() == SchemaConstants.OwnerObjectsOwned))
 	      {
 		if (supergashMode)

@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/06/09 03:33:41 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/02/29 09:35:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,24 +72,6 @@ import java.util.*;
 
 public interface SchemaEdit extends Remote {
 
-  /**
-   * <P>Returns true if the schema editor is allowing
-   * the 'constant' fields to be edited.  This is
-   * provided solely so the Ganymede developers can
-   * make incompatible changes to the 'constant' schema
-   * items during development.</P>
-   */
-
-  public boolean isDevelopMode() throws RemoteException;
-
-  /**
-   * <P>When the server is in develop mode, it is possible to create new
-   * built-in fields, or fields that can be relied on by the server
-   * code to exist in every non-embedded object type defined.</P>
-   */
-
-  public BaseField createNewBuiltIn() throws RemoteException;
-
   //
   // From here on are the normal schema editing methods
   //
@@ -147,7 +129,7 @@ public interface SchemaEdit extends Remote {
    * take place for real unless the SchemaEdit is committed.</P>
    */
 
-  public void deleteBase(Base b) throws RemoteException;
+  public ReturnVal deleteBase(String baseName) throws RemoteException;
 
   /**
    * <P>This method returns an array of defined 
@@ -178,7 +160,7 @@ public interface SchemaEdit extends Remote {
    * the deletion could be carried out, false otherwise.</P>
    */
 
-  public boolean deleteNameSpace(String name) throws RemoteException;
+  public ReturnVal deleteNameSpace(String name) throws RemoteException;
 
   /**
    * <P>Commit this schema edit, instantiate the modified schema</P>

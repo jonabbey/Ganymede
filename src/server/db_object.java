@@ -7,8 +7,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/01/29 02:32:59 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/02/29 09:35:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ import java.rmi.RemoteException;
  * client to get information about and/or make changes to a object held
  * in the Ganymede server.</p>
  *
- * @version $Revision: 1.21 $ $Date: 2000/01/29 02:32:59 $
+ * @version $Revision: 1.22 $ $Date: 2000/02/29 09:35:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -106,15 +106,13 @@ public interface db_object extends java.rmi.Remote {
 
   /**
    *
-   * Returns a vector of field information records, in display order.
+   * Returns a vector of custom field information records, in display order.
    *
    * @see arlut.csd.ganymede.FieldInfo
    *
-   * @param customOnly If true, built-in fields won't be included in the returned vector
-   *
    */
 
-  public Vector getFieldInfoVector(boolean customOnly) throws RemoteException;
+  public Vector getFieldInfoVector() throws RemoteException;
 
   /**
    *
@@ -157,13 +155,12 @@ public interface db_object extends java.rmi.Remote {
 
   /**
    *
-   * <p>Get list of DBFields contained in this object.</p>
-   *
-   * @param customOnly If true, listFields will not include built-in fields
+   * <p>Get list of all db_fields contained in this object,
+   * in unsorted order.</p>
    *
    */
 
-  public db_field[] listFields(boolean customOnly) throws RemoteException;
+  public db_field[] listFields() throws RemoteException;
 
   /**
    *

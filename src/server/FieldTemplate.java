@@ -7,8 +7,8 @@
    
    Created: 5 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/02/21 22:34:08 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/02/29 09:35:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ package arlut.csd.ganymede;
  * <p>The {@link arlut.csd.ganymede.FieldInfo FieldInfo} object is used to return
  * the value information associated with an actual instance of a field.</p>
  *
- * @version $Revision: 1.13 $ $Date: 2000/02/21 22:34:08 $ $Name:  $
+ * @version $Revision: 1.14 $ $Date: 2000/02/29 09:35:15 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -110,6 +110,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   String okChars = null;
   String badChars = null;
   boolean multiLine = false;
+  String regexpPat = null;
 
   // invid attributes
 
@@ -119,6 +120,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   // password attributes
   
   boolean crypted = false;
+  boolean md5crypted = false;
 
   /* -- */
 
@@ -157,6 +159,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 	okChars = fieldDef.getOKChars();
 	badChars = fieldDef.getBadChars();
 	multiLine = fieldDef.isMultiLine();
+	regexpPat = fieldDef.getRegexpPat();
 	break;
 
       case INVID:
@@ -166,6 +169,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 
       case PASSWORD:
 	crypted = fieldDef.isCrypted();
+	md5crypted = fieldDef.isMD5Crypted();
 	break;
       }
   }
@@ -452,6 +456,19 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 
   /**
    *
+   * If this field is a STRING and a regular expression has been
+   * set to limit acceptable strings in this field, returns the
+   * regexp patter string.
+   * 
+   */
+
+  public String getRegexpPat()
+  {
+    return regexpPat;
+  }
+
+  /**
+   *
    * If this field is a STRING and this field has been configured to
    * be a multiline string field, this method will return true.
    * 
@@ -507,6 +524,18 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
+   *
+   * If this field is a PASSWORD, returns true if passwords are stored in
+   * this field in BSD-style MD5Crypt() form.
+   *
+   */
+
+  public boolean isMD5Crypted()
+  {
+    return md5crypted;
+  }
+
+  /**
    * debug instrumentation
    */
 
@@ -546,6 +575,8 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 	result.append(getOKChars());
 	result.append(", badChars = ");
 	result.append(getBadChars());
+	result.append(", regexp = ");
+	result.append(getRegexpPat());
       }
     else if (isInvid())
       {

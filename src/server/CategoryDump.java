@@ -14,8 +14,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:05:28 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/02/29 09:35:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,7 +83,6 @@ public class CategoryDump implements Category, CategoryNode {
 
   CategoryDump parent;
   String name;
-  int displayOrder;
   Vector contents = new Vector();
 
   private int lastIndex = -1;
@@ -113,15 +112,6 @@ public class CategoryDump implements Category, CategoryNode {
     this.name = getChunk(src, lastIndex);
 
     // getChunk() updates lastIndex for us
-
-    try
-      {
-	this.displayOrder = Integer.valueOf(getChunk(src, lastIndex)).intValue();
-      }
-    catch (NumberFormatException ex)
-      {
-	throw new RuntimeException("couldn't parse display order chunk " + ex);
-      }
 
     token = getChunk(src, lastIndex);
 
@@ -312,20 +302,34 @@ public class CategoryDump implements Category, CategoryNode {
   }
 
   /**
-   *
-   * This method is used to place a Category Node under us.  The node
-   * will be placed according to the node's displayOrder value, if resort
-   * and/or adjustNodes are true.
+   * <p>This method is used to place a Category Node under us.  This method
+   * adds a new node into this category, after prevNodeName if prevNodeName
+   * is not null, or at the end of the category if it is.</p>
    *
    * @param node Node to place under this category
-   * @param sort If true, the nodes under this category will be resorted after insertion
-   * @param adjustNodes If true, the nodes under this category will have their displayOrder recalculated.
-   * this should not be done lightly, and not at all if any more nodes with precalculated or saved
-   * displayOrder's are to be later inserted.
+   * @param prevNodeName the name of the node that the new node is to be added after
    *
+   * @see arlut.csd.ganymede.Category
    */
 
-  public void addNode(CategoryNode node, boolean resort, boolean adjustNodes) 
+  public void addNodeAfter(CategoryNode node, String prevNodeName)
+  {
+    throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
+  }
+
+  /**
+   * <p>This method is used to place a Category Node under us.  This method
+   * adds a new node into this category, before nextNodeName if nextNodeName
+   * is not null, or at the beginning of the category if it is.</p>
+   *
+   * @param node Node to place under this category
+   * @param nextNodeName the name of the node that the new node is to be added before,
+   * must not be path-qualified.
+   *
+   * @see arlut.csd.ganymede.Category
+   */
+
+  public void addNodeBefore(CategoryNode node, String nextNodeName)
   {
     throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
   }
@@ -335,12 +339,12 @@ public class CategoryDump implements Category, CategoryNode {
    * This method can be used to move a Category from another Category to this Category,
    * or to move a Category around within this Category.
    *
-   * @param catPath the fully specified path of the node to be moved
-   * @param displayOrder where to place this node within this category.
+   * @param node Node to place under this category
+   * @param prevNodeName the name of the node that the new node is to be added after
    *
    */
 
-  public void moveCategoryNode(String catPath, int displayOrder)
+  public void moveCategoryNode(String catPath, String prevNodeName)
   {
     throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
   }
@@ -423,31 +427,6 @@ public class CategoryDump implements Category, CategoryNode {
       }
   }
 
-  /**
-   *
-   * Gets the order of this node in the containing category
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   *
-   */
-
-  public int getDisplayOrder() 
-  {
-    return displayOrder;
-  }
-
-  /**
-   *
-   * Sets the order of this node in the containing category
-   *
-   * @see arlut.csd.ganymede.CategoryNode
-   *
-   */
-
-  public void setDisplayOrder(int order) 
-  {
-    throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
-  }
 
   // ***
   //
