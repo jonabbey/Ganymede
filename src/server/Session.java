@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.32 $ %D%
+ * @version $Revision: 1.33 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -83,6 +83,48 @@ public interface Session extends Remote {
    */
 
   String      getHelpBase() throws RemoteException;
+
+  /**
+   *
+   * This method is used to allow the client to retrieve messages like
+   * the motd from the server.  The client can specify that it only
+   * wants to see a message if it has changed since the user last
+   * logged out.  This is intended to support a message of the day
+   * type functionality.  The server will not necessarily remember the
+   * last log out across server restart.
+   *
+   * @param key A string, like "motd", indicating what message to retrieve.
+   * @param onlyShowIfNew If true, the message will only be returned if
+   *                      it has changed since the user last logged out.
+   *
+   * @return A StringBuffer containing the message, if found, or null if no
+   * message exists for the key, or if onlyShowIfNew was set and the message
+   * was not new.
+   *   
+   */
+
+  StringBuffer getMessage(String key, boolean onlyShowIfNew) throws RemoteException;
+
+  /**
+   *
+   * This method is used to allow the client to retrieve messages like
+   * the motd from the server.  The client can specify that it only
+   * wants to see a message if it has changed since the user last
+   * logged out.  This is intended to support a message of the day
+   * type functionality.  The server will not necessarily remember the
+   * last log out across server restart.
+   *
+   * @param key A string, like "motd", indicating what message to retrieve.
+   * @param onlyShowIfNew If true, the message will only be returned if
+   *                      it has changed since the user last logged out.
+   *
+   * @return A StringBuffer containing the message, if found, or null if no
+   * message exists for the key, or if onlyShowIfNew was set and the message
+   * was not new.
+   *   
+   */
+
+  StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws RemoteException;
 
   /**
    *
