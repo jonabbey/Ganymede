@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.16 $ %D%
+  Version: $Revision: 1.17 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.16 $ %D% 
+ * @version $Revision: 1.17 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -65,6 +65,7 @@ public class rowTable extends baseTable implements ActionListener {
   MenuItem SortByMI;
   MenuItem RevSortByMI;
   MenuItem DeleteColMI;
+  MenuItem OptimizeMI;
 
   /**
    * This is the base constructor for rowTable, which allows
@@ -109,18 +110,21 @@ public class rowTable extends baseTable implements ActionListener {
 	  headers, horizLines, vertLines, vertFill, hVertFill, 
 	  menu, null);
     
-    rowMenu = new PopupMenu();
+    rowMenu = new PopupMenu("Column Menu");
     SortByMI = new MenuItem("Sort By This Column");
     RevSortByMI = new MenuItem("Reverse Sort By This Column");
     DeleteColMI = new MenuItem("Delete This Column");
+    OptimizeMI = new MenuItem("Optimize Column Widths");
 
     rowMenu.add(SortByMI);
     rowMenu.add(RevSortByMI);
     rowMenu.add(DeleteColMI);
+    rowMenu.add(OptimizeMI);
 
     SortByMI.addActionListener(this);
     RevSortByMI.addActionListener(this);
     DeleteColMI.addActionListener(this);
+    OptimizeMI.addActionListener(this);
     
     canvas.add(rowMenu);
 
@@ -157,7 +161,7 @@ public class rowTable extends baseTable implements ActionListener {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 false, true, true, false, callback, menu);
+	 true, true, true, false, callback, menu);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -569,10 +573,14 @@ public class rowTable extends baseTable implements ActionListener {
 	  {
 	    resort(menuCol, true, true);
 	  }
-
-	if (e.getSource() == RevSortByMI)
+	else if (e.getSource() == RevSortByMI)
 	  {
 	    resort(menuCol, false, true);
+	  }
+	else if (e.getSource() == OptimizeMI)
+	  {
+	    optimizeCols();
+	    refreshTable();
 	  }
       }
 
@@ -833,6 +841,8 @@ class rowSorter {
 
 	result = result.next();
       }
+
+    parent.reCalcRowPos(0);		// recalc vertical positions
   }
 
 }
