@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -605,7 +605,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 class ExitThread extends Thread {
 
-  final boolean debug = true;
+  final boolean debug = false;
 
   final String message;
 
@@ -625,16 +625,16 @@ class ExitThread extends Thread {
 
     int i = 30;
     
+    System.out.print("System shutting down in 30 seconds");
+
     try
       {
 	while (i > 0)
 	  {
 	    
 	    sleep(1000);
-	    if (debug)
-	      {
-		System.out.println("System shutting down in " + i-- + " seconds.");
-	      }
+	    System.out.print(".");
+	    i--;
 	  }
       }
     catch (InterruptedException ie)
@@ -642,7 +642,7 @@ class ExitThread extends Thread {
 	System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
       }
     
-    System.out.println("Ganymede disconnected: " + message);
+    System.out.println("\nGanymede disconnected: " + message);
     
     System.exit(0);
     
