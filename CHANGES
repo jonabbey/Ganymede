@@ -93,7 +93,13 @@ This has been fixed.  Thanks to John Knutson for reporting this.
 
 a) The server used to throw an exception if an admin created a user
 and hit 'commit' without filling in the home group field, because
-some of the custom logic was being 
+some of the custom logic wasn't checking to make sure that the
+field was there before trying to do calculations based on it.
+
+b) Moving a system from a room to another which was not connected
+to the network that the system had been allocated on was broken..
+a 'can't free network' error was being reported.  This case is
+now properly handled.
 
 10. [CLIENT] Miscellaneous Client Improvements and Fixes
 
@@ -125,15 +131,50 @@ enable typed choice completion if the only valid choices are listed
 
 11. [SERVER] Implemented support for object cloning
 
-Security changes to DBField.setValue(), etc., for cloning values
+Since the beginning, I've planned on having a clone_db_object() method
+on the server that would create a new object by copying values from an
+existing one, but somehow I never had gotten around to implementing
+it.  The work John Knutson is doing with Ganymede would benefit from
+this feature particularly, so I went ahead and got it done today.
 
-Added DBField.copyFieldTo()
+This involved lots of changes to the server, including DBField and all
+its subclasses, DBEditObject, DBObject, GanymedeSession, and possibly
+other classes.
 
-changes to DBEditObject
+I still need to document all of this in the DBEditObject subclassing
+guide.
+
+12. [SERVER] Added support for floating point fields
+
+All of the code for this came from John Knutson.
+
+This bumps the DBStore version numbers to major: 1, minor: 15.
+
+13. [CLIENT] Improved speed for object editing
+
+The client was inefficiently and redundantly sorting large choice
+lists, slowing object editing down a great deal.  Now all QueryResult
+objects from the server are automatically sorted on receipt using an
+efficient binary search-based insertion sort.
+
+14. [SERVER] Reworked Password fields to support OpenBSD-style MD5 hashing
+
+The Ganymede has supported 'MD5 passwords' since August, but this was
+actually just a simple MD5 hash of the plaintext.  OpenBSD, FreeBSD,
+Linux PAM, and possibly other operating systems use a much more
+involved process of generating 'MD5' passwords, including a salt field
+and a thousand round trip through MD5 to make dictionary cracks much
+more time-consuming.
+
+Ganymede's PasswordDBField class now supports these fancy MD5
+passwords, and the old support for a simple MD5 password hash has been
+removed.
+
+This bumps the DBStore version numbers to major: 1, minor: 16.
 
 -------------------- Changes from 0.99.6 to 0.99.7 -------------------
 
-RELEASE DATE: October 13 , 1999
+RELEASE DATE: October 13, 1999
 
 1. [SERVER] Fixed the Ganymede server's registry binding for localhost
 
