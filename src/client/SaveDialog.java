@@ -5,8 +5,8 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: ??
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:11 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/10/20 04:34:25 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney
@@ -65,11 +65,14 @@ import arlut.csd.JDialog.JCenterDialog;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Client dialog for saving or mailing the results of a query operation.</p>
+ */
+
 public class SaveDialog extends JCenterDialog implements ActionListener {
 
   private final boolean debug = false;
 
-  Date startDate;
   boolean
     addedFormatChoice = false,
     returnValue = false;
@@ -89,32 +92,28 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     formats = null;
 
   // This is the panel that holds everything, layed out by gbl
+
   JPanel 
     panel;
 
   formatButtonPanel
     formatPanel;
 
-  historyInfoPanel
-    historyInfo;
-
   Image
     saveImage = arlut.csd.Util.PackageResources.getImageResource(this, "SaveDialog.gif", getClass());
 
-  SaveDialog(Frame owner, boolean forMail)
-  {
-    this(owner, forMail, true);
-  }
+  /* -- */
 
   /**
    * Main Constructor.
    *
    * @param owner Parent frame
-   * @param forMail If true, the dialog will show the recipients field and the ok button will say "mail".  Otherwise, it says "save".
-   * @param showHistoryChoices If true, the dialog will show a checkbox for the history and a date field for choosing the starting date.
+   *
+   * @param forMail If true, the dialog will show the recipients field
+   * and the ok button will say "mail".  Otherwise, it says "save".
    */
 
-  SaveDialog(Frame owner, boolean forMail, boolean showHistoryChoices)
+  SaveDialog(Frame owner, boolean forMail)
   {
     super(owner, forMail ? "Send Mail" : "Save format", true);
 
@@ -122,20 +121,6 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 
     gbc.insets = new Insets(6,6,6,6);
     
-    if (showHistoryChoices)
-      {
-
-	historyInfo = new historyInfoPanel();
-	gbc.gridx = 0;
-	gbc.gridy = 0;
-	gbc.gridwidth = 2;
-	gbc.fill = GridBagConstraints.BOTH;
-	gbl.setConstraints(historyInfo, gbc);
-	panel.add(historyInfo);
-
-	gbc.fill = GridBagConstraints.NONE;
-      }
-
     gbc.gridwidth = 1;
     gbc.fill = GridBagConstraints.NONE;
 
@@ -164,7 +149,6 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	gbl.setConstraints(recipients, gbc);
 	panel.add(recipients);
 
-
 	gbc.gridy = 1;
 	gbc.gridx = 1;
 	gbc.weightx = 0;
@@ -179,7 +163,6 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	subject.setText("Query report");
 	gbl.setConstraints(subject, gbc);
 	panel.add(subject);
-
       }
 
     // Row 3 is for the format choices
@@ -215,12 +198,12 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
   }
 
   /**
-   * Show the dialog.
-   *
-   * @return True if user pressed "Ok".
+   * <p>Show the dialog.</p>
    *
    * <p>Use this instead of calling setVisible(true) yourself.  You need to get the boolean
    * return from this method, in order to know if the user pressed "Ok" or "Cancel".
+   *
+   * @return True if user pressed "Ok".
    */
 
   public boolean showDialog()
@@ -232,25 +215,6 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
       }
 
     return returnValue;
-  }
-
-  /**
-   * True if "Show History" was chosen.
-   */
-
-  public boolean isShowHistory()
-  {
-    return historyInfo.isShowHistory();
-  }
-
-  /**
-   * The start date for the history.  Makes sense only if isShowHistory() returns true.
-   *
-   */
-
-  public Date getStartDate()
-  {
-    return historyInfo.getStartDate();
   }
 
   /**
@@ -348,7 +312,6 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	    System.out.println("ok");
 	  }
 
-
 	returnValue = true;
 	setVisible(false);
       }
@@ -363,92 +326,11 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	setVisible(false);
       }
   }
-
 }
 
-class historyInfoPanel extends JPanel implements ActionListener, JsetValueCallback{
-
-  JCheckBox showHistory;
-  JdateField date;
-  
-  GridBagLayout gbl = new GridBagLayout();
-  GridBagConstraints gbc = new GridBagConstraints();
-
-  Date
-    startDate = null;
-
-  public historyInfoPanel()
-  {
-    setBorder(BorderFactory.createTitledBorder("History information"));
-    setLayout(gbl);
-    
-    gbc.insets = new Insets(4,4,4,4);
-
-    gbc.anchor = GridBagConstraints.WEST;
-
-    showHistory = new JCheckBox();
-    gbc.gridx = 1;
-    gbc.gridy = 1;
-    gbl.setConstraints(showHistory, gbc);
-    add(showHistory);
-    showHistory.addActionListener(this);
-    
-    JLabel showDateL = new JLabel("Show History");
-    gbc.gridx = 0;
-    gbl.setConstraints(showDateL, gbc);
-    add(showDateL);
-    
-    JLabel startDateL = new JLabel("Starting Date");
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbl.setConstraints(startDateL, gbc);
-    add(startDateL);
-    
-    date = new JdateField();
-    date.setEnabled(false);
-    gbc.gridx = 1;
-    gbc.gridy = 2;
-    gbl.setConstraints(date, gbc);
-    add(date);
-  }
-
-  public Date getStartDate()
-  {
-    return startDate;
-  }
-
-  public boolean isShowHistory()
-  {
-    return showHistory.isSelected();
-  }
-
-  public void actionPerformed(ActionEvent e)
-  {
-
-    date.setEnabled(showHistory.isSelected());
-  }
-
-  public boolean setValuePerformed(JValueObject o)
-  {
-    if (o.getValue() instanceof Date)
-      {
-	startDate = (Date)o.getValue();
-	return true;
-      }
-    else
-      {
-	System.out.println("What is this: " + o);
-      }
-
-    return false;
-
-  }
-
-
-}
-
-/*
- * This is the panel that holds the format radio buttons.
+/**
+ * <p>Client panel that holds the choice of formats for
+ * {@link arlut.csd.ganymede.client.SaveDialog SaveDialog}.</p>
  */
 
 class formatButtonPanel extends JPanel {
@@ -492,10 +374,7 @@ class formatButtonPanel extends JPanel {
 	layout.setConstraints(b, constraints);
 	add(b);
       }
-
-    
   }
-
 
   public String getSelectedFormat()
   {

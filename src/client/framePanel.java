@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/08/26 23:05:32 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/10/20 04:34:26 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.58 $ $Date: 1999/08/26 23:05:32 $ $Name:  $
+ * @version $Revision: 1.59 $ $Date: 1999/10/20 04:34:26 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -692,19 +692,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void sendMail()
   {
-    SaveDialog dialog = new SaveDialog(gc, true);
+    SaveObjDialog dialog;
     boolean showHistory = false;
+    boolean showTransactions = false;
     Date startDate = null;
     String address;
+    String subject;
     StringBuffer body;
-    //Vector choices = new Vector();
 
     /* -- */
 
-    //choices.addElement("Html");
-    //choices.addElement("Plain text");
-    //choices.addElement("Tab separated");
-    //dialog.setFormatChoices(choices);
+    dialog = new SaveObjDialog(gc, "Mail summary for " + getObjectType() + " " + getObjectLabel(),
+			       true, "Status summary for " + getObjectType() + " " + getObjectLabel());
 
     if (!dialog.showDialog())
       {
@@ -716,22 +715,24 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	return;
       }
 
-    System.out.println("Format: " + dialog.getFormat());
-
     showHistory = dialog.isShowHistory();
+    showTransactions = dialog.isShowTransactions();
+
     if (showHistory)
       {
 	startDate = dialog.getStartDate();
       }
 
+    subject = dialog.getSubject();
     address = dialog.getRecipients();
+
     if ((address == null) || (address.equals("")))
       {
 	gc.showErrorMessage("You must specify at least one recipient.");
 	return;
       }
     
-    body = encodeObjectToStringBuffer(showHistory, startDate);
+    body = encodeObjectToStringBuffer(showHistory, showTransactions, startDate);
 
     if (debug)
       {
@@ -740,7 +741,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     try
       {
-	gc.getSession().sendMail(address, "Ganymede results", body);
+	gc.getSession().sendMail(address, subject, body);
       }
     catch (RemoteException rx)
       {
@@ -755,17 +756,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void save()
   {
-    SaveDialog dialog = new SaveDialog(gc, false);
+    SaveObjDialog dialog;
     JFileChooser chooser = new JFileChooser();
     int returnValue;
     Date startDate = null;
     boolean showHistory = false;
+    boolean showTransactions = false;
     File file;
 
     FileOutputStream fos = null;
     PrintWriter writer = null;
 
     /* -- */
+
+    dialog = new SaveObjDialog(gc, "Save summary for " + getObjectType() + " " + getObjectLabel(),
+			       false, null);
 
     if (!dialog.showDialog())
       {
@@ -780,6 +785,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     gc.setWaitCursor();
 
     showHistory = dialog.isShowHistory();
+    showTransactions = dialog.isShowTransactions();
+
     if (showHistory)
       {
 	startDate = dialog.getStartDate();
@@ -827,7 +834,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	return;
       }
 
-    writer.println(encodeObjectToStringBuffer(showHistory, startDate).toString());
+    writer.println(encodeObjectToStringBuffer(showHistory, showTransactions, startDate).toString());
     writer.close();
 
     gc.setNormalCursor();
@@ -837,7 +844,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * Generates a String representation of this object for save() and sendMail().
    */
 
-  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, Date startDate)
+  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, boolean showTransactions, 
+						  Date startDate)
   {
     StringBuffer buffer = new StringBuffer();
     FieldTemplate template;
@@ -877,10 +885,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     if (showHistory)
       {
+	if (showTransactions)
+	  {
+	    buffer.append("\nTransactional History:\n\n");
+	  }
+	else
+	  {
+	    buffer.append("\nHistory:\n\n");
+	  }
 	try
 	  {
-	    buffer.append("\nHistory:\n\n" + 
-			  gc.getSession().viewObjectHistory(getObjectInvid(), startDate).toString());
+	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(), 
+							    startDate, showTransactions).toString());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -1453,6 +1469,36 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   private final void setStatus(String status)
   {
     wp.gc.setStatus(status);
+  }
+
+  String getObjectType()
+  {
+    String result = null;
+
+    try
+      {
+	result = getObject().getTypeName();
+      }
+    catch (RemoteException ex)
+      {
+      }
+
+    return result;
+  }
+  
+  String getObjectLabel()
+  {
+    String result = null;
+
+    try
+      {
+	result = getObject().getLabel();
+      }
+    catch (RemoteException ex)
+      {
+      }
+
+    return result;
   }
 
   /**

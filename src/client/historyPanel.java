@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/01/29 20:17:28 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/10/20 04:34:27 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -73,7 +73,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     historyText;
 
   JButton
-    showHistory;
+    showHistory,
+    showFullHistory;
 
   JdateField
     selectDate;
@@ -88,6 +89,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   TitledBorder
     titledBorder;
+
+  StringBuffer
+    historyBuffer;
 
   /* -- */
   
@@ -107,9 +111,16 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JPanel buttonPanel = new JPanel(false);
 
     showHistory = new JButton("Show history");
+    showHistory.setToolTipText("Show all changes made to this specific object");
     showHistory.addActionListener(this);
     
     buttonPanel.add(showHistory);
+
+    showFullHistory = new JButton("Show Transactional History");
+    showFullHistory.setToolTipText("Show all transactions in which this object was changed");
+    showFullHistory.addActionListener(this);
+    
+    buttonPanel.add(showFullHistory);
 
     JPanel rightPanel = new JPanel(false);
     rightPanel.add(new JLabel("Since:"));
@@ -140,12 +151,15 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == showHistory)
+    if (e.getSource() == showHistory || e.getSource() == showFullHistory)
       {
 	try
 	  {
 	    gc.setWaitCursor();
-	    historyText.setText((gc.getSession().viewObjectHistory(invid, selectedDate)).toString());
+
+	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, 
+							      (e.getSource() == showFullHistory));
+	    historyText.setText(historyBuffer.toString());
 
 	    if (selectedDate != null)
 	      {
@@ -199,6 +213,13 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
                                                                       datesPanel
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Component panel used in the Ganymede client to hold modification and creation
+ * date information in the client's
+ * {@link arlut.csd.ganymede.client.historyPanel historyPanel} tab component.</p>
+ *
+ */
 
 class datesPanel extends JPanel {
 

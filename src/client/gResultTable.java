@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/04/12 21:37:26 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/10/20 04:34:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.27 $ $Date: 1999/04/12 21:37:26 $ $Name:  $
+ * @version $Revision: 1.28 $ $Date: 1999/10/20 04:34:27 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -203,7 +203,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void sendReport(boolean mailit)
   {
-    SaveDialog dialog = new SaveDialog(wp.gc, mailit, false);
+    SaveDialog dialog = new SaveDialog(wp.gc, mailit);
     Vector formatChoices = new Vector();
     String addresses;
     String format;
