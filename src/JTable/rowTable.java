@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.26 $ %D%
+  Version: $Revision: 1.27 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.26 $ %D% 
+ * @version $Revision: 1.27 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -374,31 +374,14 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
-   * Unselect all cells
+   *
+   * Unselect all cells.. override of a baseTable method.
+   *
    */
 
   public void unSelectAll()
   {
-    for (int i = 0; i < rows.size(); i++)
-      {
-	if (testRowSelected(i))
-	  {
-	    unSelectRow(i);
-
-	    if (callback != null)
-	      {
-		// if we get a nullpointer exception on
-		// element here, it means that the tableCanvas
-		// code didn't properly check to make sure that
-		// the location clicked on corresponded to
-		// a proper row
-		callback.rowUnSelected(((rowHandle)crossref.elementAt(i)).key, true);
-	      }
-	  }
-      }
-
-    rowSelectedKey = null;
-
+    unSelectRow();
     refreshTable();
   }
 
