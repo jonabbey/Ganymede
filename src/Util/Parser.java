@@ -10,7 +10,7 @@
    treated as word chars.
    
    Created: 6 August 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -170,12 +170,25 @@ public class Parser {
 	tokens.nextToken();
       }
 
-    while (checkNextToken() != ':')
+    while ((checkNextToken() != ':') && !EOLnext() && !EOFnext())
       {
 	if (checkNextToken() == ',')
 	  {
 	    tokens.nextToken();
 	    buffer.append(",");
+	  }
+
+	// handle back-slashed colons
+
+	if (checkNextToken() == '\\')
+	  {
+	    tokens.nextToken();
+
+	    if (checkNextToken() == ':')
+	      {
+		tokens.nextToken();
+		buffer.append(":");
+	      }
 	  }
 
 	buffer.append(getNextBit(tokens, false, true));
