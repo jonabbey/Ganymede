@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,6 +50,8 @@ public class DBEditSet {
   DBStore dbStore;
   DBSession session;
   String description;
+
+  Stack checkpoints = new Stack();
 
   DBWriteLock wLock = null;
 
@@ -148,6 +150,195 @@ public class DBEditSet {
 	// just need something to mark the slot in the hash table,
 	basesModified.put(object.objectBase, this);	
       }
+  }
+
+  /**
+   *
+   * This method checkpoints the current transaction at its current
+   * state.  If need be, this transaction can later be rolled back
+   * to this point by calling the rollback() method.
+   *
+   * @param name An identifier for this checkpoint
+   *
+   */
+
+  public synchronized void checkpoint(String name)
+  {
+    // check point our objects
+
+    checkpoints.push(new DBCheckPoint(name, this));
+
+    // and our namespaces
+
+    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+      {
+	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
+      }
+  }
+
+  /**
+   *
+   * This brings this transaction back to the state it was
+   * at at the time of the matching checkPoint() call.  Any
+   * objects that were checked out in care of this transaction
+   * since the checkPoint() will be checked back into the
+   * database and made available for other transactions to
+   * access.  All namespace changes made by this transaction
+   * will likewise be rolled back to their state at the
+   * checkpoint.
+   *
+   * @param name An identifier for the checkpoint to be rolled back to.
+   *
+   */
+
+  public synchronized boolean rollback(String name)
+  {
+    DBCheckPoint point = null;
+    DBCheckPointObj objck;
+    DBEditObject obj;
+    boolean found;
+
+    /* -- */
+
+    found = false;
+
+    for (int i = 0; i < checkpoints.size(); i++)
+      {
+	point = (DBCheckPoint) checkpoints.elementAt(i);
+
+	if (point.name.equals(name))
+	  {
+	    found = true;
+	  }
+      }
+
+    if (!found)
+      {
+	System.err.println("DBEditSet.rollback: couldn't find rollback for " + name);
+	return false;
+      }
+
+    // ok, we know it's in there.. now pop down the stack til we find it.
+
+    found = false;
+
+    while (!found && !checkpoints.empty())
+      {
+	point = (DBCheckPoint) checkpoints.pop();
+
+	if (point.name.equals(name))
+	  {
+	    found = true;
+	  }
+      }
+
+    // this really never will happen, but it costs us little to check
+
+    if (!found)
+      {
+	System.err.println("DBEditSet.rollback: couldn't find rollback for " + name);
+	return false;
+      }
+
+    // rollback our mail/log events
+
+    logEvents = point.logEvents;
+
+    // and our objects
+
+    // first, take care of all the objects that were in the transaction at
+    // the time of this checkpoint.
+
+    for (int i = 0; i < point.objects.size(); i++)
+      {
+	objck = (DBCheckPointObj) point.objects.elementAt(i);
+
+	found = false;
+
+	for (int j = 0; !found && j < objects.size(); j++)
+	  {
+	    obj = (DBEditObject) objects.elementAt(j);
+	    
+	    if (obj.getInvid().equals(objck.invid))
+	      {
+		obj.rollback(objck.fields);
+		obj.status = objck.status;
+		objck.checkedin = true;
+		found = true;
+	      }
+	  }
+
+	if (!found)
+	  {
+	    // huh?  this shouldn't ever happen, unless maybe we have a rollback order
+	    // error or something.  Complain.
+
+	    throw new RuntimeException("DBEditSet.rollback error.. we lost checked out objects in midstream?");
+	  }
+      }
+
+    // now, we have to sweep out any objects that are in the transaction now
+    // that weren't in the transaction at the checkpoint.
+
+    for (int i = 0; i < objects.size(); i++)
+      {
+	obj = (DBEditObject) objects.elementAt(i);
+
+	found = false;
+
+	for (int j = 0; !found && j < point.objects.size(); j++)
+	  {
+	    objck = (DBCheckPointObj) point.objects.elementAt(j);
+	    
+	    if (obj.getInvid().equals(objck.invid))
+	      {
+		found = true;
+	      }
+	  }
+
+	if (!found)
+	  {
+	    // ok, we've got a new object.  Ditch it.
+
+	    obj.release();
+	
+	    switch (obj.getStatus())
+	      {
+	      case DBEditObject.CREATING:
+	      case DBEditObject.DROPPING:
+		obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
+		obj.getBase().store.checkIn(); // update checked out count
+		break;
+		
+	      case DBEditObject.EDITING:
+	      case DBEditObject.DELETING:
+		
+		// note that clearShadow updates the checked out count for us.
+		
+		if (!obj.original.clearShadow(this))
+		  {
+		    throw new RuntimeException("editset ownership synchronization error");
+		  }
+		break;
+	      }
+	    
+	    objects.removeElement(obj);
+	  }
+      }
+
+    // and our namespaces
+
+    boolean success = true;
+
+    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+      {
+	if (!((DBNameSpace) dbStore.nameSpaces.elementAt(i)).rollback(this, name))
+	  {
+	    success = false;
+	  }
+      }
+
+    return success;
   }
 
   /**
@@ -341,13 +532,9 @@ public class DBEditSet {
 		  case DBEditObject.DELETING:
 		  case DBEditObject.DROPPING:
 
-		    if (!eObj.remove() || !eObj.finalizeRemove())
-		      {
-			releaseWriteLock("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
-			release();
-			Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
-			return false;
-		      }
+		    // Deletion activities for this object were done at the time of the
+		    // client's request.. the commit logic may have something to do,
+		    // however.
 
 		    eObj.finalized = true;
 		    break;
@@ -664,5 +851,89 @@ public class DBEditSet {
 	    System.err.println(session.key + ": DBEditSet.commit(): released write lock: " + reason);
 	  }
       }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    DBCheckPoint
+
+------------------------------------------------------------------------------*/
+
+/**
+ * DBCheckPoint is a class designed to allow server-side code that
+ * needs to attempt a multi-step operation that might not successfully
+ * complete to be able to undo all changes made without having to
+ * abort the entire transaction.
+ * 
+ * In other words, a DBCheckPoint is basically a transaction within a transaction.
+ *
+ */
+
+class DBCheckPoint {
+
+  String 
+    name;
+
+  Vector
+    objects = null,
+    logEvents = null;
+
+  /* -- */
+
+  DBCheckPoint(String name, DBEditSet transaction)
+  {
+    DBEditObject obj;
+
+    /* -- */
+
+    this.name = name;
+
+    // assume that log events are not going to change once recorded,
+    // so we can make do with a shallow copy.
+
+    logEvents = (Vector) transaction.logEvents.clone();
+
+    objects = new Vector(transaction.objects.size());
+
+    for (int i = 0; i < transaction.objects.size(); i++)
+      {
+	obj = (DBEditObject) transaction.objects.elementAt(i);
+
+	objects.addElement(new DBCheckPointObj(obj));
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                 DBCheckPointObj
+
+------------------------------------------------------------------------------*/
+
+/**
+ * DBCheckPoint is a class designed to allow server-side code that
+ * needs to attempt a multi-step operation that might not successfully
+ * complete to be able to undo all changes made without having to
+ * abort the entire transaction.
+ * 
+ * In other words, a DBCheckPoint is basically a transaction within a transaction.
+ *
+ */
+
+class DBCheckPointObj {
+
+  Invid invid;
+  Hashtable fields;
+  byte status;
+  boolean checkedin = false;
+
+  /* -- */
+
+  DBCheckPointObj(DBEditObject obj)
+  {
+    this.invid = obj.getInvid();
+    this.status = obj.status;
+    this.fields = obj.checkpoint();
   }
 }
