@@ -22,8 +22,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 15 May 1999
-  Version: $Revision: 1.4 $
-  Last Mod Date: $Date: 2002/03/01 22:54:43 $
+  Version: $Revision: 1.5 $
+  Last Mod Date: $Date: 2002/03/01 23:21:33 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -239,18 +239,18 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	System.err.println("render called");
       }
 
+    int width = getBounds().width;
+    int height = getBounds().height;
+
+    if (width <= 0 || height <= 0)
+      {
+	return;
+      }
+
     // prep our backing image
 
     if (backing == null) 
       {
-	int width = getBounds().width;
-	int height = getBounds().height;
-
-	if (width <= 0 || height <= 0)
-	  {
-	    return;
-	  }
-
 	if (debug)
 	  {
 	    System.err.println("creating backing image");
@@ -291,8 +291,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	  }
 	bg = backing.getGraphics();
       }
-    else if ((backing_rect.width != getBounds().width) ||
-	     (backing_rect.height != getBounds().height))
+    else if ((backing_rect.width != width) ||
+	     (backing_rect.height != height))
       {
 	// need to get a new backing image
 
@@ -301,10 +301,10 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    System.err.println("creating new backing image");
 	  }
 
-	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+	backing_rect = new Rectangle(0, 0, width, height);
 
 	backing.flush();	// free old image resources
-	backing = createImage(getBounds().width, getBounds().height);
+	backing = createImage(width, height);
 	bg = backing.getGraphics();
       }
     else if ((hbar_old != rt.hbar.getValue()) ||
@@ -332,8 +332,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	  {
 	    System.err.println("h_offset = " + h_offset);
 	    System.err.println("maximum = " + rt.hbar.getMaximum());
-	    System.err.println("calculated right edge = " + (h_offset + getBounds().width));
-	    System.err.println("canvas width = " + getBounds().width);
+	    System.err.println("calculated right edge = " + (h_offset + width));
+	    System.err.println("canvas width = " + width);
 	    System.err.println("position of right pole = " + rt.colPos.elementAt(rt.cols.size()));
 	  }
 
@@ -350,7 +350,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	/* calculate last col visible */
 
 	last_col = first_col;
-	leftedge = getBounds().width + h_offset;
+	leftedge = width + h_offset;
 	
 	while ((xpos < leftedge) && (last_col < rt.cols.size() - 1))
 	  {
@@ -377,8 +377,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	  {
 	    System.err.println("v_offset = " + v_offset);
 	    System.err.println("maximum = " + rt.vbar.getMaximum());
-	    System.err.println("calculated bottom edge = " + (v_offset + getBounds().height));
-	    System.err.println("canvas height = " + getBounds().height);
+	    System.err.println("calculated bottom edge = " + (v_offset + height));
+	    System.err.println("canvas height = " + height);
 	  }
 
 	/* what is the first row that we can see?  that is, the first
@@ -409,7 +409,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	last_row = first_row;
 
-	bottomedge = v_offset + getBounds().height - 1 - rt.displayRegionFirstLine();
+	bottomedge = v_offset + height - 1 - rt.displayRegionFirstLine();
 
 	while (last_row < (rt.rows.size() - 1) &&
 	       ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
@@ -443,7 +443,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    // followed by a series of rows of single row_height 
 
 	    last_row = rt.rows.size() + 
-	      (getBounds().height - rt.displayRegionFirstLine() - rt.calcVSize()) /
+	      (height - rt.displayRegionFirstLine() - rt.calcVSize()) /
 	      (rt.row_height + rt.hRowLineThickness);
 
 	    if (debug)
@@ -540,12 +540,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    // this column
 	    
 	    bg.setClip(leftEdge, blankTop,
-		       column.width, getBounds().height - blankTop);
+		       column.width, height - blankTop);
 	    
 	    // and do it
 	    
 	    bg.fillRect(leftEdge, blankTop,
-			column.width, getBounds().height - blankTop);
+			column.width, height - blankTop);
 	  }
 	else
 	  {
@@ -590,19 +590,19 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     // max out our clip so we can draw the lines
 
-    bg.setClip(0,0, getBounds().width, getBounds().height);
+    bg.setClip(0,0, width, height);
 
     // draw horizontal lines
 
     bg.setColor(rt.hHeadLineColor);
 
-    bg.drawLine(0, 0, getBounds().width-1, 0); // top line
+    bg.drawLine(0, 0, width-1, 0); // top line
 
     bg.setColor(rt.hRowLineColor);
 
     bg.drawLine(0,
 		rt.headerAttrib.height + rt.hHeadLineThickness,
-		getBounds().width-1, 
+		width-1, 
 		rt.headerAttrib.height + rt.hHeadLineThickness); // line between header and table
 
     // draw a line across the bottom of the table
@@ -611,7 +611,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       {
 	// very bottom of the canvas
 
-    	ypos = getBounds().height - 1;
+    	ypos = height - 1;
 
 	drawHorizLine(ypos);
       }
@@ -621,7 +621,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	ypos = ((tableRow) rt.rows.lastElement()).getBottomEdge() - v_offset;
 
-	if (ypos <= getBounds().height - 1)
+	if (ypos <= height - 1)
 	  {
 	    drawHorizLine(ypos);
 	  }
@@ -678,7 +678,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    bg.setColor(rt.vHeadLineColor);
 	    bg.drawLine(xpos, 0, xpos, rt.displayRegionFirstLine() - 1);
 	    bg.setColor(rt.vRowLineColor);
-	    bg.drawLine(xpos, rt.displayRegionFirstLine(), xpos, getBounds().height - 1);
+	    bg.drawLine(xpos, rt.displayRegionFirstLine(), xpos, height - 1);
 	  }
       }
 
