@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,13 +20,21 @@ import java.applet.*;
 import java.net.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.util.*;
 
 import gjt.ImageCanvas;
 import gjt.Util;
+import gjt.Box;
+import gjt.RowLayout;
+import jdj.*;
+
 import arlut.csd.DataComponent.*;
 import arlut.csd.ganymede.*;
+import arlut.csd.ganymede.client.*;
 import arlut.csd.Tree.*;
-import edu.nyu.cs.buff.common.*;
+import arlut.csd.Dialog.*;
+
+import com.sun.java.swing.JButton;
 
 public class gclient extends Frame implements treeCallback,ActionListener {
 
@@ -34,12 +42,12 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   glogin _myglogin;
 
   //containerPanel _cPanel;
-  MosaicPanel centerPanel;
+  //Panel centerPanel;
 
   Image images[];
 
-  Button _commit;
-  Button _cancel;
+  JButton commit;
+  JButton cancel;
   
   treeControl tree;
   
@@ -50,6 +58,9 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   MenuItem inactivateMI = null;
   MenuItem queryMI = null;
 
+  MenuBar menubar;
+  MenuItem logoutMI;
+  Menu fileMenu;
 
   public gclient(Session s,glogin g) {
 
@@ -64,28 +75,22 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 
     setLayout(new BorderLayout());
 
+    BorderLayout layout = new BorderLayout();
+    setLayout( layout );
 
-    centerPanel = new MosaicPanel();
-    add("Center",centerPanel);
+    // Make the menu bar
+    menubar = new MenuBar();
 
-    MosaicLayout layout = new MosaicLayout();
-    centerPanel.setLayout( layout );
+    // File menu
+    fileMenu = new Menu("File");
+    logoutMI = new MenuItem("Logout");
+    logoutMI.addActionListener(this);
+    fileMenu.add(logoutMI);
     
-    centerPanel.propagateInvalidate();
-
-
-    layout.setConstraints( "Horz", new MosaicConstraints(MosaicConstraints.CENTER, MosaicConstraints.HORIZONTAL, 1 ) );
+    menubar.add(fileMenu);
+    this.setMenuBar(menubar);
     
-    layout.setConstraints( "Vert", new MosaicConstraints(MosaicConstraints.CENTER, MosaicConstraints.VERTICAL, 1 ) );
-    
-    layout.setConstraints( "Sticky", new MosaicConstraints(MosaicConstraints.CENTER, MosaicConstraints.BOTH, 1 ) );
-
-
-    // The left panel
-
-    Panel _leftP = new Panel();
-
-    _leftP.setLayout(new BorderLayout());
+    //centerPanel.propagateInvalidate();
 
     createMI = new MenuItem("Create");
     editMI = new MenuItem("Edit");
@@ -101,113 +106,143 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     pMenu.add(queryMI);
 
     images = new Image[3];
+    images[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    images[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
+    images[2] = PackageResources.getImageResource(this, "list.gif", getClass());
 
-    try
+    for (int j = 0; j < 3; j++)
       {
-	images[0] = Toolkit.getDefaultToolkit().getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/openfolder.gif"));
-	Util.waitForImage(this, images[0]);
-
-	//	System.err.println("image 0 width " + images[0].getWidth(this));
-
-	images[1] = Toolkit.getDefaultToolkit().getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/folder.gif"));
-	Util.waitForImage(this, images[1]);
-
-	//	System.err.println("image 1 width " + images[1].getWidth(this));
-
-	images[2] = Toolkit.getDefaultToolkit().getImage(new URL("http://www.arlut.utexas.edu/~broccol/gash2/list.gif"));
-	Util.waitForImage(this, images[2]);
-
-	//	System.err.println("image 2 width " + images[2].getWidth(this));
-      }
-    catch (MalformedURLException e)
-      {
-	System.err.println("Bad URL");
+	if (images[j] == null)
+	  {
+	    System.out.println("Image is null " + j);
+	  }
       }
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
-			 Color.black, Color.white, this, images,
-			 pMenu);
+			   Color.black, Color.white, this, images,
+			   pMenu);
 
 
+    Box leftBox = new Box(tree, "Objects");
 
-    // 
+    InsetPanel leftP = new InsetPanel();
+    leftP.setLayout(new BorderLayout());
+    leftP.add("Center", leftBox);
+    
+    add("West", leftP);
 
-// Commented out for now since the session no longer gives Type objects.
-// This code will need to be modified so that it works with the DBStore 
-/*
-    try {
-            Type typeList[] = _myglogin.my_session.types();
-	    treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
-	    tree.setRoot(typesnode);
-	    
-	    for (int i=0;i<typeList.length;i++)
+    // Build the tree
+
+    try
+      {
+	Vector  typesV = _myglogin.my_session.getTypes();
+	treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
+	tree.setRoot(typesnode);
+	
+	for (int i=0;i<typesV.size();i++)
+	  {
+	    Base tempBase = null;
+	    treeNode t;
+	    try 
 	      {
-		treeNode t = new treeNode(typesnode,typeList[i].name(),null,true,0,1);
+		tempBase = (Base)typesV.elementAt(i);
+		t = new treeNode(typesnode,tempBase.getName(),null,true,0,1);
 		tree.insertNode(t,false);
-		
 	      }
-    }
-    catch (RemoteException ex) {}
-*/	  
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("Could not get bases: " + rx);
+	      }
+	    
+   
 
-    // Just to have something in the tree
-    treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
-    tree.setRoot(typesnode);
+	    Query _query;
+	    try
+	      {
+	        //Now get all the children
+	        _query = new Query(tempBase.getTypeID());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("It's the Query! " + rx);
+	      }
+	    try
+	      {
+		if (_query == null)
+		  {
+		    System.out.println("query == null");
+		  }
+		else
+		  {
+		    Vector objects =  _myglogin.my_session.query(_query);
+		    if (objects == null)
+		      {
+			System.out.println("objects == null");
+		      }
+		    else
+		      {
+			for (int j=0 ; j < objects.size(); j++)
+			  {
+			    treeNode objNode = new treeNode(t, 
+							    ((Result)objects.elementAt(j)).toString(), 
+							    null, false, 2,2);
+			    tree.insertNode(objNode, false); 
+			  }
+		      }
+		  }
+	      }
+	    catch (RemoteException ex) 
+	      {
+		throw new IllegalArgumentException("Could not build object part of tree: " + ex);
+	      }
+      
+
+	  }
+      }
+    catch (RemoteException ex) 
+      {
+	throw new IllegalArgumentException("Could not build whole tree: " + ex);
+      }
+
 
     // The right panel which will contain the containerPanel
 
-    Panel _rightP = new Panel();
+    Panel rightP = new Panel();
 
-    _rightP.setLayout(new BorderLayout());
+    rightP.setLayout(new BorderLayout());
       
-    Panel _bottomP = new Panel();
-    Label test1 = new Label("_bottomP");
-    _bottomP.add(test1);
+    //    ScrollPane _scroll = new ScrollPane();
+    //    _scroll.setLayout(new BorderLayout());
+    windowPanel wp = new windowPanel();
+    wp.makeNewWindow("New Window from the client");
+    //_scroll.add(wp);
 
-    _rightP.add(_bottomP,"South");
+    //rightP.add(_scroll,"Center");
+    rightP.add("Center", wp);
+
+    Panel bottomButtonP = new Panel();
+    rightP.add(bottomButtonP,"South");
+    bottomButtonP.setLayout(new RowLayout());
+
+    commit = new JButton("Commit");
+    cancel = new JButton("Cancel");
+    commit.addActionListener(this);
+    cancel.addActionListener(this);
+
+    bottomButtonP.add(commit);
+    bottomButtonP.add(cancel);
 
 
-    ScrollPane _scroll = new ScrollPane();
-    Label test2 = new Label("_scroll");
-    _scroll.add(test2);
-
-    _rightP.add(_scroll,"Center");
-    
-
-    _bottomP.setLayout(new BorderLayout());
-
-    _commit = new Button("Commit");
-    _cancel = new Button("Cancel");
-    
-
-    _bottomP.add(_commit,"Center");
-    _bottomP.add(_cancel,"East");
-
-    layout.setPos( 0, 0, 0, 0 );
-
-    centerPanel.add("Sticky",tree);
    
-    layout.setPos( 0, 0, 1, 0, 0, 0 ); 
-
-    centerPanel.add("Sticky",_rightP);
-    
-    /*    layout.setPos(0,0,1,0,1,0);
-
-    centerPanel.add("",new Button("Testing 123"));
-
-    layout.setPos(0,0,1,0,1,1);
-
-    centerPanel.add("",new Button("Testing 456"));
-    */
-    
-
-    //    pack();
-    
-    
+    add("Center",rightP);
+    /*
     Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
     setSize( d.width / 2, d.height / 2 );
-
+    */
+    pack();
+    setSize(800, 600);
     show();
+
 
   }
 
@@ -216,6 +251,34 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   
   public void actionPerformed(java.awt.event.ActionEvent event)
     {
+      if (event.getSource() == cancel)
+	{
+	  System.err.println("cancel button clicked");
+	}
+      else if (event.getSource() == commit)
+	{
+	  System.out.println("commit button clicked");
+	}
+      else if (event.getSource() == logoutMI)
+	{
+	  try
+	    {
+	      _myglogin.my_session.logout();
+	      this.dispose();
+	      _myglogin.connector.setEnabled(true);
+	      _myglogin._quitButton.setEnabled(true);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("could not logout: " + rx);
+	    }
+
+
+	}
+      else
+	{
+	  System.err.println("Unknown action event generated");
+	}
     }
   
 
@@ -232,7 +295,40 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   public void treeNodeMenuPerformed(treeNode node,
 				    java.awt.event.ActionEvent event)
   {
-    tree.deleteNode(node, true);
+    
+    if (event.getSource() == createMI)
+      {
+	System.out.println("createMI");
+	try
+	  {
+	    _myglogin.my_session.openTransaction();
+	    _myglogin.my_session.create_db_object((short)1);
+	    _myglogin.my_session.commitTransaction();
+
+
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not create object: " + rx);
+	  }
+      }
+    else if (event.getSource() == editMI)
+      {
+	System.out.println("editMI");
+      }
+    else if (event.getSource() ==  viewMI)
+      {
+	System.out.println("viewMI");
+      }
+    else if (event.getSource() ==  inactivateMI)
+      {
+	System.out.println("inactivateMI");	
+      }
+    else if (event.getSource() ==  queryMI)
+      {
+	System.out.println("queryMI");	
+      }
+
   }
 
 
