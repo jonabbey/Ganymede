@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -174,34 +174,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public Base getBase(short id)
   {
-    Base base;
-    Enumeration enum;
-    int i;
-
-    /* -- */
-
-    synchronized (store)
-      {
-	enum = store.objectBases.elements();
-	while (enum.hasMoreElements())
-	  {
-	    base = (Base) enum.nextElement();
-	
-	    try
-	      {
-		if (base.getTypeID() == id)
-		  {
-		    return base;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		// we'll ignore it here.
-	      }
-	  }
-      }
-
-    return null;
+    return (Base) store.getObjectBase(id);
   }
 
   /**
@@ -216,34 +189,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public Base getBase(String baseName)
   {
-    Base base;
-    Enumeration enum;
-    int i;
-
-    /* -- */
-
-    synchronized (store)
-      {
-	enum = store.objectBases.elements();
-	while (enum.hasMoreElements())
-	  {
-	    base = (Base) enum.nextElement();
-	
-	    try
-	      {
-		if (base.getName().equals(baseName))
-		  {
-		    return base;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		// we'll ignore it here.
-	      }
-	  }
-      }
-
-    return null;
+    return (Base) store.getObjectBase(baseName);
   }
 
   /**
@@ -521,6 +467,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 		Ganymede.debug("did not got base");
 	      }
 	    base.clearEditor(this);
+	    base.updateBaseRefs();
 	  }
 
 	Ganymede.debug("DBSchemaEdit: iterating over namespaces");
