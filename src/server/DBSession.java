@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -111,6 +111,7 @@ final public class DBSession {
     return store;
   }
 
+
   /**
    * Create a new object in the database.<br><br>
    *
@@ -129,12 +130,15 @@ final public class DBSession {
    * not be constructed and initialized for some reason.
    *
    * @param object_type Type of the object to be created
+   * @param chosenSlot Invid to create the new object with.
+   * normally only used in internal Ganymede code in conjunction with
+   * the addition of new kinds of built-in objects during development
    *
    * @see arlut.csd.ganymede.DBStore
    *
    */
 
-  public synchronized DBEditObject createDBObject(short object_type)
+  public synchronized DBEditObject createDBObject(short object_type, Invid chosenSlot)
   {
     DBObjectBase base;
     DBEditObject e_object;
@@ -152,7 +156,7 @@ final public class DBSession {
 
     base = (DBObjectBase) store.objectBases.get(new Short(object_type));
 
-    e_object = base.createNewObject(editSet);
+    e_object = base.createNewObject(editSet, chosenSlot);
 
     if (!base.isEmbedded())
       {
@@ -190,6 +194,34 @@ final public class DBSession {
       }
 
     return e_object;
+  }
+
+  /**
+   * Create a new object in the database.<br><br>
+   *
+   * This method creates a slot in the object base of the
+   * proper object type.  The created object is associated
+   * with the current transaction.  When the transaction 
+   * is committed, the created object will inserted into
+   * the database, and will become visible to other
+   * sessions.<br><br>
+   *
+   * The created object will be given an object id.
+   * The DBEditObject can be queried to determine its
+   * invid.
+   *
+   * This method will return null if the object could
+   * not be constructed and initialized for some reason.
+   *
+   * @param object_type Type of the object to be created
+   *
+   * @see arlut.csd.ganymede.DBStore
+   *
+   */
+
+  public DBEditObject createDBObject(short object_type)
+  {
+    return createDBObject(object_type, null);
   }
 
   /**
@@ -318,6 +350,7 @@ final public class DBSession {
     if (isTransactionOpen())
       {
 	obj = editSet.findObject(new Invid(baseID, objectID));
+
 	if (obj != null)
 	  {
 	    return obj;
