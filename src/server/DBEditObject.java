@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ import java.rmi.server.*;
  * 
  */
 
-public class DBEditObject extends DBObject implements storable_object, ObjectStatus, FieldType {
+public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   static boolean debug = true;
 
@@ -160,6 +160,37 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
   /**
    *
    * Static method to verify whether the user has permission
+   * to clone a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for cloning by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canClone(DBSession session, DBObject object)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * Hook to allow the cloning of an object.  If this object type
+   * supports cloning (which should be very much customized for this
+   * object type.. creation of the ancillary objects, which fields to
+   * clone, etc.), this static method will actually do the work.
+   *
+   */
+
+  public static DBEditObject cloneObject(DBSession session, DBObject object)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * Static method to verify whether the user has permission
    * to create an instance of this object type.  The client's DBSession object
    * will call the canCreate method in the DBObjectBase for this object type
    * to determine whether creation is allowed to the user.
@@ -176,7 +207,6 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
   /* --------------------- Instance fields and methods --------------------- */
 
   DBObject original;
-  DBEditSet editset;
   boolean committing;
 
   byte status;
@@ -199,6 +229,11 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
   DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
   {
     super(objectBase, invid.getNum());
+
+    if (editset == null)
+      {
+	throw new NullPointerException("null editset");
+      }
 
     Enumeration 
       enum;
@@ -255,6 +290,11 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 	      case PERMISSIONMATRIX:
 		tmp = new PermissionMatrixDBField(this, fieldDef);
 		break;
+
+	      case PASSWORD:
+		tmp = new PasswordDBField(this, fieldDef);
+		break;
+
 	      }
 
 	    if (tmp != null)
@@ -294,8 +334,6 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 	this.original = original;
 	this.id = original.id;
 	this.objectBase = original.objectBase;
-	removalDate = original.removalDate;
-	expirationDate = original.expirationDate;
       }
 
     shadowObject = null;
@@ -345,6 +383,11 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 	      case PERMISSIONMATRIX:
 		tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
 		break;
+
+	      case PASSWORD:
+		tmp = new PasswordDBField(this, (PasswordDBField) field);
+		break;
+
 	      }
 
 	    if (tmp != null)
@@ -394,6 +437,11 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 		  case PERMISSIONMATRIX:
 		    tmp = new PermissionMatrixDBField(this, fieldDef);
 		    break;
+
+		  case PASSWORD:
+		    tmp = new PasswordDBField(this, fieldDef);
+		    break;
+
 		  }
 
 		fields.put(key, tmp);
@@ -469,6 +517,64 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
   boolean isStored()
   {
     return stored;
+  }
+
+  /**
+   *
+   * Clears out any non-valued fields, used to clean out any fields that remained
+   * undefined after editing is done.
+   *
+   */
+
+  final synchronized void clearTransientFields()
+  {
+    Enumeration enum;
+    DBField field;
+    Vector removeList;
+    Object key;
+    
+    /* -- */
+
+    removeList = new Vector();
+    enum = fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	field = (DBField) fields.get(key);
+
+	if (!field.defined)
+	  {
+	    removeList.addElement(key);
+
+	    if (false)
+	      {
+		System.err.println("going to be removing transient: " + ((DBField) field).getName()); 
+	      }
+	  }
+      }
+
+    enum = removeList.elements();
+
+    while (enum.hasMoreElements())
+      {
+	fields.remove(enum.nextElement());
+      }
+  }
+
+
+  /**
+   *
+   * Hook to allow intelligent generation of labels for DBObjects
+   * of this type.  Subclasses of DBEditObject should override
+   * this method to provide for custom generation of the
+   * object's label type
+   *
+   */
+
+  public String getLabelHook(DBObject object)
+  {
+    return null;		// no default
   }
 
   /**
@@ -887,6 +993,7 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
 
   public synchronized void commitPhase2()
   {
+    clearTransientFields();
     return;
   }
 
@@ -905,37 +1012,4 @@ public class DBEditObject extends DBObject implements storable_object, ObjectSta
   {
     return;
   }
-
-  /**
-   *
-   * A client that has checked this object out can call this method
-   * to trigger object storage and transaction commit.. this is
-   * sort of a hack to give the client an object-centered view
-   * of the world, rather than explicit awareness of transactions.
-   *
-   * @see storable_object
-   *
-   */
-
-  public boolean store()
-  {
-    return false;
-  }
-
-  /**
-   *
-   * A client that has checked this object out can call this method
-   * to abort the transaction.. this is
-   * sort of a hack to give the client an object-centered view
-   * of the world, rather than explicit awareness of transactions.
-   *
-   * @see storable_object
-   *
-   */
-
-  public boolean dispose()
-  {
-    return false;
-  }
-
 }
