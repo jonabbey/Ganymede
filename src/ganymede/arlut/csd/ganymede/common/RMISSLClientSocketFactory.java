@@ -166,13 +166,13 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
 	String factoryID = null;
 
-	if (System.getProperty("java.vm.vendor").indexOf("Sun") != -1)
+	if (System.getProperty("java.vm.vendor").indexOf("IBM") != -1)
 	  {
-	    factoryID = "SunX509";
+	    factoryID = "IbmX509"; // for IBM JVMs
 	  }
 	else
 	  {
-	    factoryID = "IbmX509"; // for IBM JVMs
+	    factoryID = "SunX509";
 	  }
 
 	ctx = SSLContext.getInstance("TLS");
