@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,6 +51,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   String username;
   String clienthost;
   String lastError;
+
+  String status = null;
+  String lastEvent = null;
 
   DBSession session;
 
@@ -216,6 +219,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     session = new DBSession(Ganymede.db, this, client.getName());
 
     GanymedeServer.sessions.addElement(this);
+
+    status = "logged in";
+    lastEvent = "logged in";
     GanymedeAdmin.refreshUsers();
     updatePerms();
 
@@ -478,6 +484,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaInvid = null;
 	personaTimeStamp = null;
 	updatePerms();
+	setLastEvent("selectPersona: " + persona);
 	return true;
       }
 
@@ -515,6 +522,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaTimeStamp = null;
 	updatePerms();
 	ownerList = null;
+	setLastEvent("selectPersona: " + persona);
 	return true;
       }
 
@@ -659,6 +667,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     else
       {
 	newObjectOwnerInvids = ownerInvids;
+	setLastEvent("setDefaultOwner");
 	return null;
       }
   }
@@ -821,6 +830,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     session.openTransaction(describe);
 
+    this.status = "Transaction: " + describe;
+    setLastEvent("openTransaction");
+
     return null;
   }
 
@@ -848,6 +860,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     session.editSet.checkpoint(key);
+    setLastEvent("checkpoint:" + key);
   }
 
   /**
@@ -889,6 +902,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	throw new RuntimeException("rollback called in the absence of a transaction");
       }
 
+    setLastEvent("rollback:" + key);
+
     return session.editSet.rollback(key);
   }
 
@@ -918,6 +933,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error.. no transaction in progress");
       }
 
+    this.status = "";
+    setLastEvent("commitTransaction");
+
     return session.commitTransaction();
   }
 
@@ -938,6 +956,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	throw new IllegalArgumentException("no transaction in progress");
       }
+
+    this.status = "";
+    setLastEvent("abortTransaction");
 
     return session.abortTransaction();
   }
@@ -1012,9 +1033,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     embedded = base.isEmbedded();
 
     if (debug)
-	{
-	  Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
-	}
+      {
+	Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
+      }
+
+    setLastEvent("dump");
 
     // if we're an end user looking at the user base, we'll want to be able to see
     // the fields that the user could see for his own record
@@ -1863,6 +1886,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	try
 	  {
+	    setLastEvent("view_db_object: " + obj.getLabel());
 	    return new DBObject(obj, this);	// return a copy that knows what GanymedeSession is looking at it
 	  }
 	catch (RemoteException ex)
@@ -1894,6 +1918,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (getPerm(obj).isEditable())
       {
+	setLastEvent("edit_db_object: " + obj.getLabel());
 	return session.editDBObject(invid);
       }
     else
@@ -1963,6 +1988,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	setLastError("Permission to create object of type " + type + " denied.");
 	return null;
       }
+
+    setLastEvent("create_db_object: " + newObj.getBase().getName());
 
     return (db_object) newObj;
   }
@@ -2037,6 +2064,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Object " + eObj.getLabel() +
 					  " is not of a type that may be inactivated");
       }
+
+    setLastEvent("inactivate_db_object: " + eObj.getLabel());
 
     return session.inactivateDBObject(eObj, interactive);
   }
@@ -2119,6 +2148,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Object Manager refused deletion for " + vObj.getLabel());
       }
+
+    setLastEvent("remove_db_object: " + vObj.getLabel());
     
     return session.deleteDBObject(invid, interactive);
   }
@@ -3030,5 +3061,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     return false;
+  }
+
+  private void setLastEvent(String text)
+  {
+    this.lastEvent = text;
+    GanymedeAdmin.refreshUsers();
   }
 }
