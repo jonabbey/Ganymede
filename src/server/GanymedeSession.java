@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2051,6 +2051,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * Clone a new object from object <invid>. If the return value is null,
    * getLastError() should be called for a description of the problem. 
+   *
+   * This method must be called within a transactional context.
    *
    * Typically, only certain values will be cloned.  What values are
    * retained is up to the specific code module provided for the
