@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -173,7 +173,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.removable = false;
 	bf.array = true;
 
-	fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
+	fieldHash.put(new Short(bf.field_code), bf);
 
 	/* And our 1 field, the expiration date. */
 
@@ -186,7 +186,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.editable = false;
 	bf.removable = false;
 
-	fieldHash.put(new Short(SchemaConstants.ExpirationField), bf);
+	fieldHash.put(new Short(bf.field_code), bf);
 
 	/* And our 2 field, the expiration date. */
 
@@ -199,22 +199,73 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	bf.editable = false;
 	bf.removable = false;
 
-	fieldHash.put(new Short(SchemaConstants.RemovalField), bf);
+	fieldHash.put(new Short(bf.field_code), bf);
 
-	/* And our 3 field, the history trail */
+	/* And our 3 field, the notes field */
 
 	bf = new DBObjectBaseField(this);
     
-	bf.field_name = "History List";
-	bf.field_code = SchemaConstants.HistoryField;
-	bf.field_type = FieldType.INVID;
+	bf.field_name = "Notes";
+	bf.field_code = SchemaConstants.NotesField;
+	bf.field_type = FieldType.STRING;
 	bf.field_order = 3;
 	bf.editable = false;
 	bf.removable = false;
-	bf.allowedTarget = SchemaConstants.HistoryBase;
-	bf.targetField = SchemaConstants.HistoryObjects;
 
-	fieldHash.put(new Short(SchemaConstants.HistoryField), bf);
+	fieldHash.put(new Short(bf.field_code), bf);
+
+	// And our 4 field, the creation date field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Creation Date";
+	bf.field_code = SchemaConstants.CreationDateField;
+	bf.field_type = FieldType.DATE;
+	bf.field_order = 4;
+	bf.editable = false;
+	bf.removable = false;
+
+	fieldHash.put(new Short(bf.field_code), bf);
+
+	/* And our 5 field, the Creator field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Creator Info";
+	bf.field_code = SchemaConstants.CreatorField;
+	bf.field_type = FieldType.STRING;
+	bf.field_order = 5;
+	bf.editable = false;
+	bf.removable = false;
+
+	fieldHash.put(new Short(bf.field_code), bf);
+
+	// And our 6 field, the modification date field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Modification Date";
+	bf.field_code = SchemaConstants.ModificationDateField;
+	bf.field_type = FieldType.DATE;
+	bf.field_order = 6;
+	bf.editable = false;
+	bf.removable = false;
+
+	fieldHash.put(new Short(bf.field_code), bf);
+
+	/* And our 7 field, the Modifier field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Modifier Info";
+	bf.field_code = SchemaConstants.ModifierField;
+	bf.field_type = FieldType.STRING;
+	bf.field_order = 7;
+	bf.editable = false;
+	bf.removable = false;
+
+	fieldHash.put(new Short(bf.field_code), bf);
+
       }
 
     objectHook = this.createHook();
@@ -749,6 +800,27 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	editset.addObject(e_object);
 
 	store.checkOut();
+
+	// set the following false to true to view the initial state of the object
+
+	if (false)
+	  {
+	    try
+	      {
+		Ganymede.debug("Created new object : " + e_object.getLabel());
+		db_field[] fields = e_object.listFields();
+		
+		for (int i = 0; i < fields.length; i++)
+		  {
+		    Ganymede.debug("field: " + i + " is " + fields[i].getID() + ":" + fields[i].getName());
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		Ganymede.debug("Whoah!" + ex);
+	      }
+	  }
+
 	return e_object;
       }
     else
