@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -186,7 +186,7 @@ public class DBJournal {
    *
    */
 
-  public synchronized boolean load(DBStore store) throws IOException
+  public synchronized boolean load() throws IOException
   {
     long transaction_time = 0;
     int object_count = 0;
