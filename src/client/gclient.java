@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.151 $
-   Last Mod Date: $Date: 1999/05/26 23:46:36 $
+   Version: $Revision: 1.152 $
+   Last Mod Date: $Date: 1999/07/08 04:25:37 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,11 +87,11 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.151 $ $Date: 1999/05/26 23:46:36 $ $Name:  $
+ * @version $Revision: 1.152 $ $Date: 1999/07/08 04:25:37 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
-public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback, WindowListener {
+public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback {
 
   public static boolean debug = false;
 
@@ -4928,40 +4928,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     new VecQuickSort(v, null).sort();
     
     return v;
-  }
-
-  // WindowListener methods
-
-  public void windowActivated(WindowEvent event)
-  {
-  }
-
-  public void windowClosed(WindowEvent event)
-  {
-  }
-
-  public void windowClosing(WindowEvent event)
-  {
-    if (OKToProceed())
-      {
-	logout();
-      }
-  }
-
-  public void windowDeactivated(WindowEvent event)
-  {
-  }
-
-  public void windowDeiconified(WindowEvent event)
-  {
-  }
-
-  public void windowIconified(WindowEvent event)
-  {
-  }
-
-  public void windowOpened(WindowEvent event)
-  {
   }
 
   /** why is this here, Mike??
