@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2002/03/29 02:55:26 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2002/03/29 06:02:34 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -70,8 +70,8 @@ package md5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.11 $</p>
- * <p>Last Mod Date: $Date: 2002/03/29 02:55:26 $</p>
+ * <p>Version: $Revision: 1.12 $</p>
+ * <p>Last Mod Date: $Date: 2002/03/29 06:02:34 $</p>
  * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
@@ -224,7 +224,7 @@ public final class MD5Crypt {
          salt.append(SALTCHARS.substring(index, index+1));
        }
 
-    return MD5Crypt.crypt(password, salt.toString());
+    return MD5Crypt.apacheCrypt(password, salt.toString());
   }
 
   /**
