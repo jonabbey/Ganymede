@@ -5,7 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,12 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JCalendar.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    historyPanel
+
+------------------------------------------------------------------------------*/
 
 public class historyPanel extends JPanel implements ActionListener, JsetValueCallback{
 
@@ -49,46 +55,46 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   TitledBorder
     titledBorder;
 
+  /* -- */
+
   public historyPanel(Invid invid, gclient gc)
-    {
-      this.invid = invid;
-      this.gc = gc;
+  {
+    this.invid = invid;
+    this.gc = gc;
 
-      setLayout(new BorderLayout());
+    setLayout(new BorderLayout());
       
-      JPanel topPanel = new JPanel(false);
+    JPanel topPanel = new JPanel(false);
+    
+    JPanel leftPanel = new JPanel(false);
+    leftPanel.setBorder(new TitledBorder("Restrict dates"));
+    selectDate = new JButton("Set starting date");
+    selectDate.addActionListener(this);
+    leftPanel.add(selectDate);
+    
+    clearDate = new JButton("Clear date");
+    clearDate.addActionListener(this);
+    leftPanel.add(clearDate);
+    
+    topPanel.add(leftPanel);
+      
+    showHistory = new JButton("Show history");
+    showHistory.addActionListener(this);
+    
+    topPanel.add(showHistory);
+    
+    JPanel p = new JPanel(new BorderLayout());
+    titledBorder = new TitledBorder("History");
+    p.setBorder(titledBorder);
+    historyText = new JTextArea();
+    historyText.setBackground(Color.white);
+    historyText.setEditable(false);
+    
+    p.add("Center", historyText);
 
-      JPanel leftPanel = new JPanel(false);
-      leftPanel.setBorder(new TitledBorder("Restrict dates"));
-      selectDate = new JButton("Set starting date");
-      selectDate.addActionListener(this);
-      leftPanel.add(selectDate);
-
-      clearDate = new JButton("Clear date");
-      clearDate.addActionListener(this);
-      leftPanel.add(clearDate);
-
-      topPanel.add(leftPanel);
-
-      showHistory = new JButton("Show history");
-      showHistory.addActionListener(this);
-
-      topPanel.add(showHistory);
-
-      JPanel p = new JPanel(new BorderLayout());
-      titledBorder = new TitledBorder("History");
-      p.setBorder(titledBorder);
-      historyText = new JTextArea();
-      historyText.setBackground(Color.white);
-      historyText.setEditable(false);
-
-      p.add("Center", historyText);
-
-
-
-      add("North", topPanel);
-      add("Center", p);
-    }
+    add("North", topPanel);
+    add("Center", p);
+  }
   
 
   public void actionPerformed(ActionEvent e)
