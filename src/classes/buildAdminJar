@@ -2,8 +2,8 @@
 #
 # Ganymede admin jar build script
 #
-# Version: $Revision: 1.9 $
-# Date: $Date: 1999/01/20 23:51:40 $
+# Version: $Revision: 1.10 $
+# Date: $Date: 1999/01/29 05:08:30 $
 #
 ############################################################
 
@@ -21,6 +21,8 @@ cd $builddir
 . config.sh
 
 # And do the build
+
+cd $CLASSDIR
 
 echo "Building admin jar"
 
