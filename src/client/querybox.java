@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -112,10 +112,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   
   qChoice baseChoice = new qChoice(); // there's only one of these
   qfieldChoice fieldChoice; // but there's liable to be a whole slew of these
-  qaryChoice opChoice;
-  qaryChoice intChoice;
-  qaryChoice dateChoice;
-  qaryChoice vectorChoice;
+
   qaryChoice isNot; // will either be a boolean choice, or a list of operators
                     // depending on whether the field is an array
 
@@ -196,8 +193,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     Vector Bases;
     
     /* -- */
-    
-    System.out.println("Hi! I'm your happy query friend!");
+
+    if (debug)
+      {
+	System.out.println("Hi! I'm your happy query friend!");
+      }
 
     contentPane = this.getContentPane();
 
@@ -693,6 +693,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     JLabel label2 = new JLabel("     ");
     JLabel label3 = new JLabel("     ");
     JLabel label4 = new JLabel("     ");
+    qaryChoice opChoice;
     
     /* -- */
 
@@ -793,8 +794,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
     returnChoice.addItem("does");
     returnChoice.addItem("does not");
-    
-    System.out.println("Does not selected");
+
+    if (debug)
+      {
+	System.out.println("Does not selected");
+      }
     
     returnChoice.addItemListener(this);
     return returnChoice;
@@ -816,8 +820,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // by using the name hash
     
     field = getFieldFromEmbedded(field);
-    
-    System.out.println("And We have put gotten it from NameHash: " + field);
+
+    if (debug)
+      {
+	System.out.println("And We have put gotten it from NameHash: " + field);
+      }
     
     // easy as pie
     
@@ -842,7 +849,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     else if (myField.isBoolean())
       {
 	JCheckBox boolBox = new JCheckBox("True");
-	System.out.println("It's a Boolean!");
+
+	if (debug)
+	  {
+	    System.out.println("It's a Boolean!");
+	  }
+
 	boolBox.setSelected(true);
 
 	return boolBox;
@@ -871,9 +883,16 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
 
-  private qaryChoice getOpChoice (String field)
+  private qaryChoice getOpChoice(String field)
   {
+    qaryChoice 
+      intChoice,
+      dateChoice,
+      vectorChoice;
+
     FieldTemplate myField = getTemplateFromName(field);
+
+    /* -- */
 
     // Check to see if the damn thing has slashes in it
 
@@ -889,24 +908,15 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
     
     intChoice = new qaryChoice();
-    intChoice.addItem("="); 
-    intChoice.addItem(">="); 
-    intChoice.addItem("<="); 
-    intChoice.addItem("<"); 
+    intChoice.addItem("=");
+    intChoice.addItem(">=");
+    intChoice.addItem("<=");
+    intChoice.addItem("<");
     intChoice.addItem(">");
     intChoice.addItem("= [Case Insensitive]");
     intChoice.addItem("Start With");
     intChoice.addItem("End With");
     intChoice.addItemListener(this);
-    
-    // Do a nice null test to make sure stuff isn't screwey
-	  
-    if (myField == null)
-      {
-	System.out.println("MYFIELD IS NULL! LIFE REALLY SUCKS!!");
-	
-	return intChoice;
-      }
     
     // NOTE - HANDLE VECTORS, IPs, etc
     
@@ -924,15 +934,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
     else if (myField.isNumeric())
       {
-	//System.out.println("Field: It's a number!");
 	return intChoice; 
       }
     else if (myField.isArray())
       {
 	vectorChoice = new qaryChoice();
-	vectorChoice.addItem("Contains All");
-	vectorChoice.addItem("Contains Any");
-	vectorChoice.addItem("Contains None");
+	vectorChoice.addItem("Contain");
 	vectorChoice.addItem("Length <");
 	vectorChoice.addItem("Length >");
 	vectorChoice.addItem("Length =");
@@ -1038,7 +1045,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // -- //
 
     int allRows = this.Rows.size();
-    System.out.println("NUMBER OF ROWS: " + allRows);
+
+    if (debug)
+      {
+	System.out.println("NUMBER OF ROWS: " + allRows);
+      }
        
     tempAry = (Component[]) this.Rows.elementAt(0); // This is the first row in the Vector
 
@@ -1111,8 +1122,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    // **NOTE: This will have to be implemented when we decide how
 	    // ** we're going to do dates
-
-
 	    value = new Date();
 	  }
 	else if (tempField.isBoolean())
@@ -1132,26 +1141,25 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	// -- Note: you'll have to do this agian for vectors.
         //    Don't do them here!!
 
-
 	if (! tempField.isArray())
 	  {
-	    if (operator == "=")
+	    if (operator.equals("="))
 	      {
 		opValue = 1;
 	      } 
-	    else if (operator == "<")
+	    else if (operator.equals("<"))
 	      {
 		opValue = 2;
 	      } 
-	    else if (operator == "<=")
+	    else if (operator.equals("<="))
 	      {
 		opValue = 3;
 	      } 
-	    else if (operator == ">") 
+	    else if (operator.equals(">"))
 	      {
 		opValue = 4;
 	      } 
-	    else if (operator == ">=") 
+	    else if (operator.equals(">="))
 	      {
 		opValue = 5;
 	      } 
@@ -1176,17 +1184,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    // we have a vector, so use vector operators
 	  
-	    if (operator.equals("Contains Any"))
+	    if (operator.equals("Contain"))
 	      {
 		opValue = 1;
-	      } 
-	    else if (operator.equals("Contains All"))
-	      {
-		opValue = 2;
-	      } 
-	    else if (operator.equals("Contains None"))
-	      {
-		opValue = 3;
 	      } 
 	    else if (operator.equals("Length =")) 
 	      {
@@ -1210,7 +1210,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
 	dataNode = new QueryDataNode(fieldName, opValue, value);
     
-	if (notValue == "is not" || notValue == "does not")
+	if (notValue.equalsIgnoreCase("is not") || notValue.equalsIgnoreCase("does not"))
 	  {
 	    notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
 	    myNode = notNode;
@@ -1231,41 +1231,29 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      {
 		short baseid = baseID.shortValue();
 
-		if (notValue == "is not" || notValue == "does not")
-		  {
-		    myQuery = new Query(baseid, myNode, editOnly); // Use the NOT node (see above)
-		  } 
-		else
-		  { // "NOT" not selected
-		    myQuery = new Query(baseid, myNode, editOnly); // just use the DATA node (see above)
-		  }
-		
+		myQuery = new Query(baseid, myNode, editOnly);
 		myQuery.setReturnType(defaultBase.getTypeID());
 
-		// Degug stuff
-
-		System.out.println("My Query: Embedded");
-		System.out.println("------------------");
-		System.out.println("");
-		System.out.println("Field Name: " + fieldName);
-
-		String bName = getBaseFromShort(baseID).getName();
-
-		System.out.println("Low Base: " + bName);
-		System.out.println("Top Base: " + defaultBase.getName());
-		System.out.println("Operator: " + opValue);
-		System.out.println("Value: " + value);
+		if (debug)
+		  {
+		    // Debug stuff
+		    
+		    System.out.println("My Query: Embedded");
+		    System.out.println("------------------");
+		    System.out.println("");
+		    System.out.println("Field Name: " + fieldName);
+		    
+		    String bName = getBaseFromShort(baseID).getName();
+		    
+		    System.out.println("Low Base: " + bName);
+		    System.out.println("Top Base: " + defaultBase.getName());
+		    System.out.println("Operator: " + opValue);
+		    System.out.println("Value: " + value);
+		  }
 	      }
 	    else
 	      {
-		if (notValue == "is not" || notValue == "does not")
-		  {
-		    myQuery = new Query(baseName, myNode, editOnly); // Use the NOT node (see above)
-		  } 
-		else
-		  { // "NOT" not selected
-		    myQuery = new Query(baseName, myNode, editOnly); // just use the DATA node (see above)
-		  }
+		myQuery = new Query(baseName, myNode, editOnly); 
 	      }
 	  }
 	else // Multiple Rows
@@ -1312,7 +1300,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		// Now that we have tempObj, find out what it is and
 		// use that information to assign a value to the query.
 
-
 		if (tempObj instanceof JTextField)
 		  {
 		    tempText = (JTextField) tempAry[7];    
@@ -1334,13 +1321,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		    // default
 		    tempText = (JTextField) tempAry[7];    
 		  }
-
 		
-		/* Here's some code to deal with edit-in-place fields again
+		/*
+		 * Here's some code to deal with edit-in-place fields again
 		 * what we need to do here is get the actual field from the 
 		 * name, using the shortID of the base preovided by the
 		 * fieldname Hash.
-		 *
 		 */ 
 		
 		baseID = getIdFromName(fieldName);
@@ -1366,7 +1352,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		  }
 		else if (tempField.isDate())
 		  {
-		    // Fix THIS!!!!
+		    // XXX Fix THIS!!!!
 		    value = new Date();
 		  }
 		else if (tempField.isBoolean())
@@ -1384,23 +1370,23 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		
 		// -- get the correct operator
     
-		if (operator == "=")
+		if (operator.equals("="))
 		  {
 		    opValue = 1;
 		  } 
-		else if (operator == "<")
+		else if (operator.equals("<"))
 		  {
 		    opValue = 2;
 		  } 
-		else if (operator == "<=")
+		else if (operator.equals("<="))
 		  {
 		    opValue = 3;
 		  } 
-		else if (operator == ">") 
+		else if (operator.equals(">"))
 		  {
 		    opValue = 4;
 		  } 
-		else if (operator == ">=") 
+		else if (operator.equals(">="))
 		  {
 		    opValue = 5;
 		  } 
@@ -1501,7 +1487,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     // Time to make the doughnuts -- uh, or set the return options for the fields
 
-    System.out.println("Here's how many rows we've got " + fieldOptions.size());
+    if (debug)
+      {
+	System.out.println("Here's how many rows we've got " + fieldOptions.size());
+      }
 
     fieldLoop :for (int x = 0; x < fieldOptions.size(); x ++)
       {
@@ -1524,8 +1513,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 		if (tempField == null) 
 		  {  
-		    System.out.println("It's a cold, null world,");
-		    System.out.println("Thetrefore, we're breaking out of loop");
+		    if (debug)
+		      {
+			System.out.println("It's a cold, null world,");
+			System.out.println("Therefore, we're breaking out of loop");
+		      }
 
 		    break fieldLoop;
 		  }
@@ -1570,7 +1562,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   {
     if (e.getSource() == qSave)
       {
-	System.out.println("Save Clicked");
+	if (debug)
+	  {
+	    System.out.println("Save Clicked");
+	  }
 
 	saveBox = new JDialog(optionsFrame, "Save As", true);
 
@@ -1584,7 +1579,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	saveText = new JTextField(10);
 	mid_panel.add(saveText);
-
 
 	Font f = new Font("TimesRoman", Font.BOLD, 14);
 	JLabel SaveJLabel = new JLabel("Enter Name For Query");
@@ -1614,7 +1608,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	// -- We want to save the current query under the current name
 
 	String outPut = saveText.getText();
-	System.out.println("save name is: " + outPut);
+
+	if (debug)
+	  {
+	    System.out.println("save name is: " + outPut);
+	  }
 
 	saveBox.setVisible(false);
       }
@@ -1623,7 +1621,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       {
 	// We gots to create the dialog for loading queries.
 	
-	System.out.println("Load Button Clicked");
+	if (debug)
+	  {
+	    System.out.println("Load Button Clicked");
+	  }
 	
 	JLabel l;
 	int n;
@@ -1707,7 +1708,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     if (e.getSource() == displayButton)
       {
-	System.out.println("Field Display Selected");
+	if (debug)
+	  {
+	    System.out.println("Field Display Selected");
+	  }
 
 	if (optionsFrame == null)
 	  {
@@ -1734,7 +1738,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     if (e.getSource() == OkButton) 
       {
-	System.out.println("You will submit");   
+	if (debug)
+	  {
+	    System.out.println("You will submit");   
+	  }
 
 	if (optionsFrame != null)
 	  {
@@ -1746,7 +1753,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       } 
     else if (e.getSource() == CancelButton)
       {
-	System.out.println("Cancel was pushed");
+	if (debug)
+	  {
+	    System.out.println("Cancel was pushed");
+	  }
 
 	if (optionsFrame != null)
 	  {
@@ -1786,15 +1796,27 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   
   public void itemStateChanged(ItemEvent e)
   {
+    qaryChoice opChoice;
+
+    /* -- */
+
     if (e.getSource() == editBox)
       {
 	this.editOnly = editBox.isSelected();
-	System.out.println("Edit Box Clicked: " + editOnly);
+
+	if (debug)
+	  {
+	    System.out.println("Edit Box Clicked: " + editOnly);
+	  }
       }
 
     if (e.getSource() == baseChoice)
       {
-	System.out.println("Base selected");
+	if (debug)
+	  {
+	    System.out.println("Base selected");
+	  }
+
 	// First, change the base
 	  
 	Base defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
@@ -1809,13 +1831,18 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    throw new RuntimeException("caught remote exception: " + ex);
 	  }
 	  
-	// remove for all entries in vector of component arrays
+	// remove all entries in vector of component arrays
 
 	for (int i = this.row - 1; i > -1; i--)
 	  {
 	    Component[] tempRow = (Component[]) this.Rows.elementAt(i);
 	    removeRow(tempRow, inner_choice, i);
-	    System.out.println("Removing Row: " + i);
+
+	    if (debug)
+	      {
+		System.out.println("Removing Row: " + i);
+	      }
+
 	    this.Rows.setSize(i);
 	  }
 	  
@@ -1844,7 +1871,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	
     if (e.getSource() instanceof qfieldChoice)
       {
-	System.out.println("Field Selected");
+	if (debug)
+	  {
+	    System.out.println("Field Selected");
+	  }
 
 	qfieldChoice source = (qfieldChoice) e.getSource();
 
@@ -1857,84 +1887,83 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    return;		// to handle Swing's value-set notification
 	  }
 
-	System.out.println("Current Row " + currentRow);
+	if (debug)
+	  {
+	    System.out.println("Current Row " + currentRow);
+	  }
 
 	Component[] tempRow = (Component[]) Rows.elementAt(currentRow); 
-	
-	if (tempRow == null)
+
+	if (debug)
 	  {
-	    System.out.println("OOOOOPS!!!");
+	    if (tempRow == null)
+	      {
+		System.out.println("OOOOOPS!!!");
+	      }
 	  }
 
 	removeRow(tempRow, inner_choice, currentRow);
 	opChoice = getOpChoice(fieldName);
 	Component newInput = getInputField(fieldName);
-	tempRow[3] = getIsNot(fieldName);
+	updateIsIsNot((String) opChoice.getSelectedItem(), tempRow);
 	tempRow[5] = opChoice;
 	tempRow[7] = newInput;
 	addRow(tempRow, true, inner_choice, currentRow);
       }
     else if (e.getSource() instanceof qaryChoice)
       {
-	System.out.println("Other Choice selected (presumably operator choice)");
+	if (debug)
+	  {
+	    System.out.println("Other Choice selected (presumably operator choice)");
+	  }
 
 	qaryChoice source = (qaryChoice) e.getSource();
 	
 	String opName = (String) source.getSelectedItem();
-	System.out.println("Opname: " + opName);
-	int currentRow = source.getRow();
-	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
-	
-	if ((opName.equalsIgnoreCase("Start With")) ||
-	    (opName.equalsIgnoreCase("End With"))	    )
+
+	if (debug)
 	  {
-	    // For grammatical purposes, we're changing the "is/is not"
-	    // choice to "does/does not"
-	    
-	    tempRow[3].setVisible(false);
-	    tempRow[3] = getDoesNot();    
-	  }
-	else 
-	  {
-	    JComboBox tempChoice = (JComboBox) tempRow[1];
-	    String myField = (String) tempChoice.getSelectedItem();
-	    tempRow[3].setVisible(false);
-	    tempRow[3] = getIsNot(myField);
-	    System.out.println("NO START WITH");
+	    System.out.println("Opname: " + opName);
 	  }
 
+	int currentRow = source.getRow();
+	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
+	updateIsIsNot(opName, tempRow);
 	removeRow(tempRow, inner_choice, currentRow);
 	addRow(tempRow, true, inner_choice, currentRow); // make sure the new 
 	                                                 // component makes it into the 
-	                                                 //row
-
-	if ((opName.equalsIgnoreCase("Contains All")) || 
-	    (opName.equalsIgnoreCase("Contains None")) ||
-	    (opName.equalsIgnoreCase("Contains Any")))
+	                                                 // row
+	// make sure everything's enabled
+	
+	if (!tempRow[3].isEnabled())
 	  {
-	    // disable the is/is not choice cause it makes
-	    // no sense in this contaxt
-	    
-	    // NOTE: this doesn't seem to work yet...
-
-	    if (tempRow[3].isEnabled())
-	      {	
-		tempRow[3].setEnabled(false);
-	      }
-	  }
-	else
-	  {
-	    // make sure everything's enabled
-
-	    if (! tempRow[3].isEnabled())
-	      {
-		tempRow[3].setEnabled(true);
-	      }
+	    tempRow[3].setEnabled(true);
 	  }
       }
     else 
       {
 	// ?? what the heck is it? We don't recognize this component
+      }
+  }
+
+  private void updateIsIsNot(String opName, Component[] tempRow)
+  {
+    if (opName.equalsIgnoreCase("Start With") ||
+	opName.equalsIgnoreCase("End With") ||
+	opName.equalsIgnoreCase("Contain"))
+      {
+	// For grammatical purposes, we're changing the "is/is not"
+	// choice to "does/does not"
+	
+	tempRow[3].setVisible(false);
+	tempRow[3] = getDoesNot();
+      }
+    else 
+      {
+	JComboBox tempChoice = (JComboBox) tempRow[1];
+	String myField = (String) tempChoice.getSelectedItem();
+	tempRow[3].setVisible(false);
+	tempRow[3] = getIsNot(myField);
       }
   }
 
@@ -1967,25 +1996,45 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     nameBreak = temp.indexOf(":"); // this will get the first 
                                      // index of the ':' character 
-    System.out.println("--------");
+
+    if (debug)
+      {
+	System.out.println("--------");
+      }
 
     name = temp.substring(0, nameBreak); 
-    System.out.println("Name Found: " + name);
+
+    if (debug)
+      {
+	System.out.println("Name Found: " + name);
+      }
 
     temp = temp.substring(nameBreak + 1, temp.length()); // The '+1' removes the colon
 
     baseBreak = temp.indexOf(":");
     base = temp.substring(0, baseBreak);
-    System.out.println("Here's base: " + base);
+
+    if (debug)
+      {
+	System.out.println("Here's base: " + base);
+      }
       
     temp = temp.substring(baseBreak + 1, temp.length());
     editBreak = temp.indexOf(":");
     edit = temp.substring(0, editBreak);
-    System.out.println("And Edit: " + edit);
+
+    if (debug)
+      {
+	System.out.println("And Edit: " + edit);
+      }
 
     temp = temp.substring(editBreak + 1, temp.length());
-    System.out.println("And the Rest: " + temp);
-    System.out.println("--------");
+
+    if (debug)
+      {
+	System.out.println("And the Rest: " + temp);
+	System.out.println("--------");
+      }
 
     // Time to create the query....
 
@@ -2010,9 +2059,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
     Query returnQuery = new Query(base, root, edit.equals("true"));
     
-    System.out.println("");
-    System.out.println("______________");
-    System.out.println("And Here it is: " + returnQuery.dumpToString());
+    if (debug)
+      {
+	System.out.println("");
+	System.out.println("______________");
+	System.out.println("And Here it is: " + returnQuery.dumpToString());
+      }
     
     return returnQuery;
   }
@@ -2037,8 +2089,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     if (queryString.startsWith("("))
       {
-	System.out.println("YAY!!");
-	    	  
+	if (debug)
+	  {
+	    System.out.println("YAY!!");
+	  }
+
 	// remove the outer parens
 
 	queryString = queryString.substring(1, queryString.length() - 1); 
@@ -2056,7 +2111,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     /* -- */
 
-    System.out.println("rDecode recursing: here's the rest: " + temp);
+    if (debug)
+      {
+	System.out.println("rDecode recursing: here's the rest: " + temp);
+      }
       
     /* While we're recursing, we are chopping off bits of this.queryString,
        which resides high (in the querybox object) above all this madness.
@@ -2130,7 +2188,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	if (queryPrefix("="))
 	  { 
 	    comparator = 1;
-	    System.out.println("Equals Found (=)");
+
+	    if (debug)
+	      {
+		System.out.println("Equals Found (=)");
+	      }
 	  }
 	else if (queryPrefix("<"))
 	  {
@@ -2180,7 +2242,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      {
 		// ignore parens
 		  
-		System.out.println("Continue");
+		if (debug)
+		  {
+		    System.out.println("Continue");
+		  }
 
 		continue;
 	      }
@@ -2189,7 +2254,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		// Ok, space up to the fieldname in the string and 
 		// get it. Also, be sure to look for # signs.
 
-		System.out.println("Field");
+		if (debug)
+		  {
+		    System.out.println("Field");
+		  }
 
 		nextIndex = queryString.indexOf(")");
 		  
@@ -2199,7 +2267,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		  
 		queryString = queryString.substring(nextIndex + 1, queryString.length());
 
-		System.out.println("Fieldname is: " + fieldname);
+		if (debug)
+		  {
+		    System.out.println("Fieldname is: " + fieldname);
+		  }
 
 		fieldDone = true;
 	      }
@@ -2208,7 +2279,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		// Ok, space up to the Value in the string and 
 		// get that.
 
-		System.out.println("Value");
+		if (debug)
+		  {
+		    System.out.println("Value");
+		  }
 		  
 		nextIndex = queryString.indexOf(")");
 		  
@@ -2218,7 +2292,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 		queryString = queryString.substring(nextIndex + 1, queryString.length());
 
-		System.out.println("value is: " + value);
+		if (debug)
+		  {
+		    System.out.println("value is: " + value);
+		  }
 
 		valueDone = true;
 	      }
@@ -2233,7 +2310,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	queryPrefix(")");	// cut off ) if it's left over
 
-	System.out.println("We're in the DataNode method. Returning DataNode");
+	if (debug)
+	  {
+	    System.out.println("We're in the DataNode method. Returning DataNode");
+	  }
 
 	if (myNode == null)
 	  {
