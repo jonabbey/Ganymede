@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2001/01/08 06:07:09 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2001/01/12 08:38:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2201,7 +2201,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     this.success = false;
 
-    attempt = session.openTransaction("xmlclient client (" + session.username + ")", false); // non-interactive
+    attempt = session.openTransaction("xmlclient", false); // non-interactive
 	    
     if (attempt != null && !attempt.didSucceed())
       {

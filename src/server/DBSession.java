@@ -6,15 +6,15 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2000/10/04 09:38:55 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2001/01/12 08:38:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.95 $ %D%
+ * @version $Revision: 1.96 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2001/01/11 13:54:05 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2001/01/12 08:38:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -1074,7 +1074,12 @@ public class DBEditSet {
 	    
 	    DateDBField df;
 	    StringDBField sf;
-	    String result = session.getID() + ": " + description;
+	    String result = session.getID() + " [" + description + "]";
+
+	    // intern the result string so that we don't have multiple
+	    // copies of common strings in our heap
+
+	    result.intern();
 
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
