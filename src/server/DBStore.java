@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,18 +37,18 @@ public class DBStore {
 
   // type identifiers used in the object store
 
-  static final short FIRST = 0;
-  static final short BOOLEAN = 0;
-  static final short NUMERIC = 1;
-  static final short DATE = 2;
-  static final short STRING = 3;
-  static final short INVID = 4;
-  static final short BOOLEANARRAY = 5;
-  static final short NUMERICARRAY = 6;
-  static final short DATEARRAY = 7;
-  static final short STRINGARRAY = 8;
-  static final short INVIDARRAY = 9;
-  static final short FINAL =9;
+  public static final short FIRST = 0;
+  public static final short BOOLEAN = 0;
+  public static final short NUMERIC = 1;
+  public static final short DATE = 2;
+  public static final short STRING = 3;
+  public static final short INVID = 4;
+  public static final short BOOLEANARRAY = 5;
+  public static final short NUMERICARRAY = 6;
+  public static final short DATEARRAY = 7;
+  public static final short STRINGARRAY = 8;
+  public static final short INVIDARRAY = 9;
+  public static final short FINAL =9;
 
   static final String id_string = "Gstore";
   static final byte major_version = 0;
@@ -177,7 +177,7 @@ public class DBStore {
 
     try 
       {
-	journal = new DBJournal(this, "journal");
+	journal = new DBJournal(this, "journal"); // need to parametrize filename
       }
     catch (IOException ex)
       {
@@ -186,26 +186,31 @@ public class DBStore {
 	throw new RuntimeException("couldn't initialize journal");
       }
 
-    try
+    if (!journal.clean())
       {
-	if (!journal.load())
+	try
 	  {
-	    throw new RuntimeException("problem loading journal");
+	    if (!journal.load())
+	      {
+		throw new RuntimeException("problem loading journal");
+	      }
+	    else
+	      {
+		// go ahead and consolidate the journal into the DBStore
+		// before we really get under way.
+
+		if (!journal.clean())
+		  {
+		    dump(filename, true);
+		  }
+	      }
 	  }
-	else
+	catch (IOException ex)
 	  {
-	    // go ahead and consolidate the journal into the DBStore
-	    // before we really get under way.
-
-	    dump(filename);
-	    journal.reset();
+	    // what do we really want to do here?
+	    
+	    throw new RuntimeException("couldn't load journal");
 	  }
-      }
-    catch (IOException ex)
-      {
-	// what do we really want to do here?
-
-	throw new RuntimeException("couldn't load journal");
       }
   }
 
@@ -216,19 +221,26 @@ public class DBStore {
    * This method dumps the entire database to disk.  The thread that calls the
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
-   * a long interval.
+   * a long interval.  Note that this method *will* dump the database, even
+   * if no changes have been made.  You should check the DBStore journal's 
+   * clean() method to determine whether or not a dump is really needed.
    *
    * The dump is guaranteed to be transaction consistent.
    *
    * @param filename Name of the database file to emit
+   * @param releaseLock boolean.  If releaseLock==false, dump() will not release
+   *                              the dump lock when it is done with the dump.  This
+   *                              is intended to allow for a clean shut down.  For
+   *                              non-terminal dumps, releaseLock should be true.
    *
    * @see csd.DBStore.DBEditSet
    * @see csd.DBStore.DBJournal
    *
    */
 
-  public void dump(String filename) throws IOException
+  public void dump(String filename, boolean releaseLock) throws IOException
   {
+    File dbFile = null;
     FileOutputStream outStream = null;
     DataOutputStream out = null;
     Enumeration basesEnum;
@@ -237,10 +249,25 @@ public class DBStore {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBStore: Dumping");
+      }
+
+    lock = new DBDumpLock(this);
+    lock.establish("System");	// wait until we get our lock 
+    
+    // Move the old version of the file to a backup
+    
     try
       {
-	lock = new DBDumpLock(this);
-	lock.establish("System");	// wait until we get our lock 
+	dbFile = new File(filename);
+	if (dbFile.isFile())
+	  {
+	    dbFile.renameTo(new File(filename + ".bak"));
+	  }
+
+	// and dump the whole thing
 
 	outStream = new FileOutputStream(filename);
 	out = new DataOutputStream(outStream);
@@ -267,9 +294,12 @@ public class DBStore {
       }
     finally
       {
-	if (lock != null)
+	if (releaseLock)
 	  {
-	    lock.release();
+	    if (lock != null)
+	      {
+		lock.release();
+	      }
 	  }
 
 	if (out != null)
@@ -308,6 +338,14 @@ public class DBStore {
     return new DBSession(this, key);
   }
 
+  /**
+   *
+   * <p>Do a printable dump of the object databases</p>
+   *
+   * @param out PrintStream to print to
+   *
+   */
+
   public void printBases(PrintStream out)
   {
     Enumeration enum;
@@ -320,6 +358,19 @@ public class DBStore {
       {
 	((DBObjectBase) enum.nextElement()).print(out);
       }
+  }
+
+  /**
+   *
+   * Returns the object definition class for the id class.
+   *
+   * @param id Type id for the base to be returned
+   *
+   */
+
+  public DBObjectBase getObjectBase(Short id)
+  {
+    return (DBObjectBase) objectBases.get(id);
   }
 }
 
