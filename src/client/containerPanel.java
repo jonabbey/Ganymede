@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.48 $ %D%
+    Version: $Revision: 1.49 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -601,7 +601,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (v.getOperationType() == JValueObject.ERROR)
       {
-	setStatus((String)v.getValue());
+	gc.showErrorMessage((String)v.getValue());
 	return true;
       }
 
@@ -631,6 +631,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Could not set field value: " + rx);
 	    return false;
 	  }
+      }
+    else if (v.getSource() instanceof JnumberField)
+      {
+
+	System.out.println("Jnumberfirled changed.");
+	
+	
+	db_field field = (db_field)objectHash.get(v.getSource());
+
+	try
+	  {
+	    returnValue = field.setValue(v.getValue());
+	  }
+	catch (RemoteException rx)
+	  {
+	    System.out.println("Could not set field value: " + rx);
+	    return false;
+	  }
+
+	
+
       }
     else if (v.getSource() instanceof JpassField)
       {
@@ -1279,7 +1300,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
 	QueryResult qr = null;
 	
@@ -1338,7 +1359,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    StringSelector ss = new StringSelector(null,
 						   (Vector)fieldInfo.getValue(), 
 						   this,
-						   editable,
+						   editable && fieldInfo.isEditable(),
 						   false,  // canChoose
 						   false,  // mustChoose
 						   160);
@@ -1346,7 +1367,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
-	    if (editable)
+	    if (editable && fieldInfo.isEditable())
 	      {
 		ss.setCallback(this);
 	      }
@@ -1358,14 +1379,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    StringSelector ss = new StringSelector(list.getLabels(false),
 						   (Vector)fieldInfo.getValue(), 
 						   this,
-						   editable,
+						   editable && fieldInfo.isEditable(),
 						   true,   // canChoose
 						   false,  // mustChoose
 						   160);
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
-	    if (editable)
+	    if (editable && fieldInfo.isEditable())
 	      {
 		ss.setCallback(this);
 	      }
@@ -1378,7 +1399,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	StringSelector ss = new StringSelector(null,
 					       (Vector)fieldInfo.getValue(), 
 					       this,
-					       editable,
+					       editable && fieldInfo.isEditable(),
 					       false,   // canChoose
 					       false,  // mustChoose
 					       160);
@@ -1424,7 +1445,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
 	Object key = field.choicesKey();
 
@@ -1474,9 +1495,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    System.out.println("It's not in there, downloading anew.");
 		  }
 
-		gc.cachedLists.putList(key, field.choices());
-		list = gc.cachedLists.getList(key);
-		choiceHandles = list.getListHandles(false);
+		QueryResult qr = field.choices();
+		if (qr == null)
+		  {
+		    choiceHandles = null;
+		  }
+		else
+		  {
+		    gc.cachedLists.putList(key, qr);
+		    list = gc.cachedLists.getList(key);
+		    choiceHandles = list.getListHandles(false);
+		  }
 
 		// debuging stuff
 
@@ -1521,7 +1550,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     System.out.println("Creating StringSelector");
 
-    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable, 
+    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable && fieldInfo.isEditable(), 
 					   true, true, 160, "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)
@@ -1531,7 +1560,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     objectHash.put(ss, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
 	ss.setCallback(this);
       }
@@ -1569,7 +1598,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
+    vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this);
     vectorPanelList.addElement(vp);
 
     addVectorRow( vp, fieldTemplate.getName(), fieldInfo.isVisible());
@@ -1706,7 +1735,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Setting current value: " + currentChoice);
 	  }	  
 
-	if (editable)
+	if (editable && fieldInfo.isEditable())
 	  {
 	    combo.addItemListener(this); // register callback
 	  }
@@ -1730,7 +1759,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      new JcomponentAttr(null,
 						 new Font("Helvetica",Font.PLAIN,12),
 						 Color.black,Color.white),
-			      editable,
+			      editable && fieldInfo.isEditable(),
 			      false,
 			      fieldTemplate.getOKChars(),
 			      fieldTemplate.getBadChars(),
@@ -1741,12 +1770,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      
 	sf.setText((String)fieldInfo.getValue());
 	    			
-	if (editable)
+	if (editable && fieldInfo.isEditable())
 	  {
 	    sf.setCallback(this);
 	  }
 
-	sf.setEditable(editable);
+	sf.setEditable(editable && fieldInfo.isEditable());
 
 	sf.setToolTipText(fieldTemplate.getComment());
 
@@ -1767,13 +1796,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
-	JpassField pf = new JpassField(gc, true, 10, 8, editable);
+	JpassField pf = new JpassField(gc, true, 10, 8, editable && fieldInfo.isEditable());
 	objectHash.put(pf, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), pf);
 			
-	if (editable)
+	if (editable && fieldInfo.isEditable())
 	  {
 	    pf.setCallback(this);
 	  }
@@ -1838,12 +1867,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
+	System.out.println("Setting callback on number field.");
 	nf.setCallback(this);
       }
 
-    nf.setEditable(editable);
+    nf.setEditable(editable && fieldInfo.isEditable());
     nf.setColumns(20);
     
     nf.setToolTipText(fieldTemplate.getComment());
@@ -1866,7 +1896,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
     objectHash.put(df, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), df);
-    df.setEditable(editable);
+    df.setEditable(editable && fieldInfo.isEditable());
 
     Date date = ((Date)fieldInfo.getValue());
     
@@ -1878,7 +1908,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // note that we set the callback after we initially set the
     // date, to avoid having the callback triggered on a listing
 
-    if (editable)
+    if (editable && fieldInfo.isEditable())
       {
 	df.setCallback(this);
       }
@@ -1900,8 +1930,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JCheckBox cb = new JCheckBox();
     objectHash.put(cb, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), cb);
-    cb.setEnabled(editable);
-    if (editable)
+    cb.setEnabled(editable && fieldInfo.isEditable());
+    if (editable && fieldInfo.isEditable())
       {
 	cb.addActionListener(this);	// register callback
       }
@@ -1941,10 +1971,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     Invid invid = object.getInvid(); // server call
 
     perm_button pb = new perm_button((perm_field) field,
-				     editable,
+				     editable && fieldInfo.isEditable(),
 				     gc.getBaseHash(),
-				     (invid.getType() == SchemaConstants.PermBase) &&
-				     (invid.getNum() == SchemaConstants.PermSelfUserObj));
+				     false);
     
     addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
     
@@ -2089,7 +2118,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    combo.setSelectedItem(noneHandle);
 	  }	  
 
-	if (editable)
+	if (editable && fieldInfo.isEditable())
 	  {
 	    combo.addItemListener(this); // register callback
 	  }
@@ -2142,7 +2171,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	ipf = new JIPField(new JcomponentAttr(null,
 					      new Font("Helvetica",Font.PLAIN,12),
 					      Color.black,Color.white),
-			   editable,
+			   editable && fieldInfo.isEditable(),
 			   field.v6Allowed());
       }
     catch (RemoteException rx)
