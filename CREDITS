@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.5
-July 28, 1999
+Ganymede Developer Release 0.99.6
+August 27, 1999
 CREDITS
 ---------------------------------------------
 
@@ -133,3 +133,8 @@ http://www.io.com/~maus/JavaPage.html for details and additional free
 Java code. Note that the version of Qstmp packaged with Ganymede has
 been significantly modified, to provide more convenient use and
 rudimentary MIME support.
+
+The MD5 classes used in the server were written by Santeri
+Paavolainen, and is included in Ganymede under the terms of the GNU
+General Public License.  See http://www.cs.hut.fi/~santtu/java/ for
+more information.

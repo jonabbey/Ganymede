@@ -1,7 +1,21 @@
-Ganymede Developer Release 0.99.5
-July 28, 1999
+Ganymede Developer Release 0.99.6
+August 27, 1999
 THINGSTODO
 ---------------------------------------------
+
+0) Schema Kit Separation
+
+For 0.99.7 I'm planning on reworking how schema kits are packaged and
+installed, to make it possible to maintain and distribute schema kits
+separate from the main Ganymede distribution.  This will involve
+changes to various elements of the distribution.  The most likely
+outcome of these changes will be that schema kit developers will write
+a custom Perl5 module that will get invoked by the installServer
+script to tie the schema kit's configuration and installation into the
+standard server install process.  Alternately, a free-standing and
+standard installSchema script will be able to use the same
+customization module to install a new schema kit into a pre-existing
+server installation.
 
 1) DNS Support
 

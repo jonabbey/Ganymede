@@ -1,5 +1,5 @@
 Ganymede Release 0.99.6
-July 28, 1999
+August 27, 1999
 FAQ
 ---------------------------------------------
 
@@ -100,11 +100,19 @@ done to keep everything as safe as possible.
 
    Quite possibly, yes.  The Java 1.2 platform includes support for
 RMI over custom socket types, which could theoretically include SSL
-encrypted sockets.  Most existing implementations of SSL sockets for
-Java are both pricey and export-controlled, but there exists a team
-working on a free SSL implementation for Java which is free and
-export-controlled.  That team is known as Claymore Systems, Inc., and
-you can read about their free implementation at
+encrypted sockets.
+
+   Sun has put out an early access version of their Java Secure Socket
+Extension (JSSE) which provides SSL and TLS socket encryption.  No
+word on whether anyone has gotten RMI to run over it successfully yet.
+
+See http://developer.java.sun.com/developer/earlyAccess/jsse/ for
+this.
+
+  A number of other organizations have done work on implementing SSL
+sockets within Java.. there is at least one free implementation
+underway, being done by Claymore Systems, Inc. You can read about
+their free implementation at
 
 http://www.rtfm.com/puretls/
 

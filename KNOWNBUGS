@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.5
-July 28, 1999
+Ganymede Developer Release 0.99.6
+August 27, 1999
 KNOWNBUGS
 ----------------------------------------------
 
@@ -23,7 +23,7 @@ account name/ password is not properly reset.  It is, instead, user:
 monitor, password: display.  If you start a new ganymede.db file
 from scratch, the monitor account should be configured properly.
 
-2) The gash and gasharl schemas are provided in 0.99.5 is intended to
+2) The gash and gasharl schemas are provided in 0.99.6 is intended to
 enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
 are, however, a relatively small number of functions that are not
 performed by Ganymede with the gash schemas.  These include the
