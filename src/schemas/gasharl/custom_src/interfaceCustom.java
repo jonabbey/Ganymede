@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/05/08 21:12:22 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/08/15 02:49:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -142,7 +142,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
 
 	result.append("[");
-	result.append(ipfield.getValueString(true));
+	result.append(ipfield.getValueString());
 
 	openIP = true;
       }
