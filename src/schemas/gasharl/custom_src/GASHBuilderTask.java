@@ -6,15 +6,15 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 2001/10/30 19:08:33 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 2003/06/13 03:05:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -193,6 +193,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	writeMailDirect();
 	writeSambafileVersion1();
 	writeNTfile();
+	writeUserSyncFile();
 	writeHTTPfiles();
 
 	success = true;
@@ -2095,6 +2096,99 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     finally
       {
 	rshNT.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This method writes out a userSync.txt file which includes the
+   * username, password, and invid.  This is used to allow generic
+   * username/password synchronization for external SQL applications.</p>
+   *
+   * <p>We include the invid to provide a guaranteed unique identifier,
+   * which will remain invariant even in the face of user rename.</p>
+   *
+   * <p>The userSync.txt file contains lines of the following format:</p>
+   *
+   * <PRE>
+   * username|cryptTextPassword|invid
+   * </PRE>
+   *
+   * <p>i.e.,</p>
+   *
+   * <PRE>
+   * broccol|AmgG.XVyOvJH2|3:627
+   * </PRE>
+   *
+   * <p>Note that if the user is inactivated or the user's password is undefined,
+   * the cryptTextPassword field in the userSync.txt file will be empty.  This
+   * should be construed as having the user be unusable, *not* having the user
+   * be usable with no password.</p>
+   *
+   */
+
+  private boolean writeUserSyncFile()
+  {
+    PrintWriter out = null;
+
+    /* -- */
+
+    try
+      {
+	out = openOutFile(path + "userSync.txt", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open userSync.txt file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	DBObject user;
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+	
+	String username;
+	Invid invid;
+	String cryptText;
+	
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+	    
+	    username = user.getLabel();
+	    invid = user.getInvid();
+	    cryptText = null;
+
+	    if (!user.isInactivated())
+	      {
+		PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+		
+		if (passField != null)
+		  {
+		    cryptText = passField.getUNIXCryptText();
+		  }
+	      }
+
+	    // ok, we've got a user with valid UNIXCrypt password
+	    // info.  Write it.
+
+	    out.print(username);
+	    out.print("|");
+
+	    if (cryptText != null)
+	      {
+		out.print(cryptText);
+	      }
+
+	    out.print("|");
+	    out.println(invid);
+	  }
+      }
+    finally
+      {
+	out.close();
       }
 
     return true;
