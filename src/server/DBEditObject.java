@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -907,6 +907,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    */
 
   public boolean mustChoose(DBField field)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to determine whether it is permissible to enter
+   * IPv6 address in a particular (IP) DBField.
+   *
+   */
+
+  public boolean isIPv6OK(DBField field)
   {
     return false;
   }
