@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -939,6 +939,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	      {
 		bNode.getBase().deleteField(fNode.getField());
 		refreshFields(bNode.getBase(), true);
+		ne.refreshSpaceList();
 	      }
 	    else
 	      {
@@ -2216,14 +2217,6 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 			  if (currentField.isString())
 			    {
 			      thisSpace = currentField.getNameSpaceLabel();
-			      if (thisSpace == null)
-				{
-				  System.out.println("thisSpace == null");
-				}
-			      else
-				{
-				  System.out.println("thisSpace == " + thisSpace);
-				}
 			      if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
 				{
 				  System.out.println("Adding to spaceL: " + thisBase + ":" + currentField.getName());;
