@@ -698,6 +698,19 @@ In addition, when these events do happen one at a time, the message
 subject in the mail sent out by Ganymede will now include the name of
 the object operated on.
 
+45. [SERVER] Expiration/Removal dates may not be set to times past
+
+Jeff Sims (jsims@arlut.utexas.edu) reported that Ganymede erroneously
+allowed a user's Expiration date to be set to an already passed date.
+The admin intended to set the Expiration some months in the future,
+across a year boundary, but neglected to change the year, causing
+Ganymede to expire the object at the next run of the Expiration Task.
+
+Ganymede will now forbid any changes to an object's Expiration or
+Removal date that would set either date to a time earlier than the
+Ganymede server's notion of current time, as a safeguard against this
+sort of mishap.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
