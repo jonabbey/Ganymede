@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -92,8 +92,14 @@ public class JMultiLineLabel extends JTextArea {
   boolean
     haveMeasured = false;
 
+  /**
+   * Controls the default word wrap length.  The default value of 96
+   * columns should hopefully be wide enough to handle exception
+   * traces gracefully.
+   */
+
   int 
-    columns = 42;
+    columns = 96;
 
   FontMetrics
     metric;
