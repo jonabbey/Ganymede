@@ -6,8 +6,8 @@
    
    Created: 5 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/02/10 21:22:01 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/02/10 22:08:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -175,6 +175,41 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
       }
 
     return false;
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate that a given Numeric field has a restricted
+   * range of possibilities.
+   *
+   */
+
+  public boolean isIntLimited(DBField field)
+  {
+    if (field.getID() == SchemaConstants.TaskPeriodCount)
+      {
+	return true;
+      }
+
+    return super.isIntLimited(field);
+  }
+
+  /**
+   *
+   * This method is used to specify the minimum acceptable value
+   * for the specified field.
+   *
+   */
+
+  public int minInt(DBField field)
+  {
+    if (field.getID() == SchemaConstants.TaskPeriodCount)
+      {
+	return 0;
+      }
+
+    return super.minInt(field);
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 1999/02/10 05:33:40 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 1999/02/10 22:08:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1704,6 +1704,7 @@ public class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Task";
+	b.classname = "arlut.csd.ganymede.custom.taskCustom";
 	b.type_code = (short) SchemaConstants.TaskBase; // 5
 	b.displayOrder = b.type_code;
 
@@ -1724,12 +1725,62 @@ public class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.TaskClass;
 	bf.field_type = FieldType.STRING;
-	bf.field_name = "Classname";
+	bf.field_name = "Task Class";
 	bf.badChars = "/:";
 	bf.field_order = 2;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskRunOnCommit;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Run On Transaction Commit";
+	bf.field_order = 3;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, this task will be run on transaction commit";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskRunPeriodically;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Run Periodically";
+	bf.field_order = 4;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, this task will be scheduled for periodic execution";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskPeriodUnit;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Period Unit";
+	bf.field_order = 5;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "What is the unit of time we're using?";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskPeriodCount;
+	bf.field_type = FieldType.NUMERIC;
+	bf.field_name = "Period Count";
+	bf.field_order = 6;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "How many time units between task runs?";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.TaskPeriodAnchor;
+	bf.field_type = FieldType.DATE;
+	bf.field_name = "Period Anchor";
+	bf.field_order = 7;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "When do we start counting period intervals from?";
 	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.TaskName);
