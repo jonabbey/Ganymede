@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/10/20 04:34:27 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/10/21 00:04:56 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -79,16 +79,16 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   JdateField
     selectDate;
 
+  TitledBorder
+    titledBorder;
+
   Invid
     invid;
 
   gclient gc;
 
   Date
-    selectedDate;
-
-  TitledBorder
-    titledBorder;
+    selectedDate = null;
 
   StringBuffer
     historyBuffer;
@@ -122,16 +122,20 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     
     buttonPanel.add(showFullHistory);
 
-    JPanel rightPanel = new JPanel(false);
-    rightPanel.add(new JLabel("Since:"));
-    selectDate = new JdateField();
-    selectDate.setCallback(this);
-    rightPanel.add(selectDate);
+    //    JPanel rightPanel = new JPanel(false);
+    //    rightPanel.add(new JLabel("Since:"));
+    //    selectDate = new JdateField();
+    //    selectDate.setCallback(this);
+    //    rightPanel.add(selectDate);
     
-    buttonPanel.add(rightPanel);
+    // buttonPanel.add(rightPanel);
 
-    topPanel.add("North", new datesPanel(creator_field, creation_date_field, 
-					 modifier_field, modification_date_field));
+    JPanel midPanel = new JPanel(new BorderLayout());
+    midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
+					 modifier_field, modification_date_field));;
+
+    topPanel.add("North", midPanel);
+    topPanel.setBorder(new TitledBorder("Creation/Modifcation"));
     
     JPanel p = new JPanel(new BorderLayout());
     titledBorder = new TitledBorder("Detailed History");
@@ -160,15 +164,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, 
 							      (e.getSource() == showFullHistory));
 	    historyText.setText(historyBuffer.toString());
-
-	    if (selectedDate != null)
-	      {
-		titledBorder.setTitle("History: starting from " + selectedDate);
-	      }
-	    else
-	      {
-		titledBorder.setTitle("History");
-	      }
 
 	    gc.setNormalCursor();
 	  }
@@ -227,7 +222,7 @@ class datesPanel extends JPanel {
 
   string_field notes_field;
 
-  JTextField
+  JLabel
     createdBy,
     modifiedBy,
     createdOn,
@@ -300,76 +295,79 @@ class datesPanel extends JPanel {
 	throw new RuntimeException("Could not get creation info: " + rx);
       }
     
-    createdBy = new JTextField(30);
-    
     if (creator == null)
       {
-	createdBy.setText("No creator set for this object.");
+	createdBy = new JLabel("No creator set for this object.");
       }
     else
       {
-	createdBy.setText(creator);
+	createdBy = new JLabel(creator);
       }
 
     addRow(createdBy, "Created By:");
     
-    createdOn = new JTextField(30);
-    
     if (creation_date == null)
       {
-	createdOn.setText("No creation date has been set for this object.");
+	createdOn = new JLabel("No creation date has been set for this object.");
       }
     else
       {
-	createdOn.setText(dateformat.format(creation_date));
+	createdOn = new JLabel(dateformat.format(creation_date));
       }
     
     addRow(createdOn, "Created On:");
     
-    modifiedBy = new JTextField(30);
-
     if (modifier == null)
       {
-	modifiedBy.setText("No information about the last modifier.");
+	modifiedBy = new JLabel("No information about the last modifier.");
       }
     else
       {
-	modifiedBy.setText(modifier);
+	modifiedBy = new JLabel(modifier);
       }
     
-    addRow(modifiedBy, "Modified By:");
+    addRow(modifiedBy, "Last Modified By:");
     
-    modifiedOn = new JTextField(30);
-
     if (mod_date == null)
       {
-	modifiedOn.setText("No last modification date");
+	modifiedOn = new JLabel("No last modification date");
       }
     else
       {
-	modifiedOn.setText(dateformat.format(mod_date));
+	modifiedOn = new JLabel(dateformat.format(mod_date));
       }
     
-    addRow(modifiedOn, "Modified on:");
+    addRow(modifiedOn, "Last Modified on:");
   }
 
-  void addRow(JComponent comp, String title)
+  void addRow(JLabel comp, String title)
   {
     JLabel l = new JLabel(title);
 
     /* -- */
     
-    gbc.weightx = 0.0;
-    gbc.fill = GridBagConstraints.NONE;
+    //    comp.setBorder(BorderFactory.createLineBorder(java.awt.Color.black));
+    //    comp.setBackground(java.awt.Color.white);
+    //    comp.setForeground(java.awt.Color.black);
+    //    comp.setOpaque(true);
+
+    comp.setForeground(java.awt.Color.black);
+    comp.setFont(Font.getFont("Courier"));
 
     gbc.gridwidth = 1;
-    gbc.gridx = 0;
     gbc.gridy = row;
+
+    gbc.gridx = 0;
+    //    gbc.weightx = 1.0;
+    gbc.fill = GridBagConstraints.NONE;
+
     gbl.setConstraints(l, gbc);
     add(l);
 
     gbc.gridx = 1;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    //    gbc.weightx = 4.0;
+    //    gbc.fill = GridBagConstraints.HORIZONTAL;
+
     gbl.setConstraints(comp, gbc);
     add(comp);
 

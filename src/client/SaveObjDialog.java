@@ -5,8 +5,8 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: October 19, 1999
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/10/20 04:34:26 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/10/21 00:04:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -70,7 +70,7 @@ import arlut.csd.JDialog.JCenterDialog;
  * summary, including optional history dump)</p>
  */
 
-public class SaveObjDialog extends JCenterDialog implements ActionListener {
+public class SaveObjDialog extends JCenterDialog implements ActionListener, ItemListener {
 
   private final boolean debug = false;
 
@@ -123,7 +123,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener {
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
-    super(owner, title, true);
+    super(owner, title, false);	// not modal
 
     panel = new JPanel(gbl);
 
@@ -232,7 +232,9 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener {
 
   public Date getStartDate()
   {
-    return date.getDate();
+    return null;
+
+    //    return date.getDate();
   }
 
   /**
@@ -358,30 +360,48 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener {
     gbc.anchor = GridBagConstraints.WEST;
 
     showHistory = new JCheckBox("Attach change log");
+    showHistory.addItemListener(this);
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbl.setConstraints(showHistory, gbc);
     panel.add(showHistory);
 
     showTransactions = new JCheckBox("Include complete transactions");
+    showTransactions.setEnabled(false);
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbl.setConstraints(showTransactions, gbc);
     panel.add(showTransactions);
     
-    JLabel startDateL = new JLabel("Starting Date");
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbl.setConstraints(startDateL, gbc);
-    panel.add(startDateL);
-    
-    date = new JdateField();
-    gbc.gridx = 1;
-    gbc.gridy = 2;
-    gbl.setConstraints(date, gbc);
-    panel.add(date);
+    //    JLabel startDateL = new JLabel("Starting Date");
+    //    gbc.gridx = 0;
+    //    gbc.gridy = 2;
+    //    gbl.setConstraints(startDateL, gbc);
+    //    panel.add(startDateL);
+    //    
+    //    date = new JdateField();
+    //    gbc.gridx = 1;
+    //    gbc.gridy = 2;
+    //    gbl.setConstraints(date, gbc);
+    //    panel.add(date);
 
     return panel;
+  }
+
+  public void itemStateChanged(ItemEvent e)
+  {
+    if (e.getItemSelectable() == showHistory)
+      {
+	if (e.getStateChange() == ItemEvent.DESELECTED)
+	  {
+	    showTransactions.setSelected(false);
+	    showTransactions.setEnabled(false);
+	  }
+	else if (e.getStateChange() == ItemEvent.SELECTED)
+	  {
+	    showTransactions.setEnabled(true);
+	  }
+      }
   }
 }
 
