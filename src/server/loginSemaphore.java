@@ -8,8 +8,8 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/02/14 20:45:00 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/15 05:55:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,8 +59,10 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class provides a handy counting semaphore used to arbitrate user
- * login access to the Ganymede server.
+ * <P>This class provides a handy counting semaphore used to arbitrate user
+ * login access to the {@link arlut.csd.ganymede.GanymedeServer GanymedeServer}.
+ * The server uses a single loginSemaphore to safely handle schema edits
+ * and server shutdowns.</P>
  */
 
 public final class loginSemaphore {
@@ -91,7 +93,7 @@ public final class loginSemaphore {
    *
    * <p>This method turns off user logins in Ganymede.  A piece of code in the
    * Ganymede server can call disable() on this object to signal that no further
-   * logins or schema edits should be allowed.
+   * logins or schema edits should be allowed.</p>
    *
    * @param message An explanation of why logins are being disabled.
    *
@@ -100,8 +102,8 @@ public final class loginSemaphore {
    * but the disable call itself will not block until this time
    *
    * @param millis If waitForZero is true, tells us about our blocking behavior..
-   * if millis < 0, we will block as long as necessary.  if millis = 0, we will
-   * not block.  if millis > 0, we will block no more than that number of milliseconds.
+   * if millis &lt; 0, we will block as long as necessary.  if millis = 0, we will
+   * not block.  if millis &gt; 0, we will block no more than that number of milliseconds.
    *
    * @return returns null if the disable was successful, or else a descriptive string
    * if the disable couldn't be carried out
@@ -218,7 +220,7 @@ public final class loginSemaphore {
 
   /**
    * <p>Gated enabled test.  If this method returns null, logins are allowed
-   * at the time isEnabled() is called.  This method is to be used by admin
+   * at the time checkEnabled() is called.  This method is to be used by admin
    * consoles, which should not connect to the server during schema editing or
    * server shut down, but which should not affect the login count for reasons
    * of blocking a schema edit disable, say.</p>
@@ -244,9 +246,9 @@ public final class loginSemaphore {
   /**
    * <p>Attempt to increment the login count</p>
    *
-   * @param millis Controls blocking behavior on this call.. if millis < 0,
+   * @param millis Controls blocking behavior on this call.. if millis &lt; 0,
    * we will block forever until the semaphore is re-enabled.  if millis == 0,
-   * no blocking will be peformed.  if millis > 0, we will not block for longer
+   * no blocking will be peformed.  if millis &gt; 0, we will not block for longer
    * than that number of milliseconds.
    * 
    * @return An explanation of why the increment could not be carried out, or null

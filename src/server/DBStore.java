@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2000/02/15 02:59:43 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2000/02/15 05:55:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -105,7 +105,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.103 $ %D%
+ * @version $Revision: 1.104 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -472,27 +472,30 @@ public class DBStore {
 	    throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
 	  }
 
-	if (!journal.clean())
+	if (!journal.isClean())
 	  {
 	    try
 	      {
 		if (!journal.load())
 		  {
+		    // if the journal wasn't in a totally consistent
+		    // state, print out a warning.  we'll still
+		    // continue to do everything we normally would,
+		    // however.
+
 		    System.err.println("\nError, couldn't load entire journal.. " +
 				       "final transaction in journal not processed.\n");
 		  }
-		else
+
+		// go ahead and consolidate the journal into the DBStore
+		// before we really get under way.
+
+		// Notice that we are going to archive a copy of the
+		// existing db file each time we start up the server
+		
+		if (!journal.isClean())
 		  {
-		    // go ahead and consolidate the journal into the DBStore
-		    // before we really get under way.
-
-		    // Notice that we are going to archive a copy of the
-		    // existing db file each time we start up the server
-
-		    if (!journal.clean())
-		      {
-			dump(filename, true, true);
-		      }
+		    dump(filename, true, true);
 		  }
 	      }
 	    catch (IOException ex)
@@ -515,7 +518,8 @@ public class DBStore {
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
    * if no changes have been made.  You should check the DBStore journal's 
-   * clean() method to determine whether or not a dump is really needed.</p>
+   * isClean() method to determine whether or not a dump is really needed,
+   * if you're not sure.</p>
    *
    * <p>The dump is guaranteed to be transaction consistent.</p>
    *
@@ -654,9 +658,14 @@ public class DBStore {
 
 	dbFile.renameTo(new File(filename + ".bak"));
 
-	// and move ganymede.db.new to ganymede.db.. note that we
-	// do have a very slight vulnerability here if we are
-	// interrupted between the above rename and this one.
+	// and move ganymede.db.new to ganymede.db.. note that we do
+	// have a very slight vulnerability here if we are interrupted
+	// between the above rename and this one.  If this happens,
+	// the Ganymede manager will have to manually move
+	// ganymede.db.new to ganymede.db before starting the server.
+
+	// In all other circumstances, the server will be able to come
+	// up and handle things cleanly without loss of data.
 
 	new File(filename + ".new").renameTo(dbFile);
 

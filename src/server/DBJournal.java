@@ -6,18 +6,20 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/11/16 08:00:58 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/02/15 05:55:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -277,12 +279,16 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   *
-   * The load() method reads in all transactions in the current DBStore Journal
+   * <P>The load() method reads in all transactions in the current DBStore Journal
    * and makes the appropriate changes to the DBStore Object Bases.  This
    * method should be called after the main body of the DBStore is loaded
-   * and before the DBStore is put into production mode.
+   * and before the DBStore is put into production mode.</P>
    *
+   * <P>load() will return true if the on-disk journal was in a consistent state,
+   * with no incomplete transactions.  If load() encounters EOF in the middle
+   * of attempting to read in a transaction record, load() will return false.  In
+   * either case, any valid and complete transaction records will be processed
+   * and integrated into the DBStore.</P>
    */
 
   public synchronized boolean load() throws IOException
@@ -616,7 +622,7 @@ public class DBJournal implements ObjectStatus {
    *
    */
 
-  public boolean clean()
+  public boolean isClean()
   {
     return !dirty;
   }
@@ -670,6 +676,11 @@ public class DBJournal implements ObjectStatus {
                                                                     JournalEntry
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>This class holds data corresponding to a modification record for a single
+ * object in the server's {@link arlut.csd.ganymede.DBJournal DBJournal} class.</P>
+ */
 
 class JournalEntry {
 

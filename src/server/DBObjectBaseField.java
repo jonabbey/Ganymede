@@ -7,18 +7,20 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2000/01/04 05:57:29 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2000/02/15 05:55:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
