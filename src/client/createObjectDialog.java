@@ -1,6 +1,16 @@
 /*
 
- */
+   createObjectDialog.java
+
+   This class is the dialog that is presented to the user when they go to
+   create a new object in the client.
+   
+   Created: 17 September 1998
+   Version: $Revision: 1.5 $ %D%
+   Module By: Mike Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -13,6 +23,11 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.JCenterDialog;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                              createObjectDialog
+
+------------------------------------------------------------------------------*/
 
 public class createObjectDialog extends JCenterDialog implements ActionListener {
 
@@ -34,7 +49,12 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     ok,
     cancel;
 
-  public createObjectDialog(gclient client) {
+  /* -- */
+
+  public createObjectDialog(gclient client) 
+  {
+    super(client, "Create Object", true);
+
     this.gc = client;
 
     JPanel p = new JPanel(gbl);
@@ -61,6 +81,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     gbc.ipadx = gbc.ipady = 0;
 
     // get list of types from gclient
+
     Vector bases = client.getBaseList();
     Hashtable baseToShort = client.getBaseToShort();
     Hashtable baseNames = client.getBaseNames();
@@ -76,16 +97,17 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 	    thisBase = (Base)bases.elementAt(i);
 
 	    // We don't want Admin Persona to show up in there.
+
 	    if (thisBase.getTypeID() != SchemaConstants.PersonaBase)
 	      {
 		String name = (String)baseNames.get(thisBase);
 		
 		// For some reason, baseNames.get is returning null sometimes.
+
 		if (name == null)
 		  {
 		    name = thisBase.getName();
 		  }
-		
 		
 		if (name.startsWith("Embedded:"))
 		  {
@@ -100,7 +122,6 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 		    listHandles.addElement(lh);
 		    
 		  }
-		
 	      }
 	  }
       }
@@ -149,16 +170,19 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     p.add(buttonP);
     this.setContentPane(p);
 
-    setSize(200,200);
     pack();
-    
+
+    setVisible(true);
   }
 
-  public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(ActionEvent e) 
+  {
     if (e.getSource() == ok) 
       {
 	listHandle choice = (listHandle)types.getSelectedItem();
+
 	Short type = (Short)choice.getObject();
+
 	if (type.shortValue() >= 0)
 	  {
 	    gc.createObject(type.shortValue(), true);
@@ -174,8 +198,5 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
       {
 	setVisible(false);
       }
-
-
   }
-
 }
