@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2003/09/06 04:03:20 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2003/09/08 05:04:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.Util.VectorUtils;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.64 $ $Date: 2003/09/06 04:03:20 $
+ * @version $Revision: 1.65 $ $Date: 2003/09/08 05:04:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -672,7 +672,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
     try
       {
 	setConsoleCount();
-	admin.setServerStart(Ganymede.startTime);
+	asyncPort.setServerStart(Ganymede.startTime);
 	doUpdateTransCount();
 	doUpdateTransCount();
 	doUpdateLastDump();

@@ -5,8 +5,8 @@
    Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/06 03:52:55 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/08 05:04:45 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -189,7 +189,8 @@ class GASHAdminDispatch implements Runnable {
 
   public void run()
   {
-    clientAsyncMessage event = null;
+    adminAsyncMessage events[] = null;
+    adminAsyncMessage event = null;
 
     /* -- */
 
@@ -202,23 +203,58 @@ class GASHAdminDispatch implements Runnable {
       {
 	while (okayToPoll)
 	  {
-	    event = asyncPort.getNextMsg(); // will block on server
+	    events = asyncPort.getNextMsgs(); // will block on server
 
-	    if (event == null)
+	    if (events == null || events.length == 0)
 	      {
 		return;
 	      }
 
-	    switch (event.getMethod())
+	    for (int i = 0; i < events.length; i++)
 	      {
-	      case clientAsyncMessage.SHUTDOWN:
-		forceDisconnect(event.getString(0));
-		return;
-		break;
+		event = events[i];
 
-	      case clientAsyncMessage.SENDMESSAGE:
-		sendMessage(event.getInt(0), event.getString(1));
-		break;
+		switch (event.getMethod())
+		  {
+		  case adminAsyncMessage.SETSERVERSTART:
+		    break;
+
+		  case adminAsyncMessage.SETLASTDUMPTIME:
+		    break;
+
+		  case adminAsyncMessage.SETTRANSACTIONS:
+		    break;
+
+		  case adminAsyncMessage.SETOBJSCHECKOUT:
+		    break;
+
+		  case adminAsyncMessage.SETLOCKSHELD:
+		    break;
+
+		  case adminAsyncMessage.CHANGESTATE:
+		    break;
+
+		  case adminAsyncMessage.CHANGESTATUS:
+		    break;
+
+		  case adminAsyncMessage.CHANGEADMINS:
+		    break;
+
+		  case adminAsyncMessage.CHANGEUSERS:
+		    break;
+
+		  case adminAsyncMessage.CHANGETASKS:
+		    break;
+
+		  case adminAsyncMessage.SETMEMORYSTATE:
+		    break;
+
+		  case adminAsyncMessage.FORCEDISCONNECT:
+		    break;
+
+		  default:
+		    System.err.println("Unrecognized adminAsyncMessage: " + event);
+		  }
 	      }
 	  }
       }

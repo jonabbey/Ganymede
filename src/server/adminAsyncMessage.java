@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2003/09/06 03:52:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/09/08 05:04:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2003/09/06 03:52:55 $
+ * @version $Revision: 1.3 $ $Date: 2003/09/08 05:04:46 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -85,7 +85,8 @@ public class adminAsyncMessage {
   static final int CHANGEUSERS = 8;
   static final int CHANGETASKS = 9;
   static final int SETMEMORYSTATE = 10;
-  static final int LAST = 10;
+  static final int FORCEDISCONNECT = 11;
+  static final int LAST = 11;
 
   /* --- */
 
@@ -114,6 +115,18 @@ public class adminAsyncMessage {
     this.method = method;
     params = new Object[1];
     params[0] = param;
+  }
+
+  public adminAsyncMessage(int method, int param)
+  {
+    if (method < FIRST || method > LAST)
+      {
+	throw new IllegalArgumentException("bad method code: " + method);
+      }
+
+    this.method = method;
+    params = new Object[1];
+    params[0] = new Integer(param);
   }
 
   public adminAsyncMessage(int method, Object param[])
@@ -177,7 +190,7 @@ public class adminAsyncMessage {
 	result.append("setMemoryState");
 	
       default:
-	result.append("??");
+	result.append("<" + method + ">??");
       }
 
     result.append("(");

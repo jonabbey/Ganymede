@@ -17,8 +17,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2003/09/06 03:52:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/09/08 05:04:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,7 +89,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.2 $ $Date: 2003/09/06 03:52:55 $
+ * @version $Revision: 1.3 $ $Date: 2003/09/08 05:04:46 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -124,7 +124,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
    * Client isn't responding.</p>
    */
 
-  private final int maxBufferSize = 15; // we shouldn't even need this many
+  private final int maxBufferSize = 25; // we shouldn't even need this many, since we replaceEvent
 
   /**
    * <p>If true, we have been told to shut down, and our
@@ -166,27 +166,6 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
   }
 
   /**
-   * <p>This method is used to submit a message to be sent to the
-   * client.  If the serverAdminAsyncResponder has already had its shutdown()
-   * method called, sendMessage() will silently fail, and the message
-   * will not be queued.</p>
-   */
-
-  public void sendMessage(int type, String message) throws RemoteException
-  {
-    if (done)
-      {
-	return;
-      }
-
-    Object params[] = new Object[2];
-    params[0] = new Integer(type);
-    params[1] = message;
-
-    addEvent(new adminAsyncMessage(adminAsyncMessage.SENDMESSAGE, params));
-  }
-
-  /**
    * <p>This method is used to shutdown the responder, without sending
    * a message to the client so notifying it.</p>
    */
@@ -206,36 +185,14 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
   }
 
   /**
-   * <p>This method is used to send a shutdown command to the client.
-   * This method will also set done to true, causing the
-   * serverAdminAsyncResponder to refuse any more event
-   * submissions.</p>
-   */
-
-  public void shutdown(String message) throws RemoteException
-  {
-    if (done)
-      {
-	return;
-      }
-
-    addEvent(new adminAsyncMessage(adminAsyncMessage.SHUTDOWN, message));
-
-    synchronized (eventBuffer)
-      {
-	this.done = true;
-	eventBuffer.notifyAll(); // let the client drain and exit
-      }
-  }
-
-  /**
    * <p>Blocks waiting for the next asynchronous message from the
    * server.  Returns null if isAlive() is false.</p>
    */
 
-  public adminAsyncMessage getNextMsg()
+  public adminAsyncMessage[] getNextMsgs()
   {
     adminAsyncMessage event;
+    Vector items = new Vector();
 
     /* -- */
 
@@ -257,16 +214,27 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 	    return null;	// but see finally, below
 	  }
 
-	event = dequeue();
+	while (ebSz > 0)
+	  {
+	    event = dequeue();
 
-	// clear the direct pointer to this event so that
-	// replaceEvent() will know that we don't have an event of
-	// this kind in our buffer anymore.
-	
-	lookUp[event.method] = null;
+	    // clear the direct pointer to this event so that
+	    // replaceEvent() will know that we don't have an event of
+	    // this kind in our buffer anymore.
+	    
+	    lookUp[event.getMethod()] = null;
+	    items.addElement(event);
+	  }
       }
 
-    return event;
+    adminAsyncMessage[] events = new adminAsyncMessage[items.size()];
+
+    for (int i = 0; i < events.length; i++)
+      {
+	events[i] = (adminAsyncMessage) items.elementAt(i);
+      }
+
+    return events;
   }
 
   /**
@@ -278,13 +246,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void forceDisconnect(String reason) throws RemoteException
   {
-    try
-      {
-	remoteConsole.forceDisconnect(reason);
-      }
-    catch (RemoteException ex)
-      {
-      }
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.FORCEDISCONNECT, reason);
+    addEvent(message);
 
     shutdown();
   }
@@ -296,7 +259,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setServerStart(Date date) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.SETSERVERSTART, date);
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETSERVERSTART, date);
+    replaceEvent(message);
   }
 
   /**
@@ -306,7 +270,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setLastDumpTime(Date date) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.SETLASTDUMPTIME, date);
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLASTDUMPTIME, date);
+    replaceEvent(message);
   }
 
   /**
@@ -316,7 +281,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setTransactionsInJournal(int trans) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.SETTRANSACTIONS, new Integer(trans));
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETTRANSACTIONS, trans);
+    replaceEvent(message);
   }
 
   /**
@@ -326,7 +292,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setObjectsCheckedOut(int objs) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.SETOBJSCHECKOUT, new Integer(objs));
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETOBJSCHECKOUT, objs);
+    replaceEvent(message);
   }
 
   /**
@@ -336,7 +303,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setLocksHeld(int locks) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.SETLOCKSHELD, new Integer(locks));
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLOCKSHELD, locks);
+    replaceEvent(message);
   }
 
   /**
@@ -346,12 +314,14 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void setMemoryState(long freeMem, long totalMem) throws RemoteException
   {
-    long[] parmAry = new long[2];
+    Object[] parmAry = new Object[2];
 
-    parmAry[0] = freeMem;
-    parmAry[1] = totalMem;
+    parmAry[0] = new Long(freeMem);
+    parmAry[1] = new Long(totalMem);
 
-    replaceEvent(adminAsyncMessage.SETMEMORYSTATE, parmAry);
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETMEMORYSTATE, parmAry);
+
+    replaceEvent(message);
   }
 
   /**
@@ -361,7 +331,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void changeState(String state) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.CHANGESTATE, state);
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.CHANGESTATE, state);
+    replaceEvent(message);
   }
 
   /**
@@ -394,7 +365,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 	  {
 	    // coalesce this append to the log message
 
-	    StringBuffer buffer = (StringBuffer) lookUp[adminAsyncMessage.CHANGESTATUS].param;
+	    StringBuffer buffer = (StringBuffer) lookUp[adminAsyncMessage.CHANGESTATUS].getParam(0);
 	    buffer.append(status);
 	    return;
 	  }
@@ -424,7 +395,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void changeAdmins(String adminStatus) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.CHANGEADMINS, adminStatus);
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.CHANGEADMINS, adminStatus);
+    replaceEvent(message);
   }
 
   /**
@@ -437,7 +409,10 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void changeUsers(Vector entries) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.CHANGEUSERS, entries);
+    Object params[] = new Object[entries.size()];
+    entries.copyInto(params);
+
+    replaceEvent(new adminAsyncMessage(adminAsyncMessage.CHANGEUSERS, params));
   }
 
   /**
@@ -450,7 +425,10 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   public void changeTasks(Vector tasks) throws RemoteException
   {
-    replaceEvent(adminAsyncMessage.CHANGETASKS, tasks);
+    Object params[] = new Object[tasks.size()];
+    tasks.copyInto(params);
+
+    replaceEvent(new adminAsyncMessage(adminAsyncMessage.CHANGETASKS, params));
   }
 
   /**

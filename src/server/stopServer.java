@@ -9,8 +9,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/05/07 05:57:56 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2003/09/08 05:04:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -278,26 +278,42 @@ public class stopServer {
  * connects to the server.</p>
  */
 
-class stopServerAdmin extends UnicastRemoteObject implements Admin {
+class stopServerAdmin {
 
   private Server server = null;
   private adminSession aSession = null;
-  private String adminName = null;
-  private String adminPass = null;
 
   /* -- */
 
   public stopServerAdmin(Server server, String name, String pass) throws RemoteException
   {
-    // UnicastRemoteServer can throw RemoteException 
+    ReturnVal retVal = null;
+
+    /* -- */
 
     this.server = server;
-    this.adminName = name;
-    this.adminPass = pass;
 
     try
       {
-	aSession = server.admin(this);
+	retVal = server.admin(name, pass);
+
+	if (retVal.didSucceed())
+	  {
+	    aSession = retVal.getAdminSession();
+	  }
+	else
+	  {
+	    System.err.println("Ganymede.stopServer: Error, couldn't log into server with admin privs.");
+	    
+	    String error = retVal.getDialogText();
+	    
+	    if (error != null && !error.equals(""))
+	      {
+		System.err.println(error);
+	      }
+
+	    System.exit(1);
+	  }
       }
     catch (NullPointerException ex)
       {
@@ -320,66 +336,5 @@ class stopServerAdmin extends UnicastRemoteObject implements Admin {
   public void disconnect() throws RemoteException
   {
     aSession.logout();
-  }
-
-  // everything below here are implementation methods for the Admin interface
-
-  public String getName()
-  {
-    return adminName;
-  }
-
-  public String getPassword()
-  {
-    return adminPass;
-  }
-
-  public void setServerStart(Date date)
-  {
-  }
-
-  public void setLastDumpTime(Date date)
-  {
-  }
-
-  public void setTransactionsInJournal(int trans)
-  {
-  }
-
-  public void setObjectsCheckedOut(int objs)
-  {
-  }
-
-  public void setLocksHeld(int locks)
-  {
-  }
-
-  public void setMemoryState(long free, long total)
-  {
-  }
-
-  public void changeStatus(String status)
-  {
-  }
-
-  public void changeAdmins(String adminStatus)
-  {
-  }
-
-  public void changeState(String state)
-  {
-  }
-
-  public void changeUsers(Vector entries)
-  {
-  }
-
-  public void changeTasks(Vector tasks)
-  {
-  }
-
-  public void forceDisconnect(String reason)
-  {
-    server = null;
   }
 }

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2003/09/05 21:09:39 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2003/09/08 05:04:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2801,7 +2801,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	 try
 	   {
-	     DBSchemaEdit result = new DBSchemaEdit(null);
+	     DBSchemaEdit result = new DBSchemaEdit();
 	     return result;
 	   }
 	 catch (RemoteException ex)
