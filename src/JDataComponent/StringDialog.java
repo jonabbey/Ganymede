@@ -459,7 +459,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     if (obj instanceof JComboBox)
       {
 	String label = (String)componentHash.get(obj);
-	Choice ch = (Choice)obj;
+	JComboBox ch = (JComboBox) obj;
 	valueHash.put(label, ch.getSelectedItem());
 	
 	if (debug)
