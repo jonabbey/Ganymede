@@ -43,6 +43,11 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
   Vector objects;
 
+  /**
+   * Constructor for StringDialog.
+   *
+   *@param Resource Sets resource for Dialog box.
+   */
   public StringDialog(DialogRsrc Resource) 
     {
       
@@ -174,6 +179,12 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       super.setVisible(b);
     }
 
+  /**
+   * Display the dialog box.
+   *
+   * Use this instead of Dialog.show();
+   * @returns valueHash HashTable of labels to values
+   */
 
   public Hashtable DialogShow()
     {
