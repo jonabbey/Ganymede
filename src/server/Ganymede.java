@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.*;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.ParseArgs;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -33,18 +34,22 @@ public class Ganymede {
   public static GanymedeSession internalSession;
   public static GanymedeScheduler scheduler;
   public static DBStore db;
-  public static String dbFilename;
   public static final boolean debug = true;
+
   public static Date startTime = new Date();
   public static String debugFilename = null;
-  public static String logFilename = "db/log";
   public static DBLog log = null;
   public static CategoryTransport catTransport = null;
   public static BaseListTransport baseTransport = null;
   public static Vector builderTasks = new Vector();
 
   // properties from the ganymede.properties file
-
+  
+  public static String dbFilename = null;
+  public static String journalProperty = null;
+  public static String logProperty = null;
+  public static String schemaProperty = null;
+  public static String htmlProperty = null;
   public static String serverHostProperty = null;
   public static String rootname = null;
   public static String defaultrootpassProperty = null;
@@ -55,6 +60,8 @@ public class Ganymede {
   public static String monitornameProperty = null;
   public static String defaultmonitorpassProperty = null;
 
+  public static boolean resetadmin = false;
+
   /* -- */
 
   public static void main(String argv[]) 
@@ -64,23 +71,19 @@ public class Ganymede {
 
     /* -- */
 
-    if (argv.length < 2)
+    propFilename = ParseArgs.getArg("properties", argv);
+
+    if (propFilename == null)
       {
 	System.out.println("Error: invalid command line parameters");
-	System.out.println("Usage: java Ganymede <dbfile> <property file> [<rmi debug file>]");
+	System.out.println("Usage: java Ganymede [-resetadmin] properties=<property file> [debug=<rmi debug file>]");
 	return;
       }
-    else
-      {
-	dbFilename = argv[0];
-	propFilename = argv[1];
 
-	if (argv.length >= 3)
-	  {
-	    debugFilename = argv[2];
-	  }
-      }
+    debugFilename = ParseArgs.getArg("debug", argv);
 
+    resetadmin = ParseArgs.switchExists("resetadmin", argv);
+    
     if (!loadProperties(propFilename))
       {
 	System.out.println("Error, couldn't successfully load properties from file " + propFilename + ".");
@@ -139,7 +142,7 @@ public class Ganymede {
 
 	try 
 	  {
-	    db.journal = new DBJournal(db, GanymedeConfig.journal);
+	    db.journal = new DBJournal(db, Ganymede.journalProperty);
 	  }
 	catch (IOException ex)
 	  {
@@ -204,7 +207,7 @@ public class Ganymede {
 
     try
       {
-	log = new DBLog(logFilename, internalSession);
+	log = new DBLog(logProperty, internalSession);
       }
     catch (IOException ex)
       {
@@ -315,7 +318,7 @@ public class Ganymede {
 
 	try 
 	  {
-	    db.journal = new DBJournal(db, GanymedeConfig.journal);
+	    db.journal = new DBJournal(db, Ganymede.journalProperty);
 	  }
 	catch (IOException ex)
 	  {
@@ -424,6 +427,31 @@ public class Ganymede {
     PermissionMatrixDBField pm;
     
     /* -- */
+
+    if (resetadmin)
+      {
+	internalSession.openTransaction("Ganymede startupHook");
+
+	e_object = (DBEditObject) internalSession.edit_db_object(new Invid(SchemaConstants.PersonaBase,
+									   SchemaConstants.PersonaSupergashObj));
+
+	if (e_object == null)
+	  {
+	    throw new RuntimeException("Error!  Couldn't pull " + rootname + " object");
+	  }
+
+	PasswordDBField p = (PasswordDBField) e_object.getField("Password");
+	ReturnVal retval = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+
+	if (retval != null && !retval.didSucceed())
+	  {
+	    throw new RuntimeException("Error!  Couldn't reset " + rootname + " password");
+	  }
+
+	System.out.println(rootname + " password reset to value specified in Ganymede properties file");
+
+	internalSession.commitTransaction();
+      }
 
     if (false)
       {
@@ -591,6 +619,11 @@ public class Ganymede {
 	return false;
       }
 
+    dbFilename = props.getProperty("ganymede.database");
+    journalProperty = props.getProperty("ganymede.journal");
+    logProperty = props.getProperty("ganymede.log");
+    schemaProperty = props.getProperty("ganymede.schemadump");
+    htmlProperty = props.getProperty("ganymede.htmldump");
     serverHostProperty = props.getProperty("ganymede.serverhost");
     rootname = props.getProperty("ganymede.rootname");
     defaultrootpassProperty = props.getProperty("ganymede.defaultrootpass");
@@ -600,6 +633,36 @@ public class Ganymede {
     helpbaseProperty = props.getProperty("ganymede.helpbase");
     monitornameProperty = props.getProperty("ganymede.monitorname");
     defaultmonitorpassProperty = props.getProperty("ganymede.defaultmonitorpass");
+
+    if (dbFilename == null)
+      {
+	System.err.println("Couldn't get the database property");
+	success = false;
+      }
+
+    if (journalProperty == null)
+      {
+	System.err.println("Couldn't get the journal property");
+	success = false;
+      }
+
+    if (logProperty == null)
+      {
+	System.err.println("Couldn't get the journal property");
+	success = false;
+      }
+
+    if (schemaProperty == null)
+      {
+	System.err.println("Couldn't get the schema property");
+	success = false;
+      }
+
+    if (htmlProperty == null)
+      {
+	System.err.println("Couldn't get the html dump property");
+	success = false;
+      }
 
     if (serverHostProperty == null)
       {
@@ -645,8 +708,8 @@ public class Ganymede {
 
     if (monitornameProperty == null)
       {
-	System.err.print("Couldn't get the monitor name property.. ");
-	System.err.println("may have problems if initializing a new db");
+	System.err.print("Couldn't get the monitor name property.");
+	success = false;
       }
 
     if (defaultmonitorpassProperty == null)
