@@ -811,6 +811,19 @@ in it.
 All of the install scripts now double check to make sure the
 jar files were made during the system build.
 
+54. [SERVER] Reworked checkpoint handling for non-interactive transactions
+
+I have simplified how non-interactive transactions handle
+checkpoints..  basically, the DBEditSet class now automatically
+ignores checkpoint activity for non-interactive transactions.  Any
+rollback request made during a non-interactive transaction will result
+in the transaction committing hari-kari at commit time.
+
+By putting all the logic for this in DBEditSet, I've simplified a fair
+bit of code in InvidDBField, DBEditObject, and DBSession.
+
+I should have done this before.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
