@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 1 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,9 +30,10 @@ public class QueryResult implements java.io.Serializable {
   // --
 
   StringBuffer buffer;
-  private boolean unpacked = false;
 
   // for use post-serialized
+
+  transient private boolean unpacked = false;
 
   transient Vector invids = null;
   transient Vector labels = null;
