@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1328,10 +1328,10 @@ public class GASHAdmin extends JApplet {
 
     rootname = props.getProperty("ganymede.rootname");
 
+
     if (rootname == null)
       {
-	System.err.println("Couldn't get the root name property");
-	success = false;
+	rootname = "supergash";
       }
 
     return success;

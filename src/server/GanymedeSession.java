@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,7 +229,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     GanymedeAdmin.refreshUsers();
     updatePerms();
 
-    Ganymede.debug("User " + username + " is " + (supergashMode ? "" : "not ") + "active with supergash privs");
+    Ganymede.debug("User " + username + " is " + (supergashMode ? "" : "not ") + 
+		   "active with " + Ganymede.rootname + " privs");
   }
 
   //************************************************************
@@ -2291,10 +2292,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == 0))
       {
-	setLastError("Can't delete supergash persona");	// for logging
+	setLastError("Can't delete " + Ganymede.rootname + " persona");	// for logging
 
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete supergash persona");
+					  "Error.. can't delete " + Ganymede.rootname + " persona");
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
