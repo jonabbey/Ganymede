@@ -7,18 +7,19 @@
 # converts them into an xml representation for loading into
 # Ganymede.
 #
-# Amy Bush, Jonathan Abbey & Brian O'Mara
+# Amy Bush & Jonathan Abbey
 # 11/1999-9/2000
 #
 # Released under GPL as part of the Ganymede network directory
 # management system, http://www.arlut.utexas.edu/gash2
 #
-# This script requires that the XML:Writer module is installed in
-# the Perl 5 package for use.
+# This script requires that the XML:Writer Perl 5 module be installed
+# in order to operate.  You can find this module in CPAN, or
+# at http://www.megginson.com/Software/index.html.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.2 $
-# Date: $Date: 2000/09/15 05:25:17 $
+# Version: $Revision: 1.3 $
+# Date: $Date: 2000/09/15 05:44:02 $
 #
 #=====================================================================
 
@@ -29,18 +30,26 @@ use IO;
 # Globals  
 #=====================================================================
 
-$dir = "/home/broccol/XML/";
+# Ganymede XML format major and minor numbers
+
+$major_ver = 1;
+$minor_ver = 0;
+
+# name of directory containing the files we are going to load from
+
+$dir = ".";
 
 # name of file containing user records
 
-$passwdfile = "passwd";
+$passwdfile = "$dir/passwd";
 
-# name of file containing passwords, if not in the above $passwdfile;
-# (uncomment only the appropriate one) - if no shadow file, comment
-# each of these
+# name of file containing group records
 
-$shadowfile = "shadow";
-#$shadowfile = "master.passwd";
+$groupfile = "$dir/group";
+
+# name of shadow file, if in use
+
+$shadowfile = "$dir/shadow";
 
 #=====================================================================
 # Main  
@@ -49,7 +58,7 @@ $shadowfile = "shadow";
 # Loop through passwd file creating a hash entry (username as key)
 # for each passwd entry.
 
-open (INPUT, "<$dir/$passwdfile") || die "Error!  Couldn't open $dir/passwd!";
+open (INPUT, "<$passwdfile") || die "Error!  Couldn't open $passwdfile!";
 
 while (<INPUT>) {
 
@@ -84,7 +93,7 @@ while (<INPUT>) {
       shell    => $shell,
     };
   } else {
-    print "Error, passwd line\n$_\ndidn't match regexp for passwd entry";
+    print STDERR "Error, passwd line\n$_\ndidn't match regexp for passwd entry";
   }
 }
 
@@ -98,7 +107,7 @@ if (defined $shadowfile) {
   # actual password from the shadow/master.passwd file and place the
   # value in $UsernameToUser{username}{password}
 
-  open (INPUT, "<$dir/$shadowfile") || die "Error!  Couldn't open $dir$shadowfile";
+  open (INPUT, "<$shadowfile") || die "Error!  Couldn't open $shadowfile";
 
   while (<INPUT>) {
 
@@ -115,13 +124,13 @@ if (defined $shadowfile) {
         if (length($UsernameToUser{$username}{password}) < 3) {
           $UsernameToUser{$username}{password} = $passwd;
         } else {
-          print "$username may already have a valid password - skipping shadow password for this user\n";
+          print STDERR "$username may already have a valid password - skipping shadow password for this user\n";
         }
       } else {
-        print "$username was found in the shadow file but not the passwd file - skipping\n";
+        print STDERR "$username was found in the shadow file but not the passwd file - skipping\n";
       }
     } else {
-      print "Error, shadow line\n$_\ndidn't match regexp for shadow entry";
+      print STDERR "Error, shadow line\n$_\ndidn't match regexp for shadow entry";
     }
   }
   
@@ -132,7 +141,7 @@ if (defined $shadowfile) {
 # GroupnameToGroup hash. At the same time, place gid (key) and
 # groupname (value) in the GidToName hash for future lookups.
 
-open (INPUT, "<$dir/group") || die "Error!  Couldn't open $dir/group!";
+open (INPUT, "<$groupfile") || die "Error!  Couldn't open $groupfile!";
 
 while (<INPUT>) {
   
@@ -156,7 +165,7 @@ while (<INPUT>) {
       if ($UsernameToUser{$user}) { 
         push @users, $user;
       } else {
-        print "$user is in a group but not in the passwd file - skipping\n";
+        print STDERR "$user is in a group but not in the passwd file - skipping\n";
       }
     }
     
@@ -168,7 +177,7 @@ while (<INPUT>) {
 				    };
     
   } else {
-    print "Error, group line\n$_\ndidn't match regexp for group entry";
+    print STDERR "Error, group line\n$_\ndidn't match regexp for group entry";
   }
 }
 
@@ -193,8 +202,8 @@ exit;
 
 sub printXML {
 
-  my $output = new IO::File(">$Output_File");
-  my $writer = new XML::Writer2(OUTPUT => $output);
+  $output = new IO::File(">$Output_File");
+  $writer = new XML::Writer(OUTPUT => $output);
 
   # set up the indentation level
 
@@ -238,10 +247,19 @@ sub printXML {
     $writer->emptyTag("password", 'crypt' => $UsernameToUser{$user}{password});
     $writer->endTag("Password");
 
+    # We are only showing the user's home group in the <Groups> field, even
+    # if the user is actually in multiple groups.. the Ganymede server will
+    # take care of linking ther Groups into this user at load time if need
+    # be.
+
     &xmlIndent();
     $writer->startTag("Groups");
     $writer->emptyTag("invid", 'type' => 'Group', 'id' => $GidToName{$UsernameToUser{$user}{gid}});
     $writer->endTag("Groups");
+
+    # This field is actually called "Home Group", note that we have to
+    # substitute underscores for spaces in field names when doing XML
+    # loading
 
     &xmlIndent();
     $writer->startTag("Home_Group");
@@ -290,20 +308,28 @@ sub printXML {
     $writer->emptyTag("int", 'val' => $GroupnameToGroup{$group}{gid});
     $writer->endTag("GID");
 
-    &xmlIndent();
-    $writer->startTag("Users");
+    # we're only going to write out users that were explicitly listed
+    # in the group file.. we don't write out implicit membership due
+    # to the gid field in the passwd file
 
-    $indentlevel++;
+    @usermembers = @{$GroupnameToGroup{$group}{users}};
 
-    foreach $groupuser (@{$GroupnameToGroup{$group}{users}}) {
+    if ($#usermembers > 0) {
       &xmlIndent();
-      $writer->emptyTag("invid", 'type' => 'User', 'id' => $groupuser);
+      $writer->startTag("Users");
+
+      $indentlevel++;
+
+      foreach $groupuser (@usermembers) {
+	&xmlIndent();
+	$writer->emptyTag("invid", 'type' => 'User', 'id' => $groupuser);
+      }
+      
+      $indentlevel--;
+
+      &xmlIndent();
+      $writer->endTag("Users");
     }
-
-    $indentlevel--;
-
-    &xmlIndent();
-    $writer->endTag("Users");
 
     $indentlevel--;
 
@@ -324,7 +350,6 @@ sub printXML {
   $writer->endTag("ganymede");
 
   $writer->end();
-  $output->close();
 } 
 
 #---------------------------------------------------------------------
@@ -336,7 +361,7 @@ sub printXML {
 #
 #---------------------------------------------------------------------
 
-sub EmitNL() {
+sub xmlIndent() {
   my $indentation = "\n";
   my $tab = " " x 2;   # leading spaces           
 
@@ -366,13 +391,13 @@ sub printUsers {
         print "group\t";
         print "$GidToName{$UsernameToUser{$key}{$key2}}\n";
       } else {
-      print "$key2\t";
-      print "$UsernameToUser{$key}{$key2}\n";
+	print "$key2\t";
+	print "$UsernameToUser{$key}{$key2}\n";
       }
     }
-  print "\n";
+    print "\n";
   }
-} 
+}
 
 #---------------------------------------------------------------------
 #                                                          printGroups
@@ -387,13 +412,13 @@ sub printGroups {
     foreach $key2 (keys %{$GroupnameToGroup{$key}}) {
       print "$key2\t";
       if ($key2 eq "users") {
-          foreach $user ($GroupnameToGroup{$key}{users}) {
-            print "@{$user}\n";
-          }
+	foreach $user ($GroupnameToGroup{$key}{users}) {
+	  print "@{$user}\n";
+	}
       } else {
         print "$GroupnameToGroup{$key}{$key2}\n";
       }
     }
-  print "\n";
+    print "\n";
   }
 }
