@@ -584,7 +584,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      {
 		my_client.connect();	// exceptions ahoy!
 
-		if (my_client.getCipherSuite() != null)
+		if (my_client.getCipherSuite() != null && !ssl)
 		  {
 		    ssl = true;
 		    image.setIcon(new ImageIcon(ganymede_ssl_logo));

@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -326,7 +326,15 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     hostLabel = new JLabel("Ganymede Server Host:");
 
-    hostField = new JTextField(GASHAdmin.url, 40);
+    if (adminPanel.isSSL())
+      {
+	hostField = new JTextField(GASHAdmin.url + "  [SSL]", 40);
+      }
+    else
+      {
+	hostField = new JTextField(GASHAdmin.url, 40);
+      }
+
     hostField.setEditable(false);
 
     topPanel = new JPanel();

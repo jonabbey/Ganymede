@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -85,6 +85,8 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.ganymede.common.RMISSLClientListener;
+import arlut.csd.ganymede.common.RMISSLClientSocketFactory;
 import arlut.csd.ganymede.rmi.Server;
 
 /*------------------------------------------------------------------------------
@@ -107,7 +109,7 @@ import arlut.csd.ganymede.rmi.Server;
  * method.</P>
  */
 
-public class GASHAdmin extends JApplet implements Runnable, ActionListener {
+public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMISSLClientListener {
 
   static final boolean debug = false;
 
@@ -145,7 +147,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   static Server server = null;	// remote reference
   static Image admin_logo = null;
+  static Image admin_ssl_logo = null;
 
+  JLabel image = null;
   JTextField username = null;
   JPasswordField password = null;
   JButton quitButton;
@@ -158,6 +162,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   String connectError = null;
 
+  private String cipherSuite = null;
+
+  /**
+   * <p>We set this to true if we have set the logo to display the
+   * SSL icon.</p>
+   */
+
+  private boolean ssl_logo = false;
+
   private booleanSemaphore connecting = new booleanSemaphore(false);
   private booleanSemaphore connected = new booleanSemaphore(false);
 
@@ -169,6 +182,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   public GASHAdmin() 
   {
     admin_logo = PackageResources.getImageResource(this, "ganymede_admin.jpg", getClass());
+    admin_ssl_logo = PackageResources.getImageResource(this, "ganymede_ssl_admin.jpg", getClass());
+
     GASHAdmin.applet = this;
   }
 
@@ -221,6 +236,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       {
 	loadParameters();
       }
+
+    // let's get notified if we establish an SSL connection
+
+    RMISSLClientSocketFactory.setSSLClientListener(this);
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
@@ -283,7 +302,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     if (admin_logo != null)
       {
-	JLabel image = new JLabel(new ImageIcon(admin_logo));
+	image = new JLabel(new ImageIcon(admin_logo));
 	image.setOpaque(true);
 	image.setBackground(Color.black);
 
@@ -432,6 +451,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 		    server.up();	// RMI call to verify our connection
 		  }
 
+		if (this.cipherSuite != null && !ssl_logo)
+		  {
+		    image.setIcon(new ImageIcon(admin_ssl_logo));
+		    this.ssl_logo = true;
+		  }
+
 		connected.set(true);
 		break;
 	      }
@@ -481,7 +506,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	      {
 		public void run()
 		{
-		  loginButton.setText("Login to server");
+		  if (!ssl_logo)
+		    {
+		      loginButton.setText("Login to server (NO SSL)");
+		    }
+		  else
+		    {
+		      loginButton.setText("Login to server");
+		    }
+
 		  username.setEnabled(true);
 		  password.setEnabled(true);
 		  
@@ -614,6 +647,29 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	    System.err.println("Problem trying to refresh: " + rx);
 	  }
       }
+  }
+
+  /**
+   * <p>This method returns true if we have created an RMI SSL socket
+   * to our server.</p>
+   */
+
+  public boolean isSSL()
+  {
+    return this.cipherSuite != null;
+  }
+
+  /**
+   * <p>This method is called when an RMI SSL client socket is created on the
+   * Ganymede client.</p>
+   *
+   * <p>This method implements the {@link arlut.csd.ganymede.common.RMISSLClientListener}
+   * interface.</p>
+   */
+
+  public void notifySSLClient(String host, int port, String cipherSuite)
+  {
+    this.cipherSuite = cipherSuite;
   }
 
   /**
