@@ -1494,6 +1494,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     canvas.render();
     canvas.repaint();
+    repaint();
   }
 }
 
