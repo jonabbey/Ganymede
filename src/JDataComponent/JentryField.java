@@ -5,7 +5,7 @@
    use textfields.  The subclasses of this class should be used.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin 
 
@@ -170,9 +170,3 @@ abstract public class JentryField extends JTextField implements FocusListener{
       }
   }
 }
-
-
-
-
-
-
