@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 2000/02/01 04:04:16 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 2000/02/14 20:44:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -22,6 +22,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -145,7 +146,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     String clientName;
     String clientPass;
     boolean found = false;
-    boolean success = true;
+    boolean success = false;
     Query userQuery;
     QueryNode root;
     DBObject user = null, persona = null;
@@ -394,25 +395,29 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public void clearIdleSessions()
   {
-    synchronized (sessions)
+    // clone the sessions Vector so any forceOff() resulting from a
+    // timeCheck() call won't disturb the loop
+
+    Vector sessionsCopy = (Vector) sessions.clone();
+
+    for (int i = 0; i < sessionsCopy.size(); i++)
       {
-	for (int i = 0; i < sessions.size(); i++)
-	  {
-	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
-	    session.timeCheck();
-	  }
+	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
+	session.timeCheck();
       }
   }
 
   public void killAllUsers(String reason)
   {
-    synchronized (sessions)
+    // clone the sessions Vector so any forceOff() won't disturb the
+    // loop
+
+    Vector sessionsCopy = (Vector) sessions.clone();
+
+    for (int i = 0; i < sessionsCopy.size(); i++)
       {
-	for (int i = 0; i < sessions.size(); i++)
-	  {
-	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
-	    session.forceOff(reason);
-	  }
+	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
+	session.forceOff(reason);
       }
   }
 
@@ -423,6 +428,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public boolean killUser(String username, String reason)
   {
+    // it's okay to loop inside sessions since we'll exit the loop as
+    // soon as we do a forceOff (which can cause the sessions Vector
+    // to be modified in a way that would otherwise disturb the loop
+
     synchronized (sessions)
       {
 	for (int i = 0; i < sessions.size(); i++)

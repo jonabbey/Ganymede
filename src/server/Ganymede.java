@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/01/29 02:32:56 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2000/02/14 20:44:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1413,7 +1413,6 @@ class dumpTask implements Runnable {
 	    Ganymede.debug("dump could not succeed.. IO error " + ex.getMessage());
 	  }
 
-	Ganymede.debug("Completed dump task");
 	completed = true;
       }
     finally
@@ -1431,6 +1430,8 @@ class dumpTask implements Runnable {
 	  {
 	    GanymedeServer.lSemaphore.decrement();
 	  }
+
+	Ganymede.debug("Completed dump task");
       }
   }
 }
@@ -1489,7 +1490,6 @@ class dumpAndArchiveTask implements Runnable {
 	    Ganymede.debug("dump/archive could not succeed.. IO error " + ex.getMessage());
 	  }
 
-	Ganymede.debug("Completed dump/archive task");
 	completed = true;
       }
     finally
@@ -1504,6 +1504,8 @@ class dumpAndArchiveTask implements Runnable {
 	  }
 
 	GanymedeServer.lSemaphore.decrement();
+
+	Ganymede.debug("Completed dump/archive task");
       }
   }
 }

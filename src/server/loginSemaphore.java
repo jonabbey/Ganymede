@@ -8,8 +8,8 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/02/02 01:03:01 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/02/14 20:45:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -21,6 +21,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -235,7 +236,7 @@ public final class loginSemaphore {
    * <p>Returns a count of the number of users logged in on this semaphore</p>
    */
 
-  public synchronized int getCount()
+  public int getCount()
   {
     return count;
   }

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/02/10 04:35:39 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/02/14 20:44:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.41 $ $Date: 2000/02/10 04:35:39 $
+ * @version $Revision: 1.42 $ $Date: 2000/02/14 20:44:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -160,7 +160,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   public static void setStatus(String status)
   {
     GanymedeAdmin temp;
-    String stampedLine = new Date() + " " + status + "\n";
+    String stampedLine = new Date() + " [" + GanymedeServer.lSemaphore.getCount() + "] " + status + "\n";
 
     /* -- */
 

@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/01/27 06:03:24 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/02/14 20:44:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,6 +93,9 @@ public class GanymedeWarningTask implements Runnable {
     Ganymede.debug("Warning Task: Starting");
 
     String semaphoreCondition;
+
+    // we have to increment the GanymedeServer loginSemaphore, because
+    // we are using a non-semaphored local GanymedeSession
 
     try
       {
@@ -424,6 +427,8 @@ public class GanymedeWarningTask implements Runnable {
       }
     finally
       {
+	GanymedeServer.lSemaphore.decrement();
+
 	if (started && !finished)
 	  {
 	    // we'll get here if this task's thread is stopped early
