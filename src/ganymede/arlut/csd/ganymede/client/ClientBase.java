@@ -65,6 +65,8 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.clientAsyncMessage;
+import arlut.csd.ganymede.common.RMISSLClientListener;
+import arlut.csd.ganymede.common.RMISSLClientSocketFactory;
 import arlut.csd.ganymede.rmi.ClientAsyncResponder;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
@@ -85,7 +87,7 @@ import arlut.csd.Util.booleanSemaphore;
  * @author Mike Mulvaney
  */
 
-public class ClientBase implements Runnable {
+public class ClientBase implements Runnable, RMISSLClientListener {
 
   private final static boolean debug = false;
 
@@ -122,6 +124,13 @@ public class ClientBase implements Runnable {
    */
 
   private XMLSession xSession = null;
+
+  /**
+   * If we have created an RMI SSL connection, we'll record the cipher
+   * suite here.
+   */
+
+  private String cipherSuite = null;
  
   private Vector listeners = new Vector();
   private String myServerURL = null;
@@ -148,6 +157,11 @@ public class ClientBase implements Runnable {
     
     myServerURL = serverURL;
     listeners.addElement(listener);
+
+    // and make sure we are notified if the RMI system creates an SSL
+    // connection for us
+
+    RMISSLClientSocketFactory.setSSLClientListener(this);
   }
 
   /**
@@ -487,6 +501,28 @@ public class ClientBase implements Runnable {
       {
 	((ClientListener)myVect.elementAt(i)).messageReceived(e);
       }
+  }
+
+  /**
+   * <p>This method is from the RMISSLClientListener, and we use it to
+   * get notified about the SSL cipher suite used if we wind up using
+   * SSL to connect to an RMI server.</p>
+   */
+ 
+  public void notifySSLClient(String host, int port, String cipherSuite)
+  {
+    this.cipherSuite = cipherSuite;
+  }
+
+  /**
+   * <p>If we are connected to the server with an SSL connection, this method will return
+   * a string description of the cipher suite we are using.  If we are not connected through
+   * an SSL RMI connection, this method will return null.</p>
+   */
+
+  public String getCipherSuite()
+  {
+    return this.cipherSuite;
   }
 
   /**
