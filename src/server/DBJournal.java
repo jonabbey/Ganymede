@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -616,10 +616,20 @@ class JournalEntry {
 	  }
 	else
 	  {
-	    // Remove the object.  If any of the fields are namespace restricted, see if any of the values
-	    // currently held in such a field are registered in a namespace.  If so, and if the field we're
-	    // deleting is the one currently taking that value's slot in the namespace, remove the value
+	    // Remove the object.  If any of the fields are namespace
+	    // restricted, see if any of the values currently held in
+	    // such a field are registered in a namespace.  If so, and
+	    // if the field we're deleting is the one currently taking
+	    // that value's slot in the namespace, remove the value
 	    // from the namespace hash.
+
+	    // NOTE: we don't want to do a full-up object delete here
+	    // because that would just get put into a new transaction.
+	    // All invid linking issues are taken care of when this
+	    // transaction was written to the journal.. the invid
+	    // unbinding process would automatically include the other
+	    // objects in their post-commit state, so we don't have
+	    // to worry about it here.
 
 	    fields = (DBField[]) badObj.listFields();
 
