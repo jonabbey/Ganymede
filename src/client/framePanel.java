@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 2001/07/27 02:12:57 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 2001/07/27 02:42:34 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.68 $ $Date: 2001/07/27 02:12:57 $ $Name:  $
+ * @version $Revision: 1.69 $ $Date: 2001/07/27 02:42:34 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -311,6 +311,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   boolean isCreating;
 
+  private boolean removal_Editable = false;
+  private boolean expiration_Editable = false;
+
   /* -- */
 
   /**
@@ -511,12 +514,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 	// Only add the date panels if the date has been set.  In order
 	// to set the date, use the menu items.
-    
+
 	try
 	  {
 	    exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
 	    rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
 	  
+	    expiration_Editable = editable && exp_field.isEditable();
+	    removal_Editable = editable && rem_field.isEditable();
+
 	    if ((exp_field != null) && (exp_field.getValue() != null))
 	      {
 		addExpirationDatePanel();
@@ -897,7 +903,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 	try
 	  {
-	    if (getObject().canInactivate())
+	    if (expiration_Editable && getObject().canInactivate())
 	      {
 		JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
 		setExpirationMI.setMnemonic('e');
@@ -910,11 +916,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  {
 	  }
 
-        JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
-	setRemovalMI.setMnemonic('v');
-	setRemovalMI.addActionListener(this);
-	setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
-	fileM.add(setRemovalMI);
+	if (removal_Editable)
+	  {
+	    JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
+	    setRemovalMI.setMnemonic('v');
+	    setRemovalMI.addActionListener(this);
+	    setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
+	    fileM.add(setRemovalMI);
+	  }
       }
 
     if (debug)
@@ -964,21 +973,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     expiration_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    boolean local_editable = editable;
-
-    if (local_editable)
-      {
-	try
-	  {
-	    local_editable = exp_field.isEditable();
-	  }
-	catch (RemoteException ex)
-	  {
-	    local_editable = false;
-	  }
-      }
-
-    exp_date_panel = new datePanel(exp_field, "Expiration date", local_editable, this);
+    exp_date_panel = new datePanel(exp_field, "Expiration date", expiration_Editable, this);
     expiration_date.setViewportView(exp_date_panel);
     
     createdList.addElement(new Integer(expiration_date_index));
@@ -1022,23 +1017,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
       }
 
-    boolean local_editable = editable;
-
-    if (local_editable)
-      {
-	try
-	  {
-	    local_editable = rem_field.isEditable();
-	  }
-	catch (RemoteException ex)
-	  {
-	    local_editable = false;
-	  }
-      }
-
     removal_date.getVerticalScrollBar().setUnitIncrement(15);
 
-    rem_date_panel = new datePanel(rem_field, "Removal date", local_editable, this);
+    rem_date_panel = new datePanel(rem_field, "Removal date", removal_Editable, this);
     removal_date.setViewportView(rem_date_panel);
 	  
     createdList.addElement(new Integer(removal_date_index));
