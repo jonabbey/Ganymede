@@ -6,8 +6,8 @@
    
    Created: 16 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:05 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/04/06 22:38:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,7 +61,6 @@ package arlut.csd.ganymede.custom;
  */
 
 public interface networkSchema {
-
   final static short NETNUMBER=256;
   final static short BROADCAST=257;
   final static short NETMASK=258;
@@ -71,4 +70,6 @@ public interface networkSchema {
   final static short IPV6OK=262;
   final static short INTERFACES=263;
   final static short ROOMS=264;
+  final static short ALLOCRANGE=265;
+  final static short PUBLICNETWORK=266;
 }
