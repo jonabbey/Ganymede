@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.27 $ %D%
+  Version: $Revision: 1.28 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.27 $ %D%
+ * @version $Revision: 1.28 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -135,7 +135,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   Vector
     cols;			// header information, column attributes
 
-  PopupMenu
+  JPopupMenu
     headerMenu,			// popup menu to appear in header row
     menu;			// popup menu attached to table as a whole
 
@@ -188,8 +188,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 		   String[] headers,
 		   boolean horizLines, boolean vertLines,
 		   boolean vertFill, boolean hVertFill,
-		   PopupMenu menu,
-		   PopupMenu headerMenu)
+		   JPopupMenu menu,
+		   JPopupMenu headerMenu)
   {
     // implicit super() call here creates the panel
 
@@ -213,12 +213,18 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
     if (menu!= null)
       {
-	MenuItem temp;
+	Component elements[];
+	JMenuItem temp;
 
-	for (int i = 0; i < menu.getItemCount(); i++)
+	elements = menu.getComponents();
+
+	for (int i = 0; i < elements.length; i++)
 	  {
-	    temp = menu.getItem(i);
-	    temp.addActionListener(this);
+	    if (elements[i] instanceof JMenuItem)
+	      {
+		temp = (JMenuItem) elements[i];
+		temp.addActionListener(this);
+	      }
 	  }
       }
 
@@ -323,7 +329,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
    */
 
   public baseTable(int[] colWidths, String[] headers,
-		   PopupMenu menu, PopupMenu headerMenu)
+		   JPopupMenu menu, JPopupMenu headerMenu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -780,6 +786,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   {
     rowsToShow = x;
   }
+
   /**
    * Sets the tableAttr for the table
    *
@@ -1331,9 +1338,39 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     tableCol col;
     int nominalWidth[];
     int localNW, newWidth;
-    float totalOver, spareSpace, percentOver, scaledWidth, growthFactor;
+    float totalOver, spareSpace, scaledWidth;
+
+    float 
+      percentSpace,
+      shrinkFactor,
+      percentOver,
+      growthFactor;
+
+    float totalGrowth = (float) 0.0;
+    float totalShrink = (float) 0.0;
+    float redistribute = (float) 0.0;
 
     /* -- */
+
+    /*
+      This method uses the following variables to do its calculations.
+
+      nominalWidth[] - An array of ints holding the width needed by each column.
+
+      totalOver - the aggregate amount of horizontal space that the columns are short,
+                  in the absence of wordwrapping.
+
+      spareSpace - the aggregate amount of horizontal space that the columns have to
+                   spare.
+
+			      ----------
+
+      In addition, the following variable is defined in baseTable that this method uses:
+
+      scalefact - A float that indicates how big the total width of the table is relative
+                  to the requested total width of the columns.
+
+    */
 
     nominalWidth = new int[cols.size()];
     totalOver = (float) 0.0;
@@ -1341,7 +1378,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
     for (int i = 0; i < cols.size(); i++)
       {
-	nominalWidth[i] = 0;
+	nominalWidth[i] = canvas.mincolwidth;
 	col = (tableCol) cols.elementAt(i);
 
 	for (int j = 0; j < rows.size(); j++)
@@ -1349,7 +1386,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	    row = (tableRow) rows.elementAt(j);
 	    cell = row.elementAt(i);
 
-	    localNW = cell.getNominalWidth();
+	    localNW = cell.getNominalWidth() + 5;
 
 	    if (localNW > nominalWidth[i])
 	      {
@@ -1357,26 +1394,22 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	      }
 	  }
 
-	// nominalWidth is now the required width of this column
+	// nominalWidth[i] is now the required width of this column
 
 	scaledWidth = scalefact * col.origWidth;
 
 	if (debug)
 	  {
-	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] + 
+	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] +
 			       " and a current scaled width of " + scaledWidth);
 	  }
 
 	if (nominalWidth[i] < scaledWidth)
 	  {
-	    if (debug)
+	    if ((scaledWidth - (nominalWidth[i] * scalefact)) > 0)
 	      {
-		System.err.println("Reducing column " + i + " to nominal + 5");
+		spareSpace += scaledWidth - (nominalWidth[i] * scalefact);
 	      }
-
-	    spareSpace += scaledWidth;
-	    col.origWidth = (float) (nominalWidth[i] + 5) / scalefact;
-	    spareSpace -= col.origWidth * scalefact;
 	  }
 	else
 	  {
@@ -1389,33 +1422,73 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
       }
 
-    // we've shrunk the columns as much as we can.. now let's take
-    // our spareSpace and apportion it out to those columns whose
-    // nominal widths are bigger than they 
+    redistribute = java.lang.Math.min(spareSpace, totalOver);
+
+    if (debug)
+      {
+	System.err.println("redistribute = " + redistribute);
+      }
 
     for (int i = 0; i < cols.size(); i++)
       {
 	col = (tableCol) cols.elementAt(i);
-	scaledWidth = scalefact * col.origWidth;
 
-	if (nominalWidth[i] > scaledWidth)
+	// are we going to be actually doing some redistributing?
+
+	if (redistribute > 1.0)
 	  {
-	    percentOver = (nominalWidth[i] - scaledWidth) / totalOver;
-	    growthFactor = (spareSpace * percentOver) / scalefact;
+	    scaledWidth = scalefact * col.origWidth;
+
+	    // Does this column have space to give?
+
+	    if (nominalWidth[i] < scaledWidth)
+	      {
+		percentSpace = (scaledWidth - nominalWidth[i]) / spareSpace;
+		shrinkFactor = (redistribute * percentSpace) / scalefact;
+
+		col.origWidth -= shrinkFactor;
+
+		totalShrink += shrinkFactor * scalefact;
+
+		if (debug)
+		  {
+		    System.err.println("Column " + i + ": percentSpace = " + percentSpace +
+				       " , reducing by " + shrinkFactor + ", new width = " +
+				       col.origWidth * scalefact);
+		  }
+	      }
+	    else // need to grow
+	      {
+		// what percentage of the overage goes to this col?
+
+		percentOver = (nominalWidth[i] - scaledWidth) / totalOver; 
+		growthFactor = (redistribute * percentOver) / scalefact;
+
+		col.origWidth += growthFactor;
+
+		totalGrowth += growthFactor * scalefact;
+
+		if (debug)
+		  {
+		    System.err.println("Column " + i + ": percentOver = " + percentOver + 
+				       " , growing by " + growthFactor + ", new width = " + 
+				       col.origWidth * scalefact);
+		  }
+	      }
 
 	    if (debug)
 	      {
-		System.err.print("Column " + i + ": percentOver = " + percentOver + " , growing by " + growthFactor);
+		System.err.println("totalShrink " + totalShrink + ", totalGrowth = " + totalGrowth);
 	      }
+	  }
 
-	    col.origWidth += growthFactor;
+	// now we need to wrap the column
 
-	    for (int j = 0; j < rows.size(); j++)
-	      {
-		row = (tableRow) rows.elementAt(j);
-		cell = row.elementAt(i);
-		cell.wrap(Math.round(col.origWidth * scalefact));
-	      }
+	for (int j = 0; j < rows.size(); j++)
+	  {
+	    row = (tableRow) rows.elementAt(j);
+	    cell = row.elementAt(i);
+	    cell.wrap(Math.round(col.origWidth * scalefact));
 	  }
       }
 
@@ -2844,6 +2917,11 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("renderBlitCell: (" + col + "," + row +")");
+      }
+
     if (row < rt.rows.size())
       {
 	cell = rt.getCell(col, row);
@@ -3537,7 +3615,7 @@ class tableCell {
   boolean 
     selected;
 
-  PopupMenu menu;
+  JPopupMenu menu;
 
   baseTable rt;
   tableCol col;
@@ -3552,7 +3630,7 @@ class tableCell {
 
   /* -- */
 
-  public tableCell(baseTable rt, tableCol col, String text, tableAttr attr, PopupMenu menu)
+  public tableCell(baseTable rt, tableCol col, String text, tableAttr attr, JPopupMenu menu)
   {
     this.rt = rt;
     this.col = col;
@@ -3572,12 +3650,18 @@ class tableCell {
 
 	if (menu!= null)
 	  {
-	    MenuItem temp;
+	    Component elements[];
+	    JMenuItem temp;
+	
+	    elements = menu.getComponents();
 
-	    for (int i = 0; i < menu.getItemCount(); i++)
+	    for (int i = 0; i < elements.length; i++)
 	      {
-		temp = menu.getItem(i);
-		temp.addActionListener(rt);
+		if (elements[i] instanceof JMenuItem)
+		  {
+		    temp = (JMenuItem) elements[i];
+		    temp.addActionListener(rt);
+		  }
 	      }
 
 	    rt.canvas.add(menu);
@@ -3642,7 +3726,7 @@ class tableCell {
       }
     else
       {
-	currentWidth = nominalWidth = 0;
+	currentWidth = nominalWidth = tableCanvas.mincolwidth;
       }
 
     calcRowSpan();
@@ -3792,6 +3876,11 @@ class tableCell {
 
   public String getText(int n)
   {
+    if (text == null)
+      {
+	return null;
+      }
+
     if (n+1 > rowSpan)
       {
 	return "";
@@ -3847,6 +3936,11 @@ class tableCell {
       fm;
 
      /* -- */
+
+    if (text == null)
+      {
+	return;
+      }
 
     if (wrap_length < 5)
       {
@@ -4287,12 +4381,12 @@ class tableCol {
   tableAttr attr;
   float origWidth;		// the basic width of a column.. needs to be multiplied by scalefact
   int width;
-  PopupMenu menu;
+  JPopupMenu menu;
 
   /* -- */
 
   public tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
-	   PopupMenu menu)
+		  JPopupMenu menu)
   {
     if (rt == null && menu != null)
       {
@@ -4310,12 +4404,18 @@ class tableCol {
 
     if (menu!= null)
       {
-	MenuItem temp;
+	Component elements[];
+	JMenuItem temp;
 
-	for (int i = 0; i < menu.getItemCount(); i++)
+	elements = menu.getComponents();
+
+	for (int i = 0; i < elements.length; i++)
 	  {
-	    temp = menu.getItem(i);
-	    temp.addActionListener(rt);
+	    if (elements[i] instanceof JMenuItem)
+	      {
+		temp = (JMenuItem) elements[i];
+		temp.addActionListener(rt);
+	      }
 	  }
 
 	rt.canvas.add(menu);
