@@ -812,69 +812,74 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	setWaitCursor();
 
-	if (!my_client.isConnected())
-	  {
-	    if (connecting.isSet())
-	      {
-		return;		// our connection thread is still trying to connect
-	      }
-	    else
-	      {
-		// looks like the ClientBase object lost connection to
-		// the RMI server.. let's try to re-acquire.
-
-		new Thread(this).start();
-		return;
-	      }
-	  }
-
-	String uname = username.getText().trim();
-	String pword = new String(passwd.getPassword());
-
-	my_username = uname;
-	my_passwd = pword;
-	my_session = null;
-	
 	try
 	  {
-	    my_session = my_client.login(uname, pword);
-	  }
-	catch (Exception ex)
-	  {
-	    new JErrorDialog(my_frame, "Couldn't log into server: \n"
-                + ex.getMessage(), getErrorImage());
-	    
-	    enableButtons(true);
-	  }
-	    
-	if (my_session != null) 
-	  {
-	    enableButtons(false);
-	    startSession(my_session);
-	  }
-	else 
-	  {
-	    // This means that the user was not able to log into the server properly.
-
-	    if (!my_client.isConnected() && !connecting.isSet())
+	    if (!my_client.isConnected())
 	      {
-		// looks like the ClientBase object lost connection to
-		// the RMI server.. let's try to re-acquire.
+		if (connecting.isSet())
+		  {
+		    return;		// our connection thread is still trying to connect
+		  }
+		else
+		  {
+		    // looks like the ClientBase object lost connection to
+		    // the RMI server.. let's try to re-acquire.
 
-		new Thread(this).start();
-		return;
+		    new Thread(this).start();
+		    return;
+		  }
 	      }
-	    else
-	      {
-		// We are connected to the server.. bad password?
-		// re-enable the "Login to server" button so that the
-		// user can try again.
 
+	    String uname = username.getText().trim();
+	    String pword = new String(passwd.getPassword());
+
+	    my_username = uname;
+	    my_passwd = pword;
+	    my_session = null;
+	
+	    try
+	      {
+		my_session = my_client.login(uname, pword);
+	      }
+	    catch (Exception ex)
+	      {
+		new JErrorDialog(my_frame, "Couldn't log into server: \n"
+				 + ex.getMessage(), getErrorImage());
+	    
 		enableButtons(true);
 	      }
-	  }
+	    
+	    if (my_session != null) 
+	      {
+		enableButtons(false);
+		startSession(my_session);
+	      }
+	    else 
+	      {
+		// This means that the user was not able to log into the server properly.
 
-	setNormalCursor();
+		if (!my_client.isConnected() && !connecting.isSet())
+		  {
+		    // looks like the ClientBase object lost connection to
+		    // the RMI server.. let's try to re-acquire.
+
+		    new Thread(this).start();
+		    return;
+		  }
+		else
+		  {
+		    // We are connected to the server.. bad password?
+		    // re-enable the "Login to server" button so that the
+		    // user can try again.
+
+		    enableButtons(true);
+		  }
+	      }
+	  }
+	finally
+	  {
+	    setNormalCursor();
+	  }
       }
     else if (e.getSource() == _quitButton)
       {

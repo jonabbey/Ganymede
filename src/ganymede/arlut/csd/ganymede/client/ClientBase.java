@@ -472,7 +472,6 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
   public void forceDisconnect(String reason)
   {
-    connected.set(false);
     session = null;
 
     ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
