@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
