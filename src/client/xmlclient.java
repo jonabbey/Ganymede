@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/09/17 10:04:27 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/09/25 21:45:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.25 $ $Date: 2000/09/17 10:04:27 $ $Name:  $
+ * @version $Revision: 1.26 $ $Date: 2000/09/25 21:45:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -317,6 +317,8 @@ public final class xmlclient implements ClientListener {
     // now do what we came for
 
     ReturnVal retVal = session.getSchemaXML(new FileReceiverBase(new xmlclientPrintReceiver()));
+
+    // and say goodbye
 
     session.logout();
 
