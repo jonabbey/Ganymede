@@ -4,7 +4,7 @@
    vectorPanel.java
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -62,7 +62,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     centerPanel;
 
   boolean 
-    editable;
+    editable,
+    isEditInPlace;
 
   private db_field my_field;
 
@@ -74,7 +75,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    *
    *
    */
-  public vectorPanel(db_field field, windowPanel parent, boolean editable)
+  public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace)
   {
 
     try
@@ -91,9 +92,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	if (parent == null)
 	  throw new IllegalArgumentException("Error: Where's my windowPanel?");
 	
-	
-
-
 	my_field = field;
       }
     catch (RemoteException rx)
@@ -102,6 +100,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
 
     this.editable = editable;
+    this.isEditInPlace = isEditInPlace;
 
     bottomPanel = new JPanel();
     bottomPanel.setLayout(new BorderLayout());
@@ -138,7 +137,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     main.add("Center", centerPanel);
     
     //scrollPane = new JScrollPane();
-    //scrollPane.getViewport().add(main);
+    //scrollPane.setViewportView(main);
     //add(scrollPane);
     add(main);
 
@@ -146,7 +145,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     ewHash = new Hashtable();
 
     this.parent = parent;
-
+    
     createVectorComponents();
   }
 
@@ -167,6 +166,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new RuntimeException("Can't tell if field is vector" + rx);
       }
 
+    
     
     if (my_field instanceof date_field)
       {
@@ -261,19 +261,32 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  {
 		    for (int i=0;i<stringfield.size();i++) 
 		      {
-			
-			JstringField sf = new JstringField(stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
-							   stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
-							   ca,
-							   stringfield.isEditable(),
-							   !(stringfield.showEcho()),
-							   stringfield.allowedChars(),
-							   stringfield.disallowedChars(),
-							   this);
-			System.out.println("Setting text");
-			sf.setText((String)(stringfield.getElement(i)));
-			
-			addElement(sf);
+			if (isEditInPlace)
+			  {
+			    /*
+			    containerPanel cp = new containerPanel(stringfield, 
+								   stringfield.isEditable() && editable, 
+								   parent.parent,
+								   parent);
+			    addElement(cp);
+			    */
+			  }
+			else
+			  {
+			    
+			    JstringField sf = new JstringField(stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
+							       stringfield.maxSize() > 12 ? 12 : stringfield.maxSize(),
+							       ca,
+							       stringfield.isEditable(),
+							       !(stringfield.showEcho()),
+							       stringfield.allowedChars(),
+							       stringfield.disallowedChars(),
+							       this);
+			    System.out.println("Setting text");
+			    sf.setText((String)(stringfield.getElement(i)));
+			    
+			    addElement(sf);
+			  }
 			
 		      }
 		  }
@@ -313,30 +326,41 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	try
 	  {
 	    invid_field invidfield = (invid_field)my_field;
-	    
-	    for (int i=0;i<invidfield.size();i++) 
+
+	    if (isEditInPlace)
 	      {
-		
-		Invid inv = (Invid)(invidfield.getElement(i));
-		
-		JstringField sf = new JstringField();
-	  /*
-	  JstringField sf = new JstringField(stringField.DEFAULT_COLS,
-					   stringField.DEFAULT_COLS,
-					   ca,
-					   invidfield.isEditable(),
-					   false,
-					   null,
-					   null,
-					   this);
-					   */
-		if (inv == null)
-		  sf.setText("");
-		else 
-		  sf.setText(inv.toString());
-		
-		elementWrapper ew = new elementWrapper(sf, this);
-		
+		System.out.println("Adding edit in place invid vector");
+		for (int i=0;i<invidfield.size();i++)
+		  {
+		    Invid inv = (Invid)(invidfield.getElement(i));
+		    db_object object = parent.getgclient().getSession().edit_db_object(inv);
+		    containerPanel cp = new containerPanel(object,
+							   invidfield.isEditable() && editable,
+							   parent.parent,
+							   parent);
+		  }
+	      }
+	    else
+	      {
+		System.out.println("Adding invid vector");
+		Vector choices = invidfield.choices();
+		for (int i=0;i<invidfield.size();i++) 
+		  {
+		    
+		    Invid inv = (Invid)(invidfield.getElement(i));
+		    // Add a series of JChoices
+		    JChoice choice = new JChoice();
+		    for (int j=0; j< choices.size(); j++)
+		      {
+			String string = (String)choices.elementAt(j);
+			choice.addItem(string);
+
+		      }
+
+		    
+		    
+		    elementWrapper ew = new elementWrapper(choice, this);
+		  }
 	      }
 	  }
 	catch (RemoteException rx)
@@ -349,7 +373,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	if (my_field.isEditable())
 	  {
+	    System.out.println("Adding add button");
 	    bottomPanel.add("Center", addB);
+	  }
+	else
+	  {
+	    System.out.println("Field is not editable, no button added");
 	  }
       }
     catch (RemoteException rx)
@@ -375,7 +404,27 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       else
 	{
 	  System.out.println("Adding new element");
-	  if (my_field instanceof string_field)
+	  
+	  if (isEditInPlace)
+	    {
+	      System.out.println("Adding new edit in place element");
+	      try
+		{
+		  short type = my_field.getType();
+		  db_object object = parent.getgclient().getSession().create_db_object(type);
+		  containerPanel cp = new containerPanel(object,
+							 my_field.isEditable() && editable,
+							 parent.parent,
+							 parent);
+		  addElement(cp);
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new RuntimeException("Could not create new containerPanel: " + rx);
+		}
+
+	    }
+	  else if (my_field instanceof string_field)
 	    {
 	      System.out.println("Adding new string type");
 	      try
@@ -493,7 +542,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	{
 	  centerPanel.add(c);
 	}
-      invalidate();
+      validate();
 
       parent.validate();
       
@@ -715,7 +764,7 @@ class elementWrapper extends JPanel implements ActionListener {
 
       this.parent = parent;
     
-      removeImage = PackageResources.getImageResource(this, "dynamite.gif", getClass());
+      removeImage = PackageResources.getImageResource(this, "trash.gif", getClass());
 
       setLayout(new BorderLayout());
       
@@ -724,6 +773,7 @@ class elementWrapper extends JPanel implements ActionListener {
       buttonPanel.setLayout(new BorderLayout());
       
       minus = new JButton(new ImageIcon(removeImage));
+      minus.setPad(new Insets(0,0,0,0));
       //minus = new JButton("X");
       minus.addActionListener(this);
       
