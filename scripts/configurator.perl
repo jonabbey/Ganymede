@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.9 $
-# $Date: 1999/01/16 04:35:04 $
+# $Revision: 1.10 $
+# $Date: 1999/01/16 05:30:08 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -106,14 +106,14 @@ classfiles:
 	\@cd $rootdir/src/jcrypt; \\
 	build		
 	\@cd $rootdir/src/Util; \\
-	build		
+	build
+	\@cd $rootdir/src/JDataComponent; \\
+	build
 	\@cd $rootdir/src/JDialog; \\
 	build
 	\@cd $rootdir/src/JTree; \\
 	build
 	\@cd $rootdir/src/JTable; \\
-	build
-	\@cd $rootdir/src/JDataComponent; \\
 	build
 	\@cd $rootdir/src/server; \\
 	build
