@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.181 $
-   Last Mod Date: $Date: 2000/04/19 07:55:52 $
+   Version: $Revision: 1.182 $
+   Last Mod Date: $Date: 2000/05/24 22:52:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.181 $ $Date: 2000/04/19 07:55:52 $
+ * @version $Revision: 1.182 $ $Date: 2000/05/24 22:52:47 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -245,7 +245,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * <p>username should never be null.  If a client logs in directly
    * to a persona, username will be that personaname plus an optional
-   * session id.</p> */
+   * session id.</p> 
+   */
 
   String username;
 
@@ -3941,6 +3942,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
+	    Vector ownerInvids = new Vector();
+
 	    if (newObjectOwnerInvids == null)
 	      {
 		if (ownerList == null)
@@ -3950,10 +3953,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		// if we have only one group possible, we'll assume we're
 		// putting it in that, otherwise since the client hasn't
-		// done a setDefaultOwner() call, we're gonna have to
-		// abort before even trying to create the object.
+		// done a setDefaultOwner() call, if we're running with an
+		// interactive client, return an error dialog telling them
+		// to set the default owner group
 
-		if (ownerList != null && ownerList.size() != 1)
+		// if we're running non-interactively and we have more than one
+		// choice
+
+		if (ownerList != null && ownerList.size() != 1 && enableWizards)
 		  {
 		    return Ganymede.createErrorDialog("Can't create",
 						      "Can't create new object, no way of knowing which " +
@@ -3962,8 +3969,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 
 	    // calculate ownership for this object
-
-	    Vector ownerInvids = new Vector();
 
 	    // we may have either a vector of Invids in
 	    // newObjectOwnerInvids, or a query result containing a list
@@ -3978,7 +3983,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else if (ownerList != null)
 	      {
-		ownerInvids.addElement(ownerList.getInvid(0));
+		// if we've only got one possible owner group, set
+		// that.  otherwise, if we're not supergashmode, go
+		// ahead and just pick one so the creator has
+		// ownership over the new object..  since we would
+		// have caught an interactive attempt at object
+		// creation with multiple possible choices before now,
+		// we must be operating in non-interactive mode, and
+		// we'll just have to trust the batch user to set the
+		// ownership of the object subequently, if they care.
+
+		// if we are operating in supergashmode, of course,
+		// the user's session will continue to have ownership
+		// privileges over the object even without setting an
+		// owner, so in that case we again will trust that the
+		// ownership will be explicitly set later on, and we
+		// won't set any owners
+
+		if (ownerList.size() == 1 || !supergashMode)
+		  {
+		    ownerInvids.addElement(ownerList.getInvid(0));
+		  }
 	      }
 
 	    retVal = session.createDBObject(type, ownerInvids); // *sync* DBSession
