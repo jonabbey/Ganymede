@@ -5,7 +5,7 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -109,6 +109,15 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
       {
 	this.debug = gc.debug;
       }
+
+
+    addWindowListener(new WindowAdapter()
+					  {
+					    public void WindowClosing(WindowEvent e)
+					      {
+						myshow(false);
+					      }
+					  });
 
     // Change the tree icons/font to match the gclient. -Better place to put this?
     UIManager.put("Tree.leafIcon", new ImageIcon(PackageResources.getImageResource(this, "i043.gif", getClass())));
@@ -330,18 +339,17 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     getContentPane().setBackground(Color.white);
 
-    TitledBorder border = new TitledBorder(this.DialogTitle);
+    TitledBorder border = new TitledBorder(new EtchedBorder(), this.DialogTitle);
     border.setTitlePosition(TitledBorder.TOP);
     border.setTitleJustification(TitledBorder.LEFT);
 
     Base_Panel = new JPanel(); 
     Base_Panel.setBorder(border);
     Base_Panel.setLayout(new BorderLayout());
-
+    Base_Panel.setBackground(Color.white);
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
-    //    getContentPane().add("Center", edit_pane);
-    //    getContentPane().add("South", All_Buttons);
+
     getContentPane().add("Center", Base_Panel);
     gc.setWaitCursor();
     
@@ -734,7 +742,7 @@ class BoolRenderer extends JCheckBox
   TreeTableModelAdapter tntModel;
   boolean viewOnly;
 
-  // This is the "X" which replaces the checkbox
+  // This is the "-" which replaces the checkbox
   ImageIcon noAccess = 
     new ImageIcon(PackageResources.getImageResource(this, "noaccess.gif", getClass()));
 
@@ -764,8 +772,10 @@ class BoolRenderer extends JCheckBox
 
 
     // Check if viewOK, etc. If not, put
-    // noAccess icon ("X") instead of checkbox
+    // noAccess icon ("-") instead of checkbox
 
+    // Note that this just shows what to display. Whether you can select the box or not
+    // is controlled in the isCellEditable() method of PermEditorModel.
 
     // Visible Column    
     if (columnName.equals("Visible")) {
@@ -786,7 +796,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeCreate()) {
 	setIcon(null);
-	setEnabled(viewOnly ? false : enabled);
+	setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -800,7 +810,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeEdit()) {
 	setIcon(null);
-	setEnabled(viewOnly ? false : enabled);
+	setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -812,9 +822,9 @@ class BoolRenderer extends JCheckBox
     // Deletable Column
     else if (columnName.equals("Deletable")){
 
-      if (myRow.canSeeDelete()) {
+      if (myRow.canSeeDelete() && myRow.isBase()) {
 	setIcon(null);
-	setEnabled(viewOnly ? false : enabled);
+	setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -1053,11 +1063,11 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
     if (viewOnly) 
       return false;
     
-    // disabled checkbox is not editable
-    if (!myRow.isEnabled())  
+    // disabled checkbox is not editable, also bases if Visible base not checked
+    if (!myRow.isEnabled() || ((myRow.isBase()) && (!myRow.isVisible()) && (col != VISIBLE)))  
       return false;
     
-    // otherwise, if it's not an "X", it is editable  
+    // otherwise, if it's not a "-", it is editable  
     else { 
       
       switch(col) {
@@ -1081,7 +1091,7 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
 	break;
 	
       case DELETABLE:
-	if (myRow.canSeeDelete()) 
+	if (myRow.canSeeDelete() && myRow.isBase()) 
 	  return true;
 	break;
       }
@@ -1096,6 +1106,19 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
       
     case VISIBLE:
       myRow.setVisible((Boolean)value);
+
+      // Turning off base Visible turns off all other bases too. 
+      if (((Boolean)value).booleanValue() == false) {
+
+	// We don't want to programmatically modify a checkbox 
+	// that we can't manually modify (noaccess fields). 
+	if (myRow.canSeeCreate()) 
+	  myRow.setCreatable((Boolean)value);
+	if (myRow.canSeeEdit())
+	  myRow.setEditable((Boolean)value);
+	if (myRow.canSeeDelete())
+	  myRow.setDeletable((Boolean)value);
+      }
       myRow.setChanged(true);
       
       
