@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.160 $
-   Last Mod Date: $Date: 2001/10/10 22:51:51 $
+   Version: $Revision: 1.161 $
+   Last Mod Date: $Date: 2001/10/10 22:57:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.160 $ %D%
+ * @version $Revision: 1.161 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1338,7 +1338,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to remote object",
 					      "Field " + this.toString() + 
 					      " cannot be linked to remote object " + newRemote.toString() + 
-					      ".  The remote object is being deleted.");
+					      ".\n\nThe remote object has been deleted.");
 	  }
       }
     else
@@ -1939,7 +1939,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	return Ganymede.createErrorDialog("InvidDBField.establish(): object being deleted",
 					  "Couldn't establish a new linkage in field " + this.toString() +
-					  " because object " + getOwner().getLabel() + " is being deleted.");
+					  " because object " + getOwner().getLabel() + " has been deleted.");
       }
 
     if (isVector())
