@@ -51,6 +51,11 @@ of the wizards and schema logic embodied in the bsd schema still
 assume that there won't be any purely implicit group membership
 references in the user's gid field.
 
+5) The Ganymede admin console will fail with security exceptions when
+run in a browser with any Java 1.2 plugin prior to version 1.2.2, due
+to a bug in thread permission allocations in early 1.2 JDK's.  If you
+see problems with the Ganymede admin console, try the 1.2.2 plugin.
+
 Comments welcome. ;-)
 
 ganymede@arlut.utexas.edu for the list, or

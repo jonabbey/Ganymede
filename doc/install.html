@@ -285,22 +285,30 @@
     pages designed for use with a browser with built-in RMI and Swing
     support.</p>
 
-    <p><b>IMPORTANT NOTE</b>: If your users do not install the Java
-    plug-in before trying to run the Plug-In clients, their web
-    browser will help them download the Plug-In as needed.  Internet
-    Explorer users will be given the chance to automatically download
-    and install the Plug-In for use with IE.  Netscape users will be
-    taken to a page from which they can download the Plug-In.  Once
-    the Java Plug-In is downloaded, you'll want to quit out of your
-    browser and run the Plug-In control panel.  Configure the Plug-In
-    so that your network and class access is unrestricted and unsigned
-    applets are allowed.  Apply the preference changes, and restart
-    your browser.  The next time you visit one of the activator pages,
-    you should see the appropriate client come up.</p>
+    <p>If your users do not install the Java plug-in before trying to
+    run the Plug-In clients, their web browser will help them download
+    the Plug-In as needed.  Once the Java Plug-In is downloaded, the
+    user will need to quit out of the browser and run the Plug-In
+    control panel.  Configure the Plug-In so that the network and
+    class access is unrestricted and unsigned applets are allowed.
+    Apply the preference changes, and restart the browser.  The
+    Ganymede Plug-In clients should work properly now.</p>
+
+    <p><b>IMPORTANT NOTE<b>: whenever you run applets using the Java
+    Plug-In, the applets can only run as long as the log-in applet is
+    still displayed in the web browser.  If you close the main browser
+    window or click to a different page (either by following a link or
+    by clicking back on the browser), the applet will be shut down.
+    Both the Ganymede client and admin console have been written so
+    that this shut-down is handled in an orderly fashion, but the
+    shut-down is unavoidable, so be sure not to disturb the applet
+    frame while you are using the client or console.</p>
     
-    <p>We have also included a simple password-change utility, which can
-    be either run from a web page, or from the command line.  We
-    have included source and build scripts for this program.</p>
+    <p>In addition to the Ganymede client and admin console, <a
+    href="glossary.html#installWeb">installWeb</a> will also install a
+    simple password-change utility/applet.  This program hasn't been
+    maintained in a while, and may not be working properly
+    currently.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -491,7 +499,7 @@
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Thu Jul  8 21:27:43 CDT 1999
+Last modified: Thu Jul  8 21:49:34 CDT 1999
 <!-- hhmts end -->
   </body>
 </html>
