@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2001/05/29 22:53:33 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2001/06/08 08:09:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2261,9 +2261,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	String pass1 = pField1.getPlainText();
 
 	PasswordDBField pField2 = (PasswordDBField) original.getField(userSchema.PASSWORD);
-	String pass2 = pField2.getPlainText();
 
-	if (pass1 != null && !pass1.equals(pass2))
+	if (pField2 != null)
+	  {
+	    String pass2 = pField2.getPlainText();
+
+	    if (pass1 != null && !pass1.equals(pass2))
+	      {
+		savePasswordChoice(pass1);
+	      }
+	  }
+	else if (pass1 != null)
 	  {
 	    savePasswordChoice(pass1);
 	  }
