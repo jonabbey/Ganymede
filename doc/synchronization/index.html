@@ -50,7 +50,7 @@
     for Ganymede and the trigger that causes the Ganymede server to
     synchronize its data to target directory services.</p>
 
-    <p>There are, in priniciple, two ways that Ganymede might handle
+    <p>There are, in principle, two ways that Ganymede might handle
     synchronizing data to the services that it feeds.  It could dump
     out everything it knows and arrange for that 'full state'
     information to completely replace the previous state of the
@@ -89,7 +89,7 @@
     service in order to be able to detect what has changed.  This may
     mean that more data will need to be sent to the target service
     than is strictly necessary, even if that same data is already
-    securely (but unretrievably) held in the target service.</p>
+    securely (but irretrievably) held in the target service.</p>
 
     <p>Synchronizing only the recently applied transactions can be far
     more efficient, assuming the target directory service can accept
@@ -107,7 +107,7 @@
     the amount of data we send to the synchronization channel to only
     that which recently changed, we might fail to provide enough
     surrounding context to allow the synchronization system to
-    translate the synchronziation data into a form suitable to the
+    translate the synchronization data into a form suitable to the
     target directory service.  It wouldn't do, for example, to try and
     write to a synchronization channel the fact that a user's password
     changed without also including enough surrounding context to allow
@@ -967,7 +967,7 @@ disadvantage of using the GanymedeBuilderTask approach.</p>
     transaction that is committed while the external processing step
     may execute after some delay, synchronization data can accumulate
     as it waits to be processed.  The Sync Channel Synchronization
-    Model must therefore act as a message queueing system.  The
+    Model must therefore act as a message queuing system.  The
     message queue represents the 'channel' that gives the Sync Channel
     Synchronization Model its name.</p>
 
