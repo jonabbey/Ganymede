@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/01/27 06:03:18 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/02/03 04:59:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -158,8 +158,17 @@ public class DBReadLock extends DBLock {
       {
 	try
 	  {
+	    // okay, we're wanting to establish a read lock.. first we
+	    // check to see if we already have a lock with the same
+	    // lock key.. if so, and it's a reader, we'll add
+	    // ourselves to the list of locks held by that key.  If
+	    // not, we'll record that we are trying to establish/hold
+	    // a read lock with this key
+
 	    if (lockManager.lockHash.containsKey(key))
 	      {
+		// we've got a lock already by this key.. 
+
 		obj = lockManager.lockHash.get(key);
 
 		if (obj instanceof Vector)
@@ -196,6 +205,8 @@ public class DBReadLock extends DBLock {
 	      }
 	    else
 	      {
+		// no lock with this key.. remembe that we have this one
+
 		vect = new Vector();
 
 		vect.addElement(this);
@@ -209,6 +220,11 @@ public class DBReadLock extends DBLock {
 		  }
 	      }
 
+	    // okay, we've made sure that we're not going to chance a
+	    // deadlock by grabbing incompatible locks after we've
+	    // already gotten some.  now we need to actually acquire
+	    // lock the bases down.
+
 	    this.key = key;
 
 	    inEstablish = true;
@@ -217,8 +233,6 @@ public class DBReadLock extends DBLock {
 
 	    while (!done)
 	      {
-		// if we've received an abort notification, bail.
-
 		if (debug)
 		  {
 		    // Ganymede.debug("DBReadLock (" + key + "):  looping to get establish permission");
@@ -226,8 +240,13 @@ public class DBReadLock extends DBLock {
 		    System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
 		  }
 
+		// if we've received an abort notification, bail.
+
 		if (abort)
 		  {
+		    // this lock is going away.. dissociate it from the key
+		    // in the lockManager lockHash.
+
 		    vect = (Vector) lockManager.lockHash.get(key);
 		    vect.removeElement(this);
 
@@ -244,6 +263,7 @@ public class DBReadLock extends DBLock {
 		      }
 
 		    inEstablish = false;
+
 		    throw new InterruptedException();
 		  }
 
@@ -252,8 +272,9 @@ public class DBReadLock extends DBLock {
 
 		okay = true;
 
-		// if there are any writers queued, we have to wait
-		// for them to finish before we can proceed
+		// if there are any writers queued on any of the bases
+		// we want to get a readlock for, we have to wait for
+		// them to finish before we can proceed
 
 		for (int i = 0; okay && (i < baseSet.size()); i++)
 		  {
@@ -266,12 +287,17 @@ public class DBReadLock extends DBLock {
 		      {
 			if (debug)
 			  {
-			    System.err.println("DBReadLock (" + key + "):  base " + base.getName() + " has writers queued");
+			    System.err.println("DBReadLock (" + key + "):  base " + 
+					       base.getName() + " has writers queued");
 			  }
 
 			okay = false;
 		      }
 		  }
+
+		// at this point, we'll know whether or not we can
+		// grant the lock.  if okay is true, we'll mark the
+		// bases off as having us locked on them.
 
 		if (okay)
 		  {
@@ -285,6 +311,11 @@ public class DBReadLock extends DBLock {
 		  }
 		else
 		  {
+		    // oops, things aren't clear for us to lock yet.
+		    // we need to wait for a few seconds, or until
+		    // something wakes up by doing a notifyAll() on
+		    // our lockManager.
+
 		    if (debug)
 		      {
 			// Ganymede.debug("DBReadLock (" + key + "):  waiting on lockManager");
@@ -305,6 +336,11 @@ public class DBReadLock extends DBLock {
 		      }
 		    catch (InterruptedException ex)
 		      {
+			// looks like something wants us to abort the
+			// lock?  dissociate this lock from our key in
+			// the lockManager's lockHash and throw the
+			// exception up.
+
 			if (debug)
 			  {
 			    // Ganymede.debug("DBReadLock (" + key + "):  interrupted exception");
@@ -326,6 +362,8 @@ public class DBReadLock extends DBLock {
 		  }
 	      } // while (!done)
 
+	    // okay!  if we got this far, we're locked
+
 	    locked = true;
 	    inEstablish = false;
 	    lockManager.addLock();	// notify consoles
@@ -337,6 +375,7 @@ public class DBReadLock extends DBLock {
 	  }
 	finally
 	  {
+	    inEstablish = false; // in case we threw an exception while establishing
 	    lockManager.notifyAll(); // let a thread trying to release this lock proceed
 	  }
       }	// synchronized (lockManager)
@@ -348,6 +387,16 @@ public class DBReadLock extends DBLock {
    * <P>Should be called by {@link arlut.csd.ganymede.DBSession DBSession}'s
    * {@link arlut.csd.ganymede.DBSession#releaseLock(arlut.csd.ganymede.DBLock) releaseLock()}
    * method.</P>
+   *
+   * <P>Note that this method is designed to be able to be called from
+   * one thread while another is trying to use and/or establish the lock.  If
+   * this.abort is not set to true before calling release(), release() will
+   * block until the establish is granted.  That's why abort() sets this.abort
+   * to true before calling release().</P>
+   *
+   * <P>The point of release() is to clear out this lock's connections to
+   * the locked object bases and to allow DBLock establish() methods in other
+   * threads to proceed.</P>
    */
 
   public void release()
@@ -367,6 +416,12 @@ public class DBReadLock extends DBLock {
       {
 	try
 	  {
+	    // if this lock is being established in another thread, we
+	    // need to wait until that thread exits its establish
+	    // section.  if we haven't set abort to true, this won't
+	    // happen until it gets the lock established, or it
+	    // catches an InterruptedException for some reason.
+
 	    while (inEstablish)
 	      {
 		if (debug)
@@ -404,8 +459,20 @@ public class DBReadLock extends DBLock {
 	      }
 
 	    locked = false;
-	    lockManager.lockHash.remove(key);
-	    key = null;
+
+	    // dissociate this lock from the lockManager's lockHash.
+	    // if this key has another readlock, that other lock will
+	    // need to take care of its own dissociation
+
+	    Vector vect = (Vector) lockManager.lockHash.get(key);
+	    vect.removeElement(this);
+
+	    if (vect.size() == 0)
+	      {
+		lockManager.lockHash.remove(key);
+	      }
+
+	    key = null;		// for gc
 
 	    if (debug)
 	      {
@@ -418,7 +485,7 @@ public class DBReadLock extends DBLock {
 	  }
 	finally
 	  {
-	    lockManager.notifyAll();
+	    lockManager.notifyAll(); // let other threads waiting to establish proceed
 	  }
       }
   }
@@ -434,6 +501,15 @@ public class DBReadLock extends DBLock {
    * <P>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to establish() will always throw
    * InterruptedException.</P>
+   *
+   * <P>Note that calling abort() on a lock that has already established
+   * in another thread will remove the lock, but a thread that is using
+   * the lock to iterate over a list will explicitly need to check to
+   * see if its lock was pulled.  
+   *{@link arlut.csd.ganymede.GanymedeSession#queryDispatch(arlut.csd.ganymede.Query,boolean,boolean,arlut.csd.ganymede.DBLock,arlut.csd.ganymede.DBEditObject) queryDispatch()} 
+   * and {@link arlut.csd.ganymede.GanymedeSession#getObjects(short) getObjects()}
+   * both do this properly, so it is generally safe to abort read locks in the
+   * GanymedeServer as needed.</P>
    */
 
   public void abort()
@@ -443,7 +519,7 @@ public class DBReadLock extends DBLock {
 	try
 	  {
 	    abort = true;
-	    release();
+	    release();		// blocks until freed
 	  }
 	finally
 	  {

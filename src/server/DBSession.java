@@ -6,15 +6,16 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2000/01/26 04:49:30 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2000/02/03 04:59:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -90,7 +91,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.77 $ %D%
+ * @version $Revision: 1.78 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1396,16 +1397,18 @@ final public class DBSession {
   }
 
   /**
-   * <P>releaseLock releases a particular lock held by this session.</P>
+   * <P>releaseLock releases a particular lock held by this session.
+   * This method will not force a lock being held by another thread to
+   * drop out of its establish method.. it is intended to be called by
+   * the same thread that established the lock.</P>
    *
-   * <P>This method must be synchronized.</P>
-   */
+   * <P>This method must be synchronized to avoid conflicting with
+   * iterations on lockVect.</P> */
 
   public synchronized void releaseLock(DBLock lock)
   {
     lock.release();		// *sync* DBStore
     lockVect.removeElement(lock);
-    notifyAll();
   }
 
   /**
@@ -1414,8 +1417,7 @@ final public class DBSession {
    *
    * <P>This method is *not* synchronized.  This method must
    * only be called by code synchronized on this DBSession
-   * instance, as for instance {@link arlut.csd.ganymede.DBSession#logout() logout()},
-   * {@link arlut.csd.ganymede.DBSession#abortTransaction() abortTransaction()}, and
+   * instance, as for instance {@link arlut.csd.ganymede.DBSession#logout() logout()}
    * and {@link arlut.csd.ganymede.DBSession#commitTransaction() commitTransaction()}.</P>
    */
 
@@ -1434,12 +1436,10 @@ final public class DBSession {
     while (enum.hasMoreElements())
       {
 	lock = (DBLock) enum.nextElement();
-	lock.abort();
+	lock.abort();		// blocks until the lock can be cleared
       }
 
     lockVect.removeAllElements();
-
-    notifyAll();
   }
 
   /**
@@ -1510,24 +1510,12 @@ final public class DBSession {
 	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
+    // we can't commit a transaction with locks held, because that
+    // might lead to deadlock.  we release all locks now, then when we
+    // call editSet.commit(), that will attempt to establish whatever
+    // write locks we need, for the duration of the commit() call.
+
     releaseAllLocks();
-
-    while (lockVect.size() != 0)
-      {
-	Ganymede.debug("DBSession: commitTransaction waiting for read/dump locks to be released");
-
-	try
-	  {
-	    wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("DBSession: commitTransaction got an interrupted exception " + 
-			   "waiting for read locks to be released." + ex);
-	  }
-
-	//	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
-      }
 
     if (debug)
       {
@@ -1572,13 +1560,15 @@ final public class DBSession {
    * or destroyed by this session during this transaction are abandoned / unaffected
    * by the actions during the transaction.</P>
    *
-   * <P>Calling abortTransaction() has no affect on any locks held by this session, but
-   * generally no locks should be held here.</P>
+   * <P>Calling abortTransaction() has no affect on any locks held by
+   * this session, but generally no locks should be held here.
+   * abortTransaction() will attempt to abort a write lock being
+   * established by a commitTransaction() call on another thread.</P>
    *
    * @return null if the transaction was committed successfully,
    *         a non-null ReturnVal if there was a commit failure.
    *
-   * @see arlut.csd.ganymede.DBEditObject
+   * @see arlut.csd.ganymede.DBEditObject 
    */
 
   public synchronized ReturnVal abortTransaction()
@@ -1590,44 +1580,39 @@ final public class DBSession {
 
     if (editSet.wLock != null)
       {
-	if (editSet.wLock.inEstablish)
+	// if we are called while our DBEditSet transaction object is
+	// waiting on a write lock in order to commit() on another
+	// thread, try to kill it off.  We synchronize on Ganymede.db
+	// here because we are using that as a monitor for all lock
+	// operations, and we need the wLock.inEstablish check to be
+	// sync'ed so that we don't force an abort after the editSet
+	// has gotten its lock established and is busy mucking with
+	// the server's DBObjectTables.
+
+	synchronized (Ganymede.db)
 	  {
-	    try
+	    if (editSet.wLock.inEstablish)
 	      {
-		editSet.wLock.abort();
+		try
+		  {
+		    editSet.wLock.abort();
+		  }
+		catch (NullPointerException ex)
+		  {
+		  }
 	      }
-	    catch (NullPointerException ex)
+	    else
 	      {
+		Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
+		    
+		return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
+						  "Error.. transaction could not abort: can't safely dump writeLock");
 	      }
-	  }
-	else
-	  {
-	    Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
-
-	    return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
-					      "Error.. transaction could not abort: can't safely dump writeLock");
-	  }
-      }
-
-    releaseAllLocks();
-
-    while (lockVect.size() != 0)
-      {
-	Ganymede.debug("DBSession: abortTransaction waiting for read/dump locks to be released");
-
-	try
-	  {
-	    wait(500);
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("DBSession: abortTransaction got an interrupted exception " +
-			   "waiting for read locks to be released." + ex);
 	  }
       }
 
     editSet.release();
-    editSet = null;
+    editSet = null;		// for gc
 
     return null;
   }

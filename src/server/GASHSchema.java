@@ -6,8 +6,8 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 1999/06/09 03:33:38 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2000/02/03 04:59:33 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -16,7 +16,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 

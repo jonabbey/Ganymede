@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2000/01/26 04:49:29 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2000/02/03 04:59:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -913,6 +914,8 @@ public class DBEditSet {
       {
 	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + 
 		       session.key);
+
+	// the following test shouldn't be necessary, but just in case
 
 	if (wLock != null)
 	  {

@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/02/02 19:57:54 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/02/03 04:59:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.14 $ $Date: 2000/02/02 19:57:54 $
+ * @version $Revision: 1.15 $ $Date: 2000/02/03 04:59:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -460,10 +460,10 @@ public class serverAdminProxy implements Admin, Runnable {
 
 	eventBuffer.setSize(0);
 
-	// setSize() syncs on eventBuffer, so after this, done
-	// will prevent any new events from coming in.
+	// we may get a thread that missed the done check adding to
+	// eventBuffer after the above, but that's not fatal.. it'll
+	// just be something for the gc to handle
 
-	eventBuffer = null;
 	remoteConsole = null;
 	lookUp = null;
 	commThread = null;

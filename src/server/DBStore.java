@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2000/01/27 06:03:19 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2000/02/03 04:59:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -109,7 +109,7 @@ import arlut.csd.Util.zipIt;
  * monitor object for all {@link arlut.csd.ganymede.DBLock DBLock}
  * activity.</p>
  *
- * @version $Revision: 1.100 $ %D%
+ * @version $Revision: 1.101 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -957,52 +957,55 @@ public class DBStore {
    * @param myTransaction The DBSession that is checking on deletion privs
    */
 
-  public synchronized boolean okToDelete(Invid invid, DBSession mySession)
+  public boolean okToDelete(Invid invid, DBSession mySession)
   {
     if (true)
       {
 	System.err.println("DBStore.okToDelete(" + Ganymede.internalSession.describe(invid) + ") entering");
       }
 
-    for (int i = 0; i < sessions.size(); i++)
+    synchronized (sessions)
       {
-	DBSession session = (DBSession) sessions.elementAt(i);
-	
-	if (true)
+	for (int i = 0; i < sessions.size(); i++)
 	  {
-	    System.err.println("DBStore.okToDelete() checking session " + session);
-	  }
-
-	// if mySession is equal to session, the fact that a deletion
-	// block is set won't really stop us, since that transaction
-	// can handle the blocking object in its own transaction
+	    DBSession session = (DBSession) sessions.elementAt(i);
 	
-	if (session == mySession)
-	  {
 	    if (true)
 	      {
-		System.err.println("DBStore.okToDelete() skipping session " + session);
-	      }
-	    continue;
-	  }
-
-	synchronized (session)
-	  {
-	    DBEditSet editSet = session.editSet;
-
-	    if (editSet == null)
-	      {
-		System.err.println("DBStore.okToDelete() session " + session + " has null editset");
+		System.err.println("DBStore.okToDelete() checking session " + session);
 	      }
 
-	    if (editSet != null && !editSet.canDelete(invid))
+	    // if mySession is equal to session, the fact that a deletion
+	    // block is set won't really stop us, since that transaction
+	    // can handle the blocking object in its own transaction
+	
+	    if (session == mySession)
 	      {
 		if (true)
 		  {
-		    System.err.println("DBStore.okToDelete() refusing delete");
+		    System.err.println("DBStore.okToDelete() skipping session " + session);
+		  }
+		continue;
+	      }
+
+	    synchronized (session)
+	      {
+		DBEditSet editSet = session.editSet;
+
+		if (editSet == null)
+		  {
+		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
 		  }
 
-		return false;
+		if (editSet != null && !editSet.canDelete(invid))
+		  {
+		    if (true)
+		      {
+			System.err.println("DBStore.okToDelete() refusing delete");
+		      }
+
+		    return false;
+		  }
 	      }
 	  }
       }
@@ -1120,22 +1123,25 @@ public class DBStore {
    * @param baseName Name of the base to be returned
    */
 
-  public synchronized DBObjectBase getObjectBase(String baseName)
+  public DBObjectBase getObjectBase(String baseName)
   {
     DBObjectBase base;
     Enumeration enum;
 
     /* -- */
 
-    enum = objectBases.elements();
-    
-    while (enum.hasMoreElements())
+    synchronized (objectBases)
       {
-	base = (DBObjectBase) enum.nextElement();
+	enum = objectBases.elements();
 	
-	if (base.getName().equals(baseName))
+	while (enum.hasMoreElements())
 	  {
-	    return base;
+	    base = (DBObjectBase) enum.nextElement();
+	    
+	    if (base.getName().equals(baseName))
+	      {
+		return base;
+	      }
 	  }
       }
 
