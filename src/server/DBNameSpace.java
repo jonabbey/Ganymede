@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2001/05/22 02:20:18 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2001/06/07 15:50:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1311,10 +1311,19 @@ class DBNameSpaceCkPoint {
 
 	reserved = (Hashtable) reserved.clone();
 
-	// size a hashtable for the elements we need to retain
+	if (reserved.size() > 0)
+	  {
+	    // size a hashtable for the elements we need to retain
 
-	uniqueHash = new Hashtable(reserved.size(), 1.0f);
-	
+	    uniqueHash = new Hashtable(reserved.size(), 1.0f);
+	  }
+	else
+	  {
+	    // just create a small one
+
+	    uniqueHash = new Hashtable(10);
+	  }
+
 	// now copy our hash to preserve the namespace handles
 	
 	Enumeration enum = reserved.elements();
