@@ -4,8 +4,8 @@
    Handy, simple synchronized flag class
 
    Created: 29 March 2001
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/03/29 07:12:18 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2002/02/27 23:30:22 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -97,6 +97,146 @@ public class booleanSemaphore {
     old = state;
     state = b;
 
+    this.notifyAll();
+
     return old;
+  }
+
+  /**
+   * <p>Safe, simple method to wait until this boolean semaphore has been
+   * cleared.  If the semaphore is already cleared at the time this
+   * method is called, this method will return immediately.</p>
+   *
+   * <p>Note that this method will not time out.</p>
+   */
+
+  public synchronized void waitForCleared()
+  {
+    while (state)
+      {
+	try
+	  {
+	    wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+      }
+  }
+
+  /**
+   * <p>Safe, simple method to wait until this boolean semaphore has
+   * been cleared, or until at least millis milliseconds have passed.
+   * If the semaphore is already cleared at the time this method is
+   * called, this method will return immediately.</p>
+   *
+   * @returns the state of the semaphore at the time the method
+   * returns.. this will be false if the semaphore was cleared, or
+   * true if the wait timed out before the semaphore was cleared
+   */
+
+  public synchronized boolean waitForCleared(long millis)
+  {
+    long waitTime = millis;
+    long startTime = System.currentTimeMillis();
+    long timeSoFar = 0;
+	    
+    /* -- */
+    
+    while (state)
+      {
+	// we already know from above that we have to wait, so
+	// we'll start the loop waiting
+
+	try
+	  {
+	    wait(waitTime);
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+
+	timeSoFar = System.currentTimeMillis() - startTime;
+
+	if (timeSoFar > millis)	// timed out
+	  {
+	    return state;
+	  }
+	else
+	  {
+	    waitTime = millis - timeSoFar;
+	  }
+      }
+
+    return state;
+  }
+
+  /**
+   * <p>Safe, simple method to wait until this boolean semaphore has been
+   * set. If the semaphore is already set at the time this method is
+   * called, this method will return immediately.</p>
+   *
+   * <p>Note that this method will not time out.</p>
+   */
+
+  public synchronized void waitForSet()
+  {
+    while (!state)
+      {
+	try
+	  {
+	    wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+      }
+  }
+
+  /**
+   * <p>Safe, simple method to wait until this boolean semaphore has
+   * been cleared, or until at least millis milliseconds have
+   * passed. If the semaphore is already set at the time this method
+   * is called, this method will return immediately.</p>
+   *
+   * @returns the state of the semaphore at the time the method
+   * returns.. this will be true if the semaphore was set, or
+   * false if the wait timed out before the semaphore was set
+   */
+
+  public synchronized boolean waitForSet(long millis)
+  {
+    long waitTime = millis;
+    long startTime = System.currentTimeMillis();
+    long timeSoFar = 0;
+	    
+    /* -- */
+    
+    while (!state)
+      {
+	// we already know from above that we have to wait, so
+	// we'll start the loop waiting
+
+	try
+	  {
+	    wait(waitTime);
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+
+	timeSoFar = System.currentTimeMillis() - startTime;
+
+	if (timeSoFar > millis)	// timed out
+	  {
+	    return state;
+	  }
+	else
+	  {
+	    waitTime = millis - timeSoFar;
+	  }
+      }
+
+    return state;
   }
 }
