@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2002/10/02 20:32:22 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2002/10/05 05:47:41 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1499,6 +1499,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 
 	    operand = new JstringField();
+	    ((JstringField) operand).setEnterHandler(parent);
 	    addOperand = true;
 	  }
       }
@@ -1509,6 +1510,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 
 	    operand = new JnumberField();
+	    ((JnumberField) operand).setEnterHandler(parent);
 	    addOperand = true;
 	  }
       }
@@ -1519,6 +1521,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 
  	    operand = new JfloatField();
+	    ((JfloatField) operand).setEnterHandler(parent);
  	    addOperand = true;
  	  }
       }
@@ -1553,6 +1556,7 @@ class QueryRow implements ItemListener {
 		removeOperand();
 
 		operand= new JstringField();
+		((JstringField) operand).addActionListener(parent);
 		addOperand = true;
 	      }
 	  }
@@ -1593,6 +1597,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 	    
 	    operand = new JstringField();
+	    ((JstringField) operand).addActionListener(parent);
 	    addOperand = true;
 	  }
       }
@@ -1625,7 +1630,17 @@ class QueryRow implements ItemListener {
 
 	if (operand instanceof JstringField)
 	  {
-	    ((JstringField) operand).removeActionListener(parent);
+	    ((JstringField) operand).setEnterHandler(null);
+	  }
+
+	if (operand instanceof JnumberField)
+	  {
+	    ((JnumberField) operand).setEnterHandler(null);
+	  }
+
+	if (operand instanceof JfloatField)
+	  {
+	    ((JfloatField) operand).setEnterHandler(null);
 	  }
 	
 	operand.setVisible(false);
