@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.91 $ %D%
+   Version: $Revision: 1.92 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3071,20 +3071,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   /**
    *
-   * Opens a panel to choose a new type to create an object.
+   * Show the create object dialog, let the user choose
+   * to create or not create an object.
+   *
    */
+
   void createObjectDialog()
   {
-    short type = -1;
+    // The dialog is modal, and will set itself visible when created.
+    // If we have already created it, we'll just pack it and make it
+    // visible
 
     if (createDialog == null)
       {
 	createDialog = new createObjectDialog(this);
       }
-
-    // This shows the dialog
-    createDialog.setVisible(true);
-
+    else
+      {
+	createDialog.pack();	// force it to re-center itself.
+	createDialog.setVisible(true);
+      }
   }
   
   /**
@@ -3100,6 +3106,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
 	if (selectedNode != null && selectedNode instanceof InvidNode)
 	  {
 	    openDialog.dispose();
@@ -3139,6 +3148,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
 	if (selectedNode != null && selectedNode instanceof InvidNode)
 	  {
 	    openDialog.dispose();
@@ -3175,6 +3187,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
 	if (selectedNode != null && selectedNode instanceof InvidNode)
 	  {
 	    openDialog.dispose();
@@ -3219,6 +3234,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
 	if (selectedNode != null && selectedNode instanceof InvidNode)
 	  {
 	    openDialog.dispose();
@@ -3246,6 +3264,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
 	if (selectedNode != null && selectedNode instanceof InvidNode)
 	  {
 	    openDialog.dispose();
@@ -3292,10 +3313,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   }
 
   /**
+   *
    * Logout from the client.
    *
    * This method does not do any checking, it just logs out.
+   *
    */
+
   void logout()
   {
     try
