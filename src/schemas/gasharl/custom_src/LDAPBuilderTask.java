@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2004/03/23 00:29:25 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2004/03/24 03:34:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,6 +62,8 @@ import java.util.*;
 import java.text.*;
 import java.io.*;
 import java.rmi.*;
+
+import net.iharder.xmlizable.Base64;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -137,12 +139,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     now = null;
 
-    // passwd
-
     if (baseChanged(SchemaConstants.UserBase) || 
-	baseChanged((short) 257) | // groups
-	baseChanged((short) 270)) // user netgroups
-	
+	baseChanged((short) 257))
       {
 	Ganymede.debug("Need to build LDAP output");
 
@@ -161,14 +159,23 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  {
 	    try
 	      {
-		DBObject user;
+		DBObject entity;
 		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 		
 		while (users.hasMoreElements())
 		  {
-		    user = (DBObject) users.nextElement();
+		    entity = (DBObject) users.nextElement();
 		    
-		    writeUserLine(user, out);
+		    writeLDIFUserEntry(out, entity);
+		  }
+
+		Enumeration groups = enumerateObjects((short) 257);
+		
+		while (groups.hasMoreElements())
+		  {
+		    entity = (DBObject) groups.nextElement();
+		    
+		    writeLDIFGroupEntry(out, entity);
 		  }
 	      }
 	    finally
@@ -177,27 +184,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
 
-	writeMailDirect2();
-	writeSambafileVersion1();
-	writeNTfile();
-	writeUserSyncFile();
-	writeHTTPfiles();
-
 	success = true;
-      }
-
-    if (baseChanged((short) 277) || // automounter maps
-	baseChanged((short) 276) || // nfs volumes
-	baseChanged((short) 263) || // in case systems were renamed
-	baseChanged(SchemaConstants.UserBase) || // in case users were renamed
-	baseChanged((short) 278)) // automounter map entries
-      {
-	Ganymede.debug("Need to build automounter maps");
-
-	if (writeAutoMounterFiles())
-	  {
-	    success = true;
-	  }
       }
 
     Ganymede.debug("LDAPBuilderTask builderPhase1 completed");
@@ -269,80 +256,179 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     return true;
   }
 
-  /**
-   *
-   * This method extracts an embedded hostname from a top-level interface
-   * object.
-   *
-   */
-
-  private String getInterfaceHostname(DBObject object)
+  private void writeLDIFUserEntry(PrintWriter out, DBObject user)
   {
-    return (String) object.getFieldValueLocal(interfaceSchema.NAME);
+    Invid invid = user.getInvid();
+
+    if (invid.getType() != SchemaConstants.UserBase)
+      {
+	throw new IllegalArgumentException("Wrong entity type");
+      }
+
+    writeLDIF(out, "dn", "uid=" + user.getLabel() + ", cn=users, dc=xserve");
+
+    String guid = (String) user.getFieldValueLocal(userSchema.GUID).toString();
+
+    writeLDIF(out, "apple-generateduid", guid);
+
+    writeLDIF(out, "sn", user.getLabel());
+
+    PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
+
+    writeBinaryLDIF(out, "userPassword", "{CRYPT}" + pdbf.getUNIXCryptText());
+
+    writeLDIF(out, "loginShell", user.getFieldValueLocal(userSchema.LOGINSHELL).toString());
+    
+    writeLDIF(out, "uidNumber", user.getFieldValueLocal(userSchema.UID).toString());
+
+    Invid groupInvid = (Invid) user.getFieldValueLocal(userSchema.HOMEGROUP);
+    
+    DBObject group = getObject(groupInvid);
+
+    writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
+
+    writeLDIF(out, "authAuthority", ";basic;");
+    writeLDIF(out, "objectClass", "inetOrgPerson");
+    writeLDIF(out, "objectClass", "posixAccount");
+    writeLDIF(out, "objectClass", "shadowAccount");
+    writeLDIF(out, "objectClass", "apple-user");
+    writeLDIF(out, "objectClass", "extensibleObject");
+    writeLDIF(out, "objectClass", "organizationalPerson");
+    writeLDIF(out, "objectClass", "top");
+    writeLDIF(out, "objectClass", "person");
+    writeLDIF(out, "uid", user.getLabel());
+    writeLDIF(out, "cn", user.getFieldValueLocal(userSchema.FULLNAME).toString());
+
+    out.println();
+  }
+
+  private void writeLDIFGroupEntry(PrintWriter out, DBObject group)
+  {
+    Invid invid = group.getInvid();
+
+    if (invid.getType() != 257)
+      {
+	throw new IllegalArgumentException("Wrong entity type");
+      }
+
+    writeLDIF(out, "dn", "cn=" + group.getLabel() + ", cn=groups, dc=xserve");
+    writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
+
+    Vector users = group.getFieldValuesLocal(groupSchema.USERS);
+
+    for (int i = 0; i < users.size(); i++)
+      {
+	Invid userInvid = (Invid) users.elementAt(i);
+	DBObject user = getObject(userInvid);
+
+	writeLDIF(out, "memberUid", user.getLabel());
+      }
+
+    writeLDIF(out, "objectClass", "posixGroup");
+    writeLDIF(out, "objectClass", "apple-group");
+    writeLDIF(out, "objectClass", "extensibleObject");
+
+    for (int i = 0; i < users.size(); i++)
+      {
+	Invid userInvid = (Invid) users.elementAt(i);
+	DBObject user = getObject(userInvid);
+
+	writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
+      }
+
+    writeLDIF(out, "cn", group.getLabel());
+
+    out.println();
   }
 
   /**
-   * <P>This method generates a transitive closure of the members of a
-   * user netgroup, including all users in all member netgroups,
-   * recursively.</P> 
+   * This private method writes out an attribute/value pair, doing whatever encoding
+   * is necessary.
    */
 
-  private Vector netgroupMembers(DBObject object)
+  private void writeLDIF(PrintWriter out, String attribute, String value)
   {
-    return netgroupMembers(object, null, null);
-  }
-
-  private Vector netgroupMembers(DBObject object, Vector oldMembers, Hashtable graphCheck)
-  {
-    if (oldMembers == null)
+    if (isBinary(value))
       {
-	oldMembers = new Vector();
-      }
-
-    if (graphCheck == null)
-      {
-	graphCheck = new Hashtable();
-      }
-
-    // make sure we don't get into an infinite loop if someone made
-    // the user netgroup graph circular
-
-    if (graphCheck.containsKey(object.getInvid()))
-      {
-	return oldMembers;
+	writeBinaryLDIF(out, attribute, value);
       }
     else
       {
-	graphCheck.put(object.getInvid(), object.getInvid());
+	out.print(attribute);
+	out.print(": ");
+	out.println(value);
+      }
+  }
+
+  /**
+   * This private method writes out an attribute/value pair, doing whatever encoding
+   * is necessary.
+   */
+
+  private void writeBinaryLDIF(PrintWriter out, String attribute, String value)
+  {
+    out.print(attribute);
+    out.print(":: ");
+    
+    String binaryEncoded = fixNewlines(Base64.encodeString(value));
+
+    if (binaryEncoded.indexOf('\n') != -1)
+      {
+	binaryEncoded = fixNewlines(binaryEncoded);
       }
 
-    // add users in this Netgroup to oldMembers
+    out.println(binaryEncoded);
+  }
 
-    InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
-
-    if (users != null)
+  private boolean isBinary(String value)
+  {
+    if (value.charAt(0) == ';' || value.charAt(0) == ' ')
       {
-	oldMembers = VectorUtils.union(oldMembers, 
-				       VectorUtils.stringVector(users.getValueString(), ", "));
+	return true;
       }
 
-    // recursively add in users in any netgroups in this netgroup
-
-    InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
-
-    if (subGroups != null)
+    for (int i = 0; i < value.length(); i++)
       {
-	for (int i = 0; i < subGroups.size(); i++)
+	char x = value.charAt(i);
+
+	if (x < 32 || x > 192)
 	  {
-	    DBObject subGroup = getObject(subGroups.value(i));
-	    
-	    if (!subGroup.isInactivated())
-	      {
-		oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
-	      }
+	    return true;
 	  }
       }
 
-    return oldMembers;
+    return false;
+  }
+
+  /**
+   * Base64.encodeString breaks lines with bare newlines, not
+   * newline-space pairs as is required in LDIF, so we may need to
+   * tweak things a bit here.
+   */
+
+  private String fixNewlines(String input)
+  {
+    if (input.indexOf('\n') == -1)
+      {
+	return input;
+      }
+
+    StringBuffer outBuf = new StringBuffer();
+
+    for (int i = 0; i < input.length(); i++)
+      {
+	char c = input.charAt(i);
+
+	if (c == '\n')
+	  {
+	    outBuf.append("\n ");
+	  }
+	else
+	  {
+	    outBuf.append(c);
+	  }
+      }
+
+    return outBuf.toString();
   }
 }
