@@ -6,18 +6,20 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/12/15 00:22:19 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/11/30 03:12:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -50,6 +52,8 @@ package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.SharedStringBuffer;
+import arlut.csd.Util.VectorUtils;
 
 import java.util.*;
 import java.text.*;
@@ -81,7 +85,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private Date now = null;
   private boolean backedup = false;
-  private StringBuffer result = new StringBuffer();
+  private SharedStringBuffer result = new SharedStringBuffer();
+
+  private Invid normalCategory = null;
 
   /* -- */
 
@@ -103,6 +109,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     boolean success = false;
 
     /* -- */
+
+    Ganymede.debug("GASHBuilderTask builderPhase1 running");
 
     backedup = false;
 
@@ -156,25 +164,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	
 	if (out != null)
 	  {
-	    DBObject user;
-	    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-	    while (users.hasMoreElements())
+	    try
 	      {
-		user = (DBObject) users.nextElement();
-
-		try
+		DBObject user;
+		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+		while (users.hasMoreElements())
 		  {
+		    user = (DBObject) users.nextElement();
+		    
 		    writeUserLine(user, out);
 		  }
-		catch (NullPointerException ex)
-		  {
-		    Ganymede.debug("GASHBuilderTask: NullPointerException: Couldn't write user " + user.getLabel());
-		  }
 	      }
-
-	    out.close();
+	    finally
+	      {
+		out.close();
+	      }
 	  }
+
+	writeNTfile();
+	writeHTTPfiles();
 
 	success = true;
       }
@@ -196,26 +205,27 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group_info file: " + ex);
 	  }
 	
-	if (out != null)
+	try
 	  {
 	    DBObject group;
 	    Enumeration groups = enumerateObjects((short) 257);
-
+		
 	    while (groups.hasMoreElements())
 	      {
 		group = (DBObject) groups.nextElement();
-
-		try
+		
+		if (out != null)
 		  {
 		    writeGroupLine(group, out);
 		  }
-		catch (NullPointerException ex)
-		  {
-		    Ganymede.debug("GASHBuilderTask: NullPointerException: Couldn't write user " + group.getLabel());
-		  }
 	      }
-
-	    out.close();
+	  }
+	finally
+	  {
+	    if (out != null)
+	      {
+		out.close();
+	      }
 	  }
 
 	success = true;
@@ -265,6 +275,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	success = true;
       }
 
+    Ganymede.debug("GASHBuilderTask builderPhase1 completed");
+
     return success;
   }
 
@@ -285,6 +297,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       file;
 
     /* -- */
+
+    Ganymede.debug("GASHBuilderTask builderPhase2 running");
 
     if (buildScript == null)
       {
@@ -314,7 +328,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
+	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + 
+			   ") due to IOException: " + ex);
 	  }
 	catch (InterruptedException ex)
 	  {
@@ -365,6 +380,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
       }
 
+    Ganymede.debug("GASHBuilderTask builderPhase2 completed");
+
     return true;
   }
 
@@ -397,9 +414,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	String label;
 	Date labelDate;
 
-	if (lastRunTime != null)
+	if (oldLastRunTime != null)
 	  {
-	    labelDate = lastRunTime;
+	    labelDate = oldLastRunTime;
 	  }
 	else
 	  {
@@ -436,7 +453,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * The lines in this file look like the following.
    *
-   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
+   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh:ss#:normal:exp:lastadm
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
@@ -482,6 +499,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
 
+    // extra security precaution.. warn folks if we see a root id
+
+    if (uid == 0)
+      {
+	Ganymede.debug("GASHBuilder.writeUserLine(): *** warning, root uid in user " + username + "!! ***");
+      }
+
     // get the gid
     
     groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
@@ -516,10 +540,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(Integer.toString(gid));
     result.append(":");
     result.append(name);
+
     result.append(",");
-    result.append(room);
-    result.append(" ");
-    result.append(div);
+
+    if (room != null && !room.equals(""))
+      {
+	result.append(room);
+      }
+
+    if (div != null && !div.equals(""))
+      {
+	result.append(" ");
+	result.append(div);
+      }
 
     if (officePhone != null && !officePhone.equals(""))
       {
@@ -540,13 +573,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeGroupLine(): Warning!  user " + 
+	System.err.println("GASHBuilder.writeUserLine(): Warning!  user " + 
 			   username + " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
   }
-
+  
   /**
    *
    * This method writes out a line to the group_info GASH source file.
@@ -571,6 +604,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector invids;
     Invid userInvid;
     String userName;
+    String contract;
+    String description;
 
     /* -- */
 
@@ -578,19 +613,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
-    // currently in the Ganymede schema, group passwords aren't in passfields.
+    // currently in the GASH schema, group passwords aren't in
+    // passfields.
 
     pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
     
-    // we currently don't explicitly record the home group.. just take the first group
-    // that the user is in.
-
     invids = object.getFieldValuesLocal(groupSchema.USERS);
 
     if (invids == null)
       {
-	// System.err.println("GASHBuilder.writeUserLine(): null user list for group " + groupname);
+	// System.err.println("GASHBuilder.writeGroupLine(): null user list for group " + groupname);
       }
     else
       {
@@ -658,29 +691,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeNetgroup(): couldn't open netgroup file: " + ex);
       }
 
-    // first the user netgroups
-
-    netgroups = enumerateObjects((short) 270);
-
-    while (netgroups.hasMoreElements())
+    try
       {
-	netgroup = (DBObject) netgroups.nextElement();
-	
-	writeUserNetgroup(netgroup, netgroupFile);
-      }
+	// first the user netgroups
 
-    // now the system netgroups
+	netgroups = enumerateObjects((short) 270);
+
+	while (netgroups.hasMoreElements())
+	  {
+	    netgroup = (DBObject) netgroups.nextElement();
+	
+	    writeUserNetgroup(netgroup, netgroupFile);
+	  }
+
+	// now the system netgroups
     
-    netgroups = enumerateObjects((short) 271);
+	netgroups = enumerateObjects((short) 271);
 
-    while (netgroups.hasMoreElements())
-      {
-	netgroup = (DBObject) netgroups.nextElement();
+	while (netgroups.hasMoreElements())
+	  {
+	    netgroup = (DBObject) netgroups.nextElement();
 	
-	writeSystemNetgroup(netgroup, netgroupFile);
+	    writeSystemNetgroup(netgroup, netgroupFile);
+	  }
       }
-
-    netgroupFile.close();
+    finally
+      {
+	netgroupFile.close();
+      }
 
     return true;
   }
@@ -720,12 +758,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // it, put in an entry to link the netgroup with a
     // sub netgroup for continuation.
 
-    // Thus, we want to save enough space to be able to put
-    // the link information at the end.  We reduce it by
-    // a further 6 chars to leave space for the per-entry
-    // syntax.
+    // Thus, we want to save enough space to be able to put the link
+    // information at the end.  We reduce it by a further 6 chars to
+    // leave space for the per-entry syntax.
 
-    lengthlimit = 1024 - name.length() - 6;
+    // We could do this check during our buffer building loop, but by
+    // doing it up front we guarantee that we're never going to exceed
+    // the real limit during any single iteration of our netgroup line
+    // construction without having to constantly be adding 6 to the
+    // item length.
+
+    lengthlimit = 900 - name.length() - 6;
 
     buffer.append(name);
 
@@ -737,7 +780,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    refLabel = getLabel(ref);
 	    
 	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {		
+	      {
 		if (subgroup > 1)
 		  {
 		    subname = name + "-ext" + subgroup;
@@ -777,7 +820,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    subname = name + "-ext";
 		  }
-
+		
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
@@ -836,7 +879,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // a further 6 chars to leave space for the per-entry
     // syntax.
 
-    lengthlimit = 1024 - name.length() - 6;
+    // We could do this check during our buffer building loop, but by
+    // doing it up front we guarantee that we're never going to exceed
+    // the real limit during any single iteration of our netgroup line
+    // construction without having to constantly be adding 6 to the
+    // item length.
+
+    lengthlimit = 900 - name.length() - 6;
 
     buffer.append(name);
 
@@ -857,7 +906,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    subname = name + "-ext";
 		  }
-
+		
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
@@ -889,7 +938,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    subname = name + "-ext";
 		  }
-
+		
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
@@ -920,7 +969,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     PrintWriter autoFile = null;
     DBObject map, obj, user;
     Enumeration vols, maps, entries;
-    StringBuffer buf = new StringBuffer();
+    SharedStringBuffer buf = new SharedStringBuffer();
     String mountopts, mapname;
     String volName, sysName;
     Vector tempVect;
@@ -939,60 +988,71 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
       }
 
-    // find the volume definitions
-
-    vols = enumerateObjects((short) 276);
-
-    while (vols.hasMoreElements())
+    try
       {
-	obj = (DBObject) vols.nextElement();
+	// find the volume definitions
 
-	buf.setLength(0);
+	vols = enumerateObjects((short) 276);
 
-	volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
-
-	if (volName == null)
+	while (vols.hasMoreElements())
 	  {
-	    Ganymede.debug("Couldn't emit a volume definition.. null label");
-	    continue;
+	    obj = (DBObject) vols.nextElement();
+
+	    buf.setLength(0);
+
+	    volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
+
+	    if (volName == null)
+	      {
+		Ganymede.debug("Couldn't emit a volume definition.. null label");
+		continue;
+	      }
+
+	    buf.append(volName); // volume label
+	    buf.append("\t\t");
+
+	    // mount options.. NeXT's like this.  Ugh.
+
+	    mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); 
+
+	    if (mountopts != null && !mountopts.equals(""))
+	      {
+		buf.append(mountopts);
+		buf.append(" ");
+	      }
+
+	    sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
+
+	    if (sysName == null)
+	      {
+		Ganymede.debug("Couldn't emit proper volume definition for " + 
+			       volName + ", no system found");
+		continue;
+	      }
+
+	    buf.append(sysName);
+	    buf.append(dnsdomain);
+
+	    buf.append(":");
+
+	    // mount path
+
+	    buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); 
+
+	    autoFile.println(buf.toString());
 	  }
-
-	buf.append(volName); // volume label
-	buf.append("\t\t");
-
-	mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); // mount options.. NeXT's like this.  Ugh.
-
-	if (mountopts != null && !mountopts.equals(""))
-	  {
-	    buf.append(mountopts);
-	    buf.append(" ");
-	  }
-
-	sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
-
-	if (sysName == null)
-	  {
-	    Ganymede.debug("Couldn't emit proper volume definition for " + 
-			   volName + ", no system found");
-	    continue;
-	  }
-
-	buf.append(sysName);
-	buf.append(dnsdomain);
-
-	buf.append(":");
-	buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); // mount path
-
-	autoFile.println(buf.toString());
       }
-
-    autoFile.close();
+    finally
+      {
+	autoFile.close();
+      }
 
     // second, write out all the auto.home.* files mapping user name
     // to volume name.  We depend on the GASH build scripts to convert
-    // these to the form that NIS will actually use.. we could and possibly
-    // will change this to write out the combined auto.home/auto.vol info
-    // rather than forcing it to be done after-the-fact via perl.
+    // these to the form that NIS will actually use.. we could and
+    // possibly will change this to write out the combined
+    // auto.home/auto.vol info rather than forcing it to be done
+    // after-the-fact via perl.
 
     maps = enumerateObjects((short) 277);
 
@@ -1008,51 +1068,62 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " + mapname + ": " + ex);
+	    System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " + 
+			       mapname + ": " + ex);
 	  }
 
-	tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
+	try
+	  {
+	    tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
 
-	if (tempVect == null)
+	    if (tempVect == null)
+	      {
+		autoFile.close();
+		continue;
+	      }
+
+	    entries = tempVect.elements();
+
+	    while (entries.hasMoreElements())
+	      {
+		ref = (Invid) entries.nextElement();
+		obj = getObject(ref);
+
+		// the entry is embedded in the user's record.. get
+		// the user' id and label
+
+		userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+
+		if (userRef.getType() != SchemaConstants.UserBase)
+		  {
+		    throw new RuntimeException("Schema and/or database error");
+		  }
+
+		buf.setLength(0);
+	    
+		buf.append(getLabel(userRef)); // the user's name
+		buf.append("\t");
+
+		// nfs volume for this entry
+
+		ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME); 
+
+		if (ref == null || ref.getType() != (short) 276)
+		  {
+		    Ganymede.debug("Error, can't find a volume entry for user " + getLabel(userRef) +
+				   " on automounter map " + mapname);
+		    continue;
+		  }
+
+		buf.append(getLabel(ref));
+
+		autoFile.println(buf.toString());
+	      }
+	  }
+	finally
 	  {
 	    autoFile.close();
-	    continue;
 	  }
-
-	entries = tempVect.elements();
-
-	while (entries.hasMoreElements())
-	  {
-	    ref = (Invid) entries.nextElement();
-	    obj = getObject(ref);
-
-	    // the entry is embedded in the user's record.. get the user' id and label
-
-	    userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-
-	    if (userRef.getType() != SchemaConstants.UserBase)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.setLength(0);
-	    
-	    buf.append(getLabel(userRef)); // the user's name
-	    buf.append("\t");
-
-	    ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME); // nfs volume for this entry
-
-	    if (ref == null || ref.getType() != (short) 276)
-	      {
-		throw new RuntimeException("Schema and/or database error");
-	      }
-
-	    buf.append(getLabel(ref));
-
-	    autoFile.println(buf.toString());
-	  }
-
-	autoFile.close();
       }
 
     return true;
@@ -1089,47 +1160,51 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	System.err.println("GASHBuilderTask.writeAliasesFile(): couldn't open aliases_info file: " + ex);
       }
 
-    // our email aliases database is spread across three separate object
-    // bases.
-
-    users = enumerateObjects(SchemaConstants.UserBase);
-
-    while (users.hasMoreElements())
+    try
       {
-	user = (DBObject) users.nextElement();
-	
-	writeUserAlias(user, aliases_info);
-      }
+	// our email aliases database is spread across three separate object
+	// bases.
 
-    // now the mail lists
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+	
+	    writeUserAlias(user, aliases_info);
+	  }
+
+	// now the mail lists
     
-    mailgroups = enumerateObjects((short) 274);
+	mailgroups = enumerateObjects((short) 274);
 
-    while (mailgroups.hasMoreElements())
-      {
-	group = (DBObject) mailgroups.nextElement();
+	while (mailgroups.hasMoreElements())
+	  {
+	    group = (DBObject) mailgroups.nextElement();
 	
-	writeGroupAlias(group, aliases_info);
-      }
+	    writeGroupAlias(group, aliases_info);
+	  }
 
-    // and the external mail addresses
+	// and the external mail addresses
     
-    externals = enumerateObjects((short) 275);
+	externals = enumerateObjects((short) 275);
 
-    while (externals.hasMoreElements())
-      {
-	external = (DBObject) externals.nextElement();
+	while (externals.hasMoreElements())
+	  {
+	    external = (DBObject) externals.nextElement();
 	
-	writeExternalAlias(external, aliases_info);
+	    writeExternalAlias(external, aliases_info);
+	  }
       }
-
-    aliases_info.close();
+    finally
+      {
+	aliases_info.close();
+      }
 
     return true;
   }
   
   /**
-   *
    * This method writes out a user alias line to the aliases_info GASH source file.<br><br>
    *
    * The user alias lines in this file look like the following:<br><br>
@@ -1146,7 +1221,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   *
    */
 
   private void writeUserAlias(DBObject object, PrintWriter writer)
@@ -1173,6 +1247,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (aliases != null)
       {
+	// we don't include the username in the list of aliases,
+	// but the build/gash stuff requires that it be included
+	// in aliases_info, so if we didn't write it out as the
+	// signature, make it the second alias.  The ordering
+	// doesn't matter past the first, so this is ok.
+
+	if (!signature.equals(username))
+	  {
+	    result.append(", ");
+	    result.append(username);
+	  }
+
 	for (int i = 0; i < aliases.size(); i++)
 	  {
 	    alias = (String) aliases.elementAt(i);
@@ -1181,7 +1267,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		continue;
 	      }
-	    
+
 	    result.append(", ");
 	    result.append(alias);
 	  }
@@ -1323,16 +1409,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append("<xxx>");
     result.append(name);
     result.append(":");
-
+    result.append(name);	// the name is one of the aliases
+	
     if (aliases != null)
       {
 	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
-	    
+	    result.append(", ");
+
 	    alias = (String) aliases.elementAt(i);
 	    
 	    result.append(alias);
@@ -1364,12 +1448,526 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <P>This method generates a file that can be used to synchronize
+   * passwords and accounts to an NT PDC and to Samba, and the like.</P>
+   *
+   * <P>This method writes out a file 'rshNT.txt', which contains information
+   * on user and group creation, status change, rename, inactivation, and
+   * deletion.</P>
+   *
+   * <P>The file is structured along the lines of a traditional Windows
+   * .INI file, as follows:</P>
+   *
+   * <PRE>
+   * [Create/Update]
+   * broccol:oldname:dwEsx8zlWOM/PA:Jonathan Abbey:S321:CSD,3199,3357681
+   * amy::dwEsx8zlWOM/PA:Amy Bush:S222:CSD,3028,
+   * [Inactivate]
+   * oldaccount
+   * [Delete]
+   * [Create/Update Groups]
+   * omssys:oldname:broccol,amy,omara,mulvaney
+   * omsovr::abc,gomod,gojo,kneuper,cb,luna
+   * [Inactivate Groups]
+   * oldgroup
+   * [Delete Groups]
+   * </PRE>
+   *
+   * <P>In this file, there are six sections.  The 'Create/Update' sections
+   * provide the current state of the user or group.  If the user or
+   * group was renamed since the last time the update was propagated
+   * to NT/Samba, the old name will be inserted after the first
+   * colon, where oldname is, above.  The inactivate sections list
+   * users and groups that are currently inactivated.  The delete
+   * sections list users and groups that have recently been deleted,
+   * and which need to be removed from the Samba/NT databases.</P>
+   *
+   * <P>In actuality, the way the Ganymede server is structured, this
+   * method has no way of reporting on users and groups that have been
+   * renamed or deleted in the server; the GASHBuilderTask is executed
+   * after the transaction in which a deletion or rename occurs has
+   * already been committed.  To get around this problem, the userCustom
+   * and groupCustom classes are constructed so that whenever a user or
+   * group is renamed or deleted, an external script is run which, among
+   * other things, writes a note to a file indicating that the user or
+   * group was renamed or deleted.  The rshNT.txt file emitted by this
+   * method needs to be processed by an external perl script 
+   * (ntsamba.pl, currently), which takes the notes on user and group
+   * rename and deletion, merges that information with the information
+   * we write out in this method, and then passes the expanded
+   * rshNT.txt file to both Samba and our NT PDC.</P>
+   *
+   * <P>This necessity for external scratchpad files is ugly, but
+   * necessary unless very significant modifications are made to the
+   * Ganymede server.  The Ganymede server would have to be able
+   * to provide builder tasks the ability to scan backwards in time
+   * through the database, which it currently cannot do, or the
+   * server would have to tie transaction commit synchronously to
+   * the builder task system.  In either case, a tricky problem, so
+   * for now we just work around it.</P>
+   *
+   * <P>Sooner or later, the Ganymede server may need to have some
+   * support for differential changes added.  The current Ganymede
+   * server mechanisms really only suits the case where the builder
+   * tasks simply write out the current state of the database without
+   * recourse to earlier states.</P>
+   *
+   * <P>Alternatively, the NT/Samba support could be reimplemented in
+   * a fashion whereby the perl code on NT and/or Samba are responsible
+   * for remembering at all times the known state of users and groups
+   * created by Ganymede, and to delete users and groups that are
+   * missing in a future dump.  User and group renaming would still need
+   * to be explicitly handled by the Ganymede server in some fashion,
+   * though.</P>
+   */
+
+  private boolean writeNTfile()
+  {
+    PrintWriter rshNT = null;
+    DBObject user;
+    DBObject group;
+    Enumeration users;
+    Enumeration groups;
+    Vector inactives = new Vector();
+
+    try
+      {
+	rshNT = openOutFile(path + "rshNT.txt");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeNTFile(): couldn't open rshNT.txt file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	rshNT.println("[Create/Update]");
+
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated())
+	      {
+		inactives.addElement(user.getLabel());
+		continue;
+	      }
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+	    if (passField == null)
+	      {
+		continue;
+	      }
+	    
+	    String password = passField.getPlainText();
+
+	    // ok, we've got a user with valid plaintext password
+	    // info.  Write it.
+
+	    rshNT.print(escapeString(user.getLabel()));
+	    rshNT.print("::");	// leave a space for rename info to be inserted later
+	    rshNT.print(escapeString(password));
+
+	    String fullname = (String) user.getFieldValueLocal((short) 257); // FULLNAME
+	    String room = (String) user.getFieldValueLocal((short) 259); // ROOM
+	    String div = (String) user.getFieldValueLocal((short) 258);	// DIVISION
+	    String workphone = (String) user.getFieldValueLocal((short) 260);	// OFFICEPHONE
+	    String homephone = (String) user.getFieldValueLocal((short) 261);	// HOMEPHONE
+
+	    String composite = escapeString(fullname) + ":" + 
+	      escapeString(room + " " + div + "," + workphone + "," + homephone);
+
+	    rshNT.print(":");
+	    rshNT.println(composite);
+	  }
+
+	rshNT.println("[Inactivate]");
+
+	for (int i = 0; i < inactives.size(); i++)
+	  {
+	    rshNT.println(inactives.elementAt(i));
+	  }
+
+	rshNT.println("[Delete]");
+
+	// user deletion information is inserted by the external
+	// ntsamba.pl script
+
+	rshNT.println("[Create/Update Groups]");
+
+	inactives = new Vector();
+
+	// first we write out account groups for the NT file
+
+	groups = enumerateObjects((short) 257);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		inactives.addElement(group.getLabel());
+		continue;
+	      }
+
+	    rshNT.print(escapeString(group.getLabel()));
+	    rshNT.print("::");	// skip rename info for now
+	    
+	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+
+	    if (usersField != null)
+	      {
+		rshNT.print(escapeString(usersField.getValueString()));
+	      }
+
+	    rshNT.print(":Ganymede");
+
+	    InvidDBField ownerField = (InvidDBField) group.getField(SchemaConstants.OwnerListField);
+
+	    if (ownerField != null)
+	      {
+		rshNT.print(" [");
+		rshNT.print(escapeString(ownerField.getValueString()));
+		rshNT.print("]");
+	      }
+
+	    rshNT.println();
+	  }
+
+	// second we write out user netgroups
+
+	groups = enumerateObjects((short) 270);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		inactives.addElement(group.getLabel());
+		continue;
+	      }
+
+	    rshNT.print(escapeString(group.getLabel()));
+	    rshNT.print("::");	// skip rename info for now
+	    
+	    rshNT.print(escapeString(VectorUtils.vectorString(netgroupMembers(group))));
+
+	    rshNT.print(":Ganymede");
+
+	    InvidDBField ownerField = (InvidDBField) group.getField(SchemaConstants.OwnerListField);
+
+	    if (ownerField != null)
+	      {
+		rshNT.print(" [");
+		rshNT.print(escapeString(ownerField.getValueString()));
+		rshNT.print("]");
+	      }
+
+	    rshNT.println();
+	  }
+
+	rshNT.println("[Inactivate Groups]");
+
+	for (int i = 0; i < inactives.size(); i++)
+	  {
+	    rshNT.println(inactives.elementAt(i));
+	  }
+
+	rshNT.println("[Delete Groups]");
+
+	// group and netgroup deletion information is inserted by the
+	// external ntsamba.pl script
+      }
+    finally
+      {
+	rshNT.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This method writes out password and group files compatible with
+   * with the Apache web server.  The password file is formatted according to
+   * the standard .htpasswd file format, as follows:</p>
+   *
+   * <PRE>
+   * user1:3vWsXVZDX5E7E
+   * user2:DX5E7E3vWsXVZ
+   * </PRE>
+   *
+   * <p>The group file is likewise formatted for use with Apache, as follows:</p>
+   *
+   * <PRE>
+   * group1: user1 user2 user3
+   * group2: user9 user2 user1
+   * </PRE>
+   *
+   * <p>All users and all groups and user netgroups will be written to the
+   * files.</p>
+   *
+   */
+
+  private boolean writeHTTPfiles()
+  {
+    PrintWriter webPassword = null;
+    PrintWriter webGroups = null;
+    DBObject user;
+    DBObject group;
+    Enumeration users;
+    Enumeration groups;
+
+    try
+      {
+	webPassword = openOutFile(path + "httpd.pass");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.pass file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated())
+	      {
+		continue;
+	      }
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+	    if (passField == null)
+	      {
+		continue;
+	      }
+	    
+	    String password = passField.getUNIXCryptText();
+
+	    if (password == null)
+	      {
+		continue;
+	      }
+
+	    // ok, we've got a user with valid UNIXCrypt password
+	    // info.  Write it.
+
+	    webPassword.print(user.getLabel());
+	    webPassword.print(":");
+	    webPassword.println(password);
+	  }
+      }
+    finally
+      {
+	webPassword.close();
+      }
+
+    try
+      {
+	webGroups = openOutFile(path + "httpd.groups");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.groups file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	// first we write out UNIX account groups
+
+	groups = enumerateObjects((short) 257);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		continue;
+	      }
+	    
+	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+	    
+	    if (usersField == null)
+	      {
+		continue;
+	      }
+
+	    String usersList = usersField.getValueString();
+
+	    if (usersList == null || usersList.equals(""))
+	      {
+		continue;
+	      }
+
+	    webGroups.print(group.getLabel());
+	    webGroups.print(": ");
+
+	    // InvidDBField.getValueString() returns a comma separated
+	    // list..  we want a space separated list for Apache
+
+	    webGroups.println(usersList.replace(',',' '));
+	  }
+
+	// second we write out user netgroups
+
+	groups = enumerateObjects((short) 270);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		continue;
+	      }
+
+	    String usersList = VectorUtils.vectorString(netgroupMembers(group));
+
+	    if (usersList == null || usersList.equals(""))
+	      {
+		continue;
+	      }
+
+	    webGroups.print(group.getLabel());
+	    webGroups.print(": ");
+
+	    // VectorUtils.vectorString() returns a comma separated
+	    // list..  we want a space separated list for Apache
+
+	    webGroups.println(usersList.replace(',',' '));
+	  }
+      }
+    finally
+      {
+	webGroups.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <P>This method generates a transitive closure of the members of a
+   * user netgroup, including all users in all member netgroups,
+   * recursively.</P> 
+   */
+
+  private Vector netgroupMembers(DBObject object)
+  {
+    return netgroupMembers(object, null, null);
+  }
+
+  private Vector netgroupMembers(DBObject object, Vector oldMembers, Hashtable graphCheck)
+  {
+    if (oldMembers == null)
+      {
+	oldMembers = new Vector();
+      }
+
+    if (graphCheck == null)
+      {
+	graphCheck = new Hashtable();
+      }
+
+    // make sure we don't get into an infinite loop if someone made
+    // the user netgroup graph circular
+
+    if (graphCheck.containsKey(object.getInvid()))
+      {
+	return oldMembers;
+      }
+    else
+      {
+	graphCheck.put(object.getInvid(), object.getInvid());
+      }
+
+    // add users in this Netgroup to oldMembers
+
+    InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
+
+    if (users != null)
+      {
+	oldMembers = VectorUtils.union(oldMembers, 
+				       VectorUtils.stringVector(users.getValueString(), ", "));
+      }
+
+    // recursively add in users in any netgroups in this netgroup
+
+    InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
+
+    if (subGroups != null)
+      {
+	for (int i = 0; i < subGroups.size(); i++)
+	  {
+	    DBObject subGroup = getObject(subGroups.value(i));
+	    
+	    if (!subGroup.isInactivated())
+	      {
+		oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
+	      }
+	  }
+      }
+
+    return oldMembers;
+  }
+
+  /** 
+   * We can't have any : characters in passwords in the rshNT.txt
+   * file we generate, since we use : chars as field separators in
+   * this file.  Make sure that we backslash any such chars.
+   */
+
+  private String escapeString(String in)
+  {
+    if (in == null)
+      {
+	return "";
+      }
+
+    StringBuffer buffer = new StringBuffer();
+    char[] ary = in.toCharArray();
+
+    /* -- */
+
+    // do it
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] == ':')
+	  {
+	    buffer.append("\\:");
+	  }
+	else if (ary[i] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(ary[i]);
+	  }
+      }
+
+    return buffer.toString();
+  }
+
+  /**
    *
    * This method generates a hosts_info file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
    * from our superclass.
-   *
-   */
+   * */
 
   private boolean writeSysFile()
   {
@@ -1386,32 +1984,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     catch (IOException ex)
       {
 	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open hosts_info file: " + ex);
+	return false;
       }
 
-    // the hosts_info file is kind of squirrely.  We emit all of the system lines
-    // first, followed by all of the interface lines.
-
-    systems = enumerateObjects((short) 263);
-
-    while (systems.hasMoreElements())
+    try
       {
-	system = (DBObject) systems.nextElement();
-	
-	writeSystem(system, hosts_info);
-      }
+	// the hosts_info file is kind of squirrely.  We emit all of
+	// the system lines first, followed by all of the interface
+	// lines.
 
-    // now the interfaces
+	systems = enumerateObjects((short) 263);
+
+	while (systems.hasMoreElements())
+	  {
+	    system = (DBObject) systems.nextElement();
+	
+	    writeSystem(system, hosts_info);
+	  }
+
+	// now the interfaces
     
-    interfaces = enumerateObjects((short) 265);
+	interfaces = enumerateObjects((short) 265);
 
-    while (interfaces.hasMoreElements())
-      {
-	interfaceObj = (DBObject) interfaces.nextElement();
+	while (interfaces.hasMoreElements())
+	  {
+	    interfaceObj = (DBObject) interfaces.nextElement();
 	
-	writeInterface(interfaceObj, hosts_info);
+	    writeInterface(interfaceObj, hosts_info);
+	  }
       }
-
-    hosts_info.close();
+    finally
+      {
+	hosts_info.close();
+      }
 
     return true;
   }
@@ -1469,7 +2074,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    
 	    if (interfaceName != null)
 	      {
-		interfaceName += dnsdomain;
 		interfaceNames.addElement(interfaceName);
 	      }
 	  }
@@ -1607,6 +2211,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     MAC = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
 
+    // We want to use dashes to separate the hex bytes in our ethernet addr
+
+    MAC = MAC.replace(':','-');
+
     // an interface is contained in the associated system, so we check our
     // containing object for its name.. we assume that this interface *does*
     // have a containing field (it's embedded, so it must, eh?), so we don't
@@ -1651,7 +2259,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (hostname != null)
       {
 	result.append(hostname);
-	result.append(dnsdomain);
       }
 
     result.append(", ");
