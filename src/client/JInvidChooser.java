@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -188,7 +188,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     // The item listener will remove the <none> if it is deselected.
 
-    if (!allow) && !removedNone)
+    if ((!allow) && (!removedNone))
       {
 	if (debug)
 	  {
