@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.146 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.147 $
+   Last Mod Date: $Date: 2001/10/17 19:22:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.146 $ %D%
+ * @version $Revision: 1.147 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -133,7 +133,7 @@ public final class DBStore {
    * after id_string
    */
 
-  static final byte minor_version = 2;
+  static final byte minor_version = 3;
 
   /**
    * XML version major id

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/06/05 22:28:02 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/10/17 19:22:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -213,7 +213,7 @@ public class StringDBField extends DBField implements string_field {
 	      }
 	  }
 
-	out.writeShort(count);
+	out.writeInt(count);
 
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -237,7 +237,15 @@ public class StringDBField extends DBField implements string_field {
 
     if (definition.isArray())
       {
-	count = in.readShort();
+	if (Ganymede.db.file_major < 2 || (Ganymede.db.file_major == 2 && Ganymede.db.file_minor < 3))
+	  {
+	    count = in.readShort();
+	  }
+	else
+	  {
+	    count = in.readInt();
+	  }
+
 	value = new Vector(count);
 
 	Vector values = (Vector) value;

@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/08/15 03:47:18 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/10/17 19:22:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -219,7 +219,7 @@ public class IPDBField extends DBField implements ip_field {
       {
 	Vector values = getVectVal();
 
-	out.writeShort(values.size());
+	out.writeInt(values.size());
 
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -254,7 +254,15 @@ public class IPDBField extends DBField implements ip_field {
 
     if (definition.isArray())
       {
-	count = in.readShort();
+	if (Ganymede.db.file_major < 2 || (Ganymede.db.file_major == 2 && Ganymede.db.file_minor < 3))
+	  {
+	    count = in.readShort();
+	  }
+	else
+	  {
+	    count = in.readInt();
+	  }
+
 	value = new Vector(count);
 
 	Vector values = (Vector) value;
