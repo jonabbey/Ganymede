@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   String lastError;
 
   DBSession session;
+
+  GanymediatorWizard wizard = null; // this will be non-null if the user is interacting with a wizard
 
   // the following variables are used to allow us to cache data that we use
   // in permissions handling in this GanymedeSession instead of having to
@@ -2544,6 +2546,99 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return session;
   }
 
+  //
+  //
+  // Wizard management functions
+  //
+  //
+
+  /**
+   *
+   * This method returns true if a wizard is currently interacting
+   * with the user.
+   *
+   * @see arlut.csd.GanymediatorWizard
+   *
+   */
+
+  public synchronized boolean isWizardActive()
+  {
+    return (wizard != null) && (wizard.isActive());
+  }
+
+  /**
+   * This method returns true if a particular wizard is currently
+   * interacting with the user.
+   *
+   * @see arlut.csd.GanymediatorWizard
+   *
+   */
+
+  public synchronized boolean isWizardActive(GanymediatorWizard wizard)
+  {
+    return (this.wizard == wizard) && (this.wizard.isActive());
+  }
+
+  /**
+   *
+   * This method is used to return the active wizard, if any, for
+   * this GanymedeSession.
+   *
+   * @see arlut.csd.GanymediatorWizard
+   *
+   */
+
+  public synchronized GanymediatorWizard getWizard()
+  {
+    return wizard;
+  }
+
+  /**
+   *
+   * This method is used to register a wizard for this GanymedeSession.
+   *
+   * If an active wizard is already registered, this method will return
+   * false.
+   *
+   * @see arlut.csd.GanymediatorWizard
+   *
+   */
+
+  public synchronized boolean registerWizard(GanymediatorWizard wizard)
+  {
+    if (wizard != null && wizard.isActive())
+      {
+	return false;
+      }
+    else
+      {
+	this.wizard = wizard;
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This method is used to register a wizard for this GanymedeSession.
+   *
+   * If an active wizard is already registered, this method will return
+   * false.
+   *
+   * @see arlut.csd.GanymediatorWizard
+   *
+   */
+
+  public synchronized void unregisterWizard(GanymediatorWizard wizard)
+  {
+    if (this.wizard == wizard)
+      {
+	this.wizard = null;
+      }
+    else
+      {
+	throw new IllegalArgumentException("tried to unregister a wizard that wasn't registered");
+      }
+  }
 
   /**
    *
