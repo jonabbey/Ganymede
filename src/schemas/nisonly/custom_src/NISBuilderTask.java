@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -514,7 +514,7 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     // NIS limits the length of a line to 1024 characters.
     // If the line looks like it'll go over, we'll truncate
     // it, put in an entry to link the netgroup with a
-    // sub netgroup for continuatin.
+    // sub netgroup for continuation.
 
     // Thus, we want to save enough space to be able to put
     // the link information at the end.  We reduce it by
@@ -609,7 +609,7 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     // NIS limits the length of a line to 1024 characters.
     // If the line looks like it'll go over, we'll truncate
     // it, put in an entry to link the netgroup with a
-    // sub netgroup for continuatin.
+    // sub netgroup for continuation.
 
     // Thus, we want to save enough space to be able to put
     // the link information at the end.  We reduce it by
