@@ -7,15 +7,15 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/11/22 01:50:29 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2002/03/29 03:57:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -481,7 +482,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     // we stopped using an explicitly stored display order field at
     // DBStore 2.0
     
-    if ((store.file_major == 1) && (store.file_minor <= 17))
+    if (store.isLessThan(2,0))
       {
 	tmp_displayOrder = in.readInt();
       }
@@ -516,7 +517,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	// starting at 2.0, we started reading DBObjectBases in during
 	// category reading.
 
-	if (store.file_major > 1)
+	if (store.isAtLeast(2,0))
 	  {
 	    if (in.readBoolean())
 	      {

@@ -7,15 +7,15 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/06/05 22:28:00 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2002/03/29 03:57:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -658,6 +658,29 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setMD5Crypted(boolean b) throws RemoteException;
+
+  /** 
+   * <p>This method returns true if this is a password field that
+   * stores passwords in Apache md5crypt() format, and
+   * can thus accept pre-crypted passwords.</p>
+   */
+
+  public boolean isApacheMD5Crypted() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in Apache md5crypt() format.  If
+   * passwords are stored in Apache md5crypt() format, they will not be kept
+   * in plaintext on disk, unless isPlainText() returns true.</p>
+   *
+   * <p>setApacheMD5Crypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
+  public ReturnVal setApacheMD5Crypted(boolean b) throws RemoteException;
 
   /** 
    * <p>This method returns true if this is a password field that will

@@ -6,15 +6,15 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/10/31 04:11:50 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2002/03/29 03:57:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -134,12 +134,20 @@ public interface pass_field extends db_field {
   ReturnVal setCryptPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted OpenBSD-style
+   * <p>This method is used to set a pre-crypted FreeBSD-style
    * MD5Crypt password for this field.  This method will return
    * false if this password field is not stored crypted.</p> 
    */
 
   ReturnVal setMD5CryptedPass(String text) throws RemoteException;
+
+  /**
+   * <p>This method is used to set a pre-crypted Apache-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p> 
+   */
+
+  ReturnVal setApacheMD5CryptedPass(String text) throws RemoteException;
 
   /**
    * <p>This method is used to set pre-crypted Windows-style password
@@ -165,7 +173,7 @@ public interface pass_field extends db_field {
    * various hash formats in the Ganymede schema, an error will be returned.</p>
    */
 
-  public ReturnVal setAllHashes(String crypt, String md5crypt,
+  public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,
 				String LANMAN, String NTUnicodeMD4, 
 				boolean local, boolean noWizards) throws RemoteException;
 

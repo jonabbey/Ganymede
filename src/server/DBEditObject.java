@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.165 $
-   Last Mod Date: $Date: 2002/03/13 20:44:47 $
+   Version: $Revision: 1.166 $
+   Last Mod Date: $Date: 2002/03/29 03:57:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.165 $ $Date: 2002/03/13 20:44:47 $ $Name:  $
+ * @version $Revision: 1.166 $ $Date: 2002/03/29 03:57:56 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -133,7 +133,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final static int SETPASSCRYPT = 8;
   public final static int SETPASSMD5 = 9;
   public final static int SETPASSWINHASHES = 10;
-  public final static int LASTOP = 10;
+  public final static int SETPASSAPACHEMD5 = 11;
+  public final static int LASTOP = 11;
 
   public final static Date minDate = new Date(Long.MIN_VALUE);
   public final static Date maxDate = new Date(Long.MAX_VALUE);

@@ -7,15 +7,15 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/10/17 19:22:33 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2002/03/29 03:57:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -254,7 +255,7 @@ public class IPDBField extends DBField implements ip_field {
 
     if (definition.isArray())
       {
-	if (Ganymede.db.file_major < 2 || (Ganymede.db.file_major == 2 && Ganymede.db.file_minor < 3))
+	if (Ganymede.db.isLessThan(2,3))
 	  {
 	    count = in.readShort();
 	  }

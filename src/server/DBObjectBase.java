@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2002/03/29 03:57:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -666,7 +666,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // if we're reading an old ganymede.db file, sort the customFields
     // for 2.0 the customFields will have been read in sort order
 
-    if (store.file_major == 1)
+    if (store.isLessThan(2,0))
       {
 	new VecQuickSort(customFields, comparator).sort();
 
@@ -693,7 +693,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // at file version 1.1, we introduced label_id's.
 
-    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 1))
+    if (store.isAtLeast(1,1))
       {
 	label_id = in.readShort();
       }
@@ -712,8 +712,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // the DBObjectBase block in favor of having it defined by context
     // of the DBBaseCategory this DBObjectBase was read in.
 
-    if (store.file_major == 1 && 
-	store.file_minor >= 3)
+    if (store.isBetweenRevs(1,3,2,0))
       {
 	String categoryName = in.readUTF();
 
@@ -730,8 +729,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // DBObjectBase will be read in order within its category from the
     // file.
 
-    if (store.file_major == 1 && 
-	store.file_minor >= 4)
+    if (store.isBetweenRevs(1,4,2,0))
       {
 	tmp_displayOrder = in.readInt();
       }
@@ -740,7 +738,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	tmp_displayOrder = -1;
       }
 
-    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 5))
+    if (store.isAtLeast(1,5))
       {
 	embedded = in.readBoolean(); // added at file version 1.5
       }
@@ -750,7 +748,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     createBuiltIns(embedded);
 
-    if ((store.file_major > 1) || (store.file_major == 1 && store.file_minor >= 12))
+    if (store.isAtLeast(1,12))
       {
 	maxid = in.readInt(); // added at file version 1.12
       }

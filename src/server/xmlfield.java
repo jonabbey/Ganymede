@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2001/12/04 09:39:31 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/03/29 03:57:58 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.19 $ $Date: 2001/12/04 09:39:31 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 2002/03/29 03:57:58 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1029,7 +1029,7 @@ public class xmlfield implements FieldType {
 	    // we see something like <password/>, with no attributes
 	    // set, we'll wind up clearing the password field entirely
 
-	    result = field.setAllHashes(xp.crypttext, xp.md5text, xp.lanman, xp.ntmd4, false, false);
+	    result = field.setAllHashes(xp.crypttext, xp.md5text, xp.apachemd5text, xp.lanman, xp.ntmd4, false, false);
 
 	    return result;
 	  }
@@ -1761,6 +1761,7 @@ class xPassword {
   String plaintext;
   String crypttext;
   String md5text;
+  String apachemd5text;
   String lanman;
   String ntmd4;
 
@@ -1782,15 +1783,17 @@ class xPassword {
     plaintext = item.getAttrStr("plaintext");
     crypttext = item.getAttrStr("crypt");
     md5text = item.getAttrStr("md5crypt");
+    apachemd5text = item.getAttrStr("apachemd5crypt");
     lanman = item.getAttrStr("lanman");
     ntmd4 = item.getAttrStr("ntmd4");
   }
 
-  public xPassword(String plaintext, String crypttext, String md5text, String lanman, String ntmd4)
+  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4)
   {
     this.plaintext = plaintext;
     this.crypttext = crypttext;
     this.md5text = md5text;
+    this.apachemd5text = apachemd5text;
     this.lanman = lanman;
     this.ntmd4 = ntmd4;
   }
@@ -1821,6 +1824,13 @@ class xPassword {
       {
 	result.append(" md5crypt=\"");
 	result.append(md5text);
+	result.append("\"");
+      }
+
+    if (apachemd5text != null)
+      {
+	result.append(" apachemd5crypt=\"");
+	result.append(apachemd5text);
 	result.append("\"");
       }
 

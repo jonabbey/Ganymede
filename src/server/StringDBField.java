@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/10/17 19:22:34 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2002/03/29 03:57:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -237,7 +237,7 @@ public class StringDBField extends DBField implements string_field {
 
     if (definition.isArray())
       {
-	if (Ganymede.db.file_major < 2 || (Ganymede.db.file_major == 2 && Ganymede.db.file_minor < 3))
+	if (Ganymede.db.isLessThan(2,3))
 	  {
 	    count = in.readShort();
 	  }

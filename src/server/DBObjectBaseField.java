@@ -7,15 +7,15 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2001/07/09 07:56:24 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2002/03/29 03:57:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -242,6 +242,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   boolean crypted = true;	// UNIX encryption is the default.
   boolean md5crypted = false;	// OpenBSD style md5crypt() is not
+  boolean apachemd5crypted = false;	// Apache style md5crypt() is not
   boolean winHashed = false;	// Windows NT/Samba hashes are not
   boolean storePlaintext = false; // nor is plaintext
 
@@ -370,6 +371,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     crypted = original.crypted;
     md5crypted = original.md5crypted;
+    apachemd5crypted = original.apachemd5crypted;
     winHashed = original.winHashed;
     storePlaintext = original.storePlaintext;
 
@@ -536,6 +538,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	out.writeBoolean(crypted);
 	out.writeBoolean(md5crypted);
+	out.writeBoolean(apachemd5crypted);
 	out.writeBoolean(winHashed);
 	out.writeBoolean(storePlaintext);
       }
@@ -562,7 +565,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // we stopped keeping the editable and removable flags in the
     // ganymede.db file at 1.17
 
-    if (base.store.file_major == 1 && base.store.file_minor <= 17)
+    if (base.store.isLessThan(2,0))
       {
 	in.readBoolean();	// skip editable
 	in.readBoolean();	// skip removable
@@ -570,7 +573,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     // at file version 1.6, we introduced field visibility
 
-    if ((base.store.file_major > 1) || (base.store.file_minor >= 6))
+    if (base.store.isAtLeast(1,6))
       {
 	visibility = in.readBoolean();
       }
@@ -582,9 +585,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // at file version 1.7, we introduced an explicit built-in flag
     // we took it out at 2.0
 
-    if (base.store.file_major == 1 && 
-	base.store.file_minor >= 7 && 
-	base.store.file_minor <= 17)
+    if (base.store.isBetweenRevs(1,7,2,0))
       {
 	in.readBoolean();	// skip builtIn
       }
@@ -592,9 +593,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // between file versions 1.1 and 1.17, we had a field_order
     // field
 
-    if (base.store.file_major == 1 && 
-	base.store.file_minor >= 1 && 
-	base.store.file_minor <= 17)
+    if (base.store.isBetweenRevs(1,1,2,0))
       {
 	tmp_displayOrder = in.readShort();		// skip field_order
       }
@@ -654,7 +653,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at file version 1.9, we introduced multiLine
 	
-	if ((base.store.file_major > 1) || (base.store.file_minor >= 9))
+	if (base.store.isAtLeast(1,9))
 	  {
 	    multiLine = in.readBoolean();
 	  }
@@ -665,7 +664,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at file version 1.14, we introduced regexps for string fields
 	
-	if ((base.store.file_major > 1) || (base.store.file_minor >= 14))
+	if (base.store.isAtLeast(1,14))
 	  {
 	    setRegexpPat(in.readUTF());
 	  }
@@ -676,7 +675,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at file version 2.2, we introduced a description field for regexps
 
-	if ((base.store.file_major > 2) || (base.store.file_major == 2 && base.store.file_minor >= 2))
+	if (base.store.isAtLeast(2,2))
 	  {
 	    setRegexpDesc(in.readUTF());
 	  }
@@ -693,7 +692,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.8 we introduced namespaces for number fields
 
-	if ((base.store.file_major > 1) || (base.store.file_minor >= 8))
+	if (base.store.isAtLeast(1,8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -711,7 +710,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.8 we introduced namespaces for IP fields
 
-	if ((base.store.file_major > 1) || (base.store.file_minor >= 8))
+	if (base.store.isAtLeast(1,8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -761,8 +760,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.16 we introduce md5crypted
 
-	if (((base.store.file_major == 1) && (base.store.file_minor >= 16)) ||
-	    (base.store.file_major > 1))
+	if (base.store.isAtLeast(1,16))
 	  {
 	    md5crypted = in.readBoolean();
 	  }
@@ -771,9 +769,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    md5crypted = false;
 	  }
 
+	// at 2.4 we introduce apachemd5crypted
+
+	if (base.store.isAtLeast(2,4))
+	  {
+	    apachemd5crypted = in.readBoolean();
+	  }
+	else
+	  {
+	    apachemd5crypted = false;
+	  }
+
 	// at 2.1 we introduced winHashed
 
-	if (((base.store.file_major == 2) && (base.store.file_minor >= 1)) || (base.store.file_major > 2))
+	if (base.store.isAtLeast(2,1))
 	  {
 	    winHashed = in.readBoolean();
 	  }
@@ -784,8 +793,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.10 we introduced storePlaintext
 
-	if (((base.store.file_major == 1) && (base.store.file_minor >= 10)) ||
-	    (base.store.file_major > 1))
+	if (base.store.isAtLeast(1,10))
 	  {
 	    storePlaintext = in.readBoolean();
 	  }
@@ -1091,6 +1099,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    xmlOut.startElementIndent("md5crypted");
 	    xmlOut.endElement("md5crypted");
+	  }
+
+	if (apachemd5crypted)
+	  {
+	    xmlOut.startElementIndent("apacheMd5crypted");
+	    xmlOut.endElement("apacheMd5crypted");
 	  }
 
 	if (winHashed)
@@ -1692,6 +1706,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     boolean _crypted = false;
     boolean _plaintext = false;
     boolean _md5crypted = false;
+    boolean _apachemd5crypted = false;
     boolean _winHashed = false;
     ReturnVal retVal;
 
@@ -1753,6 +1768,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    else if (child.matches("md5crypted"))
 	      {
 		_md5crypted = true;
+	      }
+	    else if (child.matches("apachemd5crypted"))
+	      {
+		_apachemd5crypted = true;
 	      }
 	    else if (child.matches("winHashed"))
 	      {
@@ -1829,6 +1848,16 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	return Ganymede.createErrorDialog("xml",
 					  "fielddef could not set md5 crypted flag: " + _md5crypted + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setApacheMD5Crypted(_apachemd5crypted);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set apache md5 crypted flag: " + _apachemd5crypted + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
       }
@@ -4550,6 +4579,51 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     md5crypted = b;
+
+    return null;
+  }
+
+  /** 
+   * <p>This method returns true if this is a password field that
+   * stores passwords in Apache md5crypt() format, and
+   * can thus accept pre-crypted passwords.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public boolean isApacheMD5Crypted()
+  {
+    return apachemd5crypted;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in Apache md5crypt() format.  If
+   * passwords are stored in Apache md5crypt() format, they will not be kept
+   * in plaintext on disk, unless isPlainText() returns true.</p>
+   *
+   * <p>setApacheMD5Crypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public ReturnVal setApacheMD5Crypted(boolean b)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    apachemd5crypted = b;
 
     return null;
   }

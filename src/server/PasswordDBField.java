@@ -7,15 +7,15 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2002/03/16 01:54:40 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2002/03/29 03:57:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -131,6 +131,13 @@ public class PasswordDBField extends DBField implements pass_field {
   private String md5CryptPass;
 
   /**
+   * <p>The complex md5crypt()'ed password, with the magic string
+   * used by Apache for their htpasswd file format.</p>
+   */
+
+  private String apacheMd5CryptPass;
+
+  /**
    * <p>Plaintext password.. will never be saved to
    * disk if we have cryptedPass or md5CryptPass.</p>
    */
@@ -195,6 +202,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     cryptedPass = field.cryptedPass;
     md5CryptPass = field.md5CryptPass;
+    apacheMd5CryptPass = field.apacheMd5CryptPass;
     uncryptedPass = field.uncryptedPass;
     lanHash = field.lanHash;
     ntHash = field.ntHash;
@@ -209,8 +217,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean isDefined()
   {
-    return (cryptedPass != null || md5CryptPass != null || uncryptedPass != null ||
-	    lanHash != null || ntHash != null);
+    return (cryptedPass != null || md5CryptPass != null ||
+	    apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
+	    || ntHash != null);
   }
 
   /**
@@ -243,6 +252,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     cryptedPass = null;
     md5CryptPass = null;
+    apacheMd5CryptPass = null;
     uncryptedPass = null;
     ntHash = null;
     lanHash = null;
@@ -267,6 +277,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     return (streq(cryptedPass, origP.cryptedPass) &&
 	    streq(md5CryptPass, origP.md5CryptPass) &&
+	    streq(apacheMd5CryptPass, origP.apacheMd5CryptPass) &&
 	    streq(uncryptedPass, origP.uncryptedPass) && 
 	    streq(lanHash, origP.lanHash) && 
 	    streq(ntHash, origP.ntHash));
@@ -325,6 +336,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     target.cryptedPass = cryptedPass;
     target.md5CryptPass = md5CryptPass;
+    target.apacheMd5CryptPass = apacheMd5CryptPass;
     target.lanHash = lanHash;
     target.ntHash = ntHash;
     target.uncryptedPass = uncryptedPass;
@@ -405,6 +417,25 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
+    if (getFieldDef().isApacheMD5Crypted())
+      {
+	apacheMd5CryptPass = getApacheMD5CryptText();
+
+	if (apacheMd5CryptPass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(apacheMd5CryptPass);
+	    wrote_hash = true;
+	  }
+      }
+    else
+      {
+	out.writeUTF("");
+      }
+
     if (getFieldDef().isWinHashed())
       {
 	lanHash = getLANMANCryptText();
@@ -463,8 +494,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // we radically simplified PasswordDBField's on-disk format at
     // file version 2.1
 
-    if (((Ganymede.db.file_major == 2) && (Ganymede.db.file_minor >= 1)) ||
-	Ganymede.db.file_major > 2)
+    if (Ganymede.db.isAtLeast(2,1))
       {
 	cryptedPass = in.readUTF();
 
@@ -478,6 +508,18 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (md5CryptPass.equals(""))
 	  {
 	    md5CryptPass = null;
+	  }
+
+	// at file format 2.4 we added the Apache-hashed password format
+
+	if (Ganymede.db.isAtLeast(2,4))
+	  {
+	    apacheMd5CryptPass = in.readUTF();
+	    
+	    if (apacheMd5CryptPass.equals(""))
+	      {
+		apacheMd5CryptPass = null;
+	      }
 	  }
 
 	lanHash = in.readUTF();
@@ -510,7 +552,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // passwords on disk.  Since then, we have decided to only write
     // out encrypted passwords if we are using them.
 
-    if ((Ganymede.db.file_major == 1) && (Ganymede.db.file_minor == 10))
+    if (Ganymede.db.isAtRev(1,10))
       {
 	cryptedPass = in.readUTF();
 
@@ -542,8 +584,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    cryptedPass = null;
 	  }
 
-	if ((Ganymede.db.file_major == 1) && (Ganymede.db.file_minor >= 13) &&
-	    (Ganymede.db.file_minor < 16))
+	if (Ganymede.db.isBetweenRevs(1,13,1,16))
 	  {
 	    in.readUTF();	// skip old-style (buggy) md5 pass
 	  }
@@ -554,7 +595,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // note that even though we test for >= 1.16, we won't get to this point
     // if we are using the >= 2.1 logic
 	
-    if ((Ganymede.db.file_major >= 1) || (Ganymede.db.file_minor >= 16))
+    if (Ganymede.db.isAtLeast(1,16))
       {
 	if (definition.isMD5Crypted())
 	  {
@@ -615,6 +656,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (md5CryptPass != null)
       {
 	dump.attribute("md5crypt", md5CryptPass);
+      }
+
+    if (apacheMd5CryptPass != null)
+      {
+	dump.attribute("apachemd5crypt", apacheMd5CryptPass);
       }
 
     if (lanHash != null)
@@ -700,7 +746,12 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    result.append("md5crypt ");
 	  }
-
+	
+	if (apacheMd5CryptPass != null)
+	  {
+	    result.append("apachemd5crypt ");
+	  }
+	
 	if (lanHash != null)
 	  {
 	    result.append("lanman ");
@@ -884,82 +935,31 @@ public class PasswordDBField extends DBField implements pass_field {
 	return false;
       }
 
+    // test against our hashes in decreasing order of hashing fidelity
+
     if (uncryptedPass != null)
       {
-	success = uncryptedPass.equals(plaintext); // easiest
+	success = uncryptedPass.equals(plaintext); // most accurate
       }
-    else if (cryptedPass != null)
+    else if (md5CryptPass != null)
       {
-	success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
+	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
       }
-    else if (lanHash != null)
+    else if (apacheMd5CryptPass != null)
       {
-	success = lanHash.equals(smbencrypt.LANMANHash(plaintext));
+	success = apacheMd5CryptPass.equals(MD5Crypt.apacheCrypt(plaintext, getApacheMD5Salt()));
       }
     else if (ntHash != null)
       {
 	success = ntHash.equals(smbencrypt.NTUNICODEHash(plaintext));
       }
-    else if (md5CryptPass != null) // hardest/most expensive
+    else if (lanHash != null)
       {
-	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
+	success = lanHash.equals(smbencrypt.LANMANHash(plaintext));
       }
-
-    // This section of code is turned off due to an essential unsafety
-    // about it.
-
-    // This bit was intended to do passive password capture, so that
-    // Ganymede could retain memory of a password in all encryption
-    // forms when a user logged into Ganymede.
-    //
-    // The problem with this bit of code is that if the user logs into
-    // Ganymede with a password that is 'close enough' to a hashed
-    // version (i.e., a password that matches the crypt() hashed
-    // password in the first 8 characters but diverges thereafter), then
-    // Ganymede would remember the newly entered, erroneous plaintext
-    // password, and the user would never be able to log in again unless
-    // they happened to type the same incorrect variant.
-    //
-    // Worse, if the user logged into Ganymede with an incorrect but
-    // hash-compatible password, then the retention of the user's
-    // incorrect password might leak out into a builder task which
-    // needs the plaintext, thus propagating an incorrect password
-    // out, possibly to systems that consider more characters in the
-    // hash.  This would effectively lock the user out of that service
-    // until such time as Ganymede was restarted (clearing Ganymede's
-    // transient memory of the plaintext) and then visited by the user
-    // (establishing a new, and hopefully faithful version of the
-    // plaintext) and then run through the builder task
-    //
-    // The only downside to turning off passive capture here is that
-    // if the Ganymede schema is modified to retain more password hash
-    // variants (plaintext or any other hash formats), then the user
-    // would have to explicitly change their password in Ganymede, and
-    // not simply log in.
-
-    if (false && success)
+    else if (cryptedPass != null)
       {
-	uncryptedPass = plaintext;
-
-	if (getFieldDef().isCrypted() && cryptedPass == null)
-	  {
-	    cryptedPass = jcrypt.crypt(plaintext);
-	  }
-
-	if (getFieldDef().isMD5Crypted() && md5CryptPass == null)
-	  {
-	    md5CryptPass = MD5Crypt.crypt(plaintext);
-	  }
-
-	if (getFieldDef().isWinHashed() && lanHash == null)
-	  {
-	    lanHash = smbencrypt.LANMANHash(plaintext);
-	  }
-
-	if (getFieldDef().isWinHashed() && ntHash == null)
-	  {
-	    ntHash = smbencrypt.NTUNICODEHash(plaintext);
-	  }
+	success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
       }
 
     return success;
@@ -1008,6 +1008,32 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (uncryptedPass != null)
 	  {
 	    return MD5Crypt.crypt(uncryptedPass);
+	  }
+	else
+	  {
+	    return null;
+	  }
+      }
+  }
+
+  /** 
+   * <p>This server-side only method returns the Apache md5crypt()-encrypted
+   * hashed password text.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p> 
+   */
+
+  public String getApacheMD5CryptText()
+  {
+    if (apacheMd5CryptPass != null)
+      {
+	return apacheMd5CryptPass;
+      }
+    else
+      {
+	if (uncryptedPass != null)
+	  {
+	    return MD5Crypt.apacheCrypt(uncryptedPass);
 	  }
 	else
 	  {
@@ -1087,8 +1113,6 @@ public class PasswordDBField extends DBField implements pass_field {
    * 
    * <p>If the password is not stored in crypt() form, null will be
    * returned.</p> 
-   * 
-   * @see arlut.csd.ganymede.pass_field 
    */
 
   public String getSalt()
@@ -1111,8 +1135,6 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * <p>If the password is not stored in md5crypt() form,
    * null will be returned.</p>
-   * 
-   * @see arlut.csd.ganymede.pass_field 
    */
 
   public String getMD5Salt()
@@ -1121,6 +1143,49 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	String salt = md5CryptPass;
 	String magic = "$1$";
+
+	if (salt.startsWith(magic))
+	  {
+	    salt = salt.substring(magic.length());
+	  }
+	
+	/* It stops at the first '$', max 8 chars */
+	
+	if (salt.indexOf('$') != -1)
+	  {
+	    salt = salt.substring(0, salt.indexOf('$'));
+	  }
+
+	if (salt.length() > 8)
+	  {
+	    salt = salt.substring(0, 8);
+	  }
+
+	return salt;
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  /** 
+   * <p>Method to obtain the SALT for a stored Apache-style
+   * md5crypt()'ed password.  If the client is going to submit a
+   * pre-crypted Apache password for comparison via
+   * matchMD5CryptText(), it must be salted by the salt returned by
+   * this method.</p>
+   *
+   * <p>If the password is not stored in apacheMd5crypt() form,
+   * null will be returned.</p>
+   */
+
+  public String getApacheMD5Salt()
+  {
+    if (getFieldDef().isApacheMD5Crypted() && apacheMd5CryptPass != null)
+      {
+	String salt = apacheMd5CryptPass;
+	String magic = "$apr1$";
 
 	if (salt.startsWith(magic))
 	  {
@@ -1242,6 +1307,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isMD5Crypted())
       {
 	md5CryptPass = MD5Crypt.crypt(plaintext);
+      }
+
+    if (getFieldDef().isApacheMD5Crypted())
+      {
+	apacheMd5CryptPass = MD5Crypt.apacheCrypt(plaintext);
       }
 
     if (getFieldDef().isWinHashed())
@@ -1427,6 +1497,92 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>This method is used to set a pre-crypted Apache-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p>
+   *
+   * @see arlut.csd.ganymede.pass_field
+   */
+
+  public ReturnVal setApacheMD5CryptedPass(String text)
+  {
+    return setApacheMD5CryptedPass(text, false, false);
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted Apache-style
+   * MD5Crypt password for this field.  This method will return
+   * false if this password field is not stored crypted.</p>
+   */
+
+  public ReturnVal setApacheMD5CryptedPass(String text, boolean local, boolean noWizards)
+  {
+    ReturnVal retVal;
+    DBEditObject eObj;
+
+    /* -- */
+
+    if (!isEditable(local))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
+      }
+
+    if (!getFieldDef().isApacheMD5Crypted())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setApacheMD5CryptedPass()",
+					  "Can't set a pre-crypted ApacheMD5Crypt value into a non-ApacheMD5Crypted password field");
+      }
+
+    if (text != null && !text.equals("") && (!text.startsWith("$apr1$") || (text.indexOf('$', 6) == -1)))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "setApacheMD5CryptedPass() called with an improperly " +
+					  "formatted Apache-style password entry.");
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+	
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, text, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // call finalizeSetValue to allow for chained reactions
+
+    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	// whenever the apacheMd5CryptPass password is directly set, we lose 
+	// plaintext and alternate hashes
+
+	clear_stored();
+
+	if ((text == null) || (text.equals("")))
+	  {
+	    apacheMd5CryptPass = null;
+	  }
+	else
+	  {
+	    apacheMd5CryptPass = text;
+	  }
+      }
+
+    return retVal;
+  }
+
+  /**
    * <p>This method is used to set a pre-crypted OpenBSD-style
    * MD5Crypt password for this field.  This method will return
    * false if this password field is not stored crypted.</p>
@@ -1529,6 +1685,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setAllHashes(String crypt,
 				String md5crypt,
+				String apacheMd5Crypt,
 				String LANMAN, 
 				String NTUnicodeMD4, 
 				boolean local, 
@@ -1536,7 +1693,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     ReturnVal retVal;
     DBEditObject eObj;
-    boolean settingCrypt, settingMD5, settingWin;
+    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin;
 
     /* -- */
 
@@ -1549,6 +1706,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     settingCrypt = (crypt != null && !crypt.equals(""));
     settingMD5 = (md5crypt != null && !md5crypt.equals(""));
+    settingApacheMD5 = (apacheMd5Crypt != null && !apacheMd5Crypt.equals(""));
     settingWin = (LANMAN != null && !LANMAN.equals("")) || (NTUnicodeMD4 != null && !NTUnicodeMD4.equals(""));
 
     if (!settingCrypt && !settingWin && !settingMD5)
@@ -1572,13 +1730,19 @@ public class PasswordDBField extends DBField implements pass_field {
 					  "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
       }
 
+    if (settingMD5 && !getFieldDef().isMD5Crypted())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					  "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
+      }
+
     // it's easy to sanity-check md5 hashes
 
-    if (settingMD5 && (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1)))
+    if (settingApacheMD5 && (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1)))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "setAllHashes() called with an improperly " +
-					  "formatted FreeBSD-style md5Crypt password entry: " + md5crypt);
+					  "formatted Apache-style md5Crypt password entry: " + apacheMd5Crypt);
       }
 
     if (settingCrypt && !getFieldDef().isCrypted())
@@ -1608,6 +1772,18 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (settingMD5)
 	  {
 	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, md5crypt, null);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
+
+	if (settingApacheMD5)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, apacheMd5Crypt, null);
 
 	    // if a wizard intercedes, we are going to let it take the ball.
 	    
@@ -1667,6 +1843,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (settingMD5)
 	  {
 	    md5CryptPass = md5crypt;
+	  }
+
+	if (settingApacheMD5)
+	  {
+	    apacheMd5CryptPass = apacheMd5Crypt;
 	  }
       }
 

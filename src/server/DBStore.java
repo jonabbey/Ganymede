@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.148 $
-   Last Mod Date: $Date: 2002/03/15 22:33:23 $
+   Version: $Revision: 1.149 $
+   Last Mod Date: $Date: 2002/03/29 03:57:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.148 $ %D%
+ * @version $Revision: 1.149 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -133,7 +133,7 @@ public final class DBStore {
    * after id_string
    */
 
-  static final byte minor_version = 3;
+  static final byte minor_version = 4;
 
   /**
    * XML version major id
@@ -330,6 +330,65 @@ public final class DBStore {
   }
 
   /**
+   * <p>This method returns true if the disk file being loaded by this DBStore
+   * has a version number greater than major.minor.</p>
+   */
+
+  public boolean isAtLeast(int major, int minor)
+  {
+    return (this.file_major > major || 
+	    (this.file_major == major && this.file_minor >= minor));
+  }
+
+
+  /**
+   * <p>This method returns true if the disk file being loaded by this DBStore
+   * has a version number earlier than major.minor.</p>
+   */
+
+  public boolean isLessThan(int major, int minor)
+  {
+    return (this.file_major < major || 
+	    (this.file_major == major && this.file_minor < minor));
+  }
+
+  /**
+   * <p>This method returns true if the disk file being loaded by this DBStore
+   * has a version number equal to major.minor.</p>
+   */
+
+  public boolean isAtRev(int major, int minor)
+  {
+    return (this.file_major == major && this.file_minor == minor);
+  }
+
+  /**
+   * <p>This method returns true if the disk file being loaded by this
+   * DBStore has a version number between greater than or equal to
+   * major1.minor1 and less than major2.minor2.</p>
+   */
+
+  public boolean isBetweenRevs(int major1, int minor1, int major2, int minor2)
+  {
+    if (this.file_major == major1 && this.file_minor >= minor1)
+      {
+	return true;
+      }
+
+    if (this.file_major == major2 && this.file_minor < minor2)
+      {
+	return true;
+      }
+
+    if (this.file_major > major1 && this.file_major < major2)
+      {
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
    * <p>Load the database from disk.</p>
    *
    * <p>This method loads both the database type definition and database
@@ -440,7 +499,7 @@ public final class DBStore {
 	    System.err.println("DBStore load(): loading  category definitions");
 	  }
 
-	if (file_major > 1 || (file_major == 1 && file_minor >= 3))
+	if (isAtLeast(1,3))
 	  {
 	    rootCategory = new DBBaseCategory(this, in);
 	  }
@@ -448,7 +507,7 @@ public final class DBStore {
 	// previous to 2.0, we wrote out the DBObjectBase structures
 	// to ganymede.db as a separate step from the category loading
 
-	if (file_major == 1)
+	if (isLessThan(2,0))
 	  {
 	    baseCount = in.readShort();
 
