@@ -6,7 +6,7 @@
    the container panel needs to render a field.
    
    Created: 4 November 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,9 @@ public class FieldInfo implements java.io.Serializable {
 
   db_field
     field;
+
+  short
+    ID;
 
   boolean
     defined,
@@ -54,12 +57,19 @@ public class FieldInfo implements java.io.Serializable {
     editable = field.isEditable();
     visible = field.isVisible();
 
+    ID = field.getID();
+
     displayOrder = field.getDisplayOrder();
   }
 
   public db_field getField()
   {
     return field;
+  }
+
+  public short getID()
+  {
+    return ID;
   }
 
   public boolean isDefined()
