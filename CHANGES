@@ -386,6 +386,24 @@ admin console schema editor has been rewritten to behave better in a
 greater variety of circumstances.  In particular, bugs that were seen
 when using the multi-line label field have been addressed.
 
+23. [SERVER,ADMIN CONSOLE,CLIENT] New data field type added for GanymedeBuilderQueue
+
+Introducing the first new DBField type since the introduction of Float
+back in 1999.. the FieldOptionDBField!
+
+The purpose of the FieldOptionDBField is to allow the client and/or
+xmlclient to configure the list of objects and fields that the new
+GanymedeBuilderQueue synchronization channels (to be introduced
+hereafter) will use when writing out an XML description of
+transactions to disk as they happen.
+
+The intention is that the GanymedeBuilderQueue will write out an XML
+description in a known format for each transaction that is committed,
+and a dedicated queue runner will be launched on an asynchronous basis
+to sweep up the XML records for the queue, up to a fixed transaction
+number, for integration into directory services oriented around change
+requests rather than complete dump and reloads.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
