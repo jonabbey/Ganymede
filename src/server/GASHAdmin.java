@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1079,12 +1079,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	killAllDLGR = new DialogRsrc(this,
 				     "Are you sure you want to log out all users?", 
 				     "Are you sure you want to log out all users?", 
-				     "Hell Yes", "No", question);
+				     "Yes", "No", question);
     
 	killAllDLG = new StringDialog(killAllDLGR);
-	Hashtable results = killAllDLG.DialogShow();
 	
-	if (results == null)
+	if (killAllDLG.DialogShow() == null)
 	  {
 	    return;
 	  }
