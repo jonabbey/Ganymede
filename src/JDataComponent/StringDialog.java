@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2003/03/14 01:17:44 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2004/03/01 20:43:54 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.60 $ $Date: 2003/03/14 01:17:44 $ $Name:  $
+ * @version $Revision: 1.61 $ $Date: 2004/03/01 20:43:54 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -310,7 +310,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	flowPanel.add(CancelButton);
       }
 
-    buttonPanel.add(new JSeparator(), "North");
+    buttonPanel.add(new arlut.csd.JDataComponent.JSeparator(), "North");
     buttonPanel.add(flowPanel, "South");
 
     southPanel.add(buttonPanel, "South");
