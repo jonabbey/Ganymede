@@ -5,8 +5,8 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/06/15 20:59:13 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/06/26 05:58:15 $
    Release: $Name:  $
 
    Module By: Navin Manohar
@@ -374,7 +374,6 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     return my_date;
   }
 
-
   /**
    * sets the date value of this JdateField
    *
@@ -382,6 +381,17 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
    */
 
   public void setDate(Date d)
+  {
+    this.setDate(d, true);
+  }
+
+  /**
+   * sets the date value of this JdateField
+   *
+   * @param d the date to use
+   */
+
+  public void setDate(Date d, boolean checkLimits)
   {
     if (d == null)
       {
@@ -397,7 +407,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	System.err.println("setDate() called: " + d);
       }
         
-    if (limited)
+    if (checkLimits && limited)
       {
 	if (d.after(maxDate) || d.before(minDate))
 	  {
@@ -631,7 +641,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		    System.err.println("Resetting date to " + old_date);
 		  }
 		
-		setDate(old_date);
+		setDate(old_date, false);
 	      }
 	  }
 	else
