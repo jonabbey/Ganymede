@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,15 +49,22 @@ public class DBEditObject extends DBObject {
     this.editset = editset;
     this.original = original;
     this.id = original.id;
-    this.fieldcount = original.fieldcount;
+    this.tmp_count = 0;
     this.objectBase = original.objectBase;
     this.shadowObject = null;
 
     // this clones the hash, but not the individual fields.. since
     // non-array fields can't be modified once created this is
     // okay.. we'll clone the array fields' arrays when/if we need to
-    
-    fields = (Hashtable) original.fields.clone();
+
+    if (original.fields != null)
+      {
+	fields = (Hashtable) original.fields.clone();
+      }
+    else
+      {
+	fields = new Hashtable();
+      }
   }
 
   /**
@@ -89,7 +96,10 @@ public class DBEditObject extends DBObject {
 
     if (!objectBase.fieldHash.containsKey(key))
       {
-	throw new RuntimeException("bad field code");
+	throw new RuntimeException("bad field code: " + key + " in " + 
+				   objectBase.object_name +
+				   "(" + objectBase.type_code + ")" +
+				   " field hash.");
       }
 
     fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);

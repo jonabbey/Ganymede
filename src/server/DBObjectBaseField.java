@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -193,5 +193,61 @@ public class DBObjectBaseField {
   public short limit()
   {
     return limit;
+  }
+
+  public void print(PrintStream out)
+  {
+    out.print(field_name + "(" + field_code + "):");
+    switch (field_type)
+      {
+      case DBStore.BOOLEAN:
+	out.print("boolean");
+	break;
+      case DBStore.NUMERIC:
+	out.print("numeric");
+	break;
+      case DBStore.DATE:
+	out.print("date");
+	break;
+      case DBStore.STRING:
+	out.print("string");
+	if (limit != -1)
+	  {
+	    out.print(", " + limit + " chars max");
+	  }
+	break;
+      case DBStore.INVID:
+	out.print("invid");
+	if (limit != -1)
+	  {
+	    out.print(", type " + limit + " only");
+	  }
+	break;
+      case DBStore.BOOLEANARRAY:
+	out.print("booleanArray");
+	break;
+      case DBStore.NUMERICARRAY:
+	out.print("numericArray");
+	break;
+      case DBStore.DATEARRAY:
+	out.print("dateArray");
+	break;
+      case DBStore.STRINGARRAY:
+	out.print("stringArray");
+	if (limit != -1)
+	  {
+	    out.print(", " + limit + " chars max");
+	  }
+	break;
+      case DBStore.INVIDARRAY:
+	out.print("invidArray");
+	if (limit != -1)
+	  {
+	    out.print(", type " + limit + " only");
+	  }
+	break;
+      }
+
+    out.println();
   }
 }

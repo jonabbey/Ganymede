@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,9 +48,11 @@ import java.util.*;
 
 public class DBObject {
 
+  static final boolean debug = true;
+
   DBObjectBase objectBase;
   int id;			// 32 bit id - the object's invariant id
-  short fieldcount;
+  short tmp_count;
   Hashtable fields;
   DBEditObject shadowObject;	// if this object is being edited, this points
 				// to the shadow
@@ -66,7 +68,7 @@ public class DBObject {
   {
     this.objectBase = objectBase;
     id = 0;
-    fieldcount = 0;
+    tmp_count = 0;
     fields = null;
     shadowObject = null;
     editset = null;
@@ -107,7 +109,7 @@ public class DBObject {
   {
     objectBase = eObj.objectBase;
     id = eObj.id;
-    fieldcount = eObj.fieldcount;
+    tmp_count = 0;  // we just use tmp_count for a scratch variable
     fields = eObj.fields;
     shadowObject = null;
     markedAsDeleted = false;
@@ -132,7 +134,7 @@ public class DBObject {
     /* -- */
 
     out.writeInt(id);
-    out.writeShort(fieldcount);
+    out.writeShort(fields.size());
    
     enum = fields.keys();
 
@@ -169,11 +171,16 @@ public class DBObject {
 
     // get number of fields
 
-    fieldcount = in.readShort();
+    tmp_count = in.readShort();
 
-    fields =  new Hashtable(fieldcount);
+    if (debug && tmp_count == 0)
+      {
+	System.err.println("DBObject.receive(): tmp_count = 0");
+      }
 
-    for (int i = 0; i < fieldcount; i++)
+    fields = new Hashtable(tmp_count);
+
+    for (int i = 0; i < tmp_count; i++)
       {
 	// read our field code, look it up in our
 	// DBObjectBase

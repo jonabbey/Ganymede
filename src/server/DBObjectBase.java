@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,8 @@ import java.util.*;
  */
 
 public class DBObjectBase {
+
+  static final boolean debug = true;
 
   DBStore store;
   String object_name;
@@ -107,27 +109,54 @@ public class DBObjectBase {
   {
     int size;
     DBObject tempObject;
+    int temp_val;
+    DBObjectBaseField field;
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): enter");
+      }
+
     object_name = in.readUTF();
+
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): object base name: " + object_name);
+      }
+
     type_code = in.readShort();
 
     size = in.readShort();
+
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): " + size + " fields in dictionary");
+      }
+
     fieldHash = new Hashtable(size);
 
     // read in the field dictionary for this object
 
     for (int i = 0; i < size; i++)
       {
-	fieldHash.put(new Short(type_code), new DBObjectBaseField(in, this));
+	field = new DBObjectBaseField(in, this);
+	fieldHash.put(new Short(field.field_code), field);
       }
 
     // read in the objects belonging to this ObjectBase
 
     object_count = in.readInt();
 
-    objectHash = new Hashtable(object_count, (float) 0.5);
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
+      }
+
+    temp_val = (object_count > 0) ? object_count : 100;
+
+    objectHash = new Hashtable(temp_val, (float) 0.5);
 
     for (int i = 0; i < object_count; i++)
       {
@@ -181,6 +210,22 @@ public class DBObjectBase {
   public DBEnum elements()
   {
     return new DBEnum(this);
+  }
+
+  public void print(PrintStream out)
+  {
+    Enumeration enum;
+
+    /* -- */
+
+    out.println("ObjectBase: " + object_name + "(" + type_code + ")");
+    
+    enum = fieldHash.elements();
+    while (enum.hasMoreElements())
+      {
+	out.print("\t");
+	((DBObjectBaseField) enum.nextElement()).print(out);
+      }
   }
 }
 

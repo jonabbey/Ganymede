@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,8 @@ import java.util.*;
  */
 
 public class DBEditSet {
+
+  static final boolean debug = true;
 
   Vector 
     objectsChanged = null, 
@@ -165,6 +167,11 @@ public class DBEditSet {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBEditSet.commit(): entering");
+      }
+
     baseSet = new Vector();
     enum = basesModified.keys();
 
@@ -173,8 +180,24 @@ public class DBEditSet {
 	baseSet.addElement(enum.nextElement());
       }
 
+    if (debug)
+      {
+	System.err.println("DBEditSet.commit(): acquiring write lock");
+      }
+
     wLock = new DBWriteLock(dbStore, baseSet);
+
+    if (debug)
+      {
+	System.err.println("DBEditSet.commit(): created write lock");
+      }
+
     wLock.establish(session);	// wait for write lock
+
+    if (debug)
+      {
+	System.err.println("DBEditSet.commit(): established write lock");
+      }
 
     // write this transaction out to the Journal
 

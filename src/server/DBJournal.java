@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -236,7 +236,18 @@ public class DBJournal {
       {
 	if (jFile.readUTF().compareTo(OPENTRANS) != 0)
 	  {
+	    if (debug)
+	      {
+		System.err.println("DBJournal.load(): Transaction open string mismatch");
+	      }
 	    throw new IOException();
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("DBJournal.load(): Transaction open string match OK");
+	      }
 	  }
 
 	EOFok = false;
