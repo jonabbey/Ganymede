@@ -9,7 +9,7 @@
    changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import java.rmi.RemoteException;
 
 public class DBObjectDeltaRec implements FieldType {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
