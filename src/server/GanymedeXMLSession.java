@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2001/06/23 02:34:11 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2001/09/10 18:57:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1823,9 +1823,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This private helper method handles logging on to the server as
-   * a normal client, and sets up the {@link
-   * arlut.csd.ganymede.client.xmlclient#session session} variable.</p>
+   * <p>This private method handles data structures initialization for
+   * the GanymedeXMLSession, prepping hash lookups that are used
+   * to accelerate XML processing.</p>
    */
 
   private void initializeLookups()
