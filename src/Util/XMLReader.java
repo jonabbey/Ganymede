@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/04/11 20:47:48 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/04/11 20:50:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -391,7 +391,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    
   /**
    * <P>pushbackItem() may be used to push the most recently read XMLItem back
-   * onto the XMLReader's buffer.  The XMLReader code guarantees that their
+   * onto the XMLReader's buffer.  The XMLReader code guarantees that there
    * will be room to handle a single item pushback, but two pushbacks in a row
    * with no getNextItem() call in between will cause an exception to be thrown.</P>
    */
