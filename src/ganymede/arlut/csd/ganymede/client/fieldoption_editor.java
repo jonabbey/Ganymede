@@ -133,6 +133,7 @@ class fieldoption_editor extends JDialog
     TreeTableModel model = new FieldOptionModel(rowRootNode);
     treeTable = new JTreeTable(model);
     tree = treeTable.getTree();
+    tree.setCellRenderer(new FieldOptionTreeRenderer(this));
 
     treeTable.setDefaultRenderer(Integer.class, 
         new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
@@ -462,6 +463,9 @@ class FieldOptionRow {
   /* Title of the tree node */
   private String name;
 
+  /* Is this row representing a built-in field or not? */
+  private boolean builtin = false;
+
   public FieldOptionRow(BaseDump base, FieldTemplate field, int opValue) 
   {
     this.opValue = opValue;
@@ -482,6 +486,7 @@ class FieldOptionRow {
 	  {
 	    reference = field;
 	    name = field.getName();
+            builtin = field.isBuiltIn();
 	  }
       }
   }
@@ -499,6 +504,16 @@ class FieldOptionRow {
   public void setChanged(boolean value) 
   {
     changed = value;
+  }
+
+  public boolean isBuiltIn()
+  {
+    return builtin;
+  }
+
+  public void setBuiltIn(boolean builtin)
+  {
+    this.builtin = builtin;
   }
   
   public int getOptionValue()
@@ -894,3 +909,45 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
     }
   }
 }
+
+
+/**
+ * Custom tree renderer that will give built-in fields a different icon.
+ */
+class FieldOptionTreeRenderer extends DefaultTreeCellRenderer
+{
+  ImageIcon builtInIcon;
+  ImageIcon standardIcon;
+
+  public FieldOptionTreeRenderer(fieldoption_editor parent)
+  {
+    builtInIcon = new ImageIcon(PackageResources.getImageResource(parent, "list.gif", getClass()));
+    standardIcon = new ImageIcon(PackageResources.getImageResource(parent, "i043.gif", getClass()));
+  }
+
+  public Component getTreeCellRendererComponent(JTree tree, Object value,
+						boolean selected,
+						boolean expanded,
+						boolean leaf,
+						int row,
+						boolean hasFocus)
+  {
+    if (leaf)
+      {
+	DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+	FieldOptionRow myRow = (FieldOptionRow) node.getUserObject();
+
+	if (myRow.isBuiltIn())
+	  {
+	    setLeafIcon(builtInIcon);
+	  }
+	else
+	  {
+	    setLeafIcon(standardIcon);
+	  }
+      }
+
+    return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+  }
+}
+
