@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -83,7 +83,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     super(original, editset);
 
-    initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
+    if (getGSession().enableOversight)
+      {
+	initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
+      }
   }
 
   /**
