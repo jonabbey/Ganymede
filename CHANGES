@@ -772,6 +772,26 @@ Sigh.
 This is another bug that showed up in development and testing of the
 XML client.
 
+50. [SERVER] Optimized transaction commit
+
+The server code had a potentially quite expensive checkpoint()
+operation in the DBEditSet.commit() method.  This checkpoint operation
+was there to allow the server to set the historical fields (creation
+and/or modification date and user identity) before the commitPhase1()
+methods were called while still being able to do a rollback() if a
+commitPhase1() method rejected the transaction commit.
+
+This checkpoint and rollback pair could be enormously expensive if the
+transaction gets real big, as it can with the xmlclient.
+
+The commit() method now forces the new date and user identity
+information into the transaction's edited objects in a manner that
+bypasses the object value freeze put in place during an early point in
+transaction commit.
+
+This change will make committing large transactions a good deal
+faster, and will make failed commit attempts even faster than that.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
