@@ -147,6 +147,10 @@ ganymede.db file from being usable.
 
 Reported by Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de
 
+15. [SERVER] Upgraded to gnu.regexp 1.0.8
+
+Updated the gnu.regexp classes used in the server to version 1.0.8.
+
 -------------------- Changes from 0.97 to 0.98 -------------------
 
 RELEASE DATE: March 17, 1999
