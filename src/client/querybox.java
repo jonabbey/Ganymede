@@ -347,13 +347,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
 
       this.row ++;
-      this.Rows.setSize(this.row);
-      this.Rows.setElementAt(myRow, this.row - 1); // add component array to vector
-
+      //this.Rows.setSize(this.row);
+      this.Rows.insertElementAt(myRow, Row); // add component array to vector
+      System.out.println("Vector Element Set at Index: " + Row);
 
       inner_choice.invalidate();
       inner_choice.validate();
      
+      System.out.println("++ Current Size: " + this.Rows.size());
     }
   
   void setRowVisible (Component[] myAry, boolean b)
@@ -381,18 +382,25 @@ class querybox extends Dialog implements ActionListener, ItemListener {
                            // the program executes this return line
   }
 
-  public void removeRow(Component[] myRow, Panel myPanel){
+  public void removeRow(Component[] myRow, Panel myPanel, int Row){
   
+
+    System.out.println("---preparing to remove row: " + Row);
 
     for (int n = 0; n < myRow.length ; n++)
       {
 	myPanel.remove(myRow[n]);
-      }
-    
-    this.Rows.removeElementAt(this.row - 1); // remove row from vector of rows
+      }  
+
+
+System.out.println("Removed the Row!!!");
+  
+    this.Rows.removeElementAt(Row); // remove row from vector of rows
+    System.out.println(" --Vector removed at Index: " + Row);
     this.row--;
-    System.out.println("Total Number of rows: " + this.row);
-    this.Rows.setSize(this.row);
+
+    //this.Rows.setSize(this.row);
+    System.out.println("-- Current Size: " + this.Rows.size());
   }
   
 
@@ -501,7 +509,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       else
 	{
 	  Component[] tempAry = (Component[]) this.Rows.elementAt(this.row - 1);
-	  removeRow(tempAry, inner_choice);
+	  removeRow(tempAry, inner_choice, this.row - 1);
 	  tempAry = null;
 	} 
     }
@@ -543,7 +551,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  for (int i = this.row - 1; i > -1; i--)
 	    {
 	      Component[] tempRow = (Component[]) this.Rows.elementAt(i);
-	      removeRow(tempRow, inner_choice);
+	      removeRow(tempRow, inner_choice, i);
 	      System.out.println("Removing Row: " + i);
 	      this.Rows.setSize(i);
 	    }
@@ -560,16 +568,18 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	int currentRow = source.getRow();
 
-	System.out.println("Current ROw " + currentRow);
+	System.out.println("Current Row " + currentRow);
 
 	Component[] tempRow = (Component[]) Rows.elementAt(currentRow); 
 	
-	removeRow(tempRow, inner_choice);
+	if (tempRow == null){
+	  System.out.println("OOOOOPS!!!");
+	}
+
+	removeRow(tempRow, inner_choice, currentRow);
 	opChoice = getOpChoice(fieldName);
 	tempRow[4] = opChoice;
 	addRow(tempRow, true, inner_choice, currentRow);
-	this.invalidate();
-	this.validate();
       }
 	 
     }
