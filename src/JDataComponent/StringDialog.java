@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -162,7 +162,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
   public StringDialog(DialogRsrc Resource) 
   {
-    super(Resource.frame, Resource.title, true);
+    super(Resource.frame, Resource.title, false);
 
     if (debug)
       {
