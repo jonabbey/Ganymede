@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -600,10 +600,14 @@ public class Ganymede {
    *
    * This method loads properties from the ganymede.properties
    * file.
+   *
+   * This method is public so that loader code linked with the
+   * Ganymede server code can initialize the properties without
+   * going through Ganymede.main().
    * 
    */
 
-  private static boolean loadProperties(String filename)
+  public static boolean loadProperties(String filename)
   {
     Properties props = new Properties();
     boolean success = true;
