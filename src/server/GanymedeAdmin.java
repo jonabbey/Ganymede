@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 2002/01/26 20:05:52 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2002/01/26 20:14:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.58 $ $Date: 2002/01/26 20:05:52 $
+ * @version $Revision: 1.59 $ $Date: 2002/01/26 20:14:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -135,7 +135,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
      -----====================--------------------====================----- */
 
   /**
-   * <p>This public static method handles sending disconnect messages
+   * <p>This static method handles sending disconnect messages
    * to all attached consoles and cleaning up the
    * GanymedeAdmin.consoles Vector.</p>
    */
@@ -167,10 +167,10 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This static method is used to send debug log info to
+   * <p>This static method is used to send debug log info to
    * the consoles.  It is used by
    * {@link arlut.csd.ganymede.Ganymede#debug(java.lang.String) Ganymede.debug()}
-   * to append information to the console logs.
+   * to append information to the console logs.</p>
    */
 
   public static void setStatus(String status)
@@ -213,8 +213,8 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * <p>This method sends an updated console count figure to all of the
-   * attached admin consoles.</p>
+   * <p>This static method sends an updated console count figure to
+   * all of the attached admin consoles.</p>
    */
 
   public static void setConsoleCount()
@@ -289,7 +289,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This method updates the last dump time to all
+   * This static method updates the last dump time to all
    * consoles.
    */
 
@@ -332,7 +332,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This method is used to send the server's memory status to all
+   * This static method is used to send the server's memory status to all
    * connected admin consoles.
    */
 
@@ -363,7 +363,8 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This method updates the objects checked out count on all consoles.
+   * This static method updates the objects checked out count on all
+   * consoles.
    */
 
   public static void updateCheckedOut()
@@ -456,8 +457,9 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This static method is used to update the list of connnected users that
-   * appears in any admin consoles attached to the Ganymede server.
+   * <p>This static method is used to update the list of connnected
+   * users that appears in any admin consoles attached to the Ganymede
+   * server.</p>
    */
 
   public static void refreshUsers()
@@ -494,8 +496,9 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This static method is used to update the list of connnected users that
-   * appears in any admin consoles attached to the Ganymede server.
+   * <p>This static method is used to update the list of connnected
+   * users that appears in any admin consoles attached to the Ganymede
+   * server.</p>
    */
 
   public static void refreshTasks()
@@ -553,10 +556,10 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   }
 
   /**
-   * This is a private convenience function, it's purpose is to 
-   * out any consoles that we caught a remote exception from, 
-   * the context of a loop over consoles that we might interfere 
-   * here.
+   * <p>This private static method is called to remove any consoles
+   * that have experienced RMI failures from the static
+   * GanymedeAdmin.consoles vector.  This method should never be
+   * called from within a loop over GanymedeAdmin.consoles.</p>
    */
    
   private static void detachBadConsoles()
@@ -635,7 +638,9 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   {
     super();			// UnicastRemoteObject initialization
 
-    // if the timeOutTask hasn't previously updated the 
+    // if the memoryStatusTask hasn't previously recorded the free and
+    // total memory, get those statistics so we can provide them to
+    // the console
 
     if (GanymedeAdmin.freeMem == 0 && GanymedeAdmin.totalMem == 0)
       {
@@ -757,8 +762,9 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
    *
    * <p>This method *does not* handle removing this GanymedeAdmin
    * console object from the static GanymedeAdmin.consoles Vector, so
-   * that it can be called from a loop over GanymedeAdmin.consoles in
-   * closeAllConsoles() when the server is being shut down.</p>
+   * that it can safely be called from a loop over
+   * GanymedeAdmin.consoles in closeAllConsoles() when the server is
+   * being shut down.</p>
    */
 
   public void forceDisconnect(String reason) throws RemoteException
