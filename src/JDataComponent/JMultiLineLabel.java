@@ -6,8 +6,8 @@
 
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/22 18:03:56 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/08/18 23:47:24 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -111,12 +111,13 @@ public class JMultiLineLabel extends JTextArea {
       }
 
     metric = getFontMetrics(getFont());
-    
+
     setEditable(false);
     setOpaque(false);
     
     // The JTextArea has an etched border around it, so get rid of it.
     //setBorder(BorderFactory.createEmptyBorder(0,0,0,0); 
+
     setBorder(null); 
 
     // Find out the length of the string.  If the length is less than
@@ -126,6 +127,7 @@ public class JMultiLineLabel extends JTextArea {
     if (label != null)
       {
 	int length = label.length();
+
 	if (length < columns)
 	  {
 	    columns = length;
@@ -133,7 +135,6 @@ public class JMultiLineLabel extends JTextArea {
       }
 
     setText(wrap(label));
-    
   }
 
   // Public functions
@@ -171,7 +172,6 @@ public class JMultiLineLabel extends JTextArea {
     height = super.getPreferredSize().height;
 
     return new Dimension(width, height);
-
   }
 
   /**
@@ -179,6 +179,7 @@ public class JMultiLineLabel extends JTextArea {
    *
    * @lineLength Number of characters to wrap the line at.
    */
+
   public String wrap(String text)
   {
     if (text == null)
@@ -187,12 +188,11 @@ public class JMultiLineLabel extends JTextArea {
 	  {
 	    System.out.println("Whoa, text is null");
 	  }
+
 	return text; 
       }
-
     
     return (WordWrap.wrap(text, columns, null));
-
   }
 
   ///////////////////////////////////////////////////////////////////////////////
