@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/10/11 15:43:17 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/10/13 20:01:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1520,16 +1520,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append("<xxx>");
     result.append(name);
     result.append(":");
-
+    result.append(name);	// the name is one of the aliases
+	
     if (aliases != null)
       {
 	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
-	    
+	    result.append(", ");
+
 	    alias = (String) aliases.elementAt(i);
 	    
 	    result.append(alias);

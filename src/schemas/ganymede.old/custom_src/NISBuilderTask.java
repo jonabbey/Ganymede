@@ -6,8 +6,8 @@
    
    Created: 18 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/01/22 18:04:26 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/10/13 20:00:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -249,12 +249,12 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	    runtime = Runtime.getRuntime();
 	  }
 
+	Process process = null;
+
+	/* -- */
+
 	try
 	  {
-	    Process process;
-
-	    /* -- */
-
 	    process = runtime.exec(buildScript);
 
 	    process.waitFor();
@@ -266,6 +266,45 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	catch (InterruptedException ex)
 	  {
 	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+	  }
+	finally
+	  {
+	    // the following is mentioned as a work-around for the
+	    // fact that Process keeps its file descriptors open by
+	    // default until Garbage Collection
+
+	    try
+	      {
+		process.getInputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getOutputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getErrorStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
 	  }
       }
     else

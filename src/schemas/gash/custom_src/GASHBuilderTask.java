@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/02/16 19:15:16 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/10/13 20:01:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -302,12 +302,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    runtime = Runtime.getRuntime();
 	  }
 
+	Process process = null;
+
+	/* -- */
+
 	try
 	  {
-	    Process process;
-
-	    /* -- */
-
 	    process = runtime.exec(buildScript);
 
 	    process.waitFor();
@@ -319,6 +319,45 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	catch (InterruptedException ex)
 	  {
 	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+	  }
+	finally
+	  {
+	    // the following is mentioned as a work-around for the
+	    // fact that Process keeps its file descriptors open by
+	    // default until Garbage Collection
+
+	    try
+	      {
+		process.getInputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getOutputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getErrorStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
 	  }
       }
     else
