@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@
 
 package arlut.csd.ganymede;
 
+import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
@@ -207,5 +208,17 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     adminSession aSession = new GanymedeAdmin(admin, clientName, clientPass);
     Ganymede.debug("Admin console attached for admin " + clientName + " " + new Date());
     return aSession;
+  }
+
+  public synchronized void dump()
+  {
+    try
+      {
+	Ganymede.db.dump(Ganymede.dbFilename, false); // don't release lock
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("GanymedeServer.dump error: " + ex);
+      }
   }
 }
