@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,6 @@ import gjt.ColumnLayout;
 
 import arlut.csd.Tree.*;
 
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       GASHSchema
@@ -50,17 +49,24 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     editor;
 
   Image
-    images[];
+    questionImage,
+    treeImages[];
 
   treeControl 
     tree;
 
+  Category
+    rootCategory;
+
+  CatTreeNode
+    objects;			// root category node
+
   treeNode
-    objects, namespaces;
-  treeNode
-    currentNode = null;
+    namespaces;
 
   MenuItem
+    createCategoryMI = null,
+    deleteCategoryMI = null,
     createObjectMI = null,
     deleteObjectMI = null,
     createNameMI = null,
@@ -68,14 +74,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     createFieldMI = null,
     deleteFieldMI = null;
   
-  YesNoDialog 
-    deleteFieldDialog = null,
-    deleteNameDialog = null;
-
   PopupMenu
+    categoryMenu = null,
     baseMenu = null,
     fieldMenu = null,
-    namespaceObjectMenu = null;
+    nameSpaceMenu = null,
+    nameSpaceObjectMenu = null;
 
   CardLayout
     card;
@@ -89,7 +93,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     baseEditPane,
     fieldEditPane,
     namespaceEditPane,
-    attribButtonPane;
+    categoryEditPane;
 
   BaseEditor
     be;
@@ -99,22 +103,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   NameSpaceEditor
     ne;
+
+  CategoryEditor
+    ce;
   
   boolean
     showingBase,
     showingField;
 
   Button
-    okButton, cancelButton, attribOkButton;
-
-  Toolkit
-    toolkit;
-
-  Base[] bases;
-
-  Hashtable
-    baseHash,
-    fieldHash;
+    okButton, cancelButton;
 
   Color
     bgColor = SystemColor.control;
@@ -126,6 +124,14 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     super(title);
 
     this.editor = editor;
+
+    questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
+
+    //
+    //
+    //   **** Set up panels
+    //
+    //
     
     setLayout(new BorderLayout());
 
@@ -142,14 +148,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     attribCardPane.setBackground(bgColor);
     attribCardPane.setLayout(card);
 
+    // set up the base editor
+
     baseEditPane = new Panel();
     baseEditPane.setBackground(bgColor);
     baseEditPane.setLayout(new BorderLayout());
 
-    // initialize the base editor
-
     be = new BaseEditor(this);
     baseEditPane.add("Center", be);
+
+    // set up the base field editor
 
     fieldEditPane = new Panel();
     fieldEditPane.setBackground(bgColor);
@@ -158,6 +166,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     fe = new BaseFieldEditor(this);
     fieldEditPane.add("Center", fe);
 
+    // set up the name space editor
+
     namespaceEditPane = new Panel();
     namespaceEditPane.setBackground(bgColor);
     namespaceEditPane.setLayout(new BorderLayout());
@@ -165,76 +175,39 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     ne = new NameSpaceEditor(this);
     namespaceEditPane.add("Center", ne);
 
+    // set up the category editor
+
+    categoryEditPane = new Panel();
+    categoryEditPane.setBackground(bgColor);
+    categoryEditPane.setLayout(new BorderLayout());
+
+    ce = new CategoryEditor(this);
+    categoryEditPane.add("Center", ce);
+
+    // set up the empty card
+
     emptyPane = new Panel();
     emptyPane.setBackground(bgColor);
+
+    // Finish attribPane setup
 
     attribCardPane.add("empty", emptyPane);
     attribCardPane.add("base", baseEditPane);
     attribCardPane.add("field", fieldEditPane);
     attribCardPane.add("name", namespaceEditPane);
-
-    attribButtonPane = new Panel();
-    attribButtonPane.setBackground(bgColor);
-    attribButtonPane.setLayout(new RowLayout());
+    attribCardPane.add("category", categoryEditPane);
 
     attribPane.add("Center", attribCardPane);
-    attribPane.add("South", attribButtonPane);
 
     Box rightBox = new Box(attribPane, "Attributes");
-
-    toolkit = Toolkit.getDefaultToolkit();
-
-    images = new Image[3];
-
-    images[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
-    images[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
-    images[2] = PackageResources.getImageResource(this, "list.gif", getClass());
-
-    tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, SystemColor.window, this, images,
-			   null);
-    tree.setDrag(this, tree.DRAG_LINE);
-
-    // create object types node
-
-    PopupMenu objectMenu = new PopupMenu();
-    createObjectMI = new MenuItem("Create Object Type");
-    objectMenu.add(createObjectMI);
-
-    objects = new treeNode(null, "Object Types", null, true, 0, 1, objectMenu);
-    tree.setRoot(objects);
-
-    // create namespaces node
-
-    PopupMenu nameSpaceMenu = new PopupMenu("Namespace Menu");
-    createNameMI = new MenuItem("Create Namespace");
-    nameSpaceMenu.add(createNameMI);
-
-    namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
-    tree.insertNode(namespaces, false);
-
-    namespaceObjectMenu = new PopupMenu();
-    deleteNameMI = new MenuItem("Delete Namespace");
-    namespaceObjectMenu.add(deleteNameMI);
-
-    deleteNameDialog = new YesNoDialog(this,
-    				       "Confirm Name Space deletion",
-    				       "Are you sure you want to delete the name space?",
-    				       this);
-
-    Box leftBox = new Box(tree, "Schema Objects");
-
-    InsetPanel leftPanel = new InsetPanel(5, 10, 5, 5);
-    leftPanel.setLayout(new BorderLayout());
-    leftPanel.add("Center", leftBox);
 
     InsetPanel rightPanel = new InsetPanel(5, 5, 5, 10);
     rightPanel.setLayout(new BorderLayout());
     rightPanel.add("Center", rightBox);
 
-    displayPane.add("West", leftPanel);
-
     displayPane.add("Center", rightPanel);
+
+    // Set up button pane
 
     buttonPane = new Panel();
     buttonPane.setLayout(new RowLayout());
@@ -248,29 +221,115 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     buttonPane.add(okButton);
     buttonPane.add(cancelButton);
 
-    add("Center", displayPane);
     add("South", buttonPane);
 
-    deleteObjectMI = new MenuItem("Delete Object Type");
-    createFieldMI = new MenuItem("Create Field");
-    deleteFieldMI = new MenuItem("Delete Field");
+    //
+    //
+    //   **** Set up display tree
+    //
+    //
 
-    deleteFieldDialog = new YesNoDialog(this,
-					"Confirm field deletion",
-					"Are you sure you want to delete this field?",
-					this);
+    treeImages = new Image[3];
+
+    treeImages[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    treeImages[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
+    treeImages[2] = PackageResources.getImageResource(this, "list.gif", getClass());
+
+    tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
+			   Color.black, SystemColor.window, this, treeImages,
+			   null);
+    tree.setDrag(this, tree.DRAG_LINE | tree.DRAG_ICON);
+
+    //
+    //
+    //   **** Set up display tree panels
+    //
+    //
+
+    Box leftBox = new Box(tree, "Schema Objects");
+
+    InsetPanel leftPanel = new InsetPanel(5, 10, 5, 5);
+    leftPanel.setLayout(new BorderLayout());
+    leftPanel.add("Center", leftBox);
+
+    displayPane.add("West", leftPanel);
+
+    add("Center", displayPane);
+
+    //
+    //
+    //   **** Set up tree popup menus
+    //
+    //
+
+    // category menu
+
+    categoryMenu = new PopupMenu();
+
+    createCategoryMI = new MenuItem("Create Category");
+    deleteCategoryMI = new MenuItem("Delete Category");
+    createObjectMI = new MenuItem("Create Object Type");
+
+    categoryMenu.add(createCategoryMI);
+    categoryMenu.add(deleteCategoryMI);
+    categoryMenu.add(createObjectMI);
+
+    // namespace menu
+
+    nameSpaceMenu = new PopupMenu("Namespace Menu");
+    createNameMI = new MenuItem("Create Namespace");
+    nameSpaceMenu.add(createNameMI);
+
+    // namespace object menu
+
+    nameSpaceObjectMenu = new PopupMenu();
+    deleteNameMI = new MenuItem("Delete Namespace");
+    nameSpaceObjectMenu.add(deleteNameMI);
+
+    // base menu
 
     baseMenu = new PopupMenu("Base Menu");
+    deleteObjectMI = new MenuItem("Delete Object Type");
+    createFieldMI = new MenuItem("Create Field");
     baseMenu.add(createFieldMI);
     baseMenu.add(deleteObjectMI);
 
+    // field menu
+
     fieldMenu = new PopupMenu("Field Menu");
+    deleteFieldMI = new MenuItem("Delete Field");
     fieldMenu.add(deleteFieldMI);
 
-    fieldHash = new Hashtable();
-    baseHash = new Hashtable();
+    //
+    //
+    //   **** Set up tree 
+    //
+    //
 
-    objectsRefresh();
+    try
+      {
+	rootCategory = editor.getRootCategory();
+
+	objects = new CatTreeNode(null, rootCategory.getName(), rootCategory,
+				  null, true, 0, 1, categoryMenu);
+
+	System.err.println("Created rootCategory node: " + rootCategory.getName());
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't get rootCategory " + ex);
+      }
+
+    tree.setRoot(objects);
+
+    // create namespaces node
+
+    namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
+    tree.insertNode(namespaces, false);
+
+    // and initialize tree
+
+    initializeDisplayTree();
 
     pack();
     setSize(800, 600);
@@ -278,7 +337,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     System.out.println("GASHSchema created");
   }
-
 
   /**
    *
@@ -296,151 +354,103 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       return editor;
     }
 
-  void objectsRefresh()
+  void initializeDisplayTree()
   {
     try
       {
-	refreshBases();
+	recurseDownCategories(objects);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("couldn't refresh bases" + ex);
+	throw new RuntimeException("couldn't refresh categories" + ex);
       }
 
     refreshNamespaces();
     tree.refresh();
   }
 
-  void refreshBases() throws RemoteException
+  void recurseDownCategories(CatTreeNode node) throws RemoteException
   {
-    Base base;
-    BaseNode bNode, oldNode, newNode;
-    treeNode parentNode;
-    String baseName = null;
-    int i;
-    
+    Vector
+      children;
+
+    Category 
+      c;
+
+    CategoryNode
+      cNode;
+
+    treeNode 
+      thisNode,
+      prevNode;
+
     /* -- */
 
-    try
+    c = node.getCategory();
+
+    // update the current tree node in case the category was renamed
+
+    node.setText(c.getName());
+
+    // get this category's children
+
+    //    c.resort();
+    children = c.getNodes();
+
+    prevNode = null;
+    thisNode = node.getChild();
+
+    for (int i = 0; i < children.size(); i++)
       {
-	bases = editor.getBases();
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("GASHSchema: refreshBases(): couldn't get bases");
-	System.err.println(ex.toString());
+	// find the CategoryNode at this point in the server's category tree
 
-	throw new RuntimeException("couldn't get bases" + ex);
-      }
+	cNode = (CategoryNode) children.elementAt(i);
 
-    // editor.getBases() returns items in hash order.. sort
-    // them by baseID before adding them to tree
-
-    new QuickSort(bases,  
-		  new arlut.csd.Util.Compare()
-		  {
-		    public int compare(Object a, Object b) 
-		      {
-			Base aB, bB;
-			
-			aB = (Base) a;
-			bB = (Base) b;
-
-			try
-			  {
-			    if (aB.getTypeID() < bB.getTypeID())
-			      {
-				return -1;
-			      }
-			    else if (aB.getTypeID() > bB.getTypeID())
-			      {
-				return 1;
-			      }
-			    else
-			      {
-				return 0;
-			      }
-			  }
-			catch (RemoteException ex)
-			  {
-			    throw new RuntimeException("couldn't compare bases " + ex);
-			  }
-		      }
-		  }
-		  ).sort();
-
-    // now that we've got our bases in order, we need to go
-    // through our basenodes in the tree in order, inserting
-    // any bases that aren't in the tree into the tree in 
-    // the proper place.  We'll go ahead and call setText()
-    // on the existent nodes to make sure that we've caught
-    // a base rename.
-
-    parentNode = objects;
-    oldNode = null;
-    bNode = (BaseNode) parentNode.getChild();
-    i = 0;
-
-    while ((i < bases.length) || (bNode != null))
-      {
-	if (i < bases.length)
+	prevNode = insertCategoryNode(cNode, prevNode, node);
+	
+	if (prevNode instanceof CatTreeNode)
 	  {
-	    base = bases[i];
-	  }
-	else
-	  {
-	    base = null;
-	  }
-
-	if ((bNode == null) ||
-	    ((base != null) &&
-	     (base.getTypeID() < bNode.getBase().getTypeID())))
-	  {
-	    // insert a new base node 
-
-	    newNode = new BaseNode(parentNode, base.getName(), base,
-				   oldNode, true, 0, 1, baseMenu);
-
-	    tree.insertNode(newNode, false);
-	    baseHash.put(base, newNode);
-
-	    refreshFields(newNode, false);
-
-	    oldNode = newNode;
-	    bNode = (BaseNode) oldNode.getNextSibling();
-
-	    i++;
-	  }
-	else if ((base == null) || 
-		 (base.getTypeID() > bNode.getBase().getTypeID()))
-	  {
-	    // delete a base node
-
-	    if (showingBase && (be.base == bNode.getBase()))
-	      {
-		card.show(attribCardPane, "empty");
-	      }
-
-	    baseHash.remove(bNode.getBase());
-
-	    // System.err.println("Deleting: " + bNode.getText());
-	    newNode = (BaseNode) bNode.getNextSibling();
-	    tree.deleteNode(bNode, false);
-
-	    bNode = newNode;
-	  }
-	else
-	  {
-	    bNode.setText(base.getName());
-	    //	    System.err.println("Setting: " + base.getName());
-	    refreshFields(bNode, false);
-
-	    oldNode = bNode;
-	    bNode = (BaseNode) oldNode.getNextSibling();
-	    
-	    i++;
+	    recurseDownCategories((CatTreeNode) prevNode);
 	  }
       }
+  }
+
+  /**
+   *
+   * Local helper method to place a new CategoryNode (either a Base or a Category)
+   * into the schema editor's display tree.
+   *   
+   */
+
+  treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode parentNode) throws RemoteException
+  {
+    treeNode newNode = null;
+
+    /* -- */
+
+    if (node instanceof Base)
+      {
+	Base base = (Base) node;
+
+	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+			       false, 2, 2, baseMenu);
+      }
+    else if (node instanceof Category)
+      {
+	Category category = (Category) node;
+
+	newNode = new CatTreeNode(parentNode, category.getName(), category,
+				  prevNode, true, 0, 1, categoryMenu);
+      }
+
+    tree.insertNode(newNode, true);
+
+    if (newNode instanceof BaseNode)
+      {
+	refreshFields((BaseNode)newNode, false);
+      }
+
+    return newNode;
   }
 
   void refreshFields(BaseNode node, boolean doRefresh) throws RemoteException
@@ -526,8 +536,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    newNode = new FieldNode(parentNode, field.getName(), field,
 				    oldNode, false, 2, 2, fieldMenu);
 
-	    tree.insertNode(newNode, false);
-	    fieldHash.put(field, newNode);
+	    tree.insertNode(newNode, true);
 
 	    oldNode = newNode;
 	    fNode = (FieldNode) oldNode.getNextSibling();
@@ -543,8 +552,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      {
 		card.show(attribCardPane, "empty");
 	      }
-
-	    fieldHash.remove(fNode.getField());
 
 	    // System.err.println("Deleting: " + fNode.getText());
 	    newNode = (FieldNode) fNode.getNextSibling();
@@ -570,11 +577,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
   }
 
-  void refreshFields(Base base, boolean doRefresh) throws RemoteException
-  {
-    refreshFields((BaseNode) baseHash.get(base), doRefresh);
-  }
-
   void refreshNamespaces()
   { 
     boolean isOpen = namespaces.isOpen();
@@ -582,6 +584,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     tree.removeChildren(namespaces, false);
 
     NameSpace[] spaces = null;
+
     try 
       {
 	spaces = editor.getNameSpaces();
@@ -596,7 +599,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	try 
 	  {
 	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
-					      null, false, 2, 2, namespaceObjectMenu);
+					      null, false, 2, 2, nameSpaceObjectMenu);
 	    tree.insertNode(newNode, true);
 	  }
 	catch (RemoteException e)
@@ -607,56 +610,57 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
 
     if (isOpen)
-      tree.expandNode(namespaces, false);
+      {
+	tree.expandNode(namespaces, false);
+      }
 
     tree.refresh();
   }
   
 
-  void editBase(Base base)
+  void editBase(BaseNode node)
   {
-    be.editBase(base);
+    be.editBase(node);
     card.show(attribCardPane,"base");
     showingBase = true;
     showingField = false;
 
     // attach the button pane to the base editor
     
-    attribButtonPane.removeAll();
-    attribOkButton = new Button("ok");
-    attribOkButton.addActionListener(be);
-    attribButtonPane.add(attribOkButton);
     validate();
   }
 
-  void editField(BaseField field)
+  void editField(FieldNode node)
   {
     System.err.println("in GASHSchema.editField");
-    fe.editField(field);
+    fe.editField(node);
     card.show(attribCardPane, "field");
     showingBase = false;
     showingField = true;
 
     // attach the button pane to the field editor
     
-    attribButtonPane.removeAll();
-    attribOkButton = new Button("ok");
-    attribOkButton.addActionListener(fe);
-    attribButtonPane.add(attribOkButton);
     validate();
   }
 
-  void editNameSpace(NameSpace space)
+  void editNameSpace(SpaceNode node)
   {
-    ne.editNameSpace(space);
+    ne.editNameSpace(node);
     card.show(attribCardPane, "name");
     showingBase = false;
     showingField = false;
 
-    attribButtonPane.removeAll();
-    attribOkButton = new Button("ok");
-    attribOkButton.addActionListener(ne);
-    attribButtonPane.add(attribOkButton);
+    validate();
+  }
+
+  void editCategory(CatTreeNode node)
+  {
+    ce.editCategory(node);
+    card.show(attribCardPane, "category");
+
+    showingBase = false;
+    showingField = false;
+
     validate();
   }
 
@@ -676,19 +680,20 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     if (node instanceof BaseNode)
       {
-	Base base = ((BaseNode) node).getBase();
-	editBase(base);
+	editBase((BaseNode) node);
       }
     else if (node instanceof FieldNode)
       {
-	BaseField field = ((FieldNode) node).getField();
-	editField(field);
+	editField((FieldNode) node);
       }
     else if (node instanceof SpaceNode)
       {
 	System.out.println("namespacenode selected");
-	NameSpace nameSpace = ((SpaceNode) node).getSpace();
-	editNameSpace(nameSpace);
+	editNameSpace((SpaceNode) node);
+      }
+    else if (node instanceof CatTreeNode)
+      {
+	editCategory((CatTreeNode) node);
       }
     else
       {
@@ -711,17 +716,78 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   {
     String nodeText;
 
-    currentNode = node;
+    /* -- */
 
     nodeText = node.getText();
 
     System.out.println("node " + nodeText + ", action: " + event );
-    
-    if (event.getSource() == createObjectMI)
+
+    if (event.getSource() == createCategoryMI)
       {
 	try
 	  {
-	    editBase(editor.createNewBase());
+	    CatTreeNode cNode = (CatTreeNode) node;
+	    Category category = cNode.getCategory();
+
+	    Category newCategory = category.newSubCategory();
+
+	    // we want to insert at the bottom of the base
+
+	    treeNode n = node.getChild();
+	    short order = 0;
+	    
+	    if (n != null)
+	      {
+		while (n.getNextSibling() != null)
+		  {
+		    try
+		      {
+			if (n instanceof BaseNode)
+			  {
+			    order = (short) (((BaseNode) n).getBase().getDisplayOrder() + 1);
+			  }
+			else
+			  {
+			    order = (short) (((CatTreeNode) n).getCategory().getDisplayOrder() + 1);
+			  }
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("couldn't get display order for " + n);
+		      }
+
+		    n = n.getNextSibling();
+		  }
+	      }
+	    
+	    CatTreeNode newNode = new CatTreeNode(node, newCategory.getName(), newCategory,
+						  n, true, 0, 1, categoryMenu);
+
+	    tree.insertNode(newNode, true);
+
+	    editCategory(newNode);
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't create new base." + ex);
+	  }
+      }
+    else if (event.getSource() == createObjectMI)
+      {
+	try
+	  {
+	    CatTreeNode cNode = (CatTreeNode) node;
+	    Category category = cNode.getCategory();
+	    Base newBase = editor.createNewBase(category);
+	    
+	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
+					    null, false, 2, 2, baseMenu);
+
+	    tree.insertNode(newNode, true);
+
+	    refreshFields(newNode, true);
+
+	    editBase(newNode);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -732,17 +798,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	System.out.println("Create namespace chosen");
 
-	Image image = null;
-
-	image = PackageResources.getImageResource(this, "question.gif", getClass());
-
-	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Create", "Cancel", image);
+	DialogRsrc dialogResource = new DialogRsrc(this, 
+						   "Create new namespace", 
+						   "Create a new namespace", 
+						   "Create", "Cancel", 
+						   questionImage);
 
 	dialogResource.addString("Namespace:");
 	dialogResource.addBoolean("Case Insensitive:");
 
-	StringDialog dialog = new StringDialog(dialogResource);
-	Hashtable results = dialog.DialogShow();
+	Hashtable results = new StringDialog(dialogResource).DialogShow();
 
 	String newNameSpace = null;
 	Boolean insensitive = null;
@@ -757,11 +822,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    System.out.println("Printing the hash:");
 	    Enumeration enum = results.keys();
+
 	    while (enum.hasMoreElements()) 
 	      {
 		//String label = (String)enum.nextElement();
 		String label = (String)enum.nextElement();
 		Object ob = results.get(label);
+
 		if (ob instanceof String) 
 		  {
 		    if (label == "Namespace:")
@@ -773,11 +840,11 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		      {
 			System.out.println("Red alert!  unknown string returned: " + (String)ob);
 		      }
-			
 		  }
 		else if (ob instanceof Boolean)
 		  {
 		    Boolean bool = (Boolean)ob;
+
 		    if (label == "Case Insensitive:")
 		      {
 			System.out.println("Sensitivity set to: " + bool);
@@ -793,6 +860,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		    System.out.println("Unknown type returned by Dialog.");
 		  }
 	      }
+
 	    if ((newNameSpace != null) && (insensitive != null))
 	      {
 		try
@@ -804,14 +872,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		  {
 		    System.out.println("Exception while creating NameSpace: " + e);
 		  }
-
 	      }
 	  }
+
 	// List out the NameSpaces for testing
 
 	NameSpace[] spaces  = null;
 
 	System.out.println("Actual NameSpaces:");
+
 	try
 	  {
 	    spaces = editor.getNameSpaces();
@@ -833,9 +902,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      }
 	    catch (java.rmi.RemoteException e)
 	      {
-		
 		System.out.println("Exception while listing NameSpace: " + e);
 	      }
+
 	    if (Insensitive)
 	      {
 		System.out.println("   " + name + " is case insensitive.");
@@ -844,10 +913,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      {
 		System.out.println("   " + name + " is not case insensitive.");
 	      }
-	    
-	    
 	  }
+
 	refreshNamespaces();
+
 	if (showingField)
 	  {
 	    fe.refreshFieldEdit();
@@ -858,13 +927,37 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	System.out.println("deleting Namespace");
 	treeNode tNode = (treeNode)node;
-		
-	deleteNameDialog.setVisible(true);
+
+	DialogRsrc dialogResource = new DialogRsrc(this,
+						   "Confirm Name Space Deletion",
+						   "Confirm Name Space Deletion",
+						   "Delete", "Cancel",
+						   questionImage);
+
+	Hashtable results = new StringDialog(dialogResource).DialogShow();
+
+	if (results != null)
+	  {
+	    try
+	      {
+		editor.deleteNameSpace(node.getText());
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
+	      }
+
+	    refreshNamespaces();
+
+	    if (showingField)
+	      {
+		fe.refreshFieldEdit();
+	      }
+	  }
       }
     else if (event.getSource() == deleteObjectMI)
       {
-
-	BaseNode bNode = (BaseNode)currentNode;
+	BaseNode bNode = (BaseNode) node;
 	Base b = bNode.getBase();
 
 	// Check to see if this base is removable.  If it's not, then politely
@@ -872,6 +965,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	// the deletion.
 
 	boolean isRemovable = false;
+
 	try 
 	  {
 	    isRemovable = b.isRemovable();
@@ -883,15 +977,11 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 	if (isRemovable)
 	  {
-	    
-	    StringDialog dialog = new StringDialog(this,
-						   "Confirm deletion of Object",
-						   "Are you sure you want to delete this object?",
-						   "Confirm",
-						   "Cancel");
-	    
-	    
-	    if (dialog.DialogShow() == null) //Returned cancel
+	    if (new StringDialog(this,
+				 "Confirm deletion of Object",
+				 "Are you sure you want to delete this object?",
+				 "Confirm",
+				 "Cancel").DialogShow() == null)
 	      {
 		System.out.println("Deletion canceled");
 	      }
@@ -907,19 +997,16 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
 		  }
 		
-		objectsRefresh();
+		tree.deleteNode(node, true);
 	      }
 	  }
 	else
 	  {
-	    StringDialog notRemovableD = new StringDialog(this,
-							  "Error:  Base not removable",
-							  "You are not allowed to remove this base.",
-							  "Ok",
-							  null);
-	    notRemovableD.DialogShow();
-
-
+	    new StringDialog(this,
+			     "Error:  Base not removable",
+			     "You are not allowed to remove this base.",
+			     "Ok",
+			     null).DialogShow();
 	  }
       }
     else if (event.getSource() == createFieldMI)
@@ -971,8 +1058,43 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 	    bF = b.createNewField();
 	    bF.setName(newname);
-	    objectsRefresh();
-	    editField(bF);
+
+	    // we want to insert the child's field node
+	    // at the bottom of the base
+
+	    treeNode n = node.getChild();
+	    short order = 0;
+	    
+	    if (n != null)
+	      {
+		while (n.getNextSibling() != null)
+		  {
+		    try
+		      {
+			order = (short) (((FieldNode) n).getField().getDisplayOrder() + 1);
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("couldn't get display order for " + n);
+		      }
+
+		    n = n.getNextSibling();
+		  }
+	      }
+
+	    try
+	      {
+		bF.setDisplayOrder(order);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("couldn't set display order for " + bF);
+	      }
+
+	    FieldNode newNode = new FieldNode(node, newname, bF, n,
+					      false, 2, 2, fieldMenu);
+	    tree.insertNode(newNode, true);
+	    editField(newNode);
 	    System.err.println("Called editField");
 	  }
 	catch (RemoteException ex)
@@ -982,8 +1104,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (event.getSource() == deleteFieldMI)
       {
-
-	FieldNode fNode = (FieldNode)currentNode;
+	FieldNode fNode = (FieldNode) node;
 	BaseField field = fNode.getField();
 	boolean isEditable = false;
 	boolean isRemovable = false;
@@ -1010,30 +1131,58 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    if (isEditable)
 	      {
 		System.err.println("deleting field node");
-		
-		deleteFieldDialog.setVisible(true);
+
+		DialogRsrc dialogResource = new DialogRsrc(this,
+							   "Confirm Field Deletion",
+							   "Confirm Field Deletion",
+							   "Delete", "Cancel",
+							   questionImage);
+
+		Hashtable results = new StringDialog(dialogResource).DialogShow();
+
+		if (results != null)
+		  {
+		    BaseNode bNode = (BaseNode) node.getParent();
+
+		    try
+		      {
+			if (!bNode.getBase().fieldInUse(fNode.getField()))
+			  {
+			    bNode.getBase().deleteField(fNode.getField());
+			    refreshFields(bNode, true);
+			    ne.refreshSpaceList();
+			    be.refreshLabelChoice();
+			  }
+			else
+			  {
+			    // field in use
+			
+			    System.err.println("Couldn't delete field.. field in use");
+			  }
+		      }
+		    catch (RemoteException ex)
+		      {
+			System.err.println("couldn't delete field" + ex);
+		      }
+		  }
 	      }
 	    else
 	      {
-		StringDialog notEditableDialog = new StringDialog(this, 
-								  "Error: field not editable",
-								  "This field is not editable.  You cannot delete it.",
-								  "Ok",
-								  null);
-		notEditableDialog.DialogShow();
-		
+		new StringDialog(this, 
+				 "Error: field not editable",
+				 "This field is not editable.  You cannot delete it.",
+				 "Ok",
+				 null).DialogShow();
 	      }
 	  }
 	else
 	  {
-	    StringDialog notRemovaleDialog = new StringDialog(this,
-							      "Error: field not removable",
-							      "This field is not removable.",
-							      "Ok",
-							      null);
-	    notRemovaleDialog.DialogShow();
+	    new StringDialog(this,
+			     "Error: field not removable",
+			     "This field is not removable.",
+			     "Ok",
+			     null).DialogShow();
 	  }
-	  
       }
   }
 
@@ -1053,6 +1202,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    throw new RuntimeException("Couldn't commit: " + ex);
 	  }
+
 	setVisible(false);
       }
     else if (event.getSource() == cancelButton)
@@ -1065,88 +1215,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
+
 	setVisible(false);
-      }
-    else if (event.getSource() == deleteNameDialog)
-      {
-	if (deleteNameDialog.answeredYes())
-	  {
-	    if (currentNode == null)
-	      {
-		System.err.println("currentNode is null");
-	      }
-	    else
-	      {
-		treeNode tNode = (treeNode)currentNode;
-		System.out.println("deleting Namespace " + tNode.getText());
-		try
-		  {
-		    editor.deleteNameSpace(tNode.getText());
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
-		  }
-		refreshNamespaces();
-	
-		if (showingField)
-		  {
-		    fe.refreshFieldEdit();
-		  }
-		
-	      }
-	  }
-	else
-	  {
-	    System.out.println("Not deleting Name Space");
-	  }
-       
-
-      }
-    else if (event.getSource() == deleteFieldDialog)
-      {
-	if (deleteFieldDialog.answeredYes())
-	  {
-	    System.out.println("Answered yes");
-	    if (currentNode == null)
-	      {
-		System.out.println("currentNode is null");
-	      }
-	    else
-	      {
-		try
-		  {
-		    FieldNode fNode = (FieldNode) currentNode;
-		    BaseNode bNode = (BaseNode) currentNode.getParent();
-		    
-		    if (!bNode.getBase().fieldInUse(fNode.getField()))
-		      {
-			bNode.getBase().deleteField(fNode.getField());
-			refreshFields(bNode.getBase(), true);
-			ne.refreshSpaceList();
-			be.refreshLabelChoice();
-		      }
-		    else
-		      {
-			// field in use
-			
-			System.err.println("Couldn't delete field.. field in use");
-		      }
-		  }
-		catch (RemoteException ex)
-		  {
-		    System.err.println("couldn't delete field" + ex);
-		  }
-	      }
-	  }
-	else
-	  {
-	    System.out.println("Not deleting field");
-	  }
-
-
-
-
       }
     else
       {
@@ -1168,7 +1238,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public boolean startDrag(treeNode dragNode)
   {
-    return (dragNode instanceof FieldNode);
+    return ((dragNode instanceof FieldNode) ||
+	    (dragNode instanceof BaseNode) ||
+	    (dragNode instanceof CatTreeNode &&
+	     dragNode != objects));
   }
 
   /**
@@ -1181,6 +1254,41 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public boolean iconDragOver(treeNode dragNode, treeNode targetNode)
   {
+    if (targetNode.isOpen())
+      {
+	return false;
+      }
+
+    if (dragNode instanceof FieldNode)
+      {
+	return false;
+      }
+
+    if (dragNode instanceof BaseNode)
+      {
+	return (targetNode instanceof CatTreeNode);
+      }
+
+    if (dragNode instanceof CatTreeNode)
+      {
+	if (!(targetNode instanceof CatTreeNode))
+	  {
+	    return false;
+	  }
+	
+	CatTreeNode cNode = (CatTreeNode) dragNode;
+	CatTreeNode cNode1 = (CatTreeNode) targetNode;
+
+	try
+	  {
+	    return (!cNode1.getCategory().isUnder(cNode.getCategory()));
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
+    
     return false;
   }
 
@@ -1207,8 +1315,81 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
     treeNode parent = dragNode.getParent();
-    return (((aboveNode instanceof FieldNode) && (aboveNode != null) && (aboveNode.getParent() == parent)) || 
-	     ((belowNode instanceof FieldNode) && (belowNode != null) && (belowNode.getParent() == parent)));
+
+    /* -- */
+
+    if (belowNode == objects)
+      {
+	return false;
+      }
+
+    if (dragNode instanceof FieldNode)
+      {
+	return (((aboveNode instanceof FieldNode) && (aboveNode != null) && (aboveNode.getParent() == parent)) || 
+		((belowNode instanceof FieldNode) && (belowNode != null) && (belowNode.getParent() == parent)));
+      }
+    else if (dragNode instanceof BaseNode)
+      {
+	if (belowNode instanceof FieldNode)
+	  {
+	    return false;
+	  }
+
+	if (belowNode == namespaces)
+	  {
+	    return true;
+	  }
+
+	return ((aboveNode instanceof BaseNode) || 
+		(aboveNode instanceof CatTreeNode) ||
+		(belowNode instanceof BaseNode) || 
+		(belowNode instanceof CatTreeNode));
+      }
+    else if (dragNode instanceof CatTreeNode)
+      {
+	try
+	  {
+	    if (belowNode instanceof FieldNode)
+	      {
+		return false;
+	      }
+
+	    if (belowNode == namespaces)
+	      {
+		return true;
+	      }
+
+	    if (aboveNode instanceof CatTreeNode)
+	      {
+		return !((CatTreeNode) aboveNode).getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
+	      }
+	    
+	    if (belowNode instanceof CatTreeNode)
+	      {
+		return !((CatTreeNode) belowNode).getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
+	      }
+
+	    if (aboveNode instanceof BaseNode)
+	      {
+		return !((BaseNode) aboveNode).getBase().getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
+	      }
+  
+	    if (belowNode instanceof BaseNode)
+	      {
+		return !((BaseNode) belowNode).getBase().getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
+	      }
+		    
+	    return false;
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't get category details for drag " + ex);
+	  }
+      }
+    else
+      {
+	return false;
+      }
   }
 
   /**
@@ -1245,7 +1426,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      {
 		System.out.println("aboveNode == dragNode, Not moving it");
 	      }
-	    
 	  }
 	else if (belowNode instanceof FieldNode)
 	  {
@@ -1267,16 +1447,18 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    System.err.println("Dropped away from FieldNodes, shouldn't happen");
 	  }
 	
-	//Ok, that mostly works, plugging ahead
+	// Ok, that mostly works, plugging ahead
 
-	//Renumber the fields of this parent.
+	// Renumber the fields of this parent.
 	
 	FieldNode currentNode = (FieldNode)parentNode.getChild();
+
 	if (currentNode != null)
 	  {
 	    try
 	      {
 		short i = 0;
+
 		while (currentNode != null)
 		  {
 		    currentNode.getField().setDisplayOrder(++i);
@@ -1294,1457 +1476,46 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    System.err.println("No children to renumber, something not right");
 	  }
       }
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                      BaseEditor
-
-------------------------------------------------------------------------------*/
-
-class BaseEditor extends ScrollPane implements setValueCallback, ActionListener, ItemListener {
-
-  Base 
-    base;
-
-  numberField 
-    typeN;
-
-  stringField 
-    nameS, 
-    classS;
-
-  Choice
-    labelC;
-
-  componentAttr 
-    ca;
-
-  Panel 
-    editPanel;
-
-  GASHSchema
-     owner;
-
-  /* -- */
-
-  BaseEditor(GASHSchema owner)
-  {
-    if (owner == null)
-      {
-	throw new IllegalArgumentException("owner must not be null");
-      }
-
-    System.err.println("BaseEditor constructed");
-
-    base = null;
-    this.owner = owner;
-
-    editPanel = new InsetPanel(10, 10, 10, 10);
-    editPanel.setLayout(new TableLayout(false));
-    
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
-
-    typeN = new numberField(20, ca, false, false, 0, 0);
-    typeN.setCallback(this);
-    addRow(editPanel, typeN, "ObjectType ID:", 0);
-
-
-    nameS = new stringField(20, 100, ca, true, false, null, null);
-    nameS.setCallback(this);
-    addRow(editPanel, nameS, "Object Type:", 1);
-
-    classS = new stringField(20, 100, ca, true, false, null, null);
-    classS.setCallback(this);
-    addRow(editPanel, classS, "Class name:", 2);
-
-    labelC = new Choice();
-    labelC.addItemListener(this);
-    addRow(editPanel, labelC, "Label:", 3);
-
-    add(editPanel);
-    //    doLayout();
-  }
-
-  /**
-   *
-   * This method is used to retarget the base editor to a new base
-   * without having to break down and reconstruct the panels.
-   */
-
-  public void editBase(Base base)
-  {
-    this.base = base;
-
-    try
-      {
-	typeN.setValue(base.getTypeID());
-	nameS.setText(base.getName());
-	classS.setText(base.getClassName());
-	refreshLabelChoice();
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("editBase: accessor failed: " + ex);
-      }
-  }
-
-  /**
-   *
-   * This method is an internal helper method to update the label choice displayed
-   * in the base editor.
-   *
-   */
-
-  void refreshLabelChoice()
-  {
-    Vector fields = null;
-    BaseField currentField;
-    String labelField = null;
-
-    /* -- */
-
-    labelC.removeAll();
-
-    if (base == null)
-      {
-	System.out.println("base is null, not refreshing labelC");
-	return;
-      }
-
-    try
-      {
-	fields = base.getFields();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("exception getting fields: " + rx);
-      }
-    
-    labelC.add("<none>");
-    
-    if (fields == null)
-      {
-	System.out.println("No fields to add");
-	return;
-      }
-
-    for (int i = 0; i < fields.size() ; i++)
-      {
-	currentField = (BaseField) fields.elementAt(i);
-
-	if (currentField != null)
-	  {
-	    try
-	      {
-		if (currentField.isString() || currentField.isNumeric())
-		  {
-		    labelC.add(currentField.getName());
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("exception getting field name: " + rx);
-	      }
-	  }
-      }
-
-    try
-      {
-	labelField = base.getLabelFieldName();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Exception getting base label: " + rx);
-      }
-
-    if (labelField == null)
-      {
-	System.out.println("selecting <none>");
-	labelC.select("<none>");
-      }
-    else
+    else if (dragNode instanceof BaseNode)
       {
 	try
 	  {
-	    System.out.println("selecting label: " + labelField);
-	    labelC.select(labelField);
-	  }
-	catch (NullPointerException ex)
-	  {
-	    System.out.println("Attempted to set label to field not in choice, setting it to <none>");
-	    labelC.select("<none>");
-	  }
-      }
-  }
+	    BaseNode bn = (BaseNode) dragNode;
+	    Base base = bn.getBase();
+	    Category parent = base.getCategory();
 
-  public void itemStateChanged(ItemEvent e)
-  {
-    String label = null;
+	    Category newCategory;
 
-    /* -- */
-
-    System.out.println("itemStateChanged");
-
-    if (e.getItemSelectable() == labelC)
-      {
-	try
-	  {
-	    label = labelC.getSelectedItem();
-
-	    System.out.println("setting label to " + label);
-
-	    if ((label == null) || (label.equals("<none>")))
+	    if (aboveNode instanceof CatTreeNode)
 	      {
-		System.out.println("Setting label field to null");
-		base.setLabelField(null);
+		newCategory = ((CatTreeNode) aboveNode).getCategory();
+	      }
+	    else if (aboveNode instanceof BaseNode)
+	      {
+		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
 	      }
 	    else
 	      {
-		System.out.println("Setting label field to " + label);
-		base.setLabelField(label);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("exception setting label field: " + rx);
-	  }
-      }
-  }
+		// if the node below us is the namespaces node,
+		// we're going to be moving this base down to the
+		// bottom of the top level category hierarchy
 
-  public boolean setValuePerformed(ValueObject v)
-  {
-    Component source;
-    String val;
+		//		if (belowNode == namespaces)
 
-    /* -- */
-
-    // we really shouldn't find ourselves called if
-    // base is null, but just in case..
-
-    if (base == null)
-      {
-	return false;
-      }
-
-    System.err.println("setValuePerformed:" + v);
-
-    source = v.getSource();
-    val = (String) v.getValue();
-
-    try
-      {
-	if (source == nameS)
-	  {
-	    base.setName(val);
-	  }
-	else if (source == classS)
-	  {
-	    base.setClassName(val);
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("Couldn't set attribute on base: " + ex);
-	return false;
-      }
-    
-    return true;
-  }
-
-  public void actionPerformed(ActionEvent event)
-  {
-    if (event.getSource() == owner.attribOkButton)
-      {
-	owner.objectsRefresh();
-      }
-  }
-
-  void addRow(Panel parent, Component comp,  String label, int row)
-  {
-    Label l = new Label(label);
-    
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
-
-  }
-
-}
-
-
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                 BaseFieldEditor
-
-------------------------------------------------------------------------------*/
-
-class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionListener, ItemListener, TextListener {
-
-  BaseField 
-    fieldDef;
-
-  CardLayout
-    card;
-
-  Panel 
-    editPanel;
-
-  GASHSchema 
-    owner;
-
-  StringDialog
-    changeLabelTypeDialog;
-
-  TextArea
-    commentT;			// all
-
-  stringField
-    nameS,			// all
-    classS,			// all
-    trueLabelS,			// boolean
-    falseLabelS,		// boolean
-    OKCharS,			// string
-    BadCharS;			// string
-
-  numberField
-    idN,			// all
-    maxArrayN,			// all
-    minLengthN,			// string
-    maxLengthN;			// string
-
-  checkboxField
-    vectorCF,			// all but password, boolean
-    labeledCF,			// boolean
-    editInPlaceCF,		// invid
-    cryptedCF;			// password
-
-  Choice
-    typeC,			// all
-    namespaceC,			// string
-    targetC,			// invid
-    fieldC;			// invid
-
-  componentAttr 
-    ca;
-
-  Hashtable
-    rowHash;			// to keep track of field labels
-
-  boolean
-    booleanShowing,
-    numericShowing,
-    dateShowing,
-    stringShowing,
-    referenceShowing,
-    passwordShowing;
-
-  /* -- */
-
-  /**
-   *
-   * Constructor
-   *
-   */
-
-  BaseFieldEditor(GASHSchema owner)
-  {
-
-    if (owner == null)
-      {
-	throw new IllegalArgumentException("owner must not be null");
-      }
-
-    rowHash = new Hashtable();
-
-    fieldDef = null;
-    this.owner = owner;
-    
-    editPanel = new InsetPanel(10, 10, 10, 10);
-    editPanel.setLayout(new TableLayout(false));
-    
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
-    
-    idN = new numberField(20, ca, false, false, 0, 0);
-    idN.setCallback(this);
-    addRow(editPanel, idN, "Field ID:", 0);
-    
-    nameS = new stringField(20, 100, ca, true, false, null, null);
-    nameS.setCallback(this);
-    addRow(editPanel, nameS, "Field Name:", 1);
-
-    classS = new stringField(20, 100, ca, true, false, null, null);
-    classS.setCallback(this);
-    addRow(editPanel, classS, "Class name:", 2);
-
-    commentT = new TextArea(4, 20);
-    commentT.addTextListener(this);
-    addRow(editPanel, commentT, "Comment:", 3);
-    
-    // This one is different:
-    vectorCF = new checkboxField(null, false, ca, true);
-    vectorCF.setCallback(this);
-    addRow(editPanel, vectorCF, "Vector:", 4);
-
-    maxArrayN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
-    maxArrayN.setCallback(this);
-    addRow(editPanel, maxArrayN, "Max Array Size:", 5);
-
-    typeC = new Choice();
-    typeC.add("Boolean");
-    typeC.add("Numeric");
-    typeC.add("Date");
-    typeC.add("String");
-    typeC.add("Object Reference");
-    typeC.add("Password");
-    typeC.addItemListener(this);
-
-    //choose the one that is the default
-    changeTypeChoice("Boolean");
-
-    cryptedCF = new checkboxField(null, false, ca, true);
-    cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "Stored Crypted:" , 7);
-   
-    addRow(editPanel, typeC, "Field Type:", 6);
-
-    minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
-    minLengthN.setCallback(this);
-    addRow(editPanel, minLengthN, "Minimum String Size:", 8);
-    
-    maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
-    maxLengthN.setCallback(this);
-    addRow(editPanel, maxLengthN, "Maximum String Size:", 9);
-   
-    OKCharS = new stringField(20, 100, ca, true, false, null, null);
-    OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, "Allowed Chars:", 10);
-
-    BadCharS = new stringField(20, 100, ca, true, false, null, null);
-    BadCharS.setCallback(this);
-    addRow(editPanel, BadCharS, "Disallowed Chars:", 11);
-
-    namespaceC = new Choice();
-    namespaceC.addItemListener(this);
-
-    addRow(editPanel, namespaceC, "Namespace:", 12);
-    
-    labeledCF = new checkboxField(null, false, ca, true);
-    labeledCF.setCallback(this);
-    addRow(editPanel, labeledCF, "Labeled:", 13);
-
-    trueLabelS = new stringField(20, 100, ca, true, false, null, null);
-    trueLabelS.setCallback(this);
-    addRow(editPanel, trueLabelS, "True Label:", 14);
-
-    falseLabelS = new stringField(20, 100, ca, true, false, null, null);
-    falseLabelS.setCallback(this);
-    addRow(editPanel, falseLabelS, "False Label:", 15);
-
-    editInPlaceCF = new checkboxField(null, false, ca, true);
-    editInPlaceCF.setCallback(this);
-    addRow(editPanel, editInPlaceCF, "Edit In Place:", 16);
-
-    targetC = new Choice();
-    targetC.addItemListener(this);
-    addRow(editPanel, targetC, "Target Object:", 17);
-
-    fieldC = new Choice();
-    fieldC.addItemListener(this);
-    addRow(editPanel, fieldC, "Target Field:", 18);
-
-    booleanShowing = true;
-    numericShowing = false;
-    dateShowing = false;
-    stringShowing = false;
-    referenceShowing = false;
-    passwordShowing = false;
-
-    add(editPanel);
-  }
-
-  void clearFields()
-  {
-    commentT.setText("");
-
-    nameS.setText("");
-    classS.setText("");
-
-    trueLabelS.setText("");
-    falseLabelS.setText("");
-    OKCharS.setText("");
-    BadCharS.setText("");
-
-    idN.setText("");
-    maxArrayN.setText("");
-    minLengthN.setText("");
-    maxLengthN.setText("");
-  }
-
-  void addRow(Panel parent, Component comp,  String label, int row)
-  {
-    addRow(parent, comp, label, row, true);
-  }
-
-  void addRow(Panel parent, Component comp,  String label, int row, boolean visible)
-  {
-    Label l = new Label(label);
-
-    rowHash.put(comp, l);
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
-
-    setRowVisible(comp, visible);
-  }
-
-  void setRowVisible(Component comp, boolean b)
-  {
-    Component c = (Component) rowHash.get(comp);
-
-    if (c == null)
-      {
-	return;
-      }
-
-    comp.setVisible(b);
-    c.setVisible(b);
-  }
-
-  // This goes through all the components, and sets the visibilities
-
-  void checkVisibility()
-  {
-    if (passwordShowing || booleanShowing)
-      {
-	setRowVisible(vectorCF, false);
-	setRowVisible(maxArrayN, vectorCF.getState());
-      }
-    else
-      {
-	setRowVisible(vectorCF, true);
-	setRowVisible(maxArrayN, vectorCF.getState());
-      }
-
-    if (passwordShowing)
-      {
-	setRowVisible(cryptedCF, true);
-      }
-    else
-      {
-	setRowVisible(cryptedCF, false);
-      }
-
-    setRowVisible(labeledCF, booleanShowing);
-
-    if (booleanShowing)
-      {
-	setRowVisible(trueLabelS, labeledCF.getState());
-	setRowVisible(falseLabelS, labeledCF.getState());
-      }
-    else
-      {
-	setRowVisible(trueLabelS, false);
-	setRowVisible(falseLabelS, false);
-      }
-
-    setRowVisible(OKCharS, stringShowing || passwordShowing);
-    setRowVisible(BadCharS, stringShowing || passwordShowing);
-    setRowVisible(minLengthN, stringShowing || passwordShowing);
-    setRowVisible(maxLengthN, stringShowing || passwordShowing);
-    setRowVisible(namespaceC, stringShowing);
-
-    if (referenceShowing)
-      {
-	setRowVisible(editInPlaceCF, true);
-	setRowVisible(targetC, true);
-
-	if (targetC.getSelectedItem().equalsIgnoreCase("<any>"))
-	  {
-	    setRowVisible(fieldC, false);
-	  }
-	else
-	  {
-	    setRowVisible(fieldC, true);
-	  }
-      }
-    else
-      {
-	setRowVisible(editInPlaceCF, false);
-	setRowVisible(targetC, false);
-	setRowVisible(fieldC, false);
-      }
-
-    editPanel.doLayout();
-    this.validate();
-  }
-
-  void refreshNamespaceChoice()
-   {
-     NameSpace[] nameSpaces = null;
-
-     /* -- */
-      
-     namespaceC.removeAll();
-
-     SchemaEdit test = owner.getSchemaEdit();
-
-     if (test == null)
-       {	
-	 System.err.println("owner.editor is null");
-       }
-     
-     try
-       {
-	 nameSpaces = owner.getSchemaEdit().getNameSpaces();
-       }
-     catch (RemoteException rx)
-       {
-	 System.err.println("RemoteException getting namespaces: " + rx);
-       }
-      
-     namespaceC.addItem("<none>");      
-
-     if ( (nameSpaces.length == 0) || (nameSpaces == null) )
-       {
-	 System.err.println("No other namespaces to add");
-       }
-     else
-       {
-	 for (int i=0 ; i < nameSpaces.length ; i++)
-	   {
-	     try
-	       {
-		 namespaceC.addItem(nameSpaces[i].getName());
-	       }
-	     catch (RemoteException rx)
-	       {
-		 System.err.println("RemoteException getting namespace: " + rx);
-	       }    
-	   }
-       }
-   }
-
-  /**
-   *
-   * This method regenerates the list of valid target base choices
-   * in the BaseFieldEditor.
-   *
-   */
-    
-  void refreshTargetChoice()
-  {
-    Base[] baseList;
-
-    /* -- */
-
-    targetC.removeAll();
-
-    try
-      {
-	baseList = owner.getSchemaEdit().getBases();
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("Exception getting Bases: " + rx);
-      }
-
-    targetC.addItem("<any>");
-
-    for (int i = 0 ; i < baseList.length ; i++)
-      {
-	try
-	  {
-	    targetC.addItem(baseList[i].getName());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Exception getting bases name: " + rx);
-	  }
-      }
-  }
-
-  /**
-   *
-   * This method regenerates the list of valid target field choices
-   * in the BaseFieldEditor when the targetBase is not "<any>".  
-   *
-   * This method doesn't make a selection, so upon exit of this
-   * method, "<none>" will be selected in the fieldC widget.
-   *
-   */
-
-  void refreshFieldChoice()
-  {
-    String target;
-    short type;
-    Base targetBase;
-    BaseField bf;
-    Vector fields = null;
-
-    /* -- */
-    
-    target = targetC.getSelectedItem();
-
-
-    try
-      {
-	if (target.equals("<all>"))
-	  {
-	    targetBase = owner.getSchemaEdit().getBase((short)0);
-	  }
-	else
-	  {
-	    targetBase = owner.getSchemaEdit().getBase(target);
-	  }
-
-	if (targetBase == null)
-	  {
-	    System.out.println("targetBase is null");
-	  }
-	else
-	  {
-	    fields = targetBase.getFields();
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
-      }
-
-    fieldC.removeAll();
-    fieldC.addItem("<none>");
-    
-    if (fields == null)
-      {
-	System.out.println("fields == null");
-
-	// By default, the Choice item will keep the
-	// first item added.. the following line is
-	// redundant, at least under JDK 1.1.2
-	//	fieldC.select("<none>");
-      }
-    else
-      {
-	for (int i = 0; i < fields.size(); ++i)
-	  {
-	    bf = (BaseField)fields.elementAt(i);
-
-	    try
-	      {
-		type = bf.getType();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception getting type description " + rx);
 	      }
 
-	    System.out.println("checking type: " + type);
-
-	    if (type == FieldType.INVID)
-	      {
-		try
-		  {
-		    System.out.println("adding " + bf.getName());
-		    fieldC.add(bf.getName());
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new IllegalArgumentException("Exception getting base field name " + rx);
-		  }
-	      }
-	  }
-      }
-  }
-  
-  /**
-   *
-   * This method changes the type on the server and updates
-   * the booleans that BaseFieldEditor uses to keep track
-   * of what field attributes should be visible.  We do not
-   * do any of the BaseFieldEditor updates that a change
-   * to the field type in question would require.  This
-   * is currently done elsewhere, primarily by a call to
-   * refreshFieldEdit().
-   *
-   */
-
-  void changeTypeChoice(String selectedItem)
-  {
-    booleanShowing = false;
-    numericShowing = false;
-    dateShowing = false;
-    stringShowing = false;
-    referenceShowing = false;
-    passwordShowing = false;
-
-    try
-      {
-	if (selectedItem.equalsIgnoreCase("Boolean"))
-	  {
-	    booleanShowing = true;
-	    fieldDef.setType(FieldType.BOOLEAN);
-	  }
-	else if (selectedItem.equalsIgnoreCase("Numeric"))
-	  {
-	    numericShowing = true;
-	    fieldDef.setType(FieldType.NUMERIC);
-	  }
-	else if (selectedItem.equalsIgnoreCase("Date"))
-	  {
-	    dateShowing = true;
-	    fieldDef.setType(FieldType.DATE);
-	  }
-	else if (selectedItem.equalsIgnoreCase("String"))
-	  {
-	    stringShowing = true;
-	    fieldDef.setType(FieldType.STRING);
-	  }
-	else if (selectedItem.equalsIgnoreCase("Object Reference"))
-	  {
-	    referenceShowing = true;
-	    fieldDef.setType(FieldType.INVID);
-	  }
-	else if (selectedItem.equalsIgnoreCase("Password"))
-	  {
-	    passwordShowing = true;
-	    fieldDef.setType(FieldType.PASSWORD);
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("changeTypeChoice: got RemoteException: " + ex);
-      }
-    catch (NullPointerException ex)
-      {
-	// we don't have fieldDef set yet.  Just ignore.
-      }
-  }
-
-  /**
-   *
-   * Edit the given field.  This method prepares the BaseFieldEditor
-   * for display, initializing all items in the BaseFieldEditor panel
-   * with the contents of fieldDef.
-   *
-   */
-
-  void editField(BaseField fieldDef)
-  {
-    System.err.println("in FieldEditor.editField()");
-
-    //    if (fieldDef == this.fieldDef)
-    //      {
-    //	return;
-    //      }
-
-    clearFields();
-    this.fieldDef = fieldDef;
-
-    // Check to see if this field is editable.
-    // Assume it is not, then ask server.
-    // Each field will be set to editable depending on this variable.
-    boolean isEditable = false;
-    try
-      {
-	isEditable = fieldDef.isEditable();
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("exception: isEditable in editField: " + rx);
-      }
-
-    booleanShowing = false;
-    numericShowing = false;
-    dateShowing = false;
-    stringShowing = false;
-    referenceShowing = false;
-    passwordShowing = false;
-
-    try
-      {
-	idN.setValue(fieldDef.getID());
-	nameS.setText(fieldDef.getName());
-	classS.setText(fieldDef.getClassName());
-	commentT.setText(fieldDef.getComment());
-
-        if (fieldDef.isArray())
-	  {
-	    vectorCF.setState(true);
-	  }
-	else
-	  {
-	    vectorCF.setState(false);
-	  }
-
-	if (fieldDef.isString())
-	  {
-	    minLengthN.setValue(fieldDef.getMinLength());
-	    maxLengthN.setValue(fieldDef.getMaxLength());
-	    OKCharS.setText(fieldDef.getOKChars());
-	    BadCharS.setText(fieldDef.getBadChars());
-	    
-	    typeC.select("String");
-	    stringShowing = true;
-
-	    // add all defined namespaces here
-
-	    refreshNamespaceChoice();
-
-	    System.out.println(fieldDef.getNameSpaceLabel());
-
-	    if (fieldDef.getNameSpaceLabel() == null)
-	      {
-		namespaceC.select("<none>");
-		System.out.println("selecting <none> for NameSpace");
-	      }
-	    else
-	      {
-		namespaceC.select(fieldDef.getNameSpaceLabel());
-		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
-	      }
-	  }
-	else if (fieldDef.isPassword())
-	  {
-	    minLengthN.setValue(fieldDef.getMinLength());
-	    maxLengthN.setValue(fieldDef.getMaxLength());
-	    OKCharS.setText(fieldDef.getOKChars());
-	    BadCharS.setText(fieldDef.getBadChars());
-	    
-	    typeC.select("Password");
-	    passwordShowing = true;
-
-	    cryptedCF.setState(fieldDef.isCrypted());
-	  }
-	else if (fieldDef.isBoolean())
-	  {
-	    if (fieldDef.isLabeled())
-	      {
-		labeledCF.setState(true);
-		trueLabelS.setText(fieldDef.getTrueLabel());
-		falseLabelS.setText(fieldDef.getFalseLabel());
-	      }
-	    else
-	      {
-		labeledCF.setState(false);
-		trueLabelS.setText("");
-		falseLabelS.setText("");
-	      }
-
-	    typeC.select("Boolean");
-	    booleanShowing = true;
-	  }
-	else if (fieldDef.isInvid())
-	  {
-	    editInPlaceCF.setState(fieldDef.isEditInPlace());
-
-	    refreshTargetChoice();
-
-	    SchemaEdit se = owner.getSchemaEdit();
-	    short targetB = fieldDef.getTargetBase();
-
-	    if (targetB == -1)
-	      {
-		System.out.println("unknown target base");
-		targetC.select("<any>");
-	      }
-	    else
-	      {
-		Base targetBase = null;
-		String string = null;
-
-		if (targetB == -2)
-		  {
-		    // we're assuming that we've got a known target field in
-		    // all objects bases in the system.. this is mainly for
-		    // the 'owner list' field.. we'll just pick the field from
-		    // the current fieldDef and go with it.
-		    
-		    System.out.println("new 'alltarget' base");
-		    targetC.addItem("<all>");
-		    targetC.select("<all>");
-
-		    string = "<all>";
-
-		    targetBase = se.getBase((short) 0);	// assume the field is present in first base
-		  }
-		else
-		  {
-		    targetBase = se.getBase(targetB);
-
-		    if (targetBase == null)
-		      {
-			throw new Error("targetbase is null when it shouldn't be: server error : base id " + targetB);
-		      }
-		    
-		    string = targetBase.getName();
-		    
-		    System.out.println("Choosing " + string);
-		    targetC.select(string);
-		  }
-
-		// regenerate the list of choices in fieldC
-
-		refreshFieldChoice();
-
-		// Now that we have an appropriate list of
-		// choice items in the fieldC, let's see
-		// if we can't find something to select
-		// in fieldC
-
-		short targetF = fieldDef.getTargetField();
-
-		if (targetF == -1)
-		  {
-		    System.out.println("unknown target field");
-		    fieldC.select("<none>");
-		  }
-		else
-		  {
-		    BaseField targetField;
-
-		    // see if our old field target value is still
-		    // appropriate for the currently chosen base
-
-		    try
-		      {
-			targetField = targetBase.getField(targetF);
-			
-			if (targetField != null)
-			  {
-			    string = targetField.getName();
-			    System.out.println("selecting " + string);
-			    fieldC.select(string);
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("exception getting field " + rx);
-		      }
-		  }
-	      } // else targetB != -1
-		
-	    typeC.select("Object Reference");
-	    referenceShowing = true;
-	  }
-	else if (fieldDef.isDate())
-	  {
-	    typeC.select("Date");
-	    dateShowing = true;
-	  }
-	else if (fieldDef.isNumeric())
-	  {
-	    typeC.select("Numeric");
-	    numericShowing = true;
-	  }
-	else if (fieldDef.isPermMatrix())
-	  {
-	    typeC.addItem("Permission Matrix");
-	    typeC.select("Permission Matrix");
-	  }
-
-	//Here is where the editability is checked.
-
-	commentT.setEditable(isEditable);
-	nameS.setEditable(isEditable);
-	classS.setEditable(isEditable);
-	trueLabelS.setEditable(isEditable);
-	falseLabelS.setEditable(isEditable);
-	OKCharS.setEditable(isEditable);
-	BadCharS.setEditable(isEditable);
-	idN.setEditable(isEditable);
-	maxArrayN.setEditable(isEditable);
-	minLengthN.setEditable(isEditable);
-	maxLengthN.setEditable(isEditable);
-
-	cryptedCF.setEnabled(isEditable);
-	vectorCF.setEnabled(isEditable);
-	labeledCF.setEnabled(isEditable);
-	editInPlaceCF.setEnabled(isEditable);
-	typeC.setEnabled(isEditable);
-	namespaceC.setEnabled(isEditable);
-	targetC.setEnabled(isEditable);
-	fieldC.setEnabled(isEditable);
-	
-	checkVisibility();
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("remote exception in FieldEditor.editField: " + ex);
-      }
-  }
-
-  /**
-   *
-   * Reinitialize the BaseFieldEditor with the current field.
-   *
-   */
-
-  public void refreshFieldEdit()
-  {
-    this.editField(fieldDef);
-  }
-
-  /**
-   * 
-   * For string and numeric fields
-   *
-   * @see arlut.csd.DataComponent.setValueCallback
-   *
-   */
-
-  public boolean setValuePerformed(ValueObject v)
-  {
-    Component comp = v.getSource();
-
-    try
-      {
-	if (comp == nameS)
-	  {
-	    System.out.println("nameS");
-	    fieldDef.setName((String) v.getValue());
-	  }
-	else if (comp == classS)
-	  {
-	    System.out.println("classS");
-	    fieldDef.setClassName((String) v.getValue());
-	  }
-	else if (comp == idN)
-	  {
-	    System.out.println("idN");
-	    fieldDef.setID(((Integer)v.getValue()).shortValue());
-	  }
-	else if (comp == maxArrayN)
-	  {
-	    System.out.println("maxArrayN");
-	    fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue());
-	  }
-	else if (comp == vectorCF)
-	  {
-	    //setRowVisible(maxArrayN, vectorCF.getState());
-	    System.out.println("vectorCF");
-	    fieldDef.setArray(vectorCF.getState());
-	    checkVisibility();
-	  }
-	else if (comp == OKCharS)
-	  {
-	    System.out.println("OkCharS");
-	    fieldDef.setOKChars((String) v.getValue());
-	  }
-	else if (comp == BadCharS)
-	  {
-	    System.out.println("BadCharS");
-	    fieldDef.setBadChars((String) v.getValue());
-	  }
-	else if (comp == minLengthN)
-	  {
-	    System.out.println("minLengthN");
-	    fieldDef.setMinLength(((Integer)v.getValue()).shortValue());
-	  }
-	else if (comp == maxLengthN)
-	  {
-	    System.out.println("maxLengthN");
-	    fieldDef.setMaxLength(((Integer)v.getValue()).shortValue());
-	  }
-	else if (comp == trueLabelS)
-	  {
-	    System.out.println("trueLabelS");
-	    fieldDef.setTrueLabel((String) v.getValue());
-	  }
-	else if (comp == falseLabelS)
-	  {
-	    System.out.println("falseLabelS");
-	    fieldDef.setFalseLabel((String) v.getValue());
-	  }
-	else if (comp == labeledCF)
-	  {
-	    System.out.println("labeledCF");
-	    fieldDef.setLabeled(labeledCF.getState());
-	    checkVisibility();
-	  }
-	else if (comp == editInPlaceCF)
-	  {
-	    System.out.println("editInPlaceCF");
-	    fieldDef.setEditInPlace(editInPlaceCF.getState());
-	  }
-	else if (comp == cryptedCF)
-	  {
-	    System.out.println("cryptedCF");
-	    fieldDef.setCrypted(cryptedCF.getState());
-	  }
-	return true;
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception in setting field value " + ex);
-      }
-  }
-
-  /**
-   *
-   * For choice fields
-   *
-   */
-
-  public void itemStateChanged(ItemEvent e)
-  {
-    String item = null;
-    Base newBase = null;
-    String oldBaseName = null;
-    short baseID;
-    Base oldBase;
-    Base currentBase = null;
-    String currentLabel = null;
-    String currentFieldName = null;
-
-    /* -- */
-
-    if (e.getItemSelectable() == typeC)
-      {
-	boolean okToChange = true;
-	item = typeC.getSelectedItem();
-
-	if (!item.equals("Numeric") && !item.equals("String"))
-	  {
-	    // Now it can't be a label.. was it a label before?
-
-	    try
-	      {
-		currentBase = fieldDef.getBase();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting base: " + rx);
-	      }
-
-	    try
-	      {
-		currentLabel = currentBase.getLabelFieldName();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting label: " + rx);
-	      }
-
-	    try
-	      {
-		currentFieldName = fieldDef.getName();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting field name: " + rx);
-	      }
-
-	    if ((currentFieldName != null) && (currentLabel != null)  &&
-		currentLabel.equals(currentFieldName))
-	      {
-		changeLabelTypeDialog = new StringDialog(owner, 
-							 "Warning: changing object type",
-							 "Changing the type of this field will invalidate the label for this base.  Are you sure you want to continue?",
-							 "Confirm",
-							 "Cancel");
-		
-		Hashtable answer = changeLabelTypeDialog.DialogShow();
-
-		if (answer != null)  //Ok button was clicked
-		  {
-		    try
-		      {
-			System.out.println(" clicked ok");
-			currentBase.setLabelField(null); // we're making this field unacceptable as a label
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("exception setting label to null: " + rx);
-		      }
-		  }
-		else
-		  {
-		    System.out.println(" Canceled, not changing field type");
-		    okToChange = false;
-		    try 
-		      {
-			if (fieldDef.isNumeric())
-			  {
-			    typeC.select("Numeric");
-			  }
-			else if (fieldDef.isString())
-			  {
-			    typeC.select("String");
-			  }
-			else
-			  {
-			    System.err.println("Field is not String or Numeric, not changing type choice");
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("exception getting old type");
-		      }
-		  }
-	      }
-	    else
-	      {
-		    System.out.println("not the label, ok to change");
-		    
-	      }
-	  }
-	if (okToChange)
-	  {
-	    changeTypeChoice(item);	// switch the visible rows to fit the new type
-	    refreshFieldEdit();	// and refresh
-	  }
-      }
-    else if (e.getItemSelectable() == namespaceC)
-      {
-	item = namespaceC.getSelectedItem();
-
-	System.out.println("Namespace: " + item);
-	System.out.println("Setting namespace to " + item);
-
-	try 
-	  {
-	    if (item.equalsIgnoreCase("<none>"))
-	      {
-		fieldDef.setNameSpace(null);
-	      }
-	    else
-	      {
-		fieldDef.setNameSpace(item);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Remote Exception setting NameSpace: " + rx);
-	  }
-      }
-    else if (e.getItemSelectable() == targetC)
-      {
-	item = targetC.getSelectedItem();
-
-	try
-	  {
-	    baseID = fieldDef.getTargetBase();
-	    oldBase = owner.getSchemaEdit().getBase(baseID);
-	    if (oldBase != null)
-	      {
-		oldBaseName = oldBase.getName();
-	      }
 	  }
 	catch (RemoteException ex)
 	  {
-	    throw new RuntimeException("couldn't get old base name " + ex);
 	  }
-
-	if (item.equalsIgnoreCase("<any>"))
-	  {
-	    try
-	      {
-		fieldDef.setTargetBase(null);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
-	      }
-	  }
-	else
-	  {
-	    try
-	      {
-		newBase = owner.getSchemaEdit().getBase(item);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception getting base: " + rx);
-	      }
-
-	    if (newBase == null)
-	      {
-		throw new IllegalArgumentException("Could not match selection with a Base");
-	      }
-	    else
-	      {
-		try
-		  {
-		    System.out.println("Setting target base to " + item);
-
-		    fieldDef.setTargetBase(item);
-
-		    // if we've changed our target base, clear out the
-		    // target field to avoid accidental confusion if our
-		    // new target base has a valid target field with the
-		    // same id code as our old target field.
-		    
-		    if ((oldBaseName != null) && !oldBaseName.equals(item))
-		      {
-			fieldDef.setTargetField(null);
-		      }
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Remote Exception setting Target: " + rx);
-		  }
-	      }
-	  }
-
-	refreshFieldEdit();
-	checkVisibility();
+	
       }
-    else if (e.getItemSelectable() == fieldC)
+    else if (dragNode instanceof CatTreeNode)
       {
-	item = fieldC.getSelectedItem();
-
-	System.out.println("Setting field to " + item);
-
-	try
-	  {
-	    if (item.equals("<none>"))
-	      {
-		fieldDef.setTargetField(null);
-	      }
-	    else
-	      {
-		fieldDef.setTargetField(item);
-	      } 
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
-	  }
-      }
-  }
-
-  // for the multiline comment field
-
-  public void textValueChanged(TextEvent e)
-    {
-      Object obj = e.getSource();
-      if (obj == commentT)
-	{
-	  TextComponent text = (TextComponent)obj;
-	  try
-	    {
-	      fieldDef.setComment(text.getText());
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Remote exception setting comment: " +rx);
-	    }
-	}
-    }
-
-  // for ok/cancel buttons
-
-  public void actionPerformed(ActionEvent event)
-  {
-    if (event.getSource() == owner.attribOkButton)
-      {
-	owner.objectsRefresh();
       }
   }
 }
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -2754,6 +1525,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
 class NameSpaceEditor extends ScrollPane implements ActionListener {
   
+  SpaceNode node;
+  NameSpace space;
   stringField nameS;
   List spaceL;
   Checkbox caseCB;
@@ -2765,232 +1538,230 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
   /* -- */
 
   NameSpaceEditor(GASHSchema owner)
-    {
-
-      if (owner == null)
+  {
+    if (owner == null)
+      {
 	throw new IllegalArgumentException("owner must not be null");
+      }
 
-      System.err.println("NameSpaceEditor constructed");
+    System.err.println("NameSpaceEditor constructed");
 
-      this.owner = owner;
+    this.owner = owner;
 
-      namePanel = new InsetPanel(10,10,10,10);
-      namePanel.setLayout(new TableLayout(false));
+    namePanel = new InsetPanel(10,10,10,10);
+    namePanel.setLayout(new TableLayout(false));
 
-      ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			     Color.black, Color.white);
+    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+			   Color.black, Color.white);
       
-      nameS = new stringField(20, 100, ca, false, false, null, null);
-      addRow(namePanel, nameS, "Namespace:", 0);
+    nameS = new stringField(20, 100, ca, false, false, null, null);
+    addRow(namePanel, nameS, "Namespace:", 0);
       
-      caseCB = new Checkbox();
-      caseCB.setEnabled(false);
-      addRow(namePanel, caseCB, "Case insensitive:", 1);
+    caseCB = new Checkbox();
+    caseCB.setEnabled(false);
+    addRow(namePanel, caseCB, "Case insensitive:", 1);
+    
+    spaceL = new List(5);
+    //spaceL.setEnabled(false);
+    addRow(namePanel, spaceL, "Fields in this space:", 2);
+    
+    add(namePanel);
+  }
 
-      spaceL = new List(5);
-      //spaceL.setEnabled(false);
-      addRow(namePanel, spaceL, "Fields in this space:", 2);
-            
-      add(namePanel);
-    }
-  public void editNameSpace(NameSpace space)
-    {
-      try
-	{
-	  nameS.setText(space.getName());
-	  caseCB.setState(space.isCaseInsensitive());
-	  currentNameSpaceLabel = space.getName();
-	  refreshSpaceList();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
-
-	}
-    }
+  public void editNameSpace(SpaceNode node)
+  {
+    this.node = node;
+    space = node.getSpace();
+    
+    try
+      {
+	nameS.setText(space.getName());
+	caseCB.setState(space.isCaseInsensitive());
+	currentNameSpaceLabel = space.getName();
+	refreshSpaceList();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
+      }
+  }
 
   public void actionPerformed(ActionEvent e)
-    {
-      System.out.println("action Performed in NameSpaceEditor");
-    }
+  {
+    System.out.println("action Performed in NameSpaceEditor");
+  }
 
   public void refreshSpaceList()
-    {
-      spaceL.removeAll();
-      SchemaEdit se = owner.getSchemaEdit();
-      Base[] bases = null;
-      try
-	{
-	  bases = se.getBases();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new IllegalArgumentException("Exception: can't get bases: " + rx);
-	}
-      Vector fields = null;
-      BaseField currentField = null;
-      String thisBase = null;
-      String thisField = null;
-      String thisSpace = null;
-      if ((bases == null) || (currentNameSpaceLabel == null))
-	{
-	  System.out.println("bases or currentNameSpaceLabel is null");
-	}
-      else
-	{
-	  System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
+  {
+    spaceL.removeAll();
+    SchemaEdit se = owner.getSchemaEdit();
+    Base[] bases = null;
+
+    try
+      {
+	bases = se.getBases();
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("Exception: can't get bases: " + rx);
+      }
+
+    Vector fields = null;
+    BaseField currentField = null;
+    String thisBase = null;
+    String thisField = null;
+    String thisSpace = null;
+
+    if ((bases == null) || (currentNameSpaceLabel == null))
+      {
+	System.out.println("bases or currentNameSpaceLabel is null");
+      }
+    else
+      {
+	System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
 	  
-	  for (int i = 0; i < bases.length; i++)
-	    {
-	      try
-		{
-		  thisBase = bases[i].getName();
-		  fields = bases[i].getFields();
-		}
-	      catch (RemoteException rx)
-		{
-		  throw new IllegalArgumentException("exception getting fields: " + rx);
-		}
-	      if (fields == null)
-		{
-		  System.out.println("fields == null");
-		}
-	      else
-		{
-		  for (int j = 0; j < fields.size(); j++)
-		    {
-		      try 
-			{
-			  currentField = (BaseField)fields.elementAt(j);
-			  if (currentField.isString())
-			    {
-			      thisSpace = currentField.getNameSpaceLabel();
-			      if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
-				{
-				  System.out.println("Adding to spaceL: " + thisBase + ":" + currentField.getName());;
-				  spaceL.addItem(thisBase + ":" + currentField.getName());
-				  
+	for (int i = 0; i < bases.length; i++)
+	  {
+	    try
+	      {
+		thisBase = bases[i].getName();
+		fields = bases[i].getFields();
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("exception getting fields: " + rx);
+	      }
 
-				}
-			      
-			    }
+	    if (fields == null)
+	      {
+		System.out.println("fields == null");
+	      }
+	    else
+	      {
+		for (int j = 0; j < fields.size(); j++)
+		  {
+		    try 
+		      {
+			currentField = (BaseField)fields.elementAt(j);
 
+			if (currentField.isString())
+			  {
+			    thisSpace = currentField.getNameSpaceLabel();
 
-			}
-		      catch (RemoteException rx)
-			{
-			  throw new IllegalArgumentException("Exception generating spaceL: " + rx);
-			}
-		    }
-
-
-		}
-	      
-
-
-
-	    }
-
-	}
-    }
+			    if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
+			      {
+				System.out.println("Adding to spaceL: " + thisBase + ":" + currentField.getName());;
+				spaceL.addItem(thisBase + ":" + currentField.getName());
+			      }
+			  }
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new IllegalArgumentException("Exception generating spaceL: " + rx);
+		      }
+		  }
+	      }
+	  }
+      }
+  }
 
   void addRow(Panel parent, Component comp,  String label, int row)
-    {
-      Label l = new Label(label);
-      
-      parent.add("0 " + row + " lhwHW", l);
-      parent.add("1 " + row + " lhwHW", comp);
-    }
-}
-
-
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                        BaseNode
-
-------------------------------------------------------------------------------*/
-
-class BaseNode extends arlut.csd.Tree.treeNode {
-
-  private Base base;
-
-  /* -- */
-
-  BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
-	   boolean expandable, int openImage, int closedImage, PopupMenu menu)
   {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.base = base;
-  }
+    Label l = new Label(label);
 
-  public Base getBase()
-  {
-    return base;
-  }
-
-  public void setBase(Base base)
-  {
-    this.base = base;
+    parent.add("0 " + row + " lhwHW", l);
+    parent.add("1 " + row + " lhwHW", comp);
   }
 }
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                       FieldNode
+                                                                  CategoryEditor
 
 ------------------------------------------------------------------------------*/
 
-class FieldNode extends arlut.csd.Tree.treeNode {
+class CategoryEditor extends ScrollPane implements setValueCallback {
 
-  private BaseField field;
-
-  /* -- */
-
-  FieldNode(treeNode parent, String text, BaseField field, treeNode insertAfter,
-	    boolean expandable, int openImage, int closedImage, PopupMenu menu)
-  {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.field = field;
-  }
-
-  public BaseField getField()
-  {
-    return field;
-  }
-
-  public void setField(BaseField field)
-  {
-    this.field = field;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                       SpaceNode
-
-------------------------------------------------------------------------------*/
-
-class SpaceNode extends arlut.csd.Tree.treeNode {
-
-  private NameSpace space;
+  GASHSchema owner;  
+  Panel catPanel;
+  stringField catNameS;
+  CatTreeNode catNode;
+  Category category;
 
   /* -- */
 
-  SpaceNode(treeNode parent, String text, NameSpace space, treeNode insertAfter,
-	    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+  CategoryEditor(GASHSchema owner)
   {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.space = space;
+    componentAttr ca;
+
+    /* -- */
+
+    if (owner == null)
+      {
+	throw new IllegalArgumentException("owner must not be null");
+      }
+    
+    System.err.println("CategoryEditor constructed");
+
+    this.owner = owner;
+    
+    catPanel = new InsetPanel(10,10,10,10);
+    catPanel.setLayout(new TableLayout(false));
+    
+    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+			   Color.black, Color.white);
+    
+    catNameS = new stringField(20, 100, ca, true, false, null, null, this);
+    addRow(catPanel, catNameS, "Category Label:", 0);
+    
+    add(catPanel);
   }
 
-  public NameSpace getSpace()
+  void editCategory(CatTreeNode catNode)
   {
-    return space;
+    this.catNode = catNode;
+    this.category = catNode.getCategory();
+
+    try
+      {
+	catNameS.setText(category.getName());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
+      }
   }
 
-  public void setSpace(NameSpace space)
+  public boolean setValuePerformed(ValueObject v)
   {
-    this.space = space;
+    if (v.getSource() == catNameS)
+      {
+	try
+	  {
+	    if (category.setName((String) v.getValue()))
+	      {
+		catNode.setText((String) v.getValue());
+		return true;
+	      }
+	    else
+	      {
+		return false;
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;		// what the?
+  }
+
+  void addRow(Panel parent, Component comp,  String label, int row)
+  {
+    Label l = new Label(label);
+    
+    parent.add("0 " + row + " lhwHW", l);
+    parent.add("1 " + row + " lhwHW", comp);
   }
 }
