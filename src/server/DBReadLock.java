@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -217,12 +217,18 @@ public class DBReadLock extends DBLock {
 	      }
 	    else
 	      {
+		Ganymede.debug("DBReadLock (" + key + "):  waiting on lockManager");
+
 		try
 		  {
 		    lockManager.wait(); // an InterruptedException here gets propagated up
+
+		    Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockManager");
 		  }
 		catch (InterruptedException ex)
 		  {
+		    Ganymede.debug("DBReadLock (" + key + "):  interrupted exception");
+
 		    vect = (Vector) lockManager.lockHash.get(key);
 		    vect.removeElement(this);
 
