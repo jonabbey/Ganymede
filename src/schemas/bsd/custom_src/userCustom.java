@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -615,11 +615,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;		// by default, we just ok whatever else
       }
 
-    if (field.getValue() == null)
-      {
-	return null;
-      }
-
     // if we have not previously committed this user, we don't care if the
     // user's name is set.
 
@@ -630,6 +625,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	result.addRescanField(this.getInvid(), userSchema.HOMEDIR);
 
 	return result;
+      }
+
+    if (field.getValue().equals("root"))
+      {
+	return Ganymede.createErrorDialog("Can't rename root",
+					  "Sorry, you can't rename or remove root.  Really not what you want to do.");
       }
 
     if (!gSession.enableWizards)
