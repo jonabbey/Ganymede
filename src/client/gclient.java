@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.89 $ %D%
+   Version: $Revision: 1.90 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -833,6 +833,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     cachedLists.clearCaches();
+  }
+
+  /**
+   *
+   * This method clears out all the cached data structures
+   * refering to bases.  We need to clear these when our
+   * persona changes.
+   *
+   */
+
+  public void clearLoaderLists()
+  {
+    baseList = null;
+    baseToShort = baseNames = baseHash = baseMap = null;
   }
 
   public objectList getObjectList(Short id, boolean showAll)
@@ -3172,6 +3186,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     // This could be moved, only cache if filter is changed?
     clearCaches();
+
     if (filterDialog == null)
       {
 	filterDialog = new JFilterDialog(this);
@@ -3180,8 +3195,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	filterDialog.setVisible(true);
       }
+
     clearTree();
-    
   }
 
   /**
@@ -3381,6 +3396,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Commit the current transaction to the data base.
    */
+
   public void commitTransaction()
   {
     ReturnVal retVal;
@@ -4877,6 +4893,7 @@ class PersonaListener implements ActionListener {
 	      gc.ownerGroups = null;
 	      gc.clearCaches();
 	      gc.loader.clear();  // This reloads the hashes
+	      gc.clearLoaderLists();
 	      gc.cancelTransaction();
 	      gc.buildTree();
 	      gc.currentPersonaString = newPersona;
