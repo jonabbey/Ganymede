@@ -8,13 +8,9 @@ SVN URL: $HeadURL$
 --------------------------------------------------------------------------------
 
 This directory contains RMI remote interface definitions for the
-Ganymede server.  Clients and the admin console need access to
-these interfaces so that they can talk to objects whose classes are
-typically defined in the server directory.
-
-The one exception here is the FileReceiver interface, which is also
-(currently) implemented in the xmlclient so that the server can
-transmit XML files to that program for the -dump operation.
+Ganymede server.  Clients and the admin console need access to these
+interfaces so that they can talk to objects whose implementing classes
+are defined in the server directory.
 
 Jonathan Abbey
-7 May 2004
+6 April 2005
