@@ -20,7 +20,6 @@
       <li><a href="#installClient">installClient</a></li>
       <li><a href="#installWeb">installWeb</a></li>
       <li><a href="#distribclean">distribclean</a></li>
-      <li><a href="#runDirectLoader">runDirectLoader</a></li>
       <li><a href="#config.sh">config.sh</a></li>
       </ul></li>
 
@@ -229,24 +228,6 @@
     immediately before creating a Ganymede distribution archive, and
     probably has no practical use if you are not packaging Ganymede
     for download.</p>
-
-    <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="runDirectLoader"><b>runDirectLoader</b></h3></td></tr></table> 
-
-    <p><font color="#ff0000"><code><b>runDirectLoader</b></code></font> is a Bourne
-    shell script located in a schema kit's <code>loader</code> sub-directory.  It is used
-    in conjunction with a <a href="#ganymede.schema">ganymede.schema</a> file to load data
-    from pre-existing data files (passwd, group, NIS, or Gash files, depending on the
-    schema kit) into a <a href="#ganymede.db">ganymede.db</a> file for use with the
-    Ganymede server.</p>
-
-    <p><font
-    color="#ff0000"><code><b>runDirectLoader</b></code></font> is
-    configured with a <a href="#config.sh">config.sh</a> file by the
-    <a href="#installServer">installServer</a> script when the server
-    is installed, and should be run after the server is installed, from the
-    server's <code>schema/loader</code> directory.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -767,7 +748,7 @@
     <hr>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Tue Apr  2 19:31:06 CST 2002
+Last modified: Thu Apr  4 10:30:32 CST 2002
 <!-- hhmts end -->
   </body>
 </html>
