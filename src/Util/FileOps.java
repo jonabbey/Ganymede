@@ -7,8 +7,8 @@
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/12/10 22:53:45 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/07/13 19:54:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,7 +200,7 @@ public class FileOps {
    * process will be closed before returning.</P>
    */
 
-  public static int runProcess(String commandLine) throws IOException
+  public static int runProcess(String commandLine) throws IOException, InterruptedException
   {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
 
@@ -210,49 +210,55 @@ public class FileOps {
 	
 	return p.exitValue();
       }
-    catch (InterruptedException ex)
-      {
-	throw new IOException("Were were interrupted while waiting for the process to complete: " + ex.getMessage());
-      }
     finally
       {
-	// the following is mentioned as a work-around for the
-	// fact that Process keeps its file descriptors open by
-	// default until Garbage Collection
-	
-	try
-	  {
-	    p.getInputStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
-	
-	try
-	  {
-	    p.getOutputStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
-	
-	try
-	  {
-	    p.getErrorStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
+	FileOps.cleanupProcess(p);
       }
+  }
+
+  /**
+   * <p>This method shuts down / cleans up all resources related to
+   * Process p.  The following is mentioned as a work-around for the
+   * fact that Process keeps its file descriptors open by default
+   * until Garbage Collection.</p>
+   */
+  
+  public static void cleanupProcess(Process p)
+  {
+    try
+      {
+	p.getInputStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    try
+      {
+	p.getOutputStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    try
+      {
+	p.getErrorStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    p.destroy();
   }
 
   /**
