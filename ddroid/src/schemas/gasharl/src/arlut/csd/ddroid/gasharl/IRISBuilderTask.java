@@ -125,6 +125,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   public boolean builderPhase1()
   {
     PrintWriter out;
+    boolean needBuild = false;
     
     /* -- */
 
@@ -149,6 +150,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 	baseChanged((short) 270))
       {
 	Ganymede.debug("Need to build IRIS output");
+	needBuild = true;
 
 	out = null;
 
@@ -187,7 +189,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     Ganymede.debug("IRISBuilderTask builderPhase1 completed");
 
-    return true;
+    return needBuild;
   }
 
   /**
