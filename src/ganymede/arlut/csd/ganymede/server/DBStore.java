@@ -1385,8 +1385,20 @@ public final class DBStore implements JythonMap {
   {
     if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
       {
-	// "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
-	throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", new Integer(nextNumber), new Integer(transactionNumber+1)));
+	if (nextNumber == transactionNumber)
+	  {
+	    // Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.
+	    // This probably means that the server was terminated in the middle of a dump process,
+	    // and that the journal file is older than the ganymede.db file.  You should be able to
+	    // remove the journal file and restart the server.
+
+	    throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", new Integer(nextNumber), new Integer(transactionNumber+1)));
+	  }
+	else
+	  {
+	    // "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
+	    throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", new Integer(nextNumber), new Integer(transactionNumber+1)));
+	  }
       }
 
     transactionNumber = nextNumber;
