@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2002/01/29 10:41:31 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2002/02/02 22:01:19 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -290,11 +290,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     setLayout(new BorderLayout());
 
-    monthYearPanel = new JMonthYearPanel(this);
-
-    add(monthYearPanel,"North");
-
-    // Next, the center ( this part contains a bunch of buttons with numbers)
+    // The centerPanel will actually contain everything
 
     JPanel centerPanel = new JPanel(false);
 
@@ -302,6 +298,8 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     GridBagConstraints gbc = new GridBagConstraints();
     centerPanel.setLayout(gbl);
     
+    monthYearPanel = new JMonthYearPanel(this);
+
     gbc.gridy = 0;
     gbc.gridx = 0;
     gbc.anchor = GridBagConstraints.CENTER;
@@ -412,7 +410,6 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbl.setConstraints(southPanel, gbc);
 
     centerPanel.add(southPanel);
-    //    add(southPanel,"South");
 
     writeDates();
 
@@ -1153,6 +1150,9 @@ class JTimePanel extends JPanel implements JsetValueCallback {
  * <p>This class provides a 'spinner' widget for displaying and allowing the
  * editing of the year in the composite {@link
  * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.</p>
+ *
+ * <p>JYearChooser is incorporated into JpanelCalendar by way of
+ * the {@link arlut.csd.JCalendar.JMonthYearPanel JMonthYearPanel} widget.</p>
  */
 
 class JYearChooser extends JPanel implements ActionListener {
