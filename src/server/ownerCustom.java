@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/07/21 05:38:22 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/07/22 05:34:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -198,6 +198,71 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   public ownerCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
+  }
+
+  // and now the customizations
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * indicate that the given object is interested in receiving notification
+   * when changes involving it occur, and can provide one or more addresses for
+   * such notification to go to.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean hasEmailTarget(DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * return a Vector of Strings comprising a list of addresses to be
+   * notified above and beyond the normal owner group notification when
+   * the given object is changed in a transaction.  Used for letting end-users
+   * be notified of changes to their account, etc.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public Vector getEmailTargets(DBObject object)
+  {
+    Vector x = new Vector();
+    DBSession session;
+    Boolean cc = (Boolean) object.getFieldValueLocal(SchemaConstants.OwnerCcAdmins);
+
+    /* -- */
+
+    try
+      {
+	session = object.editset.session;
+      }
+    catch (NullPointerException ex)
+      {
+	session = Ganymede.internalSession.getSession();
+      }
+    
+    if (cc != null && cc.booleanValue())
+      {
+	Vector members = object.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+
+	if (members != null)
+	  {
+	    for (int i = 0; i < members.size(); i++)
+	      {
+		Invid admin = (Invid) members.elementAt(i);
+		
+		DBObject adminObj = session.viewDBObject(admin, true);
+		
+		x = VectorUtils.union(x, adminObj.getEmailTargets());
+	      }
+	  }
+      }
+
+    x = VectorUtils.union(x, object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
+    
+    return x;
   }
 
   /**

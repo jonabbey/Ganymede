@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 1999/06/18 22:43:20 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 1999/07/22 05:34:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.73 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.74 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1602,6 +1602,26 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <p>Returns true if this object has an 'in-care-of' email address
+   * that should be notified when this object is changed.</p>
+   */
+
+  public final boolean hasEmailTarget()
+  {
+    return objectBase.getObjectHook().hasEmailTarget(this);
+  }
+
+  /**
+   * <p>Returns a vector of email addresses that can be used to send
+   * 'in-care-of' email for this object.</p>
+   */
+
+  public final Vector getEmailTargets()
+  {
+    return objectBase.getObjectHook().getEmailTargets(this);
+  }
+
+  /**
    * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
@@ -1739,11 +1759,15 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>Shortcut method to set a field's value.  Using this
-   * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.</p>
+   * <p>Shortcut method to set a field's value.  This
+   * is a server-side method, but it can be a quick
+   * way to get a vector of elements.</p>
    *
-   * @see arlut.csd.ganymede.db_object
+   * <p><b>Warning!</b>  The Vector returned by getFieldValuesLocal()
+   * is not a clone, but is direct access to the vector
+   * held in the DBField.  Clone the vector you get back
+   * if you need to do anything with it other than read
+   * it.</p>
    */
 
   public Vector getFieldValuesLocal(short fieldID)

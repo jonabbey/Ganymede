@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 1999/07/22 03:52:33 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 1999/07/22 05:34:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.115 $ $Date: 1999/07/22 03:52:33 $ $Name:  $
+ * @version $Revision: 1.116 $ $Date: 1999/07/22 05:34:17 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -709,7 +709,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
      and hold an instance of such as DBObjectBase.objectHook.  The following
      methods are used in a static fashion, that is they are intended
      to perform actions on designated external DBObjects rather than on the
-     per-DBObjectBase instance.
+     'this' per-DBObjectBase objectHook instance, which may not be fully defined.
 
   */
 
@@ -1405,6 +1405,38 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return null;
   }
 
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * indicate that the given object is interested in receiving notification
+   * when changes involving it occur, and can provide one or more addresses for
+   * such notification to go to.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean hasEmailTarget(DBObject object)
+  {
+    return false;
+  }
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * return a Vector of Strings comprising a list of addresses to be
+   * notified above and beyond the normal owner group notification when
+   * the given object is changed in a transaction.  Used for letting end-users
+   * be notified of changes to their account, etc.</p>
+   *
+   * <p>If no email targets are present in this object, either a null value
+   * or an empty Vector may be returned.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public Vector getEmailTargets(DBObject object)
+  {
+    return null;
+  }
+
   /* -------------------- editing/creating Customization hooks -------------------- 
 
 
@@ -2053,17 +2085,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getLabel());
 	    buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
 	    buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
-	    buffer.append(".\n");
-
-	    // if we are inactivating a user, the user deserves to
-	    // know about it
-
-	    Vector addresses = new Vector();
-	    
-	    if (getTypeID() == SchemaConstants.UserBase)
-	      {
-		addresses.addElement(getLabel());
-	      }
+	    buffer.append(".\n\n");
 	
 	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
 							buffer.toString(),
@@ -2071,7 +2093,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 							 gSession.userInvid : gSession.personaInvid),
 							gSession.username,
 							invids,
-							addresses));
+							getEmailTargets(this)));
 	  }
 	else
 	  {
@@ -2084,25 +2106,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getTypeDesc());
 	    buffer.append(" ");
 	    buffer.append(getLabel());
-	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.\n");
+	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.\n\n");
 
-	    // if we are inactivating a user, the user deserves to
-	    // know about it
-
-	    Vector addresses = new Vector();
-	    
-	    if (getTypeID() == SchemaConstants.UserBase)
-	      {
-		addresses.addElement(getLabel());
-	      }
-	
 	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
 							buffer.toString(),
 							(gSession.personaInvid == null ?
 							 gSession.userInvid : gSession.personaInvid),
 							gSession.username,
 							invids,
-							addresses));
+							getEmailTargets(this)));
 	  }
 
 	editset.popCheckpoint("inactivate" + getLabel());
@@ -2179,22 +2191,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	buffer.append(getTypeDesc());
 	buffer.append(" ");
 	buffer.append(getLabel());
-	buffer.append(" has been reactivated.\n");
+	buffer.append(" has been reactivated.\n\n");
 
-	Vector addresses = new Vector();
-
-	if (getTypeID() == SchemaConstants.UserBase)
-	  {
-	    addresses.addElement(getLabel());
-	  }
-	
 	editset.logEvents.addElement(new DBLogEvent("reactivateobject",
 						    buffer.toString(),
 						    (gSession.personaInvid == null ?
 						     gSession.userInvid : gSession.personaInvid),
 						    gSession.username,
 						    invids,
-						    addresses));
+						    getEmailTargets(this)));
       }
     else
       {

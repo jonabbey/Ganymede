@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/07/22 03:52:34 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/07/22 05:34:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1080,19 +1080,6 @@ public class DBEditSet {
 						   "):" + diff + " : ENDDIFF****");
 			      }
 			    
-			    Vector addresses = new Vector();
-			    
-			    // if a user is being edited, we'll want
-			    // the user to get a copy of the
-			    // mail.. hopefully just sending mail to
-			    // the user's name in our current
-			    // environment will work..
-
-			    if (eObj.getTypeID() == SchemaConstants.UserBase)
-			      {
-				addresses.addElement(eObj.getLabel());
-			      }
-			    
 			    logEvent("objectchanged",
 				     eObj.getTypeDesc() + " " + eObj.getLabel() +
 				     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
@@ -1100,7 +1087,7 @@ public class DBEditSet {
 				     (gSession.personaInvid == null ?
 				      gSession.userInvid : gSession.personaInvid),
 				     gSession.username,
-				     invids, addresses);
+				     invids, eObj.getEmailTargets());
 			  }
 		    
 			break;
@@ -1134,7 +1121,7 @@ public class DBEditSet {
 				     (gSession.personaInvid == null ?
 				      gSession.userInvid : gSession.personaInvid),
 				     gSession.username,
-				     invids, null);
+				     invids, eObj.getEmailTargets());
 			  }
 
 			break;
@@ -1157,7 +1144,7 @@ public class DBEditSet {
 				 (gSession.personaInvid == null ?
 				  gSession.userInvid : gSession.personaInvid),
 				 gSession.username,
-				 invids, null);
+				 invids, eObj.getEmailTargets());
 
 			break;
 		      }

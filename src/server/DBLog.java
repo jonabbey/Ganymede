@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/07/22 03:52:34 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/07/22 05:34:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1332,8 +1332,14 @@ public class DBLog {
 	    System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
 	  }
 
-	// okay, we've got a reference to (one of) the DBObject's being
-	// modified by this event.. what do we want to do with it?
+	// first off, does the object itself have anyone it wants to notify?
+
+	if (object.hasEmailTarget())
+	  {
+	    results = VectorUtils.union(results, object.getEmailTargets());
+	  }
+
+	// okay, now we've got to see about notifying the owners..
 
 	if (object.isEmbedded())
 	  {

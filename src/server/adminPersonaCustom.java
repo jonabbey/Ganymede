@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/07/22 03:52:36 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/07/22 05:34:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,6 +157,67 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   // and now the customizations
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * indicate that the given object is interested in receiving notification
+   * when changes involving it occur, and can provide one or more addresses for
+   * such notification to go to.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean hasEmailTarget(DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
+   * return a Vector of Strings comprising a list of addresses to be
+   * notified above and beyond the normal owner group notification when
+   * the given object is changed in a transaction.  Used for letting end-users
+   * be notified of changes to their account, etc.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public Vector getEmailTargets(DBObject object)
+  {
+    Vector x = new Vector();
+
+    String address = (String) object.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
+
+    if (address == null)
+      {
+	// okay, we got no address pre-registered for this
+	// admin.. we need now to try to guess at one, by looking
+	// to see this admin's name is of the form user:role, in
+	// which case we can just try to send to 'user', which will
+	// work as long as Ganymede's users cohere with the user names
+	// at Ganymede.mailHostProperty.
+
+	String adminName = object.getLabel();
+
+	int colondex = adminName.indexOf(':');
+	
+	if (colondex == -1)
+	  {
+	    // supergash?
+
+	    return null;
+	  }
+    
+	address = adminName.substring(0, colondex);
+      }
+
+    if (x != null)
+      {
+	x.addElement(address);
+      }
+
+    return x;
+  }
 
   /**
    *
