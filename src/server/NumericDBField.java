@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -60,15 +60,7 @@ public class NumericDBField extends DBField implements num_field {
     
     defined = false;
     value = null;
-
-    if (isVector())
-      {
-	values = new Vector();
-      }
-    else
-      {
-	values = null;
-      }
+    values = null;		// numeric fields cannot be arrays
   }
 
   /**
@@ -82,16 +74,8 @@ public class NumericDBField extends DBField implements num_field {
     this.owner = owner;
     definition = field.definition;
     
-    if (isVector())
-      {
-	values = (Vector) field.values.clone();
-	value = null;
-      }
-    else
-      {
-	value = field.value;
-	values = null;
-      }
+    value = field.value;
+    values = null;
 
     defined = true;
   }
@@ -104,11 +88,6 @@ public class NumericDBField extends DBField implements num_field {
 
   public NumericDBField(DBObject owner, int value, DBObjectBaseField definition) throws RemoteException
   {
-    if (definition.isArray())
-      {
-	throw new IllegalArgumentException("scalar constructor called on vector field");
-      }
-
     this.owner = owner;
     this.definition = definition;
     this.value = new Integer(value);
@@ -125,26 +104,7 @@ public class NumericDBField extends DBField implements num_field {
 
   public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
-    if (!definition.isArray())
-      {
-	throw new IllegalArgumentException("vector constructor called on scalar field");
-      }
-
-    this.owner = owner;
-    this.definition = definition;
-
-    if (values == null)
-      {
-	this.values = new Vector();
-	defined = false;
-      }
-    else
-      {
-	this.values = (Vector) values.clone();
-	defined = true;
-      }
-
-    value = null;
+    throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
@@ -161,40 +121,12 @@ public class NumericDBField extends DBField implements num_field {
 
   void emit(DataOutput out) throws IOException
   {
-    if (isVector())
-      {
-	out.writeShort(values.size());
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    out.writeInt(((Integer) values.elementAt(i)).intValue());
-	  }
-      }
-    else
-      {
-	out.writeInt(((Integer) value).intValue());
-      }
+    out.writeInt(((Integer) value).intValue());
   }
 
   void receive(DataInput in) throws IOException
   {
-    int count;
-
-    /* - */
-
-    if (isVector())
-      {
-	count = in.readShort();
-	values = new Vector(count);
-	for (int i = 0; i < count; i++)
-	  {
-	    values.addElement(new Integer(in.readInt()));
-	  }
-      }
-    else
-      {
-	value = new Integer(in.readInt());
-      }
-
+    value = new Integer(in.readInt());
     defined = true;
   }
 
@@ -216,12 +148,7 @@ public class NumericDBField extends DBField implements num_field {
 
   public int value(int index)
   {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
-      }
-
-    return ((Integer) values.elementAt(index)).intValue();
+    throw new IllegalArgumentException("vector accessor called on scalar field");
   }
 
   public synchronized String getValueString()
@@ -231,32 +158,25 @@ public class NumericDBField extends DBField implements num_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (!isVector())
+    if (value == null)
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
-
-	return Integer.toString(this.value());
+	return "null";
       }
 
-    String result = "";
-    int size = size();
-
-    for (int i = 0; i < size; i++)
-      {
-	if (!result.equals(""))
-	  {
-	    result = result + ", ";
-	  }
-
-	result = result + Integer.toString(this.value(i));
-      }
-
-    return result;
+    return Integer.toString(this.value());
   }
 
+  /**
+   *
+   * For numbers, our default getValueString() encoding is adequate.
+   *
+   */
+
+  public String getEncodingString()
+  {
+    return getValueString();
+  }
+  
 
   // ****
   //
