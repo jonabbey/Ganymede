@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2002/03/13 06:17:32 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2002/06/14 01:19:29 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -284,12 +284,24 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	panel.add(image);
       }
 
-    JLabel label = new JLabel("Ganymede Admin Console");
+    JPanel labelPanel = new JPanel();
+    labelPanel.setLayout(new BorderLayout());
+
+    JLabel label = new JLabel("Ganymede Admin on: ");
+    labelPanel.add("West", label);
+
+    JLabel hostLabel = new JLabel(serverhost + ":" + registryPortProperty);
+    Font x = new Font("Courier", Font.ITALIC, 14);
+    hostLabel.setFont(x);
+    hostLabel.setForeground(Color.black);
+
+    labelPanel.add("Center", hostLabel);
+
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
     gbc.gridy = 1;
-    gbl.setConstraints(label, gbc);
-    panel.add(label);
+    gbl.setConstraints(labelPanel, gbc);
+    panel.add(labelPanel);
 
     gbc.ipady = 4;
 
