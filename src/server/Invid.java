@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,6 +38,32 @@ public class Invid implements java.io.Serializable {
 
     this.type = type;
     this.num = num;
+  }
+
+  /**
+   *
+   * This is the string constructor.. string should be
+   * a pair of colon separated numbers, in the form
+   *
+   * 5:134 where the first number is the short type
+   * and the second is the int object number
+   *
+   */
+
+  public Invid(String string)
+  {
+    String first = string.substring(0, string.indexOf(':'));
+    String last = string.substring(string.indexOf(':')+1);
+
+    try
+      {
+	this.type = Short.valueOf(first).shortValue();
+	this.num = Integer.valueOf(last).intValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new IllegalArgumentException("bad string format " + ex);
+      }
   }
 
   // equals
