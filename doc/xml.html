@@ -173,7 +173,7 @@
 	  can be ignored or contracted.  For Ganymede's purposes, however,
 	  whitespace between tags is generally ignored, and newlines and
 	  indentation are nice for human readability but not necessary for
-	  Ganymede's input parsing.  More on this as we discuss what Ganymede
+	  Ganymede's input parsing.  More on this as we discuss what Ganymedew
 	  does with XML, below.</p>
       </li>
     </ul>
@@ -328,7 +328,6 @@
               &lt;fielddef name="Event_Token" id="100"&gt;
                 &lt;comment&gt;Single-word token for this event class&lt;/comment&gt;
                 &lt;typedef type="string"&gt;
-                  &lt;minlength val="0"/&gt;
                   &lt;maxlength val="32"/&gt;
                   &lt;badchars val=" |"/&gt;
                   &lt;namespace val="eventtoken"/&gt;
@@ -341,7 +340,6 @@
               &lt;fielddef name="Mail_List" id="107"&gt;
                 &lt;typedef type="string"&gt;
                   &lt;vector/&gt;
-                  &lt;minlength val="0"/&gt;
                 &lt;/typedef&gt;
               &lt;/fielddef&gt;
             &lt;/objectdef&gt;
@@ -370,7 +368,7 @@
     that are opened are properly closed before the close of the
     &lt;object_type_definitions&gt; element.</p>
 
-    <p>Whenever the Ganymede server refers to object or field names,
+    <p><a name="underscore">Whenever the Ganymede server refers to object or field names,
     any spaces in the object or field name is replaced by an
     underscore in the XML file.  This is so that when actual instances
     of objects are recorded in the &lt;ganydata&gt; element, encoded
@@ -458,7 +456,14 @@
     </pre>
 
     <p>Once the optional elements are out of the way, we get down to
-    the meat of an object definition element.. the fields.</p>
+    the meat of an object definition element.. the fields.  The
+    <b>objectdef</b> element will typically contain a series of
+    <b>fielddef</b> elements, one for each field defined in this
+    object type.  These <b>fielddef</b> elements are listed in
+    the order they should appear in the client.  The first <b>fielddef</b>
+    element in an <b>objectdef</b> element will appear at the
+    top of the object editing window in the Ganymede client, with
+    subsequent <b>fielddef</b>'s in order below the first.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -518,19 +523,41 @@
     element.  The <b>typedef</b> element specifies what kind of data
     field the containing <b>fielddef</b> field definition element
     defines, and has a single attribute, <b>type</b>.  The <b>type</b>
-    attribute can have any of the following values:</p>
+    attribute can have any of the values listed in the following
+    table:</p>
 
-    <ul>
-      <li>string</li>
-      <li>ip</li>
-      <li>invid</li>
-      <li>boolean</li>
-      <li>date</li>
-      <li>numeric</li>
-      <li>float</li>
-      <li>password</li>
-      <li>permmatrix</li>
-    </ul>
+    <table border=1>
+      <tr>
+	<th>Type</th><th>Explanation</th><th>Vector Allowed?</th>
+      </tr>
+      <tr>
+	<td>string</td><td>Unicode String</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>ip</td><td>I.P. Address, IPv4 or IPv6</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>invid</td><td>Object Reference</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>boolean</td><td>Boolean</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>date</td><td>Date/Timestamp</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>numeric</td><td>Integer Number Field</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>float</td><td>Double precision float</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>password</td><td>Password Field</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>permmatrix</td><td>Ganymede Permissions Matrix</td><td>NO</td>
+      </tr>
+    </table>
 
     <p>For example:</p>
 
@@ -849,7 +876,11 @@
 	  <b>crypted</b> or <b>md5crypted</b> set, the server will
 	  never dump the plaintext of passwords in this field to disk,
 	  as it is capable of authenticating logins against either the
-	  crypt() or md5crypt() hash.</p>
+	  crypt() or md5crypt() hash.  If the <b>plaintext</b> element
+	  is present, the password will be preserved in plaintext form
+	  in the ganymede.db file, regardless of whether or not the
+	  password is also handled via one of the encryption
+	  hashes.</p>
 
 	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
 	  <b>plaintext</b> elements must be present or an error will
@@ -897,7 +928,7 @@
             &lt;fielddef name="Password" id="101"&gt;
               &lt;comment&gt;Password for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
               &lt;typedef type="password"&gt;
-                &lt;minlength val="0"/&gt;
+                &lt;minlength val="3"/&gt;
                 &lt;maxlength val="32"/&gt;
                 &lt;crypted/&gt;
                 &lt;plaintext/&gt;
@@ -997,7 +1028,6 @@ Limited to 16 for NFS.&lt;/comment&gt;
             &lt;fielddef name="Email_Aliases" id="267"&gt;
               &lt;typedef type="string"&gt;
                 &lt;vector/&gt;
-                &lt;minlength val="0"/&gt;
                 &lt;maxlength val="32"/&gt;
                 &lt;badchars val="@"/&gt;
                 &lt;namespace val="username"/&gt;
@@ -1023,6 +1053,269 @@ Limited to 16 for NFS.&lt;/comment&gt;
 	<td colspan="1"><h2><b>Ganymede Object Data Import/Export Definition in XML</b></h2></td>
       </tr>
     </table>
+
+    <p>While the Ganymede server is capable of expressing its schema
+    definition information in the <b>&lt;ganyschema&gt;</b> section of
+    its XML file, this aspect of Ganymede's XML support is bound to be
+    much less used than the data dumping and loading support.  This
+    section discusses the <b>&lt;ganydata&gt;</b> element that may be
+    present in the Ganymede XML file format.</p>
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%" >
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="GANYDATA">&lt;ganydata&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;ganydata&gt;</b> element is a container for object data to be updated on the server.  When
+exported, the <b>&lt;ganydata&gt;</b> element contains a complete dump of the server's data state.  When
+imported, the <b>&lt;ganydata&gt;</b> element contains a collection of <b>&lt;object&gt;</b> elements
+which specify objects to be created, edited, inactivated, or deleted.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td>NONE</td>
+<td><a href="#OBJECT">&lt;object&gt;</a></td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<p>
+<dt>NONE</dt>
+<dd>&nbsp;</dd>
+
+</dl>
+</td>
+</tr>
+</table></center>
+
+    <p>The <b>&lt;ganydata&gt;</b> element contains a series of
+    <b>&lt;object&gt;</b> elements, each one corresponding to an
+    object in the Ganymede database.  The <b>&lt;object&gt;</b>
+    element itself may contain one element for each field in the
+    object.  The open tag for the <b>object</b> element as exported
+    contains possibly four attributes, those being <b>type</b>
+    (required), <b>id</b>, <b>num</b>, and <b>action</b>.</p>
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="OBJECT">&lt;object&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;object&gt;</b> element contains data for a single object.  When exported, the <b>&lt;object&gt;</b>
+element contains a complete dump of the object's state, minus the historical fields (last modification data, etc.).When
+imported, the <b>&lt;object&gt;</b> element contains a collection of field elements
+whose contents are to be transmitted to the server to update the object identified by the
+<b>&lt;object&gt;</b>'s attributes.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;ganydata&gt;</a></td>
+<td>Various field elements, each with a unique tag name based on the name of the corresponding server field</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<p>
+<dt><b>type</b></dt>
+<dd>The name of the type this object belongs to.  This string
+is case sensitive and must match the <b>name</b> attribute for
+the type's <b>&lt;objectdef&gt;</b> element, which is the object's
+type name with <a href="#underscore">underscores substituted for spaces</a>.</dd>
+
+<dt><b>id</b></dt>
+
+<dd>An optional identifier string for this object, unique among
+objects of this type within the <b>&lt;ganydata&gt;</b> element in
+this XML file.  If this string is not present, the <b>num</b>
+attribute becomes mandatory. The <b>id</b> attribute is used for two
+purposes; the first is to identify an object on the server to be
+edited, inactivated or deleted if the <b>action</b> attribute
+specifies these actions.  This may only be done if objects of this
+type on the server have unique and determinable labels.  The second is
+to act as a target for <b>&lt;invid&gt;</b> elements within the XML
+file to use to refer to <b>&lt;object&gt;</b> elements that are
+created during the XML file processing.</dd>
+
+<dt><b>num</b></dt>
+
+<dd>An optional object number for this object, unique among objects of
+this type on the server.  If this number is not present, the <b>id</b>
+attribute becomes mandatory.  If both the <b>id</b> and <b>num</b>
+attributes are present, the <b>id</b> attribute takes precedent.  The
+number contained in this attribute corresponds to the Invid object
+number for the object designated by this <b>&lt;object&gt;</b>
+element.  The <b>num</b> attribute is used to select pre-existing
+objects on the server for editing, inactivation, or deletion.  If this
+<b>&lt;object&gt;</b> has an <b>action</b> attribute value that would
+cause a new object to be created on the Ganymede server, the
+<b>num</b> attribute is simply ignored.</dd>
+
+<dt><b>action</b></dt>
+
+<dd>
+The <b>action</b> attribute is optional, and plays a role only in
+XML data importing.  If the <b>action</b> attribute is present, it may
+contain one of four strings:
+
+<ul>
+<li>create</li>
+<li>edit</li>
+<li>inactivate</li>
+<li>delete</li>
+</ul>
+
+<p>
+If there is no <b>action</b> attribute specified at import time, the
+<b>&lt;object&gt;</b> element will be created if there is no object
+already on the server that matches the <b>id</b> or <b>num</b> object
+identifying attributes.  Otherwise, the pre-existing object on the
+Ganymede server matching the identifying attributes will be checked
+out for editing.
+</p>
+
+<p>
+If the <b>action</b> attribute is present and contains
+<b>"create"</b>, the <b>&lt;object&gt;</b> element will cause the
+Ganymede xmlclient to create a new object, even if an object of the
+same type that matches the given <b>id</b> attribute already exists on
+the server.  In addition, in such cases all <b>&lt;invid&gt;</b>
+elements in the XML file with matching <b>type</b> and <b>id</b>
+attributes will be interpreted to be referring to the newly created
+<b>&lt;object&gt;</b> element and not any pre-existing object on the
+server that might match those identifying attributes.</p>
+</p>
+
+<p>If the <b>action</b> attribute is present and contains <b>"edit"</b>,
+the <b>&lt;object&gt;</b> element will cause the Ganymede xmlclient
+to seek to check the object out for editing from the server.  If no
+object exists on the server matching the <b>id</b> attribute, an
+error will be displayed and xmlclient will abort the transaction.</p>
+
+<p>In the unspecified, <b>"create"</b>, and <b>"edit"</b> cases, the
+object element will typically contain a set of field elements.  In the
+<b>"inactivate"</b> and <b>"delete"</b> cases, the
+<b>&lt;object&gt;</b> element must be empty, and the xmlclient will
+simply attempt to inactivate or delete the object identified by the
+<b>id</b> or <b>num</b> attributes.</p>
+
+</dd>
+
+</dl>
+</td>
+</tr>
+</table></center>
+
+<p>Aside from the special case of object inactivation or deletion, all
+&lt;object&gt; elements in a &lt;ganydata&gt; section will contain a
+set of elements that correspond to fields in the object to be created
+or edited on the server.  The elements for these fields have no fixed
+tag name.  Instead, each field element will start with an open tag
+that is named according to the name of the field, with spaces
+transformed into underscores.</p>  
+
+<p>For instance, a record to change the values of the "Room",
+"Groups", "Home Group" and "Email Aliases" fields in a pre-existing
+object on the server would be represented in the XML file as:</p>
+
+<pre>
+  &lt;object type="User" id="broccol" action="edit"&gt;
+    &lt;Room&gt;S321&lt;/Room&gt;
+    &lt;Groups&gt;
+        &lt;invid type="Group" id="omssys"/&gt;
+        &lt;invid type="Group" id="omsnet"/&gt;
+    &lt;/Groups&gt;
+    &lt;Home_Group&gt;&lt;invid type="Group" id="omssys"&gt;&lt;/Home_Group&gt;
+    &lt;Email_Aliases&gt;
+        &lt;string val="abbey"/&gt;
+        &lt;string val="jonabbey"/&gt;
+    &lt;/Email_Aliases&gt;
+  &lt;/object&gt;
+</pre>
+
+<p>An &lt;object&gt; element contains nothing but such field elements,
+all of which lack any sort of attributes.  The field elements
+themselves, however, will contain a variety of kinds of elements,
+depending on the field type.  In the above example, the "Room" field
+is a scalar String field, the "Groups" field is a vector Invid/object
+reference field, the "Home Group" field is a scalar Invid/object
+reference field, and the "Email Aliases" field is a vector String
+field.</p>
+
+<p>There are presently nine different types of data fields supported
+by the Ganymede server, and each of these types has its own rules as
+to what kinds of elements are allowed within the field element and how
+they may be structured.  For the most part, these rules are very similar
+for all field types, with just the value carrying element type differing.
+The following table shows the data carrying element types that correspond
+to the nine field types.</p>
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="STRING">&lt;string&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;string&gt;</b> element contains data for a String field.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<p>
+<dt><b>val</b></dt>
+<dd>The contents of the mandatory <b>val</b> attribute actually holds the string value
+corresponding to this &lt;string&gt; element.</dd>
+</td>
+</tr>
+</table></center>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
