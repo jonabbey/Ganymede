@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,39 +37,47 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
   framePanel
    fp;
 
+  gclient
+    gc;
+
   JPanel
     holdOnPanel;
 
+  /* -- */
+
   public ownerPanel(invid_field field, boolean editable, framePanel fp)
-    {
-      if (debug)
-	{
-	  System.out.println("Adding ownerPanel");
-	}
+  {
+    if (debug)
+      {
+	System.out.println("Adding ownerPanel");
+      }
+    
+    this.editable = editable;
+    this.field = field;
+    this.fp = fp;
 
-      this.editable = editable;
-      this.field = field;
-      this.fp = fp;
+    gc = fp.wp.gc;
 
-      setLayout(new BorderLayout());
+    setLayout(new BorderLayout());
 
-      setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+    setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
-      holdOnPanel = new JPanel();
-      holdOnPanel.add(new JLabel("Loading ownerPanel, please wait.", new ImageIcon(fp.getWaitImage()), SwingConstants.CENTER));
+    holdOnPanel = new JPanel();
+    holdOnPanel.add(new JLabel("Loading ownerPanel, please wait.", 
+			       new ImageIcon(fp.getWaitImage()), SwingConstants.CENTER));
       
-      add("Center", holdOnPanel);
-      invalidate();
-      fp.validate();
-
-      Thread thread = new Thread(this);
-      thread.start();
-
-    }
+    add("Center", holdOnPanel);
+    invalidate();
+    fp.validate();
+    
+    Thread thread = new Thread(this);
+    thread.start();
+  }
 
   public void run()
   {
     System.out.println("Starting new thread");
+
     if (field == null)
       {
 	JLabel l = new JLabel("There is no owner for this object.");
@@ -90,6 +98,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	    throw new RuntimeException("Could not addDateField: " + rx);
 	  }
       }
+
     invalidate();
     fp.validate();
   }
@@ -105,10 +114,12 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
       availableOwners = null;
 
     /* -- */
+
     if (debug)
       {
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
+
     if (editable)
       {
 	Object key = field.choicesKey();
@@ -128,6 +139,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	      {
 		System.out.println("Downloading copy");
 	      }
+
 	    availableOwners = field.choices().getListHandles();
 	    
 	    if (key != null)
@@ -140,14 +152,17 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		fp.getgclient().cachedLists.put(key, availableOwners);
 	      }
 	  }
-	
       }
 
     currentOwners = field.encodedValues().getListHandles();
 
     // availableOwners might be null
     // if editable is false, availableOwners will be null
-    tStringSelector ss = new tStringSelector(availableOwners, currentOwners, this, editable, 100, "Owners", "Owner Groups");
+
+    tStringSelector ss = new tStringSelector(availableOwners, 
+					     currentOwners, 
+					     this, editable, 
+					     100, "Owners", "Owner Groups");
     if (editable)
       {
 	ss.setCallback(this);
@@ -157,46 +172,64 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
   }
 
   public boolean setValuePerformed(JValueObject o)
-    {
-      boolean returnValue = false;
-      if (o.getSource() instanceof tStringSelector)
-	{
-	  if (o.getOperationType() == JValueObject.ERROR)
-	    {
-	      fp.getgclient().setStatus((String)o.getValue());
-	    }
-	  else if (o.getValue() instanceof Invid)
-	    {
-	      Invid invid = (Invid)o.getValue();
-	      int index = o.getIndex();
-	      try
-		{
-		  if (o.getOperationType() == JValueObject.ADD)
-		    {
-		      returnValue = field.addElement(invid);
-		    }
-		  else if (o.getOperationType() == JValueObject.DELETE)
-		    {
-		      returnValue = field.deleteElement(invid);
-		    }
-		}
-	      catch (RemoteException rx)
-		{
-		  throw new RuntimeException("Could not change owner field: " + rx);
-		}
-	    }
-	}
-      else
-	{
-	  System.out.println("Where did this setValuePerformed come from?");
-	}
+  {
+    ReturnVal retVal;
+    boolean succeeded = false;
 
-      if (returnValue)
-	{
-	  fp.getgclient().somethingChanged = true;
-	}
+    /* -- */
 
-      return returnValue;
-    }
+    if (o.getSource() instanceof tStringSelector)
+      {
+	if (o.getOperationType() == JValueObject.ERROR)
+	  {
+	    fp.getgclient().setStatus((String)o.getValue());
+	  }
+	else if (o.getValue() instanceof Invid)
+	  {
+	    Invid invid = (Invid)o.getValue();
+	    int index = o.getIndex();
 
+	    try
+	      {
+		if (o.getOperationType() == JValueObject.ADD)
+		  {
+		    retVal = field.addElement(invid);
+
+		    succeeded = (retVal == null) ? true : retVal.didSucceed();
+
+		    if (retVal != null)
+		      {
+			gc.handleReturnVal(retVal);
+		      }
+		  }
+		else if (o.getOperationType() == JValueObject.DELETE)
+		  {
+		    retVal = field.deleteElement(invid);
+
+		    succeeded = (retVal == null) ? true : retVal.didSucceed();
+
+		    if (retVal != null)
+		      {
+			gc.handleReturnVal(retVal);
+		      }
+		  }
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not change owner field: " + rx);
+	      }
+	  }
+      }
+    else
+      {
+	System.out.println("Where did this setValuePerformed come from?");
+      }
+    
+    if (succeeded)
+      {
+	fp.getgclient().somethingChanged = true;
+      }
+    
+    return succeeded;
+  }
 }

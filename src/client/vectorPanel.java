@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.25 $ %D%
+  Version: $Revision: 1.26 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -101,6 +101,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   containerPanel
     container;
 
+  gclient
+    gc;
+
   JPopupMenu
     popupMenu;
 
@@ -132,6 +135,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     this.isEditInPlace = isEditInPlace;
     this.wp = parent;
     this.container = container;
+    
+    gc = container.gc;
 
     centerPanel = new JPanel(false);
 
@@ -147,7 +152,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	throw new RuntimeException("Cannot get field type: " + rx);
       }
-
     
     setLayout(new BorderLayout());
 
@@ -201,7 +205,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   private void showPopupMenu(int x, int y)
   {
     popupMenu.show(this, x, y);
-
   }
 
   private void createVectorComponents()
@@ -259,6 +262,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 
 		int size = invidfield.size();
+
 		for (int i=0; i < size ; i++)
 		  {
 		    if (debug)
@@ -301,28 +305,30 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     //try
     //{
 	//if (editable && my_field.isEditable())
-	if (editable)
+
+    if (editable)
+      {
+	if (debug)
 	  {
-	    if (debug)
-	      {
-		System.out.println("Adding add button");
-	      }
-
-	    JPanel addPanel = new JPanel();
-	    addPanel.setLayout(new BorderLayout());
-	    addB.addActionListener(this);
-
-	    addPanel.add("East", addB);
-
-	    add("South", addPanel);
+	    System.out.println("Adding add button");
 	  }
-	else
+
+	JPanel addPanel = new JPanel();
+	addPanel.setLayout(new BorderLayout());
+	addB.addActionListener(this);
+
+	addPanel.add("East", addB);
+
+	add("South", addPanel);
+      }
+    else
+      {
+	if (debug)
 	  {
-	    if (debug)
-	      {
-		System.out.println("Field is not editable, no button added");
-	      }
+	    System.out.println("Field is not editable, no button added");
 	  }
+      }
+
 	//   }
 	//catch (RemoteException rx)
 	// {
@@ -333,6 +339,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   public void addNewElement()
   {
     int size = -1;
+
+    /* -- */
 
     try
       {
@@ -353,7 +361,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    System.out.println("Adding new element");
 	  }
-
+	
 	if (isEditInPlace)
 	  {
 	    if (debug)
@@ -545,18 +553,24 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   public void expandLevels(boolean recursive)
   {
     Enumeration wrappers = ewHash.keys();
+
+    /* -- */
+
     while (wrappers.hasMoreElements())
       {
 	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
 	ew.expand(true);
+
 	if (recursive)
 	  {
 	    System.out.println("Recursing...");
 	    Component comp = ew.getComponent();
+
 	    if (comp instanceof containerPanel)
 	      {
 		System.out.println("Aye, it's a containerPanel");
 		containerPanel cp = (containerPanel)comp;
+
 		for (int i = 0; i < cp.vectorPanelList.size(); i++)
 		  {
 		    ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
@@ -573,13 +587,16 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   public void closeLevels(boolean recursive)
   {
     Enumeration wrappers = ewHash.keys();
+
     while (wrappers.hasMoreElements())
       {
 	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
 	ew.expand(false);
+
 	if (recursive)
 	  {
 	    Component comp = ew.getComponent();
+
 	    if (comp instanceof vectorPanel)
 	      {
 		((vectorPanel)comp).closeLevels(true);
@@ -598,6 +615,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     else if (e.getSource() instanceof JMenuItem)
       {
 	System.out.println("JMenuItem: " + e.getActionCommand());
+
 	if (e.getActionCommand().equals("Expand all elements"))
 	  {
 	    expandLevels(true);
@@ -695,12 +713,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   public void mousePressed(java.awt.event.MouseEvent e) 
-    {
-      if (e.isPopupTrigger())
-	{
-	  showPopupMenu(e.getX(), e.getY());
-	}
-    }
+  {
+    if (e.isPopupTrigger())
+      {
+	showPopupMenu(e.getX(), e.getY());
+      }
+  }
+
   public void mouseClicked(MouseEvent e) {}
   public void mouseReleased(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {}
@@ -712,11 +731,25 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public boolean changeElement(Object obj, short index) throws RemoteException
   {
+    ReturnVal retVal;
+    boolean succeeded;
+    
+    /* -- */
+
     if (index >= my_field.size())
       {
 	System.out.println("Adding new element");
 
-	if (my_field.addElement(obj))
+	retVal = my_field.addElement(obj);
+
+	succeeded = (retVal == null) ? true : retVal.didSucceed();
+
+	if (retVal != null)
+	  {
+	    gc.handleReturnVal(retVal);
+	  }
+
+	if (succeeded)
 	  {
 	    System.out.println("Add Element returned true");
 	    System.out.println("There are now " + my_field.size() + " elements in the field");
@@ -733,7 +766,16 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	System.out.println("Changing element " + index);
 
-	if (my_field.setElement(index, obj))
+	retVal = my_field.setElement(index, obj);
+
+	succeeded = (retVal == null) ? true : retVal.didSucceed();
+
+	if (retVal != null)
+	  {
+	    gc.handleReturnVal(retVal);
+	  }
+
+	if (succeeded)
 	  {
 	    System.out.println("set Element returned true");
 	    return true;

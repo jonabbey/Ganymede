@@ -120,11 +120,18 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 	else
 	  {
 	    listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
-	    listHandles.addItem(lh);
+	    listHandles.addElement(lh);
 	  }
       }
-      
-    listHandles = client.sortListHandleVector(listHandles);
+
+    //
+    //
+    // We do need to sort the list handles, but gclient doesn't have this method
+    //
+    //
+
+    //	listHandles = client.sortListHandleVector(listHandles);
+
     for (int i = 0; i < listHandles.size(); i++)
       {
 	type.addItem(listHandles.elementAt(i));

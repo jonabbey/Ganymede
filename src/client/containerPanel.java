@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.40 $ %D%
+    Version: $Revision: 1.41 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -749,6 +749,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (command.equals("Edit object"))
 	  {
 	    System.out.println("Edit object: " + v.getValue());
+
 	    if (v.getValue() instanceof listHandle)
 	      {
 		Invid invid = (Invid)((listHandle)v.getValue()).getObject();
@@ -761,14 +762,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		Invid invid = (Invid)v.getValue();
 		    
 		gc.viewObject(invid);
-		
 	      }
-	    returnValue = true;
+
+	    returnValue = null;
 	  }
 	else if (command.equals("View object"))
 	  {
-
 	    System.out.println("View object: " + v.getValue());
+
 	    if (v.getValue() instanceof Invid)
 	      {
 		try
@@ -782,6 +783,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    throw new RuntimeException("Could not view object: " + rx);
 		  }
 	      }
+
 	    returnValue = null;
 	  }
 	else
@@ -801,7 +803,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	gc.somethingChanged = true;
 	return true;
       }
-    else if (returnValue.didSucceed())
+
+    gc.handleReturnVal(returnValue);
+
+    if (returnValue.didSucceed())
       {
 	if (returnValue.doRescan())
 	  {

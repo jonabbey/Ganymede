@@ -26,6 +26,9 @@ public class personaPanel extends JPanel implements ActionListener{
   framePanel
     fp;
 
+  gclient
+    gc;
+
   invid_field
     field;
 
@@ -52,11 +55,15 @@ public class personaPanel extends JPanel implements ActionListener{
   EmptyBorder
     empty = new EmptyBorder(new Insets(7,7,7,7));
 
+  /* -- */
+
   public personaPanel(invid_field field, boolean editable, framePanel fp) 
   {
     this.field = field;
     this.editable = editable;
     this.fp = fp;
+
+    gc = fp.wp.gc;
 
     setLayout(new BorderLayout());
 
@@ -86,7 +93,6 @@ public class personaPanel extends JPanel implements ActionListener{
 
     add("Center", middleP);
 
-
     try
       {
 	personas = field.getValues();
@@ -109,6 +115,7 @@ public class personaPanel extends JPanel implements ActionListener{
       }
 
     // Show the first one(will just be a progress bar for now)
+
     if (total > 0)
       {
 	middle.setSelectedIndex(0);
@@ -117,6 +124,10 @@ public class personaPanel extends JPanel implements ActionListener{
 
   public void actionPerformed(ActionEvent e)
   {
+    ReturnVal retVal;
+
+    /* -- */
+
     if (debug)
       {
 	System.out.println(e.getActionCommand());
@@ -160,7 +171,14 @@ public class personaPanel extends JPanel implements ActionListener{
 	  {
 	    Invid user = fp.getObjectInvid();
 
-	    removed = fp.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
+	    retVal = fp.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
+
+	    removed = (retVal == null) ? true : retVal.didSucceed();
+
+	    if (retVal != null)
+	      {
+		gc.handleReturnVal(retVal);
+	      }
 
 	    if (removed)
 	      {
@@ -169,7 +187,14 @@ public class personaPanel extends JPanel implements ActionListener{
 		    System.out.println("removed the element from the field ok");
 		  }
 
-		deleted = fp.getgclient().getSession().remove_db_object(invid);
+		retVal = fp.getgclient().getSession().remove_db_object(invid);
+
+		deleted = (retVal == null) ? true : retVal.didSucceed();
+		
+		if (retVal != null)
+		  {
+		    gc.handleReturnVal(retVal);
+		  }
 	      }
 	    else
 	      {
@@ -208,11 +233,15 @@ public class personaPanel extends JPanel implements ActionListener{
 		System.out.println("Could not fully remove the object.");
 	      }
 	  }
-
       }
   }
-
 } 
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                personaContainer
+
+------------------------------------------------------------------------------*/
 
 class personaContainer extends JScrollPane implements Runnable{
 
@@ -225,6 +254,9 @@ class personaContainer extends JScrollPane implements Runnable{
 
   personaPanel
     pp;
+
+  gclient
+    gc;
 
   boolean
     createNew,
@@ -251,6 +283,7 @@ class personaContainer extends JScrollPane implements Runnable{
     this.invid = invid;
     this.index = index;
     this.pp = pp;
+    gc = pp.gc;
     this.editable = editable;
     this.createNew = createNew;
 
@@ -273,12 +306,12 @@ class personaContainer extends JScrollPane implements Runnable{
 	if (createNew)
 	  {
 	    // Make sure the default owner is chosen
-
+	    
 	    if (!pp.fp.getgclient().defaultOwnerChosen())
 	      {
 		pp.fp.getgclient().chooseDefaultOwner(false);
 	      }
-
+	    
 	    // First set up the back linking
 	    db_object newObject = pp.fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
 	    Invid user = pp.fp.getObjectInvid();
