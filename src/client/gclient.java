@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.76 $ %D%
+   Version: $Revision: 1.77 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1210,6 +1210,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	Hashtable rescan = retVal.getObjResultSet();
 	if (rescan != null)
 	  {
+	    if (debug)
+	      {
+		System.out.println("Rescanning " + rescan.size() + " objects.");
+	      }
+
 	    Enumeration keys = rescan.keys();
 
 	    //
@@ -1723,23 +1728,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 					       
 					      handle);
 	    
-	    invidNodeHash.put(invid, objNode);
-	    if (createdObjectsWithoutNodes.containsKey(invid))
+	    if (invid != null)
 	      {
-		if (debug)
+		invidNodeHash.put(invid, objNode);
+		if (createdObjectsWithoutNodes.containsKey(invid))
 		  {
-		    System.out.println("Found this object in the creating objectsWithoutNodes hash: " + handle.getLabel());
+		    if (debug)
+		      {
+			System.out.println("Found this object in the creating objectsWithoutNodes hash: " + handle.getLabel());
+		      }
+		    
+		    
+		    createHash.put(invid, new CacheInfo(node.getTypeID(),
+							(handle.getLabel() == null) ? "New Object" : handle.getLabel(),
+							null, handle));
+		    createdObjectsWithoutNodes.remove(invid);
 		  }
-
-
-		createHash.put(invid, new CacheInfo(node.getTypeID(),
-							     (handle.getLabel() == null) ? "New Object" : handle.getLabel(),
-							     null, handle));
-		createdObjectsWithoutNodes.remove(invid);
+		
+		setIconForNode(invid);
 	      }
 
-	    setIconForNode(invid);
-	   
 	    tree.insertNode(objNode, false);
 
 	    oldNode = objNode;
