@@ -126,7 +126,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.JDialog.StringDialog");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.StringDialog");
 
   // --
 
