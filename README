@@ -1,0 +1,104 @@
+Ganymede Developer Release 6a
+December 4, 1998
+README
+---------------------------------------------
+
+Greetings.  This package comprises a developer's pre-release of the
+Java-based directory management software we at the Computer Science
+Division of ARL:UT have been developing for the past 3 years.  It is
+intended to allow interested parties to view the work we have done to
+date, to experiment with using the system, and possibly to try their
+hand at doing customization.
+
+This includes just about all the components necessary to have a
+working NIS/DNS management system in the fashion of GASH.  Bear in
+mind that as noted in the COPYRIGHT file, neither ARL:UT nor the
+University Of Texas at Austin is obligated to provide support for this
+code, nor are there any guarantees as to performance or behavior.
+
+This release includes:
+
+  The Ganymede server, an extendable database and application server
+  that supports custom plug-ins for object types held in the database
+  and for tasks that can be run in the server to do directory
+  propagation to NIS, DNS, and the like.
+
+  A full-featured Ganymede client, providing a convenient
+  Explorer-like interface to all operations supported by the server.
+
+  A full-featured Administration Console, which can be used to monitor
+  the server's operations, and to modify the design of the database
+  held in the server.
+
+  Sample database configurations, including both the database
+  definition file and custom plug-in classes to match.
+
+  Comprehensive documentation on all classes and methods comprising
+  the server and the primary client.
+
+  Source code for all custom classes, and for an example password
+  client that can talk directly to the Ganymede server.
+
+  Source code for the core module of any Ganymede client.
+
+  Templates for running the admin console and primary client off of
+  a Java-enabled web browser.
+
+  A Java program to load data from NIS maps and/or GASH files into
+  the Ganymede server.
+
+  Build scripts that can take NIS and DNS information from the
+  Ganymede server and propagate the information into NIS maps or
+  DNS tables when the GASH schema is used.
+
+This release does not include:
+
+  Source code for the Ganymede server, the Admin console, or the
+  primary client.  We have not yet made a determination as to
+  what the official release status of the system will be, and as
+  such we are not releasing the source code at this time.  We are
+  including all source code that should be necessary to use and
+  customize the system.
+
+Things you will need:
+
+  A JDK 1.1.5 or better compliant JVM to run the server, client, and
+  admin console.  We recommend using Sun's JDK 1.1.7 on UNIX, and
+  JDK 1.2 on Windows.  JDK 1.2 will work on UNIX as well, but the
+  versions of JDK 1.2 on UNIX thus far only seem to support 8 and
+  24 bit color displays.
+
+  Swing 1.1 beta 3 (or later) from Sun. You can download this
+  from http://java.sun.com/products/jfc/index.html.  Earlier versions
+  of Swing will NOT work, as Ganymede is now built to use the javax
+  version of the Swing libraries.  Probably the best thing to do
+  is to install the latest JDK 1.2 package, which includes an
+  up-to-date Swing.  Most of the client testing on dev5c has been
+  performed with the 1.2 Release Candidate 1 JRE.
+
+  Perl 5 to run the install scripts.
+
+  Note that the HTML for the Ganymede client and admin pages have not
+  yet been updated to prompt the user to go to a 1.2 specific plug-in
+  page. Users without any version of the Java plugin installed may or
+  may not be directed to the right page for downloading.
+
+  The place to go to see about Sun's java plug-in is
+  http://java.sun.com/products/plugin/.
+  
+--
+
+As mentioned above, ARL:UT has not made a final determination of the
+ultimate disposition of this system.  Please read and observe the
+COPYRIGHT notice, which grants you permission to use, modify, and copy
+this software for internal use only.  Please do not redistribute this
+code, nor distribute modifications to this code.
+
+We are intensely interested in any feedback from you folks, and we are
+committed to making this software the best we can make it.  Please
+send comments to the mailing list at ganymede@arlut.utexas.edu.
+
+Thanks,
+
+  Jonathan Abbey - Ganymede Guy
+  jonabbey@arlut.utexas.edu

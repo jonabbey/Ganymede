@@ -1,0 +1,1989 @@
+Ganymede Developer Release 6b
+January ??, 1999
+CHANGES
+---------------------------------------------
+
+-------------------- Changes from dev6a to dev6b -------------------
+
+RELEASE DATE: January ??, 1999
+
+1. [CLIENT] QueryBox improvements
+
+The client was broken when it came to submitting requests for a
+membership test on vector fields.  This caused the server to always
+return empty results when querying on invid vector fields.
+
+Also, the querybox now just prompts for the label of an invid to match
+against, rather than forcing the user to scroll through a (possibly
+huge) list of possibilities.  The user can actually use any string
+comparator on simple scalar invid fields.
+
+Regular expressions can be used on vector string and invid fields
+using the 'Contain Matching' operator.
+
+The list of available object types and fields to search on is
+now sorted.
+
+2. [SCHEMA] Fixed gasharl schema to expand group ownership privileges
+
+The gasharl schema now allows an administrator who has privilege to
+edit a group to place any user in that group, even if the
+administrator would not normally be able to edit those users.
+
+3. [CLIENT] Icons shuffled
+
+The tree no longer uses the icons from the toolbar.
+
+4. [CLIENT] Permissions editor now uses a hybrid table/tree GUI.
+
+Brian O'Mara has made the permissions editor much spiffier, by using a
+hybrid table/tree Swing GUI component.
+
+-------------------- Changes from dev6 to dev6a -------------------
+
+RELEASE DATE: December 4, 1998
+
+1. [CLIENT] Fixed another long-standing table rendering bug
+
+The table code had an obscure bug that would cause the vertical lines
+to be misdrawn if the table's vertical height got too big, either
+through having a lot of rows, or by having a lot of word-wrapping.
+
+2. [CLIENT] Fixed tooltips on vector panel element wrappers
+
+The 'expand this element' and 'close this element' tooltips were
+reversed after an element was first opened.
+
+3. [CLIENT] Made the QueryBox pop down calendars
+
+Basically took care of the problem handled in change dev6.10 in the
+query dialog.
+
+4. [SERVER] A number of fixes relating to schema editing
+
+There was an opportunity for field ordering changes to not be kept..
+it turned out to be a bug with wider implications, so a fair bit of
+code was changed to make things work better.  Turned off some
+debugging which should make schema editing go faster.
+
+5. [SERVER] Changed the permissions inheritance system
+
+Previously, the default role's Objects Owned permissions bits were
+inherited into all other roles.  This is inappropriate, as it might
+be desirable to have an admin who has less power over a broad set
+of objects owned by a linked object group than end-users have over
+themselves and other implicitly owned objects.
+
+That is, for all admin personae other than supergash, permission to
+mess with object types and fields in objects owned must be explicitly
+granted by a non-default role.  Default privileges over non-owned
+objects are still enjoyed by all, and end-users still get the
+'default' objects owned privilege over their implicitly owned objects.
+
+6. [CLIENT, ADMIN CONSOLE] Replaced Homer and Krusty with custom icons
+
+Brian O'Mara has done some really nice work on the icons for Ok,
+Error, and Question in the client and admin console.
+
+7. [CLIENT] GUI Calendar fixes
+
+Previously, the GUI Calendar object used in the client was not able to
+handle a non-set date.  In addition, the calendar did not properly
+reset itself if the user hit a date button that was rejected by the
+server.  These have been fixed, and the client's datePanel class now
+directly clears the calendar rather than displaying a 'This date will
+be cleared when the transaction is committed' message.
+
+8. [SCHEMA] gasharl schema user expiration limitation implemented
+
+The gasharl schema will now properly restrict changes to a user's
+expiration date in keeping with the limits set in the user's category.
+User's with mandatory expiration dates will not be able to be cleared,
+nor set too far in the future, relative to the current date.
+
+9. [ADMIN CONSOLE] Revised console applet to simplify login
+
+You can now hit return in the password field of the admin console
+applet to log in.
+
+10. [CLIENT] Changed code for text fields
+
+We now use a custom DocumentModel to filter keystrokes in the client's
+text fields, which is more reliable, works properly in JDK 1.2rc2, and
+will properly handle cut and paste text entry.
+
+11. [CLIENT] Rewrote permissions editor
+
+The permissions editor is now based on the Swing JTable class,
+providing better performance.  The code is much cleaner now.
+
+-------------------- Changes from dev5c to dev6 -------------------
+
+RELEASE DATE: November 9, 1998
+
+1. [CLIENT] Replaced the 'click' menu on the scalar invid chooser fields
+
+Replace the confusing 'click' menu with a pair of buttons to view and/or
+create a remote target for a scalar invid field.
+
+2. [CLIENT] Modified the status label handling
+
+The status bar at the bottom of the client will now be automatically
+cleared after 5 seconds by default, to make the status label less
+confusing.
+
+3. [CLIENT] GUI Tweaks
+
+Some new icons, tweaks to dialogs, fixes to a few graphical glitches.
+
+4. [CLIENT] A few major fixes to table code
+
+The table code had a horrendous bug that made the table rendering
+routine take forever with large datasets.  All table operations on
+large tables should be very much faster now.
+
+A number of memory and speed optimizations were made along with the
+bug fix, probably of minor impact, but maybe not.
+
+Fixed a couple of edge-case rendering problems in both the table and
+the tree that could screw things up if the vertical or horizontal
+scrollbar was set to max and then the table/tree was grown to a larger
+size, but not large enough to get rid of the scrollbars.
+
+5. [CLIENT] Fixed date bug in QueryBox
+
+The JdateField and JpopUpCalendar classes had a problem such that
+if the JdateField had no callback set, the JpopUpCalendar would
+always complain that the date entered was unacceptable, which broke
+things in the QueryBox.
+
+6. [SERVER/CLIENT] Made the DumpResult class more memory efficient
+
+In what is probably at best a fairly minor aid to garbage collection
+on the server, the DumpResult class used to pass tabular query results
+from the server to the client has gained the ability to self-dissolve,
+making GC go quicker if things get tight while handling a query.
+
+7. [CLIENT] Fixed re-entrancy problem with JstringField, JnumberField
+
+The GUI fields used in the client's object editing windows had a
+problem wherein they could trigger a callback to the server several
+times for a single change, if the focus is taken back and forth from
+the GUI field whose changed triggered the callback.  This was a
+particular problem with changes to fields that triggered wizards,
+because the focus transition between the wizard dialog and the main
+client window could cause the callback to be re-issued repeatedly.
+
+The focus/callback handling code in JstringField and JnumberField have
+been made safe for re-entrancy.
+
+8. [SERVER] Fixed admin persona rename on user rename
+
+Fixed a bug in the adminPersonaCustom class so that the label for
+adminPersona objects are properly refreshed when the attached user
+is renamed.
+
+9. [SERVER/CLIENT] Added regexp capability to the server's query engine
+
+The dev6 server takes advantage of the gnu.regexp package to provide
+regexp based string match capability in the server's query engine.
+
+10. [CLIENT] Cleaned up auxiliary windows on frame close in client
+
+The client now closes any date field calendar windows when the
+containerPanel held in a object editing window is closed.
+
+11. [SCHEMA EDITOR] Made some dialogs more descriptive
+
+For instance, when you go to delete a field in the schema editor,
+the confirmation dialog mentions what field it thinks you are trying
+to delete.
+
+12. [INSTALL SCRIPTS] Added installClient2.perl for installing the client under 1.2
+
+The installClient2.perl script is provided to install the client on
+systems using the 1.2 JDK, which includes the Swing GUI library
+required for the operation of the Ganymede client and admin console.
+
+-------------------- Changes from dev5b to dev5c -------------------
+
+RELEASE DATE: November 2, 1998
+
+1. [SERVER] Fixed bug in GanymedeWarningTask
+
+The GanymedeWarningTask class had a bug such that when it went to
+report on an object's incipient removal, it would throw a
+NullPointerException.  The task scheduler did properly clean up after
+itself, but no warnings about incipient removal were sent.  Fixed.
+
+2. [CLIENT] Fixed buttons embedded object wrapper
+
+Previously, the buttons on the blue embedded object wrapper did this
+ugly flashing thing when you clicked on them.  No more.  Brian O'Mara
+did nice pressed/not-pressed versions of the expand/contract icon, and
+figured out how to make them not be surrounded by the brown yuck.
+
+3. [CLIENT] Set menu hot keys for all the menus
+
+Some of the menus in the client had no hot-keys associated with them.
+I set hot keys for most of the menus.. the version of Swing in
+JDK 1.2 RC 1 has a bug that makes it impossible to give an item in
+a menu the same hotkey as the menu itself has, so I didn't set menu
+items where it would naturally lead to a conflict.
+
+4. [CLIENT] Improved open/close box handling in tree, rendering
+
+Previously, the tree open/close boxes were handled by the tree when it
+received the mouseClicked() signal.  Now the boxes are handled on the
+mousePressed() signal, which happens faster.  It seems that the
+mouseClicked() and mousePressed() handling were confusing each other
+occasionally before.
+
+Also, the tree would only render rows that it could fully display,
+leaving a bit of empty space at the bottom of the tree, depending
+on where the scrollbar was with respect to the division point between
+rows in the tree.  This has been fixed.
+
+5. [CLIENT] Reinstated applet.destroy(), made the client respond to disconnect
+
+Change dev5b.8 turned out not to be practical with the JDK 1.2
+plug-in, as it will halt the plug-in if the browser leaves the
+applet's page, regardless of whether the destroy() method does
+anything or not.  So, I reinstated the destroy() clean-up method to
+help insure a clean logout.  This is unfortunate for users with the
+1.1 plug-in, but the 1.2 behavior is quite arguably correct, so
+we'll just request users running Ganymede in a browser not to leave
+the page while they're running it.  At least now they'll get very
+clear feedback when they do.
+
+Made the client able to respond properly to disconnect commands from the
+server, even when running as an applet.  This change makes the disconnect
+works properly under the Java 1.2 security model.
+
+6. [CLIENT] Intercepted client's main window closing
+
+Now, when you click on the window manager (or Windows') close box to
+shut down the main client window, it will handle that in the same way
+that it handles the logout menu item.
+
+7. [CLIENT] Fixed title for created object panels
+
+This is just a tweak to the dev5b.3 change.
+
+8. [CLIENT] Made the persona combo not show up if the user has no personae
+
+The persona selector combo box will no longer appear if a user logs
+into the Ganymede client who has no admin personae attached to his
+user account.
+
+9. [CLIENT] Made the cancel button close all windows in the client
+
+Before, clicking on cancel would close just the editing windows in the
+client.  This could be potentially misleading to the user, as view
+object windows can be left displaying the status of things as they
+were during the transaction which was since aborted.  The commit
+button will continue to leave up the non-editable windows.
+
+-------------------- Changes from dev5a to dev5b -------------------
+
+RELEASE DATE: October 28, 1998
+
+1. [SCHEMAS] gasharl schema fixes
+
+The gasharl schema included in dev5a did not properly have the custom code
+to manage the user category object specified.
+
+The system object's fieldRequired() logic did not check the associated
+system type to see if the associated user field was required.
+
+Both fixed.
+
+2. [SERVER] Took out limit variable from GanymedeServer
+
+The arlut.csd.GanymedeServer class had a 'limit' parameter in its
+constructor, ostensibly for allocating space for a specific maximum
+number of concurrent clients.  In fact, this parameter didn't actually
+do anything and so it was removed.
+
+3. [CLIENT] Titlebars in all windows now include type of object
+
+There were a number of cases in which object panels would pop up
+without any indication of what type of object was being displayed or
+edited.  This has been fixed.
+
+4. [SERVER] Fixed permissions checking for object viewing
+
+In dev5a and before, the server could throw an
+IllegalArgumentException if the user tried to view an object that
+contained fields that the user did not have permission to see.  This
+has been fixed.  The server will now just omit those fields from the
+FieldInfoVector passed back to the client.
+
+5. [CLIENT] Added ARL logo
+
+I spent some time playing with gimp, to fancy up the login window,
+and to let people know where ganymede came from.
+
+6. [SERVER/CLIENT] Optimized memory usage for query handling
+
+In dev5a and before, the client can take an enormous amount of
+memory in processing a set of query results from the server, as
+a result of inefficient memory usage in java.lang.StringBuffer().
+
+The code used by the client to process query results now uses a
+modified StringBuffer() designed to be far more memory efficient,
+so the client should be able to handle much larger queries.  Truly
+large result sets may still be a pain to handle in the table, speed-wise,
+but the client shouldn't just crap out trying to digest the results
+from the server.
+
+In addition, the client now traps any errors in query processing and
+will clean up the 'guy at work' window if the query fails for some
+reason.
+
+7. [SERVER/SCHEMAS] Fixed embedded object creation logic, pulled it into DBEditObject
+
+Previously, the gash and gasharl schemas included code in the
+userCustom and systemCustom objects to handle creating embedded
+objects.  That code was broken, as it did not go through the normal
+permissions checking to see if the user had permission to create the
+object.  Now, in order to create an embedded object of a given type,
+the user must be granted privilege to create that kind of object.
+Having editing authority over the embedding field is no longer
+adequate.  This change makes it possible to grant permission to edit
+or delete entries in an embedding field without necessarily granting
+privilege to create new entries in the field.
+
+In addition, the code to do the creation of embedded objects was
+essentially the same in the gash and gasharl userCustom and
+systemCustom classes, so I pulled the code up into
+DBEditObject.createNewEmbeddedObject().  Customizers can still
+override createNewEmbeddedObject() in their custom DBEditObject
+subclasses, but the normally expected behavior will be handled by
+DBEditObject if they do not.
+
+8. [CLIENT] Made the client applet not log out when the browser leaves the page
+
+Previously, the client would log out as soon as the browser that it
+was running in left the applet page, even though the client's other
+windows were left up.  Now the client won't disconnect from the server
+until forced to by the browser closing.  This was done by having the
+glogin applet ignore both the stop() and destroy() methods in JApplet.
+This probably wouldn't be the right thing to do if the client were run
+directly out of a browser, but when using the Java plug-in, this lets
+us keep going until the browser is shut down.  The server is able to
+automatically disconnect clients that go inactive, so it isn't
+strictly necessary that the client do a clean logout.
+
+9. [CLIENT] Fixed the StringDialog class
+
+The dialog used for entering a persona password when changing personas
+was some broken, in that if you entered your password and hit return
+it would fail, and in that on Windows, the dialog would come up with a
+big scrollbar across the dialog.  Both of these have been fixed.
+
+This change will also make it possible to hit enter in the last field
+in a wizard to progress to the next.
+
+One possible detriment to this change is that the main dialog class
+used in the Ganymede client no longer includes a ScrollPane.. this
+means that if a wizard dialog is given too much stuff, the dialog
+might not be able to fit on the user's screen.. but no wizard dialog
+should have that much stuff anyway.
+
+Also made it so that if the StringDialog window is closed without
+cancel being hit, the dialog treats that as a cancel request.
+
+10. [SERVER] Fixed embedded object query handling
+
+In dev5a and prior, the server would not return proper results if a
+equality test query was made on an namespace-managed field in an
+embedded object.  This caused corrupted results if you tried to
+search for a system by IP address in the gash and gasharl schemas.
+
+-------------------- Changes from dev5 to dev5a -------------------
+
+RELEASE DATE: October 19, 1998
+
+1. [SERVER/CLIENT] Added support for date, multiline text fields in dialogs
+
+The dialog system used to pass wizards from the server to the client
+has been radically simplified, and now depends on the Java
+serialization system rather than its own serialization /
+de-serialization code.
+
+The server can now pass multiline text fields and date fields to the
+client for use in wizards.
+
+The GUI calendar/date field class has been reworked a bit so that
+the system is more robust when dates outside of the defined range
+are entered.
+
+2. [SERVER] Reworked database field handling
+
+Made the server more robust in the face of changes made with the
+schema editor.  Converting fields in use between vector and scalar
+will no longer cause the schema/db dump to fail, but changing a
+field between scalar and vector will cause any instances of that
+field loaded in the database to be dropped.
+
+All of the DBField subclasses now use explicit isDefined() and
+setUndefined() methods to handle tracking whether a field is
+defined or not, rather than using a defined flag.  This makes
+things much more flexible and robust, as the isDefined() method
+can check things out at any time and report on the status of the
+field, rather than having to try to properly update the defined
+flag everytime anything could possibly affect it.  Like changes
+to the schema, say.
+
+3. [SERVER] Made DBEditObject.{getSession(), getGSession(), getOriginal()} public
+
+This change allows custom wizard code to have more access to the
+Ganymede server for examining state and making changes, etc.
+
+4. [SERVER] Fixed GanymedeWarningTask
+
+The Ganymede warning task had an error in it that caused it to throw a
+NullPointerException when it came time to warn about an impending
+object removal.
+
+5. [SERVER] Added support for generic transactional mailouts
+
+I added support in the Ganymede transaction class (DBEditSet) for
+doing generic mailings associated with a transaction, using the
+logMail() methods.  Some changes made to DBLog and DBLogEvent to go
+along with it.
+
+This code isn't the cleanest, as the existing event handling code has
+been adapted for handling generic mailouts rather than reworking the
+logic to use different kinds of events with a base class and
+subclasses, but will have to do for now.
+
+6. [CLIENT] Substantially simplified, reworked icon tracking for nodes in tree
+
+Previously, the client maintained an extensive set of hashes to try to
+synchronize changes to objects made by the client to the graphical
+representation of nodes in the tree.  This has been changed.  Now the
+client just asks the server for the status of objects after a transaction
+has been committed, rather than trying to track the changes by guesswork.
+
+The point of these changes is to make the client much more robust in its
+synchronization with the server, and to make it easier to maintain.
+
+The cost is that whenever an object is manually inactivated or
+reactivated, the client will do a round-trip to the server to verify
+and update the status of the object, and whenever a transaction is
+committed, the client will spend time checking the status of all the
+objects touched by the transaction.
+
+All of this was due to the need to have the client be able to
+react appropriately if server-side wizards set an expiration date
+on a user, etc.
+
+The client still uses a client-side cache to handle reverting the icon
+for deleted/created objects on transaction cancel.
+
+7. [SERVER] Added Session.queryInvids()
+
+This provides a high-speed, non-blocking path that the client can use
+to get a status update on a specific list of objects.  This is to
+support #6, above.
+
+8. [SCHEMAS] Fixed writeUserLine in builder task
+
+In the Linux and BSD schemas, the system would throw a null pointer
+exception when it went to build the passwd file if a user had
+a home phone number but no office phone number registered.
+
+9. [SERVER] Fixed InvidDBField.unbindAll()
+
+The object binding logic erroneously assumed that all invid fields
+potentially targeting a backlinks field were vector fields.  This
+could lead to problems when deleting objects with a non-empty
+backlinks field.
+
+10. [SCHEMA] Added 'gasharl' schema
+
+This is a variant of the gash schema that includes support for some
+of the extended user_info fields we use here at the lab, including
+user categories, user expiration dates, and social security number
+handling.
+
+-------------------- Changes from dev4f to dev5 -------------------
+
+RELEASE DATE: October 8, 1998
+
+1. [SERVER/SCHEMA EDITOR] Enhanced the password field
+
+Password fields can now be configured in the schema editor to remember
+plain text passwords while the server is up.  That is, a password
+field can be configured such that when a password is entered into
+that password field and, in the case of the password field in the
+user account object, whenever a password is authenticated for
+Ganymede login, the field will remember the plaintext password in
+memory.
+
+This is intended to be used to support NT and UNIX integration.
+Currently, ARL is synchronizing our UNIX passwords to our NT primary
+domain controller by running a Perl script on NT via RSH.  The Perl
+script is fed a list of changes, including the passwords for the NT
+users.  Because NT can't use UNIX-crypt()'ed passwords, it is
+necessary to include the plaintext of any passwords that have changed.
+
+Since the beginning, the Ganymede server was able to handle passwords
+using either UNIX's crypt() password hashing function or plain text
+passwords.  Now, a password field can store both in memory (if both
+crypted and plain-text are selected for a password field in the schema
+editor), but plaintext passwords will never be saved to disk if the
+crypted option was also selected.  That is, Ganymede uses crypted
+passwords for its own authentication and unless it has NO OTHER
+CHOICE, it will only save the encrypted passwords to disk.  In addition,
+the Ganymede server provides no means for a client to get access to
+the plain text of a password stored in the server.  Only local code
+directly linked with the server (built tasks) can get access to the
+plain text of the passwords.
+
+The idea is that the NT primary domain controller is perfectly capable
+of remembering the NT-hashed passwords once set, and Ganymede need not
+risk security by keeping the plaintext passwords around on disk.
+
+By default, all Ganymede passwords are encrypted using the UNIX crypt
+function.  An adopter must explicitly configure a password field to
+have the server retain plaintext passwords in memory during execution.
+
+2. [EVERYTHING] Updated all code to work with JDK 1.1.7, Swing 1.1b3
+
+Swing 1.1 beta 3 has had all of the Swing classes moved from
+com.sun.java.swing to javax.swing.  For compatibility with the future
+releases of Swing (beta and otherwise), all of the Ganymede clients
+and admin console code has been moved over to the javax.* package
+naming.  This means that from this point on, the Ganymede client will
+require Swing 1.1 beta 3 or later.
+
+3. [CLIENT] Fixed invid/string vector selector so that pop-up menus work again
+
+At some point the right mouse button stopped selecting items in the
+Swing JList class.  This broke the popup menu in the client's
+string/invid selector.  The problem was that the lack of selection
+caused the right-mouse-button pop up menu to not be able to identify
+the item in the list that it needed to pass up to the containerPanel.
+
+4. [CLIENT] Fixed scalar invid chooser refresh
+
+The JInvidChooser GUI component's refresh logic, as changed in dev4f,
+wasn't taking into account the possibility that an invid field's
+choices() might not include the value currently set in the invid
+field.  This left the invid chooser blank after a change was made, as
+the server immediately requests a refresh of the field.
+
+5. [CLIENT] Tweaked the open object/create object dialogs
+
+The Swing libraries, up to and including Swing 1.1 beta 3, have some
+serious problems with pop-up menus in dialogs.  That is to say, Swing
+is currently incapable of displaying a pop-up menu that goes outside
+of the dialog.  In dev4f and before, we tried to encourage Swing to
+try to do this, with the result being that the pop-up menu just gets
+truncated in the dialog.  In dev5, we have modified our dialogs with
+pop-down menus so that they don't try to extend the menus past the
+bounds of the dialog.
+
+All of which is to say, we've made it look a _little_ bit better now,
+but we're going to have to remember to keep an eye on later Swing
+releases and try to make this a bit better when we can.
+
+6. [SERVER/CLIENT] Field choice listing improved
+
+Previously, the list of choices provided when one edited an invid
+field only listed the set of objects that could be directly edited,
+and did not take into account the DBEditObject anonymousLinkOK()
+method that can provide for an exception to the normal editability 
+determination.  Now, objects that can be linked by virtue of the
+remote object type's anonymousLinkOK() method will also be shown
+in the client's list of possible choices.
+
+The server and client have been elaborated a bit so that the client's
+results caching system won't be confused by this.
+
+7. [SERVER/SCHEMAS] Removed the 'throws RemoteException' from DBEditObject constructors
+
+Part of change dev4b.11 (the big optimization) was to make it so that
+the DBObject and DBField classes no longer subclassed from
+java.rmi.UnicastRemoteObject, which automatically exported them on
+creation.  Since this change, it has not been necessary to have the
+'throws RemoteException' any more.  Since the optimization has been
+working perfectly for over a month now, I've gone ahead and gone
+through the code and removed these vestigal code bits.
+
+I also removed the try..catch.. that was surrounding code in the
+server that was responsible for creating instances of DBEditObject,
+as well.
+
+The upshot of this is that you'll want to use the new custom jar
+file corresponding to whatever schema kit you've been testing with,
+and if you've written any custom DBEditObject subclasses, you'll
+want to go ahead and lop the 'throws RemoteException' off of your
+constructor definitions.
+
+The documentation for DBEditObject customization has been amended to
+reflect the dropping of the 'throws RemoteException' from the
+constructors.
+
+8. [SERVER] adminPersona custom code modified
+
+The plug-in for the admin persona object has been modified so that the
+user field is not presented for editing for the supergash and monitor
+personas.
+
+9. [SCHEMA] Fix-ups to the GASH schema
+
+The GASH schema was not correctly updated in dev4f.  The
+ganymede.schema file included with the GASH schema kit now has all of
+the fields required for the new admin persona schema.
+
+10. [PASSWORD] Brought the password client(s) up to date
+
+The password client has not been up-to-date with changes to the server
+over the last several releases.
+
+-------------------- Changes from dev4e to dev4f -------------------
+
+RELEASE DATE: September 28, 1998
+
+1. [SCHEMA EDITOR] Minor fixes
+
+Made it so you can't set a category's title to the empty string.  Made
+it so the category name string field will prevent entering a '/'
+character.
+
+2. [CLIENT] Client Fixes/Enhancements
+
+The client will now put up the same 'guy working' query progress
+window while the client is working on responding to a 'List editable'
+or 'List all' command in the tree, to emphasize that listing is using
+the same mechanisms as querying, and will result in the same kind of
+report window.
+
+3. [SERVER] Fixed Bug In Owner Group Handling
+
+Ugh.  The server code was accidentally messing with the list of owners
+in an owner group outside of the normal change process, creating an
+improper self-reference in owner group's owner list.  This basically
+put an invalid self-reference in a newly created owner group's owner
+list.
+
+4. [SERVER/CLIENT] Modified admin Persona object
+
+The admin persona object class now includes a hidden label field which
+it uses to maintain uniqueness among persona objects.  The server no
+longer requires you to enter <name:descrip> for an admin persona.
+Instead, you choose the user with a combo box and type in a brief
+description.
+
+The client once again allows personas to be created directly from
+the tree and/or toolbar.
+
+5. [CLIENT] Fixed JComboBox Update Logic, Rescan Logic
+
+Previously, if the client ever got it into its head that it needed to
+update the contents of a very large JComboBox, it would take a very
+long time.  As in, on the order of half an hour for a list of 800
+users.  It'll now happen pretty much instantaneously, as it ought.
+
+Removed a couple of redundant client updates that could happen on an
+invid chooser. This should speed up by a good margin operations that
+required the client to update fields.
+
+6. [SERVER/SCHEMAS] DBEditObject methods changed
+
+The finalizeSetValue(), finalizeSetElement(), finalizeAddElement(),
+and finalizeDeleteElement() methods in DBEditObject have been
+redefined.  Now, instead of returning a boolean indicating approval
+or disapproval of the operation, they return a ReturnVal.
+
+This allows the finalize*() methods to return error dialogs to the
+client, and to pass back rescan information from contingent operations
+that the finalize methods may perform (for cascading changes, etc.)
+
+All of the custom code included in the schemas distributed with dev4f
+have had their finalize methods changed to return the appropriate
+return type.
+
+-------------------- Changes from dev4d to dev4e -------------------
+
+RELEASE DATE: September 21, 1998
+
+1. [CLIENT] Tooltips Not Set If Blank
+
+In 4d and prior, the client would set tooltips on all field
+components, even if those components did not have comments registered.
+This left mysterious little blue boxes floating around the field.  Now,
+the client will only set tooltips if the comment for that field is
+actually defined.   Thanks to Matt Bush for pointing this out.
+
+2. [CLIENT] Toolbar added, persona menu moved, dialogs added.
+
+The client now has a nifty toolbar, both to facilitate users creating
+new objects intuitively, and to allow for easier single-button
+operation on Macs and the like.
+
+3. [CLIENT/SERVER] adminPersonae may no longer be created out of context
+
+Previously, it was possible to use the tree in the client to create
+new admin Persona objects.  This was an oversight.  Admin Persona
+objects should only be created in the context of a user, using the
+create button in the Personae panel, which takes care of linking
+the persona to the user, behind the scenes.
+
+4. [SCHEMA] Parser, script fixes for linux and bsd schemas
+
+Fixed up the sample builder scripts, and modified the parser for Users
+so that trailing commas in the gcos field won't break things.
+
+5. [CLIENT/SERVER] Added support for a message of the day, other messages
+
+We added the property ganymede.messageDirectory to the server.  This
+property is set by default to <installdir>/db/text.  Files placed in
+this directory can be retrieved by the client using Session.getMessage()
+and Session.getMessageHTML().  So far, the client only ever looks for
+motd.txt and/or motd.html in this directory.
+
+6. [CLIENT] Pruned Client's Category Tree Display
+
+The client will now omit category nodes in the server's category tree
+if the category has no siblings.  That is, the 'Categories' node will
+no longer show up in the client, and if the user is logged in without
+privileges to see the Admin Level Objects or Configuration categories,
+they will just see the user level object subtrees at the top level.
+
+-------------------- Changes from dev4c to dev4d -------------------
+
+RELEASE DATE: September 9, 1998
+
+1. [SCHEMA] Added Linux Schema, Revised BSD Schema
+
+We have added a simple Linux schema, which is designed for basically
+managing users and groups on a single system.  The user
+inactivation/reactivation logic from the GASH schema has been left
+out of the linux schema.  Unlike the BSD schema, the Linux schema
+does not currently support the use of shadow passwords.
+
+The linux and bsd schemas both have sample linux/bsd builder scripts
+that you can install.  We've tested the linux_builder.sample script on
+RedHat Linux 5.1, the bsd_builder.sample has not yet been tested.
+
+Using the linux schema with the linux_builder.sample script installed,
+we have got Ganymede actually creating real user accounts on RedHat
+5.1.
+
+2. [INSTALL] Made the installServer script smarter.
+
+The installServer.perl script will now refuse to continue if it
+couldn't find java where you told it to look.  installServer will now
+give you a brief, customized outline of what you need to do to get
+your schema up and running when it finishes installing everything.
+
+-------------------- Changes from dev4b to dev4c -------------------
+
+RELEASE DATE: September 2, 1998
+
+1. [SERVER] System Event Records Initialized On Database Bootstrap
+
+More work to get the database bootstrapping complete.  Now, if you
+run Ganymede without a database, in addition to everything else, it
+will create the system event objects in the database.
+
+2. [CLIENT] Tree Wasn't Handling Fonts Correctly
+
+The arlut.csd.JTree.treeControl GUI component we're using in the
+client and the schema editor was consulting the font specification
+passed in by the user of the tree in order to calculate the width
+of the tree, but it didn't actually bother setting that font to
+render with.  This made the tree width calculations not match the
+on-screen rendering, confusing things as to when scroll bars were
+supposed to appear.
+
+3. [CLIENT] Number Fields were broken
+
+In dev4b and dev4a, Number fields just didn't work.  This broke
+things in the Schema editor, mainly, since number fields don't
+tend to show up a lot in the schemas we've been working with,
+except for uid's/gid's, which are fixed.
+
+4. [CLIENT] Viewing Persona Panel With No Persona Fixed
+
+In dev4b, viewing (not editing) a user who had no persona attached
+would cause a NullPointerException to be thrown on the client.
+
+5. [ADMIN CONSOLE] Schema Editor GUI Changes
+
+The Schema Editor's layout has been improved a bit.
+
+6. [SERVER] Invid and String fields sort values for getValueString().
+
+Invid and String fields will now show up sorted when Doing queries or
+lists on the server.
+
+7. [CLIENT] Save File Dialog Expects Swing 1.1 beta 2 or better
+
+The query / object list table in the client gives the user the option
+of saving the table to disk in ASCII or HTML mode if the client is
+run as a command-line application rather than as an applet in a
+web browser.  When this option is chosen, the Ganymede client will
+bring up the Swing file chooser to select the filename and location
+to save to.  We've made the Ganymede client require the 1.1 beta 2
+version of Swing to do this function.  If you are running an older
+version of Swing, you won't be able to save files to disk from the
+Query Result table successfully.
+
+8. [CLIENT] Improvments to the table code
+
+The table now changes the cursor while you are dragging a pole.
+Improvements were made to the optimize column logic.
+
+9. [CLIENT] Query Box Can Be Used To List All Objects Of A Type
+
+The Query Box now has a 'view all objects' check box that you can
+use to get a full list of objects that you do/do not have editing
+authority over, without having to make up a selection criteria
+that all objects should match (User uid > 0, etc.).
+
+10. [DISTRIBUTION] base_classes included again
+
+In dev4b, schemas/base_classes was inadvertently omitted.  This
+pre-release includes the source to DBEditObject and GanymedeBuilderTask
+to help people interested in writing custom subclasses of these
+classes.
+
+-------------------- Changes from dev4a to dev4b -------------------
+
+RELEASE DATE: August 27, 1998
+
+1. [CLIENT] View-only StringSelectors are double width
+
+The StringSelector GUI components are now twice as wide as before 
+when they are not being edited.  That is, the single StringSelector
+panel will expand to take up the space that would have been given
+to the list of choices in an editing context.
+
+2. [SERVER] Owner Groups Now Own Themselves, Implicitly
+
+This change allows owner groups to be self-administering, so that
+group administrators (possibly with a special role) can edit the mail
+delivery options for object event notification for a group.  This
+change also prepares the way for group administrators with a special
+role to be able to create sub-groups, and to put their administrators
+in these subgroups.
+
+The permissions logic in GanymedeSession can now handle recursive
+ownership hierarchies.
+
+3. [SERVER] Roles can be created by non-supergash admins
+
+But the roles created cannot exceed the privileges granted to the
+admin that creates the role.
+
+4. [SERVER] Permission Bits Cleaning Implemented
+
+The permission bits system (used by PermissionMatrixDBField) is only
+loosely bound to the object/field definitions held in the schema.
+Previously, the permission matrix fields would not properly drop
+permission entries recorded for object or field definitions that had
+been removed by the schema editor.  Now, the database-writing code for
+the PermissionMatrixDBField will check all entries for validity, and
+omit those entries that no longer have any application to the revised
+schema. Permission entries that are redundant or pointless are
+filtered out as well.
+
+5. [SERVER] CategoryTransport fixed
+
+The CategoryTransport object passed from the server to the client was
+supposed to carry only entries for object bases that were editable by
+the end user, and the categories containing such objects.  In dev4a
+and prior, the CategoryTransport code that was supposed to make this
+determination did a Visibility test when choosing to include Category
+definitions and an Editability test when choosing to include Base
+definitions.  This made for a confusing set of results in the tree for
+non-supergash users/admins.
+
+6. [CUSTOM] Miscellaneous GASH Schema Fixes
+
+Fixed network selection error in interface custom class.  This was
+preventing users from being able to create more than one interface
+in a system.
+
+7. [CLIENT] Miscellaneous Client Fixes
+
+Fixes in some of the GUI components, and their interaction with the
+server to present choices, etc.
+
+8. [INSTALL] Changed the install script to support new schema development.
+
+It has always been possible to install the Ganymede server without
+specifying one of the schemas that we provide with the Ganymede
+distribution.  Now, if the installer does not choose one of bsd,
+nisonly, or gash, the installServer.perl script will go ahead and
+install the scaffolding upon which custom code for a custom schema can
+be built.
+
+9. [DOCUMENTATION] Documentation on DBEditObject subclassing added.
+
+We've added a lengthy guide to the operation of the DBEditObject
+class, and how you can subclass it to implement custom logic
+on the server.  A book should probably be written on this topic,
+but this guide should prove a useful start on things.
+
+10. [SERVER] Important Fixes In Invid Binding Code
+
+The object linking code now handles 'untargeted' object reference
+fields properly, both in binding and in unbinding.  The InvidDBField
+code will also properly catch ambiguous link operations resulting from
+improperly specified link fields in the schema.
+
+11. [SERVER] *** Major Memory/Speed Optimization ***
+
+Previously, all objects and all fields in the server were subclassed
+from java.rmi.server.UnicastRemoteObject, which meant that as each
+field and object was created, it was registered as a remotely
+accessible object through the RMI system.  Now, all objects and fields
+in the server are no longer subclasses of UnicastRemoteObject, but
+instead are exported through the RMI system only at the time the
+object or fields are accessed by the client.  This reduces the size of
+the Ganymede server in RAM by a lot.  With the full ARL GASH database
+loaded, the server used to take up anywhere from 93 to 105 megabytes.
+After this change, it's down to 40.  Likewise, database loading time
+for our GASH database is less than half of what it was.
+
+12. [SCHEMA] Recompiled all schema files to take advantage of 11.
+
+You will need to recompile any custom classes you may have authored,
+as they are no longer subclasses of UnicastRemoteObject.
+
+-------------------- Changes from dev4 to dev4a -------------------
+
+RELEASE DATE: August 11, 1998
+
+1. [SERVER] Deleting admin personae now works properly
+
+Before, deleting an admin persona object would cause a null pointer
+exception to be thrown, as the code that checked to verify the new
+name wasn't expecting a null name.
+
+2. [SERVER] Added more rescan info for client.
+
+In many cases, the server would not properly notify the client of
+fields that Wizard code had changed on behalf of the client.  Now,
+anytime anyone calls setValue(), setElemet(), addElement(), or
+deleteElement() on a field, the ReturnVal returned will include an
+instruction to the client to rescan that field.  This is primarily
+useful for Wizard code that changes fields on the client's behalf.
+
+3. [SERVER] User names forced to lowercase on login
+
+Previously, it was possible to log in with mixed case or all-uppercase
+and have Ganymede not recognize that the user was the same as another
+login by the same user for the purpose of tracking the client's name.
+Now, whenever a user logs in, Ganymede will track that user by an
+all-lowercase version of their name.
+
+4. [SERVER/CLIENT] Server tells Client its assigned id
+
+If a user logs into the server more than once concurrently, the server
+assigns each instance a unique name.  The client now asks the server
+what that name is, so that you can see which instantiation of the
+client matches which entry in the admin console's active user list.
+
+5. [SERVER/CLIENT] String Fields can optionally be multi-line
+
+The schema editor and the client now support multiline string fields,
+for cases where an object needs more than a simple TextField can
+reasonably provide.
+
+6. [SERVER/CLIENT] CategoryTransport, BaseListTransport fixed
+
+CategoryTransport and BaseListTransport are serializable classes that
+transport data from the server to the client.  Both of these classes
+included transient (non-transported) references to the GanymedeSession
+class for use on the server.  Because we are not using the
+RMISecurityManager any longer, the JVM is not able to download the
+GanymedeSession class definition when the object is deserialized.  To
+get around this, these classes now simply hold a generic transient
+Object reference, and do a cast whenever the methods intended to be
+run on the server are run.  This allows us to defer the class-loading
+on the client until a server-side only method is called on these
+objects, which should never happen anyway.
+
+7. [CLIENT] Viewing The Ownership Panel Fixed
+
+In dev4, clicking on the 'ownership' tab on a viewed (not edited)
+object would throw a null pointer exception.
+
+8. [SERVER/CLIENT] ReturnVal Rescan Information Reworked
+
+In dev4 and before, the ReturnVal object returned by the server to the
+client in response to most operations included information on what
+fields and objects should be rescanned.  The design was ad hoc and
+unwieldy, however, and has been changed. [...]
+
+9. [CLIENT] String, Number Data Fields Limit Entry Properly
+
+For awhile now, the GUI fields that allow String and Number entry
+in the client weren't properly restricting keystrokes to enforce
+string length and acceptable character restrictions.
+
+In addition, String fields in the GUI will now size themselves to
+reflect the size limit for size-limited fields.  Fields with large
+sizes will be limited to 40 characters wide.
+
+-------------------- Changes from dev3c to dev4 -------------------
+
+RELEASE DATE: July 30 1998
+
+1. [SERVER] DBEditObject.finalizeInactivate() no longer assumes removal
+
+DBEditObject.finalizeInactivate() used to throw a NullPointerException
+if the inactivated object didn't have its removal date set in the
+removalField field.  While this is arguably appropriate, I made the
+code resistant to that circumstance.  I may want to change it back
+to catastrophic failure.
+
+2. [SERVER/CUSTOM] Radically Simplified Wizard Construction
+
+I moved a lot of the wizard bookkeeping from the individual
+GanymediatorWizard subclasses up into GanymediatorWizard.  It's much
+simpler to make wizards for DBEditObject customization now.
+
+3. [SERVER] Modified DBEditObject.finalizeRemove() to track rescan.
+
+The server should now properly provide field/object rescan to the
+client when the client deletes an object.
+
+4. [SERVER] Rescheduled Garbage Collection Task in Ganymede.
+
+The server used to schedule the Garbage Collection task for 5 minutes
+after startup, which always hit us right when we were testing whatever
+feature we restarted the server for.  Ganymede will now schedule the
+Garbage Collection task for 6 hours after server startup.  The server
+will initiate garbage collection when it needs it anyway.. I had just
+made it a task to have something to test the scheduler with.  I may
+take the GC task out entirely.
+
+5. [SERVER] Fixed bugs in Journal file processing
+
+We ran into some problems with the Journal file logic as implemented
+in dev3b.  The journal file format has been reworked a bit, both to
+fix some vulnerabilities to failure and to further improve file size
+and processing time.
+
+6. [SERVER] Server Properly Reports Inactivated Objects
+
+The server wasn't properly reporting the inactivation, expiration,
+and removal of objects.  Now whenever the client does a query on
+the server (including for the building of the tree), it will get back
+the proper status of the objects.
+
+7. [SERVER] DBEditObject now has default reactivation logic
+
+Previously, the DBEditObject reactivate() method would simply refuse
+action, forcing this method to be overridden by subclasses if
+inactivation was to be supported.  Now DBEditObject.reactivate() will
+go ahead and clear the Removal date if called on an inactive object.
+Customizers are still encouraged to override this method to provide
+intelligent reactivation.
+
+8. [CUSTOM] Various refinements to the GASH schema
+
+You can now rename a user to a name the user previously had as an
+email alias.  You can now inactivate a group in good conscience.  The
+fields in the user object have been re-ordered to make entering data
+for a new user more straightforward.  The mapEntryCustom code checks
+to see if it is being deleted before complaining about an
+auto.home.default pointer being messed with.
+
+Added preliminary code in userCustom.commitPhase2() to perform
+external actions when a user is created, deleted, renamed, or when
+their home directory is moved from volume to volume.  Right now, these
+are just stubs, but the logic is there.  Turn on the debug flag and
+recompile userCustom.java to get messages about when various external
+actions would be taken.
+
+9. [SERVER] Set serialVersionUID on serializable classes
+
+This change will allow the server and client to communicate even if
+they are using slightly different versions of the data objects used to
+pass data back and forth between the client and server.  It will also
+make for a (probably very) slight speed-up in server initialization.
+
+10. [CLIENT] The client will now terminate when killed by the server
+
+In recent versions, the client would not get the hint and die when the
+admin console knocked a user off.  Instead, it would display a dialog
+reporting the boot, but would keep running, getting all kinds of
+exceptions from the server.  Now, the dialog will show up, and a timer
+is started.  When the timer counts down to zero, the client will
+self-destruct.  The user can, of course, acknowledge the dialog to
+shut it down sooner.
+
+11. [SERVER] original field in DBEditObject is now protected
+
+This change allows custom DBEditObject subclasses (out of the
+arlut.csd.ganymede package) to get easy access to the original state
+of a changed object for comparisons.
+
+12. [SERVER] Server now re-sorts fields after the schema is edited
+
+The server will now properly report the correct order of fields after
+that order has been changed by the schema editor.  This worked before,
+but only if the server was restarted.
+
+13. [SERVER] Object creation and deletion is now logged
+
+Before, only changes to existing objects were explicitly logged.. now
+object creation and deletion is also logged, and can be emailed.
+Right now, there is no straightforward way to specify that different
+users should get mail when different kinds of objects are created, as
+all object creation falls under a single event category.  This is one
+problem with trying for the super-generic, customizable event
+model.. to handle this properly would involve having a whole sub-tree
+under the object creation/deletion/change events, with each object
+type being able to have its own notification list, like GASH has.
+
+14. [CLIENT] Embedded objects in newly created objects are opened
+
+Before, when you created a user in the GASH schema, you had to manually
+open up the auto.home.default entry to set the user's home volume.  Now
+all embedded objects in newly created objects start out opened by
+default.
+
+15. [SERVER/CLIENT] The log/history system has been optimized
+
+All of the log code has been heavily optimized, and is now both a
+great deal faster and a great deal more memory efficient on the
+server.
+
+We're intending to support more general (i.e., non admin or
+object-limited) log searching by the client in the next pre-release.
+
+16. [SERVER] Event/Email notification system has been totally revised
+
+GASH's event/mail/logging model had separate event codes for the
+creation, inactivation, and editing of objects by their type.  So it
+was possible to specify that whenever a user was created, someone in
+personnel could be notified.  The code in GASH that manipulated users
+was custom-coded to use those event codes.  Ganymede uses a more
+generic model, in which the event logging/email system is designed to
+work with any kind of object handled by Ganymede.  However, there is
+still a need to be able to specify that certain users be notified
+whenever an object of a specific type has had a specific operation
+performed on it.  So there is now a second kind of event object listed
+under Admin-Level Objects, an 'Object Event' object, which lets the
+adopter create special email for whenever an object of a specific type
+is created, edited, inactivated, deleted, reactivated, etc.  The orignal
+event object type has been renamed 'System Event'.
+
+Admin Persona objects now include a field to specify an email address
+where email to that administrator should be sent.  If Ganymede is
+managing your email database, you won't need to set this field,
+but it's there otherwise.
+
+Owner Groups and System Events now have an 'external email list' field,
+used when you want email related to those objects to go to email
+addresses not contained within Ganymede.
+
+17. [TREE] Significant tree fixes/enhancements
+
+The JTree code had an error in its drag/drop logic when both
+tween-dropping and on-dropping were enabled, that made it impossible
+for on-dropping to ever occur.  This has been fixed, which corrects a
+problem in the schema editor.  I added a moveNode() method to allow
+the schema editor to do the right thing in moving shuffling categories
+and objects around within the tree.
+
+Made treeCanvas extend JComponent instead of JPanel.. this seems to
+fix some responsiveness problems that the tree was exhibiting under
+Java Plug-In 1.1 on Win32. (ref. changes dev3 #5)
+
+18. [SCHEMA EDITOR] Fixed lots of bugs in schema editing
+
+Moving object types and categories between categories now works
+reliably.  This involved both adding a new primitive to the server,
+Category.moveCategoryNode() and to the tree, moveNode().  The
+server-side schema editing context does a better job of mapping remote
+Base references supplied by the client-side schema editor to the
+server-side local DBObjectBase objects.  Basically, schema editing
+should be robust and reliable now.  Or at least, much more so.
+
+Forced the schema editor tree to be black on white instead of
+black on SystemColor.background.. testing the admin console on a
+friend's FreeBSD system showed the ugliness that results if a system
+had SystemColor.background set to black.
+
+19. [SERVER/CUSTOM] Pulled classes for critical objects into ganymedeServer.jar
+
+Previously, all subclasses of DBEditObject were packaged along with
+the custom schema code.  This was inappropriate, as the server depends
+on those classes for proper authentication and logging, and there is
+little to be gained by forcing adopters to include those classes in
+their customization efforts.  Worse, if an adopter did not select a
+schema at install time, no support classes for the permission system
+were installed.  Now, all the code that the server _depends_ on for
+its own logic is kept safe and bundled.
+
+20. [CLIENT] Fixes to the tree icon logic
+
+There were some circumstances in which an object with more than one
+exceptional condition (both checked out for editing and marked for
+inactivation, say..) would not have the most sensible icon displayed
+for it in the tree.  The client now takes the possibility of multiple
+conditons into account and takes the relevance of the various
+conditions into account when assigning an icon for the object's node
+in the tree.
+
+21. [CLIENT/ADMIN CONSOLE/SERVER] Tweaks for 1.2b4 compatibility
+
+The new security system supported in the 1.2b4 and (presumably) later
+releases of the JDK forces a new security model on code that installs
+a SecurityManager, in such a way that the code is not compatible
+across 1.1 and 1.2, at least as of 1.2b4.  To get around this, the
+Ganymede client and server code no longer install the
+RMISecurityManager.  There is no practical downside to this, as the
+only thing that the RMISecurityManager enabled was the transfer of
+executable classfiles between the client and the server, which
+Ganymede did not do anyway.
+
+22. [SERVER] Various fixes
+
+a. The fully-privileged internalSession GanymedeSession that the
+server uses for its internal operations has had oversight turned off,
+to speed things up somewhat, and as an attempt at debugging stuff.
+
+b. Object reference (invid) fields can now lookup a remote object's
+label in a transaction, even if the remote object has had its fields
+cleared in preparation for deleting that object at transaction commit
+time.  This comes into play when the details of a transaction is being
+logged to disk at transaction commit time.  One side effect of this is
+that if you (say) rename a user and then delete the user in one
+transaction, the logging system will report that user <newname> was
+deleted, but that <oldname> was removed from account groups, and the
+like.  Fixing this would be rather more involved than the payoff would
+be worth at this time, I think.
+
+c. Boolean fields are considered to be undefined if they are set to
+false.  This makes it possible to edit the schema to remove boolean
+fields if all instances of a boolean field are false.  Previously, the
+boolean fields would be undefined until someone set them, at which
+point they would remain defined, regardless of value.  One consequence
+of this is that the logging for boolean toggles may seem
+counter-intuitive, with true-to-false transitions recorded as the
+field being removed.
+
+d. The database dumper, expiration processor, and expiration warning
+tasks won't fire if the schema is being edited.
+
+e. The Ganymede server will never explicitly record an object as
+being owned by supergash, since by definition supergash implicitly
+owns all objects.  This change reduces the size and memory loading
+of the database, but will increase the time it takes to do initial
+bulk loading.
+
+23. [ADMIN CONSOLE] Admin Console will exit when server is shutdown
+
+If you use the 'shutdown server' menu option in the Ganymede Admin
+Console, the console itself will shut down once the server finishes
+its shutdown sequence.
+
+24. [SERVER/CUSTOM] anonymousLinkOK and anonymousUnlinkOK expanded
+
+In order to properly secure privileges to add or remove objects from
+owner groups on the server, we have added a new parameter to the
+anonymousLinkOK and anonymousUnlinkOK methods in DBEditObject.  This
+is the GanymedeSession parameter, so the code can determine whether to
+allow the link or unlink based on the identity of the user attempting
+the link.  If a custom subclass author does not override the expanded
+version of these methods, the old methods will be called, without
+the GanymedeSession reference.
+
+25. [SERVER] Ownership security hole fixed
+
+Previously, the Ganymede system depended on the client being
+trustworthy when it came to restricting the ability to grant ownership
+of objects to an owner group.  The server now checks this operation
+against the admin's owner group membership to prevent abuse.
+
+A related change fixes a similar vulnerability in all object-linking
+logic.  The server will no longer allow values to be placed in
+InvidDBFields if the field is choice-restricted and if the value was
+not a choice presented to the client.
+
+26. [CUSTOM] Added bsd schema
+
+Added a simple passwd/group BSD 4.4 compatible schema, analagous to
+the nisonly schema, but with support for the BSD 4.4 master.passwd
+file format.
+
+-------------------- Changes from dev3b to dev3c -------------------
+
+RELEASE DATE: 17 June 1998
+
+1. [CLIENT] Improvements in the view/edit/delete/inactivate object dialog
+
+ Previously, the view object dialog would only search for objects that
+the user had permission to edit.  The dialog is smarter now about what
+is appropriate for the different operations.
+
+2. [CUSTOM] GASH, nisonly loader code fixed.
+
+ Ugh.  In dev3b, the GASH and nisonly loader code was simply broken..
+the change in create_db_object() and edit_db_object() broke the
+directLoader class in both schemas.  I had caught the changes in the
+custom_src directory, but not in loader/source.  The loader code
+for both work now.
+
+3. [SERVER] Made InvidDBField checkpoint/rollback code issued selectively
+
+ In dev3b, all Invid binding operations was checkpointed, which made
+doing bulk-loading far, far too slow.  The bind/unbind checkpointing
+is now only done when GanymedeSession.enableOversight is true.  That
+is, not during bulk-loading.
+
+-------------------- Changes from dev3a to dev3b -------------------
+
+RELEASE DATE: 15 June 1998
+
+1. [SERVER] Memory, Performance Optimizations
+
+ By using custom-crafted DBObjectTable, DBFieldTable, and
+DBBaseFieldTable classes instead of java.util.Hashtable's for the
+primary Ganymede server data structures, we have reduced the memory
+loading for the server by over 20% and eliminated the creation of a
+lot of unnecessary temporary objects.  A number of operations that
+were previously synchronized unnecessarily are now unsync'ed, and a
+number of operations that required explicit casts are now type
+specific, leading to further performance improvements.
+
+2. [CLIENT] Swing Deadlock Prevented
+
+ The Swing GUI library is not thread safe, and the client had a risk
+of locking on updating the status label at the bottom of the client
+window if the user attempted to open up several object windows
+simultaneously.  The client now uses the Swing thread synchronization
+primitives to update the status label, eliminating the potential for
+client thread lock.
+
+3. [CLIENT] Object Window ProgressBar Improved
+
+ The object view/edit window progress bar has been improved so it
+shows progress across vector fields, rather than simply halting while
+a large number of vector components are loaded.  This gives a better
+indication of the true progress when loaded an object with many
+embedded objects.
+
+4. [CLIENT] Query Dialog Allows Matches Against Non-Editable Objects
+
+ Before, the query box would allow you to do queries on invid fields,
+searching for objects whose invid field pointed to a listed object.
+The choices listed, however, only included objects that the admin had
+edit privilege on.  Now the list of options that is included in the
+pull-down list for such fields will show all objects of the given type
+that the admin has read privileges for.
+
+5. [CUSTOM] Fixes to GASH Schema
+
+ The system interface code was not properly handling the display of
+the name and alias fields.. this was due to a broken canSeeField()
+fix in dev3a.
+
+6. [SERVER/CLIENT] edit/create/view/clone_db_object now return ReturnVal
+
+ The server now has the ability to return error dialogs in response
+to requests to view, edit, create, or clone objects.  The server will
+now provide a detailed report explaining why an operation could not
+be successfully completed.  If a user attempts to edit an object that
+has already been checked out for editing by another user, the server
+will report this, including the identity of the user who has the object
+checked out.
+
+7. [CLIENT] Query issue is now threaded
+
+ Before, the client issued queries to the server on the GUI thread,
+blocking the client's GUI refresh until the server responded.  The
+client now handles queries in a separate thread, and displays a
+window with an animated gif while waiting for the server to complete
+the query.
+
+8. [SERVER] Journal file optimized
+
+ Before, whenever an object was changed in a transaction, the entire
+state of the object would be written to the journal file.  Now, the
+server only writes a record of the changes made to objects to the
+journal, in some cases dramatically reducing the size of the journal
+file and the time required to process it.
+
+9. [SERVER] All Invid bind/unbind operations checkpointed
+
+ The Ganymede server is now more robust in the face of errors in the
+object linking logic.
+
+10. [CLIENT] Fix in client refresh logic
+
+ The client wouldn't properly display items in vector panels when
+ordered to change the vector panel's visibility in certain cases.
+
+11. [CUSTOM] Changes to gash, nisonly custom source
+
+ Small changes to the gash and nisonly custom source to cohere with
+change #6, above.  Since Session.edit_db_object() now returns a
+ReturnVal, the custom code for the two schemas had to be changed where
+it called edit_db_object().  No changes were made to NISBuilderTask.java
+and GASHBuilderTask.java.
+
+-------------------- Changes from dev3 to dev3a --------------------
+
+RELEASE DATE: 8 June 1998
+
+1. [CLIENT] Notes, History Panels reorganized.
+
+ The object created, object modified timestamps are now on the history
+panel.
+
+2. [CLIENT] Can now do vector search operations on embedded invid fields.
+
+ Previously, it wasn't possible to do things like search for systems
+with multiple interfaces, as the client-side query code just displayed
+the fields contained under the embedded interfaces.  Now it is possible
+to query based on the status of the interfaces vector itself.
+
+3. [INSTALL SCRIPTS] Fixed install scripts to work with Perl5.003
+
+ It turns out that the Copy module in perl 5.003 is less friendly than
+the one in perl 5.004_4, which we used to develop the install scripts.
+We have fixed the install scripts to run under 5.003.
+
+We also made the installServer and installClient scripts check to
+prevent relative pathnames.
+
+4. [CUSTOM] A number of fixes in the GASH/nisonly schema/custom code.
+
+ Fixed interfaceCustom.canSeeField(), which was breaking the
+viewing (not editing) of multi-interface systems.
+
+ Made the directLoader code a bit more liberal, and made it able
+to handle admins in admin_info with supergash-level privs.  Made it
+able to handle alias_info lines with program invocation targets.
+
+  Both the GASH and nisonly schemas now allow single-character
+usernames.  Previously, the schemas were configured to require
+a minimum of 2 characters for usernames, which was unnecessarily
+restrictive.
+
+5. [SCHEMA EDITOR] Turned off debug output.
+
+-------------------- Changes from dev2c to dev3 --------------------
+
+RELEASE DATE: 28 May 1998
+
+IMPORTANT NOTE: The GASH schema and custom code have been very
+significantly revised since dev2c.  You will not be able to port
+an existing ganymede.db file from 2c or prior for use with the
+dev3 GASH schema module.  As a general matter, we are not committing
+to a lock-down on either schemas or classes until the initial
+'production' release.
+
+1. [CLIENT] Double-clicking on objects in the tree opens them for viewing.
+
+ It is now more straight-forward to use Ganymede without a
+multi-button mouse.
+
+2. [CLIENT] Simplified ContainerPanel Menus.
+
+ The menus attached to Object windows have been reduced in number and
+made more intuitive.
+
+3. [ADMIN CONSOLE] Fixed Initialization Exception on JDK 1.1.6 / Swing 1.0.2.
+
+ The Admin Console used to throw an IllegalArgumentException on
+startup when run under JDK 1.1.6 and Swing 1.0.2.
+
+4. [SERVER/CLIENT] Fixed a lot of things regarding the query system.
+
+ The client is now a lot smarter about handling non-String query
+types, and will provide a list of choices for restricted object
+reference fields.  Dates are handled with a pop-up calendar, and the
+client properly implements 'same day as', 'same week as', and 'same
+month as' logic.  A single query can handle searching on top-level
+fields as well as fields in embedded objects.  The whole system is
+significantly reworked and improved.  The GUI was reorganized.
+
+5. [CLIENT] Custom Table Code Improved.
+
+ Previously, the table code used in the admin console and query
+results windows was subclassed from the Swing JPanel class.  This
+caused a lot of mouse events to not get propagated to the table canvas
+for some reason.  The table code now subclasses directly from
+JComponent and works more reliably now.  Menus and row selection
+occurs reliably on the first mouse click.
+
+6. [CLIENT] Object Panel Loading Speedups.
+
+ The manner in which certain GUI components load what may be large lists
+of objects has been improved, leading to possibly significant speedups
+in bringing up an object window.
+
+7. [CUSTOM] The GASH schema has been significantly revised and completed.
+
+ The GASH schema and custom code has been significantly revised.
+Instead of there being a separate NISBuilderTask and DNSBuilderTask,
+there is now just a single GASHBuilderTask, which generates all the
+files supported by the GASH make process. The hosts_info file emitted
+does not contain a list of administrators, so you will lose
+information if you import GASH files into Ganymede, modify them, and
+write them back out via the GASHBuilderTask.
+
+ The GASH schema has been revised so that the systems database closely
+adheres to the features supported by GASH.  The following changes
+were made in this regard:
+
+  1. Single IP address and DNS record per interface
+  2. Rooms are bound to a list of networks, and the interface objects
+     for each system provide a list of IP network choices from the
+     room the system is placed in. 
+
+ In addition, the GASHBuilderTask now emits an aliases_info file for
+the first time.  In theory, you should be able to plug an installation
+of Ganymede with the GASH schema loaded into the back-end GASH makefiles
+you may already have.
+
+8. [SERVER] Client code can now use the server to send mail.
+
+ It is now possible to write client-side code that can send mail out,
+even if that code is running as an applet in a restricted browser
+context.  The mail is sent by the Ganymede server rather than the
+client, and includes a signature identifying the mail as coming from a
+Ganymede client.  The server supports sending both plain ASCII (rfc
+822) mail, and mixed HTML/ascii MIME mail.
+
+9. [CLIENT] Object windows and query result tables now save and mail reports.
+
+ The object windows and the query result table windows now have a menu
+allowing you to save and/or mail their contents in either text or HTML
+format.  If the client is running in a restricted applet context, the
+save option will not be available, but the client can still email
+reports.
+
+ The save function uses the version of the JFileChooser provided in
+Swing 1.0.2, it may not work properly with earlier versions of the
+Swing GUI libraries.
+
+10. [SCHEMA EDITOR] Fixed a few schema editor bugs.
+
+ Made the schema editor generally more robust when removing objects
+types that have fields in other object types pointing to them.
+
+11. [CLIENT/ADMIN CONSOLE] Put in some work-arounds for bug in Swing 1.0.2
+
+ There is a significant bug in the JComboBox code in Swing 1.0.2.. see
+bug #4132528 in the Javasoft Bug Parade at 
+http://developer.javasoft.com/developer/bugParade/bugs/4132528.html.
+
+ We put a few workarounds in the code, but there may still be times
+when JComboBox operations will throw IllegalArgumentExceptions.  I
+think folks are still better off using Swing 1.0.2 over previous
+releases.
+
+12. [SERVER] Added a reserve() method to the DBNameSpace class.
+
+ Previously, a transaction could only allocate a unique name/number by
+actually placing that value in a field of an object.  Now custom code
+can 'pre-allocate' a set of values which can then be shown to the
+client as a list of available options.  The newly revised GASH schema
+uses this code to pre-allocate IP addresses for the networks available
+in a particular room.
+
+13. [SERVER] Fixed various elements relating to IP address handling.
+
+ The java.util.Hashtable class does not work properly for the array of
+Byte representation used in Ganymede to handle IP addresses.
+GHashtable was modified to wrap bare Byte arrays with a wrapper class
+that enables proper Hashtable functioning.
+
+ The IPDBField class was not properly invoking a DBEditObject subclass'
+wizardHook() method.
+
+14. [DOCUMENTATION] Added more documentation.
+
+ We have added doc/editobject.html, doc/server.html, and
+doc/client-custom.html.  Each of these documents should be
+significantly expanded in the next dev release.
+
+15. [SERVER] Added default field permissions support for object types.
+
+ In modifying the directLoader to properly initialize permissions for
+the GASH schema, it became clear that we needed a way to set the
+default permissions for an object's fields to something other than the
+top-level permissions that apply to the object.  We modified
+perm_field and PermissionMatrixDBField to add setDefaultFieldPerms().
+
+16. [SERVER] invid_field.createNewEmbedded() returns a ReturnVal
+
+ Previously, there was no way to get a detailed error report or rescan
+information from a createNewEmbedded call.  We added a getInvid()
+method to ReturnVal and made the client able to handle rescan requests
+when adding a new edit-in-place object to a vectorPanel.
+
+17. [SERVER] Various changes in Invid handling.
+
+ Fixed/altered a number of things involving invid binding to make
+things more robust across a wider range of circumstances.
+
+18. [SERVER] Dumped schemas now retain builder task information.
+
+ Previously, a raw schema file dump would not retain any information
+about builder tasks associated with the schema, forcing end-users to
+manually configure builder tasks after initially populating the
+database from their data.  Ganymede now saves the builder task
+information in the schema file, and users implementing Ganymede no
+longer need to register the default builder task.
+
+19. [DOCUMENTATION] Added CREDITS file.
+
+20. [INSTALL SCRIPTS] Made the install scripts provide schema-specific options.
+
+ The installServer.perl script has been made a bit smarter, and will
+not prompt for configuration variables that are not applicable to the
+schema selected.
+
+-------------------- Changes from dev2b to dev2c --------------------
+
+RELEASE DATE: 5 May 1998
+
+1. [SERVER] DBSession.createDBObject() checkpoints DBEditObject.initializeNewObject().
+
+ The server now performs a checkpoint/rollback when it calls
+DBEditObject.initializeNewObject() if enableOversight is turned on.
+That is, as long as the system is not doing bulk loading, the
+DBEditObject.initializeNewObject() method is no longer responsible
+for doing its own checkpoint/rollback.
+
+2. [CUSTOM] Bulk loading Streamlined for nisonly, gash Schemas.
+
+ The nisonly and gash userCustom and groupCustom classes no longer try
+to automatically allocate uid's and gid's in initializeNewObject()
+during bulk loading.  The gash schema previously tried to create
+automounter entries at user creation time, which could confuse the
+gash directLoader code.  Both the nisonly and gash schemas now only
+attempt to do user and group initialization if the system is not
+in bulk-load mode (enableOversight is true).
+
+3. [CUSTOM] nisonly, gash schema code cleaned up.
+
+ I went through and cleaned up the NISBuilderTask source in the
+nisonly and gash schemas.  They now use schema constants rather
+than numbers for field id's.  Removed a bunch of code from the
+nisonly NISBuilderTask class that was no longer relevant.
+
+4. [SERVER] Added a DBObject Parameter to anonymousLink methods in DBEditObject.
+
+ I added a DBObject parameter to anonymousLinkOK() and anonymousUnlinkOK()
+in DBEditObject.  This allows DBEditObject subclasses to enable or
+disable anonymous linking and unlinking to a given field based on the
+state of the object.
+
+5. [CUSTOM] The GASH Schema Always Allows Linking, Unlinking from auto.home.default.
+
+ In dev2b, it was not possible to create a new user as a GASH administrator
+without specifically setting the permission matrix privileges to allow all
+GASH administrators to edit all automounter maps.  With the new parameter
+added to anonymousLinkOK(), we have now made the mapCustom object always
+allow remote linking to auto.home.default.
+
+6. [SERVER] Fixed InvidDBField.getEncodedValues() To Show Custom Labels on Viewing.
+
+ In dev2b and before, Invid fields were supposed to be able to generate
+custom labels for objects referenced through the lookupLabel() method
+in DBEditObject subclasses.  This was only occurring with editable objects,
+and not when such objects were being viewed.
+
+7. [CLIENT] Fixed Objects Owned Panel.
+
+ The client was not enabling the commit button when ownership of objects
+was changed in the objects owned panel when an administrator edited
+an owner group.
+
+-------------------- Changes from dev2a to dev2b --------------------
+
+RELEASE DATE: 4 May 1998
+
+1. [SERVER] Creating New Objects With Embedded Objects.
+
+ In dev2a, creating objects whose initializeNewObject() methods
+created embedded objects would fail with a NullPointerException.  This
+was due to the object being initialized before being added to the
+transaction's working set, and caused NullPointerExceptions when
+creating users with the GASH schema.
+
+2. [CLIENT] Queries Were Not Attached To Tree Nodes Before Loading.
+
+ In the client, if a user tried to issue a query on an object base 
+folder in the tree prior to opening the folder, a null query would
+be issued, and no results would come back.
+
+3. [CUSTOM] Groups Field Broken In nisonly User Object.
+
+ When using the nisonly schema, adding groups to the user's group
+list was not working properly.  The home group choice box was not
+updated properly, and the change to the group list would not be
+committed properly.
+
+4. [CLIENT] Editable/non-editable Choice GUI Component Logic Fixed.
+
+ The release of Swing 1.0.2 from Javasoft has revealed a logic error
+that would invert the editability status of a choice list.  It is now
+possible to manually enter arbitrary strings for the shell field in
+user objects in the gash and nisonly schemas.
+
+5. [CLIENT] Tab Pane In Object Windows No Longer Transparent.
+
+ Another bug that showed up when running the Ganymede client against
+the 1.0.2 Swing release.  With Swing 1.0.2., the tab panes in dev2a
+were transparent, allowing obscured windows to show through.
+
+-------------------- Changes from dev2 to dev2a --------------------
+
+RELEASE DATE: 1 May 1998
+
+1. [SERVER] Required Fields Not Checked For Deleted Objects.
+
+ DBEditSet (the Ganymede transaction class) no longer checks required
+fields for objects that are being dropped or deleted.
+
+2. [HTML] HTML for Java Activator/Plug-In Updated for Plug-In 1.1 Release
+
+ We have updated the HTML template for use with the Java Activator to
+work with the official release of the 1.1 Java Plug-In.
+
+3. [SERVER] Added GanymedeSession.enableOversight(boolean) Method
+
+ It is now possible for server-side code to turn off required field
+checking and all wizard activity.  This is intended to be used
+by the offline bulk loader code.
+
+4. [CUSTOM] Updated nisonly, gash Loader Code
+
+ Both the gash and nisonly loader code now uses enableOversight() to
+turn off wizards and required field checking during bulk loading.  The
+nisonly loader hadn't been recompiled since the delete bit was added
+to the PermEntry class, so the nisonly loader code as broken.
+
+
+-------------------- Changes from dev1b to dev2 --------------------
+
+RELEASE DATE: 27 April 1998
+
+Following are the most significant changes since dev1b.  There are a
+number of additional small performance and behavior improvements
+throughout.  We have continued to evolve the ARL Ganymede schema
+and custom code, which has prompted us to enrich the customization
+plug-in classes to allow for needed functionality.  The ARL schema
+is not yet ready for release, but our work on it is driving the
+improvement of the system generally.
+
+1. [SERVER] Deadlock Prevention.
+
+ There were a number of cases in which the server could become
+deadlocked due to a nested-monitor condition.  We have corrected a
+good number of these, and the server should be far less susceptible to
+deadlocked threads.
+
+2. [SERVER] Transactions Can Fail Without Mandatory Abort.
+
+ The server now has the ability to have a transaction fail without
+having to throw out the entire transaction.  This is built on the
+checkpoint logic in DBEditSet and DBEditObject.
+
+3. [CUSTOM] DBEditObject Customization Class Enriched.
+
+ We have added a method to DBEditObject that will allow custom
+plug-ins on the server to specify what fields must be filled in at
+commit time.  The server's commit engine uses (2.) above to return an
+explanatory dialog to the client, allowing the user to fill in the
+additional required fields before trying to re-commit the transaction.
+
+ In addition, the DBEditObject class now has the ability for an object
+to determine for itself when it should be considered owned by the
+current Ganymede administrator, as well as the ability to return
+expanded or restricted permissions as needed.
+
+4. [CLIENT/SERVER] Client Automatically Refreshes Object Pointers.
+
+ The server now returns to the client a list of objects and fields
+that need to be updated in response to an action by the client.  The
+basic object linking code automatically handles this, so whenever you
+change an object reference pointer with the client, you will see
+affected references in other windows update.  There are still a couple
+of cases in which this is not yet handled correctly, including when a
+change to an object causes the object's label to change, and in
+certain cases when objects are deleted.
+
+5. [SERVER] String Relative Compares Work In Query.
+
+ Before, if you attempted to use >, >=, <, or <= in a string field in
+the Ganymede query mechanism, you would not get any results back.
+Relative string comparisons is now working properly.
+
+6. [CLIENT] Several GUI Fixes.
+
+ The calendar panel now shows up correctly.  The GUI logic for the
+vector of embedded objects has a number of bug fixes.  More.
+
+7. [CUSTOM] Now Using *Schema.java Files To Enumerate Fields.
+
+ The custom code associated with the provided schema files now use
+symbolic constants to refer to fields in the customized object types.
+This should make that code easier to read and maintain.
+
+8. [CLIENT/SERVER] Permissions System Now Has Delete Bit.
+
+ The permissions system now maintains a delete permission that is
+distinct from an edit permission.  It is now possible to allow an
+administrator permission to edit an object while denying that
+administrator deletion privileges.  The permissions editor currently
+shows the delete bit as applying to object fields as well as objects,
+but currently the server only consults the delete bit when an attempt
+is made to remove, inactivate, or reactivate objects.
+
+9. [CUSTOM] GASH Schema Uses Properties.
+
+ We have made the GASH schema custom code use a couple of properties
+to specify the default home directory location and default email
+address suffix.  You will be prompted for the values for these
+properties when you run the installServer.perl script.  We may
+want to move these out of the ganymede.properties file and into the
+database proper to make it possible to change these values without
+having to stop and restart the server.
+
+ installServer.perl should be smart enough not to prompt for these
+properties if the user is not installing the GASH schema.
+
+
+-------------------- Changes from dev1a to dev1b --------------------
+
+RELEASE DATE: 6 April 1998
+
+1. [SERVER] Tasks Loading / Server dependency fix fixed.
+
+ In amending the arlut.csd.ganymede.QueryResult class to not be dependent
+on server-side classes, I broke a method that was required for the
+server to load any registered builder tasks.  As a result, installers
+were not able to get the DNS/NIS builder tasks to load.  This problem
+was considered serious enough to precipitate this release.
+
+2. [SERVER] Default Builder Tasks Will Now Call External Build Scripts.
+
+ I have modified the builderPhase2() method in the builder tasks
+included in the gash and nisonly schemas to automatically call a
+script, "nisbuilder" or "dnsbuilder" in the db/out directory whenever
+a transaction is committed that resulted in changes to the object
+bases monitored by the installed build scripts.  With this change,
+it is now possible for the nisonly schema install to be used for
+actually managing passswd and group without much hassle.
+
+ We are still not including any actual NIS or DNS build scripts.
+
+3. [SERVER] Permissions Failures No Longer Throw Server Exceptions.
+
+ Pretty much everywhere the server previously threw exceptions on
+permissions violations are now properly caught and an error dialog
+is returned to the client.
+
+4. [CLIENT] Persona Panel Works Properly.
+
+ In dev1a, the client could freeze up when the user attempted to carry
+out an action that they did not have permissions for.  The persona
+panel is more robust now.
+
+5. [CLIENT] Miscellaneous Client Fixes.
+
+ A small number of minor blemishes were cleaned up in the client.
+
+-------------------- Changes from dev1 to dev1a --------------------
+
+RELEASE DATE: 1 April 1998
+
+1. [DOCUMENTATION] INSTALL
+
+  We have slightly revised this file to better reflect the state of
+things after the install scripts have run.
+
+2. [DOCUMENTATION] Javadocs improved
+
+  We used the 1.2beta3 JDK's javadoc to produce the class documentation.
+The 1.2b3 javadoc includes a lot more information about the classes,
+and will give you a better idea of how things fit together.
+
+3. [INSTALL] Install Script Fixes.
+
+  The dev1 prerelease installServer script was broken when it
+came to properly configuring the loader code.
+
+4. [CONSOLE] Schema Editor Fixes.
+
+  Check boxes were not working properly in the schema editor,
+making it impossible to configure certain aspects of new fields.
+
+  Dragging newly created object types around between categories
+was throwing an exception.
+
+5. [CLIENT] Permission Editor Fixes.
+
+  When the user attempted to edit permissions in a permission
+object, it wasn't possible to change the top-level permissions
+for an object type, only for individual fields.
+
+6. [CLIENT] Reworked client architecture.
+
+  We broke out the basic client logic into a new class,
+arlut.csd.ganymede.client.ClientBase.  This change makes it easy
+to write new clients without having to restart the server.
+Previously, the server couldn't talk to a client unless it had
+the custom RMI stub for that client.  Now, all clients simply use
+the ClientBase class to connect to the server.  The server jar file
+has this stub in place, so any clients written to use ClientBase will
+work without needing to restart the server.
+
+  We rewrote the Password client to demonstrate the use of ClientBase.
+
+7. [SERVER/CLIENT] Fixed client dependency on server class.
+
+  The client referred to a class, arlut.csd.ganymede.QueryResult,
+which in turn contained a reference to a server class,
+arlut.csd.ganymede.DBObject.  This made the client crash out
+with a class not found exception when run as configured in the
+client install.
+
+8. [SERVER] Expanded DBEditObject to allow permission customization.
+
+  We added permOverride() and permExpand() methods to
+arlut.csd.ganymede.DBEditObject to allow custom objects to be able to
+customize permission authentication for special cases.
+
+9. [SERVER] Fixed initialization bug in DBStore.initializeSchema().
+
+  This code that is supposed to create the standard object types
+for a newly created ganymede.db file had an error that caused an
+exception to be thrown.
+
+10. [CLIENT] Object reference GUI field changed.
+
+  When an object has a single reference to another object in a field
+(as opposed to a vector of references), the client will now allow you
+to link to the referred object.  The editable version of this field
+type will be a bit more polished in the next release.  Currently, you'll
+see a simple 'click' button.  We're going to come up with some sort of
+icon for this by the next release.
+
+			 --------------------
+
+The remainder of our coding efforts have been in the development of a
+new schema set, called 'ganymede' for now, which is being tailored for
+our laboratory environment.  Our initial DNS support will be in this
+schema, but we are not yet ready to release this set of
+customizations.

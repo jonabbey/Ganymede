@@ -1,0 +1,34 @@
+#!/bin/sh
+
+echo "Ganymede configure script"
+echo
+
+# Find the source files, if location was not specified.
+
+# Try the directory containing this script, then its parent.
+
+prog=$0
+
+GROOTDIR=`echo $prog|sed 's%/[^/][^/]*$%%'`
+# if the program name is the same as the srcdir name, we have no path
+# set.. must be .
+test "x$GROOTDIR" = "x$prog" && GROOTDIR=.
+if test ! -d $GROOTDIR/src/classes; then
+  echo "configure: error: can not find sources in $rootdir" 1>&2; exit 1;
+fi
+export GROOTDIR
+
+GPERL=`which perl5`
+echo "perl one $GPERL"
+if test ! -r $GPERL; then
+  GPERL=`which perl`
+fi
+export GPERL
+
+#echo "My env is"
+#
+#env
+
+# echo "perl at $perlplace"
+
+$GPERL $GROOTDIR/scripts/configurator.perl

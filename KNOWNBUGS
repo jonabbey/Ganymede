@@ -1,0 +1,67 @@
+Ganymede Developer Release 6a
+December 4, 1998
+KNOWNBUGS
+----------------------------------------------
+
+Ganymede developer's release 6 requires Swing 1.1 beta 3 or later,
+as it is built to expect the Swing libraries to be in the
+package javax.swing, rather than com.sun.java.swing, as it was
+in prior versions.
+
+--
+
+1) When using a pre-existing schema (gash/nisonly/bsd), the monitor
+account name/ password is not properly reset.  It is, instead, user:
+monitor, password: display.  If you start a new ganymede.db file
+from scratch, the monitor account should be configured properly.
+
+2) The gash and gasharl schemas are provided in dev5c is intended to
+enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
+are, however, a relatively small number of functions that are not
+performed by Ganymede with the gash schemas.  These include the
+automatic creation of users' home directories on user creation, and
+the renaming of user's home directories and /var/mail mailboxes on
+user rename.  Also, moving a user's home directory from automounter
+volume to automounter volume does not yet trigger a specialized mail
+message to be sent to the managers responsible for those volumes.
+
+The logic to do these things has been sketched out in the
+userCustom.java file in the schemas/{gash|gasharl}/custom_src
+directory, but it is not yet complete to the point of calling external
+scripts for these actions and, in fact, has been disabled in this
+release.
+
+See the README file in the schema directory if you choose to run
+either of the gash schemas.
+
+3) The 'Reload Custom Classes' menu item in the admin console doesn't
+actually do anything very useful.  You need to stop and restart the
+server if you have recompiled any plug-in classes.  It may be useful
+if you have just used the schema editor to attach a plug-in class to
+an object type, but it can't actually reload classes that were
+previously loaded.
+
+4) The bsd schema is preliminary.. it works, but the larger assumptions
+embodied by the bsd schema code is still modeled closely on the
+GASH model.  For instance, if you have users in the master.passwd
+file whose gid references a group in the group file for which
+that group does not have an explicit reference to the user.  All
+of the wizards and schema logic embodied in the bsd schema still
+assume that there won't be any purely implicit group membership
+references in the user's gid field.
+
+5) There are still a number of small gui bugs arising out of the Swing
+libraries, as of Swing 1.1 beta 3.  In particular, the permissions
+editor requires the user to click twice on a checkbox to set or clear
+it.
+
+6) Using the JDK 1.2 RC1 plug-in on Win32, the html files in the help,
+'about ganymede', and MOTD will not be properly displayed.  This bug
+has been reported to Sun, and will hopefully be fixed in the official
+1.2 release.
+
+Comments welcome. ;-)
+
+ganymede@arlut.utexas.edu for the list, or jonabbey@arlut.utexas.edu
+to comment to us.
+
