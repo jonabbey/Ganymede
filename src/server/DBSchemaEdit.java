@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 1999/11/19 20:37:02 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/01/26 04:49:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -202,6 +202,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
+	store.setSchemaEditInProgress(true);
+
 	// duplicate the existing category tree and all the contained
 	// bases
 
@@ -1016,7 +1018,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	// and unlock the server
 
-	store.schemaEditInProgress = false;
+	store.setSchemaEditInProgress(false);
 
 	// and update the serialized representation of the
 	// category/base structure.. note that we want it to be
@@ -1235,7 +1237,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	
 	// unlock the server
 	
-	store.schemaEditInProgress = false;
+	store.setSchemaEditInProgress(false);
       }
 
     Ganymede.debug("DBSchemaEdit: released");

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2000/01/13 02:12:55 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2000/01/26 04:49:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,38 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static Vector sessions = new Vector();
   static Hashtable activeUsers = new Hashtable();
   static Hashtable userLogOuts = new Hashtable();
+
+  /**
+   * <p>If true, the server is waiting for all users to disconnect
+   * so that it can shut itself down.</p>
+   */
+
   static boolean shutdown = false;
+
+  /**
+   * <p>If true, the server is on the way down.</p>
+   */
+
+  static boolean shuttingDown = false;
+
+  /**
+   * <p>How many users and/or admin consoles are currently in
+   * the process of being connected?</p>
+   */
+
+  static int loginCount = 0;
+
+  // ---
+
+  /**
+   * returns true if the server is not shutting down or otherwise
+   * forbidding logins at the moment
+   */
+
+  public static boolean loginsOk()
+  {
+    return (!GanymedeServer.shutdown && !GanymedeServer.shuttingDown);
+  }
 
   /* -- */
 
@@ -128,7 +159,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * @see arlut.csd.ganymede.Server 
    */
 
-  public synchronized Session login(Client client) throws RemoteException
+  public Session login(Client client) throws RemoteException
   {
     String clientName;
     String clientPass;
@@ -144,21 +175,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	try
 	  {
-	    if (Ganymede.db.schemaEditInProgress)
+	    if (Ganymede.db.isSchemaEditInProgress())
 	      {
 		client.forceDisconnect("Schema Edit In Progress");
-		return null;
-	      }
-	    
-	    if (Ganymede.db.sweepInProgress)
-	      {
-		client.forceDisconnect("Invid Sweep In Progress");
-		return null;
-	      }
-
-	    if (GanymedeServer.shutdown)
-	      {
-		client.forceDisconnect("Login not allowed, the Ganymede server is being shut down.");
 		return null;
 	      }
 	  }
@@ -166,205 +185,243 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    Ganymede.db.notifyAll(); // for lock code
 	  }
+
+	GanymedeServer.loginCount++;
       }
 
-    // force logins to lowercase so we can keep track of things
-    // cleanly..  we do a case insensitive match against user/persona
-    // name later on, but we want to have a canonical name to track
-    // multiple logins with.
-    
-    clientName = client.getName().toLowerCase();
-    clientPass = client.getPassword();
-
-    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
-    userQuery = new Query(SchemaConstants.UserBase, root, false);
-
-    Vector results = Ganymede.internalSession.internalQuery(userQuery);
-
-    // results.size() really shouldn't be any larger than 1, since we
-    // are doing a match on username and username is managed by a
-    // namespace in the schema.
-
-    for (int i = 0; !found && results != null && (i < results.size()); i++)
+    try
       {
-	user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
-	
-	pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-	
-	if (pdbf != null && pdbf.matchPlainText(clientPass))
+	synchronized (this)
 	  {
-	    found = true;
-	  }
-      }
-
-    // if we didn't find a user, perhaps they tried logging in by
-    // entering their persona name directly?  For the time being we
-    // are allowing this, so we'll go ahead and look for a matching
-    // persona.
-
-    if (!found)
-      {
-	// we want to match against either the persona name field or
-	// the new persona label field.  This lets us work with old
-	// versions of the database or new.  Going forward we'll
-	// want to match here against the PersonaLabelField.
-
-	// note.. this is a hack for compatibility.. the
-	// personalabelfield will always be good, but if it does not
-	// exist, we'll go ahead and match against the persona name
-	// field as long as we don't have an associated user in that
-	// persona.. this is to avoid confusing 'broccol:supergash'
-	// with 'supergash'
-
-	// the persona label field would be like 'broccol:supergash',
-	// whereas the persona name would be 'supergash', which could
-	// be confused with the supergash account.
-
-	root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
-			       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
-								  QueryDataNode.EQUALS, clientName),
-						new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
-										   QueryDataNode.DEFINED, null))));
-
-	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-
-	results = Ganymede.internalSession.internalQuery(userQuery);
-
-	// find the entry with the matching name and the matching
-	// password.  We no longer expect the PersonaNameField to be
-	// managed by a namespace, so we could conceivably get
-	// multiple matches back from our query.  This is particularly
-	// true if the user tries to log in as 'GASH Admin', which
-	// might be the "name" of many persona accounts.  In this case
-	// we'll depend on the password telling us which to match
-	// against.
-
-	// once we get all the ganymede.db files transitioned over to
-	// the new persona format, we'll probably want to just match
-	// against PersonaLabelField to avoid the possibility of
-	// ambiguous admin selection here.
-
-	for (int i = 0; !found && (i < results.size()); i++)
-	  {
-	    persona = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
-	    
-	    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
-
-	    if (pdbf == null)
+	    if (!GanymedeServer.loginsOk())
 	      {
-		System.err.println("GanymedeServer.login(): Couldn't get password for persona " + persona.getLabel());
+		client.forceDisconnect("Login not allowed, the Ganymede server is being shut down.");
+		return null;
 	      }
-	    else
+
+	    // force logins to lowercase so we can keep track of things
+	    // cleanly..  we do a case insensitive match against user/persona
+	    // name later on, but we want to have a canonical name to track
+	    // multiple logins with.
+    
+	    clientName = client.getName().toLowerCase();
+	    clientPass = client.getPassword();
+
+	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
+	    userQuery = new Query(SchemaConstants.UserBase, root, false);
+
+	    Vector results = Ganymede.internalSession.internalQuery(userQuery);
+
+	    // results.size() really shouldn't be any larger than 1, since we
+	    // are doing a match on username and username is managed by a
+	    // namespace in the schema.
+
+	    for (int i = 0; !found && results != null && (i < results.size()); i++)
 	      {
-		if (clientPass == null)
+		user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+	
+		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+	
+		if (pdbf != null && pdbf.matchPlainText(clientPass))
 		  {
-		    System.err.println("GanymedeServer.login(): null clientpass.. ");
+		    found = true;
+		  }
+	      }
+
+	    // if we didn't find a user, perhaps they tried logging in by
+	    // entering their persona name directly?  For the time being we
+	    // are allowing this, so we'll go ahead and look for a matching
+	    // persona.
+
+	    if (!found)
+	      {
+		// we want to match against either the persona name field or
+		// the new persona label field.  This lets us work with old
+		// versions of the database or new.  Going forward we'll
+		// want to match here against the PersonaLabelField.
+
+		// note.. this is a hack for compatibility.. the
+		// personalabelfield will always be good, but if it does not
+		// exist, we'll go ahead and match against the persona name
+		// field as long as we don't have an associated user in that
+		// persona.. this is to avoid confusing 'broccol:supergash'
+		// with 'supergash'
+
+		// the persona label field would be like 'broccol:supergash',
+		// whereas the persona name would be 'supergash', which could
+		// be confused with the supergash account.
+
+		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
+				       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
+									  QueryDataNode.EQUALS, clientName),
+							new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
+											   QueryDataNode.DEFINED, null))));
+
+		userQuery = new Query(SchemaConstants.PersonaBase, root, false);
+
+		results = Ganymede.internalSession.internalQuery(userQuery);
+
+		// find the entry with the matching name and the matching
+		// password.  We no longer expect the PersonaNameField to be
+		// managed by a namespace, so we could conceivably get
+		// multiple matches back from our query.  This is particularly
+		// true if the user tries to log in as 'GASH Admin', which
+		// might be the "name" of many persona accounts.  In this case
+		// we'll depend on the password telling us which to match
+		// against.
+
+		// once we get all the ganymede.db files transitioned over to
+		// the new persona format, we'll probably want to just match
+		// against PersonaLabelField to avoid the possibility of
+		// ambiguous admin selection here.
+
+		for (int i = 0; !found && (i < results.size()); i++)
+		  {
+		    persona = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+	    
+		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
+
+		    if (pdbf == null)
+		      {
+			System.err.println("GanymedeServer.login(): Couldn't get password for persona " + persona.getLabel());
+		      }
+		    else
+		      {
+			if (clientPass == null)
+			  {
+			    System.err.println("GanymedeServer.login(): null clientpass.. ");
+			  }
+			else
+			  {
+			    if (pdbf.matchPlainText(clientPass))
+			      {
+				found = true;
+			      }
+			  }
+		      } 
+		  } 
+	
+		// okay, if the user logged in directly to his persona
+		// (broccol:GASH Admin, etc.), try to find his base user
+		// account.
+	
+		if (clientName.indexOf(':') != -1)
+		  {
+		    String userName = clientName.substring(0, clientName.indexOf(':'));
+	    
+		    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
+		    userQuery = new Query(SchemaConstants.UserBase, root, false);
+	    
+		    results = Ganymede.internalSession.internalQuery(userQuery);
+
+		    if (results.size() == 1)
+		      {
+			user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+		      }
+		  }
+	      }
+
+	    if (found)
+	      {
+		// the GanymedeSession constructor calls registerActiveUser()
+		// on us, as well as directly adding itself to our sessions
+		// Vector.
+
+		GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
+		Ganymede.debug(session.username + " logged in");
+
+		Vector objects = new Vector();
+
+		if (user != null)
+		  {
+		    objects.addElement(user.getInvid());
 		  }
 		else
 		  {
-		    if (pdbf.matchPlainText(clientPass))
-		      {
-			found = true;
-		      }
+		    objects.addElement(persona.getInvid());
 		  }
-	      } 
-	  } 
-	
-	// okay, if the user logged in directly to his persona
-	// (broccol:GASH Admin, etc.), try to find his base user
-	// account.
-	
-	if (clientName.indexOf(':') != -1)
-	  {
-	    String userName = clientName.substring(0, clientName.indexOf(':'));
-	    
-	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
-	    userQuery = new Query(SchemaConstants.UserBase, root, false);
-	    
-	    results = Ganymede.internalSession.internalQuery(userQuery);
 
-	    if (results.size() == 1)
+		String clienthost;
+
+		try
+		  {
+		    clienthost = getClientHost();
+		  }
+		catch (ServerNotActiveException ex)
+		  {
+		    clienthost = "unknown";
+		  }
+
+		if (Ganymede.log != null)
+		  {
+		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
+							       "OK login for username: " + 
+							       clientName + 
+							       " from host " + 
+							       clienthost,
+							       null,
+							       clientName,
+							       objects,
+							       null));
+		  }
+
+		return (Session) session;
+	      }
+	    else
 	      {
-		user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+		String clienthost;
+
+		try
+		  {
+		    clienthost = getClientHost();
+		  }
+		catch (ServerNotActiveException ex)
+		  {
+		    clienthost = "unknown";
+		  }
+
+		Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
+
+		if (Ganymede.log != null)
+		  {
+		    Vector recipients = new Vector();
+
+		    //	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
+
+		    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+							       "Bad login attempt for username: " + 
+							       clientName + " from host " + 
+							       clienthost,
+							       null,
+							       clientName,
+							       null,
+							       recipients));
+		  }
+
+		return null;
 	      }
 	  }
       }
-
-    if (found)
+    finally
       {
-	GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
- 	Ganymede.debug(session.username + " logged in");
-
-	Vector objects = new Vector();
-
-	if (user != null)
-	  {
-	    objects.addElement(user.getInvid());
-	  }
-	else
-	  {
-	    objects.addElement(persona.getInvid());
-	  }
-
-	String clienthost;
-
-	try
-	  {
-	    clienthost = getClientHost();
-	  }
-	catch (ServerNotActiveException ex)
-	  {
-	    clienthost = "unknown";
-	  }
-
-	if (Ganymede.log != null)
-	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
-						       "OK login for username: " + 
-						       clientName + 
-						       " from host " + 
-						       clienthost,
-						       null,
-						       clientName,
-						       objects,
-						       null));
-	  }
-
-	return (Session) session;
+	GanymedeServer.loginCount--;
       }
-    else
-      {
-	String clienthost;
+  }
 
-	try
-	  {
-	    clienthost = getClientHost();
-	  }
-	catch (ServerNotActiveException ex)
-	  {
-	    clienthost = "unknown";
-	  }
+  public synchronized boolean assertLoggingIn()
+  {
+  }
 
-	Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
+  public synchronized boolean clearLoggingIn()
+  {
+  }
 
-	if (Ganymede.log != null)
-	  {
-	    Vector recipients = new Vector();
+  public synchronized boolean assertEditLock()
+  {
+  }
 
-	    //	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
-
-	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-						       "Bad login attempt for username: " + 
-						       clientName + " from host " + 
-						       clienthost,
-						       null,
-						       clientName,
-						       null,
-						       recipients));
-	  }
-
-	return null;
-      }
+  public synchronized boolean clearEditLock()
+  {
   }
 
   /**
@@ -372,21 +429,27 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * scheduled task, and forces an idle time check on any users logged in.
    */
 
-  public synchronized void clearIdleSessions()
+  public void clearIdleSessions()
   {
-    for (int i = 0; i < sessions.size(); i++)
+    synchronized (sessions)
       {
-	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
-	session.timeCheck();
+	for (int i = 0; i < sessions.size(); i++)
+	  {
+	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+	    session.timeCheck();
+	  }
       }
   }
 
-  public synchronized void killAllUsers(String reason)
+  public void killAllUsers(String reason)
   {
-    for (int i = 0; i < sessions.size(); i++)
+    synchronized (sessions)
       {
-	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
-	session.forceOff(reason);
+	for (int i = 0; i < sessions.size(); i++)
+	  {
+	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+	    session.forceOff(reason);
+	  }
       }
   }
 
@@ -395,26 +458,29 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * class to kick a specific user off of the server.
    */
 
-  public synchronized boolean killUser(String username, String reason)
+  public boolean killUser(String username, String reason)
   {
-    for (int i = 0; i < sessions.size(); i++)
+    synchronized (sessions)
       {
-	GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
+	for (int i = 0; i < sessions.size(); i++)
+	  {
+	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
 
-	if (session.personaName != null)
-	  {
-	    if (session.personaName.equals(username))
+	    if (session.personaName != null)
 	      {
-		session.forceOff(reason);
-		return true;
+		if (session.personaName.equals(username))
+		  {
+		    session.forceOff(reason);
+		    return true;
+		  }
 	      }
-	  }
-	else
-	  {
-	    if (session.username.equals(username))
+	    else
 	      {
-		session.forceOff(reason);
-		return true;
+		if (session.username.equals(username))
+		  {
+		    session.forceOff(reason);
+		    return true;
+		  }
 	      }
 	  }
       }
@@ -610,7 +676,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * @see arlut.csd.ganymede.Server
    */
 
-  public adminSession admin(Admin admin) throws RemoteException
+  public synchronized adminSession admin(Admin admin) throws RemoteException
   {
     String clientName;
     String clientPass;
@@ -624,6 +690,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     String clienthost;
 
     /* -- */
+
+    if (!GanymedeServer.loginsOk())
+      {
+	throw new RuntimeException("Can't connect admin console to server.. server going down.");
+      }
 
     clientName = admin.getName();
     clientPass = admin.getPassword();
@@ -721,8 +792,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
 
     // creating a new GanymedeAdmin can block if we are currently
-    // looping over the connected consoles.. that's why this method
-    // isn't synchronized.
+    // looping over the connected consoles.
 
     adminSession aSession = new GanymedeAdmin(admin, fullprivs, clientName, clienthost);
 
@@ -753,7 +823,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * method to put the server into 'shutdown soon' mode.</p>
    */
 
-  public static synchronized void setShutdown()
+  public static void setShutdown()
   {
     GanymedeServer.shutdown = true;
     GanymedeAdmin.setState("Server going down.. waiting for users to log out");
@@ -770,6 +840,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     GanymedeAdmin atmp;
 
     /* -- */
+
+    GanymedeServer.shuttingDown = true;
 
     GanymedeAdmin.setState("Server going down.. performing final dump");
 
@@ -795,9 +867,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     tempList = new Vector();
 
-    for (int i = 0; i < sessions.size(); i++)
+    synchronized (sessions)
       {
-	tempList.addElement(sessions.elementAt(i));
+	for (int i = 0; i < sessions.size(); i++)
+	  {
+	    tempList.addElement(sessions.elementAt(i));
+	  }
       }
 
     for (int i = 0; i < tempList.size(); i++)
@@ -860,7 +935,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    *
    */
 
-  public synchronized void dump()
+  public void dump()
   {
     try
       {
@@ -883,7 +958,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    *
    */
 
-  public synchronized boolean sweepInvids()
+  public boolean sweepInvids()
   {
     Enumeration
       enum1, enum2, enum3, enum4;
@@ -921,19 +996,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	try
 	  {
-	    if (Ganymede.db.schemaEditInProgress)
+	    if (Ganymede.db.isSchemaEditInProgress())
 	      {
 		Ganymede.debug("GanymedeServer.sweepInvids(): aborting.. schema edit in progress");
 		return false;
 	      }
-
-	    if (Ganymede.db.sweepInProgress)
-	      {
-		Ganymede.debug("GanymedeServer.sweepInvids(): aborting.. sweep already in progress");
-		return false;
-	      }
-	    
-	    Ganymede.db.sweepInProgress = true;
 	  }
 	finally
 	  {
@@ -941,117 +1008,128 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
 
-    // loop 1: iterate over the object bases
+    DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
-    enum1 = Ganymede.db.objectBases.elements();
-
-    while (enum1.hasMoreElements())
+    try
       {
-	base = (DBObjectBase) enum1.nextElement();
+	lock.establish("sweepInvids"); // wait until we get our lock
+      }
+    catch (InterruptedException ex)
+      {
+      }
 
-	Ganymede.debug("GanymedeServer.sweepInvids(): sweeping " + base);
+    try
+      {
+	// loop 1: iterate over the object bases
 
-	// loop 2: iterate over the objects in the current object base
+	enum1 = Ganymede.db.objectBases.elements();
 
-	enum2 = base.objectTable.elements();
-
-	while (enum2.hasMoreElements())
+	while (enum1.hasMoreElements())
 	  {
-	    object = (DBObject) enum2.nextElement();
+	    base = (DBObjectBase) enum1.nextElement();
 
-	    removeVector = new Vector();
+	    Ganymede.debug("GanymedeServer.sweepInvids(): sweeping " + base);
 
-	    // loop 3: iterate over the fields present in this object
+	    // loop 2: iterate over the objects in the current object base
 
-	    enum3 = object.fields.elements();
+	    enum2 = base.objectTable.elements();
 
-	    while (enum3.hasMoreElements())
+	    while (enum2.hasMoreElements())
 	      {
-		field = (DBField) enum3.nextElement();
+		object = (DBObject) enum2.nextElement();
 
-		if (!(field instanceof InvidDBField))
+		removeVector = new Vector();
+
+		// loop 3: iterate over the fields present in this object
+
+		enum3 = object.fields.elements();
+
+		while (enum3.hasMoreElements())
 		  {
-		    continue;	// only check invid fields
-		  }
+		    field = (DBField) enum3.nextElement();
 
-		iField = (InvidDBField) field;
-
-		if (iField.isVector())
-		  {
-		    tempVector = iField.getVectVal();
-		    vectorEmpty = true;
-
-		    // clear out the invid's held in this field pending
-		    // successful lookup
-
-		    iField.value = new Vector(); 
-
-		    // iterate over the invid's held in this vector
-		    
-		    enum4 = tempVector.elements();
-
-		    while (enum4.hasMoreElements())
+		    if (!(field instanceof InvidDBField))
 		      {
-			invid = (Invid) enum4.nextElement();
+			continue;	// only check invid fields
+		      }
 
-			if (session.viewDBObject(invid) != null)
+		    iField = (InvidDBField) field;
+
+		    if (iField.isVector())
+		      {
+			tempVector = iField.getVectVal();
+			vectorEmpty = true;
+
+			// clear out the invid's held in this field pending
+			// successful lookup
+
+			iField.value = new Vector(); 
+
+			// iterate over the invid's held in this vector
+		    
+			enum4 = tempVector.elements();
+
+			while (enum4.hasMoreElements())
 			  {
-			    iField.getVectVal().addElement(invid); // keep this invid
-			    vectorEmpty = false;
+			    invid = (Invid) enum4.nextElement();
+
+			    if (session.viewDBObject(invid) != null)
+			      {
+				iField.getVectVal().addElement(invid); // keep this invid
+				vectorEmpty = false;
+			      }
+			    else
+			      {
+				Ganymede.debug("Removing invid: " + invid + 
+					       " from vector field " + iField.getName() +
+					       " from object " +  base.getName() + 
+					       ":" + object.getLabel());
+				swept = true;
+			      }
 			  }
-			else
+
+			// now, if the vector is totally empty, we'll be removing
+			// this field from definition
+
+			if (vectorEmpty)
 			  {
+			    removeVector.addElement(new Short(iField.getID()));
+			  }
+		      }
+		    else
+		      {
+			invid = (Invid) iField.value;
+
+			if (session.viewDBObject(invid) == null)
+			  {
+			    swept = true;
+			    removeVector.addElement(new Short(iField.getID()));
+
 			    Ganymede.debug("Removing invid: " + invid + 
-					   " from vector field " + iField.getName() +
+					   " from scalar field " + iField.getName() +
 					   " from object " +  base.getName() + 
 					   ":" + object.getLabel());
-			    swept = true;
 			  }
 		      }
-
-		    // now, if the vector is totally empty, we'll be removing
-		    // this field from definition
-
-		    if (vectorEmpty)
-		      {
-			removeVector.addElement(new Short(iField.getID()));
-		      }
 		  }
-		else
+
+		// need to remove undefined fields now
+
+		for (int i = 0; i < removeVector.size(); i++)
 		  {
-		    invid = (Invid) iField.value;
+		    object.fields.remove(((Short) removeVector.elementAt(i)).shortValue());
 
-		    if (session.viewDBObject(invid) == null)
-		      {
-			swept = true;
-			removeVector.addElement(new Short(iField.getID()));
-
-			Ganymede.debug("Removing invid: " + invid + 
-				       " from scalar field " + iField.getName() +
-				       " from object " +  base.getName() + 
-				       ":" + object.getLabel());
-		      }
+		    Ganymede.debug("Undefining (now) empty field: " + 
+				   removeVector.elementAt(i) +
+				   " from object " +  base.getName() + 
+				   ":" + object.getLabel());
 		  }
-	      }
-
-	    // need to remove undefined fields now
-
-	    for (int i = 0; i < removeVector.size(); i++)
-	      {
-		object.fields.remove(((Short) removeVector.elementAt(i)).shortValue());
-
-		Ganymede.debug("Undefining (now) empty field: " + 
-			       removeVector.elementAt(i) +
-			       " from object " +  base.getName() + 
-			       ":" + object.getLabel());
 	      }
 	  }
       }
-
-    synchronized (Ganymede.db)
+    finally
       {
-	Ganymede.db.sweepInProgress = false;
-	Ganymede.db.notifyAll(); // for lock code
+	lock.release();
       }
 
     Ganymede.debug("GanymedeServer.sweepInvids(): completed");
@@ -1074,7 +1152,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * the database
    */
 
-  public synchronized boolean checkInvids()
+  public boolean checkInvids()
   {
     Enumeration
       enum1, enum2, enum3, enum4;
@@ -1105,13 +1183,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	try
 	  {
-	    if (Ganymede.db.schemaEditInProgress ||
-		Ganymede.db.sweepInProgress)
+	    if (Ganymede.db.isSchemaEditInProgress())
 	      {
 		return false;
 	      }
-	    
-	    Ganymede.db.sweepInProgress = true;
 	  }
 	finally
 	  {
@@ -1119,88 +1194,99 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
 
-    // loop over the object bases
+    DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
-    enum1 = Ganymede.db.objectBases.elements();
-
-    while (enum1.hasMoreElements())
+    try
       {
-	base = (DBObjectBase) enum1.nextElement();
+	lock.establish("checkInvids"); // wait until we get our lock
+      }
+    catch (InterruptedException ex)
+      {
+      }
 
-	// loop over the objects in this base
+    try
+      {
+	// loop over the object bases
 
-	Ganymede.debug("Testing invid links for objects of type " + base.getName());
-	
-	enum2 = base.objectTable.elements();
+	enum1 = Ganymede.db.objectBases.elements();
 
-	while (enum2.hasMoreElements())
+	while (enum1.hasMoreElements())
 	  {
-	    object = (DBObject) enum2.nextElement();
+	    base = (DBObjectBase) enum1.nextElement();
 
-	    //	Ganymede.debug("Testing invid links for object " + object.getLabel());
+	    // loop over the objects in this base
 
-	    // loop over the fields in this object	    
+	    Ganymede.debug("Testing invid links for objects of type " + base.getName());
+	
+	    enum2 = base.objectTable.elements();
 
-	    enum3 = object.fields.elements();
-
-	    while (enum3.hasMoreElements())
+	    while (enum2.hasMoreElements())
 	      {
-		field = (DBField) enum3.nextElement();
+		object = (DBObject) enum2.nextElement();
 
-		// we only care about invid fields
+		//	Ganymede.debug("Testing invid links for object " + object.getLabel());
 
-		if (!(field instanceof InvidDBField))
+		// loop over the fields in this object	    
+
+		enum3 = object.fields.elements();
+
+		while (enum3.hasMoreElements())
 		  {
-		    continue;
-		  }
+		    field = (DBField) enum3.nextElement();
 
-		iField = (InvidDBField) field;
+		    // we only care about invid fields
+
+		    if (!(field instanceof InvidDBField))
+		      {
+			continue;
+		      }
+
+		    iField = (InvidDBField) field;
 		
-		if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+		    if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+		      {
+			ok = false;
+		      }
+		  }
+	      }
+	  }
+
+	synchronized (Ganymede.db.backPointers)
+	  {
+	    Ganymede.debug("Testing Ganymede backPointers hash structure for validity");
+	    Ganymede.debug("Ganymede backPointers hash structure tracking " + Ganymede.db.backPointers.size() +
+			   " invid's.");
+
+	    Enumeration keys = Ganymede.db.backPointers.keys();
+
+	    while (keys.hasMoreElements())
+	      {
+		Invid key = (Invid) keys.nextElement();
+		Hashtable ptrTable = (Hashtable) Ganymede.db.backPointers.get(key);
+		Enumeration backpointers = ptrTable.keys();
+
+		while (backpointers.hasMoreElements())
 		  {
-		    ok = false;
+		    Invid backTarget = (Invid) backpointers.nextElement();
+
+		    if (session.viewDBObject(backTarget) == null)
+		      {
+			ok = false;
+		    
+			Ganymede.debug("*** Backpointers hash for object " +
+				       Ganymede.internalSession.describe(key) +
+				       " has an invid pointing to a non-existent object: " + backTarget);
+		      }
 		  }
 	      }
 	  }
       }
-
-    synchronized (Ganymede.db.backPointers)
+    finally
       {
-	Ganymede.debug("Testing Ganymede backPointers hash structure for validity");
-	Ganymede.debug("Ganymede backPointers hash structure tracking " + Ganymede.db.backPointers.size() +
-		       " invid's.");
-
-	Enumeration keys = Ganymede.db.backPointers.keys();
-
-	while (keys.hasMoreElements())
-	  {
-	    Invid key = (Invid) keys.nextElement();
-	    Hashtable ptrTable = (Hashtable) Ganymede.db.backPointers.get(key);
-	    Enumeration backpointers = ptrTable.keys();
-
-	    while (backpointers.hasMoreElements())
-	      {
-		Invid backTarget = (Invid) backpointers.nextElement();
-
-		if (session.viewDBObject(backTarget) == null)
-		  {
-		    ok = false;
-		    
-		    Ganymede.debug("*** Backpointers hash for object " +
-				   Ganymede.internalSession.describe(key) +
-				   " has an invid pointing to a non-existent object: " + backTarget);
-		  }
-	      }
-	  }
+	lock.release();
       }
 
     Ganymede.debug("Ganymede invid link test complete");
-
-    synchronized (Ganymede.db)
-      {
-	Ganymede.db.sweepInProgress = false;
-	Ganymede.db.notifyAll(); // for lock code, probably not necessary here
-      }
 
     return ok;
   }

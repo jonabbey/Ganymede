@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/01/13 02:12:54 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/01/26 04:49:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.36 $ %D%
+ * @version $Revision: 1.37 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -762,7 +762,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * out.  No new users will be allowed to login.
    */
 
-  public synchronized ReturnVal shutdown(boolean waitForUsers)
+  public ReturnVal shutdown(boolean waitForUsers)
   {
     GanymedeSession temp;
     GanymedeAdmin atmp;
@@ -794,7 +794,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * <P>dump the current state of the db to disk</P>
    */
 
-  public synchronized ReturnVal dumpDB()
+  public ReturnVal dumpDB()
   {
     if (!fullprivs)
       {
@@ -827,7 +827,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * <P>dump the current db schema to disk</P>
    */
 
-  public synchronized ReturnVal dumpSchema()
+  public ReturnVal dumpSchema()
   {
     if (!fullprivs)
       {
@@ -872,58 +872,66 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * <P>Better to shutdown and restart the server.</P>
    */
 
-  public synchronized ReturnVal reloadCustomClasses()
+  public ReturnVal reloadCustomClasses()
   {
-    Enumeration enum;
-    DBObjectBase base;
+    return Ganymede.createErrorDialog("Not implemented",
+				      "This function never really worked, and has been removed to simplify the code.");
 
-    /* -- */
-    
-    synchronized (Ganymede.server)
+    /*
+      Enumeration enum;
+      DBObjectBase base;
+
+      synchronized (Ganymede.server)
       {
-	if (GanymedeServer.sessions.size() != 0)
-	  {
-	    return Ganymede.createErrorDialog("Can't reload classes",
-					      "Can't reload classes, users logged in");
-	  }
-	else if (!Ganymede.db.schemaEditInProgress)
-	  {
-	    Ganymede.db.schemaEditInProgress = true;
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("Can't reload classes",
-					      "Can't reload classes, schema edit already in progress");
-	  }
+      if (GanymedeServer.loginCount != 0 || GanymedeServer.sessions.size() != 0)
+      {
+      return Ganymede.createErrorDialog("Can't reload classes",
+      "Can't reload classes, users logged in");
+      }
+      else if (!Ganymede.db.schemaEditInProgress)
+      {
+      Ganymede.db.setSchemaeditinprogress(true);
+      }
+      else
+      {
+      return Ganymede.createErrorDialog("Can't reload classes",
+      "Can't reload classes, schema edit already in progress");
+      }
+      }
+      
+      synchronized (Ganymede.db)
+      {
+      try
+      {
+      Ganymede.debug("entering reloadCustomClasses synchronization block");
+      
+      enum = Ganymede.db.objectBases.elements();
+      
+      if (enum != null)
+      {
+      while (enum.hasMoreElements())
+      {
+      base = (DBObjectBase) enum.nextElement();
+      
+      // force reload of class
+      
+      base.reloadCustomClass();
+      }
+      }
+      }
+      finally
+      {
+      Ganymede.db.notifyAll(); // in case a DBLock caught on our sync
+      }
+      }
+      
+      synchronized (Ganymede.server)
+      {
+      Ganymede.db.setSchemaEditInProgress(false);
       }
 
-    synchronized (Ganymede.db)
-      {
-	Ganymede.debug("entering reloadCustomClasses synchronization block");
-
-	enum = Ganymede.db.objectBases.elements();
-
-	if (enum != null)
-	  {
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-
-		// force reload of class
-
-		base.reloadCustomClass();
-	      }
-	  }
-
-	Ganymede.db.notifyAll(); // in case a DBLock caught on our sync
-      }
-
-    synchronized (Ganymede.server)
-      {
-	Ganymede.db.schemaEditInProgress = false;
-      }
-
-    return null;
+      return null;
+    */
   }
 
   /**
@@ -1100,14 +1108,14 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     synchronized (Ganymede.server)
       {
-	if (GanymedeServer.sessions.size() != 0)
+	if (GanymedeServers.loginCount != 0 || GanymedeServer.sessions.size() != 0)
 	  {
 	    Ganymede.debug("Can't edit Schema, users logged in");
 	    return null;
 	  }
-	else if (!Ganymede.db.schemaEditInProgress)
+	else if (!Ganymede.db.isSchemaEditInProgress())
 	  {
-	    Ganymede.db.schemaEditInProgress = true;
+	    Ganymede.db.setSchemaEditInProgress(true);
 	  }
 	else
 	  {
@@ -1136,7 +1144,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 		if (base.isLocked())
 		  {
 		    Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
-		    Ganymede.db.schemaEditInProgress = false;
+		    Ganymede.db.setSchemaEditInProgress(false);
 		    return null;
 		  }
 	      }

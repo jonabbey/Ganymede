@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 1999/11/20 00:01:53 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2000/01/26 04:49:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.98 $ %D%
+ * @version $Revision: 1.99 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -161,12 +161,6 @@ public class DBStore {
    */
 
   boolean schemaEditInProgress;
-
-  /** 
-   * lock for invid sweep
-   */
-
-  boolean sweepInProgress;	
   
   /**
    * to keep track of what ID to assign to new user-space object types
@@ -297,11 +291,26 @@ public class DBStore {
       }
     catch (RemoteException ex)
       {
+	// we shouldn't ever get here unless there is something wrong
+	// with the RMI system or the Java environment
+
+	System.err.println("Caught DBBaseCategory ex: " + ex.getMessage());
+	ex.printStackTrace();
 	throw new Error("couldn't initialize rootCategory");
       }
 
     schemaEditInProgress = false;
     GanymedeAdmin.setState("Normal Operation");
+  }
+
+  public boolean isSchemaEditInProgress()
+  {
+    return schemaEditInProgress;
+  }
+
+  public void setSchemaEditInProgress(boolean b)
+  {
+    schemaEditInProgress = b;
   }
 
   /**
@@ -320,7 +329,7 @@ public class DBStore {
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void load(String filename, boolean reallyLoad)
+  public void load(String filename, boolean reallyLoad)
   {
     load(filename, reallyLoad, true);
   }
@@ -818,7 +827,7 @@ public class DBStore {
   {
     try
       {
-	if (schemaEditInProgress)
+	if (isSchemaEditInProgress())
 	  {
 	    Ganymede.debug("DBStore.dumpSchema(): schema being edited, dump aborted");
 	  }

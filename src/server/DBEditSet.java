@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 1999/11/16 08:36:07 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2000/01/26 04:49:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -145,7 +145,7 @@ public class DBEditSet {
    * when this transaction is committed.</p>
    */
 
-  Hashtable basesModified;
+  private Hashtable basesModified;
 
   /**
    * Who's our daddy?
@@ -1547,7 +1547,15 @@ public class DBEditSet {
 
 	// clear out any checkpoints that may be lingering
 
-	checkpoints = new Stack();
+	checkpoints.setSize(0);
+
+	// reset the basesModified hash
+
+	basesModified.clear();
+
+	// and the noDeleteLocks hash
+
+	noDeleteLocks.clear();
 
 	// we're going to return a ReturnVal with doNormalProcessing set to
 	// false to let everyone above us know that we've totally cleared
@@ -1731,7 +1739,9 @@ public class DBEditSet {
 
     objects = null;
     session = null;
-    checkpoints = new Stack();
+    checkpoints.setSize(0);
+    basesModified.clear();
+    noDeleteLocks.clear();
   }
 
   /**
