@@ -1,0 +1,99 @@
+#!/opt/bin/perl5
+#
+# This script is designed to assist the Ganymede server by
+# quickly scanning through the Ganymede log file and printing
+# out only those lines which relate to a specified object
+# id.  The Ganymede server is not very efficient at doing this,
+# and by using an external filtering program the Ganymede server
+# can provide object history from its log file much much
+# more quickly than if the server had to filter out all the
+# irrelevant history details itself with the current server code.
+#
+# $Revision: 1.1 $
+# $Date: 2000/07/13 20:17:58 $
+# $Name:  $
+#
+# Robbie Sternenberg
+# robbie@arlut.utexas.edu
+#
+# Jonathan Abbey
+# jonabbey@arlut.utexas.edu
+#
+############################################################
+
+$file = "/var/ganymede/db/log";
+
+if (@ARGV == 0) {
+  die "Usage: logscan.pl (invid number) (-a for admin invid search)\n";
+}
+
+# which field in the log lines are we going to look at for the invid
+# we're filtering on?
+
+$fieldindex = 6;
+
+# parse for command line options
+
+while ($_ = $ARGV[0]) {
+  shift;
+
+  # param for admin invid search, else object invid search
+
+  if ($_ eq "-a") {
+    $fieldindex = 3;
+  }
+
+  # Regexp for invid num search
+
+  if (/^[0-9]+:[0-9]+$/) {
+    $invid = $_;
+  }
+}
+
+if (!defined $invid) {
+  die "Usage: logscan.pl (invid number) (-a for admin invid search)\n";
+}
+
+#
+# Okay, we've got everything we need, now.. go ahead and scan through
+# the log file
+#
+
+open FILE, $file || die "Couldn't open $file.\n";
+
+while (<FILE>) {
+
+  # see if line has invid in it
+
+  if (/$invid/) {
+    
+    @fields = split(/\|/);
+    
+    if (@fields[$fieldindex] =~ /$invid/) {
+      
+      print $_;
+
+      # we want to show all events in a transaction block, even
+      # the endtransaction events which don't include the object
+      # invids that we are scanning for.  So, when we see a
+      # starttransaction, we just print out lines for as long
+      # as we see the transaction id.
+
+      if (@fields[2] =~ /starttransaction/) {					
+
+	$pid = @fields[0];
+
+	while ($pid) {
+	  $_ = <FILE>;
+	  
+	  if (/$pid/) {
+	    print $_;
+	  } else {
+	    $pid = 0;
+	  }
+	}
+      }
+    }
+  }
+}
+

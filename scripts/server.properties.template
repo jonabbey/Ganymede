@@ -159,6 +159,66 @@ ganymede.monitorname=monitor
 ganymede.defaultmonitorpass=display
 
 
+# ganymede.softtimeout
+#
+# If true, the Ganymede server will handle timeouts by
+# ordering the Ganymede client to downshift from a privileged
+# admin account to an unprivileged login.  If the client
+# does not respond to the downshift command, the server
+# will proceed to force the client off using the hard
+# time out logic.
+#
+# If a user is logged in without any extended admin privileges
+# (that is, without being logged into an admin persona),
+# the user will never be timed out, unless their client dies.
+#
+# If the user is logged in with supergash privileges, the server
+# will perform a hard timeout.
+#
+# Usage:
+#
+# ganymede.softtimeout=true
+#
+# or
+#
+# ganymede.softtimeout=false
+#
+# If the ganymede.softtimeout property is commented out, it is
+# treated as false.
+
+ganymede.softtimeout=true
+
+
+# ganymede.timeoutIdleNoObjs
+#
+# This property defines how many minutes a client is allowed
+# to be idle with no objects checked out before the Ganymede
+# server forces a timeout.
+#
+# If ganymede.softtimeout is set to true, the timeout will
+# consist of the server sending the client a timeout message,
+# which the client is meant to respond to by shifting down
+# to the user's non-privileged login.  If the user is
+# supergash, then timeout will always be a force-off.
+
+ganymede.timeoutIdleNoObjs=15
+
+
+# ganymede.timeoutIdleWithObjs
+#
+# This property defines how many minutes a client is allowed
+# to be idle with objects checked out before the Ganymede
+# server forces a timeout.
+#
+# If ganymede.softtimeout is set to true, the timeout will
+# consist of the server sending the client a timeout message,
+# which the client is meant to respond to by shifting down
+# to the user's non-privileged login.  If the user is
+# supergash, then timeout will always be a force-off.
+
+ganymede.timeoutIdleWithObjs=20
+
+
 # ganymede.helpbase
 #
 # The url for the root of the Ganymede help document tree.
