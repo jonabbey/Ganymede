@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 1999/03/04 19:30:01 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 1999/03/09 17:16:20 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -488,7 +488,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     personaListener = new PersonaListener(session, this);
 
-    if (personae != null)
+    if ((personae != null) && personae.size() > 1)
       {
 	changePersonaMI = new JMenuItem("Change Persona");
 	changePersonaMI.setMnemonic('p');
@@ -877,13 +877,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     }
 
-
+    toolBar.revalidate();
 
     // If user has multiple personas, ask which to start with.
 
     if ((personae != null)  && personae.size() > 1)
       {
 	changePersona(); // bring up change persona dialog
+	personaDialog.updatePassField(currentPersonaString);
       }
 
     // Check for MOTD
