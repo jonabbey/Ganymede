@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,6 +51,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     helpBase = null;
 
   public static Properties ganymedeProperties = null;
+
+  // ---
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
@@ -173,7 +175,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public void init() 
   {
-    System.out.println("init in glogin");
+    if (debug)
+      {
+	System.out.println("init in glogin");
+      }
 
     my_glogin = this;
     
@@ -345,6 +350,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      {
 		System.out.println("Could not start up the ClientBase, trying again..." + rx);
 	      }
+
 	    try 
 	      {
 		// Wait for 1 sec before retrying to connect to server
@@ -547,8 +553,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
   }
 
-
   // These are for the ClientListener
+
   public void messageReceived(ClientEvent e)
   {
     if (debug)
@@ -571,6 +577,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // server, then it will wait all day without ever showing the
     // dialog.  So we spawn this thread, to kill the client off after
     // 2 minutes even if the dialog never shows.
+
     if (! isApplet())
       {
 	if (debug)
@@ -603,10 +610,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	System.exit(0);
       }
-      
   }
-
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      ExitThread
+
+------------------------------------------------------------------------------*/
 
 class ExitThread extends Thread {
 
