@@ -23,7 +23,7 @@ That doesn't mean that the server will be able to behave well with 2
 billion items in a String field, but there at least won't be an
 artificial cap of 32k items anymore.
 
-2. [SERVER] Fixed scheduler to allow enabling/disabling on demand tasks
+2. [SERVER] Fixed scheduler to allow enabling/disabling of on demand tasks
 
 The Ganymede scheduler code to handle task enabling/disabling from the
 admin console had a bug that prevented it from being able to handle on
@@ -37,7 +37,16 @@ client-side cache structure, making the re-use of the querybox
 impossible after the client was forcibly timed out.
 
 The querybox now takes care to get an updated reference to the caching
-structures it needs.
+structures it needs, so that re-use of the client querybox after
+a forced time out will not cause an exception to be thrown.
+
+4. [SERVER] Implemented LANMAN and NTMD4 hash support in the XML system
+
+The server's xmlfield code was missing support for processing the
+"lanman" and "ntmd4" XML attributes for the <password> element in the
+Ganymede XML file format when loading data.  This support has now been
+added, and it should now be possible to write scripts to load user
+accounts, passwords included, from a Samba password file.
 
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
