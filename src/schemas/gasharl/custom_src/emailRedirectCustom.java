@@ -6,8 +6,8 @@
    
    Created: 25 June 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2002/04/10 04:59:49 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2002/04/10 05:17:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -186,8 +186,9 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
     if (!fitsInNIS(newItemVect))
       {
 	return Ganymede.createErrorDialog("Overflow error",
-					  "Error, can't add to " + getTypeName() + ":" + 
-					  getLabel() + " without overflowing the NIS line length limit.");
+					  "The address that you are attempting to add to the " + getTypeName() + 
+					  " email redirection cannot all fit.  No NIS email alias definition in the laboratory's " +
+					  "network can be longer than 1024 characters.");
       }
 
     return null;
@@ -223,9 +224,11 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
     if (!fitsInNIS(submittedValues))
       {
 	return Ganymede.createErrorDialog("Overflow error",
-					  "Error, can't add all " + submittedValues.size() + 
-					  " new items to " + getTypeName() + ":" + 
-					  getLabel() + " without overflowing the NIS line length limit.");
+					  "The " + submittedValues.size() + 
+					  " addresses that you are attempting to add to the " + getTypeName() + 
+					  " email redirection cannot all fit.  No NIS email list in the laboratory's " +
+					  "network can be longer than 1024 characters when converted to an " +
+					  "NIS email alias definition.");
       }
 
     return null;
