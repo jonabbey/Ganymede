@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -187,6 +187,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == interfaceSchema.IPNET)
       {
+	// we don't want to mess with the available-network
+	// management code if we are doing bulk-loading.
+
+	if (!gSession.enableOversight)
+	  {
+	    return true;
+	  }
+
 	// we're changing the IP net.. make sure our parent is ok with us
 	// taking the new net.
 	
