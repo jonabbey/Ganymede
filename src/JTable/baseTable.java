@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.16 $ %D%
+  Version: $Revision: 1.17 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,10 +69,10 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.16 $ %D%
+ * @version $Revision: 1.17 $ %D%
  */
 
-public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
+public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
   
   static final boolean debug = false;
 
@@ -1790,7 +1790,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
 ------------------------------------------------------------------------------*/
 
-class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener {
+class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
   static final int colgrab = 4;
