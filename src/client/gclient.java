@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.109 $ %D%
+   Version: $Revision: 1.110 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -259,7 +259,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   JMenuItem 
     logoutMI,
-    removeAllMI,
     clearTreeMI,
     filterQueryMI,
     defaultOwnerMI,
@@ -379,10 +378,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     logoutMI.addActionListener(this);
 
     clearTreeMI = new JMenuItem("Clear Tree");
+    clearTreeMI.setMnemonic('c');
     clearTreeMI.addActionListener(this);
 
     filterQueryMI = new JMenuItem("Filter Query");
-    filterQueryMI.setMnemonic('a');
+    filterQueryMI.setMnemonic('f');
     filterQueryMI.addActionListener(this);
     defaultOwnerMI = new JMenuItem("Set Default Owner");
     defaultOwnerMI.setMnemonic('s');
