@@ -22,6 +22,22 @@ I fixed the pop-up calendar's reversion handling for when the user
 attempts to change the date/time in a date field and chooses a date
 that is out of range.
 
+3. [CLIENT] Enhanced list GUI boxes in the client
+
+The client's JstringListBox and StringSelector components have
+had their behavior enhanced, with a 'select all' button added
+at the top of the StringSelector, and with the JstringListBox
+keeping all items added selected, to allow easy undo of
+item moves.
+
+The JstringListBox is now capable of supporting item dragging
+in the list.
+
+4. [CLIENT] Enhanced query box
+
+The query box now uses a pair of StringSelectors to represent
+the list of field choices rather than a bunch of checkboxes.
+
 -------------------- Changes from 1.02 to 1.03 -------------------
 
 RELEASE DATE: June 22, 2001
