@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,7 +154,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     editable = original.editable;
     removable = original.removable;
-    editInPlace = original.editInPlace;
     visibility = original.visibility;
     builtIn = original.builtIn;
 
@@ -162,6 +161,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     comment = original.comment;
     classdef = original.classdef; // class object containing the code managing dbfields of this type
     array = original.array;	// true if this field is an array type
+    limit = original.limit;
 
     labeled = original.labeled;
     trueLabel = original.trueLabel;
@@ -171,9 +171,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     maxLength = original.maxLength;
     okChars = original.okChars;
     badChars = original.badChars;
-    namespace = original.namespace;
+    namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
     caseInsensitive = original.caseInsensitive;
 
+    editInPlace = original.editInPlace;
     allowedTarget = original.allowedTarget;
     targetField = original.targetField;
 
