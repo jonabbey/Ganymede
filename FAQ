@@ -203,7 +203,37 @@ something to say about it as well.
 
    For the feedback is the life.
 
-11) Where's the Ganymede web site?
+11) Why is it called Ganymede?
+
+   It's actually an acronym, standing for GAsh Network Manager, Deluxe
+Edition.  I wanted a name that connected this project to GASH, and I
+just couldn't come up with any great names that involved GASH in some
+fashion (I did come up with a lot of really bad names, though...)
+
+12) What is Ganymede's development history like?
+
+   Ganymede is the successor to GASH, the Group Admin Shell, which was
+developed at ARL starting in early 1993, and which was presented at
+the USENIX LISA VIII conference in San Diego, CA in September, 1994.
+Refinements and further development of GASH continued into mid-1995,
+before we decided that the GASH design wouldn't carry us much further
+without massive pain and effort.
+
+   Initial work on spec'ing Ganymede started in late 1995.  After
+several months of planning on pen and paper, active code development
+started around June 1996.  In March 1998, the first binary developer's
+pre-release was put on the ftp site.  In December 1998, we presented
+Ganymede at the USENIX LISA XII conference in Boston, MA.  The first
+full source distribution, under GPL licensing, was sent out in
+January, 1999.  Development and refinement has continued since then.
+
+   For the majority of that time, there has probably been on average
+1.5 developers working on the code.  Doing Ganymede in Java rather
+than in something like C or C++ made it possible.  We still wound up
+with the massive pain and effort, however.  Hopefully it'll be useful
+to people.
+
+13) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
