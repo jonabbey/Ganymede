@@ -5,7 +5,7 @@
    This file is a management class for NFS volume objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -134,6 +134,25 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
       }
 
     return super.obtainChoiceList(field);
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   */
+
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  {
+    if (fieldID == volumeSchema.ENTRIES)
+      {
+	return true;
+      }
+
+    return false;
   }
 
   /**
