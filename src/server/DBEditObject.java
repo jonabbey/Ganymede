@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1248,7 +1248,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public ReturnVal inactivate()
   {
-    return null;
+    return Ganymede.createErrorDialog("DBEditObject.inactivate() error",
+				      "Base DBEditObject does not support inactivation");
   }
 
   /**
@@ -1326,7 +1327,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public ReturnVal reactivate()
   {
-    return null;
+    return Ganymede.createErrorDialog("DBEditObject.reactivate() error",
+				      "Base DBEditObject does not support reactivation");
   }
 
   /**
