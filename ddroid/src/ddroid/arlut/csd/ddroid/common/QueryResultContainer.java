@@ -1,9 +1,56 @@
 /*
- * Created on Sep 16, 2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
+
+   QueryResultContainer.java
+ 
+   This class presents a List-interface on top of a query result set.
+
+   Created: 16 September 2004
+
+   Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
+
+   Module By: Deepak Giridharagopal, deepak@arlut.utexas.edu, ARL:UT
+
+   -----------------------------------------------------------------------
+	    
+   Directory Droid Directory Management System
+ 
+   Copyright (C) 1996-2004
+   The University of Texas at Austin
+
+   Contact information
+
+   Web site: http://www.arlut.utexas.edu/gash2
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
+
+   US Mail:
+
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
+
+   Telephone: (512) 835-3200
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
+*/
 package arlut.csd.ddroid.common;
 
 import java.io.Serializable;
@@ -18,10 +65,10 @@ import java.util.Vector;
 import java.util.Map;
 
 /**
- * @author deepak
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * This class presents a List-interface on top of a query result set.
+ *  
+ * Each item in the list can be either an Object array, or a Map,
+ * depending on how the user has contructed this container.
  */
 public class QueryResultContainer implements List, Serializable {
   static final long serialVersionUID = -8277390343373928867L;
@@ -54,7 +101,7 @@ public class QueryResultContainer implements List, Serializable {
    * represented in each row of the result set. There is one handle per
    * row.
    */
-  Vector handles = null;
+  List handles = null;
 
   /**
    * Optimization structure that speeds up obtaining a list of labels for each
@@ -130,7 +177,7 @@ public class QueryResultContainer implements List, Serializable {
    * will be the name of column 1, etc.
    */
    
-  public void addField(String fieldName, Short fieldID)
+  public synchronized void addField(String fieldName, Short fieldID)
   {
     headers.add(fieldName);
     types.add(fieldID);
@@ -195,9 +242,8 @@ public class QueryResultContainer implements List, Serializable {
 	return;
       }
 
-    handles.addElement(new ObjectHandle(label, invid, 
-					inactive, expirationSet, 
-					removalSet, editable));
+    handles.add(new ObjectHandle(label, invid, inactive, expirationSet,
+        removalSet, editable));
 
     if (rowType == MAPROWS)
       {
@@ -221,7 +267,7 @@ public class QueryResultContainer implements List, Serializable {
    *
    */
 
-  public Vector getHandles()
+  public synchronized List getHandles()
   {
     return handles;
   }
@@ -234,9 +280,9 @@ public class QueryResultContainer implements List, Serializable {
    * @return
    */
 
-  public Invid getInvid(int row)
+  public synchronized Invid getInvid(int row)
   {
-    return ((ObjectHandle) handles.elementAt(row)).getInvid();
+    return ((ObjectHandle) handles.get(row)).getInvid();
   }
 
   /**
@@ -247,7 +293,7 @@ public class QueryResultContainer implements List, Serializable {
    * @return
    */
 
-  public Vector getInvids()
+  public synchronized Vector getInvids()
   {
     if (invidList == null)
       {
@@ -265,7 +311,7 @@ public class QueryResultContainer implements List, Serializable {
    * @return
    */
 
-  public Vector getLabels()
+  public synchronized Vector getLabels()
   {
     if (labelList == null)
       {
@@ -283,18 +329,18 @@ public class QueryResultContainer implements List, Serializable {
    * @return
    */
   
-  public String getLabel(int row)
+  public synchronized String getLabel(int row)
   {
-    return ((ObjectHandle) handles.elementAt(row)).getLabel();
+    return ((ObjectHandle) handles.get(row)).getLabel();
   }
 
   /**
    * Returns the ObjectHandle for this row.
    */
 
-  public ObjectHandle getObjectHandle(int row)
+  public synchronized ObjectHandle getObjectHandle(int row)
   {
-    return (ObjectHandle) handles.elementAt(row);
+    return (ObjectHandle) handles.get(row);
   }
 
   /**
@@ -332,7 +378,7 @@ public class QueryResultContainer implements List, Serializable {
    * list of column headers in the GUI client.</p>
    */
 
-  public List getHeaders()
+  public synchronized List getHeaders()
   {
     return headers;
   }
@@ -346,7 +392,7 @@ public class QueryResultContainer implements List, Serializable {
    * DumpResult.</p>
    */
 
-  public List getTypes()
+  public synchronized List getTypes()
   {
     return types;
   }
@@ -359,7 +405,7 @@ public class QueryResultContainer implements List, Serializable {
    * and {@link arlut.csd.ddroid.common.DumpResult#getTypes getTypes()}.</p>
    */
 
-  public List getRows()
+  public synchronized List getRows()
   {
     return rows;
   }
@@ -375,7 +421,7 @@ public class QueryResultContainer implements List, Serializable {
    * getTypes()}.</p>
    */
   
-  public Vector getFieldRow(int rowNumber)
+  public synchronized Vector getFieldRow(int rowNumber)
   {
     Object[] row;
     if (rowType == MAPROWS)
@@ -398,7 +444,7 @@ public class QueryResultContainer implements List, Serializable {
    * fields.</p>
    */
 
-  public Object getResult(int row, int col)
+  public synchronized Object getResult(int row, int col)
   {
     Object[] r;
     if (rowType == MAPROWS)
@@ -417,7 +463,7 @@ public class QueryResultContainer implements List, Serializable {
    * number of objects encoded in this result set.</p>
    */
 
-  public int resultSize()
+  public synchronized int resultSize()
   {
     return rows.size();
   }
@@ -428,7 +474,7 @@ public class QueryResultContainer implements List, Serializable {
    * 
    */
   
-  private void rebuildTransients()
+  private synchronized void rebuildTransients()
   {
     invidList = new Vector(handles.size());
     labelList = new Vector(handles.size());
@@ -439,8 +485,8 @@ public class QueryResultContainer implements List, Serializable {
     String label;
     for (int i = 0; i < handles.size(); i++)
       {
-        invid = ((ObjectHandle) handles.elementAt(i)).getInvid();
-        label = ((ObjectHandle) handles.elementAt(i)).getLabel();
+        invid = ((ObjectHandle) handles.get(i)).getInvid();
+        label = ((ObjectHandle) handles.get(i)).getLabel();
         invidList.addElement(invid);
         labelList.addElement(label);
         invidHash.put(invid, label);
@@ -486,6 +532,40 @@ public class QueryResultContainer implements List, Serializable {
       	newRow[i] = row.get(currentHeader);
       }
     return newRow;
+  }
+  
+  /**
+   * Changes this result set from using rows of one type to rows of another.
+   * This method will preserve the existing row/header ordering.
+   * 
+   * @param newRowType This should be either MAPROWS or ARRAYROWS, which are
+   * both constants defined in this class.
+   */
+  public synchronized void changeRowType(int newRowType)
+  {
+    /* If we're not really changing anything, then bail out */
+    if (newRowType == rowType)
+      {
+      	return;
+      }
+    else
+      {
+      	rowType = newRowType;
+      }
+    
+    Object row;
+    for (int i=0; i<handles.size(); i++)
+      {
+      	row = rows.get(i);
+      	if (newRowType == ARRAYROWS)
+      	  {
+      	    rows.set(i, convertMapRowToArrayRow((Map) row));
+      	  }
+      	else
+      	  {
+      	    rows.set(i, convertArrayRowToMapRow((Object[]) row));
+      	  }
+      }
   }
 
   /* ------------------------------------------------------------------------
@@ -541,7 +621,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#contains(java.lang.Object)
    */
-  public boolean contains(Object o)
+  public synchronized boolean contains(Object o)
   {
     return rows.contains(o);
   }
@@ -549,7 +629,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#containsAll(java.util.Collection)
    */
-  public boolean containsAll(Collection c)
+  public synchronized boolean containsAll(Collection c)
   {
     return rows.containsAll(c);
   }
@@ -557,7 +637,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#get(int)
    */
-  public Object get(int index)
+  public synchronized Object get(int index)
   {
     return rows.get(index);
   }
@@ -565,7 +645,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#indexOf(java.lang.Object)
    */
-  public int indexOf(Object o)
+  public synchronized int indexOf(Object o)
   {
     return rows.indexOf(o);
   }
@@ -573,7 +653,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#isEmpty()
    */
-  public boolean isEmpty()
+  public synchronized boolean isEmpty()
   {
     return rows.isEmpty();
   }
@@ -581,7 +661,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#iterator()
    */
-  public Iterator iterator()
+  public synchronized Iterator iterator()
   {
     return rows.iterator();
   }
@@ -589,7 +669,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#lastIndexOf(java.lang.Object)
    */
-  public int lastIndexOf(Object o)
+  public synchronized int lastIndexOf(Object o)
   {
     return rows.lastIndexOf(o);
   }
@@ -597,7 +677,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#listIterator()
    */
-  public ListIterator listIterator()
+  public synchronized ListIterator listIterator()
   {
     return rows.listIterator();
   }
@@ -605,7 +685,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#listIterator(int)
    */
-  public ListIterator listIterator(int index)
+  public synchronized ListIterator listIterator(int index)
   {
     return rows.listIterator(index);
   }
@@ -658,7 +738,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#size()
    */
-  public int size()
+  public synchronized int size()
   {
     return rows.size();
   }
@@ -666,7 +746,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.List#subList(int, int)
    */
-  public List subList(int fromIndex, int toIndex)
+  public synchronized List subList(int fromIndex, int toIndex)
   {
     return rows.subList(fromIndex, toIndex);
   }
@@ -674,7 +754,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#toArray()
    */
-  public Object[] toArray()
+  public synchronized Object[] toArray()
   {
     return rows.toArray();
   }
@@ -682,7 +762,7 @@ public class QueryResultContainer implements List, Serializable {
   /* 
    * @see java.util.Collection#toArray(java.lang.Object[])
    */
-  public Object[] toArray(Object[] a)
+  public synchronized Object[] toArray(Object[] a)
   {
     return rows.toArray(a);
   }
