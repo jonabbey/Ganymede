@@ -351,9 +351,9 @@ public class StringDBField extends DBField implements string_field {
 	    emitStringXML(xmlOut, (String) unchangedValues.elementAt(i));
 	  }
 
-	if (vectorDelta.addValues.size() > 0)
+	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "add");
 	    xmlOut.indentOut();
 
@@ -364,14 +364,13 @@ public class StringDBField extends DBField implements string_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 
-	if (vectorDelta.delValues.size() > 0)
+	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "remove");
 	    xmlOut.indentOut();
 
@@ -382,9 +381,8 @@ public class StringDBField extends DBField implements string_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 	
 	xmlOut.indentIn();

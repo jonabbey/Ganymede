@@ -663,69 +663,83 @@ public final class DBObjectDeltaRec implements FieldType {
 	    System.err.println("====== Emitting " + fdRec.addValues.size() + " addition elements");
 	  }
 
-	out.writeInt(fdRec.addValues.size());
-
-	for (int j = 0; j < fdRec.addValues.size(); j++)
+	if (fdRec.addValues == null)
 	  {
-	    value = fdRec.addValues.elementAt(j);
+	    out.writeInt(0);
+	  }
+	else
+	  {
+	    out.writeInt(fdRec.addValues.size());
 
-	    // we only support 3 vector field types
-
-	    if (value instanceof String)
+	    for (int j = 0; j < fdRec.addValues.size(); j++)
 	      {
-		out.writeUTF((String) value);
-	      }
-	    else if (value instanceof Invid)
-	      {
-		((Invid) value).emit(out);
-	      }
-	    else if (value instanceof IPwrap)
-	      {
-		Byte[] bytes = ((IPwrap) value).address;
+		value = fdRec.addValues.elementAt(j);
 
-		out.writeByte(bytes.length);
+		// we only support 3 vector field types
 
-		for (int k = 0; k < bytes.length; k++)
+		if (value instanceof String)
 		  {
-		    out.writeByte(bytes[k].byteValue());
+		    out.writeUTF((String) value);
 		  }
-	      }
-	    else
-	      {
-		Ganymede.debug("DBObjectDeltaRec.emit(): Error!  Unrecognized element in vector!");
+		else if (value instanceof Invid)
+		  {
+		    ((Invid) value).emit(out);
+		  }
+		else if (value instanceof IPwrap)
+		  {
+		    Byte[] bytes = ((IPwrap) value).address;
+		    
+		    out.writeByte(bytes.length);
+		    
+		    for (int k = 0; k < bytes.length; k++)
+		      {
+			out.writeByte(bytes[k].byteValue());
+		      }
+		  }
+		else
+		  {
+		    Ganymede.debug("DBObjectDeltaRec.emit(): Error!  Unrecognized element in vector!");
+		  }
 	      }
 	  }
 
 	// write out what is being removed from this vector
 
-	out.writeInt(fdRec.delValues.size());
-
-	for (int j = 0; j < fdRec.delValues.size(); j++)
+	if (fdRec.delValues == null)
 	  {
-	    value = fdRec.delValues.elementAt(j);
+	    out.writeInt(0);
+	  }
+	else
+	  {
+	    out.writeInt(fdRec.delValues.size());
 
-	    // we only support 3 vector field types
-
-	    if (value instanceof String)
+	    for (int j = 0; j < fdRec.delValues.size(); j++)
 	      {
-		out.writeUTF((String) value);
-	      }
-	    else if (value instanceof Invid)
-	      {
-		Invid invid = (Invid) value;
-
-		out.writeShort(invid.getType());
-		out.writeInt(invid.getNum());
-	      }
-	    else if (value instanceof IPwrap)
-	      {
-		Byte[] bytes = ((IPwrap) value).address;
-
-		out.writeByte(bytes.length);
-
-		for (int k = 0; k < bytes.length; k++)
+		value = fdRec.delValues.elementAt(j);
+		
+		// we only support 3 vector field types
+		
+		if (value instanceof String)
 		  {
-		    out.writeByte(bytes[k].byteValue());
+		    out.writeUTF((String) value);
+		  }
+		else if (value instanceof Invid)
+		  {
+		    Invid invid = (Invid) value;
+		    
+		    out.writeShort(invid.getType());
+		    out.writeInt(invid.getNum());
+		  }
+		else if (value instanceof IPwrap)
+		  {
+		    Byte[] bytes = ((IPwrap) value).address;
+		    
+		    out.writeByte(bytes.length);
+		    
+		    for (int k = 0; k < bytes.length; k++)
+		      {
+			out.writeByte(bytes[k].byteValue());
+		      }
 		  }
 	      }
 	  }
@@ -799,28 +813,34 @@ public final class DBObjectDeltaRec implements FieldType {
 
 	DBField field = copy.retrieveField(fieldRec.fieldcode);
 
-	for (int j = 0; j < fieldRec.addValues.size(); j++)
+	if (fieldRec.addValues != null)
 	  {
-	    value = fieldRec.addValues.elementAt(j);
-
-	    if (value instanceof IPwrap)
+	    for (int j = 0; j < fieldRec.addValues.size(); j++)
 	      {
-		value = ((IPwrap) value).address;
+		value = fieldRec.addValues.elementAt(j);
+		
+		if (value instanceof IPwrap)
+		  {
+		    value = ((IPwrap) value).address;
+		  }
+		
+		field.getVectVal().addElement(value);
 	      }
-
-	    field.getVectVal().addElement(value);
 	  }
 
-	for (int j = 0; j < fieldRec.delValues.size(); j++)
+	if (fieldRec.delValues != null)
 	  {
-	    value = fieldRec.delValues.elementAt(j);
-
-	    if (value instanceof IPwrap)
+	    for (int j = 0; j < fieldRec.delValues.size(); j++)
 	      {
-		value = ((IPwrap) value).address;
+		value = fieldRec.delValues.elementAt(j);
+		
+		if (value instanceof IPwrap)
+		  {
+		    value = ((IPwrap) value).address;
+		  }
+		
+		field.getVectVal().removeElement(value);
 	      }
-
-	    field.getVectVal().removeElement(value);
 	  }
       }
 

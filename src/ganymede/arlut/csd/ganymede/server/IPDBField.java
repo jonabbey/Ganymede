@@ -366,14 +366,12 @@ public class IPDBField extends DBField implements ip_field {
       {
 	xmlOut.indentOut();
 
-	xmlOut.indent();
-	xmlOut.startElement("delta");
+	xmlOut.startElementIndent("delta");
 	xmlOut.attribute("state", "before");
 	emitIPXML(xmlOut, ((IPDBField) orig).value());
 	xmlOut.endElement("delta");
 
-	xmlOut.indent();
-	xmlOut.startElement("delta");
+	xmlOut.startElementIndent("delta");
 	xmlOut.attribute("state", "after");
 	emitIPXML(xmlOut, this.value());
 	xmlOut.endElement("delta");
@@ -398,7 +396,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	if (addedValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "add");
 	    xmlOut.indentOut();
 
@@ -409,14 +407,13 @@ public class IPDBField extends DBField implements ip_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 
 	if (deletedValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "remove");
 	    xmlOut.indentOut();
 
@@ -427,9 +424,8 @@ public class IPDBField extends DBField implements ip_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 	
 	xmlOut.indentIn();

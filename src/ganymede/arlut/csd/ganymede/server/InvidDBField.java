@@ -467,9 +467,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	    emitInvidXML(xmlOut, (Invid) unchangedValues.elementAt(i), false);
 	  }
 
-	if (vectorDelta.addValues.size() > 0)
+	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "add");
 	    xmlOut.indentOut();
 
@@ -480,14 +480,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementInvid("delta");
 	  }
 
-	if (vectorDelta.delValues.size() > 0)
+	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
 	  {
-	    xmlOut.startElement("delta");
+	    xmlOut.startElementIndent("delta");
 	    xmlOut.attribute("state", "remove");
 	    xmlOut.indentOut();
 
@@ -498,9 +497,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 
 	    xmlOut.indentIn();
-	    xmlOut.indent();
 
-	    xmlOut.endElement("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 	
 	xmlOut.indentIn();
