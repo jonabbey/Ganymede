@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -223,7 +223,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
 
-  public void addTableWindow(Session session, Query query, String results, String title)
+  public void addTableWindow(Session session, Query query, DumpResult results, String title)
   {
     gResultTable 
       rt = null;
