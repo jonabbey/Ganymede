@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-June ??, 2000
+July ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: June ??
+RELEASE DATE: July ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -748,6 +748,16 @@ shutting down.
 This is to insure that a builder task in phase 2 won't interrupt an
 external build script or program, leaving a network service in an
 inconsistent state.
+
+48. [SERVER] Fixed namespace-optimized lookups on IP fields
+
+The server has special logic in GanymedeSession for optimizing query
+lookups on namespace-indexed data fields.  That logic was not properly
+handling IP address fields when given an IP address in string form
+rather than in byte array form.
+
+Now, the query logic will properly convert IP strings to byte array
+form for optimized namespace lookups.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
