@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2002/06/19 23:16:27 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2003/07/24 18:14:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -516,9 +516,9 @@ public class GanymedeWarningTask implements Runnable {
     tempString.append(typeName.substring(1));
     tempString.append(" ");
     tempString.append(label);
-    tempString.append(" is scheduled to expire after " + actionDate.toString());
+    tempString.append(" is scheduled to expire after " + actionDate.toString() + ".");
 
-    tempString.append("In order to prevent this " + typeName + " from expiring, this object's Expiration Date Field must ");
+    tempString.append("  In order to prevent this " + typeName + " from expiring, this object's Expiration Date Field must ");
     tempString.append("be cleared or changed in Ganymede.");
 
     tempString.append("\n\nObject expiration typically means that the object in question is ");
