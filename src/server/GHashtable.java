@@ -6,7 +6,7 @@
    hashing/retrieval.
    
    Created: 10 April 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -127,14 +127,20 @@ public class GHashtable extends Hashtable {
 
   public synchronized Object put(Object key, Object value)
   {
+    Object result;
+
+    /* -- */
+
     if (caseInsensitive)
       {
-	return super.put(new GKey(key), value);
+	result = super.put(new GKey(key), value);
       }
     else
       {
-	return super.put(key, value);
+	result = super.put(key, value);
       }
+
+    return result;
   }
 
   public synchronized Object remove(Object key)
@@ -188,7 +194,14 @@ class GKey {
 
   public boolean equals(Object obj)
   {
-    return key.equals(obj);
+    if (obj instanceof GKey)
+      {
+	return key.equals(((GKey) obj).key);
+      }
+    else
+      {
+	return key.equals(obj);
+      }
   }
 
   public Object origValue()
