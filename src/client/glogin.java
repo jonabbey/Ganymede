@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -159,10 +159,11 @@ public class glogin extends java.applet.Applet implements Runnable {
     bPanel.setLayout(new BorderLayout());
 
     _quitButton = new JButton("Quit");
-
+    _quitButton.setBackground(ClientColor.buttonBG);
     _loginHandler = new LoginHandler(this);
 
     connector = new JButton("Login to Server");
+    connector.setBackground(ClientColor.buttonBG);
     connector.addActionListener(_loginHandler);
     
     _quitButton.addActionListener(_loginHandler);
