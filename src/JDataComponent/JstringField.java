@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -59,7 +59,6 @@ public class JstringField extends JentryField implements KeyListener{
    */
   public JstringField(int columns,
 		      int maxstrlen,
-		      //JcomponentAttr valueAttr,
 		      boolean is_editable,
 		      boolean invisible,
 		      String allowed,
@@ -74,28 +73,10 @@ public class JstringField extends JentryField implements KeyListener{
 
     size = maxstrlen;
     
-    /*
-    if (valueAttr == null)
-      {
-	throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
-      }
-
-    this.valueAttr = valueAttr;
-    */
-
-    //    setText(null);
-
     setEditable(is_editable);  // will this JstringField be editable or not?
 
     setEnabled(true);
 
-    // This will take care of masking the characters
-    // in the JstringField if necessary.
-    /* JTextField doesn't have this :(    
-    if (invisible)
-      setEchoChar(' ');
-     */
-     
     if (allowed != null)
       {
 	setAllowedChars(allowed);
@@ -106,10 +87,6 @@ public class JstringField extends JentryField implements KeyListener{
 	setDisallowedChars(disallowed);
       }
 
-    //JcomponentAttr.setAttr(this,valueAttr);
-
-    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
   
   /**
@@ -121,8 +98,6 @@ public class JstringField extends JentryField implements KeyListener{
   public JstringField()
   {
     this(JstringField.DEFAULT_COLS,JstringField.DEFAULT_SIZE,
-	 // new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-	 //		    Color.black,Color.white),
 	 true,
 	 false,
 	 null,
@@ -138,8 +113,6 @@ public class JstringField extends JentryField implements KeyListener{
   public JstringField(int cols, boolean is_editable)
   {
     this(cols,JstringField.DEFAULT_SIZE,
-	 //new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-	 //		    Color.black,Color.white),
 	 is_editable,
 	 false,
 	 null,
@@ -160,14 +133,12 @@ public class JstringField extends JentryField implements KeyListener{
 
   public JstringField(int cols,
 		      int maxstrlen,
-		      //JcomponentAttr valueAttr,
 		      boolean is_editable,
 		      boolean invisible,
 		      String allowed,
 		      String disallowed,
 		      JsetValueCallback callback)
   {
-    //this(cols,maxstrlen,valueAttr,is_editable,invisible,allowed,disallowed);
     this(cols,maxstrlen,is_editable,invisible,allowed,disallowed);
 
     setCallback(callback);
@@ -176,7 +147,9 @@ public class JstringField extends JentryField implements KeyListener{
  /************************************************************/
  // JstringField methods
 
-
+  /**
+   * deprecated
+   */
   public void setIncrementalCallback(boolean callbackOn)
   {
     if (!allowCallback)
@@ -335,8 +308,13 @@ public class JstringField extends JentryField implements KeyListener{
    * @param ch the character which is being tested for its validity
    */
 
-  private boolean isAllowed(char ch)
+  private final boolean isAllowed(char ch)
   {
+    if (getText().length() >= size)
+      {
+	return false;
+      }
+
     if (disallowedChars != null)
       {
 	if (disallowedChars.indexOf(ch) != -1)
@@ -354,45 +332,6 @@ public class JstringField extends JentryField implements KeyListener{
       }
     
     return true;
-  }
-
-  /**
-   *
-   * We only want certain keystrokes to be registered by the stringfield.
-   *
-   * This method overrides the processKeyEvent() method in JComponent and
-   * gives us a way of intercepting characters that we don't want in our
-   * string field.
-   *
-   */
-
-  protected void processKeyEvent(KeyEvent e)
-  {
-    // always pass through useful editing keystrokes.. this seems to be
-    // necessary because backspace and delete apparently have defined
-    // Unicode representations, so they don't match CHAR_UNDEFINED below
-
-    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
-	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
-	(e.getKeyCode() == KeyEvent.VK_END) ||
-	(e.getKeyCode() == KeyEvent.VK_HOME))
-      {
-	super.processKeyEvent(e);
-      }
-
-    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
-    // through things like backspace, arrow keys, etc.
-
-    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
-      {
-	super.processKeyEvent(e);
-      }
-    else if (isAllowed(e.getKeyChar()) && (getText().length() < size))
-      {
-	super.processKeyEvent(e);
-      }
-
-    // otherwise, we ignore it
   }
 
   public void sendCallback()
@@ -497,6 +436,7 @@ public class JstringField extends JentryField implements KeyListener{
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e)
   {
+    System.out.println("In keyTyped");
     if (incrementalCallback && allowCallback)
       {
 	try
