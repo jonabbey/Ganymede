@@ -2,10 +2,10 @@
 
    brian_editor.java
 
-   Description.
+   perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -232,7 +232,14 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 			     new BoolRenderer(rowVector));
 
     table.setShowHorizontalLines(false);
-    //    table.getTableHeader().setReorderingAllowed(false);
+
+
+    // leave column reordering enabled for now to make sure all is well...
+    // Can disable it later- it's not really useful in this 
+    // application.
+
+    //    table.getTableHeader().setReorderingAllowed(false); 
+
 
     edit_pane = new JScrollPane(table);
     
@@ -302,6 +309,9 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 
 
 	// retrieve the current permissions for this object type 
+	
+	// The following logic is unchanged from the original perm editor
+
 	
 	entry = matrix.getPerm(id);
 	
@@ -382,6 +392,8 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 
 	    // get the permission set for this field
 
+	    // The following logic is unchanged from the original perm editor
+
 	    entry = matrix.getPerm(id, template.getID());
 
 	    if (entry == null)
@@ -450,7 +462,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	  }
       }
     
-    return rows;
+    return rows; // Vector of PermRows
   }
 
   private void stopLoading()
@@ -620,10 +632,16 @@ class BPermTableModel extends AbstractTableModel {
   static final int EDITABLE = 3;
   static final int DELETABLE = 4;
 
+  //
+  // Constructor
+  //
   public BPermTableModel(Vector rowVector) {
     this.rows = rowVector;
   } 
   
+  // 
+  // Standard methods for a table model
+  //
   public int getColumnCount() {
     return columnNames.length;
   }
@@ -993,10 +1011,10 @@ class BoolRenderer extends JCheckBox
 
 class PermRow {
 
-  private static final int VISIBLE = 0;
-  private static final int CREATABLE = 1;
-  private static final int EDITABLE = 2;
-  private static final int DELETABLE = 3;
+  static final int VISIBLE = 0;
+  static final int CREATABLE = 1;
+  static final int EDITABLE = 2;
+  static final int DELETABLE = 3;
 
   private Object reference;
   private boolean[] permBitsAry;
@@ -1052,30 +1070,31 @@ class PermRow {
     return permBitsAry[VISIBLE];
   }
 
-  public void setVisible(Boolean value) {
-    permBitsAry[VISIBLE] = value.booleanValue();
-  }
-
   public boolean isCreatable() {
     return permBitsAry[CREATABLE];
   }
-  
-  public void setCreatable(Boolean value) {
-    permBitsAry[CREATABLE] = value.booleanValue();
-  }
-  
+
   public boolean isEditable() {
     return permBitsAry[EDITABLE];
-  }
-
-  public void setEditable(Boolean value) {
-    permBitsAry[EDITABLE] = value.booleanValue();
   }
 
   public boolean isDeletable() {
     return permBitsAry[DELETABLE];
   }
   
+
+  public void setVisible(Boolean value) {
+    permBitsAry[VISIBLE] = value.booleanValue();
+  }
+  
+  public void setCreatable(Boolean value) {
+    permBitsAry[CREATABLE] = value.booleanValue();
+  }
+  
+  public void setEditable(Boolean value) {
+    permBitsAry[EDITABLE] = value.booleanValue();
+  }
+
   public void setDeletable(Boolean value) {
     permBitsAry[DELETABLE] = value.booleanValue();
   }
