@@ -22,12 +22,14 @@ import java.awt.*;
 
 public class JValueObject {
 
-
-  public static final int ADD = -1000;
-  public static final int INSERT = -2000;
-  public static final int DELETE = -3000;
-  public static final int SET = -4000;
-  public static final int NONE = -5000;
+  public static final int FIRST = -1007;
+  public static final int ADD = -1001;
+  public static final int INSERT = -1002;
+  public static final int DELETE = -1003;
+  public static final int SET = -1004;
+  public static final int NONE = -1005;
+  public static final int ERROR = -1006;
+  public static final int LAST = -1000;
 
   private Component source;
   private Object value;
@@ -45,6 +47,15 @@ public class JValueObject {
       this.value = value;
       operationValue = SET;
     }
+
+  public JValueObject(Component source,
+		      Object value,
+		      int operation)
+    {
+      this.source = source;
+      this.value = value;
+      operationValue = operation;
+    }
   
   public JValueObject(Component source,
 		     int index,
@@ -54,8 +65,10 @@ public class JValueObject {
       this.source = source;
       this.index = index;
 
-      if (operation != ADD && operation != INSERT && operation != DELETE)
-	throw new IllegalArgumentException("Illegal Argument: operation has invalid value");
+      if ((operation > LAST) || (operation < FIRST))
+	{
+	  throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
+	}
 
       this.operationValue = operation;
 
@@ -73,9 +86,10 @@ public class JValueObject {
       this.index = index;
 
      
-      if (operation != ADD && operation != INSERT && operation != DELETE)
-	throw new IllegalArgumentException("Illegal Argument: operation has invalid value");
- 
+      if ((operation < FIRST) || (operation > LAST))
+	{
+	  throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
+	}
 
       this.operationValue = operation;
 
