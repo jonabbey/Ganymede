@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -252,7 +252,7 @@ public class DBStore {
 	  }
       }
 
-    lockHash = new Hashtable(baseCount);
+    lockHash = new Hashtable(baseCount); // reset lockHash
 
     try 
       {
@@ -1318,6 +1318,9 @@ public class DBStore {
     s = (StringDBField) eO.getField(SchemaConstants.PermName);
     s.setValue("Default");
 
+    // create SchemaConstants.PermEndUserObj, the object that determines what end-users can
+    // do without any ownership of any objects
+
     pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
     pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
 
@@ -1328,6 +1331,20 @@ public class DBStore {
 
     pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
     pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
+
+    // create SchemaConstants.PermSelfUserObj, the object that will restrict what end-users can do to their
+    // own user records
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermSelfUserObj
+
+    s = (StringDBField) eO.getField(SchemaConstants.PermName);
+    s.setValue("Self Permissions");
+
+    // By default, users will be able to view themselves and all their fields, anything
+    // else will have to be manually configured by the supergash administrator.
+
+    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
+    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); 
 
     session.commitTransaction();
   }
