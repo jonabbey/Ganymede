@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.9 $
-# $Date: 1999/07/08 04:25:18 $
+# $Revision: 1.10 $
+# $Date: 2000/05/27 00:29:51 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -207,6 +207,34 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/ganymede";
+
+# Copy and process the xmlclient script into place
+
+print "\nCustomizing xmlclient script\n";
+  
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
+  
+open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
+open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
+  
+while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+	print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+	print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
+    }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/xmlclient";
 
 # Copy and process the ganymedeAdmin script into place
 

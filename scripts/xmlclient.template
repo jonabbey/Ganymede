@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Ganymede XML client script
+#
+# Usage: xmlclient username=<username> [password=<password>] <xmlfilename>
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date:    $Date: 2000/05/27 00:29:52 $
+#
+# Module by: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+#
+##############################################################
+
+## This section is customized by the client install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installClient.perl
+# script
+
+JAVA=/opt/bin/java
+CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar:/v/site/packages/swing-1.0/swingall.jar
+PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
+
+############################################### 
+
+trap "echo Aborted" 2
+
+export CLASSPATH
+
+stty -echo
+$JAVA -mx32m arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES $*
+stty echo
