@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,7 +43,7 @@ import arlut.csd.JDialog.*;
  *
  */
 
-public abstract class DBField extends UnicastRemoteObject implements db_field, Cloneable {
+public abstract class DBField implements Remote, db_field, Cloneable {
 
   Object 
     value,			// the object's current value, for scalars
