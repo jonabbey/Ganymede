@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -258,8 +258,8 @@ public final class DBNameSpace implements NameSpace {
 
   public boolean setName(String newName)
   {
-    // need to make sure this new name isn't in conflict
-    // with existing names
+    // XXX need to make sure this new name isn't in conflict
+    // with existing names XXX
 
     name = newName;
     return true;
@@ -414,7 +414,7 @@ public final class DBNameSpace implements NameSpace {
 	return null;
       }
 
-    return _handle.getPersistentField(Ganymede.internalSession);
+    return _handle.getPersistentField(null);
   }
 
   /**
@@ -427,6 +427,38 @@ public final class DBNameSpace implements NameSpace {
    * the DBField returned may contain the value (if value is a String) with
    * different capitalization.</p>
    *
+   * <p>Note that the DBField returned will have the same object Invid
+   * and field Id as the field that has the value in the persistent
+   * database, but if you are providing a live session which happens
+   * to be editing that object, the field you get back will be
+   * editable, and may not actually contain the value, as it may have
+   * been changed during the session's transactional manipulations.
+   * If you are concerned about getting back the actual read-only
+   * field from the persistent store that has the value you're looking
+   * for, you can do as follows:</p>
+   *
+   * <p>Assume resultField is what you get from this
+   * lookupPersistent() call.  Then do the following:<br/>
+   * <br/>
+   * <pre>
+   * DBField readOnlyField = null;
+   * DBObject owner = resultField.getOwner();
+   *
+   * if (owner instanceof DBEditObject)
+   *   {
+   *      DBObject original = ((DBEditObject) owner).getOriginal();
+   *      readOnlyField = original.getField(resultField.getID());
+   *   }
+   * else
+   *   {
+   *      readOnlyField = resultField;
+   *   }
+   * </pre>
+   * <br/>
+   * And the readOnlyField you get back will be the persistent field from
+   * the database that had the value you were looking for at the time you
+   * did the lookupPersistent call.</p>
+   * 
    * <p>As well, this method is really probably useful in the context of
    * a DBReadLock, but we're not doing anything to enforce this requirement 
    * at this point.</p>
@@ -641,11 +673,6 @@ public final class DBNameSpace implements NameSpace {
     if (debug)
       {
 	System.err.println(editSet.getSession().getKey() + ": DBNameSpace.mark(): enter");
-      }
-
-    if (this.saveHash != null)
-      {
-	throw new RuntimeException("still in schema edit");
       }
 
     if (uniqueHash.containsKey(value))
@@ -1000,25 +1027,11 @@ public final class DBNameSpace implements NameSpace {
 		handle.setShadowField(null);
 	      }
 	  }
-      }
-    else
-      {
-	throw new Error("This code is ancient, and probably wrong, and should never ever ever ever be callled.\n\nAKA, Shut her down, boys, she's a-pumping mud.");
 
-	/*
-	// we're creating a new value.. previous value
-	// is false
-
-	handle = new DBNameSpaceHandle(editSet, false, null);
-	handle.inuse = true;
-	handle.setShadowField(null);
-	uniqueHash.put(value, handle);
-
-	remember(editSet, value);
-	*/
+	return true;
       }
 
-    return true;
+    return false;
   }
 
   /*----------------------------------------------------------------------------
@@ -1133,6 +1146,11 @@ public final class DBNameSpace implements NameSpace {
     // just iterate over the values that are currently reserved for
     // the transaction, and check them against the checkpoint we are
     // reverting to.
+
+    // NOTA BENE: The above comment is just attempting to describe why
+    // we can loop over tRecord.getReservedEnum(), even though we
+    // might have unmarked values from our namespace since a given
+    // checkpoint was taken.
 
     en = tRecord.getReservedEnum();
 
@@ -1582,7 +1600,7 @@ class DBNameSpaceTransaction {
       {
 	try
 	  {
-	    throw new RuntimeException("DBNameSpaceTransaction.remember(): transaction " + transaction +
+	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
 				       " already contains value " + value);
 	  }
 	catch (RuntimeException ex)
@@ -1602,7 +1620,7 @@ class DBNameSpaceTransaction {
       {
 	try
 	  {
-	    throw new RuntimeException("DBNameSpaceTransaction.forget(): transaction " + transaction +
+	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
 				       " does not contain value " + value);
 	  }
 	catch (RuntimeException ex)
@@ -1671,7 +1689,7 @@ class DBNameSpaceTransaction {
       {
 	try
 	  {
-	    throw new RuntimeException("DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
 				       " does not contain a checkpoint named " + name);
 	  }
 	catch (RuntimeException ex)
