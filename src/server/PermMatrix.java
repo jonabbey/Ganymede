@@ -2,11 +2,11 @@
 
    PermMatrix.java
 
-   This class stores a matrix of PermEntry bits, organized by
+   This class stores a read-only matrix of PermEntry bits, organized by
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,13 @@ import java.io.*;
                                                                       PermMatrix
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class stores a read-only matrix of PermEntry bits, organized by
+ * object type and field id's.
+ *
+ */
 
 public class PermMatrix implements java.io.Serializable {
 
@@ -71,6 +78,15 @@ public class PermMatrix implements java.io.Serializable {
   {
     return union(new PermMatrix(orig));	// this will cause a redundant copy, but who cares?
   }
+
+  /**
+   *
+   * This method combines this PermMatrix with that
+   * of orig.  The returned PermMatrix will allow
+   * any access either of the source PermMatrices
+   * would.
+   *
+   */
 
   public synchronized PermMatrix union(PermMatrix orig)
   {
@@ -195,20 +211,32 @@ public class PermMatrix implements java.io.Serializable {
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the field <fieldID> in base <baseID>
+   * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;<br><br>
    *
-   * @see arlut.csd.ganymede.PermMatrix
+   * If there is no entry in this PermMatrix for the given field, the
+   * default will be returned, if any has been set.
+   *
+   * @see arlut.csd.ganymede.PermMatrix 
    */
 
   public PermEntry getPerm(short baseID, short fieldID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+    PermEntry result;
+
+    result = (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+
+    if (result == null)
+      {
+	result = (PermEntry) matrix.get(matrixEntry(baseID, "default"));
+      }
+
+    return result;
   }
 
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the base <baseID>
+   * permissions on the base &lt;baseID&gt;
    *
    * @see arlut.csd.ganymede.PermMatrix
    */
@@ -234,26 +262,20 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(Base base, BaseField field)
   {
-    PermEntry result;
-
-    /* -- */
-
     try
       {
-	result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), field.getID()));
+	return getPerm(base.getTypeID(), field.getID());
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
-
-    return result;
   }
 
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the base <base>
+   * permissions on the base &lt;base&gt;
    *
    * @see arlut.csd.ganymede.PermMatrix
    */
@@ -276,111 +298,14 @@ public class PermMatrix implements java.io.Serializable {
     return result;
   }
 
-  /**
-   *
-   * Sets the permission entry for this matrix for base <baseID>,
-   * field <fieldID> to PermEntry <entry>.
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
-   *
-   * @see arlut.csd.ganymede.PermMatrix 
-   */
-
-  public synchronized void setPerm(short baseID, short fieldID, PermEntry entry)
-  {
-    matrix.put(matrixEntry(baseID, fieldID), entry);
-
-    if (debug)
-      {
-	System.err.println("PermMatrix: base " + baseID + ", field " + fieldID + " set to " + entry);
-      }
-  }
-
-  /**
-   *
-   * Sets the permission entry for this matrix for base <baseID>
-   * to PermEntry <entry>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
-   *
-   * @see arlut.csd.ganymede.PermMatrix
-   */
-
-  public synchronized void setPerm(short baseID, PermEntry entry)
-  {
-    matrix.put(matrixEntry(baseID), entry);
-
-    if (debug)
-      {
-	System.err.println("PermMatrix: base " + baseID + " set to " + entry);
-      }
-  }
-
-  /**
-   *
-   * Sets the permission entry for this matrix for base <base>,
-   * field <field> to PermEntry <entry>
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
-   *
-   * @see arlut.csd.ganymede.PermMatrix
-   */
-
-  public synchronized void setPerm(Base base, BaseField field, PermEntry entry)
-  {
-    try
-      {
-	matrix.put(matrixEntry(base.getTypeID(), field.getID()), entry);
-	
-	if (debug)
-	  {
-	    System.err.println("PermMatrix: base " + base.getName() + 
-			       ", field " + field.getName() + " set to " + entry);
-	  }
-      }
-    catch (RemoteException ex)
-      {
-      }
-  }
-
-  /**
-   *
-   * Sets the permission entry for this matrix for base <baseID>
-   * to PermEntry <entry>.
-   *
-   * This operation will fail if this permission matrix is not
-   * associated with a currently checked-out-for-editing
-   * PermissionMatrixDBField.
-   *
-   * @see arlut.csd.ganymede.PermMatrix
-   */
-
-  public synchronized void setPerm(Base base, PermEntry entry)
-  {
-    try
-      {
-	matrix.put(matrixEntry(base.getTypeID()), entry);
-
-	if (debug)
-	  {
-	    System.err.println("PermMatrix: base " + base.getName() + 
-			       " set to " + entry);
-	  }
-      }
-    catch (RemoteException ex)
-      {
-      }
-  }
-
   private String matrixEntry(short baseID, short fieldID)
   {
     return (baseID + ":" + fieldID);
+  }
+
+  private String matrixEntry(short baseID, String text)
+  {
+    return (baseID + ":" + text);
   }
   
   private String matrixEntry(short baseID)
