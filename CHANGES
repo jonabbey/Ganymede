@@ -15,9 +15,9 @@ Prior to this fix, the server would wait forever for a dedicated
 thread to try and notify the client that it is being forced off before
 handling the server-side client logout housekeeping.
 
-Now, the server will jump in and expunge the client from the server on
-the server-side before spawning a background thread to notify the
-client of the forced disconnect.
+Now, the forceOff() method in GanymedeSession will expunge the client
+from the server on the server-side before notifying the client that it
+has been disconnected.
 
 Note that this fix may still leave those dedicated background threads
 stuck in the JVM trying to finish reading from a socket from the
