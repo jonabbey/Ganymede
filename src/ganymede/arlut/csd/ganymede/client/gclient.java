@@ -1827,7 +1827,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public final void processExceptionRethrow(Exception ex, String message)
   {
-    processExceptionRethrow(ex, message);
+    processException(ex, message);
 
     throw new RuntimeException(ex);
   }
