@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.32 $ %D%
+    Version: $Revision: 1.33 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1404,8 +1404,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						 Color.black,Color.white),
 			      editable,
 			      false,
-			      null,
-			      null,
+			      fieldTemplate.getOKChars(),
+			      fieldTemplate.getBadChars(),
 			      this);
 			      
 	objectHash.put(sf, field);
