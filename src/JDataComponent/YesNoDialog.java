@@ -5,7 +5,7 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,8 +43,18 @@ public class YesNoDialog extends Dialog implements ActionListener {
     setLayout(new BorderLayout());
     add("Center", new MessagePanel(message));
     add("South", buttonPanel);
-    pack();
+    
   }
+
+  /**
+   * 
+   *@deprecated
+   */
+  public void show()
+    {
+      pack();
+      super.show();
+    }
 
   public void setVisible(boolean b)
   {
@@ -53,7 +63,7 @@ public class YesNoDialog extends Dialog implements ActionListener {
 	answer = false;
 	yesButton.requestFocus();
       }
-
+    pack();
     super.setVisible(b);
   }
   
