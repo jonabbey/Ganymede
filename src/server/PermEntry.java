@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,15 +21,17 @@ package arlut.csd.ganymede;
 
 private boolean visible;
 private boolean editable;
+private boolean create;
 
 /* -- */
 
 public class PermEntry implements java.io.Serializable {
 
-  public PermEntry(boolean visible, boolean editable)
+  public PermEntry(boolean visible, boolean editable, boolean create)
   {
     this.visible = visible;
     this.editable = editable;
+    this.create = create;
   }
 
   public PermEntry(DataInput in) throws IOException
@@ -39,9 +41,10 @@ public class PermEntry implements java.io.Serializable {
 
   void emit(DataOutput out) throws IOException
   {
-    out.writeShort(2);
+    out.writeShort(3);
     out.writeBoolean(visible);
     out.writeBoolean(editable);
+    out.writeBoolean(create);
   }
 
   void receive(DataInput in) throws IOException
@@ -56,13 +59,13 @@ public class PermEntry implements java.io.Serializable {
 
     visible = in.readBoolean();
     editable = in.readBoolean();
+    create = in.readBoolean();
   }
 
   /**
    * This method returns true if the this entry in a PermMatrix is granted
    * visibility privilege.
    *
-   * @see arlut.csd.ganymede.PermEntry
    */ 
 
   public boolean isVisible()
@@ -74,11 +77,21 @@ public class PermEntry implements java.io.Serializable {
    * This method returns true if the this entry in a PermMatrix is granted
    * editing privilege.
    *
-   * @see arlut.csd.ganymede.PermEntry
    */ 
 
   public boolean isEditable()
   {
     return editable;
+  }
+
+  /**
+   * This method returns true if the this entry in a PermMatrix is granted
+   * creation privilege.
+   *
+   */ 
+
+  public boolean isCreatable()
+  {
+    return create;
   }
 }
