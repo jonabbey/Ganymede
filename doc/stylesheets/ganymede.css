@@ -29,7 +29,7 @@
     padding-left: 5px; padding-bottom: 10px; padding-top: 10px; padding-right: 5px;
   }
 
-  code.filename { 
+  code.filename {
     font-weight: bold;
   }
 
@@ -37,11 +37,12 @@
     font-weight: bold;
   }
 
-  img.screenshot { 
+  img.screenshot {
     float: right;
   }
   
  p.address { font-family: Arial, Helvetica; font-style: italic; }
+
 }
 
 
@@ -51,7 +52,11 @@
 
 @media print {
 
-  img.screenshot { 
+  img.screenshot {
     width: 60%;
+  }
+  
+  p.top {
+    page-break-before: always;
   }
 }
