@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.28 $ %D%
+ * @version $Revision: 1.29 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -446,60 +446,77 @@ public interface Session extends Remote {
   StringBuffer    viewAdminHistory(Invid invid, Date since) throws RemoteException;
 
   /**
-   *
-   * View an object from the database.  If the return value is null,
-   * getLastError() should be called for a description of the problem.
+   * View an object from the database.  The ReturnVal returned will
+   * carry a db_object reference, which can be obtained by the client
+   * calling ReturnVal.getObject().  If the object could not be
+   * viewed for some reason, the ReturnVal will carry an encoded error
+   * dialog for the client to display.<br><br>
    *
    * view_db_object() can be done at any time, outside of the bounds of
    * any transaction.  view_db_object() returns a snapshot of the object's
    * state at the time the view_db_object() call is processed, and will
-   * be transaction-consistent internally.
+   * be transaction-consistent internally.<br><br>
    *
-   * @return the object for viewing
+   * If view_db_object() is called during a transaction, the object
+   * will be returned as it stands during the transaction.. that is,
+   * if the object has been changed during the transaction, that
+   * changed object will be returned, even if the transaction has
+   * not yet been committed, and other clients would not be able to
+   * see that version of the object.<br><br>
    *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   * 
    */
 
-  db_object   view_db_object(Invid invid) throws RemoteException;
+  ReturnVal   view_db_object(Invid invid) throws RemoteException;
 
   /**
    *
-   * Check an object out from the database for editing.  If the return
-   * value is null, getLastError() should be called for a description
-   * of the problem. 
+   * Check an object out from the database for editing.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.
    *
-   * @return the object for editing, if null, check getLastError()
-   *
-   */
-
-  db_object   edit_db_object(Invid invid) throws RemoteException;
-
-  /**
-   *
-   * Create a new object of the given type. If the return value is null,
-   * getLastError() should be called for a description of the problem. 
-   *
-   * @return the newly created object for editing, if null, check getLastError()
+   * @return A ReturnVal carrying an object reference and/or error dialog
    *
    */
 
-  db_object   create_db_object(short type) throws RemoteException;
+  ReturnVal   edit_db_object(Invid invid) throws RemoteException;
 
   /**
    *
-   * Clone a new object from object <invid>. If the return value is null,
-   * getLastError() should be called for a description of the problem. 
+   * Create a new object of the given type.  The ReturnVal returned
+   * will carry a db_object reference, which can be obtained by the
+   * client calling ReturnVal.getObject().  If the object could not
+   * be created for some reason, the ReturnVal will carry an encoded
+   * error dialog for the client to display.
    *
-   * This method must be called within a transactional context.
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   */
+
+  ReturnVal   create_db_object(short type) throws RemoteException;
+
+  /**
+   *
+   * Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
+   * will carry a db_object reference, which can be obtained by the
+   * client calling ReturnVal.getObject().  If the object could not
+   * be cloned for some reason, the ReturnVal will carry an encoded
+   * error dialog for the client to display.<br><br>
+   *
+   * This method must be called within a transactional context.<br><br>
    *
    * Typically, only certain values will be cloned.  What values are
    * retained is up to the specific code module provided for the
    * invid type of object.
    *
-   * @return the newly created object for editing
-   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *  
    */
 
-  db_object   clone_db_object(Invid invid) throws RemoteException;
+  ReturnVal   clone_db_object(Invid invid) throws RemoteException;
 
   /**
    *
