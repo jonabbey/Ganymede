@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ public class DBQueryHandler {
 
   static final boolean debug = true;
 
-  public static final boolean matches(Query q, DBObject obj)
+  public static final boolean matches(GanymedeSession session, Query q, DBObject obj)
   {
     if ((q == null) || (obj == null))
       {
@@ -38,11 +38,11 @@ public class DBQueryHandler {
       }
     else
       {
-	return nodeMatch(q.root, obj);
+	return nodeMatch(session, q.root, obj);
       }
   }
 
-  public static final boolean nodeMatch(QueryNode qN, DBObject obj)
+  public static final boolean nodeMatch(GanymedeSession session, QueryNode qN, DBObject obj)
   {
     Object value = null;
     Vector values = null;
@@ -59,19 +59,19 @@ public class DBQueryHandler {
 
 	if (qN instanceof QueryNotNode)
 	  {
-	    return (!nodeMatch(((QueryNotNode)qN).child, obj));
+	    return (!nodeMatch(session, ((QueryNotNode)qN).child, obj));
 	  }
 
 	if (qN instanceof QueryAndNode)
 	  {
-	    return (nodeMatch(((QueryAndNode)qN).child1, obj) && 
-		    nodeMatch(((QueryAndNode)qN).child2, obj));
+	    return (nodeMatch(session, ((QueryAndNode)qN).child1, obj) && 
+		    nodeMatch(session, ((QueryAndNode)qN).child2, obj));
 	  }
 
 	if (qN instanceof QueryOrNode)
 	  {
-	    return (nodeMatch(((QueryOrNode)qN).child1, obj) ||
-		    nodeMatch(((QueryOrNode)qN).child2, obj));
+	    return (nodeMatch(session, ((QueryOrNode)qN).child1, obj) ||
+		    nodeMatch(session, ((QueryOrNode)qN).child2, obj));
 	  }
 
 	if (qN instanceof QueryDataNode)
@@ -142,19 +142,13 @@ public class DBQueryHandler {
 		value = obj.getLabel();
 	      }
 
-	    if (n.comparator == n.UNDEFINED)
+	    if (n.comparator == n.DEFINED)
 	      {
-		return ((field == null) || (!field.defined));
+		return (field != null && !field.defined);
 	      }
 
 	    switch (n.arrayOp)
 	      {
-	      case n.NONE:
-	      case n.CONTAINSANY:
-	      case n.CONTAINSALL:
-	      case n.CONTAINSNONE:
-		break;
-
 	      case n.LENGTHEQ:
 		intval = ((Integer) value).intValue();
 		return (intval == values.size());
@@ -170,7 +164,9 @@ public class DBQueryHandler {
 
 	    // okay.  Now we check each field type
 
-	    if (n.value instanceof String)
+	    if (n.value instanceof String &&
+		(((value != null) && value instanceof String) ||
+		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof String))))
 	      {
 		if (n.arrayOp == n.NONE)
 		  {
@@ -182,41 +178,48 @@ public class DBQueryHandler {
 		  }
 	      }
 
-	    // invids can be arrays
+	    // the client may pass us real Invid's.
 
-	    if (n.value instanceof Invid)
+	    if (n.value instanceof Invid &&
+		(((value != null) && value instanceof Invid) ||
+		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Invid))))
 	      {
-		Invid 
-		  i1 = null, 
+		Invid
+		  i1 = null,
 		  i2 = null;
 
 		/* -- */
 
-		if (n.arrayOp == n.NONE)
-		  {
-		    i1 = (Invid) n.value;
-		    i2 = (Invid) value;
-		  }
+		System.err.println("Doing a real invid compare");
 
 		if (n.comparator == n.EQUALS)
 		  {
+		    i1 = (Invid) n.value;
+
+		    if (i1 == null)
+		      {
+			return false;
+		      }
+
 		    if (n.arrayOp == n.NONE)
 		      {
+			i2 = (Invid) value;
+
 			return i1.equals(i2);
 		      }
 		    else
 		      {
-			i1 = (Invid) n.value;
-
-			/* -- */
-
 			switch (n.arrayOp)
 			  {
-			  case n.CONTAINSANY:
-			
+			  case n.CONTAINS:
+
+			    System.err.println("Doing a vector invid compare against value " + i1);
+
 			    for (int i = 0; i < values.size(); i++)
 			      {
-				if (i1.equals((Invid) values.elementAt(i)))
+				i2 = (Invid) values.elementAt(i);
+
+				if (i1.equals(i2))
 				  {
 				    return true;
 				  }
@@ -224,32 +227,7 @@ public class DBQueryHandler {
 
 			    return false;
 
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!i1.equals((Invid) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (i1.equals((Invid) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
 			  default:
-
 			    return false;
 			  }
 		      }
@@ -260,7 +238,71 @@ public class DBQueryHandler {
 		  }
 	      }
 
-	    // i.p. address can be arrays
+	    // The client can pass us a String for invid comparisons.. we need to 
+	    // turn Invid's in the field we're looking at to Strings for the
+	    // compare.
+
+	    if (n.value instanceof String &&
+		(((value != null) && value instanceof Invid) ||
+		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Invid))))
+	      {
+		String
+		  s1 = null,
+		  s2 = null;
+
+		/* -- */
+
+		System.err.println("Doing an invid compare");
+
+		if (n.arrayOp == n.NONE)
+		  {
+		    s1 = (String) n.value;
+		    s2 = (String) session.viewObjectLabel((Invid)value);
+		  }
+
+		if (n.comparator == n.EQUALS)
+		  {
+		    if (n.arrayOp == n.NONE)
+		      {
+			return s1.equals(s2);
+		      }
+		    else
+		      {
+			s1 = (String) n.value;
+
+			/* -- */
+
+			switch (n.arrayOp)
+			  {
+			  case n.CONTAINS:
+
+			    System.err.println("Doing a vector invid compare against value " + s1);
+
+			    for (int i = 0; i < values.size(); i++)
+			      {
+				s2 = session.viewObjectLabel((Invid) values.elementAt(i));
+
+				if (s1.equals(s2))
+				  {
+				    return true;
+				  }
+			      }
+
+			    return false;
+
+			  default:
+			    return false;
+			  }
+		      }
+		  }
+		else
+		  {
+		    return false;	// invalid comparator
+		  }
+	      }
+
+	    // i.p. address can be arrays.. note that the client's query box will
+	    // pass us a true array of Bytes.
 
 	    if (n.value instanceof Byte[])
 	      {
@@ -284,7 +326,7 @@ public class DBQueryHandler {
 
 			switch (n.arrayOp)
 			  {
-			  case n.CONTAINSANY:
+			  case n.CONTAINS:
 			
 			    for (int i = 0; i < values.size(); i++)
 			      {
@@ -295,30 +337,6 @@ public class DBQueryHandler {
 			      }
 
 			    return false;
-
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!compareIPs(oBytes, ((Byte[]) values.elementAt(i))))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (compareIPs(oBytes, ((Byte[]) values.elementAt(i))))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
 
 			  default:
 
@@ -452,7 +470,7 @@ public class DBQueryHandler {
 
     switch (n.arrayOp)
       {
-      case n.CONTAINSANY:
+      case n.CONTAINS:
 	
 	for (int i = 0; i < values.size(); i++)
 	  {
@@ -463,30 +481,6 @@ public class DBQueryHandler {
 	  }
 
 	return false;
-	    
-      case n.CONTAINSALL:
-	    
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (!compareString(n.comparator, queryValue, (String) values.elementAt(i)))
-	      {
-		return false;
-	      }
-	  }
-
-	return true;
-	    
-      case n.CONTAINSNONE:
-
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (compareString(n.comparator, queryValue, (String) values.elementAt(i)))
-	      {
-		return false;
-	      }
-	  }
-
-	return true;
 
       default:
 	
