@@ -171,7 +171,6 @@ refresh the jar files.
 
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/client/*"/>
     </jar>
 
