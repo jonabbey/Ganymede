@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/10/29 16:58:01 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/05/19 04:42:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -196,9 +196,9 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method is used to get an Invid that the server
-   * wants to return to the client.  Used particularly
-   * for invid_field.createNewEmbedded().  Return null
-   * if no Invid was set.</p>
+   * wants to return to the client.  Used particularly for
+   * {@link arlut.csd.ganymede.invid_field#createNewEmbedded() invid_field.createNewEmbedded()}.
+   * Return null if no Invid was set.</p>
    *
    * @see arlut.csd.ganymede.invid_field
    * @see arlut.csd.ganymede.InvidDBField
@@ -229,13 +229,38 @@ public class ReturnVal implements java.io.Serializable {
    * return a dialog box describing the problem and, potentially,
    * asking for more information to complete the operation.</p>
    *
-   * <p>This method be checked after all calls to the server that
+   * <p>This method should be checked after all calls to the server that
    * return non-null ReturnVal objects.</p>
    */
 
   public JDialogBuff getDialog()
   {
     return dialog;
+  }
+
+  /**
+   * <p>If the operation was not successful, this method should return
+   * a the text of any encoded dialog box describing the problem.  This
+   * method is intended for text-mode clients that do not support the
+   * full callback/wizard features that the
+   * {@link arlut.csd.ganymede.JDataComponent.JDialogBuff JDialogBuff} 
+   * class supports.</p>
+   *
+   * <p>This method (or getDialog() for GUI clients) should be checked
+   * after all calls to the server that return non-null ReturnVal
+   * objects.</p> 
+   */
+
+  public String getDialogText()
+  {
+    if (dialog == null)
+      {
+	return null;
+      }
+    else
+      {
+	return dialog.getText();
+      }
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/03/03 02:05:01 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/05/19 04:42:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import java.util.*;
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
  *
- * @version $Revision: 1.21 $ $Date: 2000/03/03 02:05:01 $ $Name:  $
+ * @version $Revision: 1.22 $ $Date: 2000/05/19 04:42:54 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -283,7 +283,7 @@ public interface db_field extends java.rmi.Remote {
    * <p>Removes a set of elements from this field, if a
    * vector.  Using deleteElements() to remove a sequence of items
    * from a field may be many times more efficient than calling
-   * deleteElement() repeatedly, as removeElements() can do a single
+   * deleteElement() repeatedly, as deleteElements() can do a single
    * server checkpoint before attempting to remove all the values.</p>
    *
    * <p>The ReturnVal object returned encodes success or failure, and
