@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -235,6 +235,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
     pack();
     show();
+    setSize(800, 600);
   }
 
   public int compare(Object a, Object b) 
@@ -680,12 +681,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   Panel 
     mainPanel,
-    editPanel,
-    cardPanel,
-    emptyPanel,
-    stringPanel,
-    booleanPanel,
-    invidPanel;
+    editPanel;
+    //    cardPanel,
+    // emptyPanel,
+    //stringPanel,
+    //booleanPanel,
+    //invidPanel;
 
   GASHSchema 
     owner;
@@ -725,6 +726,13 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   Hashtable
     rowHash;			// to keep track of field labels
 
+  boolean
+    booleanShowing,
+    numericShowing,
+    dateShowing,
+    stringShowing,
+    referenceShowing;
+
   BaseFieldEditor(GASHSchema owner)
   {
     rowHash = new Hashtable();
@@ -736,7 +744,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     mainPanel.setLayout(new BorderLayout());
 
     editPanel = new Panel();
-    //editPanel.setLayout(new ColumnLayout());
     editPanel.setLayout(new TableLayout(false));
 
     ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
@@ -744,34 +751,27 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     idN = new numberField(20, ca, false, false, 0, 0);
     idN.setCallback(this);
-    //editPanel.add(new FieldWrapper("Field ID:", idN));
     addRow(editPanel, idN, "Field ID:", 0);
 
     nameS = new stringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
-    //editPanel.add(new FieldWrapper("Field Name:", nameS));
     addRow(editPanel, nameS, "Field Name:", 1);
 
     classS = new stringField(20, 100, ca, true, false, null, null);
     classS.setCallback(this);
-    //editPanel.add(new FieldWrapper("Class name:", classS));
     addRow(editPanel, classS, "Class name:", 2);
 
     commentT = new TextArea(4, 20);
     commentT.addTextListener(this);
-    //editPanel.add(new FieldWrapper("Comment:", commentT));
     addRow(editPanel, commentT, "Comment:", 3);
     
-
     // This one is different:
     vectorCF = new checkboxField(null, false, ca, true);
     vectorCF.setCallback(this);
-    //editPanel.add(vectorCF);
     addRow(editPanel, vectorCF, "Vector:", 4);
 
     maxArrayN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxArrayN.setCallback(this);
-    //editPanel.add(new FieldWrapper("Max Array Size:", maxArrayN));
     addRow(editPanel, maxArrayN, "Max Array Size:", 5);
 
     typeC = new Choice();
@@ -781,110 +781,89 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     typeC.add("String");
     typeC.add("Object Reference");
     typeC.addItemListener(this);
-    //editPanel.add(new FieldWrapper("Field Type:", typeC));
+
+    //choose the one that is the default
+    changeTypeChoice("Boolean");
+
+   
     addRow(editPanel, typeC, "Field Type:", 6);
-
-    card = new CardLayout();
-    cardPanel = new Panel();
-    cardPanel.setLayout(card);
-
-    emptyPanel = new Panel();
-    cardPanel.add("empty", emptyPanel);
-
-    stringPanel = new Panel();
-    //stringPanel.setLayout(new ColumnLayout());
-    stringPanel.setLayout(new TableLayout(false));
 
     minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
-    //stringPanel.add(new FieldWrapper("Minimum String Size:", minLengthN));
-    addRow(stringPanel, minLengthN, "Minimum String Size:", 0);
+    addRow(editPanel, minLengthN, "Minimum String Size:", 7);
 
     maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
-    //stringPanel.add(new FieldWrapper("Maximum String Size:", maxLengthN));
-    addRow(stringPanel, maxLengthN, "Maximum String Size:", 1);
+    addRow(editPanel, maxLengthN, "Maximum String Size:", 8);
    
     OKCharS = new stringField(20, 100, ca, true, false, null, null);
     OKCharS.setCallback(this);
-    //stringPanel.add(new FieldWrapper("Allowed Chars:", OKCharS));
-    addRow(stringPanel, OKCharS, " Allowed Chars:", 2);
+    addRow(editPanel, OKCharS, " Allowed Chars:", 9);
 
     BadCharS = new stringField(20, 100, ca, true, false, null, null);
     BadCharS.setCallback(this);
-    //stringPanel.add(new FieldWrapper("Disallowed Chars:", BadCharS));
-    addRow(stringPanel, BadCharS, "Disallowed Chars:", 3);
+    addRow(editPanel, BadCharS, "Disallowed Chars:", 10);
 
     namespaceC = new Choice();
     namespaceC.addItemListener(this);
-    //stringPanel.add(new FieldWrapper("Namespace:", namespaceC));
-    addRow(stringPanel, namespaceC, "Namespace:", 4);
-
-    cardPanel.add("string", stringPanel);
-
-    booleanPanel = new Panel();
-    //booleanPanel.setLayout(new ColumnLayout());
-    booleanPanel.setLayout(new TableLayout(false));
+    addRow(editPanel, namespaceC, "Namespace:", 11);
 
     labeledCF = new checkboxField(null, false, ca, true);
     labeledCF.setCallback(this);
-    //booleanPanel.add(labeledCF);
-    addRow(booleanPanel, labeledCF, "Labeled:", 0);
+    addRow(editPanel, labeledCF, "Labeled:", 12);
 
     trueLabelS = new stringField(20, 100, ca, true, false, null, null);
     trueLabelS.setCallback(this);
-    //booleanPanel.add(new FieldWrapper("True Label:", trueLabelS));
-    addRow(booleanPanel, trueLabelS, "True Label:", 1);
+    addRow(editPanel, trueLabelS, "True Label:", 13);
 
     falseLabelS = new stringField(20, 100, ca, true, false, null, null);
     falseLabelS.setCallback(this);
-    //booleanPanel.add(new FieldWrapper("False Label:", falseLabelS));
-    addRow(booleanPanel, falseLabelS, "False Label:", 2);
+    addRow(editPanel, falseLabelS, "False Label:", 14);
 
-    cardPanel.add("boolean", booleanPanel);
-
-    invidPanel = new Panel();
-    //invidPanel.setLayout(new ColumnLayout());
-    invidPanel.setLayout(new TableLayout(false));
-
-    targetLimitCF = new checkboxField("Restricted Target:", false, ca, true);
+    targetLimitCF = new checkboxField(null, false, ca, true);
     targetLimitCF.setCallback(this);
-    //invidPanel.add(targetLimitCF);
-    addRow(invidPanel, targetLimitCF, "Restricted Target:", 0);
+    addRow(editPanel, targetLimitCF, "Restricted Target:", 15);
 
     targetC = new Choice();
     targetC.addItemListener(this);
-    //invidPanel.add(new FieldWrapper("Target Object:", namespaceC));
-    addRow(invidPanel, targetC, "Target Object:", 1);
+    addRow(editPanel, targetC, "Target Object:", 16);
 
-    symmetryCF = new checkboxField("Maintain Symmetry:", false, ca, true);
+    symmetryCF = new checkboxField(null, false, ca, true);
     symmetryCF.setCallback(this);
-    //invidPanel.add(symmetryCF);
-    addRow(invidPanel, symmetryCF, "Maintain Symmetry:", 2);
+    addRow(editPanel, symmetryCF, "Maintain Symmetry:", 17);
 
     fieldC = new Choice();
     fieldC.addItemListener(this);
-    //invidPanel.add(new FieldWrapper("Target Field:", namespaceC));
-    addRow(invidPanel, fieldC, "Target Field:", 3);
+    addRow(editPanel, fieldC, "Target Field:", 18);
 
-    cardPanel.add("invid", invidPanel);
-    
-    //editPanel.add(cardPanel);
-    
-    mainPanel.add("North", editPanel);
-    mainPanel.add("Center", cardPanel);
+    booleanShowing = false;
+    numericShowing = false;
+    dateShowing = false;
+    stringShowing = false;
+    referenceShowing = false;
 
-    
-    add(mainPanel);
+    checkVisibility();
+
+    add(editPanel);
   }
 
   void addRow(Panel parent, Component comp,  String label, int row)
+  {
+    addRow(parent, comp, label, row, true);
+  }
+
+  void addRow(Panel parent, Component comp,  String label, int row, boolean visible)
   {
     Label l = new Label(label);
     rowHash.put(comp, l);
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhH", comp);
+    if (visible)
+      setRowVisible(comp, true);
+    else
+      setRowVisible(comp, false);
   }
+  
 
   void setRowVisible(Component comp, boolean b)
   {
@@ -898,6 +877,79 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     c.setVisible(b);
   }
 
+  void checkVisibility()
+  //This goes through all the components, and sets the visibilities
+  {
+    setRowVisible(maxArrayN, vectorCF.getState());
+
+    setRowVisible(targetC, targetLimitCF.getState());
+    setRowVisible(symmetryCF, targetLimitCF.getState());
+    
+    setRowVisible(fieldC, symmetryCF.getState());
+
+    //Now check the nameC choice stuff
+    setRowVisible(labeledCF, booleanShowing);
+    if (booleanShowing)
+      {
+	setRowVisible(trueLabelS, labeledCF.getState());
+	setRowVisible(falseLabelS, labeledCF.getState());
+      }
+    else
+      {
+	setRowVisible(trueLabelS, false);
+	setRowVisible(falseLabelS, false);
+      }
+
+    setRowVisible(OKCharS, stringShowing);
+    setRowVisible(BadCharS, stringShowing);
+    setRowVisible(minLengthN, stringShowing);
+    setRowVisible(maxLengthN, stringShowing);
+    setRowVisible(namespaceC, stringShowing);
+
+    setRowVisible(targetLimitCF, referenceShowing);
+    if (referenceShowing && targetLimitCF.getState())
+      {
+	setRowVisible(targetC, referenceShowing);
+	
+	setRowVisible(symmetryCF, referenceShowing);
+	if (symmetryCF.getState())
+	  setRowVisible(fieldC, referenceShowing);
+	else
+	  setRowVisible(fieldC, false);
+      }
+    else
+      {
+	setRowVisible(targetC, false);
+	
+	setRowVisible(symmetryCF, false);
+	
+	
+      }
+    editPanel.doLayout();
+    mainPanel.invalidate();
+    this.validate();
+  }
+    
+  void changeTypeChoice(String selectedItem)
+  {
+    booleanShowing = false;
+    numericShowing = false;
+    dateShowing = false;
+    stringShowing = false;
+    referenceShowing = false;
+    if (selectedItem == "Boolean")
+      booleanShowing = true;
+    else if (selectedItem == "Numeric")
+      numericShowing = true;
+    else if (selectedItem == "Date")
+      dateShowing = true;
+    else if (selectedItem == "String")
+      stringShowing = true;
+    else if (selectedItem == "Object Reference")
+      referenceShowing = true;
+      
+
+  }
   // edit the given field
 
   public void editField(BaseField fieldDef)
@@ -931,7 +983,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    namespaceC.removeAll();
 	    namespaceC.add("<None>");
 	    // add all defined namespaces here
-	    card.show(cardPanel, "string");
+	    //	    card.show(cardPanel, "string");
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -952,7 +1004,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		falseLabelS.setEnabled(false);
 	      }
 	    
-	    card.show(cardPanel, "boolean");
+	    //card.show(cardPanel, "boolean");
 	  }
 	else if (fieldDef.isInvid())
 	  {
@@ -989,11 +1041,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		fieldC.removeAll();
 	      }
 
-	    card.show(cardPanel,"invid");
+	    //card.show(cardPanel,"invid");
 	  }
 	else
 	  {
-	    card.show(cardPanel,"empty");
+	    //card.show(cardPanel,"empty");
 	  }
       }
     catch (RemoteException ex)
@@ -1007,11 +1059,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   public boolean setValuePerformed(ValueObject v)
   {
     Component comp = v.getSource();
-    if (comp == commentT)
-      {
-	System.out.println("commentT");
-      }
-    else if (comp == nameS)
+    if (comp == nameS)
       {
 	System.out.println("nameS");
       }
@@ -1029,11 +1077,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
     else if (comp == vectorCF)
       {
-	setRowVisible(maxArrayN, vectorCF.getState());
+	//setRowVisible(maxArrayN, vectorCF.getState());
 	System.out.println("vectorCF");
-	editPanel.doLayout();
-	mainPanel.invalidate();
-	this.validate();
+	checkVisibility();
       }
     else if (comp == typeC)
       {
@@ -1070,14 +1116,17 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     else if (comp == labeledCF)
       {
 	System.out.println("labeledCF");
+	checkVisibility();
       }
     else if (comp == targetLimitCF)
       {
 	System.out.println("targetLimitCF");
+	checkVisibility();
       }
     else if (comp == symmetryCF)
       {
 	System.out.println("symmetryCF");
+	checkVisibility();
       }
     else if (comp == targetC)
       {
@@ -1095,6 +1144,27 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   public void itemStateChanged(ItemEvent e)
   {
+    System.out.println("itemStateChanged");
+    System.out.println(e.getItem());
+    /*    booleanShowing = false;
+    numericShowing = false;
+    dateShowing = false;
+    stringShowing = false;
+    referenceShowing = false;
+    if (e.getItem() == "Boolean")
+      booleanShowing = true;
+    else if (e.getItem() == "Numeric")
+      numericShowing = true;
+    else if (e.getItem() == "Date")
+      dateShowing = true;
+    else if (e.getItem() == "String")
+      stringShowing = true;
+    else if (e.getItem() == "Object Reference")
+      referenceShowing = true;
+      */
+
+    changeTypeChoice((String)e.getItem());
+    checkVisibility();
   }
 
   // for the multiline comment field
