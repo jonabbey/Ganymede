@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -109,6 +109,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * mean that only one user at a time can currently be processed for
    * login. 8-(
    * 
+   * Internal sessions, as created by this constructor, have full
+   * privileges to do any possible operation.
+   *
    */
 
   GanymedeSession() throws RemoteException
@@ -344,6 +347,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (client == null)
       {
+	// for internal sessions
+
+	logged_in = false;
+	session.logout();
+	ownerList = null;
 	return;
       }
 
@@ -354,6 +362,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // logout the client, abort any DBSession transaction going
 
     session.logout();
+
+    // if we weren't forced off, do normal logout logging
 
     if (!forced_off)
       {
@@ -933,7 +943,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     embedded = base.isEmbedded();
 
-    Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
+    if (debug)
+	{
+	  Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
+	}
 
     // if we're an end user looking at the user base, we'll want to be able to see
     // the fields that the user could see for his own record
@@ -1104,7 +1117,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
       }
 
-    Ganymede.debug("dump(): completed processing, returning buffer");
+    if (debug)
+      {
+	Ganymede.debug("dump(): completed processing, returning buffer");
+      }
 
     return result;
   }
@@ -1237,15 +1253,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (embedded)
       {
-	// Ganymede.debug("Query on embedded type");
+	if (debug)
+	  {
+	    // Ganymede.debug("Query on embedded type");
 
-	System.err.println("Query on embedded type");
+	    System.err.println("Query on embedded type");
+	  }
       }
     else
       {
-	// Ganymede.debug("Query on non-embedded type");
-
-	System.err.println("Query on non-embedded type");
+	if (debug)
+	  {
+	    // Ganymede.debug("Query on non-embedded type");
+	    
+	    System.err.println("Query on non-embedded type");
+	  }
       }
 
     // are we able to optimize the query into a direct lookup?
@@ -1292,7 +1314,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // aha!  We've got an optimized case!
 	    
-	    System.err.println("Eureka!  Optimized query!");
+	    if (debug)
+	      {
+		System.err.println("Eureka!  Optimized query!");
+	      }
 
 	    DBObject resultobject;
 	    DBNameSpace ns = fieldDef.namespace;
@@ -1327,7 +1352,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    addResultRow(resultobject, query, result, internal);
 		
-		    System.err.println("Returning result from optimized query");
+		    if (debug)
+		      {
+			System.err.println("Returning result from optimized query");
+		      }
 		
 		    return result;
 		  }
@@ -1339,10 +1367,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (debug)
       {
-	Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
-      }
-    else
-      {
+	// Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+
 	System.err.println("Query: " + username + " : opening read lock on " + base.getName());
       }
 
@@ -1358,10 +1384,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (debug)
       {
-	Ganymede.debug("Query: " + username + " : got read lock");
-      }
-    else
-      {
+	// Ganymede.debug("Query: " + username + " : got read lock");
+
 	System.err.println("Query: " + username + " : got read lock");
       }
 
@@ -1404,10 +1428,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (debug)
       {
-	Ganymede.debug("Query: " + username + " : completed query over primary hash, releasing read lock");
-      }
-    else
-      {
+	// Ganymede.debug("Query: " + username + " : completed query over primary hash, releasing read lock");
+
 	System.err.println("Query: " + username + " : completed query over primary hash, releasing read lock");
       }
 
@@ -1418,10 +1440,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (debug)
 	  {
-	    Ganymede.debug("Query: " + username + " : scanning intratransaction objects");
-	  }
-	else
-	  {
+	    // Ganymede.debug("Query: " + username + " : scanning intratransaction objects");
+
 	    System.err.println("Query: " + username + " : scanning intratransaction objects");
 	  }
 
@@ -1488,15 +1508,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (debug)
 	  {
-	    Ganymede.debug("Query: " + username + " : completed scanning intratransaction objects");
-	  }
-	else
-	  {
+	    // Ganymede.debug("Query: " + username + " : completed scanning intratransaction objects");
+
 	    System.err.println("Query: " + username + " : completed scanning intratransaction objects");
 	  }
       }
     
-    Ganymede.debug("Query: " + username + ", object type " + base.getName() + " completed");
+    if (debug)
+      {
+	Ganymede.debug("Query: " + username + ", object type " + base.getName() + " completed");
+      }
     return result;
   }
 
