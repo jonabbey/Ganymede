@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -107,9 +107,19 @@ public interface Session extends Remote {
    * The database will be read-locked during the query, assuring
    * a transaction-consistent view of the database.
    *
+   * @returns a Vector of Result objects.
+   *
    */
 
-  Result[]    query(Query query) throws RemoteException;
+  Vector    query(Query query) throws RemoteException;
+
+  /**
+   *
+   * This method returns the label for a specific invid.
+   *
+   */
+
+  String    viewObjectLabel(Invid invid) throws RemoteException;
 
   /**
    *
