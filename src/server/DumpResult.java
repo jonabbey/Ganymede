@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,8 +31,11 @@ public class DumpResult implements java.io.Serializable {
 
   // --
 
+  // for transport
+
   StringBuffer buffer;
-  private boolean unpacked = false;
+
+  transient private boolean unpacked = false;
 
   // for use pre-serialized
 
@@ -40,6 +43,7 @@ public class DumpResult implements java.io.Serializable {
 
   // for use post-serialized
 
+  transient private boolean postTransport = true;
   transient Vector headers = null;
   transient Vector types = null;
   transient Vector invids = null;
@@ -55,6 +59,7 @@ public class DumpResult implements java.io.Serializable {
 
     /* -- */
 
+    postTransport = false;
     this.fieldDefs = fieldDefs;
     buffer = new StringBuffer();
 
@@ -538,5 +543,10 @@ public class DumpResult implements java.io.Serializable {
       }
 
     unpacked = true;
+
+    if (postTransport)
+      {
+	buffer = null;		// for GC
+      }
   }
 }
