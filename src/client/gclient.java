@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -120,6 +120,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     loader;      // Use this to do start up stuff in a thread
   
   boolean
+    showToolbar = false,       //Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
   
   helpPanel
@@ -491,17 +492,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftP.setLayout(new BorderLayout());
     leftP.add("Center", tree);
     
-    leftTop = new JPanel(false);
-    leftTop.setBorder(statusBorderRaised);
-    
-    leftL = new JLabel("Objects");
-    leftTop.setLayout(new BorderLayout());
-    //leftTop.setBackground(ClientColor.menu);
-    //leftTop.setForeground(ClientColor.menuText);
-    leftTop.add("Center", leftL);
-
-    leftP.add("North", leftTop);
-    
+    if (!showToolbar)
+      {
+	leftTop = new JPanel(false);
+	leftTop.setBorder(statusBorderRaised);
+	
+	leftL = new JLabel("Objects");
+	leftTop.setLayout(new BorderLayout());
+	//leftTop.setBackground(ClientColor.menu);
+	//leftTop.setForeground(ClientColor.menuText);
+	leftTop.add("Center", leftL);
+	
+	leftP.add("North", leftTop);
+      }
 
     if (debug)
       {
@@ -539,27 +542,28 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     wp = new windowPanel(this, windowMenu);
 
     rightP.add("Center", wp);
-
-    rightL = new JLabel("Open objects");
-    
     rightTop = new JPanel(false);
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
-    rightTop.add("West", rightL);
-    //rightTop.add("West", createToolbar());
-    timerLabel = new JLabel("                                       ", JLabel.RIGHT);
-
-    timer = new connectedTimer(timerLabel, 5000);
-    timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
-    rightTop.add("East", timerLabel);
     
-    rightP.add("North", rightTop);
-    //mainPanel.add("North", rightTop);
+    if (showToolbar)
+      {
+	rightTop.add("West", createToolbar());
+      }
+    else
+      {
+	rightL = new JLabel("Open objects");
+	
+	rightTop.add("West", rightL);
+	//timerLabel = new JLabel("                                       ", JLabel.RIGHT);
+	timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
+	timer = new connectedTimer(timerLabel, 5000, true);
+	timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
+	rightTop.add("East", timerLabel);
+	
+	rightP.add("North", rightTop);
 
-    // Button bar at bottom, includes commit/cancel panel and taskbar
-    JPanel bottomButtonP = new JPanel(false);
-    rightP.add(bottomButtonP,"South");
-
+      }
     commit = new JButton("Commit");
     commit.setOpaque(true);
     commit.setBackground(Color.lightGray);
@@ -574,8 +578,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     cancel.setToolTipText("Click this to cancel all changes");
     cancel.addActionListener(this);
 
+    // Button bar at bottom, includes commit/cancel panel and taskbar
+    JPanel bottomButtonP = new JPanel(false);
+    if (showToolbar)
+      {
+	rightTop.add("East", bottomButtonP);
+      }
+    else
+      {
+	rightP.add(bottomButtonP,"South");
+      }
+
     bottomButtonP.add(commit);
     bottomButtonP.add(cancel);
+    
 
     sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
    
@@ -855,6 +871,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     JErrorDialog d = new JErrorDialog(this, title, message);
   }
 
+  public void setWaitCursor()
+  {
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+  }
+
+  public void setNormalCursor()
+  {
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
+
   // Private methods
 
   /**
@@ -915,7 +941,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	System.out.println("No personas.");
       }
-    
+
+    // Now the connected timer.
+    timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
+    timer = new connectedTimer(timerLabel, 5000, true);
+    timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
+    add(timerLabel);
+
     return panel;
   }
 
@@ -1460,6 +1492,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     try
       {
 	db_object o = session.edit_db_object(invid);
+	if (o == null)
+	  {
+	    setStatus("edit_db_object returned a null pointer, aborting");
+	    return;
+	  }
 	wp.addWindow(o, true, objectType);
 	InvidNode node = null;
 	if (invidNodeHash.containsKey(invid))
