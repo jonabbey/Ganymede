@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -218,7 +218,8 @@ public class directLoader {
 
 	    // We'll get a null pointer exception here if it didn't work out
 
-	    System.err.println("Using pre-existing gash privilege matrix: " + gashadminPermInvid.toString());
+	    System.err.println("Using pre-existing gash privilege matrix: " + 
+			       gashadminPermInvid.toString());
 	  }
 
 	current_obj = (DBEditObject) my_client.session.edit_db_object(gashadminPermInvid);
@@ -285,6 +286,15 @@ public class directLoader {
 	while (enum.hasMoreElements())
 	  {
 	    ogRec = (OwnerGroup) enum.nextElement();
+
+	    // the supergash ownergroup record already exists on the server, we
+	    // don't need to create it here.
+
+	    if (ogRec.prefix.equals("super"))
+	      {
+		continue;
+	      }
+
 	    System.out.print("Creating ownergroup:" + ogRec.prefix);
 
 	    // create the owner group on the server
@@ -303,7 +313,7 @@ public class directLoader {
 
 	    System.out.println(" [" + invid + "]");
 
-	    // and set the name of the owner group.. using the prefix mask isn't
+ 	    // and set the name of the owner group.. using the prefix mask isn't
 	    // great, but it will serve for now.  The administrators will be able to
 	    // edit them through the client
 
@@ -401,9 +411,19 @@ public class directLoader {
 
   /*----------------------------------------------------------------------------*/
 
+
+  /**
+   *
+   * scan the admin_info file, coalesce a group of owner groups
+   *
+   */
+
   private static void scanOwnerGroups()
   {
-    // scan the admin_info file, coalesce a group of owner groups
+    // create an ownergroup record for supergash-level admins
+
+    OwnerGroup supergash = new OwnerGroup();
+    ownerGroups.addElement(supergash);
 
     try
       {
@@ -458,11 +478,19 @@ public class directLoader {
 		
 		if (!found)
 		  {
-		    // create a new owner group
+		    if (adminObj.mask != null && !adminObj.mask.equals("*"))
+		      {
+			// create a new owner group
+			
+			ogRec = new OwnerGroup(adminObj);
+			ownerGroups.addElement(ogRec);
+		      }
+		    else	// the admin is a member of supergash
+		      {
+			ogRec = supergash;
+		      }
 
-		    ogRec = new OwnerGroup(adminObj);
 		    ogRec.addAdmin(adminObj.name, adminObj.password);
-		    ownerGroups.addElement(ogRec);
 		  }
 		
 		// System.out.println("Putting " + adminObj.name + " : " + ogRec);
@@ -1437,7 +1465,14 @@ public class directLoader {
 
 	if (ogRec != null)
 	  {
-	    System.out.print("User " + key + " is a GASH admin.. creating persona object ");
+	    if (ogRec.prefix.equals("super"))
+	      {
+		System.out.print("User " + key + " is a SuperGASH admin.. creating persona object ");
+	      }
+	    else
+	      {
+		System.out.print("User " + key + " is a GASH admin.. creating persona object ");
+	      }
 
 	    DBEditObject newPersona = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PersonaBase);
 	    Invid personaInvid = newPersona.getInvid();
@@ -1450,8 +1485,6 @@ public class directLoader {
 
 	    pass_field passField = (pass_field) newPersona.getField(SchemaConstants.PersonaPasswordField);
 	    passField.setCryptPass(ogRec.password(key));
-
-	    //	    newPersona.setFieldValueLocal(SchemaConstants.PersonaPasswordField,ogRec.password(key));
 
 	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminConsole, new Boolean(true));
 
@@ -1574,7 +1607,7 @@ public class directLoader {
 	  {
 	    temp = (String) mailGroup.targets.elementAt(j);
 
-	    if (temp.indexOf('@') != -1)
+	    if ((temp.indexOf('@') != -1) || (temp.indexOf('/') != -1))
 	      {
 		current_field.addElement(mailGroup.targets.elementAt(j));
 	      }
@@ -1615,7 +1648,7 @@ public class directLoader {
 	  {
 	    temp = (String) mailGroup.targets.elementAt(j);
 
-	    if (temp.indexOf('@') == -1)
+	    if ((temp.indexOf('@') == -1) && (temp.indexOf('/') == -1))
 	      {
 		targetInvid = (Invid) mailInvids.get(temp.toLowerCase());
 
@@ -2106,6 +2139,13 @@ public class directLoader {
 
 	    ogRec = (OwnerGroup) adminUsers.get(u);
 
+	    // we don't want to add a system to the supergash owner group
+
+	    if (ogRec.prefix.equals("super"))
+	      {
+		continue;
+	      }
+
 	    if (ogRec != null)
 	      {
 		if (owners.get(ogRec.getInvid()) == null)
@@ -2376,19 +2416,29 @@ public class directLoader {
 
 	userInvid = (Invid) userInvids.get(m.userName);
 
-	// need to edit this user, create an imbedded object
+	if (userInvid != null)
+	  {
+	    // need to edit this user, create an imbedded object
 
-	user_obj = (DBEditObject) my_client.session.edit_db_object(userInvid);
+	    user_obj = (DBEditObject) my_client.session.edit_db_object(userInvid);
 
-	embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
+	    embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
 
-	embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded().getInvid());
+	    embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded().getInvid());
 
-	// we've got the new map entry, load 'er up
-
-	embed_obj.setFieldValueLocal(mapEntrySchema.MAP, mapInvids.get(m.mapName));	// map invid
-
-	embed_obj.setFieldValueLocal(mapEntrySchema.VOLUME, volumeInvids.get(m.volName)); // volume invid
+	    // we've got the new map entry, load 'er up
+	    
+	    embed_obj.setFieldValueLocal(mapEntrySchema.MAP, mapInvids.get(m.mapName));	// map invid
+	    
+	    embed_obj.setFieldValueLocal(mapEntrySchema.VOLUME, volumeInvids.get(m.volName)); // volume invid
+	  }
+	else
+	  {
+	    System.err.println("** Error, user " + m.userName + 
+			       " found in map " + m.mapName + 
+			       ", but not in user_info");
+	    System.err.println("** Skipping.");
+	  }
       }
     
     System.out.println("\nFinished creating automounter map entries\n");

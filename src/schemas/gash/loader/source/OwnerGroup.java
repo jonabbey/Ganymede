@@ -6,7 +6,7 @@
    GASH user_info file
    
    Created: 30 September 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,7 @@
 package arlut.csd.ganymede.loader;
 
 import arlut.csd.ganymede.Invid;
+import arlut.csd.ganymede.SchemaConstants;
 import java.util.*;
 
 /*------------------------------------------------------------------------------
@@ -34,6 +35,30 @@ public class OwnerGroup {
   Vector admins;
 
   // instance constructor
+
+  /**
+   *
+   * Supergash owner group constructor
+   *
+   */
+
+  public OwnerGroup()
+  {
+    lowuid = 0;
+    highuid = 32767;
+    lowgid = 0;
+    highgid = 32767;
+    prefix = "super";
+    objInvid = new Invid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
+
+    admins = new Vector();
+  }
+
+  /**
+   *
+   * Normal admin owner group constructor
+   *
+   */
 
   public OwnerGroup(int lowuid, int highuid, int lowgid, int highgid, String prefix)
   {
@@ -110,23 +135,80 @@ public class OwnerGroup {
     admins.addElement(new adminRec(adminName, password));
   }
 
+  /**
+   *
+   * Returns true if this ownergroup should have control over the
+   * given uid.  Returns false if this owner group corresponds to
+   * supergash, since supergash implicitly owns all objects.. we
+   * don't need directLoader to set ownership explicitly.
+   * 
+   */
+
   public boolean matchUID(int uid)
   {
+    if (prefix.equals("super"))
+      {
+	return false;
+      }
+
     return (uid >= lowuid && uid <= highuid);
   }
 
+  /**
+   *
+   * Returns true if this ownergroup should have control over the
+   * given gid.  Returns false if this owner group corresponds to
+   * supergash, since supergash implicitly owns all objects.. we
+   * don't need directLoader to set ownership explicitly.
+   * 
+   */
+
   public boolean matchGID(int gid)
   {
+    if (prefix.equals("super"))
+      {
+	return false;
+      }
+
     return (gid >= lowgid && gid <= highgid);
   }
 
+  /**
+   *
+   * Returns true if this ownergroup should have control over the
+   * given mask.  Returns false if this owner group corresponds to
+   * supergash, since supergash implicitly owns all objects.. we
+   * don't need directLoader to set ownership explicitly.
+   * 
+   */
+
   public boolean matchMask(String str)
   {
+    if (prefix.equals("super"))
+      {
+	return false;
+      }
+
     return str.startsWith(prefix);
   }
 
+  /**
+   *
+   * Returns true if this ownergroup should have control over an
+   * object managed by admin 'name'.  Returns false if this owner
+   * group corresponds to supergash, since supergash implicitly owns
+   * all objects.. we don't need directLoader to set ownership
+   * explicitly.
+   *  
+   */
+
   public synchronized boolean containsAdmin(String name)
   {
+    if (prefix.equals("super"))
+      {
+	return false;
+      }
+
     adminRec a;
 
     for (int i = 0; i < admins.size(); i++)
