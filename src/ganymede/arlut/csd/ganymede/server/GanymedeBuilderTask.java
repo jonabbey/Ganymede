@@ -482,7 +482,17 @@ public abstract class GanymedeBuilderTask implements Runnable {
   /**
    * <P>This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular base has had any modifications
-   * made to it since the last time this builder task was run.</P>
+   * made to it since the last time this builder task was run.  This
+   * method works because each GanymedeBuilderTask object keeps a
+   * timestamp which records the last time the builder task ran.
+   * baseChanged() just compares that time stamp against the {@link
+   * arlut.csd.ganymede.server.DBObjectBase#lastChange} time stamp
+   * that the {@link arlut.csd.ganymede.server.DBObjectBase} class
+   * maintains at transaction commit.  Note that this method will
+   * always return true the first time a particular builder task is
+   * run after the server is started.  This means that the first time
+   * a transaction is committed when you start your server, your
+   * builder task will wind up doing a full build.</P>
    *
    * <P>See also the {@link
    * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short,
@@ -515,12 +525,23 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * <p>This method is used by subclasses of GanymedeBuilderTask to
-   * determine whether a particular base has had any modifications of
-   * interest made to it since the last time this builder task was
-   * run.</p>
+   * determine whether a particular field of a particular base has had
+   * any modifications made to it since the last time this builder
+   * task was run.  This method works because each GanymedeBuilderTask
+   * object keeps a set of timestamp which records the last time the
+   * builder task ran.  baseChanged() just compares that time stamp
+   * against the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField#lastChange} time
+   * stamp that the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField} class maintains at
+   * transaction commit.  Note that this method will always return
+   * true the first time a particular builder task is run after the
+   * server is started.  This means that the first time a transaction
+   * is committed when you start your server, your builder task will
+   * wind up doing a full build.</P></p>
    *
-   * <p>If none of the fields listed have changed since this
-   * GanymedeBuilderTask was last run, baseChanged() will return
+   * <p>Othterwise, if none of the fields listed have changed since
+   * this GanymedeBuilderTask was last run, baseChanged() will return
    * false.  If any of the fields in the fieldIds list have changed
    * since this GanymedeBuilderTask last ran, baseChanged() will
    * return true.</p>
