@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.17 $ %D%
+    Version: $Revision: 1.18 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -700,6 +700,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  case FieldType.INVID:
 	    addInvidField(field);
 	    break;
+
+	  case FieldType.IP:
+	    addIPField((ip_field) field);
+	    break;
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + type);
@@ -1292,6 +1296,65 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
   }
 
+  /**
+   *
+   * private helper method to instantiate an ip field in this
+   * container panel
+   *
+   */
+
+  private void addIPField(ip_field field) throws RemoteException
+  {
+    JIPField
+      ipf;
+
+    Byte[] bytes;
+
+    /* -- */
+
+    ipf = new JIPField(new JcomponentAttr(null,
+					  new Font("Helvetica",Font.PLAIN,12),
+					  Color.black,Color.white),
+		       editable);
+    
+    objectHash.put(ipf, field);
+    
+    try
+      {
+	bytes = (Byte[]) field.getValue();
+
+	if (bytes != null)
+	  {
+	    ipf.setValue(bytes, false); // don't want v6 for now..
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get value for field: " + rx);
+      }
+	
+    ipf.setCallback(this);
+
+    try
+      {
+	ipf.setToolTipText(field.getComment());
+	    
+	// System.out.println("Setting tool tip to " + field.getComment());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get tool tip text: " + rx);
+      }
+	
+    try
+      {
+	addRow( ipf, field.getName(), field.isVisible());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not check visibility: " + rx);
+      }
+  }
 
   /**
    * The idea here is that you could use this in a catch from a RemoteException

@@ -9,8 +9,8 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.12 $ %D%
-  Module By: Navin Manohar
+  Version: $Revision: 1.13 $ %D%
+  Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
 
@@ -292,7 +292,35 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     else if (my_field instanceof string_field)
       {
 	System.out.println("string_field!?!  Use the stringSelector");
+      }
+    else if (my_field instanceof ip_field)
+      {
+	if (debug)
+	  {
+	    System.out.println("Adding ip vector field");
+	  }
 
+	try
+	  {
+	    ip_field ipfield = (ip_field) my_field;
+	    
+	    for (int i=0;i < ipfield.size();i++) 
+	      {
+		JIPField ipf = new JIPField(new JcomponentAttr(null,
+							       new Font("Helvetica",Font.PLAIN,12),
+							       Color.black,Color.white),
+					    editable);
+		
+		ipf.setValue((Byte[]) ipfield.getElement(i), false); // don't want v6 yet
+		ipf.setCallback(this);
+		
+		addElement(ipf);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("Can't make ip field: " + rx);
+	  }
       }
     else if (my_field instanceof invid_field)
       {
@@ -443,6 +471,22 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		throw new RuntimeException("Could not get datefield information: " + rx);
 	      }
 	  }
+	else if (my_field instanceof ip_field)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Adding new ip vector field");
+	      }
+
+	    ip_field ipfield = (ip_field) my_field;
+	    
+	    JIPField ipf = new JIPField(new JcomponentAttr(null,
+							   new Font("Helvetica",Font.PLAIN,12),
+							   Color.black,Color.white),
+					true);
+	    ipf.setCallback(this);
+	    addElement(ipf);
+	  }
 	else if (my_field instanceof num_field) 
 	  {
 	    if (debug)
@@ -510,6 +554,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
       
     compVector.addElement(c);
+
     if (debug)
       {
 	System.out.println("Index of element: " + compVector.size());
@@ -680,6 +725,25 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    throw new RuntimeException("Could not set value of date field: " + rx);
 	  }
       }
+    else if (v.getSource() instanceof JIPField)
+      {
+	if (debug)
+	  {
+	    System.out.println("IP field changed");
+	  }
+
+	short index = (short)compVector.indexOf(v.getSource());
+	System.out.println(" index = " + index);
+
+	try
+	  {
+	    returnValue = changeElement((Byte[])v.getValue(), index);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not set value of date field: " + rx);
+	  }
+      }
     else
       {
 	System.out.println("Value changed in field that is not yet supported");
@@ -732,7 +796,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
       }	    
   }
-	
   
   public Session getSession() 
   {
