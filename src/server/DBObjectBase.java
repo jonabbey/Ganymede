@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 1999/03/09 20:15:54 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 1999/03/10 06:06:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1882,7 +1882,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     removeField(field);
 
-    if (debug)
+    if (debug2)
       {
 	Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
       }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 1999/02/25 05:19:54 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 1999/03/10 06:06:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.123 $ %D%
+ * @version $Revision: 1.124 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -413,7 +413,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  GanymedeSession() throws RemoteException
+  public GanymedeSession() throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -451,7 +451,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
   
-  GanymedeSession(Client client, String loginName, 
+  public GanymedeSession(Client client, String loginName, 
 		  DBObject userObject, DBObject personaObject) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
@@ -3516,7 +3516,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// done a setDefaultOwner() call, we're gonna have to
 		// abort before even trying to create the object.
 
-		if (ownerList.size() != 1)
+		if (ownerList != null && ownerList.size() != 1)
 		  {
 		    return Ganymede.createErrorDialog("Can't create",
 						      "Can't create new object, no way of knowing which " +
@@ -3539,7 +3539,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
 		  }
 	      }
-	    else
+	    else if (ownerList != null)
 	      {
 		ownerInvids.addElement(ownerList.getInvid(0));
 	      }
