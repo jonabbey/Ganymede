@@ -1068,10 +1068,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	String yearString, monthString, dateString;
 
-	if (match.getSubStartIndex(1) != -1)
+	if (match.getStartIndex(1) != -1)
 	  {
-	    yearString = names[i].substring(match.getSubStartIndex(1),
-					    match.getSubEndIndex(1));
+	    yearString = names[i].substring(match.getStartIndex(1),
+					    match.getEndIndex(1));
 	  }
 	else
 	  {
@@ -1083,10 +1083,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	if (match.getSubStartIndex(2) != -1)
+	if (match.getStartIndex(2) != -1)
 	  {
-	    monthString = names[i].substring(match.getSubStartIndex(2),
-					     match.getSubEndIndex(2));
+	    monthString = names[i].substring(match.getStartIndex(2),
+					     match.getEndIndex(2));
 	  }
 	else
 	  {
@@ -1098,10 +1098,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	if (match.getSubStartIndex(3) != -1)
+	if (match.getStartIndex(3) != -1)
 	  {
-	    dateString = names[i].substring(match.getSubStartIndex(3),
-					    match.getSubEndIndex(3));
+	    dateString = names[i].substring(match.getStartIndex(3),
+					    match.getEndIndex(3));
 	  }
 	else
 	  {
