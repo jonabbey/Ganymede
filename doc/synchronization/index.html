@@ -113,14 +113,53 @@
     the synchronization system to locate the user record to be changed
     in the target service.</p>
 
-    <h2 id="buildertask">3. Ganymede Synchronization Options</h2>
+    <h2 id="options">3. Ganymede Synchronization Options</h2>
 
     <p>As it happens, Ganymede 2.0 provides three distinct systems for
-    data synchronization.  Two are based on the full state
-    synchronization model and one on the transactional delta model.
-    The two full state models differ mostly in where the logic for the
-    synchronization process is placed, and in when and how the
-    synchronizations are triggered.</p>
+    data synchronization, all of which work in the same general way.
+    The Ganymede server writes out synchronization data to files on
+    your server system's disk.  An external, free-standing program is
+    then run to read in these data files and do whatever may be
+    required to transmit the synchronization information to target
+    services.  This division of labor between the Ganymede server and
+    your external code allows for a great degree of flexibility,
+    without requiring extensive code development within the Ganymede
+    server itself.</p>
+
+    <p>The three options for synchronization in the Ganymede system
+    differ on the form of the synchronization data files, on whether
+    the synchronizations are full-state or incremental, and on whether
+    or not the Ganymede server automatically emits the synchronization
+    data and runs your external code.</p>
+
+    <p>The <a href="#buildertask">GanymedeBuilderTask</a>
+    synchronization model is the original Ganymede synchronization
+    system.  It requires you to write Java code to scan the Ganymede
+    data store and write out custom synchronization data files, but
+    scheduling of your synchronization builds is done for you.  This
+    model is only suitable for full-state synchronization.</p>
+
+    <p>The <a href="#xml_incrementals">Sync Channel Incremental</a>
+    model is an incremental synchronization model based on XML
+    synchronization files generated for you by code built into the
+    Ganymede server.  Synchronization information is put into a
+    message queue for you, transaction by transaction, and the
+    Ganymede server will automatically schedule builds from the sync
+    channel message queues.</p>
+
+    <p>The <a href="#xml_full_state">Sync Channel Full State</a> model
+    is similar to the Sync Channel Incremental model in its use of an
+    XML file format for synchronization data.  This model is, in fact,
+    primarily intended as a backup for the Sync Channel Incremental
+    model.  Since the Sync Channel Incremental can only do
+    transaction-by-transaction incremental synchronization, you'll
+    need some other way to get your target services into initial
+    synchronization with the contents of the Ganymede data store.  The
+    Sync Channel Full State model is designed to be that way.  This
+    model is also what you'll use if a service that you normally
+    maintain with the Sync Channel Incremental model gets corrupted or
+    out of sync with your Ganymede server and you need to force a full
+    re-sync.</p>
 
     <div align="center">
     <table border="1">
@@ -178,8 +217,8 @@
     set of builder tasks for execution as soon as possible.  When a
     builder task runs, it locks the Ganymede database to prevent any
     new transactions from committing and it executes <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>.
-    The builderPhase1 method scans the Ganymede database for whatever
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>.
+    The builderPhase1() method scans the Ganymede database for whatever
     objects are relevant to the builder task's synchronization duties
     and writes that data out to disk, using whatever data format is
     convenient for the purposes of that synchronization channel.  When
@@ -189,11 +228,11 @@
     can commit.</p>
 
     <p>The builder tasks then runs <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2</a>.
-    builderPhase2 is designed to execute an external program or script
-    which reads the data written out by builderPhase1 and does
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>.
+    builderPhase2() is designed to execute an external program or script
+    which reads the data written out by builderPhase1() and does
     whatever is necessary to integrate that data into the target
-    directory services.  During the time that builderPhase2 is
+    directory services.  During the time that builderPhase2() is
     running, users are free to commit changes into the Ganymede
     database, but the Ganymede Scheduler is blocked from re-running the
     same builder task again.  This prevents any possibility of the
@@ -231,8 +270,8 @@
     that it depends on a lot of custom code being written in Java and
     compiled into the Ganymede server.  In order to create a custom
     GanymedeBuilderTask, the adopter must create his own subclass of
-    GanymedeBuilderTask and write all the logic for builderPhase1 and
-    builderPhase2.  Further, if the code in either of these methods
+    GanymedeBuilderTask and write all the logic for builderPhase1() and
+    builderPhase2().  Further, if the code in either of these methods
     need to change, either to fix a bug or to respond to a change made
     in the Ganymede server's schema, the server would have to be
     stopped and restarted after compiling and loading the new version
@@ -413,8 +452,8 @@ variable from the GanymedeBuilderTask class.</p>
    * Code run in builderPhase1() can call enumerateObjects() and
    * baseChanged().
    *
-   * @return true if builderPhase1 made changes necessitating the
-   * execution of builderPhase2.
+   * @return true if builderPhase1() made changes necessitating the
+   * execution of builderPhase2().
    */
 
   public boolean builderPhase1()
@@ -560,7 +599,7 @@ not to bother running builderPhase2().</p>
    * build process by running (probably external) code that does not
    * require direct access to the database.
    *
-   * builderPhase2 is only run if builderPhase1 returns true.
+   * builderPhase2() is only run if builderPhase1() returns true.
    *
    */
 
@@ -962,25 +1001,25 @@ need to move to an incremental model for synchronization.</p>
 
     <p>Ganymede 2.0 introduces an incremental XML-based
     synchronization system, which we call the "Sync Channel
-    Synchronization Model".  The Sync Channel model shares enough
-    similarities to the GanymedeBuilderTask model that you will
+    Incremental Model".  The Sync Channel Incremental model shares
+    enough similarities to the GanymedeBuilderTask model that you will
     recognize some familiar concepts, but the differences are
     significant.</p>
 
-    <p>The general structure and timing of the Sync Channel system is
-    both similar to and different from the GanymedeBuilderTask model.
-    As with GanymedeBuilderTask, synchronization is a two-step
-    process.  In the first step, the Ganymede server writes out files
-    with synchronization information.  In the second step, an external
-    process is initiated to incorporate that synchronization data into
-    targeted services.  In the GanymedeBuilderTask model, both of
-    these steps are scheduled to occur as soon as possible after a
-    transaction is committed, and the second step follows immediately
-    after the first.</p>
+    <p>The general structure and timing of the Sync Channel
+    Incremental system is both similar to and different from the
+    GanymedeBuilderTask model.  As with GanymedeBuilderTask,
+    synchronization is a two-step process.  In the first step, the
+    Ganymede server writes out files with synchronization information.
+    In the second step, an external process is initiated to
+    incorporate that synchronization data into targeted services.  In
+    the GanymedeBuilderTask model, both of these steps are scheduled
+    to occur as soon as possible after a transaction is committed, and
+    the second step follows immediately after the first.</p>
 
-    <p>In the Sync Channel model, the first step of writing out the
-    synchronization data is always done synchronously with the
-    transaction commit process.  (So much so, in fact, that a
+    <p>In the Sync Channel Incremental model, the first step of
+    writing out the synchronization data is always done synchronously
+    with the transaction commit process.  (So much so, in fact, that a
     transaction is not considered committed until all registered Sync
     Channels have finished writing out their synchronization files.)
     The second step is scheduled for asynchronous execution with the
@@ -994,24 +1033,44 @@ need to move to an incremental model for synchronization.</p>
     transaction that is committed while the external processing step
     may execute after some delay, synchronization data can accumulate
     as it waits to be processed.  The Sync Channel Synchronization
-    Model must therefore act as a message queuing system.  The
-    message queue represents the 'channel' that gives the Sync Channel
-    Synchronization Model its name.</p>
+    Model therefore acts as a message queuing system.  The message
+    queue represents the 'channel' that gives the Sync Channel
+    Incremental Model its name.</p>
 
-    <p>The Sync Channel Synchronization Model is designed to require
-    less customization of the Ganymede server.  Where the
+    <p>The Sync Channel Incremental Model is designed to require less
+    customization of the Ganymede server.  Where the
     GanymedeBuilderTask model requires adopters to write their own <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
     methods in order to write out custom data files, the Sync Channel
-    system uses a standard XML format which is generated by standard
-    logic in the <a
+    Incremental system uses a standard XML format which is generated
+    by standard logic in the <a
     href="../javadoc/arlut/csd/ganymede/server/SyncRunner.html">SyncRunner</a>
     class.  The external synchronization process must be smart enough
     to interpret the XML synchronization data, but it generally works
     out better to have this logic be outside of the Ganymede server,
     where it can more easily be maintained.</p>
 
+    <h4 id="configuring_sync_incremental">Configuring Sync Channels</h4>
+
+    <p>All that you need to do to configure a Sync Channel in Ganymede
+    is to create a <code class="type">Sync Channel</code> object in the
+    Ganymede server.  Each <code class="type">Sync Channel</code>
+    object has a unique name, a path for the directory that the
+    Ganymede server will write synchronization files to, a path to the
+    exectuable external program that will process synchronization
+    files from the synchronization files directory, and a list of what
+    objects and fields from the Ganymede data store the Sync Channel
+    is supposed to include in its synchronization files.</p>
+
+    <p>It looks like this:</p>
+
     <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
+
+    <p>You configure the data that will be synchronizaed to the Sync
+    Channel by editing the <code class="type">Sync Data</code> field.
+    It looks like this:<?p>
+
+    <center><img src="screenshots/sync_field_options.png" class="screenshot"/></center>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
