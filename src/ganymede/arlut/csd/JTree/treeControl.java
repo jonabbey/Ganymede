@@ -1047,7 +1047,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
 	if (myNode.nextSibling != null)
 	  {
-	    myNode = nextSibling;
+	    myNode = myNode.nextSibling;
 	  }
 	else if (myNode.child != null && myNode.expanded)
 	  {
