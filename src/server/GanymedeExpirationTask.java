@@ -7,8 +7,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:05:44 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/01/27 21:49:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,16 @@ public class GanymedeExpirationTask implements Runnable {
 	    return;
 	  }
 
+	// we don't want no wizards
+
 	mySession.enableWizards(false);
+
+	// and we don't want forced required fields oversight..  this
+	// can leave us with some invalid objects, but we can do a
+	// query to scan for them, and if someone edits the objects
+	// later, they'll be requested to fix the problem.
+
+	mySession.enableOversight(false);
 	
 	ReturnVal retVal = mySession.openTransaction("expiration task");
 
@@ -139,6 +148,10 @@ public class GanymedeExpirationTask implements Runnable {
 						     currentTime);
 
 	// --
+
+	// we do each query on one object type.. we have to iterate
+	// over all the object types defined in the server and scan
+	// each for objects to be inactivated and/or removed.
 
 	baseEnum = Ganymede.db.objectBases.elements();
 
