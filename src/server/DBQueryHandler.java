@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -287,6 +287,11 @@ public class DBQueryHandler {
 
 		    if (n.arrayOp == n.NONE)
 		      {
+			if (debug)
+			  {
+			    System.err.println("Doing a scalar invid compare against value " + i1);
+			  }
+
 			i2 = (Invid) value;
 
 			return i1.equals(i2);
@@ -321,6 +326,11 @@ public class DBQueryHandler {
 		  }
 		else
 		  {
+		    if (debug)
+		      {
+			System.err.println("*** INVALID invid compare against value " + i1);
+		      }
+
 		    return false;	// invalid comparator
 		  }
 	      }
