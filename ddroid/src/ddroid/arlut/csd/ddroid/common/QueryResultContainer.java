@@ -10,10 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
+import java.util.Map;
 
 /**
  * @author deepak
@@ -21,13 +23,8 @@ import java.util.Vector;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class QueryResultContainer implements Serializable {
-  static final boolean debug = false;
+public class QueryResultContainer implements List, Serializable {
   static final long serialVersionUID = -8277390343373928867L;
-
-  private boolean forTransport = true;
-  public StringBuffer buffer = null;
-  private boolean unpacked = false;
 
   List headers = null;
   List types = null;
@@ -36,24 +33,24 @@ public class QueryResultContainer implements Serializable {
   
   transient Vector labelList = null;
   transient Vector invidList = null;
-
-  /* -- */
+  transient Map labelHash = null;
+  transient Map invidHash = null;
 
   public QueryResultContainer()
   {
-    buffer = new StringBuffer();
     handles = new Vector();
     headers = new ArrayList();
     types = new ArrayList();
     rows = new ArrayList();
   }
   
-  public QueryResultContainer(boolean forTransport)
-  {
-    this();
-    this.forTransport = forTransport;
-  }
-
+  /**
+   * Adds a field header to this query result. Field headers are used to map
+   * column numbers in the result set to column identifiers; the first field
+   * header added using this method will be the name of column 0, the second
+   * will be the name of column 1, etc.
+   */
+   
   public void addField(String fieldName, Short fieldID)
   {
     headers.add(fieldName);
@@ -63,9 +60,8 @@ public class QueryResultContainer implements Serializable {
   /**
    *
    * This method is used to add an object's information to
-   * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server, but may also be called on
-   * the client for result augmentation.
+   * the QueryResult's set of objects that matched the original
+   * query.
    *
    */
 
@@ -77,9 +73,8 @@ public class QueryResultContainer implements Serializable {
   /**
    *
    * This method is used to add an object's information to
-   * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server, but may also be called on
-   * the client for result augmentation.
+   * the QueryResult's set of objects that matched the original
+   * query.
    *
    */
 
@@ -93,9 +88,8 @@ public class QueryResultContainer implements Serializable {
   /**
    *
    * This method is used to add an object's information to
-   * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server, but may also be called on
-   * the client for result augmentation.
+   * the QueryResult's set of objects that matched the original
+   * query.
    *
    */
 
@@ -106,11 +100,6 @@ public class QueryResultContainer implements Serializable {
 				  boolean removalSet,
 				  boolean editable)
   {
-    if (debug)
-      {
-	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
-      }
-
     if (label == null)
       {
 	throw new NullPointerException("QueryResult.addRow(): null label passed in");
@@ -131,32 +120,8 @@ public class QueryResultContainer implements Serializable {
 					inactive, expirationSet, 
 					removalSet, editable));
 
-    if (invid != null)
-      {
-	if (invidList != null)
-	  {
-	    invidList.addElement(invid);
-	  }
-      }
-
-    if (label != null)
-      {
-	if (labelList != null)
-	  {
-	    labelList.addElement(label);
-	  }
-      }
-      
     rows.add(row);
   }
-
-  // ***
-  //
-  // The following methods are intended to be called on a QueryResult
-  // after it has been serialized and passed from the server to the
-  // client.
-  //
-  // ***
 
   /**
    *
@@ -172,77 +137,69 @@ public class QueryResultContainer implements Serializable {
 
   public Vector getHandles()
   {
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
     return handles;
   }
 
+  /**
+   * Grab the Invid of the object represented in the given row of the
+   * result set.
+   * 
+   * @param row
+   * @return
+   */
+
   public Invid getInvid(int row)
   {
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
     return ((ObjectHandle) handles.elementAt(row)).getInvid();
   }
 
+  /**
+   * Grab the list of Invids that are contained in this result set.
+   * The invids returned are in the same order that they were added
+   * to this result set.
+   * 
+   * @return
+   */
+
   public Vector getInvids()
   {
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
     if (invidList == null)
       {
-	invidList = new Vector();
-
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    invidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
-	  }
+      	rebuildTransients();
       }
 
     return invidList;
   }
 
+  /**
+   * Grab a list of the labels of each object contained in this result set.
+   * The labels returned are in the same order their corresponding objects were 
+   * added to this result set.
+   * 
+   * @return
+   */
+
   public Vector getLabels()
   {
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
     if (labelList == null)
       {
-	labelList = new Vector();
-
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
-	  }
+      	rebuildTransients();
       }
 
     return labelList;
   }
+
+  /**
+   * Grabs the label for the object represented in the given row of the result
+   * set.
+   * 
+   * @param row
+   * @return
+   */
   
   public String getLabel(int row)
   {
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
     return ((ObjectHandle) handles.elementAt(row)).getLabel();
-  }
-
-  public boolean isForTransport()
-  {
-    return forTransport;
   }
 
   /**
@@ -251,63 +208,37 @@ public class QueryResultContainer implements Serializable {
 
   public ObjectHandle getObjectHandle(int row)
   {
-    ObjectHandle handle;
-
-    /* -- */
-
-    if (forTransport && !unpacked)
-      {
-	unpackBuffer();
-      }
-
-    handle = (ObjectHandle) handles.elementAt(row);
-
-    return handle;
+    return (ObjectHandle) handles.elementAt(row);
   }
 
-  // ***
-  //
-  // pre-serialization (server-side) methods
-  //
-  // ***
-
   /**
-   *
-   * This method is provided for the server to optimize
-   * it's QueryResult loading operations, and is not
-   * intended for use post-serialization.
-   *
+   * Returns boolean showing if the result set contains the given Invid.
    */
 
   public synchronized boolean containsInvid(Invid invid)
   {
-    return getInvids().contains(invid);
+    if (invidHash == null)
+      {
+      	rebuildTransients();
+      }
+    
+    return invidHash.containsKey(invid);
   }
 
   /**
-   *
-   * This method is provided for the server to optimize
-   * it's QueryResult loading operations, and is not
-   * intended for use post-serialization.
-   *
+   * Returns boolean showing if the result set contains an object with the 
+   * given label.
    */
 
   public synchronized boolean containsLabel(String label)
   {
-    return getLabels().contains(label);
+    if (labelHash == null)
+      {
+      	rebuildTransients();
+      }
+    
+    return labelHash.containsKey(label);
   }
-
-  /**
-   *
-   * For debug.
-   * 
-   */
-
-  public String getBuffer()
-  {
-    return buffer.toString();
-  }
-  
 
   /**
    * <p>This method can be called on the client to obtain a {@link
@@ -317,11 +248,6 @@ public class QueryResultContainer implements Serializable {
 
   public List getHeaders()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     return headers;
   }
 
@@ -336,11 +262,6 @@ public class QueryResultContainer implements Serializable {
 
   public List getTypes()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     return types;
   }
 
@@ -354,11 +275,6 @@ public class QueryResultContainer implements Serializable {
 
   public List getRows()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     return rows;
   }
 
@@ -368,18 +284,13 @@ public class QueryResultContainer implements Serializable {
    * java.util.Vector Vector} containing the data values returned for
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
-   * arlut.csd.ddroid.common.DumpResult#getHeaders getHeaders()} and
-   * {@link arlut.csd.ddroid.common.DumpResult#getTypes
+   * arlut.csd.ddroid.common.QueryResultContainer getHeaders()} and
+   * {@link arlut.csd.ddroid.common.QueryResultContainer
    * getTypes()}.</p>
    */
   
   public Vector getFieldRow(int rowNumber)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     Object[] row = (Object[]) rows.get(rowNumber);
     return new Vector(Arrays.asList(row));
   }
@@ -395,33 +306,44 @@ public class QueryResultContainer implements Serializable {
 
   public Object getResult(int row, int col)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     Object[] r = (Object[]) rows.get(row);
     return r[col];
   }
 
   /**
    * <p>This method can be called on the client to determine the
-   * number of objects encoded in this DumpResult.</p>
+   * number of objects encoded in this result set.</p>
    */
 
   public int resultSize()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
-
     return rows.size();
   }
   
-  private void unpackBuffer()
+  /**
+   * Used to rebuild any ancillary data-structures that aren't preserved during
+   * serialization/deserialization.
+   * 
+   */
+  
+  private void rebuildTransients()
   {
-    unpacked = true;
+    invidList = new Vector(handles.size());
+    labelList = new Vector(handles.size());
+    invidHash = new HashMap();
+    labelHash = new HashMap();
+
+    Invid invid;
+    String label;
+    for (int i = 0; i < handles.size(); i++)
+      {
+        invid = ((ObjectHandle) handles.elementAt(i)).getInvid();
+        label = ((ObjectHandle) handles.elementAt(i)).getLabel();
+        invidList.addElement(invid);
+        labelList.addElement(label);
+        invidHash.put(invid, label);
+        labelHash.put(label, invid);
+      }
   }
 
   /* ------------------------------------------------------------------------
@@ -479,10 +401,6 @@ public class QueryResultContainer implements Serializable {
    */
   public boolean contains(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.contains(o);
   }
   
@@ -491,10 +409,6 @@ public class QueryResultContainer implements Serializable {
    */
   public boolean containsAll(Collection c)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.containsAll(c);
   }
   
@@ -503,10 +417,6 @@ public class QueryResultContainer implements Serializable {
    */
   public Object get(int index)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.get(index);
   }
   
@@ -515,10 +425,6 @@ public class QueryResultContainer implements Serializable {
    */
   public int indexOf(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.indexOf(o);
   }
   
@@ -527,10 +433,6 @@ public class QueryResultContainer implements Serializable {
    */
   public boolean isEmpty()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.isEmpty();
   }
   
@@ -539,10 +441,6 @@ public class QueryResultContainer implements Serializable {
    */
   public Iterator iterator()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.iterator();
   }
   
@@ -551,10 +449,6 @@ public class QueryResultContainer implements Serializable {
    */
   public int lastIndexOf(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.lastIndexOf(o);
   }
   
@@ -563,10 +457,6 @@ public class QueryResultContainer implements Serializable {
    */
   public ListIterator listIterator()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.listIterator();
   }
   
@@ -575,10 +465,6 @@ public class QueryResultContainer implements Serializable {
    */
   public ListIterator listIterator(int index)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.listIterator(index);
   }
   
@@ -632,10 +518,6 @@ public class QueryResultContainer implements Serializable {
    */
   public int size()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.size();
   }
   
@@ -644,10 +526,6 @@ public class QueryResultContainer implements Serializable {
    */
   public List subList(int fromIndex, int toIndex)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.subList(fromIndex, toIndex);
   }
   
@@ -656,10 +534,6 @@ public class QueryResultContainer implements Serializable {
    */
   public Object[] toArray()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.toArray();
   }
   
@@ -668,10 +542,6 @@ public class QueryResultContainer implements Serializable {
    */
   public Object[] toArray(Object[] a)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
     return rows.toArray(a);
   }
 
