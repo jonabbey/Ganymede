@@ -6,7 +6,7 @@
    the container panel needs to render a field.
    
    Created: 4 November 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,6 +21,8 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class FieldInfo implements java.io.Serializable {
+
+  transient short displayOrder = 0;
 
   db_field
     field;
@@ -51,6 +53,13 @@ public class FieldInfo implements java.io.Serializable {
     defined = field.isDefined();
     editable = field.isEditable();
     visible = field.isVisible();
+
+    displayOrder = field.getDisplayOrder();
+  }
+
+  public db_field getField()
+  {
+    return field;
   }
 
   public boolean isDefined()
@@ -67,4 +76,10 @@ public class FieldInfo implements java.io.Serializable {
   {
     return visible;
   }
+
+  public Object getValue()
+  {
+    return value;
+  }
+
 }
