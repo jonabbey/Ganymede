@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -85,6 +85,15 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	// sure that it's okay to do that.
 
 	str = (String) value;
+
+	// if we are being deleted, sure, we're ok with the persona name
+	// being cleared.
+
+	if (str == null && deleting)
+	  {
+	    return true;
+	  }
+
 	inv = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
 
 	if (inv != null)
