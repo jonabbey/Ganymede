@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,7 +23,7 @@ import java.util.*;
 
 public class DBQueryHandler {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   public static final boolean matches(GanymedeSession session, Query q, DBObject obj)
   {
@@ -142,9 +142,19 @@ public class DBQueryHandler {
 		value = obj.getLabel();
 	      }
 
+	    // if we've gotten this far, the field is defined, but
+	    // we want to check to see if it is null-valued.
+
 	    if (n.comparator == n.DEFINED)
 	      {
-		return (field != null && !field.defined);
+		if (field.isVector())
+		  {
+		    return (values != null && values.size() != 0);
+		  }
+		else
+		  {
+		    return value != null;
+		  }
 	      }
 
 	    switch (n.arrayOp)
@@ -190,7 +200,10 @@ public class DBQueryHandler {
 
 		/* -- */
 
-		System.err.println("Doing a real invid compare");
+		if (debug)
+		  {
+		    System.err.println("Doing a real invid compare");
+		  }
 
 		if (n.comparator == n.EQUALS)
 		  {
@@ -213,7 +226,10 @@ public class DBQueryHandler {
 			  {
 			  case n.CONTAINS:
 
-			    System.err.println("Doing a vector invid compare against value " + i1);
+			    if (debug)
+			      {
+				System.err.println("Doing a vector invid compare against value " + i1);
+			      }
 
 			    for (int i = 0; i < values.size(); i++)
 			      {
@@ -252,7 +268,10 @@ public class DBQueryHandler {
 
 		/* -- */
 
-		System.err.println("Doing an invid compare");
+		if (debug)
+		  {
+		    System.err.println("Doing an string/invid compare");
+		  }
 
 		if (n.arrayOp == n.NONE)
 		  {
@@ -276,7 +295,10 @@ public class DBQueryHandler {
 			  {
 			  case n.CONTAINS:
 
-			    System.err.println("Doing a vector invid compare against value " + s1);
+			    if (debug)
+			      {
+				System.err.println("Doing a vector string/invid compare against value " + s1);
+			      }
 
 			    for (int i = 0; i < values.size(); i++)
 			      {
