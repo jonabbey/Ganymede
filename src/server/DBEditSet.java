@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,13 +42,16 @@ public class DBEditSet {
   static final boolean debug = true;
 
   Vector
-    objects = null;
+    objects = null,
+    logEvents = null;
 
   Hashtable basesModified;
 
   DBStore dbStore;
   DBSession session;
   String description;
+
+  DBWriteLock wLock = null;
 
   /* -- */
 
@@ -66,6 +69,7 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     objects = new Vector();
+    logEvents = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
   }
 
@@ -89,7 +93,7 @@ public class DBEditSet {
    *
    */
 
-  public synchronized DBObject findObject(DBObject object)
+  public synchronized DBEditObject findObject(DBObject object)
   {
     return findObject(object.getInvid());
   }
@@ -105,10 +109,10 @@ public class DBEditSet {
    *
    */
 
-  public synchronized DBObject findObject(Invid invid)
+  public synchronized DBEditObject findObject(Invid invid)
   {
     Enumeration enum;
-    DBObject obj;
+    DBEditObject obj;
 
     /* -- */
 
@@ -116,7 +120,7 @@ public class DBEditSet {
 
     while (enum.hasMoreElements())
       {
-	obj = (DBObject) enum.nextElement();
+	obj = (DBEditObject) enum.nextElement();
 
 	if (obj.getInvid().equals(invid))
 	  {
@@ -159,7 +163,6 @@ public class DBEditSet {
 
   public synchronized boolean commit()
   {
-    DBWriteLock wLock;
     Vector baseSet;
     Enumeration enum;
     DBObjectBase base;
@@ -193,6 +196,24 @@ public class DBEditSet {
 	System.err.println(session.key + ": DBEditSet.commit(): acquiring write lock");
       }
 
+    if (wLock != null)
+      {
+	if (wLock.inEstablish)
+	  {
+	    wLock.abort();	// we've got an old lock.. force it to die.. will cause the old lock
+                        	// thread's establish method to have an interrupted exception thrown
+	    wLock = null;
+
+	    System.err.println(session.key + ": DBEditSet.commit(): aborting dead write lock");
+	  }
+	else
+	  {
+	    System.err.println(session.key + ": DBEditSet.commit(): dead (?) write lock already established.. can't commit");
+	    release();
+	    return false;
+	  }
+      }
+
     wLock = new DBWriteLock(dbStore, baseSet);
     
     if (debug)
@@ -206,7 +227,9 @@ public class DBEditSet {
       }
     catch (InterruptedException ex)
       {
+	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + session.key);
 	release();
+	wLock = null;
 	return false;
       }
 
@@ -227,116 +250,142 @@ public class DBEditSet {
     StringDBField sf;
     String result;
 
-    for (int i = 0; i < objects.size(); i++)
-      {
-	eObj = (DBEditObject) objects.elementAt(i);
-
-	switch (eObj.getStatus())
-	  {
-	  case DBEditObject.CREATING:
-	    
-	    if (!eObj.getBase().isEmbedded())
-	      {
-		df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-		df.setValue(modDate);
-		
-		sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-		
-		result = session.getID();
-		
-		if (description != null)
-		  {
-		    result += ": " + description;
-		  }
-
-		sf.setValue(result);
-	      }
-
-	  case DBEditObject.EDITING:
-
-	    if (!eObj.getBase().isEmbedded())
-	      {
-		df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-		df.setValue(modDate);
-
-		sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-
-		result = session.getID();
-
-		if (description != null)
-		  {
-		    result += ": " + description;
-		  }
-
-		sf.setValue(result);
-	      }
-	    break;
-
-	  case DBEditObject.DELETING:
-	  case DBEditObject.DROPPING:
-
-	    if (!eObj.remove())
-	      {
-		release();
-		Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
-		return false;
-	      }
-	    break;
-	  }
-
-	if (!eObj.commitPhase1())
-	  {
-	    release();
-	    Ganymede.debug("Transaction commit rejected in phase 1");
-	    return false;
-	  }
-      }
-
-    // need to clear out any transients before
-    // we write the transaction out to disk
-
-    for (int i = 0; i < objects.size(); i++)
-      {
-	eObj = (DBEditObject) objects.elementAt(i);
-	eObj.clearTransientFields();
-      }
-
-    // write this transaction out to the Journal
+    // this is the mother of all try clauses.. its purpose is to help us recover from
+    // any unforeseen exceptions in this area.  The code that writes transactions
+    // to the journal could cause the journal to be slightly corrupted, but otherwise
+    // nothing in this try does anything that aborting the transaction can't undo.
+    //
+    // well, that's not quite true.  the phase 2 commit code by definition may do
+    // something that would cause exterior databases to be updated, but if we
+    // get an exception thrown in that part of the code, we still have to try
+    // to do something.
 
     try
       {
-	if (!dbStore.journal.writeTransaction(this))
+	for (int i = 0; i < objects.size(); i++)
 	  {
+	    eObj = (DBEditObject) objects.elementAt(i);
+
+	    switch (eObj.getStatus())
+	      {
+	      case DBEditObject.CREATING:
+	    
+		if (!eObj.getBase().isEmbedded())
+		  {
+		    df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+		    df.setValue(modDate);
+		
+		    sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+		
+		    result = session.getID();
+		
+		    if (description != null)
+		      {
+			result += ": " + description;
+		      }
+
+		    sf.setValue(result);
+		  }
+
+	      case DBEditObject.EDITING:
+
+		if (!eObj.getBase().isEmbedded())
+		  {
+		    df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+		    df.setValue(modDate);
+
+		    sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+
+		    result = session.getID();
+
+		    if (description != null)
+		      {
+			result += ": " + description;
+		      }
+
+		    sf.setValue(result);
+		  }
+		break;
+
+	      case DBEditObject.DELETING:
+	      case DBEditObject.DROPPING:
+
+		if (!eObj.remove())
+		  {
+		    releaseWriteLock("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
+		    release();
+		    Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
+		    return false;
+		  }
+		break;
+	      }
+
+	    if (!eObj.commitPhase1())
+	      {
+		releaseWriteLock("transaction commit rejected in phase 1");
+		release();
+		Ganymede.debug("Transaction commit rejected in phase 1");
+		return false;
+	      }
+	  }
+
+	// need to clear out any transients before
+	// we write the transaction out to disk
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    eObj = (DBEditObject) objects.elementAt(i);
+	    eObj.clearTransientFields();
+	  }
+
+	// write this transaction out to the Journal
+
+	try
+	  {
+	    if (!dbStore.journal.writeTransaction(this))
+	      {
+		releaseWriteLock("couldn't write transaction to disk");
+		release();
+		Ganymede.debug("DBEditSet.commit(): Couldn't write transaction to disk");
+		return false;
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    // we probably want to be more extreme here.. if we couldn't write out
+	    // the transaction, we are probably out of space on the filesystem
+	    // with the journal/dbstore file.
+
+	    // log this condition somehow
+
+	    releaseWriteLock("IO Exception in transaction commit");
 	    release();
+	    Ganymede.debug("IO exception in transaction commit");
 	    return false;
 	  }
+
+	if (debug)
+	  {
+	    System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
+	  }
+
+	// phase one complete, go ahead and have all our
+	// objects do their 2nd level commit processes
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    eObj = (DBEditObject) objects.elementAt(i);
+
+	    eObj.commitPhase2();
+	  }
       }
-    catch (IOException ex)
+    catch (Exception ex)
       {
-	// we probably want to be more extreme here.. if we couldn't write out
-	// the transaction, we are probably out of space on the filesystem
-	// with the journal/dbstore file.
-
-	// log this condition somehow
-
+	Ganymede.debug("** Caught exception while preparing transaction for commit: " + ex);
+	Ganymede.debug("** aborting transaction");
+	releaseWriteLock("exception caught while preparing trans.");
 	release();
-	Ganymede.debug("IO exception in transaction commit");
 	return false;
-      }
-
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
-      }
-
-    // phase one complete, go ahead and have all our
-    // objects do their 2nd level commit processes
-
-    for (int i = 0; i < objects.size(); i++)
-      {
-	eObj = (DBEditObject) objects.elementAt(i);
-
-	eObj.commitPhase2();
       }
 
     if (debug)
@@ -348,6 +397,12 @@ public class DBEditSet {
 
     // create new, non-editable versions of our newly created objects
     // and insert them into the appropriate slots in our DBStore
+
+    // note that once we get to this point, we're not taking no
+    // for an answer.. we don't check within this loop to see
+    // if our write lock has been pulled.  we just have to hope
+    // it wasn't.  Any exceptions thrown at this point will
+    // propagate up, and let the chips fall where they may.
 
     for (int i = 0; i < objects.size(); i++)
       {
@@ -410,7 +465,7 @@ public class DBEditSet {
 	System.err.println(session.key + ": DBEditSet.commit(): releasing write lock");
       }
 
-    wLock.release();
+    releaseWriteLock("successful commit");
 
     if (debug)
       {
@@ -488,5 +543,28 @@ public class DBEditSet {
       }
 
     objects = null;
+  }
+
+  /**
+   *
+   * This is a dinky little private helper method to keep things
+   * clean.  It's essential that wLock be released if things go
+   * wrong, else next time this session tries to commit a transaction,
+   * it'll wind up waiting forever for the old lock to be released.
+   *
+   */
+
+  private void releaseWriteLock(String reason)
+  {
+    if (wLock != null)
+      {
+	wLock.release();
+	wLock = null;
+	
+	if (debug)
+	  {
+	    System.err.println(session.key + ": DBEditSet.commit(): released write lock: " + reason);
+	  }
+      }
   }
 }
