@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2001/11/14 21:40:12 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2002/01/14 22:24:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -1219,7 +1219,7 @@ public class DBEditSet {
 
 			if (eObj.isEmbedded())
 			  {
-			    DBObject container = gSession.getContainingObj(eObj);
+			    DBObject container = session.getContainingObj(eObj);
 			    
 			    if (container != null)
 			      {
@@ -1241,15 +1241,52 @@ public class DBEditSet {
 				System.err.println("**** DIFF (" + eObj.getLabel() +
 						   "):" + diff + " : ENDDIFF****");
 			      }
-			    
-			    logEvent("objectchanged",
-				     eObj.getTypeDesc() + " " + eObj.getLabel() +
-				     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
-				     diff,
-				     (gSession.personaInvid == null ?
-				      gSession.userInvid : gSession.personaInvid),
-				     gSession.username,
-				     invids, eObj.getEmailTargets());
+
+			    boolean logNormal = true;
+
+			    if (eObj.isEmbedded())
+			      {
+				try
+				  {
+				    DBObject parentObj = session.getContainingObj(eObj);
+
+				    logEvent("objectchanged",
+					     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
+					     "'s embedded " + eObj.getLabel() + " " +
+					     eObj.getTypeDesc() + " object" +
+					     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
+					     diff,
+					     (gSession.personaInvid == null ?
+					      gSession.userInvid : gSession.personaInvid),
+					     gSession.username,
+					     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+
+				    logNormal = false;
+				  }
+				catch (IntegrityConstraintException ex)
+				  {
+				    // We might catch this from
+				    // getContainingObj if the
+				    // embedded object doesn't have a
+				    // proper container.  Won't be
+				    // fatal, as we'll just leave
+				    // logNormal true and handle it below
+
+				    ex.printStackTrace();
+				  }
+			      }
+
+			    if (logNormal)
+			      {
+				logEvent("objectchanged",
+					 eObj.getTypeDesc() + " " + eObj.getLabel() +
+					 ", <" +  eObj.getInvid() + "> was modified.\n\n" +
+					 diff,
+					 (gSession.personaInvid == null ?
+					  gSession.userInvid : gSession.personaInvid),
+					 gSession.username,
+					 invids, eObj.getEmailTargets());
+			      }
 			  }
 		    
 			break;

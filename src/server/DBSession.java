@@ -6,15 +6,15 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2001/09/24 21:47:43 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2002/01/14 22:24:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.102 $ %D%
+ * @version $Revision: 1.103 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1160,6 +1160,146 @@ final public class DBSession {
       }
 
     return retVal;
+  }
+
+  /**
+   * <p>This method, when called on an embedded DBObject, recurses up the embedding
+   * hierarchy to find the top-level embedding object.  If the embedded object is
+   * an editable object in the process of being deleted (its status is set to 'DELETING'),
+   * the returned top-level embedding object will be the original, pre-edited version,
+   * so that the original label might be retrieved.</p>
+   */
+
+  DBObject getContainingObj(DBObject object)
+  {
+    DBObject localObj;
+    InvidDBField inf = null;
+    Invid inv = null;
+    int loopcount = 0;
+    boolean original;
+
+    /* -- */
+
+    // if we're looking at an embedded object, lets cascade up and
+    // find the top-level ancestor
+
+    if (false)
+      {
+	System.err.println("Trying to find top-level object for " + 
+			   object.getTypeDesc() + ":" + 
+			   object.getInvid().toString());
+      }
+
+    localObj = object;
+
+    while (localObj != null && localObj.isEmbedded())
+      {
+	original = false;		// we haven't switched to check the original yet
+	inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+
+	// if we need to find the top-level containing object for an
+	// embedded object that has been or is in the process of being
+	// deleted, we'll need to consult the original version of the
+	// object to find its containing parent.
+
+	if (inf == null)
+	  {
+	    if (true)
+	      {
+		Ganymede.debug("Couldn't initially get a container field for object " + localObj.toString());
+	      }
+
+	    if (localObj instanceof DBEditObject)
+	      {
+		if (false)
+		  {
+		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
+		  }
+
+		DBEditObject localEditObj = (DBEditObject) localObj;
+
+		if (localEditObj.getStatus() == ObjectStatus.DELETING)
+		  {
+		    if (false)
+		      {
+			System.err.println("Object " + localObj.toString() + " has status DELETING.");
+		      }
+
+		    localObj = localEditObj.getOriginal();
+		  }
+
+		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+		original = true;
+	      }
+	  }
+
+	if (inf == null)
+	  {
+	    if (true)
+	      {
+		Ganymede.debug("getContainingObj(): Couldn't get a container field for object " + localObj.toString() + " at all.");
+	      }
+
+	    localObj = null;
+	    break;
+	  }
+
+	inv = (Invid) inf.getValueLocal();
+
+	if (inv == null && !original)
+	  {
+	    if (localObj instanceof DBEditObject)
+	      {
+		if (false)
+		  {
+		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
+		  }
+
+		DBEditObject localEditObj = (DBEditObject) localObj;
+
+		if (localEditObj.getStatus() == ObjectStatus.DELETING)
+		  {
+		    if (false)
+		      {
+			System.err.println("Object " + localObj.toString() + " has status DELETING.");
+		      }
+
+		    localObj = localEditObj.getOriginal();
+		  }
+
+		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+		original = true;
+	      }
+
+	    inv = (Invid) inf.getValueLocal();
+	  }
+
+	if (inv == null)
+	  {
+	    if (true)
+	      {
+		Ganymede.debug("getContainingObj() error <2:" + loopcount +
+			       "> .. Couldn't get a container invid for object " + localObj.getLabel());
+	      }
+
+	    localObj = null;
+	    break;
+	  }
+
+	// remember, viewDBObject() will get an object even if it was
+	// created in the current transaction
+
+	localObj = viewDBObject(inv);
+	loopcount++;
+      }
+
+    if (localObj == null)
+      {
+	throw new IntegrityConstraintException("getContainingObj() couldn't find owner of embedded object " + 
+					       object.getLabel());
+      }
+
+    return localObj;
   }
 
   /**
