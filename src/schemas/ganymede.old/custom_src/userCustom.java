@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,7 +22,7 @@ import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     userCustom
+                                                                      userCustom
 
 ------------------------------------------------------------------------------*/
 
