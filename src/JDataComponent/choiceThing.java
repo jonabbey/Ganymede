@@ -1,5 +1,14 @@
-/* 
+/*
+
+   choiceThing.java
+
    Resource class for use with StringDialog.java
+   
+   Created: 16 June 1997
+   Version: $Revision: 1.4 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.JDialog;
@@ -7,11 +16,21 @@ package arlut.csd.JDialog;
 import java.lang.String;
 import java.util.Vector;
 
-public class choiceThing {
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     choiceThing
+
+------------------------------------------------------------------------------*/
+
+
+public class choiceThing implements java.io.Serializable {
   
   String choiceLabel;
   Vector items;
   Object selected;
+
+  /* -- */
 
   public choiceThing(String label, Vector Items)
     {
