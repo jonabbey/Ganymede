@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2000/02/22 07:21:24 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2000/02/22 07:36:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -819,30 +819,35 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     
     switch (field_type)
       {
-      case BOOLEAN:
+      case FieldType.BOOLEAN:
 	xmlOut.attribute("type", "boolean");
 	break;
-      case NUMERIC:
+      case FieldType.NUMERIC:
 	xmlOut.attribute("type", "numeric");
 	break;
-      case FLOAT:
+      case FieldType.FLOAT:
 	xmlOut.attribute("type", "float");
 	break;
-      case DATE:
+      case FieldType.DATE:
 	xmlOut.attribute("type", "date");
 	break;
-      case STRING:
+      case FieldType.STRING:
 	xmlOut.attribute("type", "string");
 	break;
-      case INVID:
+      case FieldType.INVID:
 	xmlOut.attribute("type", "invid");
 	break;
-      case PERMISSIONMATRIX:
+      case FieldType.PERMISSIONMATRIX:
 	xmlOut.attribute("type", "permmatrix");
 	break;
-      case PASSWORD:
+      case FieldType.PASSWORD:
 	xmlOut.attribute("type", "password");
 	break;
+      case FieldType.IP:
+	xmlOut.attribute("type", "ip");
+	break;
+      default:
+	throw new RuntimeException("emitXML: unrecognized field type:" + field_type);
       }
 
     indentLevel++;
