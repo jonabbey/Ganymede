@@ -165,7 +165,6 @@ public class DialogRsrc {
   
   public void addChoice(String label, Vector choices)
   {
-    System.out.println("adding choice, but not really");
     objects.addElement(new choiceThing(label, choices));
   }
 
