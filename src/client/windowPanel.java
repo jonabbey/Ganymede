@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -197,6 +197,47 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       {
 	gc.showErrorMessage("null object passed to addWindow.");
 	return;
+      }
+    
+    // We only want top level windows for top level objects.  No
+    // embedded objects.
+    try
+      {
+	while  (object.isEmbedded())
+	  {
+	    db_field parent = object.getField(SchemaConstants.ContainerField);
+	    if (parent == null)
+	      {
+		throw new IllegalArgumentException("Could not find the ContainerField of this embedded object: " + object);
+	      }
+	    
+	    Invid i  = (Invid)((invid_field)parent).getValue();
+	    if (i == null)
+	      {
+		throw new RuntimeException("Invid value of ContainerField is null");
+	      }
+	    
+	    if (editable)
+	      {
+		object = gc.getSession().edit_db_object(i);
+		if (object == null)
+		  {
+		    throw new RuntimeException("Could not call edit_db_object on the parent of this embedded object.");
+		  }
+	      }
+	    else
+	      {
+		object = gc.getSession().view_db_object(i);
+		if (object == null)
+		  {
+		    throw new RuntimeException("Could not call view_db_object on the parent of this embedded object.");
+		  }
+	      }
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("RemoteException: " + rx);
       }
 
     if (editable)
