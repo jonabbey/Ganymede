@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.12 $ %D%
+  Version: $Revision: 1.13 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.12 $ %D%
+ * @version $Revision: 1.13 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -2117,14 +2117,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	if ((node.expandable || node.child != null) &&
 	    (x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
 	  {
-	    if (node.expanded)
-	      {
-		ctrl.contractNode(node, true);
-	      }
-	    else
-	      {
-		ctrl.expandNode(node, true);
-	      }
+	    // mousePressed will have taken care of this for us.
 
 	    return;
 	  }
@@ -2155,10 +2148,48 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   {
     treeNode node, tempNode;
     int row;
+    int x, y;
     
     /* -- */
 
-    row = (e.getY() + v_offset) / ctrl.row_height;
+    x = e.getX();
+    y = e.getY();
+
+    row = (y + v_offset) / ctrl.row_height;
+
+    try
+      {
+	node = (treeNode) ctrl.rows.elementAt(row);
+      }
+    catch (ArrayIndexOutOfBoundsException ex)
+      {
+	// out of range, deselect all rows
+
+	if (debug)
+	  {
+	    System.err.println("Hey!  received out of bounds exception, row = " + row);
+	  }
+
+	ctrl.unselectAllNodes(false);
+	render();
+	repaint();
+	return;
+      }
+
+    if ((node.expandable || node.child != null) &&
+	(x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
+      {
+	if (node.expanded)
+	  {
+	    ctrl.contractNode(node, true);
+	  }
+	else
+	  {
+	    ctrl.expandNode(node, true);
+	  }
+	
+	return;
+      }
 
     // remember that the mouse was last pressed on this node if
     // we subsequently receive mouseDragged events
@@ -2183,25 +2214,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     if (debug)
       {
 	System.err.println("Press in row " + row);
-      }
-
-    try
-      {
-	node = (treeNode) ctrl.rows.elementAt(row);
-      }
-    catch (ArrayIndexOutOfBoundsException ex)
-      {
-	// out of range, deselect all rows
-
-	if (debug)
-	  {
-	    System.err.println("Hey!  received out of bounds exception, row = " + row);
-	  }
-
-	ctrl.unselectAllNodes(false);
-	render();
-	repaint();
-	return;
       }
 
     if (node == null)
