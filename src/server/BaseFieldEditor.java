@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -422,7 +422,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  }
 	else
 	  {
-	    baseList = owner.getSchemaEdit().getBases();
+	    baseList = owner.getSchemaEdit().getBases(); // list all object types
 	  }
       }
     catch (RemoteException rx)
@@ -757,6 +757,14 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	else if (fieldDef.isInvid())
 	  {
 	    editInPlaceCF.setState(fieldDef.isEditInPlace());
+
+	    // all edit in place references are vectors
+
+	    if (fieldDef.isEditInPlace())
+	      {
+		vectorCF.setState(true);
+		fieldDef.setArray(true);
+	      }
 
 	    refreshTargetChoice();
 
