@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,6 +84,51 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
 
     initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
+  }
+
+  /**
+   *
+   * Initialize a newly created DBEditObject.
+   *
+   * When this method is called, the DBEditObject has been created,
+   * its ownership set, and all fields defined in the controlling
+   * DBObjectBase have been instantiated without defined
+   * values.<br><br>
+   *
+   * This method is responsible for filling in any default
+   * values that can be calculated from the DBSession
+   * associated with the editset defined in this DBEditObject.<br><br>
+   *
+   * If initialization fails for some reason, initializeNewObject()
+   * will return false.  If the owning GanymedeSession is not in
+   * bulk-loading mode (i.e., enableOversight is true),
+   * DBSession.createDBObject() will checkpoint the transaction before
+   * calling this method.  If this method returns false, the calling
+   * method will rollback the transaction.  This method has no
+   * responsibility for undoing partial initialization, the
+   * checkpoint/rollback logic will take care of that.<br><br>
+   *
+   * If enableOversight is false, DBSession.createDBObject() will not
+   * checkpoint the transaction status prior to calling initializeNewObject(),
+   * so it is the responsibility of this method to handle any checkpointing
+   * needed.<br><br>
+   *
+   * This method should be overridden in subclasses.
+   *   
+   */
+
+  public boolean initializeNewObject()
+  {
+    // create the first interface
+
+    InvidDBField invField = (InvidDBField) getField(systemSchema.INTERFACES);
+
+    // we shouldn't throw a null pointer here, as we should always have the
+    // INTERFACES field available
+
+    invField.createNewEmbedded(true);
+
+    return true;
   }
 
   /**
@@ -207,7 +252,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	if (handle.getInvid().equals(netInvid))
 	  {
 	    freeNets.addElement(handle);
-	    System.err.println("systemCustom.freeNet(" + handle.getLabel() + ")");
+
+	    if (debug)
+	      {
+		System.err.println("systemCustom.freeNet(" + handle.getLabel() + ")");
+	      }
+
 	    return true;
 	  }
       }
@@ -237,7 +287,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	
 	if (handle.getInvid().equals(netInvid))
 	  {
-	    System.err.println("systemCustom.allocNet(" + handle.getLabel() + ")");
+	    if (debug)
+	      {
+		System.err.println("systemCustom.allocNet(" + handle.getLabel() + ")");
+	      }
+
 	    freeNets.removeElementAt(i);
 	    return true;
 	  }
@@ -272,7 +326,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    System.err.println("systemCustom.initializeNets(" + getGSession().viewObjectLabel(roomInvid)+")");
+    if (debug)
+      {
+	System.err.println("systemCustom.initializeNets(" + 
+			   getGSession().viewObjectLabel(roomInvid)+")");
+      }
 
     if (netsInRoom == null)
       {
@@ -386,7 +444,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 		if (handle.getInvid().equals(netInvid))
 		  {
-		    System.err.println("systemCustom.initializeNets(): freeing net " + handle.getLabel());
+		    if (debug)
+		      {
+			System.err.println("systemCustom.initializeNets(): freeing net " + 
+					   handle.getLabel());
+		      }
+
 		    freeNets.addElement(handle);
 		    break;
 		  }
@@ -467,7 +530,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    start = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
 	    stop = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
 
-	    System.err.println("systemCustom.getIPAddress(): found start and stop for this type: " + start + "->" + stop);
+	    if (debug)
+	      {
+		System.err.println("systemCustom.getIPAddress(): found start and stop for this type: " + 
+				   start + "->" + stop);
+	      }
 	  }
       }
     catch (NullPointerException ex)
@@ -493,7 +560,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-
     // see if we really did wind up with an acceptable address
 
     if (!namespace.reserve(editset, address))
@@ -502,19 +568,22 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
     else
       {
-	System.err.print("systemCustom.getIPAddress(): returning ");
-	
-	for (int j = 0; j < address.length; j++)
+	if (debug)
 	  {
-	    if (j > 0)
+	    System.err.print("systemCustom.getIPAddress(): returning ");
+	    
+	    for (int j = 0; j < address.length; j++)
 	      {
-		System.err.print(".");
+		if (j > 0)
+		  {
+		    System.err.print(".");
+		  }
+		
+		System.err.print(s2u(address[j].byteValue()));
 	      }
-
-	    System.err.print(s2u(address[j].byteValue()));
+	    
+	    System.err.println();
 	  }
-
-	System.err.println();
 
 	return address;
       }
@@ -682,7 +751,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	// need to update the net information from this room
 
-	System.err.println("systemCustom: room changed to " + getGSession().viewObjectLabel((Invid) value));
+	if (debug)
+	  {
+	    System.err.println("systemCustom: room changed to " + 
+			       getGSession().viewObjectLabel((Invid) value));
+	  }
 	
 	if (gSession.enableOversight)
 	  {
@@ -694,7 +767,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	// need to update the ip addresses pre-allocated for this system
 
-	System.err.println("systemCustom: system type changed to " + getGSession().viewObjectLabel((Invid) value));
+	if (debug)
+	  {
+	    System.err.println("systemCustom: system type changed to " + 
+			       getGSession().viewObjectLabel((Invid) value));
+	  }
 	
 	if (gSession.enableOversight)
 	  {
@@ -758,6 +835,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	if (retVal != null && !retVal.didSucceed())
 	  {
 	    return false;
+	  }
+
+	Vector aliasNames = io.getFieldValuesLocal(interfaceSchema.ALIASES);
+
+	if (aliasNames != null)
+	  {
+	    DBField aliasesField = (DBField) getField(systemSchema.SYSTEMALIASES);
+
+	    for (int i = 0; i < aliasNames.size(); i++)
+	      {
+		aliasesField.addElementLocal(aliasNames.elementAt(i));
+	      }
 	  }
       }
 
@@ -852,6 +941,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    
 	    ReturnVal interfaceRescan = new ReturnVal(true, true);
 	    interfaceRescan.addRescanField(interfaceSchema.NAME);
+	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
 	    
 	    ReturnVal result = new ReturnVal(true, true);
 	    
@@ -873,6 +963,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    
 	    ReturnVal interfaceRescan = new ReturnVal(true, true);
 	    interfaceRescan.addRescanField(interfaceSchema.NAME);
+	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
 	    
 	    ReturnVal result = new ReturnVal(true, true);
 	    
@@ -881,6 +972,9 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
 	      }
 	    
+	    // finalizeDeleteElement() may add things to the SYSTEMALIASES field.
+
+	    result.addRescanField(systemSchema.SYSTEMALIASES);
 	    return result;
 	  }
       }
@@ -910,10 +1004,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
 
-	    // link it in
-
-	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
-	    
 	    return newObject.getInvid();
 	  }
 	else
