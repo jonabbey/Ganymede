@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.205 $
-   Last Mod Date: $Date: 2000/10/05 18:52:28 $
+   Version: $Revision: 1.206 $
+   Last Mod Date: $Date: 2000/10/06 03:16:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.205 $ $Date: 2000/10/05 18:52:28 $
+ * @version $Revision: 1.206 $ $Date: 2000/10/06 03:16:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -542,11 +542,31 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     super();			// UnicastRemoteObject initialization
 
-    // handle the server login semaphore for this session, unless we have
-    // no session label, in which case we are the master internalSession,
-    // which we don't yet try to handle with the semaphore
+    // handle the server login semaphore for this session
 
-    if (!sessionLabel.equals("internal"))
+    // if we are attempting to start a builder session, we'll proceed
+    // even if the server is waiting to handle a deferred shutdown.
+
+    // otherwise, if we are not starting one of the master internal
+    // sessions (either Ganymede.internalSession or
+    // GanymedeServer.loginSession), we'll want to increment the login
+    // semaphore to make sure we are allowing logins and to keep the
+    // server up to date
+
+    String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+
+    if (sessionLabel.equals("builder"))
+      {
+	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
+	  {
+	    Ganymede.debug("Couldn't create " + sessionLabel +
+			   " GanymedeSession.. semaphore disabled: " + disabledMessage);
+	    
+	    throw new RuntimeException("semaphore error: " + disabledMessage);
+	  }
+      }
+    else if ((!sessionLabel.equals("internal") && !sessionLabel.equals("builder")) || 
+	     (sessionLabel.equals("builder") && disabledMessage == null))
       {
 	try
 	  {
