@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -374,7 +374,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     return true;
   }
 
-  void synchronized addRow(JPanel parent, java.awt.Component comp,  String label, int row)
+  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
     

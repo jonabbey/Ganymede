@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.75 $ %D%
+   Version: $Revision: 1.76 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2767,7 +2767,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     return true;		// what the?
   }
 
-  void synchronized addRow(JPanel parent, java.awt.Component comp,  String label, int row, 
+  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row, 
 			   GridBagLayout gbl)
   {
     JLabel l = new JLabel(label);
