@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -771,6 +771,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	// update field name map
 	
 	mapBaseNamesToTemplates(selectedBase.getTypeID());
+
+	// update the fieldChoices vector
+
+	resetFieldChoices();
 	  
 	// remove all rows in vector of component arrays
 
@@ -1155,6 +1159,12 @@ class QueryRow implements ItemListener {
     else if (field.isBoolean())
       {
 	compareChoice.addItem("==");
+      }
+    else if (field.isIP())
+      {
+	compareChoice.addItem("==");
+	compareChoice.addItem("Start With");
+	compareChoice.addItem("End With");
       }
     else if (field.isString())
       {
