@@ -31,11 +31,22 @@ ganymede.schemadir=
 ganymede.log=/home/broccol/gash2/code/arlut/csd/ganymede/db/log
 
 
+# ganymede.maillog
+#
+# The location and filename for the optional Ganymede mail log file,
+# which will record any 'mailout' events.  mailout events are not
+# logged to the ganymede.log file, and do not show up when viewing
+# an object's history in the Ganymede client.
+
+ganymede.maillog=
+
+
 # ganymede.journal
 #
 # The location and filename for the Ganymede journal file.
 
 ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
+
 
 # ganymede.htmldump
 #

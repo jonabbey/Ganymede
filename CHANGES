@@ -94,6 +94,22 @@ plaintext password capture logic has been disabled.
 The Ganymede server will now explicitly report a permissions problem
 when an attempt is made to link to an uneditable object.
 
+6. [SERVER] Re-enabled mailout event logging
+
+I had disabled logging of mailout events, to keep the Ganymede log
+from being flooded by non-critical email sent out by the Ganymede
+server.  Unfortunately, the inevitable question arose here about
+whether Ganymede did or did not send out an email message warning
+about an upcoming account inactivation.  Having a log of all advisory
+email sent out by Ganymede would have helped clarify the situation, so
+this function is being added back to the Ganymede server as an
+optional logging facility.
+
+Now, if the Ganymede server's ganymede.properties file defines a
+ganymede.maillog property, the file named in that property will have
+all mailout events logged to it.  If the ganymede.maillog property is
+not set, no mail events will be logged on disk.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
