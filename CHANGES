@@ -54,7 +54,7 @@ text field was enabled all the time, confusing users manipulating
 the component.  Now the 'Add' button will only be enabled when the
 user has entered something into the text button.
 
-5. [SERVER/CLIENT] Modified default removal logic
+5. [SERVER/CLIENT] Modified removal/inactivation handling
 
 The server now by default refuses to allow objects to be removed
 that have an inactivation protocol defined.  supergash can go ahead
@@ -69,6 +69,10 @@ difficult to handle the delete toolbar icon properly if I just
 wanted the client to prevent the user from ever trying to delete
 an object that can be inactivated.  And besides, the user might
 be operating with supergash privileges.
+
+In conjunction with this, took out the inactivation stubs for the
+linux and bsd schema kits, where there wasn't really any inactivation
+logic present.
 
 6. [SCHEMA] Lots of refinements to gasharl schema
 
