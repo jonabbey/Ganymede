@@ -305,6 +305,29 @@ which could cause the server to throw an exception down to the client.
 
 This change just serializes transaction cancellation a bit better.
 
+15. [CLIENT, ADMIN CONSOLE] Miscellaneous GUI cleanups, improvements
+
+Quite a varied collection of small improvements in the GUI client and
+the admin console.
+
+In the client, the history panel now uses the OneTouchExpandable
+option in its splitter panel, and sets its initial size so all the
+historical fields are visible.
+
+The expiration and removal tabs now show the appropriate icon from the
+tree when they are present.  This will hopefully make it less likely
+that users will miss noticing that these tabs are present when editing
+certain user accounts.
+
+The client's vertical splitter supports the OneTouchExpandable option
+as well, making it possible to entirely hide the tree if more space is
+needed for showing object windows.
+
+The admin console's layout has changed very slightly, with a splitter
+bar added between the log panel and the bottom status tables panel,
+and the 'clear log' button removed and put in the Control menu, where
+it won't take up screen real estate.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
