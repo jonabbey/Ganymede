@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/01/27 21:44:08 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/03/24 03:29:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,7 @@ package arlut.csd.ganymede.custom;
 import arlut.csd.ganymede.*;
 
 import java.util.*;
+import gnu.regexp.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -62,6 +63,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
 
+  static gnu.regexp.RE regexp = null;
   // ---
 
   systemCustom sysObj = null;
@@ -833,6 +835,76 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.<br><br>
+   *
+   * Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?
+   * 
+   */
+
+  public ReturnVal verifyNewValue(DBField field, Object value)
+  {
+    if (field.getID() == interfaceSchema.ETHERNETINFO)
+      {
+	// no worries about thread synchronization here, since
+	// equality and assignment are both atomic operators
+
+	String etherString = (String) value;
+
+	if ((etherString == null) || (etherString.equals("")))
+	  {
+	    return null;
+	  }
+
+	if (regexp == null)
+	  {
+	    try
+	      {
+		String hexdigit = "[abcdef0123456789]";
+		String separator = "[-:]";
+
+		regexp = new gnu.regexp.RE("^" + hexdigit + hexdigit + "?" + separator +
+					   hexdigit + hexdigit + "?" + separator +
+					   hexdigit + hexdigit + "?" + separator +
+					   hexdigit + hexdigit + "?" + separator +
+					   hexdigit + hexdigit + "?" + separator +
+					   hexdigit + hexdigit + "?$",
+					   gnu.regexp.RE.REG_ICASE);
+	      }
+	    catch (gnu.regexp.REException ex)
+	      {
+		throw new RuntimeException("Error, interface custom code can't initialize regular expression" + 
+					   ex.getMessage());
+	      }
+	  }
+
+	gnu.regexp.REMatch match = regexp.getMatch(etherString);
+
+	if (match == null)
+	  {
+	    return Ganymede.createErrorDialog("Bad Ethernet Address",
+					      "You entered an invalid ethernet address (" + etherString +
+					      ")\n\nEthernet addresses should be in the form of 6 - or :" +
+					      " separated hex bytes.\n\nExamples:\n01:a2:cc:4:12:2d\n" +
+					      "5-12-09-1a-ff-0");
+	  }
+	else
+	  {
+	    return null;
+	  }
+      }
+
+    return super.verifyNewValue(field, value);
   }
 
   /**
