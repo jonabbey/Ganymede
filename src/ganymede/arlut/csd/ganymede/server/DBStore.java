@@ -167,7 +167,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 7;
+  static final byte minor_version = 8;
 
   /**
    * XML version major id
@@ -199,6 +199,12 @@ public final class DBStore implements JythonMap {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
+
+  /**
+   * <p>Monotonically increasing transaction number.</p>
+   */
+
+  private int transactionNumber = 0;
 
   /**
    * <p>Convenience function to find and return objects from the database
@@ -516,6 +522,14 @@ public final class DBStore implements JythonMap {
 	    System.err.println("*** There may be errors in loading the data.");
 	  }
 
+	// at version 2.8, we started tracking monotonic transaction
+	// id numbers
+
+	if (this.isAtLeast(2, 8))
+	  {
+	    transactionNumber = in.readInt();
+	  }
+
 	// read in the namespace definitions
 
 	namespaceCount = in.readShort();
@@ -816,6 +830,8 @@ public final class DBStore implements JythonMap {
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
 	out.writeByte(minor_version);
+
+	out.writeInt(transactionNumber);
 
 	namespaceCount = (short) nameSpaces.size();
 
@@ -1336,6 +1352,43 @@ public final class DBStore implements JythonMap {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
+  }
+
+  /**
+   * <p>Increments and returns the server's monotonic
+   * transactionNumber.</p>
+   */
+
+  public synchronized int getNextTransactionNumber()
+  {
+    return ++transactionNumber;
+  }
+
+  /**
+   * <p>Returns the most recent transaction number allocated.</p>
+   */
+
+  public int getTransactionNumber()
+  {
+    return transactionNumber;
+  }
+
+  /**
+   * <p>This method is used when reading journal entries to
+   * bump up the transaction number.  If the nextNumber provided
+   * isn't actually the next number in our transaction sequence,
+   * we'll throw an IntegrityConstraintException.</p>
+   */
+
+  public synchronized void updateTransactionNumber(int nextNumber) throws IntegrityConstraintException
+  {
+    if (nextNumber != transactionNumber + 1)
+      {
+	// "Inconsistent transaction number detected while reading transaction from journal, skipping"
+	throw new IntegrityConstraintException(ts.l("setTransactionNumber.badnumber"));
+      }
+
+    transactionNumber = nextNumber;
   }
 
   /**
