@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -304,41 +304,6 @@ public class StringDBField extends DBField implements string_field {
   public String getEncodingString()
   {
     return getValueString();
-  }
-
-  /**
-   *
-   * Returns true if this field has a value associated
-   * with it, or false if it is an unfilled 'placeholder'.
-   *
-   * @see arlut.csd.ganymede.db_field
-   *
-   */
-
-  public boolean isDefined()
-  {
-    if (isVector())
-      {
-	if (values != null && values.size() > 0)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
-      }
-    else
-      {
-	if (value != null)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
-      }
   }
 
   /**

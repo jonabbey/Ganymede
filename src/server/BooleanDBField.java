@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 public class BooleanDBField extends DBField implements boolean_field {
-  
+
   /**
    *
    * Receive constructor.  Used to create a BooleanDBField from a DBStore/DBJournal
@@ -35,7 +35,6 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   BooleanDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    defined = true;
     value = null;
     values = null;
     this.owner = owner;
@@ -60,9 +59,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
-
     values = null;
   }
 
@@ -79,8 +76,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     
     value = field.value;
     values = null;
-
-    defined = true;
   }
 
   /**
@@ -96,7 +91,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     this.value = new Boolean(value);
 
     values = null;
-    defined = true;
   }
 
   /**
@@ -123,7 +117,43 @@ public class BooleanDBField extends DBField implements boolean_field {
   void receive(DataInput in) throws IOException
   {
     value = new Boolean(in.readBoolean());
-    defined = true;
+  }
+
+  /**
+   *
+   * Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public boolean isDefined()
+  {
+    return value();
+  }
+
+  /**
+   *
+   * This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of DBField will
+   * implement this in different ways.  Any namespace values claimed
+   * by the field will be released, and when the transaction is
+   * committed, this field will be released.
+   * 
+   */
+
+  public synchronized ReturnVal setUndefined(boolean local)
+  {
+    if (isEditable(local))
+      {
+	value = new Boolean(false);
+	return null;
+      }
+
+    return Ganymede.createErrorDialog("Permissions Error",
+				      "Don't have permission to clear this permission matrix field\n" +
+				      getName());
   }
 
   // ****
@@ -140,35 +170,6 @@ public class BooleanDBField extends DBField implements boolean_field {
   public boolean value(int index)
   {
     throw new IllegalArgumentException("vector accessor called on scalar");
-  }
-
-  /**
-   *
-   * Sets the value of this field, if a scalar.<br><br>
-   *
-   * This method is server-side only.<br><br>
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
-   * @param value Value to set this field to
-   * @param local If true, permissions checking will be skipped
-   *
-   */
-
-  public synchronized ReturnVal setValue(Object value, boolean local)
-  {
-    ReturnVal result = super.setValue(value, local);
-
-    if (value != null)
-      {
-	Boolean boolVal = (Boolean) value;
-
-	defined = boolVal.booleanValue();
-      }
-
-    return result;
   }
 
   public synchronized String getValueString()

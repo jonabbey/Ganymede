@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,6 +29,47 @@ import arlut.csd.JDialog.*;
 public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static final boolean debug = false;
+
+  // ---
+
+  boolean defined = false;
+
+  /**
+   *
+   * Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public boolean isDefined()
+  {
+    return defined;
+  }
+
+  /**
+   *
+   * This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of DBField will
+   * implement this in different ways.  Any namespace values claimed
+   * by the field will be released, and when the transaction is
+   * committed, this field will be released.
+   * 
+   */
+
+  public synchronized ReturnVal setUndefined(boolean local)
+  {
+    if (isEditable(local))
+      {
+	defined = false;
+	return null;
+      }
+
+    return Ganymede.createErrorDialog("Permissions Error",
+				      "Don't have permission to clear this permission matrix field\n" +
+				      getName());
+  }
 
   /**
    *
