@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,6 +36,10 @@ import java.awt.Frame;
  */
 
 public class JDialogBuff implements java.io.Serializable {
+
+  static final boolean debug = false;
+
+  // ---
   
   StringBuffer buffer;		// serialized dialog resource description
 
@@ -45,6 +49,11 @@ public class JDialogBuff implements java.io.Serializable {
 
   public DialogRsrc extractDialogRsrc(Frame frame)
   { 
+    if (debug)
+      {
+	System.err.println("JDialogBuff: entering extractDialogRsrc()");
+      }
+
     Vector chunks = retrieveChunks();
 
     String title;
@@ -58,6 +67,7 @@ public class JDialogBuff implements java.io.Serializable {
     JDialogBuffChunk chunk;
 
     /* -- */
+
 
     if (chunks == null || chunks.size() < 5)
       {
@@ -97,31 +107,71 @@ public class JDialogBuff implements java.io.Serializable {
 
     while (index < chunks.size())
       {
+	if (debug)
+	  {
+	    System.err.println("JDialogBuff: retrieving chunk " + index);
+	  }
+
 	chunk = (JDialogBuffChunk) chunks.elementAt(index);
 
 	// System.err.println("Retrieving extra chunk: " + chunk);
 
 	if (chunk.label.equals("@string"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving string chunk");
+	      }
+
 	    retVal.addString((String) chunk.value);
 	  }
 	else if (chunk.label.equals("@boolean"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving boolean chunk");
+	      }
+
 	    retVal.addBoolean((String) chunk.value);
 	  }
 	else if (chunk.label.equals("@separator"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving separator chunk");
+	      }
+
 	    retVal.addSeparator();
 	  }
 	else if (chunk.label.equals("@pass"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving password chunk");
+	      }
+
 	    retVal.addPassword((String) chunk.value);
 	  }
 	else if (chunk.label.startsWith("@choice>"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving choice chunk");
+	      }
+
 	    String choiceLabel = chunk.label.substring(8); // after @choice>
 
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: choice label = " + choiceLabel);
+	      }
+
 	    retVal.addChoice(choiceLabel, (Vector) chunk.value);
+
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: added choice values:  " + chunk.value);
+	      }
 	  }
 	else 
 	  {
@@ -303,6 +353,11 @@ public class JDialogBuff implements java.io.Serializable {
 	    throw new RuntimeException("parse error in entry " + labels.size());
 	  }
 
+	if (debug)
+	  {
+	    System.err.println("retrieved chunk " + tempString.toString());
+	  }
+
 	index++;		// skip over :
 
 	// now read in the operand(s) for this invid
@@ -329,9 +384,25 @@ public class JDialogBuff implements java.io.Serializable {
 
 	    if (chars[index] == ',')
 	      {
+		index++;
+
 		if (tempVect == null)
 		  {
+		    if (debug)
+		      {
+			System.err.println("end of first vector chunk: " + tempString.toString());
+		      }
+
 		    tempVect = new Vector();
+		    tempVect.addElement(tempString.toString());
+		  }
+		else
+		  {
+		    if (debug)
+		      {
+			System.err.println("end of a middle vector chunk: " + tempString.toString());
+		      }
+
 		    tempVect.addElement(tempString.toString());
 		  }
 	      }
@@ -339,10 +410,20 @@ public class JDialogBuff implements java.io.Serializable {
 	      {
 		if (tempVect != null)
 		  {
+		    if (debug)
+		      {
+			System.err.println("end of a last vector chunk: " + tempString.toString());
+		      }
+
 		    tempVect.addElement(tempString.toString());
 		  }
 		else
 		  {
+		    if (debug)
+		      {
+			System.err.println("end of scalar chunk: " + tempString.toString());
+		      }
+
 		    operands.addElement(tempString.toString());
 		  }
 	      }
@@ -350,7 +431,7 @@ public class JDialogBuff implements java.io.Serializable {
 
 	if (tempVect != null)
 	  {
-	    operands.addElement(tempString.toString());
+	    operands.addElement(tempVect);
 	  }
 	else if (tempString.length() == 0)
 	  {
