@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@
 package arlut.csd.ganymede;
 
 import java.util.Vector;
+import java.util.Hashtable;
 
 import arlut.csd.JDialog.*;
 
@@ -74,9 +75,22 @@ public class ReturnVal implements java.io.Serializable {
   boolean success;
   byte status;
   private StringBuffer rescanList;
-  private StringBuffer objRescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
+
+  private Hashtable objRescanHash;
+
+  /**
+   *
+   * This boolean variable is used on the server side only,
+   * to determine whether the field code that invoked 
+   * wizardHook on a DBEditObject subclass should continue
+   * with its normal process or whether it should immediately
+   * return this ReturnVal to the (client-side) caller.
+   *
+   */
+
+  public transient boolean doNormalProcessing;
 
   /* -- */
 
@@ -219,74 +233,30 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    *
-   * This method returns true if the server is requesting that 
-   * other objects that the client may be displaying for viewing
-   * or editing be reprocessed.<br><br>
+   * This method returns a hashtable mapping invid's to
+   * ReturnVal objects.  The intent of this is to allow
+   * a server method to make changes to a number of
+   * objects that the client might be concerned with (be
+   * currently displaying, etc.), and to provide details
+   * on status changes for those objects.<br><br>
    *
-   * This method will never return true if didSucceed() returns
-   * false, and need not be checked in that case.
+   * For instance, a method might make a change on the
+   * server that would oblige the client to perform
+   * a refresh on a particular field in another object
+   * that it is displaying.  In such a case, the hashtable
+   * returned by this method would map the invid of the
+   * object to a ReturnVal that specified a list of
+   * fields to rescan.<br><br>
    *
-   */
-
-  public boolean doObjRescan()
-  {
-    return !(objRescanList == null);
-  }
-
-  /**
-   *
-   * This method returns true if the server is requesting that all
-   * objects displayed by the client be refreshed.<br><br>
-   *
-   * It is unclear at this point whether the server will ever actually
-   * make such a request of the client.
-   *
-   */
-
-  public boolean objRescanAll()
-  {
-    if (objRescanList != null &&
-	objRescanList.toString().equals("all"))
-      {
-	return true;
-      }
-
-    return false;
-  }
-
-  /**
-   *
-   * This method returns a Vector of Invid objects if the server
-   * provided an explicit list of objects that need to be reprocessed,
-   * or null if all or no objects need to be processed.
+   * The ReturnVal's encoded for other objects will
+   * not specify a dialog or callback.  Likewise, the
+   * success value has undefined meaning.
    *
    */
   
-  public Vector getObjRescanList()
+  public Hashtable getObjResultSet()
   {
-    if (objRescanList == null ||
-	objRescanList.toString().equals("all"))
-      {
-	return null;
-      }
-
-    Vector results = new Vector();
-    int index = 0;
-    String temp1 = objRescanList.toString();
-    String temp2;
-
-    while (temp1.indexOf('|', index) != -1)
-      {
-	temp2 = temp1.substring(index, temp1.indexOf('|', index));
-
-	results.addElement(new Invid(temp2));
-
-	// let's get the next bit
-
-	index = temp1.indexOf('|', index) + 1;
-      }
-
-    return results;
+    return objRescanHash;
   }
 
   // ---------------------------------------------------------------------------
@@ -295,8 +265,14 @@ public class ReturnVal implements java.io.Serializable {
 
   public ReturnVal(boolean success)
   {
+    this(success, false);
+  }
+
+  public ReturnVal(boolean success, boolean doNormalProcessing)
+  {
     this.success = success;
     rescanList = null;
+    objRescanHash = null;
     dialog = null;
     callback = null;
     status = NONE;
@@ -344,22 +320,14 @@ public class ReturnVal implements java.io.Serializable {
     rescanList.append("|");
   }
 
-  public void addRescanObject(Invid objid)
+  public void addRescanObject(Invid objid, ReturnVal retVal)
   {
-    if (objRescanList == null)
+    if (objRescanHash == null)
       {
-	objRescanList = new StringBuffer();
-      }
-    else
-      {
-	if (objRescanList.toString().equals("all"))
-	  {
-	    return;
-	  }
+	objRescanHash = new Hashtable();
       }
 
-    objRescanList.append(objid.toString());
-    objRescanList.append("|");
+    objRescanHash.put(objid, retVal);
   }
 
   public void setCallback(Ganymediator callback)
