@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -329,13 +329,15 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// if the net is being set to a net that matches what's already
 	// in the address field, we'll go ahead and ok it
 
-	if (matchNet((Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS), (Invid) value))
+	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
+
+	if (address != null && matchNet(address, (Invid) value))
 	  {
 	    if (debug)
 	      {
 		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
 	      }
-
+	    
 	    return true;
 	  }
 	
@@ -385,7 +387,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
 
 	IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
-	Byte[] address = getParentObj().getAddress((Invid) value);
+	address = getParentObj().getAddress((Invid) value);
 	
 	if (address != null)
 	  {
@@ -668,6 +670,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	if (debug)
 	  {
 	    System.err.println("interfaceCustom.matchNet():");
+
 	    System.err.println("\taddress: " + IPDBField.genIPV4string(address));
 	    System.err.println("\tnet num: " + IPDBField.genIPV4string(netNum));
 	  }
@@ -680,6 +683,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		  {
 		    System.err.println("interfaceCustom.matchNet(): failure to match octet " + i);
 		  }
+
 		return false;
 	      }
 	  }
@@ -688,6 +692,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	if (debug)
 	  {
+	    ex.printStackTrace();
 	    Ganymede.debug("interfaceCustom.matchNet: NullPointer " + ex.getMessage());
 	  }
 	return false;
