@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,11 +37,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   // ---
 
-  private boolean developMode = false; // CAUTION!! Should be false unless the schema elements
-             			       // that the Ganymede server's
-				       // internal logic depends on
-				       // are being deliberately
-				       // altered!
+  boolean developMode = false;	// CAUTION!! Should be false unless the schema elements
+				// that the Ganymede server's
+				// internal logic depends on
+				// are being deliberately
+				// altered!
 
   private boolean locked;	// if true, this DBSchemaEdit object has already been
 				// committed or aborted
