@@ -1,6 +1,7 @@
 import ldap
 import config
 import utils
+from flags import *
 
 
 class ADLDAPConnection:
@@ -60,43 +61,88 @@ class ADFrontend(ADLDAPConnection):
       return result[0]
 
 
+  def get_dn_for_user(self, username):
+    return "cn=" + username + ",cn=users," + config.LDAP_BASEDN
+
+
   def user_exists(self, username):
     user = self.get_user(username)
     return (user is not None)
 
 
-  def add_user(self, userobj):
-    # TODO: Don't take a direct user object, take a username an a dictionary
-    # of  attributes
-    assert not self.user_exists(userobj.sAMAccountName), \
-           userobj.sAMAccountName + " can't be added since he already exists."
+  def add_user(self, username, attrdict, password=None, accountControlFlag=None):
+    assert not self.user_exists(username), \
+           username + " can't be added since he already exists."
 
-    dn = "cn=" + userobj.sAMAccountName + ",cn=users," + config.LDAP_BASEDN
+    assert "unicodePwd" not in attrdict.keys(), \
+           "You can't set a password attribute at the time a user is created. " + \
+           "Pass the password in as an additional, separate argument."
 
-    # 512=Normal account, 32=Password not required
-    attrs = [("objectclass", "user"), ("userAccountControl", "514")]
-    for attr in userobj.__dict__.iterkeys():
-      if attr[:2] != "__" and attr not in ["unicodePwd", "userAccountControl"]:
-        attrs.append((attr, getattr(userobj, attr)))
+    assert "userAccountControl" not in attrdict.keys(), \
+           "You can't set an account level attribute at the time a user is created. " + \
+           "Pass the account control flag in as an additional, separate argument."
+
+    dn = self.get_dn_for_user(username)
+
+    uac = NORMAL_ACCOUNT + ACCOUNTDISABLE + PASSWD_NOTREQD + PASSWORD_EXPIRED
+    attrs = [("objectclass", "user"), ("userAccountControl", str(uac)), ("sAMAccountName", username)]
+    for key, value in attrdict.iteritems():
+      attrs.append((key, value))
 
     self.add(dn, attrs)
+
+    if password is not None:
+      self.set_user_pw(username, password)
+
+    if accountControlFlag is not None:
+      self.set_user_account_control_flag(username, accountControlFlag)
+
+
+  def set_user_account_control_flag(self, username, flag):
+    assert self.user_exists(username), \
+           username + "'s account flag can't be set since he doesn't exist."
+
+    if type(flag) != type(""):
+      flag = str(flag)
+
+    self.set_user_attributes(username, {"userAccountControl": flag}, True)
     
 
   def set_user_pw(self, username, password):
     assert self.user_exists(username), \
            username + "'s password can't be set since he doesn't exist."
 
-    dn = "cn=" + username + ",cn=users," + config.LDAP_BASEDN
+    dn = self.get_dn_for_user(username)
+
     pw = unicode("\"" + password + "\"", "iso-8859-1")
     pw = pw.encode("utf-16-le")
-    self.conn.modify_s(dn, [(ldap.MOD_ADD, "unicodePwd", pw)])
-    self.conn.modify_s(dn, [(ldap.MOD_REPLACE, "userAccountControl", "576")])
+
+    self.set_user_attributes(username, {"unicodePwd": pw}, True)
+
+
+  def set_user_attributes(self, username, attrdict, clobber=False):
+    assert self.user_exists(username), \
+           username + "'s attributes can't be set since he doesn't exist."
+
+    dn = self.get_dn_for_user(username)
+
+    # TODO: This is slow, since we're doing an ldap-modify for each
+    # individual attribute instead of doing them all at once. What's
+    # the elegant way to do this?
+    for key, value in attrdict.iteritems():
+      print "Setting", username+"'s", key, "to", value
+      try:
+        self.conn.modify_s(dn, [(ldap.MOD_ADD, key, value)])
+      except ldap.TYPE_OR_VALUE_EXISTS:
+        if clobber:
+          self.conn.modify_s(dn, [(ldap.MOD_REPLACE, key, value)])
+        else:
+          raise
 
 
   def delete_user(self, username):
     assert self.user_exists(username), \
            username + " can't be deleted since he doesn't exist."
 
-    dn = "cn=" + username + ",cn=users," + config.LDAP_BASEDN
-
+    dn = self.get_dn_for_user(username)
     self.conn.delete_s(dn)
