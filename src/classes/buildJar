@@ -2,8 +2,8 @@
 #
 # Ganymede client jar build script
 #
-# Version: $Revision: 1.5 $
-# Date: $Date: 1999/01/20 17:45:49 $
+# Version: $Revision: 1.6 $
+# Date: $Date: 1999/01/20 18:45:12 $
 #
 ############################################################
 
@@ -27,6 +27,10 @@ echo "Building client jar"
 mv -f ganymede.jar ganymede.jar.old
 
 cd client_classes
+
+# We need the Util directory as well
+
+ln -s ../arlut/csd/Util arlut/csd/Util
 
 sync_tree
 
