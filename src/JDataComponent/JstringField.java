@@ -1,4 +1,3 @@
-
 /*
    JstringField.java
 
@@ -10,8 +9,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/08/19 02:12:44 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2002/10/05 05:38:25 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -74,7 +73,7 @@ import java.rmi.RemoteException;
  *    be preset.</p>
  */
 
-public class JstringField extends JentryField implements KeyListener {
+public class JstringField extends JentryField {
 
   public static final boolean debug = false;
 
@@ -89,10 +88,7 @@ public class JstringField extends JentryField implements KeyListener {
   private String allowedChars = null;
   private String disallowedChars = null;
 
-  private boolean 
-    addedKeyListener = false, 
-    incrementalCallback = false,
-    processingCallback = false;
+  private boolean processingCallback = false;
 
   /* -- */
 
@@ -194,43 +190,6 @@ public class JstringField extends JentryField implements KeyListener {
  // JstringField methods
 
   /**
-   *
-   * This method is used to turn on an incremental callback.. that is,
-   * this JstringField will attempt to verify the validity of each
-   * keystroke entered with the JsetValueCallback as it is entered.
-   *
-   * @deprecated An old bit of functionality, never used, not tested.
-   *
-   */
-
-  public void setIncrementalCallback(boolean callbackOn)
-  {
-    if (!allowCallback)
-      {
-	System.out.println("No callback is associated with this field");
-	return;
-      }
-
-    if (callbackOn)
-      {
-	if (addedKeyListener)
-	  {
-	    incrementalCallback = true;
-	  }
-	else
-	  {
-	    this.addKeyListener(this);
-	    incrementalCallback = true;
-	    addedKeyListener = true;
-	  }
-      }
-    else
-      {
-	incrementalCallback = false;
-      }
-  }
-
-  /**
    *  sets the JstringField to a specific value
    *
    * @param str value to which the JstringField is set
@@ -256,24 +215,10 @@ public class JstringField extends JentryField implements KeyListener {
 	value = new String("");
 	
 	super.setText("");
-      
-	changed = true;
       }
     else 
       {
-	if (str.length() > size)
-	  {
-	    throw new IllegalArgumentException("string too long");
-	  }
-
-	for (int i = 0; i < str.length(); i++)
-	  {
-	    if (!isAllowed(str.charAt(i)))
-	      {
-		throw new IllegalArgumentException("invalid char in string: " + 
-						   str.charAt(i));
-	      }
-	  }
+	verifyValue(str);
 
 	if (debug)
 	  {
@@ -283,22 +228,44 @@ public class JstringField extends JentryField implements KeyListener {
 	super.setText(str); 
 
 	value = str;
-	
-	changed = true;
       }
 
     setEditable(editable);
   }
 
   /**
+   * <p>Checks the entire string str for compliance with this field's constraints.
    *
-   *  returns the value of the member variable value
+   * Throws an IllegalArgumentException if the provided string is not acceptable.
+   */
+
+  private void verifyValue(String str)
+  {
+    if (str.length() > size)
+      {
+	throw new IllegalArgumentException("string too long");
+      }
+    
+    for (int i = 0; i < str.length(); i++)
+      {
+	if (!isAllowed(str.charAt(i)))
+	  {
+	    throw new IllegalArgumentException("invalid char in string: " + 
+					       str.charAt(i));
+	  }
+      }
+  }
+
+  /**
+   *
+   * Return the string contained in this field, whether it has been validated
+   * in a callback or not.
    *
    */
 
   public String getValue() 
   {
-    return value;
+    return getText();
   }
 
   /**
@@ -394,7 +361,10 @@ public class JstringField extends JentryField implements KeyListener {
   }
 
   /**
-   *  determines whether a given character is valid or invalid for a JstringField
+   * determines whether a given character is valid or invalid for a JstringField
+   *
+   * The JentryDocument object for this field will use this method to
+   * allow or disallow the character ch from being added.
    *
    * @param ch the character which is being tested for its validity
    */
@@ -430,13 +400,22 @@ public class JstringField extends JentryField implements KeyListener {
     return true;
   }
 
-  public void sendCallback()
+  /**
+   * sendCallback is called when focus is lost, or when we are otherwise
+   * triggered.  A true value will be returned if the value change was
+   * approved and performed, or false if not.  If the value did not change,
+   * this method will also return false.
+   *
+   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
+   */
+
+  public int sendCallback()
   {
     synchronized (this)
       {
 	if (processingCallback)
 	  {
-	    return;
+	    return -1;
 	  }
 	
 	processingCallback = true;
@@ -453,124 +432,35 @@ public class JstringField extends JentryField implements KeyListener {
     
 	str = getText();
     
-	if (value != null)
+	if ((value != null && value.equals(str)) || (value == null && (str == null || str.equals(""))))
 	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: old value != null");
-	      }
-	
-	    changed = !value.equals(str);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: old value == null");
-	      }
-	
-	    changed = true;
-	  }
-    
-	if (!changed)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: no change, ignoring");
-	      }
-	
-	    return;
-	  }
-    
-	if (!allowCallback) 
-	  {
-	    value = str;
-	    return;
+	    return 0;
 	  }
 
-	boolean b = false;
-	  
+	/* we don't need to check the string for validity, since it was checked
+	   on a character by character basis on entry by our superclass. */
+	
 	try 
 	  {
-	    if (debug)
+	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET)))
 	      {
-		System.err.println("JstringField.processFocusEvent: making callback");
-	      }
-
-	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
-	  }
-	catch (RemoteException re)
-	  {
-	  }
-
-	// If the setValuePerformed callback failed, we'll revert the value to our last
-	// approved value
-    
-	if (!b) 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: setValue rejected");
-		
-		if (value == null)
-		  {
-		    System.err.println("JstringField.processFocusEvent: resetting to empty string");
-		  }
-		else
-		  {
-		    System.err.println("JstringField.processFocusEvent: resetting to " + value);
-		  }
-	      }
-	    
-	    if (value == null)
-	      {
-		super.setText("");
+		value = str;
+		return 1;
 	      }
 	    else
 	      {
-		super.setText(value);
+		super.setText(value == null ? "":value);
+		return -1;
 	      }
-	    
-	    changed = false;
 	  }
-	else 
+	catch (RemoteException re)
 	  {
-	    if (debug)
-	      {
-		System.err.println("JstringField.processFocusEvent: setValue accepted");
-	      }
-
-	    value = str;
-		
-	    changed = false;
+	    return -1;
 	  }
       }
     finally
       {
 	processingCallback = false;
-      }
-  }
-  
-  public void keyPressed(KeyEvent e) {}
-  public void keyReleased(KeyEvent e) {}
-
-  public void keyTyped(KeyEvent e)
-  {
-    if (debug)
-      {
-	System.out.println("In keyTyped");
-      }
- 
-    if (incrementalCallback && allowCallback)
-      {
-	try
-	  {
-	    my_parent.setValuePerformed(new JValueObject(this, getText(), JValueObject.ADD));
-	  }
-	catch (RemoteException rx)
-	  {
-	    
-	  }
       }
   }
 }
