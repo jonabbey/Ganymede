@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2001/10/01 17:17:45 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2001/10/01 17:19:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -457,7 +457,8 @@ public class DBEditSet {
 	
 	while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
 	  {
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") waiting for prior thread " +
+	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") on thread " + thisThread.toString() +
+			       " waiting for prior thread " +
 			       currentCheckpointThread.toString() + "(\"" + checkpoints.getTopName() + "\")" +
 			       " to finish with prior checkpoint");
 	    try
