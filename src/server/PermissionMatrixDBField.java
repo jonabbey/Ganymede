@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1261,6 +1261,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	return true;
       }
+
+    if (entry == null)
+      {
+	throw new IllegalArgumentException("entry is null");
+      }
     
     if (getName().equals("Owned Object Bits"))
       {
@@ -1273,16 +1278,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	if (fieldID < 0)
 	  {
-	    adminPriv = (PermEntry) owner.gSession.personaPerms.getPerm(baseID);
+	    adminPriv = (PermEntry) owner.gSession.delegatablePersonaPerms.getPerm(baseID);
 	  }
 	else
 	  {
-	    adminPriv = (PermEntry) owner.gSession.personaPerms.getPerm(baseID, fieldID);
+	    adminPriv = (PermEntry) owner.gSession.delegatablePersonaPerms.getPerm(baseID, fieldID);
 	  }
 
 	// the adminPriv should have all the bits set that we are seeking to set
 
-	return entry.equals(adminPriv.intersection(entry));
+	return entry.equals(entry.intersection(adminPriv));
       }
     else if (getName().equals("Default Bits"))
       {
@@ -1295,16 +1300,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	if (fieldID < 0)
 	  {
-	    adminPriv = (PermEntry) owner.gSession.defaultPerms.getPerm(baseID);
+	    adminPriv = (PermEntry) owner.gSession.delegatableDefaultPerms.getPerm(baseID);
 	  }
 	else
 	  {
-	    adminPriv = (PermEntry) owner.gSession.defaultPerms.getPerm(baseID, fieldID);
+	    adminPriv = (PermEntry) owner.gSession.delegatableDefaultPerms.getPerm(baseID, fieldID);
 	  }
 
 	// the adminPriv should have all the bits set that we are seeking to set
 
-	return entry.equals(adminPriv.intersection(entry));
+	return entry.equals(entry.intersection(adminPriv));
       }
     else
       {
