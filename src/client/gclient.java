@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.192 $
-   Last Mod Date: $Date: 2001/10/31 00:48:55 $
+   Version: $Revision: 1.193 $
+   Last Mod Date: $Date: 2001/10/31 01:36:51 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.192 $ $Date: 2001/10/31 00:48:55 $ $Name:  $
+ * @version $Revision: 1.193 $ $Date: 2001/10/31 01:36:51 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/10/31 00:48:55 $";
+  static String release_date = "$Date: 2001/10/31 01:36:51 $";
   static String release_number = null;
 
   /**
@@ -3811,6 +3811,56 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     else
       {
 	filterDialog.setVisible(true);
+      }
+  }
+
+  public void updateTree()
+  {
+    updateAfterFilterChange(tree.getRoot());
+    tree.refresh();
+  }
+
+  public void updateAfterFilterChange(treeNode node)
+  {
+    if (node == null)
+      {
+	return;
+      }
+
+    if (debug)
+      {
+	System.err.println("updateAfterFilterChange examining: " + node);
+      }
+
+    if (node instanceof BaseNode)
+      {
+	while (node instanceof BaseNode)
+	  {
+	    if (node.getChild() != null)
+	      {
+		if (debug)
+		  {
+		    System.err.println("Updating " + node);
+		  }
+
+		try
+		  {
+		    refreshObjects((BaseNode) node, false);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("oops, couldn't refresh base" + ex);
+		  }
+	      }
+
+	    node = node.getNextSibling();
+	  }
+      }
+
+    if (node instanceof CatTreeNode)
+      {
+	updateAfterFilterChange(node.getChild());
+	updateAfterFilterChange(node.getNextSibling());
       }
   }
 
