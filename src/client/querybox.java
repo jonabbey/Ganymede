@@ -23,6 +23,7 @@ import java.util.*;
 import java.rmi.RemoteException;
 
 import tablelayout.*;
+import arlut.csd.JDataComponent.*;
 
 import com.sun.java.swing.*;
 
@@ -54,10 +55,24 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   Hashtable 
   
-    baseHash,
-    shortHash;
+  baseHash,    // Key: Bases      *--*  Value: Fields  
+   shortHash;  // Key: Base ID    *--*  Value: Corresponding Base
   
-  Hashtable myHash = new Hashtable(); // allows you to look up a base with its
+
+  Hashtable baseIDHash = new Hashtable();  
+            // Key: Fieldname
+            //Value: Short ID of corresponding base
+  
+  Hashtable fieldHash = new Hashtable();  
+            // Key: Fieldname
+            // Value: baseField
+
+  Hashtable  nameHash = new Hashtable();   
+            // Key: embedded fieldname (with slashes)
+            // Value: field after last slash 
+  
+
+ Hashtable myHash = new Hashtable(); // allows you to look up a base with its
                                       // name as the key
   
 
@@ -93,6 +108,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   qChoice opChoice; // and these too
   qChoice intChoice;
   qChoice dateChoice;
+  qaryChoice isNot; // will either be a boolean choice, or a list of operators
+                    // depending on whether the field is an array
 
   // - imput fields
 
@@ -204,10 +221,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    if (key.isEmbedded())
 	      {
 
-		System.out.println("We have an embedded object,");
-		System.out.println("And it's name is: " + key.getName());
-		
-		// get a base that works...
+		// get a base that works...this embedded would cause
+		// problems [null pointer exceptions, that kind of thing]
 		
 		continue;
 	      }
@@ -312,7 +327,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       option_panel.add("Center", inner_panel);
       
       inner_panel.setLayout(new TableLayout());
-      
+    
       try
 	{
 	  Vector fields = base.getFields();
@@ -340,7 +355,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  for (int n = 0; n < tmpAry.size(); n++)
 		    {
 		      inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
-		    }
+		       }
 		  
 		  // Here we're saving the row of components in the fieldOptions vector
 		 
@@ -361,13 +376,13 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	
 	  for (int n = 0; n < tmpAry.size(); n++)
 	   {
-	    inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
-	  
+	     inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
 	   }
 
 	  // Here we're saving the row of components in the fieldOptions vector
 	  // (again)
-	    fieldOptions.insertElementAt(tmpAry, tmpRow);
+	
+	  fieldOptions.insertElementAt(tmpAry, tmpRow);
 	  
 	}
       catch (RemoteException ex)
@@ -387,7 +402,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       return myFrame;  
     }
   
-  void getEmbedded (Vector fields, String basePrefix)
+  void getEmbedded (Vector fields, String basePrefix, Short lowestBase)
     {
       /* A companion to the following getChoiceFields method.
        * It allows fields with references to embedded objects
@@ -404,7 +419,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       Short tempIDobj;
       short tempID;
       
-
       // * -- *
       
       try
@@ -415,29 +429,42 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      // Examine each field and if it's not referring to an embedded,
 	      // then add it's name + basePrefix to the string vector
      
-	      System.out.println("We're in getembedded");
-
 	      tempField = (BaseField) fields.elementAt(j);
 	      
-	      System.out.println("Weve got the field");
-	   
-	     
-	  
-	      System.out.println("Weve got the field and its ID");
-
 	      if (! tempField.isEditInPlace())
 		{	 
-		  myName = tempField.getName();
-		  myName = basePrefix + "/" + myName;  // slap on the prefix
-		  Embedded.addElement(myName);
-		  System.out.println("ADDING Embedded: " + myName);
+		  if (tempField.getID() != 0){
+
+		    // ignore containing objects and the like...
+
+		    myName = tempField.getName();
+		    myName = basePrefix + "/" + myName;  // slap on the prefix
+		    Embedded.addElement(myName);
+
+		    fieldHash.put(myName, tempField);
+		   
+		    // Also, save the information on the target base
+		    // in a hashtable
+		      
+		    // the ID will be used in creating the query for the 
+		    // edit-in-place
+		    
+		    // if tempIDobj isn't null, then we've got 
+		    // something beneath an edit in place. Add the
+		    // id of the lowest level base to the baseIDHash
+		    
+		    if (lowestBase != null){
+		      baseIDHash.put(myName, lowestBase);
+		    }
+		  }
 		}
 	      else
 		{
 		  // since it does refer to an embedded, call getEmbedded again,
 		  // with tempBase.getFields(), basePrefix/tempBase, 
 
-		  System.out.println("We've got a nested Edit in Place");
+		  myName = tempField.getName();
+		  myName = basePrefix + "/" + myName;  // slap on the prefix
 		  
 		  tempID = tempField.getTargetBase();
 
@@ -447,12 +474,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  
 		  tempIDobj = new Short(tempID);
 		  tempBase = (Base) shortHash.get(tempIDobj);
-		  
-	
-		  
-		  System.out.println("RECURSING!!");
-		  getEmbedded(tempBase.getFields(), basePrefix);
-
+		  getEmbedded(tempBase.getFields(), basePrefix, tempIDobj);
 		}
 	 
 	    }
@@ -461,17 +483,17 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	{
 	  throw new RuntimeException("caught remote exception: " + ex);	
 	}
-
     }
     
     qfieldChoice getChoiceFields (Base base)
+
     {
       /* Method to return a choice menu containing the fields for
        * a particular base
        */
 
       short inVid;
-      Base tempBase;       // Used when handeling embedded objs
+      Base tempBase;                            // Used when handeling embedded objs
       BaseField basefield;
       qfieldChoice myChoice = new qfieldChoice();
       myChoice.addItemListener(this);
@@ -492,26 +514,52 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      if (basefield.isEditInPlace() == true)
 		{
 		  // add it to EIPfields
+		 
 		  EIPfields.addElement(basefield);
 		  String fieldName = basefield.getName();
-		  getEmbedded(EIPfields, fieldName);
+		  getEmbedded(EIPfields, fieldName, null);
 		  EIPfields.removeElement(basefield);
+		 
 		}
 	      else
 		{
 		  String Name = basefield.getName();
 		  myChoice.add(Name);
+		  
+		  // To avoid a whole bunch of string comparisons, 
+		  // we'll put the name of the field in the nameHash
+		  // with it's own name as the value (since it's not
+		  // an edit-in-place)
+		  
+		  nameHash.put(Name, Name);
+
 		}
 	    }
 	  
 	  if (! Embedded.isEmpty())
 	    {
-	      for (int k = 0; Embedded != null && (k < Embedded.size()); k ++)
+	      for (int k = 0; (k < Embedded.size()); k ++)
 		{
 		  String embedName = (String) Embedded.elementAt(k);
-		  Embedded.removeElementAt(k);
+
 		  myChoice.add(embedName); // make it so #1
+
+		  // Ok, let's try some string processing -- removing the
+		  // slashes.
+		  
+		  int first = embedName.lastIndexOf("/") + 1;
+		  int last = embedName.length();
+		  String noSlash = embedName.substring(first, last);
+		  System.out.println("Feild Name for embedded: " + noSlash);
+		  
+
+		  // Add the slash-less name to the name hash, with the key
+		  // being the slash filled name
+		  
+		  nameHash.put(embedName, noSlash);
+
 		}
+	      Embedded.removeAllElements();
 	    }
 	}
       catch (RemoteException ex)
@@ -529,12 +577,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
        */
       
       myAry = new Component[MAXCOMPONENTS];
-
-      qChoice isNot = new qChoice();
-      isNot.add("is");
-      isNot.add("is not");
-      isNot.qRow = this.row;
-
+  
       //qTextField newInput = new qTextField(6); 
       //newInput.qRow = this.row;
      
@@ -549,10 +592,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
       currentField = fieldChoice.getSelectedItem();  
       opChoice = getOpChoice(currentField);
+      isNot = getIsNot(currentField);
       opChoice.qRow = this.row;
       Component newInput = getInputField(currentField);
       
-
       // - set visible to false so they don't appear
       // as they're added. just for looks.
 
@@ -578,38 +621,122 @@ class querybox extends Dialog implements ActionListener, ItemListener {
          
     }
 
-  Component getInputField (String field){
+    qaryChoice getIsNot(String field){
+ 
+      qaryChoice returnChoice = new qaryChoice();
+      returnChoice.qRow = this.row;
 
+      try 
+	{  
+	  // Look it up in the fieldHash. if it's there, then goodie!
 
-     try 
+	  BaseField myField = (BaseField) fieldHash.get(field);
+
+	  // If the field contains slashes, then we'll remove 'em
+	  // by using the name hash
+    
+	  field = (String) nameHash.get(field);
+	  
+	  // easy as cake
+	 
+	  if (myField == null){
+
+	    // It's not an edit in place.
+
+	    myField = this.defaultBase.getField(field);  
+	  }
+
+	  else 
+	    {
+	      System.out.println("Yes, brothers and sisters, we have an EIP!!!");
+
+	    }
+	  if (myField == null){
+
+	    System.out.println("LIFE SUCKS!!");
+	    myField = this.defaultBase.getField(field);  
+	  }
+
+	  if (myField.isArray()){
+
+	    returnChoice.add("Length");
+	    returnChoice.add("Contains");
+	    returnChoice.add("Does Not Contain");       
+	  }
+	  else 
+	    {
+	    returnChoice.add("is");
+	    returnChoice.add("is not");
+	  }
+	  returnChoice.addItemListener(this);
+	  return returnChoice;
+	}  
+      
+      catch (RemoteException ex)
 	{
-	  BaseField myField = this.defaultBase.getField(field);  
+	  throw new RuntimeException("caught remote exception: " + ex);	
+	}
+      
+}
 
-	  if (myField.isDate()){
-	    //System.out.println("Field: It's a date!!!!");
+      Component getInputField (String field){
 
-	    dateField = new TextField("dd/mm/yyyy");
+	try 
+	  {
+	    BaseField myField = (BaseField) fieldHash.get(field); 
 
-	    return dateField;   
-	  }
+	    // If the field contains slashes, then we'll remove 'em
+	    // by using the name hash
 
-	  else if (myField.isBoolean()){
+	    field = (String) nameHash.get(field);
+
+	    System.out.println("And We have put gotten it from NameHash: " + field);
 	    
-	    Checkbox boolBox = new Checkbox("True");
-	    boolBox.setState(true);
+	    // easy as pie
+	  
+	    if (myField == null){
+       	      myField = this.defaultBase.getField(field);  
 
-	    return boolBox;
-	  }
+	      // Probably fix this...make it bring up an error dialog or
+	      // something
+   
+	      inputField = new qTextField(6);
+	    
+	      return inputField; 
 
-	  else {
+	    }
+
+	    if (myField.isDate()){
+	   
+	      dateField = new TextField("dd/mm/yyyy");
+
+	      return dateField;   
+	    }
+
+	    else if (myField.isBoolean()){
 	    
-	    // It ain't no date
+	      Checkbox boolBox = new Checkbox("True");
+	      boolBox.setState(true);
+
+	      return boolBox;
+	    }
+
+	    else if (myField.isIP()){
+	  
+	      JIPField IPField = new JIPField(true); // allow V6
+
+	      return IPField;
+	    }
+
+	    else {
 	    
-	    inputField = new qTextField(6);
+	      // It ain't no date
 	    
-	    return inputField; 
-	  }
-	}      
+	      inputField = new qTextField(6);
+	    
+	      return inputField; 
+	    }
+	  }      
       catch (RemoteException ex)
 	{
 	  throw new RuntimeException("caught remote exception: " + ex);	
@@ -627,8 +754,23 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       
       try 
 	{
-	  BaseField myField = this.defaultBase.getField(field);  
-      
+	  BaseField myField = (BaseField) fieldHash.get(field);
+
+
+	  // Check to see if the damn thing has slashes in it
+
+	  field = (String) nameHash.get(field);
+
+	  // easy as fish
+
+
+	  if (myField == null)
+	    {
+	      // It's not an edit in place. Engage.
+
+	      myField = this.defaultBase.getField(field);  
+	    }
+
 	  intChoice = new qChoice();
 	  intChoice.add("="); 
 	  intChoice.add(">="); 
@@ -636,9 +778,19 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  intChoice.add("<"); 
 	  intChoice.add(">");
   
-	  if (myField.isDate() == true){
-	    //System.out.println("Field: It's a date!!!!");
+	  // Do a nice null test to make sure stuff isn't screwey
+	  
+	  if (myField == null){
+	    System.out.println("MYFIELD IS NULL! LIFE REALLY SUCKS!!");
 
+	    return intChoice;
+	    
+	  }
+
+
+
+	  if (myField.isDate() == true){
+	  
 	    dateChoice = new qChoice();
 	    dateChoice.add("Same Day As");
 	    dateChoice.add("Same Week As");
@@ -668,7 +820,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  throw new RuntimeException("caught remote exception: " + ex);	
 	}
     }
-
 
   void addRow (Component[] myRow, boolean visible, Panel myPanel, int Row) 
     {
@@ -757,6 +908,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     Integer tempInt = new Integer(0);
     Checkbox tempBox = new Checkbox();
 
+    boolean editInPlace;
+    Short baseID;
+
     // -- //
 
     int allRows = this.Rows.size();
@@ -793,8 +947,32 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     try
       {      
-	tempField = defaultBase.getField(fieldName);
+	/* Here's some code to deal with edit-in-place fields again
+	 * what we need to do here is get the actual field from the 
+	 * name, using the shortID of the base preovided by the
+	 * fieldname Hash.
+	 *
+	 */ 
+
+	baseID = (Short) baseIDHash.get(fieldName);
 	
+	if (baseID != null){
+	  // The hash has a defined value for the base ID, therefore
+	  // it's an edit in place
+
+	  System.out.println("Creating Edit In Pace Query!");
+
+	  tempField = (BaseField) fieldHash.get(fieldName);
+	  fieldName = (String) nameHash.get(fieldName); // keep only the last field 
+	  editInPlace = true;
+
+	}
+
+	else {	 
+	  tempField = defaultBase.getField(fieldName);
+	  editInPlace = false;
+	}
+
 	if (tempField.isNumeric())
 	  {
 	    value = new Integer(tempText.getText());
@@ -812,11 +990,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    value = tempText.getText(); // default is string
 	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception: " + ex);	
-      }
+	//    }
+	//catch (RemoteException ex)
+	//{
+	///throw new RuntimeException("caught remote exception: " + ex);	
+	// }
     
     // -- get the correct operator
     
@@ -852,14 +1030,56 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       {
 	// Special case -- return only a single query node
 	    
-	if (notValue == "is not")
+	// We'll also have to use a different query constructor if
+	// we're dealin with an edit in place field
+
+
+
+	if (baseID != null)
 	  {
-	    myQuery = new Query(baseName, myNode); // Use the NOT node (see above)
+	    short baseid = baseID.shortValue();
+
+	    if (notValue == "is not")
+	      {
+		myQuery = new Query(baseid, myNode, editOnly); // Use the NOT node (see above)
 	  
-	  } else { // "NOT" not selected
+	      } else { // "NOT" not selected
 	  
-	    myQuery = new Query(baseName, myNode); // just use the DATA node (see above)
+		myQuery = new Query(baseid, myNode, editOnly); // just use the DATA node (see above)
 	  
+	      }
+	 
+	    myQuery.setReturnType(defaultBase.getTypeID());
+
+	    // Degug stuff
+
+	    System.out.println("My Query: Embedded");
+	    System.out.println("------------------");
+	    System.out.println("");
+	    System.out.println("Field Name: " + fieldName);
+
+	    Base upWithPeople = (Base) shortHash.get(baseID); 
+	    String bName = upWithPeople.getName();
+
+	    System.out.println("Low Base: " + bName);
+	    System.out.println("Top Base: " + defaultBase.getName());
+	    System.out.println("Operator: " + opValue);
+	    System.out.println("Value: " + value);
+
+
+	  }
+	else
+	  {
+
+	    if (notValue == "is not")
+	      {
+		myQuery = new Query(baseName, myNode, editOnly); // Use the NOT node (see above)
+		
+	      } else { // "NOT" not selected
+		
+		myQuery = new Query(baseName, myNode, editOnly); // just use the DATA node (see above)
+		
+	      }
 	  }
       }
     
@@ -886,8 +1106,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
 	    // -- set the type for the text entered in the TextField
 
-	    try
-	      {      
+	    //try
+	      // {      
 		tempField = defaultBase.getField(fieldName);
 		
 		if (tempField.isNumeric())
@@ -902,11 +1122,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  {
 		    value = tempText.getText(); // default is string
 		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote exception: " + ex);	
-	      }
+		//     }
+		//catch (RemoteException ex)
+		//{
+		//		throw new RuntimeException("caught remote exception: " + ex);	
+		//}
 	    
 
 	    // -- get the correct operator
@@ -943,14 +1163,39 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    myNode = andNode;
 	  }
 	
-	myQuery = new Query( baseName, myNode);
+	// Again, use the alternate constructor for EIP fields
+
+	if (baseID != null)
+	  {
+	    short baseid = baseID.shortValue();
+	    myQuery = new Query(baseid, myNode, editOnly);
+  
+	    // make sure the server knows what the top level base is
+	    
+	    myQuery.setReturnType(defaultBase.getTypeID()); 
+	    
+	  
+	  }
+	else
+	  {
+	    myQuery = new Query(baseName, myNode, editOnly);
+	  }
+      }
+
+    // We'll still use the highest base for the call to set the
+    // return fields
+
+
+    myQuery = setFields(myQuery);
+    return myQuery;
+    
+        }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote exception: " + ex);	
       }
     
 
-    myQuery = setFields(myQuery);
-
-    return myQuery;
-    
   }
   
   
@@ -1085,12 +1330,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	
 	this.editOnly = editBox.getState();
 	System.out.println("Edit Box Clicked: " + editOnly);
-	
+	// IMPLEMENT ME!!!
       }
 
       if (e.getSource() == baseChoice)
 	{
-
+	System.out.println("Base selected");
 	  // First, change the base
 	  
 	  Base defaultBase = (Base) myHash.get(baseChoice.getSelectedItem());
@@ -1125,6 +1370,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
 	
       if (e.getSource() instanceof qfieldChoice){
+	
+	System.out.println("Field Selected");
 
 	qfieldChoice source = (qfieldChoice) e.getSource();
 
@@ -1143,11 +1390,50 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	removeRow(tempRow, inner_choice, currentRow);
 	opChoice = getOpChoice(fieldName);
 	Component newInput = getInputField(fieldName);
+	tempRow[3] = getIsNot(fieldName);
 	tempRow[5] = opChoice;
 	tempRow[7] = newInput;
 	addRow(tempRow, true, inner_choice, currentRow);
       }
-	 
+	
+      else if (e.getSource() instanceof qaryChoice){
+	
+	System.out.println("QCHOICE SELECTED!");
+	
+	qaryChoice source = (qaryChoice) e.getSource();
+	
+	String opName = source.getSelectedItem();
+	System.out.println("Opname: " + opName);
+	int currentRow = source.getRow();
+	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
+	
+	if ((opName.equalsIgnoreCase("Contains")) || 
+	    (opName.equalsIgnoreCase("Does Not Contain")))
+	  {
+	    // disable the numeric operator choice cause it makes
+	    // no sense in this contaxt
+
+	    if (tempRow[5].isEnabled())
+	      {	
+		tempRow[5].setEnabled(false);
+	      }
+	  }
+	else
+	  {
+	    // make sure everything's enabled
+	    if (! tempRow[5].isEnabled())
+	      {
+		tempRow[5].setEnabled(true);
+	      }
+	    
+	  }
+      }
+
+      else 
+	{
+	  // ?? what the heck is it?  
+	}
+
     }
 }
 
@@ -1160,7 +1446,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 class qfieldChoice extends Choice {
   
-  int qRow; // keps track of which row the choice menu is located in
+  int qRow; // keeps track of which row the choice menu is located in
   
   public int getRow()
     {
@@ -1171,14 +1457,32 @@ class qfieldChoice extends Choice {
 
 /*------------------------------------------------------------------------------
                                                                            class 
-                                                                         qChoice
+                                                                     qbaseChoice
 
 ------------------------------------------------------------------------------*/
 
 class qbaseChoice extends Choice {
   
-  int qRow; // keps track of which row the choice menu is located in
+  int qRow; // keeps track of which row the choice menu is located in
   
+  public int getRow()
+    {
+      return qRow;
+    }
+
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                      qaryChoice
+
+------------------------------------------------------------------------------*/
+
+class qaryChoice extends Choice {
+  
+  int qRow; // keeps track of which row the choice menu is located in
+            // (deja vu...)
+ 
   public int getRow()
     {
       return qRow;
