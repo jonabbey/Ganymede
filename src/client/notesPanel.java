@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -168,8 +168,9 @@ public class notesPanel extends JPanel{
       //gbc.gridwidth = 2;
       gbc.gridwidth = GridBagConstraints.REMAINDER;
       gbc.fill = GridBagConstraints.BOTH;
-      gbl.setConstraints(notesArea, gbc);
-      center.add(notesArea);
+      JScrollPane notesScroll = new JScrollPane(notesArea);
+      gbl.setConstraints(notesScroll, gbc);
+      center.add(notesScroll);
 
       if (notes_field != null)
 	{
