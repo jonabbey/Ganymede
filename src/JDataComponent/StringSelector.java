@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2003/01/31 00:27:24 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2003/01/31 00:36:20 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.48 $ $Date: 2003/01/31 00:27:24 $ $Name:  $
+ * @version $Revision: 1.49 $ $Date: 2003/01/31 00:36:20 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -558,15 +558,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	try
 	  {
 	    out.load(available, -1, sortAvailable, availComparator);
-
-	    if (available != null)
-	      {
-		outTitle.setText(org_out.concat(": " + available.size()));
-	      }
-	    else
-	      {
-		outTitle.setText(org_out.concat(": 0"));
-	      }
 	  }
 	catch (Exception e)
 	  {
@@ -578,21 +569,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     try
       {
 	in.load(chosen, -1, sortChosen, chosenComparator);
-
-	if (chosen != null)
-	  {
-	    inTitle.setText(org_in.concat(": " + chosen.size()));
-	  }
-	else
-	  {
-	    inTitle.setText(org_in.concat(": 0"));
-	  }
       }
     catch (Exception e)
       {
 	e.printStackTrace();
 	throw new RuntimeException("Got an exception in in.reload: " + e);
       }
+
+    updateTitles();
   }
 
   /**
@@ -952,6 +936,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    invalidate();
+    parent.validate();
   }
 
   /**
@@ -1115,7 +1101,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		putItemIn(handle);
 		custom.setText("");
-		return;
 	      }
 	  }
 	else  //It's not in the outbox.
@@ -1226,6 +1211,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    invalidate();
+    parent.validate();
   }
 
   public boolean setValuePerformed(JValueObject o)
