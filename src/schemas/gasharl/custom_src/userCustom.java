@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2000/02/01 04:02:56 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2000/02/11 07:10:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1660,6 +1660,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    switch (operation)
 	      {
 	      case ADDELEMENT:
+	      case ADDELEMENTS:
 
 		// ok, no big deal, but we will need to have the client
 		// rescan the choice list for the home group field
@@ -1767,6 +1768,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// returning the wizard's dialog.
 	    
 		return groupWizard.respond(null);
+
+	      case DELELEMENTS:
+
+		// see if any of the values is the home group
+
+		Vector valuesToDelete = (Vector) param1;
+
+		if (!valuesToDelete.contains(getFieldValueLocal(HOMEGROUP)))
+		  {
+		    result = new ReturnVal(true, true);
+		    result.addRescanField(this.getInvid(), HOMEGROUP); // rebuild choice list
+		    groupChoices = null;
+		    return result;
+		  }
+		else
+		  {
+		    return Ganymede.createErrorDialog("User Validation Error",
+						      "Can't remove home group in bulk transfer.");
+		  }
 	      }
 	  }
 

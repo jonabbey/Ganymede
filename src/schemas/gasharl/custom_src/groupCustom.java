@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/08/18 23:48:25 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/02/11 07:10:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -386,6 +386,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	switch (operation) 
 	  {
 	  case ADDELEMENT:
+	  case ADDELEMENTS:
 
 	    if (debug)
 	      {
@@ -394,6 +395,10 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	    // we don't need to rescan anything, do we?
 	    return null;
+
+	  case DELELEMENTS:
+	    return Ganymede.createErrorDialog("Group Validation Error",
+					      "Can't do bulk removal of home group entries right now.");
 
 	  case DELELEMENT:
 
