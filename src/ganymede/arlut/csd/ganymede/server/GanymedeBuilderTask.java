@@ -84,61 +84,96 @@ import arlut.csd.ganymede.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class provides a template for code to be attached to the server to
- * handle propagating data from the Ganymede object store into the wide
- * world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc., through
- * full-state builds.</P>
+ * <P>This class is designed to be subclassed in order to handle
+ * full-state synchronization from the Ganymede server to external
+ * directory service targets.  GanymedeBuilderTask is really only
+ * intended to support directory service targets that are 'dump and
+ * replace' in nature, like NIS and classical DNS.  The reason for
+ * this is that GanymedeBuilderTasks are executed asynchronously with
+ * respect to transaction commits.  By the time a GanymedeBuilderTask
+ * subclass runs, the Ganymede server has forgotten all previous
+ * states of the data in the server.  All the GanymedeBuilderTask can
+ * do is check to see what kinds of objects (Users, Groups, Systems,
+ * etc.) have changed since the last time it was run.  It can also
+ * check to see which fields have been changed, within those object
+ * types.  It cannot check to see whether a particular field in a
+ * specific object has changed, however.  Since there's no way for a
+ * GanymedeBuilderTask to do a before-and-after comparison, all it can
+ * reliably do is to write out absolutely everything relevant to its
+ * synchronization channel, and then hand off the build to an external
+ * process.  If you want to do a more granular, before-and-after
+ * incremental build, you can instead choose to use the more
+ * synchronous {@link arlut.csd.ganymede.server.SyncRunner} class,
+ * which uses a standard XML format to represent changes to external
+ * synchronization processes.</P>
  *
- * <P>Subclasses of GanymedeBuilderTask primarily need to implement
- * the {@link
- * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
- * and {@link
+ * <P>Subclasses of GanymedeBuilderTask need to implement the {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()} and
+ * {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
- * methods.  builderPhase1() is run while a shared {@link
- * arlut.csd.ganymede.server.DBDumpLock} is asserted on {@link
- * arlut.csd.ganymede.server.DBStore DBStore}, guaranteeing a
- * transaction-consistent database state.  builderPhase1() should do
- * whatever is required to write out files or otherwise propagate data
- * out from the database.  If builderPhase1() returns true, the dump
- * lock is released and builderPhase2() is run.  This method is
- * intended to run external scripts and/or code that can process the
- * files/data written out by builderPhase1() without needing the
- * database to remain locked.  The Ganymede server also takes care of
- * showing the builder task's status and progress to the admin console
- * and to the Ganymede clients (the little conveyor belt icon in the
- * lower left corner of the Ganymede graphical client is displayed in
- * reaction to the activity of GanymedeBuilderTask).</P>
+ * methods.  builderPhase1() is run while a {@link
+ * arlut.csd.ganymede.server.DBDumpLock} is asserted on the server's
+ * {@link arlut.csd.ganymede.server.DBStore DBStore}, guaranteeing a
+ * transaction-consistent database state that can be examined.
+ * builderPhase1() should do whatever is required to examine the
+ * database and to determine whether this builder task needs to carry
+ * out a build.  If so, builderPhase1() should write out the data
+ * files that will be needed for builderPhase2() and return true.
+ * When builderPhase1() completes, the dump lock is released.  If
+ * builderPhase1() returns true, the builderPhase2() method is then
+ * run.  This method is intended to run external scripts (typically
+ * written in Perl or Python) that process the files written out by
+ * the builderPhase1() method.</P>
  *
- * <P>All subclasses of GanymedeBuilderTask need to be registered in the Ganymede
- * database via the Task object type.  GanymedeBuilderTasks registered to be
- * run on database commit will automatically be issued by the
- * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} when transactions
- * commit.  The GanymedeScheduler is designed so that it will not re-issue a specific
- * task while a previous instance of the task is still running, so you don't have
- * to worry about builderPhase2() taking a fair amount of time.  builderPhase1() should
- * be as fast as possible, however, as no additional transactions will be able to
- * be committed until builderPhase1() completes.</P>
+ * <P>All subclasses of GanymedeBuilderTask need to be registered in
+ * the Ganymede database via the Task object type.
+ * GanymedeBuilderTasks registered to be run on database commit will
+ * automatically be issued by the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} when
+ * transactions commit.  The GanymedeScheduler is designed so that it
+ * will not re-issue a specific task while a previous instance of the
+ * task is still running, so you don't have to be concerned about
+ * builderPhase2() having its input files overwritten by an
+ * overlapping execution of your builderPhase1() method.  Your
+ * builderPhase1() method should execute and complete as fast as
+ * possible, however, as no transactions can commit while a
+ * builderPhase1() method is executing.  The Ganymede server can
+ * execute overlapping builderPhase1() methods from multiple builder
+ * tasks, however, so you if you have a lot of work to do in a build,
+ * you are free to break your builds up into several discrete builder
+ * tasks, if you like.  This can also reduce your builderPhase2()
+ * latencies, since they will also run in parallel.</P>
  *
  * <p>GanymedeBuilderTask includes a set of helper methods that
  * subclasses can take advantage of in order to facilitate their
  * operation.  The {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short)}
  * method can be used from {@link
- * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
- * to check to see whether objects of a given type have been changed
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()} to
+ * check to see whether objects of a given type have been changed
  * since the builder task was last run.  The {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#getOptionValue(java.lang.String)}
  * method makes it possible for a builder task to retrieve
  * configuration information from the task object in the Ganymede
  * database which links the task into the server's scheduling.  The
  * {@link
- * arlut.csd.ganymede.server.GanymedeBuilderTask#openOutFile(java.lang.String, java.lang.String)}
- * method not only opens files for writing, it takes care to manage the archiving of
- * old versions of the emitted file as needed, if the <code>ganymede.builder.backups</code>
- * property is set to a path for keeping zipped copies of previous builder outputs.  Finally,
- * the {@link arlut.csd.ganymede.server.GanymedeBuilderTask#enumerateObjects(short)}
- * method can be used by builderPhase1() to get an Enumeration of objects of a given type
- * to examine for writing.</p>
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#openOutFile(java.lang.String,
+ * java.lang.String)} method not only opens files for writing, it
+ * takes care to manage the archiving of old versions of the emitted
+ * file as needed, if the <code>ganymede.builder.backups</code>
+ * property is set to a path for keeping zipped copies of previous
+ * builder outputs.  Finally, the {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#enumerateObjects(short)}
+ * method can be used by builderPhase1() to get an Enumeration of
+ * objects of a given type to examine for writing.</p>
+ *
+ * <P>In addition, the GanymedeBuilderTask base class logic is
+ * responsible for interfacing with the rest of the Ganymede server to
+ * display each builder task's status, both in the admin console and
+ * in the client.  The little conveyor belt icon in the lower left
+ * corner of the Ganymede graphical client is controlled by the action
+ * of the GanymedeBuilderTask and SyncRunner objects being run after a
+ * transaction commit.</P>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
