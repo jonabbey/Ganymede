@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/03/25 05:36:46 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/05/27 02:00:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1207,7 +1207,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					  "Can't set a pre-crypted MD5Crypt value into a non-MD5Crypted password field");
       }
 
-    if (!text.startsWith("$1$") || (text.indexOf('$', 3) == -1))
+    if (text != null && (!text.startsWith("$1$") || (text.indexOf('$', 3) == -1)))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "setMD5CryptedPass() called with an improperly " +
