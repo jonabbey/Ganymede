@@ -1,7 +1,25 @@
-Ganymede Release 1.0.6
-August 15, 2001
+Ganymede Release 1.0.7
+August ??, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.6 to 1.0.7 -------------------
+
+RELEASE DATE: August ??, 2001
+
+1. [SERVER] Deleted objects now have all of their fields logged
+
+The Ganymede server has not been logging the status of objects when
+they are deleted, which has made it in some cases impossible to
+determine what was in an object when it was deleted.  In theory,
+today, all objects created in the server will be logged with their
+initial state as well as all changes made, but at ARL we had a great
+deal of objects that were imported using the old 'directLoader' hack,
+without any logging done.
+
+The real advantage to this for other users will not so much be
+for scanning the log file as it will be to make the object deletion
+email more informative.
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
