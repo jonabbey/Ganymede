@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -64,7 +64,7 @@ import java.util.Vector;
 
 /**
  * <P>This class is used to do an ordered insert using a binary search.  
- * It's designed for speed.  Used in the Directory Droid client to efficiently
+ * It's designed for speed.  Used in the Ganymede client to efficiently
  * add new items to the client's object tree.  Uses the
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>

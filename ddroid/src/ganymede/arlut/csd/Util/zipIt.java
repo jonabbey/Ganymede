@@ -2,7 +2,7 @@
 
    zipIt.java
 
-   This utility class allows the Directory Droid server to
+   This utility class allows the Ganymede server to
    conveniently store a bunch of pre-existing files into a zip archive
    for the purposes of backups.
    
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -74,7 +74,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  *
- *  This utility class allows the Directory Droid server to
+ *  This utility class allows the Ganymede server to
  *  conveniently store a bunch of pre-existing files into a zip
  *  archive for the purposes of backups.
  *

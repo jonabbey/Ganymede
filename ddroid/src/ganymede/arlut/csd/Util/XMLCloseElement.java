@@ -3,7 +3,7 @@
 
    XMLCloseElement.java
 
-   The Directory Droid object storage system.
+   The Ganymede object storage system.
 
    Created: 9 March 2000
 
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin

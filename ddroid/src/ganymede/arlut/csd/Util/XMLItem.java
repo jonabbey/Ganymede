@@ -3,7 +3,7 @@
 
    XMLITem.java
 
-   The Directory Droid object storage system.
+   The Ganymede object storage system.
 
    Created: 9 March 2000
 
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -67,7 +67,7 @@ package arlut.csd.Util;
  *
  * <P>This class implements stubs for most of the methods
  * in its subclass {@link arlut.csd.Util.XMLElement XMLElement}, so that
- * the Directory Droid server code can process elements without having to constantly
+ * the Ganymede server code can process elements without having to constantly
  * perform cast operations.  The matches() method returns false unless this
  * XMLItem is actually an XMLElement with the appropriate label,
  * and the matchesClose() method returns false unless this XMLItem is
@@ -213,7 +213,7 @@ public abstract class XMLItem {
 
   /**
    * <P>This method returns the boolean attribute value for attribute
-   * &lt;name&gt;, if any.  For Directory Droid's purposes, an attribute
+   * &lt;name&gt;, if any.  For Ganymede's purposes, an attribute
    * value is true if the attribute is present with a string
    * value of "1".  If this element does not contain
    * an attribute of the given name, false is returned.</P>

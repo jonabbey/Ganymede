@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -76,7 +76,7 @@ import java.util.ResourceBundle;
  * <p>We'd like a way to force all TranslationServices objects to
  * reload their bundles, but Java's ResourceBundle and
  * PropertyResourceBundle classes really don't support that.  It would
- * be nice to be able to cause Directory Droid to reload its
+ * be nice to be able to cause Ganymede to reload its
  * localization strings on demand, rather than forcing a
  * stop/restart, but we'd have to recreate the locale seeking logic
  * for locating and loading the property files to do this.</p>
@@ -204,7 +204,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public String l(String key)
@@ -243,7 +243,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param)
@@ -277,7 +277,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param, Object param2)
@@ -313,7 +313,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param, Object param2, Object param3)
@@ -351,7 +351,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param, Object param2, Object param3, Object param4)
@@ -391,7 +391,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5)
@@ -428,7 +428,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Directory Droid without concern.</p>
+   * Ganymede without concern.</p>
    */
 
   public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5, Object param6)

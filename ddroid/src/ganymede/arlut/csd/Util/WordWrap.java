@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -64,7 +64,7 @@ package arlut.csd.Util;
  * {@link arlut.csd.Util.WordWrap#wrap(java.lang.String, int, java.lang.String) wrap()}
  * method for word-wrapping text strings.</P>
  *
- * <P>Used in the Directory Droid client and server for utilitarian word-wrapping.</P>
+ * <P>Used in the Ganymede client and server for utilitarian word-wrapping.</P>
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 

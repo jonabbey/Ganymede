@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -71,7 +71,7 @@ import java.util.Stack;
  * the named item will also be popped.</p>
  *
  * <p>That is, NamedStack is basically a Stack that supports rollback to a named
- * state.  It is used in the Directory Droid server to support checkpoint operations.</p>
+ * state.  It is used in the Ganymede server to support checkpoint operations.</p>
  *
  * <p>NamedStack does not require that names of pushed items be unique.  A pop
  * operation will simply pop up to the last item matching the given name off

@@ -3,7 +3,7 @@
 
    XMLUtils.java
 
-   The Directory Droid object storage system.
+   The Ganymede object storage system.
 
    Created: 21 February 2000
 
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -66,7 +66,7 @@ import com.jclark.xml.output.XMLWriter;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class contains various methods that assist the Directory Droid server
+ * <P>This class contains various methods that assist the Ganymede server
  * in reading or writing XML files.</P>
  */
 
@@ -121,7 +121,7 @@ public class XMLUtils {
   /**
    * <P>This is a helper method which undoes the effects of the
    * {@link arlut.csd.Util.XMLUtils#XMLEncode(java.lang.String) XMLEncode} method,
-   * which is used to encode all element names in the Directory Droid server.  Any
+   * which is used to encode all element names in the Ganymede server.  Any
    * pair of subsequent underscores will be replaced in the returned String
    * with a single underscore.  Any single underscore will be replaced with
    * a space.</P>

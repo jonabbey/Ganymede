@@ -3,7 +3,7 @@
 
    XMLReader.java
 
-   The Directory Droid object storage system.
+   The Ganymede object storage system.
 
    Created: 7 March 2000
 
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -75,7 +75,7 @@ import org.xml.sax.SAXParseException;
 
 /**
  * <P>This class is intended to serve as a stream-oriented pull proxy, allowing
- * the Directory Droid server to read XML entity and character data from a SAX parser
+ * the Ganymede server to read XML entity and character data from a SAX parser
  * entity by entity, rather than through the use of a callback interface, as is
  * traditionally done with SAX.</P>
  *

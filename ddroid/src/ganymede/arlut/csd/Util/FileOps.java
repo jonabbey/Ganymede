@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -202,7 +202,7 @@ public class FileOps {
   }
 
   /**
-   * <P>This method is used to run an external process line for the Directory Droid
+   * <P>This method is used to run an external process line for the Ganymede
    * server.  This method waits until the external command completes before
    * returning, and all file handles opened to communicate with the
    * process will be closed before returning.</P>

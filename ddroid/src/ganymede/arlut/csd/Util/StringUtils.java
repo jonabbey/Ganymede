@@ -13,7 +13,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -60,7 +60,7 @@ package arlut.csd.Util;
 
 /**
  * <P>This class contains a variety of utility String manipulating static 
- * methods for use in Directory Droid.</P>
+ * methods for use in Ganymede.</P>
  */
 
 public class StringUtils {
