@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.88 $ %D%
+   Version: $Revision: 1.89 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.88 $ %D%
+ * @version $Revision: 1.89 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1574,10 +1574,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    root = null;
 	  }
 
+	// the list of objects we return is intended to be ones that
+	// could actually be linked to the object presenting the
+	// list..  we need to check to see if we are allowed to do
+	// linking outside of the bounds of general object editability..
+
+	DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
+
+	boolean editOnly = !targetBase.getObjectHook().anonymousLinkOK(this, field.getID(), this.gSession);
+
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
 
-	return editset.getSession().getGSession().query(new Query(baseId, root, true), this);
+	return editset.getSession().getGSession().query(new Query(baseId, root, editOnly), this);
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
