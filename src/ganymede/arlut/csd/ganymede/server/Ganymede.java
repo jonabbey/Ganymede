@@ -277,7 +277,6 @@ public class Ganymede {
   public static String journalProperty = null;
   public static String logProperty = null;
   public static String mailLogProperty = null;
-  public static String htmlProperty = null;
   public static String serverHostProperty = null;
   public static String rootname = null;
   public static String defaultrootpassProperty = null;
@@ -1433,7 +1432,6 @@ public class Ganymede {
     journalProperty = System.getProperty("ganymede.journal");
     logProperty = System.getProperty("ganymede.log");
     mailLogProperty = System.getProperty("ganymede.maillog");
-    htmlProperty = System.getProperty("ganymede.htmldump");
     serverHostProperty = System.getProperty("ganymede.serverhost");
     rootname = System.getProperty("ganymede.rootname");
     defaultrootpassProperty = System.getProperty("ganymede.defaultrootpass");
@@ -1499,12 +1497,6 @@ public class Ganymede {
     if (logProperty == null)
       {
 	System.err.println(ts.l("loadProperties.no_log"));
-	success = false;
-      }
-
-    if (htmlProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_html"));
 	success = false;
       }
 

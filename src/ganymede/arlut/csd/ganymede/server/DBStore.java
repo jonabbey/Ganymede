@@ -900,19 +900,6 @@ public final class DBStore implements JythonMap {
 	// up and handle things cleanly without loss of data.
 
 	new File(filename + ".new").renameTo(dbFile);
-
-	// and dump the schema out in a human readable form.. note
-	// that this is far less critical than all of the above,
-	// so if we get an exception above we won't worry about
-	// completing this part.
-	
-	if (Ganymede.htmlProperty != null)
-	  {
-	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
-	    textOut = new PrintWriter(textOutStream);
-		
-	    printCategoryTreeHTML(textOut);
-	  }
       }
     catch (IOException ex)
       {
@@ -1236,63 +1223,6 @@ public final class DBStore implements JythonMap {
 	if (outStream != null)
 	  {
 	    outStream.close();
-	  }
-      }
-  }
-
-  /** 
-   * <p>Dumps an HTML representation of this database's category
-   * hierarchy, starting at the root 
-   * {@link arlut.csd.ganymede.server.DBBaseCategory DBBaseCategory}.</p>
-   *
-   * @param out PrintStream to print to 
-   */
-
-  public synchronized void printCategoryTreeHTML(PrintWriter out)
-  {
-    out.println("<HTML><HEAD><TITLE>Ganymede Schema Dump -- " + new Date() + "</TITLE></HEAD>");
-    out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Ganymede Schema Dump -- " + new Date() + "</H1>");
-    out.println("<HR>");
-
-    rootCategory.printHTML(out);
-
-    out.println("<HR>");
-    out.println("Emitted: " + new Date());
-    out.println("</BODY>");
-  }
-
-  /** 
-   * <p>Dumps a text representation of this database's category
-   * hierarchy, starting at the root 
-   * {@link arlut.csd.ganymede.server.DBBaseCategory DBBaseCategory}.</p>
-   *
-   * @param out PrintStream to print to 
-   */
-
-  public synchronized void printCategoryTree(PrintWriter out)
-  {
-    rootCategory.print(out, "");
-  }
-
-  /**
-   * <p>Do a printable dump of the object databases</p>
-   *
-   * @param out PrintStream to print to
-   */
-
-  public void printBases(PrintWriter out)
-  {
-    Enumeration en;
-
-    /* -- */
-
-    synchronized (objectBases)
-      {
-	en = objectBases.elements();
-	
-	while (en.hasMoreElements())
-	  {
-	    ((DBObjectBase) en.nextElement()).print(out, "");
 	  }
       }
   }

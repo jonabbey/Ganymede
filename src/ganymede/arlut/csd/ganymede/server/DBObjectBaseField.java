@@ -64,6 +64,7 @@ import java.util.Enumeration;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.FieldTemplate;
@@ -109,6 +110,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   static final ReturnVal warning2 = genWarning2();
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBObjectBaseField");
 
   /**
    * Object type definition for the database object class we are member of
@@ -5215,253 +5223,6 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       }
   }
 
-  /**
-   * <p>This method is intended to produce a human readable
-   * representation of this field definition's type attributes.  This
-   * method should not be used programatically to determine this
-   * field's type information.</p>
-   *
-   * <p>This method is only for human elucidation, and the precise
-   * results returned are subject to change at any time.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField 
-   */
-
-  public String getTypeDescHTML()
-  {
-    String result;
-
-    switch (field_type)
-      {
-      case BOOLEAN:
-	result = "<td>boolean</td>";
-	break;
-
-      case NUMERIC:
-	result = "<td>numeric</td>";
-	break;
-
-      case FLOAT:
-	result = "<td>float</td>";
-	break;
-
-      case FIELDOPTIONS:
-	result = "<td>field options</td>";
-	break;
-
-      case DATE:
-	result = "<td>date</td>";
-	break;
-
-      case STRING:
-	result = "<td>string</td>";
-	break;
-
-      case INVID:
-	result = "<td>invid</td>";
-	break;
-
-      case PERMISSIONMATRIX:
-	result = "<td>permission matrix</td>";
-	break;
-
-      case PASSWORD:
-	result = "<td>password</td>";
-	break;
-
-      case IP:
-	result = "<td>i.p. field</td>";
-	break;
-
-      default:
-	result = "<td>&lt;&lt;bad type code: " + field_type + " &gt;&gt;</td>";
-      }
-
-    if (array)
-      {
-	result += "<td>[0.." + limit + "]</td>";
-      }
-    else
-      {
-	result += "<td><FONT COLOR=\"#FF0000\">N</font></td>";
-      }
-
-    if (namespace != null)
-      {
-	result += "<td>" + namespace.getName() + "</td>";
-      }
-    else
-      {
-	result += "<td><FONT COLOR=\"#FF0000\">N</font></td>";
-      }
-
-    // generate the notes field
-
-    result += "<td>";
-
-    switch (field_type)
-      {
-      case STRING:
-
-	result += "min: " + minLength + ", max: " + maxLength;
-
-	if (okChars != null)
-	  {
-	    result += " okChars: '" + okChars + "'";
-	  }
-
-	if (badChars != null)
-	  {
-	    result += " badChars: '" + badChars + "'";
-	  }
-
-	if (regexpPat != null)
-	  {
-	    result += " regexpPat: '" + regexpPat + "'";
-	  }
-	
-	break;
-	
-      case INVID:
-
-	if (editInPlace)
-	  {
-	    result += "edit-in-place ";
-	  }
-
-	if (allowedTarget >= 0)
-	  {
-	    DBObjectBase refBase;
-
-	    refBase = base.store.getObjectBase(allowedTarget);
-
-	    if (refBase == null)
-	      {
-		result += "targets [INVALID OBJECT TYPE]";
-	      }
-	    else
-	      {
-		result += "targets [" + refBase.getName() + "] ";
-
-		if (targetField != -1)
-		  {
-		    try
-		      {
-			result += "reverse link [" + refBase.getField(targetField).getName() + "] ";
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("caught remote: " + ex);
-		      }
-		    catch (NullPointerException ex)
-		      {
-			System.err.println("Error, " + this.toString() +
-					   " couldn't lookup targetField (" + 
-					   targetField + ")");
-			System.err.println("In base " + base.toString());
-			System.err.println(ex.getMessage());
-		      }
-		  }
-	      }
-	  }
-	else if (allowedTarget == -1)
-	  {
-	    result += "targets [any]";
-	  }
-	else if (allowedTarget == -2)
-	  {
-	    result += "targets [any] ";
-
-	    // if allowed Target == -2 and targetField != -1, we assume
-	    // that we've got a field that's guaranteed to be present in
-	    // all bases, including our parent.
-	    
-	    if (targetField != -1)
-	      {
-		try
-		  {
-		    result += "reverse link [" + base.getField(targetField).getName() + "] ";
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
-	      }
-
-	  }
-	break;
-
-      case PASSWORD:
-
-	if (crypted)
-	  {
-	    result += "crypted";
-	  }
-
-	if (md5crypted)
-	  {
-	    result += " md5crypted";
-	  }
-
-	if (winHashed)
-	  {
-	    result += " winhashed";
-	  }
-
-	if (sshaHashed)
-	  {
-	    result += " ssha hashed";
-	  }
-
-	if (storePlaintext)
-	  {
-	    result += " plaintext";
-	  }
-
-	break;
-
-      default:
-	break;
-      }
-    
-    result += "</td>";
-    return result;
-  }
-
-  /**
-   * <p>This method is used when the Ganymede server dumps its schema.
-   * It prints an HTML description of this field type to the PrintWriter
-   * specified.</p>
-   *
-   * <p>This method was written in concert with the other DBStore objects'
-   * printHTML methods, and assumes that it will be run in the context
-   * of the full DBStore.printCategoryTreeHTML() method.</p>
-   */
-
-  public void printHTML(PrintWriter out)
-  {
-    out.print("<td>" + field_name + "</td><td>" + field_code + "</td>");
-    out.print(getTypeDescHTML());
-    out.println();
-  }
-
-  /**
-   * <p>This method is used when the Ganymede server dumps its schema.
-   * It prints an ASCII description of this field type to the PrintWriter
-   * specified.</p>
-   *
-   * <p>This method was written in concert with the other DBStore objects'
-   * print methods, and assumes that it will be run in the context
-   * of the full DBStore.printBases() method.</p>
-   */
-
-  public void print(PrintWriter out, String indent)
-  {
-    out.print(indent + field_name + "(" + field_code + "):");
-    out.print(indent + getTypeDesc());
-    out.println();
-  }
-
   public String toString()
   {
     return base.getName() + ":" + field_name;
@@ -5470,16 +5231,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   private static ReturnVal genWarning1()
   {
     ReturnVal retVal = new ReturnVal(true);
-    retVal.setDialog(new JDialogBuff("Schema Editor",
-				     "The requested change in this field's " +
-				     "allowed options has been made " +
-				     "and will be put into effect if you commit " +
-				     "your schema change.\n\n" +
-				     "This schema change will only affect new values " +
-				     "entered into this field in the database.  Pre-existing " +
-				     "fields of this kind in the database may or may not " +
-				     "satisfy your new constraint.",
-				     "OK",
+
+    // "Schema Editor"
+    //
+    // "The requested change in this field's allowed options has been made and will be put into effect if you commit your schema change.
+    //
+    // This schema change will only affect new values entered into this field in the database.  Pre-existing fields of this kind in
+    // the database may or may not satisfy your new constraint."
+    //
+
+    retVal.setDialog(new JDialogBuff(ts.l("genWarning1.title"),
+				     ts.l("genWarning1.text"),
+				     ts.l("genWarning1.ok"), // "OK"
 				     null,
 				     "ok.gif"));
 
@@ -5489,16 +5252,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   private static ReturnVal genWarning2()
   {
     ReturnVal retVal = new ReturnVal(true);
-    retVal.setDialog(new JDialogBuff("Schema Editor",
-				     "The requested change in this field's " +
-				     "allowed options has been made " +
-				     "and will be put into effect if you commit " +
-				     "your schema change.\n\n" +
-				     "Because this schema change is being made while " +
-				     "there are fields of this type active in the database, there " +
-				     "may be a chance that this change will affect database " +
-				     "consistency.",
-				     "OK",
+
+    // "Schema Editor"
+    //
+    // "The requested change in this field's allowed options has been made and will be put into effect if you commit your schema change.
+    //
+    // Because this schema change is being made while there are fields of this type active in the database, there may be a chance
+    // that this change will affect database consistency."
+    //
+
+    retVal.setDialog(new JDialogBuff(ts.l("genWarning2.title"),
+				     ts.l("genWarning2.text"),
+				     ts.l("genWarning2.ok"),
 				     null,
 				     "ok.gif"));
 
