@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -240,7 +240,7 @@ public class NumericDBField extends DBField implements num_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -265,7 +265,7 @@ public class NumericDBField extends DBField implements num_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -290,7 +290,7 @@ public class NumericDBField extends DBField implements num_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -317,12 +317,6 @@ public class NumericDBField extends DBField implements num_field {
     Integer I;
 
     /* -- */
-
-    if (!isEditable())
-      {
-	setLastError("Not editable");
-	return false;
-      }
 
     eObj = (DBEditObject) owner;
 

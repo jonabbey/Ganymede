@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -580,8 +580,9 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    *
    * This method is used to set a pre-crypted password for this field.
-   * This method will return false if this password field is not
-   * stored crypted.
+   *
+   * This method will return an error dialog if this field does not store
+   * passwords in UNIX crypted format.
    *
    * @see arlut.csd.ganymede.pass_field
    *
@@ -645,7 +646,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	return false;
       }

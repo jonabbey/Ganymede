@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -261,7 +261,7 @@ public class DateDBField extends DBField implements date_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -289,7 +289,7 @@ public class DateDBField extends DBField implements date_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -317,7 +317,7 @@ public class DateDBField extends DBField implements date_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
@@ -347,7 +347,7 @@ public class DateDBField extends DBField implements date_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	return false;
       }

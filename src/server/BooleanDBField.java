@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -279,7 +279,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	return false;
       }
