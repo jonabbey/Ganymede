@@ -762,6 +762,11 @@ public final class DBNameSpace implements NameSpace {
 		handle.inuse = true;
 		handle.setShadowField(field);
 
+		if (handle.getShadowFieldB() != null)
+		  {
+		    throw new RuntimeException("ASSERT: shadowFieldB() set on !inuse");
+		  }
+
 		if (handle.owner == null)
 		  {
 		    handle.owner = editSet;
@@ -1100,7 +1105,7 @@ public final class DBNameSpace implements NameSpace {
 		// necessary to complete the speculative namespace
 		// shuffle.
 
-		throw new RuntimeException("ASSERT BLARGH");
+		throw new RuntimeException("ASSERT unmarking another transaction's value");
 
 		//		return false;
 	      }
@@ -1139,6 +1144,11 @@ public final class DBNameSpace implements NameSpace {
 		      }
 		    else if (handle.getShadowFieldB() != null)
 		      {
+			if (!handle.inuse)
+			  {
+			    throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
+			  }
+
 			handle.setShadowField(handle.getShadowFieldB());
 			handle.setShadowFieldB(null);
 		      }
@@ -1154,7 +1164,7 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    throw new RuntimeException("ASSERT YICK!");
+    throw new RuntimeException("ASSERT unmarking an unmarked value!");
 
     //    return false;
   }
