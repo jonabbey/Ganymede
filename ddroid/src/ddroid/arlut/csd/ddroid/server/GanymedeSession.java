@@ -2995,8 +2995,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (query == null)
       {
-	setLastError("null query");
-	return null;
+	throw new IllegalArgumentException(ts.l("queryDispatch.null_query"));
       }
 
     // objectType will be -1 if the query is specifying the
