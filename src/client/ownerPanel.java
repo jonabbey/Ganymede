@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -227,7 +227,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     
     if (succeeded)
       {
-	fp.getgclient().somethingChanged = true;
+	fp.getgclient().somethingChanged();
       }
     
     return succeeded;
