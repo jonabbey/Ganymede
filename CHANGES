@@ -96,7 +96,7 @@ plaintext password capture logic has been disabled.
 The Ganymede server will now explicitly report a permissions problem
 when an attempt is made to link to an uneditable object.
 
-6. [SERVER] Re-enabled mailout event logging
+6. [SERVER] Re-enabled optional mailout event logging
 
 I had disabled logging of mailout events, to keep the Ganymede log
 from being flooded by non-critical email sent out by the Ganymede
@@ -175,7 +175,7 @@ commands.
 This change was made in response to a comment by Gaurav Bhargava at
 Villanova University.
 
-12. [SERVER] Fixed slight inconsistency in object change logging
+12. [SERVER] Fixed slight inconsistency in object link logging
 
 The Ganymede server's logging and email notification logic had a small
 inconsistency in it.  When logging changes to invid (object reference)
@@ -306,7 +306,8 @@ continuing to try and call data loading methods on the server after
 the client's main GUI thread had already cancelled the transaction,
 which could cause the server to throw an exception down to the client.
 
-This change just serializes transaction cancellation a bit better.
+This change just serializes transaction cancellation on the client
+side a bit better.
 
 15. [CLIENT, ADMIN CONSOLE] Miscellaneous GUI cleanups, improvements
 
@@ -357,6 +358,42 @@ The login box will now properly terminate the JVM if the close window
 button is used.
 
 This is in response to a bug report by Gil Kloepfer.
+
+18. [SERVER] Cleanups and refinements to transaction commit handling
+
+The transaction commit() method code in DBEditSet has been radically
+reworked.  The biggest part of this reworking is a simple refactoring
+to make the code far simpler to read, but a number of reliability
+improvements were made in the process, and a few extremely unlikely
+yet nonetheless possible security race conditions were fixed.
+
+19. [SERVER] Slight API change for DBEditObject subclasses
+
+Previously, the DBEditObject class held a 'committing' boolean flag
+that needed to be set and cleared in specific methods in order to
+coordinate field locking during the transaction commit process.
+
+The problem is that access to this boolean flag was unsynchronized,
+making it possible in theory for a system running the Ganymede server
+with multiple threads on multiple CPU's to allow changes to be made to
+fields after the commit process has started for a given object.
+
+This race condition is extremely unlikely, as it would depend on a
+system having a non-coherent memory access model in the absence of
+specific object synchronization, but the Java Language Specification
+does allow for such implementations.
+
+In any case, the committing boolean has been replaced by an
+arlut.csd.Util.booleanSemaphore object, and made private.  Subclasses
+of DBEditObject which override commitPhase1() and/or release() should
+now use the DBEditObject setCommitting() method to set or clear that
+flag.
+
+None of the custom object plugins or schema kits that we have provided
+overrided those two methods, so I think it'll be unlikely that this
+API change will affect people, but if you are not able to recompile
+your schema kit and/or plugins with this version of the server, you
+may need to look at this issue.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
