@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2002/05/31 23:54:40 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2002/08/02 08:52:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1262,7 +1262,7 @@ public class DBEditSet {
 	    // go ahead and commit the rest of the objects,
 	    // since we may already have done external actions
 	    // through other objects that have already had
-	    // their commitPhase2() methods called
+	    // their commitPhase2() methods called.
 
 	    // just show the trace, don't throw it up
 
@@ -2149,8 +2149,6 @@ public class DBEditSet {
 	  }
       }
   }
-
-
 }
 
 /*------------------------------------------------------------------------------

@@ -7,8 +7,8 @@
 
    Created: 15 March 2002
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2002/03/15 22:43:06 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2002/08/02 08:52:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -301,9 +301,6 @@ public class DBSessionLockManager {
    * This method will not force a lock being held by another thread to
    * drop out of its establish method.. it is intended to be called by
    * the same thread that established the lock.</P>
-   *
-   * <P>This method must be synchronized to avoid conflicting with
-   * iterations on lockVect.</P>
    */
 
   public synchronized void releaseLock(DBLock lock)
@@ -320,11 +317,6 @@ public class DBSessionLockManager {
   /**
    * <P>releaseAllLocks() releases all locks held by this
    * session.</P>
-   *
-   * <P>This method is *not* synchronized.  This method must
-   * only be called by code synchronized on this DBSession
-   * instance, as for instance {@link arlut.csd.ganymede.DBSession#logout() logout()}
-   * and {@link arlut.csd.ganymede.DBSession#commitTransaction() commitTransaction()}.</P>
    */
 
   public synchronized void releaseAllLocks()

@@ -50,6 +50,24 @@ internalQuery() in non-supergash sessions explicitly turn off the
 editableOnly restriction.  This involved some changes in the
 schemas/gasharl/custom_src code.
 
+5. [SERVER] Modified DBObject.checkRequiredFields() to check all fields
+
+The checkRequiredFields() method in DBObject was only checking the
+custom-specified fields, rather than all fields.  This made it
+impossible for a DBEditObject plugin's fieldRequired() method to
+enforce field requirements for the expiration and removal fields.
+
+6. [SERVER] Optimized XMLReader slightly
+
+Reworked the XMLReader to use an efficient circular buffer for the XML
+data elements scanned, rather than continually doing System.arraycopy
+operations within a Vector.  Probably won't make a noticeable
+difference, but after seeing Doug Lea's optimized concurrency
+structures (at
+http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html),
+I felt like tinkering.  At best, this might be able to speed up
+xmlclient operations (very) marginally.
+
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 
 RELEASE DATE: April 2, 2002
