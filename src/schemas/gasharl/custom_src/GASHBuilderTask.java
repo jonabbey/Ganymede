@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2004/01/31 05:50:54 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2004/01/31 06:53:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1164,19 +1164,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    members.clear();
 	    unionizeMembers(netgroup, members);
-	    users = members.elements();
 
-	    writer.print(name);
-
-	    while (users.hasMoreElements())
+	    if (members.size() > 0)
 	      {
-		name = (String) users.nextElement();
-
-		writer.print(" ");
 		writer.print(name);
-	      }
 
-	    writer.println();
+		users = members.elements();
+
+		while (users.hasMoreElements())
+		  {
+		    name = (String) users.nextElement();
+		    
+		    writer.print(" ");
+		    writer.print(name);
+		  }
+		
+		writer.println();
+	      }
 	  }
       }
     finally
@@ -1207,20 +1211,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    users = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
     memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+    users = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
 
-    for (int i = 0; i < users.size(); i++)
+    if (users != null)
       {
-	ref = (Invid) users.elementAt(i);
-	member = getLabel(ref);
-	hash.put(member, member);
+	for (int i = 0; i < users.size(); i++)
+	  {
+	    ref = (Invid) users.elementAt(i);
+	    member = getLabel(ref);
+	    hash.put(member, member);
+	  }
       }
 
-    for (int i = 0; i < memberNetgroups.size(); i++)
+    if (memberNetgroups != null)
       {
-	subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
-	unionizeMembers(subNetgroup, hash);
+	for (int i = 0; i < memberNetgroups.size(); i++)
+	  {
+	    subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
+	    unionizeMembers(subNetgroup, hash);
+	  }
       }
   }
 
