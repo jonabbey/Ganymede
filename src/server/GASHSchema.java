@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2000/11/23 02:35:53 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2000/12/03 12:00:16 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -108,7 +108,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     nodeAfterCategories,
     namespaces;			// top-level node for namespace listing
 
-  java.awt.MenuItem
+  javax.swing.JMenuItem
     createCategoryMI = null,
     deleteCategoryMI = null,
     createObjectMI = null,
