@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/03/27 12:27:42 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 1999/03/29 22:56:28 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -236,7 +236,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * in this window
    * @param editable if true, the object will be presented as editable
    * @param objectType Used for the title of the new window
-   *
    */
 
   public void addWindow(db_object object, boolean editable, String objectType)
@@ -253,7 +252,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param editable if true, the object will be presented as editable
    * @param objectType Used for the title of the new window
    * @param isNewlyCreated if true, this window will be a 'create object' window.
-   *
    */
 
   public void addWindow(db_object object, boolean editable, String objectType, boolean isNewlyCreated)

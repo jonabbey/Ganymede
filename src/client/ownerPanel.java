@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:04:17 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/03/29 22:56:27 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -60,21 +60,51 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
+/**
+ * <p>GUI panel for displaying the list of owners for a given object in
+ * the client.  This panel is created in association with the "Owners"
+ * tab in framePanel.</p>
+ *
+ * @version $Revision: 1.24 $ $Date: 1999/03/29 22:56:27 $ $Name:  $
+ * @author Mike Mulvaney
+ */
+
 public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
-  boolean debug = true;
+  boolean debug = false;
+
+  /**
+   * If true, we'll allow attempts to edit the owner list for this object.
+   */
 
   boolean
     editable;
 
+  /**
+   * Reference to an object's owners field on the server.
+   */
+
   invid_field
     field;
+
+  /**
+   * Object window we're contained in.
+   */
 
   framePanel
    fp;
 
+  /**
+   * Reference to the client's gclient object, used for utility code.
+   */
+
   gclient
     gc;
+
+  /**
+   * Panel to hold our working guy image while we download information from
+   * the server.
+   */
 
   JPanel
     holdOnPanel;
@@ -88,7 +118,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     this.fp = fp;
 
     gc = fp.wp.gc;
-    debug = gc.debug;
+
+    if (!debug)
+      {
+	debug = gc.debug;
+      }
 
     if (debug)
       {
@@ -238,18 +272,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     JPopupMenu invidTablePopup = new JPopupMenu();
     JMenuItem viewO = new JMenuItem("View object");
     JMenuItem editO = new JMenuItem("Edit object");
-    JMenuItem createO = new JMenuItem("Create new Object");
     invidTablePopup.add(viewO);
     invidTablePopup.add(editO);
-    invidTablePopup.add(createO);
 
     JPopupMenu invidTablePopup2 = new JPopupMenu();
     JMenuItem viewO2 = new JMenuItem("View object");
     JMenuItem editO2 = new JMenuItem("Edit object");
-    JMenuItem createO2 = new JMenuItem("Create new Object");
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(editO2);
-    invidTablePopup2.add(createO2);
 
     // We don't want the supergash owner group to show up anywhere,
     // because everything is owned by supergash.
@@ -361,94 +391,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		
 	    retVal = null;
 	  }
-	else if (command.equals("Create new Object"))
-	  {
-	    String label = null;
-
-	    try
-	      {
-		short type = field.getTargetBase();
-		db_object obj = gc.createObject(type, false);
-		    
-		// Find the label field.
-		db_field f = obj.getLabelField();
-
-		if ((f != null) && (f instanceof string_field))
-		  {
-		    if (debug)
-		      {
-			System.out.println("Going to get label for this object.");
-		      }
-
-		    // Set up a label for this object.
-
-		    DialogRsrc r = new DialogRsrc(gc, "Choose Label for Object", 
-						  "What would you like to name this object?",
-						  "Ok", null);
-		    r.addString("Label:");
-		    
-		    StringDialog d = new StringDialog(r);
-		    Hashtable result = d.DialogShow();
-		    ReturnVal setLabel = f.setValue((String)result.get("Label:"));
-		    
-		    // wizard?
-		    
-		    setLabel = gc.handleReturnVal(setLabel);
-		    
-		    if ((setLabel == null) || setLabel.didSucceed())
-		      {
-			label = (String)result.get("Label:");
-			
-			if (debug)
-			  {
-			    System.out.println("The set label worked!");
-			  }
-		      }
-		    else
-		      {
-			if (debug)
-			  {
-			    System.out.println("set label failed!!!!");
-			  }
-		      }
-		  }
-		
-		Invid invid = obj.getInvid();
-		retVal = field.addElement(invid);
-		
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
-		    
-		gc.showNewlyCreatedObject(obj, invid, new Short(type));
-		    
-		if ((retVal == null) || retVal.didSucceed())
-		  {
-		    if (debug)
-		      {
-			System.out.println("--Adding it to the StringSelector");
-		      }
-			
-		    if (label == null)
-		      {
-			((StringSelector)v.getSource()).addNewItem(new listHandle("New item", invid), true);
-		      }
-		    else
-		      {
-			((StringSelector)v.getSource()).addNewItem(new listHandle(label, invid), true);
-		      }
-		  }
-		else
-		  {
-		    System.out.println("--Something went wrong, so I am NOT adding it to the StringSelector");
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Exception creating new object from SS menu: " + rx);
-	      }
-	  }	    
 	else
 	  {
 	    System.out.println("Unknown action command from popup: " + command);

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.144 $
-   Last Mod Date: $Date: 1999/03/25 08:17:06 $
+   Version: $Revision: 1.145 $
+   Last Mod Date: $Date: 1999/03/29 22:56:26 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -79,7 +79,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * is run and a user logs in to the server, a single instance of this class
  * is created to handle all client GUI and networking operations for the user.</p>
  *
- * @version $Revision: 1.144 $ $Date: 1999/03/25 08:17:06 $ $Name:  $
+ * @version $Revision: 1.145 $ $Date: 1999/03/29 22:56:26 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -948,7 +948,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     try
       {
 	ReturnVal rv = session.openTransaction("gclient");
-	handleReturnVal(rv);
+	rv = handleReturnVal(rv);
 
 	if ((rv != null) && (!rv.didSucceed()))
 	  {
@@ -1065,7 +1065,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
   
   /**
-   * <p>Returns a vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s.</p>
+   * <p>Returns a vector of 
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s.</p>
    *
    * @param id Object type id to retrieve field information for.
    */
@@ -1076,7 +1077,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s
+   * <p>Returns a vector of 
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s
    * listing fields and field informaton for the object type identified by 
    * id.</p>
    *
@@ -1120,9 +1122,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Clears out the client's {@link arlut.csd.ganymede.client.objectCache objectCache},
-   * which holds object labels, and activation status for invid's returned by various
-   * query and {@link arlut.csd.ganymede.db_field db_field} choices() operations.</p>
+   * <p>Clears out the client's 
+   * {@link arlut.csd.ganymede.client.objectCache objectCache},
+   * which holds object labels, and activation status for invid's returned 
+   * by various query and {@link arlut.csd.ganymede.db_field db_field} 
+   * choices() operations.</p>
    */
 
   public void clearCaches()
@@ -1136,9 +1140,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Clears out all the cached data structures refering to bases.  We need to clear these when our
-   * persona changes, as different personas may have a different list of visible bases.</p>
-   *
+   * <p>Clears out all the cached data structures refering to bases.  We 
+   * need to clear these when our persona changes, as different personas
+   * may have a different list of visible bases.</p>
    */
 
   public void clearLoaderLists()
@@ -1155,7 +1159,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>This method supports client-side caching.. if the list required
    * has already been retrieved, the cached list will be returned.  If
    * it hasn't, getObjectList() will get the list from the server and
-   * save a local copy in an {@link arlut.csd.ganymede.client.objectCache objectCache}
+   * save a local copy in an 
+   * {@link arlut.csd.ganymede.client.objectCache objectCache}
    * for future requests.</p>
    */
 
@@ -1253,7 +1258,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>Loads and returns the error Image for use in client dialogs.</p>
    * 
-   * <p>Once the image is loaded, it is cached for future calls to getErrorImage().</p>
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().</p>
    */
 
   public final Image getErrorImage()
@@ -1269,7 +1275,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>Loads and returns the question-mark Image for use in client dialogs.</p>
    * 
-   * <p>Once the image is loaded, it is cached for future calls to getQuestionmage().</p>
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getQuestionmage().</p>
    */
 
   public final Image getQuestionImage()
@@ -1754,8 +1761,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * ultimate result.</p>
    */
 
-  public ReturnVal handleReturnVal(ReturnVal retVal)
+  public synchronized ReturnVal handleReturnVal(ReturnVal retVal)
   {
+    Hashtable dialogResults;
+
+    /* -- */
+
     if (debug)
       {
 	System.err.println("** gclient: Entering handleReturnVal");
@@ -1791,14 +1802,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    System.err.println("** gclient: displaying dialog");
 	  }
 
-	setNormalCursor();
-
-	// display the Dialog sent to us by the server, get the
-	// result of the user's interaction with it.
-
-	Hashtable result = dialog.DialogShow();
-
 	setWaitCursor();
+
+	try
+	  {
+	    // display the Dialog sent to us by the server, get the
+	    // result of the user's interaction with it.
+	    
+	    dialogResults = dialog.DialogShow();
+	  }
+	finally
+	  {
+	    setNormalCursor();
+	  }
 
 	if (debug)
 	  {
@@ -1811,12 +1827,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      {
 		if (debug)
 		  {
-		    System.out.println("Sending result to callback: " + result);
+		    System.out.println("Sending result to callback: " + dialogResults);
 		  }
 
 		// send the dialog results to the server
 
-		retVal = retVal.getCallback().respond(result);
+		retVal = retVal.getCallback().respond(dialogResults);
 
 		if (debug)
 		  {
@@ -1848,19 +1864,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Check for objects that need to be rescanned
 
-    if (retVal == null)
+    if (retVal == null || !retVal.doRescan())
       {
 	return retVal;
       }
 
     if (debug)
       {
-	System.err.println("** gclient: rescan dump: " +retVal.dumpRescanInfo());
-      }
-
-    if (!retVal.doRescan())
-      {
-	return retVal;
+	System.err.println("** gclient: rescan dump: " + retVal.dumpRescanInfo());
       }
 
     Vector objects = retVal.getRescanObjectsList();
@@ -1916,8 +1927,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		    System.out.println("Checking framePanel: " + fp.getTitle());
 		  }
 
-		// Loop over each containerPanel in the framePanel window.. there
-		// may be more than one due to embedded objects
+		// Loop over each containerPanel in the framePanel
+		// window.. there may be more than one due to embedded
+		// objects
 
 		for (int i = 0; i < fp.containerPanels.size(); i++)
 		  {
@@ -1926,14 +1938,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		    if (debug)
 		      {
 			System.out.println("Checking containerPanel number " + i);
-			System.out.println("  cp.invid= " + cp.getObjectInvid() + " lookng for: " + invid);
+			System.out.println("  cp.invid= " + cp.getObjectInvid() + 
+					   " lookng for: " + invid);
 		      }
 				
 		    if (cp.getObjectInvid().equals(invid))
 		      {
 			if (debug)
 			  {
-			    System.out.println("  Found container panel for " + invid + ": " + cp.frame.getTitle());
+			    System.out.println("  Found container panel for " + invid +
+					       ": " + cp.frame.getTitle());
 			  }
 			
 			if (retVal.rescanAll(invid))
@@ -1966,9 +1980,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   // Private methods
 
   /**
-   * Note that this actually returns a JPanel.- not anymore...
-   *
-   * That's so I can put the ComboBox in.
+   * Creates and initializes the client's toolbar.
    */
 
   JToolBar createToolbar()
@@ -1981,7 +1993,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.setMargin(insets);
 
     JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
-    //JButton b = new JButton(new ImageIcon(newToolbarIcon));
     b.setMargin(insets);
     b.setActionCommand("create new object");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -1991,7 +2002,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.add(b);
 
     b = new JButton("Edit", new ImageIcon(pencil));
-    //b = new JButton(new ImageIcon(pencil));
     b.setMargin(insets);
     b.setActionCommand("open object for editing");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -2001,7 +2011,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.add(b);
 
     b = new JButton("Delete", new ImageIcon(trash));
-    //b = new JButton(new ImageIcon(trash));
     b.setMargin(insets);
     b.setActionCommand("delete an object");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -2011,7 +2020,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.add(b);
 
     b = new JButton("View", new ImageIcon(search));
-    //b = new JButton(new ImageIcon(search));
     b.setMargin(insets);
     b.setActionCommand("open object for viewing");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -2021,7 +2029,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.add(b);
 
     b = new JButton("Query", new ImageIcon(queryIcon));
-    //b = new JButton(new ImageIcon(queryIcon));
     b.setMargin(insets);
     b.setActionCommand("compose a query");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -2045,7 +2052,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     if ((personae != null)  && personae.size() > 1)
       {
 	b = new JButton("Persona", new ImageIcon(personaIcon));  
-	//b = new JButton(new ImageIcon(personaIcon));
 	b.setMargin(insets);
 	b.setActionCommand("change persona");
 	b.setVerticalTextPosition(b.BOTTOM);
@@ -2088,9 +2094,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * This method builds the initial data structures for the object
+   * <p>This method builds the initial data structures for the object
    * selection tree, using the base information in the baseHash
-   * hashtable gained from the {@link arlut.csd.ganymede.client.Loader Loader} thread.
+   * hashtable gained from the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
    */
 
   void buildTree() throws RemoteException
@@ -2418,15 +2425,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>Updates the tree for the nodes that might have changed.</p>
    *
-   * <p>This method fixes all the icons, removing icons that were marked as
-   * to-be-deleted or dropped, and cleans out the various hashes.  Only call this 
-   * when commit is clicked.  This replaces refreshTree(boolean committed), because all the
-   * refreshing to be done after a cancel is now handled in the cancelTransaction() method
-   * directly.</p>
+   * <p>This method fixes all the icons, removing icons that were
+   * marked as to-be-deleted or dropped, and cleans out the various
+   * hashes.  Only call this when commit is clicked.  This replaces
+   * refreshTree(boolean committed), because all the refreshing to be
+   * done after a cancel is now handled in the cancelTransaction()
+   * method directly.</p>
    *
    * <p>This method is precisely analagous in function to
    * {@link arlut.csd.ganymede.client.gclient.cleanUpAfterCancel() cleanUpAfterCancel()},
-   * except for use after a commit.</p>
+   * except for use after a commit.</p> 
    */
 
   void refreshTreeAfterCommit() throws RemoteException
@@ -2511,16 +2519,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>This method scans through the changedHash hashtable and generates
-   * queries to the server for all invids that have been touched by
-   * the client after transaction commit.  The results from the
-   * queries are used to update the icons in the tree.</p>
+   * <p>Queries the server for status information on a vector of 
+   * {@link arlut.csd.ganymede.Invid invid}'s that were touched
+   * in some way by the client during the recent transaction.
+   * The results from the queries are used to update the icons
+   * in the tree.</p>
+   *
+   * <p>Called by refreshTreeAfterCommit().</p>
    *
    * <p>This method is called from
    * {@link arlut.csd.ganymede.client.gclient.refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
    *
-   * @param paramVect Vector of invid's to refresh.
-   * @param afterCommit If true, this method will update the client's status bar as it progresses.
+   * @param paramVect Vector of invid's to refresh.  
+   * @param afterCommit If true, this method will update the client's status
+   * bar as it progresses.
    */
 
   public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
@@ -2618,18 +2630,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Updates a database object's icon in the tree display.  This method
+   * uses the various client-side caches and hashes to determine the proper
+   * icon for the node.</p>
    *
-   * This method changes the icon for the tree node for the
-   * provided invid, depending on the various hashes and the object's
-   * objectHandle.
-   *
-   * This method does not actually induce the tree to refresh itself.
-   *
+   * <p>This method does not actually induce the tree to refresh itself,
+   * and may be called in bulk for a lot of nodes efficiently.</p>
    */
 
   public void setIconForNode(Invid invid)
   {
-    InvidNode node = (InvidNode)invidNodeHash.get(invid);
+    InvidNode node = (InvidNode) invidNodeHash.get(invid);
 
     if (node == null)
       {
@@ -2777,14 +2788,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    ********************************************************************************/
 
   /**
+   * <p>Opens a new window to allow the user to edit an object.</p>
    *
-   * edit an object, and open a new window for it.
-   *
-   * Use this to edit objects, so gclient can keep track of the
+   * <p>Use this to edit objects, so gclient can keep track of the
    * caches, tree nodes, and all the other dirty work.  This should be
    * the only place windowPanel.addWindow() is called for editing
-   * purposes.
+   * purposes.</p>
    *
+   * @param invid id for the object to be edited in the new window.
    */
 
   public void editObject(Invid invid)
@@ -2793,13 +2804,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * open a new window to edit the object.
+   * <p>Opens a new window to allow the user to edit an object.</p>
    *
-   * Use this to edit objects, so gclient can keep track of the
+   * <p>Use this to edit objects, so gclient can keep track of the
    * caches, tree nodes, and all the other dirty work.  This should be
-   * the only place windowPanel.addWindow is called for editing
-   * purposes.
+   * the only place windowPanel.addWindow() is called for editing
+   * purposes.</p>
    *
+   * @param invid id for the object to be edited in the new window.
+   * @param objectType String describing the kind of object being edited,
+   * used in the titlebar of the window created.
    */
 
   public void editObject(Invid invid, String objectType)
@@ -2850,20 +2864,21 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /** 
-   * Open a new window with a newly created object.
+   * <p>Creates a new object on the server and opens a new
+   * client window to allow the user to edit the new object.</p>
    *
-   * @type Type of object to be created
-   * @showNow if true, a new window will be shown.  If false, just return the object.
-   *
-   * Call showNewlyCreatedObject() to show it later.
+   * @param type Type of object to be created
    */
 
-  public db_object createObject(short type, boolean showNow)
+  public db_object createObject(short type)
   {
     Invid invid = null;
     db_object obj = null;
 
     /* -- */
+
+    // if the admin is a member of more than one owner group, ask what
+    // owner groups they want new objects to be placed in
 
     if (!defaultOwnerChosen)
       {
@@ -2874,76 +2889,24 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     try
       {
-	ReturnVal rv = handleReturnVal(session.create_db_object(type));
-	obj = rv.getObject();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Exception creating new object: " + rx);
-      }
+	try
+	  {
+	    ReturnVal rv = handleReturnVal(session.create_db_object(type));
+	    obj = rv.getObject();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Exception creating new object: " + rx);
+	  }
 
-    if (obj == null)
-      {
-	showErrorMessage("Could not create object for some reason.  Check the Admin " +
-			 "console, or the server debuggin information.");
+	// we'll depend on handleReturnVal() above showing the user a rejection
+	// dialog if the object create was rejected
 
-	throw new RuntimeException("Could not create object for some reason- server returned " +
-				   "a null object.  Check the Admin console.");
-      }
+	if (obj == null)
+	  {
+	    return null;
+	  }
 
-    if (showNow)
-      {
-	showNewlyCreatedObject(obj, invid, new Short(type));
-      }
-    else
-      {
-	setNormalCursor();
-      }
-
-    somethingChanged();
-
-    return obj;
-  }
-
-  /**
-   * Add a new window and everything for a new object.
-   *
-   * obj can be null!  If it is, then this will create a new object of the type.
-   *
-   * @param obj the object created, can be null.  If you give a non-null object, 
-   *            then this method will not create a new object.
-   *
-   * @param type The type of the object, used in creating.
-   */
-
-  public void showNewlyCreatedObject(db_object obj, Invid invid, Short type)
-  {
-    String label = null;
-
-    /* -- */
-
-    setWaitCursor();
-
-    try
-      {
-	label = getSession().viewObjectLabel(invid);
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get the object label. " + rx);
-      }
-
-    if (label == null)
-      {
-	label = "New Object";
-      }
-    
-    ObjectHandle handle = new ObjectHandle(label, invid, false, false, false, true);
-       
-    wp.addWindow(obj, true, null, true);
-    
-    if (invid == null)
-      {
 	try
 	  {
 	    invid = obj.getInvid();
@@ -2952,56 +2915,69 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    throw new RuntimeException("Could not get invid: " + rx);
 	  }
-      }
+
+	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
+       
+	wp.addWindow(obj, true, null, true);
+
+	Short typeShort = new Short(type);
     
-    if (cachedLists.containsList(type))
-      {
-	objectList list = cachedLists.getList(type);
-	list.addObjectHandle(handle);
-      }
-    
-    // If the base node is open, deal with the node.
-
-    BaseNode baseN = null;
-
-    if (shortToBaseNodeHash.containsKey(type))
-      {
-	baseN = (BaseNode)shortToBaseNodeHash.get(type);
-
-	if (baseN.isLoaded())
+	if (cachedLists.containsList(typeShort))
 	  {
-	    InvidNode objNode = new InvidNode(baseN, 
-					      handle.getLabel(),
-					      invid,
-					      null, false,
-					      OPEN_FIELD_CREATE,
-					      CLOSED_FIELD_CREATE,
-					      baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
-					      handle);
+	    objectList list = cachedLists.getList(typeShort);
+	    list.addObjectHandle(handle);
+	  }
+    
+	// If the base node is open, deal with the node.
+
+	BaseNode baseN = null;
+
+	if (shortToBaseNodeHash.containsKey(typeShort))
+	  {
+	    baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
+
+	    if (baseN.isLoaded())
+	      {
+		InvidNode objNode = new InvidNode(baseN, 
+						  handle.getLabel(),
+						  invid,
+						  null, false,
+						  OPEN_FIELD_CREATE,
+						  CLOSED_FIELD_CREATE,
+						  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
+						  handle);
 	    
-	    createHash.put(invid, new CacheInfo(type, handle.getLabel(), null, handle));
+		createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
 
-	    invidNodeHash.put(invid, objNode);
-	    setIconForNode(invid);
+		invidNodeHash.put(invid, objNode);
+		setIconForNode(invid);
 
-	    tree.insertNode(objNode, true);  // the true means the tree will refresh
+		tree.insertNode(objNode, true);  // the true means the tree will refresh
+	      }
+	    else
+	      {
+		// this hash is used when creating the node for the object
+		// in the tree.  This way, if a new object is created
+		// before the base node is expanded, the new object will
+		// have the correct icon.
+
+		createdObjectsWithoutNodes.put(invid, baseN);
+	      }
 	  }
-	else
-	  {
-	    // this hash is used when creating the node for the object
-	    // in the tree.  This way, if a new object is created
-	    // before the base node is expanded, the new object will
-	    // have the correct icon.
-
-	    createdObjectsWithoutNodes.put(invid, baseN);
-	  }
+	
+	somethingChanged();
+      }
+    finally
+      {
+	setNormalCursor();
       }
 
-    setNormalCursor();
+    return obj;
   }
 
   /**
-   * Open a view window on this object.
+   * <p>Opens a new window to view the object corresponding to the
+   * given invid.</p>
    */
 
   public void viewObject(Invid invid)
@@ -3010,7 +2986,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Open a new window to view the current object.
+   * <p>Opens a new window to view the object corresponding to the
+   * given invid.</p>
+   *
+   * @param objectType Type of the object to be viewed.. if this is
+   * null, the server will be queried to determine the type of object
+   * for the title-bar of the view object window.  By providing it
+   * here from a local cache, and server-call can be saved.
    */
 
   public void viewObject(Invid invid, String objectType)
@@ -3020,14 +3002,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	ReturnVal rv = handleReturnVal(session.view_db_object(invid));
 	db_object object = rv.getObject();
 
+	// we'll assume handleReturnVal() will display any rejection
+	// dialogs from the server
+
 	if (object == null)
 	  {
-	    showErrorMessage("You are not allowed to \nview that object.");
+	    return;
 	  }
-	else
-	  {
-	    wp.addWindow(object, false, objectType);
-	  }
+
+	wp.addWindow(object, false, objectType);
       }
     catch (RemoteException rx)
       {
@@ -3036,9 +3019,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Delete the object.
+   * <p>Marks an object on the server as deleted.  The object will not
+   * actually be removed from the database until the transaction is
+   * committed.</p>
    *
-   * Also takes care of caches and treeNodes.  
+   * <p>This method does a fair amount of internal bookkeeping to manage
+   * the client's tree display, status caching, etc.</p>
    */
 
   public boolean deleteObject(Invid invid)
@@ -3135,16 +3121,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	throw new RuntimeException("Could not delete base: " + rx);
       }
-
-    setNormalCursor();
+    finally
+      {
+	setNormalCursor();
+      }
 
     return ok;
   }
 
   /** 
-   * Inactivate an object.
+   * <p>Marks an object on the server as inactivated.  The object will not
+   * actually be removed from the database until the transaction is
+   * committed.  Note that the inactivation request will typically cause
+   * a dialog to come back from the server requesting the user fill in
+   * parameters describing how the object is to be inactivated.</p>
    *
-   * This takes care of all the hashes and everything.
+   * <p>This method does a fair amount of internal bookkeeping to manage
+   * the client's tree display, status caching, etc.</p>
    */
 
   public boolean inactivateObject(Invid invid)
@@ -3163,11 +3156,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else
       {
+	setStatus("inactivating " + invid);
+	setWaitCursor();
+
 	try
 	  {
-	    setStatus("inactivating " + invid);
-	    setWaitCursor();
-	    
 	    retVal = session.inactivate_db_object(invid);
 	    
 	    if (retVal != null)
@@ -3216,19 +3209,26 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
 	  }
+	finally
+	  {
+	    setNormalCursor();
+	  }
       }
 
-    setNormalCursor();
     return ok;
   }
 
-  /**
-   * 
-   * Reactivate an object.
+  /** <p>Reactivates an object that was previously inactivated. The
+   * object's status will not actually be changed in the database
+   * until the transaction is committed.  Note that the reactivation
+   * request will typically cause a dialog to come back from the
+   * server requesting the user fill in parameters describing how the
+   * object is to be reactivated. </p>
    *
-   * This is to reactivate a deactivated object.  I think you should
+   * <p>Typically reactivating an object involves clearing the removal
+   * date from  I think you should
    * call this from the expiration date panel if the date is cleared.
-   *
+   * 
    */
 
   public boolean reactivateObject(Invid invid)
@@ -3287,10 +3287,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * Show the create object dialog, let the user choose
    * to create or not create an object.
-   *
    */
 
   void createObjectDialog()
@@ -3314,8 +3312,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Opens a dialog to let the user choose an object for editing, and 
    * if cancel is not chosen, the object is opened for editing.</p>
    *
-   * <p>If a node is selected in the client's tree, the dialog will
-   * be pre-loaded with the type and name of the selected object.</p>
+   * <p>If an object node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected node.</p>
    */
 
   void editObjectDialog()
@@ -3358,8 +3356,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Opens a dialog to let the user choose an object for viewing,
    * and if cancel is not chosen, the object is opened for viewing.</p>
    *
-   * <p>If a node is selected in the client's tree, the dialog will
-   * be pre-loaded with the type and name of the selected object.</p>
+   * <p>If an object node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected node.</p>
    */
 
   void viewObjectDialog()
@@ -3403,8 +3401,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Opens a dialog to let the user choose an object for inactivation,
    * and if cancel is not chosen, the object is opened for inactivation.</p>
    *
-   * <p>If a node is selected in the client's tree, the dialog will
-   * be pre-loaded with the type and name of the selected object.</p>
+   * <p>If an object node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected node.</p>
    */
 
   void inactivateObjectDialog()
@@ -3551,12 +3549,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>Create a custom query filter.</p>
    *
-   * <p>The filter is used to limit the output on a query.  This pops up a JFilterDialog.</p>
+   * <p>The filter is used to limit the output on a query, so that
+   * supergash can see the world through the eyes of a less-privileged
+   * persona.  This seemed like a good idea at one point, not sure how
+   * valuable this really is anymore.</p>
    */
 
   public void chooseFilter()
   {
     // This could be moved, only cache if filter is changed?
+
     clearCaches();
 
     if (filterDialog == null)
@@ -3657,12 +3659,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Check for changes in the database before logging out.
+   * <p>Check for changes in the database before logging out.</p>
    *
-   * This checks to see if anything has been changed.  Basically, if edit panels are
+   * <p>This checks to see if anything has been changed.  Basically, if edit panels are
    * open and have been changed in any way, then somethingChanged will be true and 
    * the user will be warned.  If edit panels are open but have not been changed, then
-   * it will return true(it is ok to proceed).
+   * it will return true(it is ok to proceed).</p>
    */
 
   boolean OKToProceed()
@@ -3750,8 +3752,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
   }
 
-  /**
-   * Commit the current transaction to the data base.
+  /** 
+   * <p>Commits the currently open transaction on the server.  All
+   * changes made by the user since the last openNewTransaction() call
+   * will be integrated into the database on the Ganymede server.</p>
+   *
+   * <p>For various reasons, the server may reject the transaction as
+   * incomplete.  Usually this will be a non-fatal error.. the user
+   * will see a dialog telling him what else needs to be filled out in
+   * order to commit the transaction.  In this case,
+   * commitTransaction() will have had no effect and the user is free
+   * to try again.</p>
+   *
+   * <p>If the transaction is committed successfully, the relevant
+   * object nodes in the tree will be fixed up to reflect their state
+   * after the transaction is committed.  commitTransaction() will
+   * close all open editing windows, and will call openNewTransaction()
+   * to prepare the server for further changes by the user.</p> 
    */
 
   public void commitTransaction()
@@ -3760,10 +3777,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
+    setWaitCursor();
+
     try
       {
-	setWaitCursor();
-
 	// We need to check to see if any notes panels need to
 	// have their text flushed to the server.. 
 
@@ -3800,7 +3817,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    //
 
 	    refreshTreeAfterCommit();
-	    setNormalCursor();
 
 	    wp.resetWindowCount();
 
@@ -3833,12 +3849,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	showErrorMessage("Exception during commit: " + e);
 	throw new RuntimeException("Exception during commit: " + e);
       }
+    finally
+      {
+	setNormalCursor();
+      }
   }
 
   /**
-   * Cancel the current transaction.
-   *
-   * This will close all the editable windows, and fix up the icons in the tree.
+   * <p>Cancels the current transaction.  Any changes made by the user since
+   * the last openNewTransaction() call will be forgotten as if they
+   * never happened.  The client's tree display will be reverted to the
+   * state it was when the transaction was started, and all open windows
+   * will be closed.</p>
    */
 
   public synchronized void cancelTransaction()
@@ -4060,25 +4082,30 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     clearCaches();
   }
 
-  void toggleToolBar() {
-    // toggle the toolbar on and off
+  /**
+   * toggles the toolbar on and off
+   */
 
-    if (toolToggle == true) {
-      if (((BasicToolBarUI)toolBar.getUI()).isFloating()) {
-	((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
-      }
-
-      toolBar.setVisible(false);
-      toolToggle = false;
-    } 
+  void toggleToolBar()
+  {
+    if (toolToggle == true) 
+      {
+	if (((BasicToolBarUI)toolBar.getUI()).isFloating()) 
+	  {
+	    ((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
+	  }
+	
+	toolBar.setVisible(false);
+	toolToggle = false;
+      } 
     else if (toolToggle == false)
       { 
 	toolBar.setVisible(true);
 	toolToggle = true;
       }
+
     getContentPane().validate();
   }
-
   
   // ActionListener Methods
   
@@ -4250,10 +4277,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * This is a debugging hook, to allow the user to enter an invid in 
    * string form for direct viewing.
-   *
    */
 
   void openAnInvid()
@@ -4331,6 +4356,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   // Callbacks
 
+  /**
+   * <p>This method comprises the JsetValueCallback interface, and is how
+   * some data-carrying components notify us when something changes.</p>
+   *
+   * @see arlut.csd.JDataComponent.JsetValueCallback
+   * @see arlut.csd.JDataComponent.JValueObject
+   */
+
   public boolean setValuePerformed(JValueObject o)
   {
     if (o.getOperationType() == JValueObject.ERROR)
@@ -4353,14 +4386,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   // treeCallback methods
 
   /**
-   *
    * Called when a node is expanded, to allow the
    * user of the tree to dynamically load the information
    * at that time.
    *
    * @param node The node opened in the tree.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeExpanded(treeNode node)
@@ -4388,10 +4420,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * Called when a node is closed.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeContracted(treeNode node)
@@ -4399,14 +4430,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   *
    * Called when an item in the tree is unselected
    *
    * @param node The node selected in the tree.
    * @param someNodeSelected If true, this node is being unselected by the selection
    *                         of another node.
    *
-   * @see arlut.csd.Tree.treeCanvas
+   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeSelected(treeNode node)
@@ -4426,6 +4456,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
   }
+
+  /**
+   *
+   * Called when a popup menu item is selected
+   * on a treeNode
+   *
+   * @param node The node selected in the tree.
+   *
+   * @see arlut.csd.JTree.treeCanvas
+   */
 
   public void treeNodeMenuPerformed(treeNode node,
 				    java.awt.event.ActionEvent event)
@@ -4457,7 +4497,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    short id = baseN.getTypeID().shortValue();
 	    
-	    createObject(id, true);
+	    createObject(id);
 	  }
 	else
 	  {

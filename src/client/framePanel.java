@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/03/27 12:46:41 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/03/29 22:56:25 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -485,14 +485,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
-   * Stop loading all the container panels in this framePanel.
+   * <p>Stop loading all the container panels in this framePanel.</p>
    *
-   * This will not make the window go away, it simply tells all the
-   * containerPanels inside to stop loading.
+   * <p>This will not make the window go away, it simply tells all the
+   * containerPanels inside to stop loading.</p>
    *
-   * windowPanel(the porpertyChangeListener/InternalFrameListener)
-   * calls this when a frame is closed.
-   * 
+   * <p>windowPanel(the porpertyChangeListener/InternalFrameListener)
+   * calls this when a frame is closed.</p>
    */
 
   public void stopLoading()

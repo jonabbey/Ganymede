@@ -7,8 +7,8 @@
    
    Created: 17 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:04:12 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/03/29 22:56:25 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -63,6 +63,17 @@ import arlut.csd.JDialog.JCenterDialog;
                                                               createObjectDialog
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Dialog used to create new objects from the client's toolbar or menu.  The
+ * dialog shows the user a list of object types and prompts the user to pick
+ * an object type to create.  If the user selects one and clicks ok, we'll
+ * try to create a new object for the user and put up a window for the user
+ * to edit the new object with if we succeed.</p>
+ *
+ * @version $Revision: 1.10 $ $Date: 1999/03/29 22:56:25 $ $Name:  $
+ * @author Mike Mulvaney
+ */
 
 public class createObjectDialog extends JCenterDialog implements ActionListener {
 
@@ -223,7 +234,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
 	if (type.shortValue() >= 0)
 	  {
-	    gc.createObject(type.shortValue(), true);
+	    gc.createObject(type.shortValue());
 	  }
 	else
 	  {

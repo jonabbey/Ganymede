@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 1999/03/27 12:46:40 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 1999/03/29 22:56:24 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1407,12 +1407,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *
-   * This method comprises the JsetValueCallback interface, and is how
+   * <p>This method comprises the JsetValueCallback interface, and is how
    * the customized data-carrying components in this containerPanel
-   * notify us when something changes. <br><br>
+   * notify us when something changes.</p>
    *
-   * Note that we don't use this method for checkboxes, or comboboxes.
+   * <p>Note that we don't use this method for checkboxes, or comboboxes.</p>
    *
    * @see arlut.csd.JDataComponent.JsetValueCallback
    * @see arlut.csd.JDataComponent.JValueObject
@@ -1420,7 +1419,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @return false if the JDataComponent that is calling us should
    * reject the value change operation and revert back to the prior
    * value.
-   * 
    */
 
   public boolean setValuePerformed(JValueObject v)
@@ -1555,140 +1553,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		    currentlyChangingComponent = null;
 		    return true;
-		  }
-		else if (command.equals("Create new Object"))
-		  {
-		    String label = null;
-		    invid_field field = (invid_field) objectHash.get(sourceComponent);
-		    db_object o;
-		    db_field f;
-		    short type;
-		    Hashtable result;
-		    Invid invid;
-
-		    /* -- */
-
-		    // We are being told to create a new object from an invid field.
-		    
-		    try
-		      {
-			// We first check to see if the target of the invid field is known..
-
-			type = field.getTargetBase();
-
-			// if we don't know what kind of target to create, we can't do it
-
-			if (type < 0)
-			  {
-			    currentlyChangingComponent = null;
-			    return false;
-			  }
-
-			// otherwise, try to go ahead and create the object
-			
-			o = gc.createObject(type, false);
-
-			// Some objects have label fields pre-chosen.. if this is one
-			// of those, we'll want to prompt for the label from the
-			// user to make our tree handling clean
-
-			f = o.getLabelField();
-
-			if (f != null && (f instanceof string_field))
-			  {
-			    DialogRsrc r;
-
-			    /* -- */
-
-			    if (debug)
-			      {
-				println("Going to get label for this object.");
-			      }
-
-			    // ask the user what label they want for this object
-
-			    r = new DialogRsrc(gc, 
-					       "Choose Label for Object", 
-					       "What would you like to name this object?", 
-					       "Ok", 
-					       "Cancel");
-			    r.addString("Label:");
-			    result = (new StringDialog(r)).DialogShow();
-
-			    if (result == null)
-			      {
-				currentlyChangingComponent = null;
-				return false; // They pushed cancel.
-			      }
-			    
-			    // the setValue operation may trigger a wizard, so we wrap
-			    // the f.setValue() call in a gc.handleReturnVal().
-
-			    returnValue = gc.handleReturnVal(f.setValue(result.get("Label:")));
-
-			    if (returnValue == null || returnValue.didSucceed())
-			      {
-				label = (String) result.get("Label:");
-				
-				if (debug)
-				  {
-				    println("The set label worked!");
-				  }
-			      }
-			    else
-			      {
-				if (debug)
-				  {
-				    println("set label failed!!!!");
-				  }
-			      }
-			  }
-			else
-			  {
-			    label = "New Item";
-			  }
-
-			// we'll want to save the invid of the newly created object
-			// for linking into this field, as well as for inserting
-			// into our tree
-
-			invid = o.getInvid();
-
-			// update the tree
-			
-			gc.showNewlyCreatedObject(o, invid, new Short(type));
-
-			// and do the link in.  handleReturnVal() will
-			// once again handle displaying any wizards
-			// for us
-
-			returnValue = gc.handleReturnVal(field.addElement(invid));
-
-			if (returnValue != null && !returnValue.didSucceed())
-			  {
-			    if (debug)
-			      {
-				println("Newly created object could not be linked!!!!");
-			      }
-
-			    // well, the object did get created, but
-			    // the operation as a whole didn't
-			    // succeed, so we'll return false
-
-			    currentlyChangingComponent = null;
-			    return false;
-			  }
-			else
-			  {
-			    // display the newly linked object in the string selector
-
-			    sourceComponent.addNewItem(new listHandle(label, invid), true);
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Exception creating new object from SS menu: " + rx);
-		      }
 		  }
 		else
 		  {
@@ -2505,18 +2369,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JPopupMenu invidTablePopup = new JPopupMenu();
     JMenuItem viewO = new JMenuItem("View object");
     JMenuItem editO = new JMenuItem("Edit object");
-    //    JMenuItem createO = new JMenuItem("Create new Object");
     invidTablePopup.add(viewO);
     invidTablePopup.add(editO);
-    //invidTablePopup.add(createO);
     
     JPopupMenu invidTablePopup2 = new JPopupMenu();
     JMenuItem viewO2 = new JMenuItem("View object");
     JMenuItem editO2 = new JMenuItem("Edit object");
-    //JMenuItem createO2 = new JMenuItem("Create new Object");
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(editO2);
-    //invidTablePopup2.add(createO2);
 
     if (debug)
       {
@@ -2540,7 +2400,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     ss.setCallback(this);
 
-    addRow( ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
+    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
   private final void setStatus(String s)
@@ -3236,20 +3096,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
     choices = gc.sortListHandleVector(choices);
 
-    /*
-
-      Before I decided that it was just too much of a pain from a user
-      interface perspective to give the user the ability to create new
-      objects from a JInvidChooser, I had this line in place to allow
-      them to do that if the server didn't demand they choose from the
-      list presented.  I don't see going back to this, but it's worth
-      remembering I guess.
-    
-      combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), !mustChoose);
-
-      */
-
-    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase(), false);
+    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
 
     // Find currentListHandle
     

@@ -8,8 +8,8 @@
    
    Created: Before May 7, 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/03/23 06:20:30 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/03/29 22:56:23 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,10 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * A GUI component for choosing an Invid for a scalar invid_field.  
+ * <p>A GUI component for choosing an Invid for a scalar invid_field.</p>
+ *
+ * @version $Revision: 1.20 $ $Date: 1999/03/29 22:56:23 $ $Name:  $
+ * @author Mike Mulvaney
  */
 
 public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
@@ -75,8 +78,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   // ---
 
   JButton
-    view,
-    create;
+    view;
 
   containerPanel
     cp;
@@ -98,13 +100,11 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
    * @param parent The general or embedded object panel that contains us
    * @param objectType object type number, used to support creating a new
    * object by the use of the 'new' button if enabled.
-   * @param showNew if true, the JInvidChooser will include a 'new' button
-   * to enable creation of a new object of the type referenced by this JInvidChooser.
    */
 
-  public JInvidChooser(containerPanel parent, short objectType, boolean showNew)
+  public JInvidChooser(containerPanel parent, short objectType)
   {
-    this(null, parent, objectType, showNew);
+    this(null, parent, objectType);
   }
 
   /**
@@ -113,11 +113,9 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
    * @param parent The general or embedded object panel that contains us
    * @param objectType object type number, used to support creating a new
    * object by the use of the 'new' button if enabled.
-   * @param showNew if true, the JInvidChooser will include a 'new' button
-   * to enable creation of a new object of the type referenced by this JInvidChooser.
    */
 
-  public JInvidChooser(Vector objects, containerPanel parent, short objectType, boolean showNew)
+  public JInvidChooser(Vector objects, containerPanel parent, short objectType)
   {
     super(objects);
 
@@ -137,22 +135,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	view.setEnabled(false);
       }
 
-    // If the objectType is -1 or less, we have no information about
-    // what type of object can be pointed to by this JInvidChooser, so
-    // we certainly can't offer to create a new one for the user.
-
-    if (showNew && objectType > -1) 
-      {
-	create = new JButton("New");
-	create.addActionListener(this);
-      }
-
     buttonPanel.add("West", view);
-
-    if (create != null)
-      {
-	buttonPanel.add("East", create);
-      }
 
     // JPanelCombo already added the combo to the west.
 
@@ -172,14 +155,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   *
    * <p>Set the allowNone bit.</p>
    *
    * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
    * chooser.  If it is false, &lt;none&gt; will only be included in the
    * beginning if nothing is set; it will be removed as soon as
    * anything is chosen.</p>
-   *
    */
 
   public void setAllowNone(boolean allow)
@@ -263,7 +244,6 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   *
    * <p>Get the allowNone bit.</p>
    *
    * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
@@ -317,49 +297,6 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	      {
 		cp.gc.viewObject(invid);
 	      }
-	  }
-      }
-    else if (e.getSource() == create)
-      {
-	db_object object = null;
-	
-	try
-	  {
-	    object = cp.gc.createObject(type, false);
-
-	    Invid invid = object.getInvid();
-	    listHandle lh = new listHandle("New Object", invid);
-	    invid_field field = (invid_field)cp.objectHash.get(this);
-	    if (field == null)
-	      {
-		showErrorMessage("I can't create a new object, because I can't find the invid_field for this chooser.");
-		return;
-	      }
-	    getCombo().addItem(lh);
-
-	    field.setValue(invid);
-	    getCombo().setSelectedItem(lh);
-
-	  }
-	catch (NullPointerException nx)
-	  {
-	    showErrorMessage("Got that pesky null pointer exception.  Permissions problem?");
-	    return;
-	  }
-	catch (RuntimeException re)
-	  {
-	    showErrorMessage("Something when wrong creating the new object. " +
-			     "Perhaps you don't have the permission to creat objects of that type.");
-	    return;
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    throw new RuntimeException("I can't add this object in to the JComboBox: " + rx);
-	  }
-
-	if (object != null)
-	  {
-	    cp.gc.showNewlyCreatedObject(object, null, new Short(type));
 	  }
       }
   }

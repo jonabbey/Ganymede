@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/03/24 20:33:28 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/03/29 22:56:27 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1532,7 +1532,7 @@ class QueryRow implements ItemListener {
 	    choices = list.getListHandles(false, true); // no inactives, but do want non-editables
 	    choices = parent.gc.sortListHandleVector(choices);
 
-	    operand = invidChooser = new JInvidChooser(choices, null, targetBase, false);
+	    operand = invidChooser = new JInvidChooser(choices, null, targetBase);
 
 	    addOperand = true;
 
