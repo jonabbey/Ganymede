@@ -11,23 +11,19 @@ RELEASE DATE: March ??, 2001
 
 The RMI system has the ability to get into a state where a TCP/IP
 handling thread waits indefinitely for communication from a client.
-Prior to this fix, the server would wait forever for a dedicated thread
-to try and notify the client that it is being forced off, rather than
-throwing a RemoteException, which was already handled properly.
+Prior to this fix, the server would wait forever for a dedicated
+thread to try and notify the client that it is being forced off before
+handling the server-side client logout housekeeping.
 
 Now, the server will jump in and expunge the client from the server on
-the server-side if the client notification takes longer than 15
-seconds without completing the forceDisconnect network call, one way
-or another.
+the server-side before spawning a background thread to notify the
+client of the forced disconnect.
 
-This 15 second time period is set in the GanymedeSession.forceOff()
-method.
-
-Note that this fix will still leave those dedicated threads stuck in
-the JVM trying to finish reading from a socket from the (presumably
-dead) client.  I can't do much about this other than wait for Sun to
-fix their RMI implementation so that RMI reads on a socket will
-eventually time out.  In my experience, threads hanging due to a
+Note that this fix may still leave those dedicated background threads
+stuck in the JVM trying to finish reading from a socket from the
+(presumably dead) client.  I can't do much about this other than wait
+for Sun to fix their RMI implementation so that RMI reads on a socket
+will eventually time out.  In my experience, threads hanging due to a
 partial socket read is reasonably rare, so I'm not overly worried
 about hanging disconnect threads clogging up the server.
 
