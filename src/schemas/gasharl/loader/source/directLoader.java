@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1612,6 +1612,13 @@ public class directLoader {
 	      {
 		current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
 	      }
+	  }
+
+	// if we have an expiration date, set that
+
+	if (userObj.expirationDate != null)
+	  {
+	    current_obj.setFieldValueLocal(SchemaConstants.ExpirationField, userObj.expirationDate);
 	  }
 
 	// set the social security #

@@ -6,7 +6,7 @@
    GASH user_info file
    
    Created: 22 August 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,7 @@
 package arlut.csd.ganymede.loader;
 
 import java.io.*;
+import java.util.*;
 import arlut.csd.Util.Parser;
 
 /*------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ public class User {
 
   String socialsecurity;
   String category;
-  String expiration;
+  Date expirationDate;
 
   boolean valid;
 
@@ -158,6 +159,30 @@ public class User {
     if (parser.checkNextToken() == ':')
       {
 	category = parser.getNextBit();
+
+	//	System.err.println("Category = " + category);
+      }
+
+    if (parser.checkNextToken() == ':')
+      {
+	String expiration = parser.getNextBit();
+
+	if (expiration != null && !(expiration.equals("") || expiration.equals("0")))
+	  {
+	    try
+	      {
+		expirationDate = new Date(java.lang.Long.parseLong(expiration));
+	      }
+	    catch (NumberFormatException ex)
+	      {
+		System.err.println("User: couldn't parse expiration date.");
+		expirationDate = null;
+	      }
+	  }
+	else
+	  {
+	    expirationDate = null;
+	  }
 
 	//	System.err.println("Category = " + category);
       }
