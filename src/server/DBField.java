@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -656,6 +656,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
+
+    // verifyNewValue should setLastError for us.
 
     if (!verifyNewValue(value))
       {
