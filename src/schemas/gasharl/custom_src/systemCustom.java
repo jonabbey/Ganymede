@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -960,7 +960,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 	else if (operation == DELELEMENT)
 	  {
+	    int index = ((Integer) param1).intValue();
+
 	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	    // we don't need to get fancy if we aren't going from 2 to 1 interfaces
 
 	    if (interfaces.size() != 2)
 	      {
@@ -972,11 +976,19 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
 	    
 	    ReturnVal result = new ReturnVal(true, true);
+
+	    // We want to rescan the remaining interface, whichever that might be
 	    
-	    for (int i = 0; i < interfaces.size(); i++)
+	    if (index == 1)
 	      {
-		result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
+		index = 0;
 	      }
+	    else if (index == 0)
+	      {
+		index = 1;
+	      }
+
+	    result.addRescanObject((Invid) interfaces.elementAt(index), interfaceRescan);
 	    
 	    // finalizeDeleteElement() may add things to the SYSTEMALIASES field.
 
