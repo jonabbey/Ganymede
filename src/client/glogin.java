@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -181,8 +181,8 @@ public class glogin extends JApplet implements Runnable {
     appletContentPane.add(passwd);
     
     //username.setEnabled(false);
-    username.setText("supergash");
-    passwd.setText("dodo");
+    //    username.setText("supergash");
+    //    passwd.setText("dodo");
     //passwd.setEnabled(false);
 
     _quitButton = new JButton("Quit");
@@ -269,26 +269,26 @@ public class glogin extends JApplet implements Runnable {
 	{
 	  connected = false;
 
-	  //System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	  System.err.println("RMI: Couldn't bind to server object\n" + ex );
 	}
       catch (java.rmi.UnknownHostException ex)
 	{
 	  connected = false;
 
-	  //System.err.println("RMI: Couldn't find server\n" + gConfig._GANYMEDE_SERVER_URL );
+	  System.err.println("RMI: Couldn't find server\n" + gConfig._GANYMEDE_SERVER_URL );
 	}
       catch (RemoteException ex)
 	{
 	  connected = false;
-	  //ex.printStackTrace();
+	  ex.printStackTrace();
 
-	  //	  System.err.println("RMI: RemoteException during lookup.\n" + ex);
+	  System.err.println("RMI: RemoteException during lookup.\n" + ex);
 	}
       catch (java.net.MalformedURLException ex)
 	{
 	  connected = false;
 	  	  
-	  //System.err.println("RMI: Malformed URL " + gConfig._GANYMEDE_SERVER_URL );
+	  System.err.println("RMI: Malformed URL " + gConfig._GANYMEDE_SERVER_URL );
 	}
 
       switch (state) 
