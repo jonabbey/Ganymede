@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -503,11 +503,25 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	// our list of possible aliases includes the user's name
 
-	String name = (String) ((DBField) getField(SchemaConstants.UserUserName)).getValue();
+	// note that we first check the new value, if any, for the
+	// user name.. this way the user rename code can change the
+	// signature alias without having the StringDBField for the
+	// signature alias reject the new name.
+
+	String name = (String) ((DBField) getField(SchemaConstants.UserUserName)).getNewValue();
 
 	if (name != null)
 	  {
 	    result.addRow(null, name);
+	  }
+	else
+	  {
+	    name = (String) ((DBField) getField(SchemaConstants.UserUserName)).getValue();
+
+	    if (name != null)
+	      {
+		result.addRow(null, name);
+	      }
 	  }
 
 	// and any aliases defined
@@ -528,7 +542,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   void updateShellChoiceList()
   {
-    System.err.println("userCustom - updateShellChoiceList()");
+
 
     synchronized (shellChoices)
       {
@@ -538,7 +552,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
-	    System.err.println("userCustom - creating query");
+	    System.err.println("userCustom - updateShellChoiceList()");
 
 	    shellChoices = new QueryResult();
 
@@ -567,8 +581,6 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	      }
 	  }
       }
-
-    System.err.println("userCustom - exiting updateShellChoiceList()");
   }
 
   public synchronized boolean finalizeSetValue(DBField field, Object value)
@@ -698,6 +710,11 @@ public class userCustom extends DBEditObject implements SchemaConstants {
     if (field.getValue() == null)
       {
 	return null;
+      }
+
+    if (!gSession.enableWizards)
+      {
+	return null;		// no wizards if the user is non-interactive.
       }
 
     // looks like we're renaming this user
