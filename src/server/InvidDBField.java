@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.84 $ %D%
+   Version: $Revision: 1.85 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1061,17 +1061,14 @@ public final class InvidDBField extends DBField implements invid_field {
     // tell the client that it needs to rescan both the old and new
     // remote ends of this binding
 
-    ReturnVal rescanRet = new ReturnVal(true, true);
-    rescanRet.addRescanField(targetField);
-
     newRetVal = new ReturnVal(true, true);
 
     if (oldRemote != null)
       {
-	newRetVal.addRescanObject(oldRemote, rescanRet);
+	newRetVal.addRescanField(oldRemote, targetField);
       }
 
-    newRetVal.addRescanObject(newRemote, rescanRet);
+    newRetVal.addRescanField(newRemote, targetField);
     newRetVal.unionRescan(retVal);
 
     return newRetVal;		// success
@@ -1270,11 +1267,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // tell the client that it needs to rescan the old remote end of this binding
 
-    ReturnVal rescanRet = new ReturnVal(true, true);
-    rescanRet.addRescanField(targetField);
-
     newRetVal = new ReturnVal(true, true);
-    newRetVal.addRescanObject(remote, rescanRet);
+    newRetVal.addRescanField(remote, targetField);
 
     newRetVal.unionRescan(retVal);
 

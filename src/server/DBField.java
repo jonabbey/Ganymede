@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2100,19 +2100,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	original = new ReturnVal(true);
       }
 
-    rescan = new ReturnVal(true);
-    rescan.addRescanField(getID());
-
-    // We use addRescanObject instead of just returning
-    // rescan itself for two reasons.  One, the setValue (and etc.)
-    // method might have gone through a wizard, in which case an
-    // informative dialog might be riding along with the success
-    // value, and Two, because if a wizard did do the action, the
-    // client may not know what object the field belonged to for
-    // proper rescan behavior.  So, we specify the object and
-    // the field, and everyone's happy.
-
-    original.addRescanObject(getOwner().getInvid(), rescan);
+    original.addRescanField(getOwner().getInvid(), getID());
 
     return original;
   }
