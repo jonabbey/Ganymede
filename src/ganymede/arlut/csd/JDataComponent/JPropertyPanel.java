@@ -69,6 +69,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -139,6 +141,8 @@ public class JPropertyPanel extends JPanel implements ActionListener {
     model.addTableModelListener(listener);
 
     table = new JTable(model);
+
+    table.getSelectionModel().addListSelectionListener(new JPropertyPanelLSL(this));
 
     BevelBorder
       bborder = new BevelBorder(BevelBorder.RAISED);
@@ -253,6 +257,31 @@ public class JPropertyPanel extends JPanel implements ActionListener {
 	model.addRow(custom.getText());
 	custom.setText("");
 	table.repaint();
+      }
+
+    if (e.getActionCommand().equals("Remove"))
+      {
+	int[] selected = table.getSelectedRows();
+
+	for (int i = selected.length - 1; i >= 0; i--)
+	  {
+	    model.deleteRow(selected[i]);
+	  }
+      }
+  }
+
+  public void setSelection(boolean selectionActive)
+  {
+    remove.setEnabled(selectionActive);
+
+    if (selectionActive)
+      {
+	int[] selected = table.getSelectedRows();
+
+	for (int i = 0; i < selected.length; i++)
+	  {
+	    System.out.println("Selected: " + selected[i]);
+	  }
       }
   }
 
@@ -402,6 +431,12 @@ class JPropertyPanelTM extends AbstractTableModel {
     int row = rows.size()-1;
     fireTableRowsInserted(row, row);
   }
+
+  public void deleteRow(int row)
+  {
+    rows.remove(row);
+    fireTableRowsDeleted(row, row);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -433,5 +468,37 @@ class JPropertyPanelTML implements TableModelListener {
       {
 	System.out.println("Row event: " + row);
       }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               JPropertyPanelLSL
+
+------------------------------------------------------------------------------*/
+
+/**
+ * ListSelectionListener for the JPropertyPanel
+ */
+
+class JPropertyPanelLSL implements ListSelectionListener {
+
+  JPropertyPanel parent;
+
+  public JPropertyPanelLSL(JPropertyPanel parent)
+  {
+    this.parent = parent;
+  }
+
+  public void valueChanged(ListSelectionEvent event)
+  {
+    if (event.getValueIsAdjusting())
+      {
+	return;
+      }
+
+    System.err.println("Selection change: " + event.toString());
+    ListSelectionModel model = (ListSelectionModel) event.getSource();
+    parent.setSelection(!model.isSelectionEmpty());
   }
 }
