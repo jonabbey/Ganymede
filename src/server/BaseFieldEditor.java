@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -634,6 +634,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       }
   }
 
+  void editField(FieldNode fieldNode, boolean forceRefresh)
+  {
+    editField(fieldNode, forceRefresh, true);
+  }
+
   /**
    *
    * Edit the given field.  This method prepares the BaseFieldEditor
@@ -642,7 +647,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
    *
    */
 
-  void editField(FieldNode fieldNode, boolean forceRefresh)
+  void editField(FieldNode fieldNode, boolean forceRefresh, boolean updateTargetC)
   {
     System.err.println(" -in FieldEditor.editField()");
 
@@ -803,62 +808,102 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		fieldDef.setArray(true);
 	      }
 
-	    refreshTargetChoice();
+	    // important.. we want to avoid mucking with the targetC GUI combobox if
+	    // our refresh is being initiated by actions on the targetC GUI.  Swing
+	    // 1.0.2 gets real, real cranky if we try that.
+
+	    if (updateTargetC)
+	      {
+		refreshTargetChoice();
+	      }
 
 	    SchemaEdit se = owner.getSchemaEdit();
 	    short targetB = fieldDef.getTargetBase();
-
+		
 	    if (targetB == -1)
 	      {
 		System.out.println("unknown target base");
-		targetC.getModel().setSelectedItem("<any>");
+		
+		if (updateTargetC)
+		  {
+		    targetC.getModel().setSelectedItem("<any>");
+		  }
 	      }
 	    else
 	      {
 		Base targetBase = null;
 		String string = null;
-
+		    
 		if (targetB == -2)
 		  {
 		    // we're assuming that we've got a known target field in
 		    // all objects bases in the system.. this is mainly for
 		    // the 'owner list' field.. we'll just pick the field from
 		    // the current fieldDef and go with it.
-		    
+			
 		    System.out.println("new 'alltarget' base");
-		    targetC.addItem("<all>");
-		    targetC.getModel().setSelectedItem("<all>");
-
+		    
+		    if (updateTargetC)
+		      {
+			targetC.addItem("<all>");
+			targetC.getModel().setSelectedItem("<all>");
+		      }
+			
 		    string = "<all>";
-
+			
 		    targetBase = se.getBase((short) 0);	// assume the field is present in first base
 		  }
 		else
 		  {
 		    targetBase = se.getBase(targetB);
-
+			
 		    if (targetBase == null)
 		      {
-			throw new Error("targetbase is null when it shouldn't be: server error : base id " + targetB);
+			System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
+					   targetB);
+			    
+			System.out.println("Choosing <any>");
+			    
+			// we want to clear this bad reference
+			    
+			try
+			  {
+			    fieldDef.setTargetBase(null);
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
+			  }
+			
+			if (updateTargetC)
+			  {
+			    targetC.getModel().setSelectedItem("<any>");
+			  }
 		      }
-		    
-		    string = targetBase.getName();
-		    
-		    System.out.println("Choosing " + string);
-		    targetC.getModel().setSelectedItem(string);
+		    else
+		      {
+			string = targetBase.getName();
+			    
+			System.out.println("Choosing " + string);
+
+			if (updateTargetC)
+			  {
+			    targetC.getModel().setSelectedItem(string);
+			  }
+		      }
 		  }
-
+		    
 		// regenerate the list of choices in fieldC
-
+		
 		refreshFieldChoice();
-
+		    
 		// Now that we have an appropriate list of
 		// choice items in the fieldC, let's see
 		// if we can't find something to select
 		// in fieldC
-
+		    
 		short targetF = fieldDef.getTargetField();
-
+		    
 		if (targetF == -1)
 		  {
 		    System.out.println("unknown target field");
@@ -867,28 +912,50 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		else
 		  {
 		    BaseField targetField;
-
+		    
 		    // see if our old field target value is still
 		    // appropriate for the currently chosen base
-
-		    try
+		    
+		    if (targetBase != null)
 		      {
-			targetField = targetBase.getField(targetF);
-			
-			if (targetField != null)
+			try
 			  {
-			    string = targetField.getName();
-			    System.out.println("selecting " + string);
-			    fieldC.getModel().setSelectedItem(string);
+			    targetField = targetBase.getField(targetF);
+			    
+			    if (targetField != null)
+			      {
+				string = targetField.getName();
+				System.out.println("selecting " + string);
+				fieldC.getModel().setSelectedItem(string);
+			      }
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new IllegalArgumentException("exception getting field " + rx);
 			  }
 		      }
-		    catch (RemoteException rx)
+		    else
 		      {
-			throw new IllegalArgumentException("exception getting field " + rx);
+			System.err.println("targetbase is null, clearing targetField.");
+			
+			System.out.println("Choosing <none>");
+			
+			// we want to clear this bad reference
+			
+			try
+			  {
+			    fieldDef.setTargetField(null);
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
+			  }
+			
+			fieldC.getModel().setSelectedItem("<none>");
 		      }
 		  }
 	      } // else targetB != -1
-		
+	    
 	    typeC.getModel().setSelectedItem("Object Reference");
 	    referenceShowing = true;
 	  }
@@ -977,9 +1044,9 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
    *
    */
 
-  public void refreshFieldEdit()
+  public void refreshFieldEdit(boolean updateTargetC)
   {
-    this.editField(fieldNode, true);
+    this.editField(fieldNode, true, updateTargetC);
   }
 
   /**
@@ -1204,7 +1271,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	if (okToChange)
 	  {
 	    changeTypeChoice(item);	// switch the visible rows to fit the new type
-	    refreshFieldEdit();	// and refresh
+	    refreshFieldEdit(true);	// and refresh
 	  }
       }
     else if (e.getItemSelectable() == namespaceC)
@@ -1300,7 +1367,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      }
 	  }
 
-	refreshFieldEdit();
+	refreshFieldEdit(false);
 	checkVisibility();
       }
     else if (e.getItemSelectable() == fieldC)
