@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -66,7 +66,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   PopupMenu
     baseMenu = null,
-    fieldMenu = null;
+    fieldMenu = null,
+    namespaceObjectMenu = null;
 
   CardLayout
     card;
@@ -87,6 +88,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   BaseFieldEditor
     fe;
+
+  NameSpaceEditor
+    ne;
   
   boolean
     showingBase,
@@ -104,11 +108,16 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     baseHash,
     fieldHash;
 
+  Color
+    bgColor = SystemColor.control;
+
   /* -- */
 
   public GASHSchema(String title, SchemaEdit editor)
   {
     super(title);
+
+    this.editor = editor;
     
     setLayout(new BorderLayout());
 
@@ -116,17 +125,17 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     displayPane.setLayout(new BorderLayout());
 
     attribPane = new Panel();
-    attribPane.setBackground(Color.white);
+    attribPane.setBackground(bgColor);
     attribPane.setLayout(new BorderLayout());
 
     card = new CardLayout();
 
     attribCardPane = new Panel();
-    attribCardPane.setBackground(Color.white);
+    attribCardPane.setBackground(bgColor);
     attribCardPane.setLayout(card);
 
     baseEditPane = new Panel();
-    baseEditPane.setBackground(Color.white);
+    baseEditPane.setBackground(bgColor);
     baseEditPane.setLayout(new BorderLayout());
 
     // initialize the base editor
@@ -135,18 +144,21 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     baseEditPane.add("Center", be);
 
     fieldEditPane = new Panel();
-    fieldEditPane.setBackground(Color.white);
+    fieldEditPane.setBackground(bgColor);
     fieldEditPane.setLayout(new BorderLayout());
 
     fe = new BaseFieldEditor(this);
     fieldEditPane.add("Center", fe);
 
     namespaceEditPane = new Panel();
-    namespaceEditPane.setBackground(Color.white);
+    namespaceEditPane.setBackground(bgColor);
     namespaceEditPane.setLayout(new BorderLayout());
 
+    ne = new NameSpaceEditor(this);
+    namespaceEditPane.add("Center", ne);
+
     emptyPane = new Panel();
-    emptyPane.setBackground(Color.white);
+    emptyPane.setBackground(bgColor);
 
     attribCardPane.add("base", baseEditPane);
     attribCardPane.add("field", fieldEditPane);
@@ -154,7 +166,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     attribCardPane.add("empty", emptyPane);
 
     attribButtonPane = new Panel();
-    attribButtonPane.setBackground(Color.white);
+    attribButtonPane.setBackground(bgColor);
     attribButtonPane.setLayout(new RowLayout());
 
     attribPane.add("Center", attribCardPane);
@@ -183,7 +195,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       }
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white, this, images,
+			   Color.black, SystemColor.window, this, images,
 			   null);
 
     PopupMenu objectMenu = new PopupMenu();
@@ -200,11 +212,23 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
     tree.insertNode(namespaces, false);
 
+    namespaceObjectMenu = new PopupMenu();
+    deleteNameMI = new MenuItem("Delete Namespace");
+    namespaceObjectMenu.add(deleteNameMI);
+
     Box leftBox = new Box(tree, "Schema Objects");
 
-    displayPane.add("West", leftBox);
+    InsetPanel leftPanel = new InsetPanel(5, 10, 5, 5);
+    leftPanel.setLayout(new BorderLayout());
+    leftPanel.add("Center", leftBox);
 
-    displayPane.add("Center", rightBox);
+    InsetPanel rightPanel = new InsetPanel(5, 5, 5, 10);
+    rightPanel.setLayout(new BorderLayout());
+    rightPanel.add("Center", rightBox);
+
+    displayPane.add("West", leftPanel);
+
+    displayPane.add("Center", rightPanel);
 
     buttonPane = new Panel();
     buttonPane.setLayout(new RowLayout());
@@ -220,8 +244,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
     add("Center", displayPane);
     add("South", buttonPane);
-
-    this.editor = editor;
 
     deleteObjectMI = new MenuItem("Delete Object Type");
     createFieldMI = new MenuItem("Create Field");
@@ -242,6 +264,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     pack();
     setSize(800, 600);
     show();
+
+    System.out.println("GASHSchema created");
   }
 
 
@@ -250,6 +274,13 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
    *
    *
    */
+
+  public SchemaEdit getSchemaEdit()
+    {
+      if (editor == null)
+	System.out.println("editor is null in GASHSchema");
+      return editor;
+    }
 
   void objectsRefresh()
   {
@@ -531,9 +562,42 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
   }
 
   void refreshNamespaces()
-  {
-    // tree.removeChildren(namespaces, false);
-  }
+  { 
+    boolean isOpen = namespaces.isOpen();
+    
+    tree.removeChildren(namespaces, false);
+
+    NameSpace[] spaces = null;
+    try 
+      {
+	spaces = editor.getNameSpaces();
+      }
+    catch (RemoteException e)
+      {
+	System.out.println("Exception getting NameSpaces: " + e);
+      }
+    
+    for (int i = 0; i < spaces.length ; i++)
+      {
+	try 
+	  {
+	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
+					      null, false, 2, 2, namespaceObjectMenu);
+	    tree.insertNode(newNode, false);
+	  }
+	catch (RemoteException e)
+	  {
+	    System.out.println("Exception getting NameSpaces: " + e);
+	  }
+
+      }
+
+    if (isOpen)
+      tree.expandNode(namespaces, false);
+
+    tree.refresh();
+ }
+  
 
   void editBase(Base base)
   {
@@ -570,7 +634,16 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   void editNameSpace(NameSpace space)
   {
-    //
+    ne.editNameSpace(space);
+    card.show(attribCardPane, "name");
+    showingBase = false;
+    showingField = false;
+
+    attribButtonPane.removeAll();
+    attribOkButton = new Button("ok");
+    attribOkButton.addActionListener(ne);
+    attribButtonPane.add(attribOkButton);
+    validate();
   }
 
   // treeCallback methods
@@ -596,6 +669,12 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       {
 	BaseField field = ((FieldNode) node).getField();
 	editField(field);
+      }
+    else if (node instanceof SpaceNode)
+      {
+	System.out.println("namespacenode selected");
+	NameSpace nameSpace = ((SpaceNode) node).getSpace();
+	editNameSpace(nameSpace);
       }
     else
       {
@@ -630,21 +709,23 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     else if (event.getSource() == createNameMI)
       {
 	System.out.println("Create namespace chosen");
-	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namepace here", "Ok", "Cancel");
+	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Ok", "Cancel");
 
-	dialogResource.addString("Here is a string:");
-	dialogResource.addSeparator();
-	dialogResource.addBoolean("Here is a boolean:");
-
+	dialogResource.addString("Namespace:");
+	dialogResource.addBoolean("Case Insensitive:");
 
 	StringDialog dialog = new StringDialog(dialogResource);
 	Hashtable results = new Hashtable();
 	results = dialog.DialogShow();
 
+	String newNameSpace = null;
+	Boolean insensitive = null;
+	
+
 	//Now check the hash
 	if (results == null)
 	  {
-	    System.out.println("null hashtable");
+	    System.out.println("null hashtable, no action taken");
 	  }
 	else 
 	  {
@@ -657,27 +738,116 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 		Object ob = results.get(label);
 		if (ob instanceof String) 
 		  {
-		    System.out.println(label + " = " + (String)ob);
-		  }
-		if (ob instanceof Boolean)
-		  {
-		    Boolean bool = (Boolean)ob;
-		    if (bool.booleanValue())
+		    if (label == "Namespace:")
 		      {
-			System.out.println(label + " is true");
+			System.out.println("Namespace is " + (String)ob);
+			newNameSpace = (String)ob;
 		      }
 		    else
 		      {
-			System.out.println(label + " is false");
+			System.out.println("Red alert!  unknown string returned: " + (String)ob);
+		      }
+			
+		  }
+		else if (ob instanceof Boolean)
+		  {
+		    Boolean bool = (Boolean)ob;
+		    if (label == "Case Insensitive:")
+		      {
+			System.out.println("Sensitivity set to: " + bool);
+			insensitive = bool;
+		      }
+		    else 
+		      {
+			System.out.println("Unknown Boolean returned by Dialog.");
 		      }
 		  }
+		else 
+		  {
+		    System.out.println("Unknown type returned by Dialog.");
+		  }
+	      }
+	    if ((newNameSpace != null) && (insensitive != null))
+	      {
+		try
+		  {
+		    System.out.println("Adding new NameSpace: " + newNameSpace);
+		    editor.createNewNameSpace(newNameSpace, insensitive.booleanValue());
+		  }
+		catch (java.rmi.RemoteException e)
+		  {
+		    System.out.println("Exception while creating NameSpace: " + e);
+		  }
+
 	      }
 	  }
-	System.out.println("That's it for the hash");
+	// List out the NameSpaces for testing
 
+	NameSpace[] spaces  = null;
 
-
+	System.out.println("Actual NameSpaces:");
+	try
+	  {
+	    spaces = editor.getNameSpaces();
+	  }
+	catch (java.rmi.RemoteException e)
+	  {
+	    System.out.println("Exception while listing NameSpace: " + e);
+	  }
+	
+	boolean Insensitive = false;
+	String name = null;
+	for (int i = 0; i < spaces.length ; i++ )
+	  {
+	    try
+	      {
+		Insensitive = spaces[i].isCaseInsensitive();
+		name = spaces[i].getName();
+	      }
+	    catch (java.rmi.RemoteException e)
+	      {
+		
+		System.out.println("Exception while listing NameSpace: " + e);
+	      }
+	    if (Insensitive)
+	      {
+		System.out.println("   " + name + " is case insensitive.");
+	      }
+	    else
+	      {
+		System.out.println("   " + name + " is not case insensitive.");
+	      }
+	    
+	    
+	  }
+	refreshNamespaces();
+	if (showingField)
+	  {
+	    fe.refreshFieldEdit();
+	  }
+	
       }
+    else if (event.getSource() == deleteNameMI)
+      {
+	System.out.println("deleting Namespace");
+	treeNode tNode = (treeNode)node;
+	try
+	  {
+	    editor.deleteNameSpace(tNode.getText());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
+	  }
+	refreshNamespaces();
+
+	if (showingField)
+	  {
+	    fe.refreshFieldEdit();
+	  }
+	
+      }
+
     else if (event.getSource() == deleteObjectMI)
       {
 	BaseNode bNode = (BaseNode) node;
@@ -1001,6 +1171,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   BaseFieldEditor(GASHSchema owner)
   {
+
+    if (owner == null)
+      {
+	throw new IllegalArgumentException("owner must not be null");
+      }
+
     rowHash = new Hashtable();
 
     fieldDef = null;
@@ -1009,7 +1185,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     mainPanel = new Panel();
     mainPanel.setLayout(new BorderLayout());
     
-    editPanel = new Panel();
+    editPanel = new InsetPanel(10, 10, 10, 10);
     editPanel.setLayout(new TableLayout(false));
     
     ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
@@ -1071,36 +1247,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     namespaceC = new Choice();
     namespaceC.addItemListener(this);
-/***************************************************
- *  NameSpaces don't work yet, so can't add anything.
-    NameSpace[] nameSpaces = null;
-    try
-      {
-	nameSpaces = owner.editor.getNameSpaces();
-      }
-    catch (RemoteException rx)
-      {
-	System.err.println("RemoteException getting namespaces: " + rx);
-      }
-      
-    if ( (nameSpaces.length == 0) || (nameSpaces == null) )
-      namespaceC.addItem("<none>");
-    else
-      for (int i=0 ; i < nameSpaces.length ; i++)
-	{
-	  try
-	    {
-	      namespaceC.addItem(nameSpaces[i].getName());
-	    }
-	  catch (RemoteException rx)
-	    {
-	      System.err.println("RemoteException getting namespaces: " + rx);
-	      
-	      
-	    }    
-	}
-**********************************************/
-    namespaceC.addItem("<none>");
+
     addRow(editPanel, namespaceC, "Namespace:", 11);
     
     labeledCF = new checkboxField(null, false, ca, true);
@@ -1253,6 +1400,52 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     mainPanel.invalidate();
     this.validate();
   }
+
+  void refreshNamespaceChoice()
+    {
+      NameSpace[] nameSpaces = null;
+      
+      namespaceC.removeAll();
+
+      SchemaEdit test = owner.getSchemaEdit();
+
+      if (test == null)
+	{	
+	  System.err.println("owner.editor is null");
+	}
+      
+      try
+	{
+	  nameSpaces = owner.getSchemaEdit().getNameSpaces();
+	}
+      catch (RemoteException rx)
+	{
+	  System.err.println("RemoteException getting namespaces: " + rx);
+	}
+      
+      namespaceC.addItem("<none>");      
+
+      if ( (nameSpaces.length == 0) || (nameSpaces == null) )
+	{
+	  System.err.println("No other namespaces to add");
+	  
+	}
+      else
+	{
+	  for (int i=0 ; i < nameSpaces.length ; i++)
+	    {
+	      try
+		{
+		  namespaceC.addItem(nameSpaces[i].getName());
+		}
+	      catch (RemoteException rx)
+		{
+		  System.err.println("RemoteException getting namespace: " + rx);
+		}    
+	    }
+	}
+      
+    }
     
   void changeTypeChoice(String selectedItem)
   {
@@ -1306,10 +1499,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   {
     System.err.println("in FieldEditor.editField()");
 
-    if (fieldDef == this.fieldDef)
-      {
-	return;
-      }
+    //    if (fieldDef == this.fieldDef)
+    //      {
+    //	return;
+    //      }
 
     clearFields();
     this.fieldDef = fieldDef;
@@ -1342,14 +1535,25 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    maxLengthN.setValue(fieldDef.getMaxLength());
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
-	    namespaceC.removeAll();
-	    namespaceC.add("<None>");
-
+	    
 	    typeC.select("String");
 	    stringShowing = true;
 
 	    // add all defined namespaces here
+	    refreshNamespaceChoice();
 
+	    System.out.println(fieldDef.getNameSpaceLabel());
+
+	    if (fieldDef.getNameSpaceLabel() == null)
+	      {
+		namespaceC.select("<none>");
+		System.out.println("selecting <none>");
+	      }
+	    else
+	      {
+		namespaceC.select(fieldDef.getNameSpaceLabel());
+		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+	      }
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -1416,6 +1620,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 
+  public void refreshFieldEdit()
+  {
+    this.editField(fieldDef);
+  }
+
   // for string and numeric fields
 
   public boolean setValuePerformed(ValueObject v)
@@ -1464,15 +1673,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	else if (comp == minLengthN)
 	  {
 	    System.out.println("minLengthN");
+	    fieldDef.setMinLength(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == maxLengthN)
 	  {
 	    System.out.println("maxLengthN");
-	  }
-	else if (comp == namespaceC)
-	  {
-	    System.out.println("namespaceC");
-	    fieldDef.setNameSpace((String) v.getValue());
+	    fieldDef.setMaxLength(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == trueLabelS)
 	  {
@@ -1499,15 +1705,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    System.out.println("symmetryCF");
 	    checkVisibility();
 	  }
-	else if (comp == targetC)
-	  {
-	    System.out.println("targetC");
-	  }
-	else if (comp == fieldC)
-	  { 
-	    System.out.println("fieldC");
-	  }
-    
 	return true;
       }
     catch (RemoteException ex)
@@ -1520,9 +1717,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   public void itemStateChanged(ItemEvent e)
   {
-    //System.out.println("itemStateChanged");
-    //System.out.println(e.getItem());
-
     if (e.getItemSelectable() == typeC)
       {
 	changeTypeChoice((String)e.getItem());
@@ -1530,6 +1724,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     else if (e.getItemSelectable() == namespaceC)
       {
 	System.out.println("Namespace: " + e.getItem());
+	System.out.println("Setting namespace to " + (String) e.getItem() );
+	try 
+	  {
+	    fieldDef.setNameSpace((String)e.getItem());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Remote Exception setting NameSpace: " + rx);
+	  }
       }
     else if (e.getItemSelectable() == targetC)
       {
@@ -1545,8 +1748,25 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   // for the multiline comment field
 
   public void textValueChanged(TextEvent e)
-  {
-  }
+    {
+      Object obj = e.getSource();
+      if (obj == commentT)
+	{
+	  TextComponent text = (TextComponent)obj;
+	  try
+	    {
+	      fieldDef.setComment(text.getText());
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Remote exception setting comment: " +rx);
+	    }
+	}
+      
+
+
+
+    }
 
   // for ok/cancel buttons
 
@@ -1558,6 +1778,68 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                 NameSpaceEditor
+
+------------------------------------------------------------------------------*/
+
+class NameSpaceEditor extends ScrollPane implements ActionListener {
+  
+  stringField nameS;
+  Checkbox caseCB;
+  Panel namePanel;
+  componentAttr ca;
+  GASHSchema owner;
+  
+  /* -- */
+
+  NameSpaceEditor(GASHSchema owner)
+    {
+
+      if (owner == null)
+	throw new IllegalArgumentException("owner must not be null");
+
+      System.err.println("NameSpaceEditor constructed");
+
+      this.owner = owner;
+
+      namePanel = new Panel();
+      namePanel.setLayout(new ColumnLayout());
+
+      ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+			     Color.black, Color.white);
+      
+      nameS = new stringField(20, 100, ca, true, false, null, null);
+      namePanel.add(new FieldWrapper("Namespace:", nameS));
+      
+      caseCB = new Checkbox();
+      namePanel.add(new FieldWrapper("Case Insensitive:", caseCB));
+
+      add(namePanel);
+    }
+  public void editNameSpace(NameSpace space)
+    {
+      try
+	{
+	  nameS.setText(space.getName());
+	  caseCB.setState(space.isCaseInsensitive());
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
+
+	}
+    }
+
+  public void actionPerformed(ActionEvent e)
+    {
+      System.out.println("action Performed in NameSpaceEditor");
+    }
+}
+
+
 
 /*------------------------------------------------------------------------------
                                                                            class
