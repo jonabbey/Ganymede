@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,6 @@ public class QueryResult implements java.io.Serializable {
   // for use pre-serialized
 
   transient Hashtable invidHash = null;
-  transient Vector objects = null;
   transient private boolean forTransport = true;
 
   // for transport
@@ -77,11 +76,6 @@ public class QueryResult implements java.io.Serializable {
   {
     this();
     this.forTransport = forTransport;
-
-    if (!forTransport)
-      {
-	objects = new Vector();
-      }
   }
 
   /**
@@ -184,11 +178,6 @@ public class QueryResult implements java.io.Serializable {
 
 	invidHash.put(invid, label);
       }
-  }
-
-  public Vector getObjects()
-  {
-    return objects;
   }
 
   // ***
