@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -668,21 +668,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     question = PackageResources.getImageResource(this, "question.gif", getClass());
 
-    shutdownDialog = new StringDialog(this,
-				      "Confirm Ganymede Server Shutdown", 
-				      "Are you sure you want to \nshutdown the Ganymede server?", 
-				      "Yes", "No", question);
-
-    dumpDialog = new StringDialog(this,
-				  "Ganymede Server Dump",
-				  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
-				  "Yes", "No", question);
-
-    invidTestDialog = new StringDialog(this,
-				       "Invid Test",
-				       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
-				       "Yes", "No", question);
-
     java.awt.GridBagLayout topGBL = new java.awt.GridBagLayout();
     java.awt.GridBagConstraints topGBC = new java.awt.GridBagConstraints();
 
@@ -1003,6 +988,15 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == dumpMI)
       {
+	if (dumpDialog == null)
+	  {
+	    dumpDialog = new StringDialog(this,
+					  "Ganymede Server Dump",
+					  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
+					  "Yes", "No", question);
+
+	  }
+
 	if (dumpDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative dump request");
@@ -1041,6 +1035,14 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == runInvidTestMI)
       {
+	if (invidTestDialog == null)
+	  {
+	    invidTestDialog = new StringDialog(this,
+					       "Invid Test",
+					       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
+					       "Yes", "No", question);
+	  }
+
 	if (invidTestDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative invid test request");
@@ -1057,6 +1059,14 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == shutdownMI)
       {
+	if (shutdownDialog == null)
+	  {
+	    shutdownDialog = new StringDialog(this,
+					      "Confirm Ganymede Server Shutdown", 
+					      "Are you sure you want to \nshutdown the Ganymede server?", 
+					      "Yes", "No", question);
+	  }
+
 	if (shutdownDialog.DialogShow() != null)
 	  {
 	    System.err.println("Affirmative shutdown request");
