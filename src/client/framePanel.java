@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -751,7 +751,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     JMenuItem editMI = new JMenuItem("Edit");
     //editMI.setEnabled(!editable);
-    //editMI.addActionListener(this);
+    editMI.addActionListener(this);
     
     //editM.add(editMI);
     fileM.add(editMI);
