@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/12/04 03:10:02 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/12/04 03:52:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -732,6 +732,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    close();
 	    ex.printStackTrace();
 	    System.err.println("XMLReader parse error: " + ex.getMessage());
+
+	    System.err.println("Dumping circleBuffer");
 
 	    System.err.println(circleBuffer.getContents());
 

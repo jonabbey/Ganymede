@@ -4,8 +4,8 @@
 
    Created: 3 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/12/04 03:07:26 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/12/04 03:52:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -95,9 +95,7 @@ public class CircleBuffer {
 	  }
       }
 
-    buf[nextSlot] = item;
-
-    nextSlot++;
+    buf[nextSlot++] = item;
 
     if (nextSlot == buf.length)
       {
@@ -110,10 +108,17 @@ public class CircleBuffer {
     int count = 0;
     int i = firstSlot;
 
+    // once the buffer is filled to capacity, firstSlot will be equal
+    // to nextSlot.. the way we distinguish that case from the empty
+    // buffer case is by seeing if firstSlot contains null
+
     if (buf[i] == null)
       {
 	return "";
       }
+
+    // okay, we know there is at least one item in the buffer.. create
+    // a StringBuffer and add information for it to the StringBuffer
 
     StringBuffer sb = new StringBuffer();
 
@@ -129,12 +134,22 @@ public class CircleBuffer {
 	i = 0;
       }
 
+    // at this point, we have moved i to the slot following
+    // firstSlot.. until 
+    
     while (i != nextSlot)
       {
 	sb.append(count++);
 	sb.append(":");
 	sb.append(buf[i].toString());
 	sb.append("\n");
+
+	i++;
+
+	if (i == buf.length)
+	  {
+	    i = 0;
+	  }
       }
 
     return sb.toString();
