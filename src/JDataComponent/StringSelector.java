@@ -186,7 +186,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     // JstringListBox does the sorting
-    in = new JstringListBox(inVector, false, inPopup);
+    in = new JstringListBox(inVector, false, inPopup, rowWidth);
     in.setCallback(this);
 
     inPanel.setBorder(bborder);
@@ -263,7 +263,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.setActionCommand("Add");
 	add.addActionListener(this);
 
-	out = new JstringListBox(outVector, false, outPopup);
+	out = new JstringListBox(outVector, false, outPopup, rowWidth);
 	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
