@@ -93,9 +93,8 @@ _Upgrading the Schema Kit_
    It is possible, however, that your schema kit rebuild won't work
    properly. This generally means that something in the server has
    changed in an incompatible fashion. Since 1.0, I am trying to avoid
-   this kind of incompatible change, but if it is necessary I will do so.
-   The incompatible change should be noted in the CHANGES file in the
-   discussion of the latest release of the Ganymede distribution.
+   this kind of incompatible change, but if it happens, it should be
+   noted in the Ganymede distribution's CHANGES file.
    
    Alternately, it may be that your rebuild worked fine, but you have
    seen that a new version of the schema kit that you are using has been
@@ -191,4 +190,4 @@ _Upgrading the Ganymede Clients_
    
     Jonathan Abbey
     
-   Last modified: Fri Jul 27 23:58:08 CDT 2001
+   Last modified: Sat Jul 28 00:01:45 CDT 2001
