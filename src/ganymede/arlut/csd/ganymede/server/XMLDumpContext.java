@@ -90,6 +90,10 @@ public class XMLDumpContext {
 
   boolean dumpCreatorModifierInfo;
 
+  /**
+   * <p>The actual writer, from James Clark's XML package.</p>
+   */
+
   XMLWriter xmlOut;
 
   int indentLevel = 0;

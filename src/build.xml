@@ -193,7 +193,7 @@ refresh the jar files.
       <include name="arlut/csd/ganymede/server/serverAdminAsyncResponder.class"/>
       <include name="arlut/csd/ganymede/server/serverClientAsyncResponder.class"/>
       
-      <include name="arlut/csd/ganymede/client/FileReceiverBase.class"/>
+      <include name="arlut/csd/ganymede/server/XMLTransmitter.class"/>
     </rmic>
   </target>
 

@@ -724,53 +724,44 @@ public interface Session extends Remote {
   ReturnVal     remove_db_object(Invid invid) throws RemoteException;
 
   /**
-   * <p>This method is called by the XML client to initiate a dump
-   * of the server's schema definition in XML format.  The
-   * FileReceiver referenced passed as a parameter to this method
-   * will be used to send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete schema
-   * definition in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's schema definition in XML format.  The ReturnVal
+   * returned will, if the operation is approved, contain a reference
+   * to an RMI FileTransmitter interface, which can be iteratively
+   * called by the XML client to pull pieces of the transmission down
+   * in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
    */
 
-  ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure) throws RemoteException;
+  public ReturnVal getSchemaXML() throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
-   * the server's entire database in XML format.  The FileReceiver
-   * referenced passed as a parameter to this method will be used to
-   * send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete server data
-   * dump in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
-   *
-   * <p>This method is only available to a supergash-privileged
-   * GanymedeSession.</p>
-   */
-
-  ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure) throws RemoteException;
-
-  /**
-   * <p>This method is called by the XML client to initiate a dump of
-   * the server's entire database, schema and data, in XML format.
-   * The FileReceiver referenced passed as a parameter to this method
-   * will be used to send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete server data
-   * dump in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
+   * the entire data contents of the server.  The ReturnVal returned
+   * will, if the operation is approved, contain a reference to
+   * an RMI FileTransmitter interface, which can be iteratively called
+   * by the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p> 
    */
 
-  ReturnVal getXMLDump(FileReceiver receiver, boolean logOffOnFailure) throws RemoteException;
+  public ReturnVal getDataXML() throws RemoteException;
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's entire database, schema and data, in XML format.
+   * The ReturnVal will, if the operation is approved, contain a
+   * reference to an RMI FileTransmitter interface, which can be
+   * iteratively called by the XML client to pull pieces of the
+   * transmission down in sequence.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p> 
+   */
+
+  public ReturnVal getXMLDump() throws RemoteException;
 }

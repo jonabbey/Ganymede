@@ -83,7 +83,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import Qsmtp.Qsmtp;
-import arlut.csd.Util.BigPipedInputStream;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.WordWrap;
@@ -110,7 +109,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.BaseField;
 import arlut.csd.ganymede.rmi.Category;
 import arlut.csd.ganymede.rmi.ClientAsyncResponder;
-import arlut.csd.ganymede.rmi.FileReceiver;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
@@ -4634,72 +4632,64 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method is called by the XML client to initiate a dump
-   * of the server's schema definition in XML format.  The
-   * FileReceiver referenced passed as a parameter to this method
-   * will be used to send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete schema
-   * definition in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's schema definition in XML format.  The ReturnVal
+   * returned will, if the operation is approved, contain a reference
+   * to an RMI FileTransmitter interface, which can be iteratively
+   * called by the XML client to pull pieces of the transmission down
+   * in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
    */
 
-  public ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
+  public ReturnVal getSchemaXML() throws NotLoggedInException
   {
-    return this.sendXML(receiver, false, true, logOffOnFailure);
+    return this.getXML(false, true);
   }
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
-   * the entire data contents of the server.  The FileReceiver
-   * referenced passed as a parameter to this method will be used to
-   * send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete server data
-   * dump in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
+   * the entire data contents of the server.  The ReturnVal returned
+   * will, if the operation is approved, contain a reference to
+   * an RMI FileTransmitter interface, which can be iteratively called
+   * by the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p> 
    */
 
-  public ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
+  public ReturnVal getDataXML() throws NotLoggedInException
   {
-    return this.sendXML(receiver, true, false, logOffOnFailure);
+    return this.getXML(true, false);
   }
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
    * the server's entire database, schema and data, in XML format.
-   * The FileReceiver referenced passed as a parameter to this method
-   * will be used to send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete server data
-   * dump in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
+   * The ReturnVal will, if the operation is approved, contain a
+   * reference to an RMI FileTransmitter interface, which can be
+   * iteratively called by the XML client to pull pieces of the
+   * transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p> 
    */
 
-  public ReturnVal getXMLDump(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
+  public ReturnVal getXMLDump() throws NotLoggedInException
   {
-    return this.sendXML(receiver, true, true, logOffOnFailure);
+    return this.getXML(true, true);
   }
 
   /**
-   * <p>Private server-side helper method used to transmit the server's database in XML
-   * format to an {@link arlut.csd.ganymede.rmi.FileReceiver FileReceiver} remote receiving
-   * interface.</p>
+   * <p>Private server-side helper method used to pass a {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference
+   * back that can be called to pull pieces of an XML
+   * transmission.</p>
    */
 
-  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean sendSchema, boolean logOffOnFailure) throws NotLoggedInException
+  private ReturnVal getXML(boolean sendData, boolean sendSchema) throws NotLoggedInException
   {
     checklogin();
 
@@ -4720,135 +4710,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 					  message);
       }
 
-    /* -- */
+    XMLTransmitter transmitter = new XMLTransmitter(sendData, sendSchema);
 
-    try
-      {
-	final PipedOutputStream outpipe = new PipedOutputStream();
-	final BigPipedInputStream inpipe = new BigPipedInputStream(outpipe);
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setFileTransmitter(transmitter);
 
-	/* -- */
-
-	// we need to get a thread to dump the XML schema in the
-	// background to our pipe
-
-	final boolean doSendData = sendData;
-	final boolean doSendSchema = sendSchema;
-	final boolean logoutOnFail = logOffOnFailure;
-	final GanymedeSession mySession = this;
-
-	Thread dumpThread = new Thread(new Runnable() {
-	  public void run() {
-	    try
-	      {
-		Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema);
-	      }
-	    catch (IOException ex)
-	      {
-		// dumpXML will close outpipe on any exception,
-		// nothing we can productively do here, go
-		// ahead and show it for debug purposes
-
-		System.err.println(ts.l("sendXML.eof"));
-		
-		if (logoutOnFail)
-		  {
-		    mySession.forceOff(ts.l("sendXML.dump_error"));
-		  }
-	      }
-	  }}, "Ganymede XMLSession Schema/Data Dump Thread");
-
-	// and set it running
-
-	dumpThread.start();
-
-	// okay, now we can spin on our input thread, reading
-	// from our pipe and sending the xml file down to the
-	// xmlclient's FileReceiver.
-
-	ReturnVal retVal = null;
-	byte[] data = null;
-	int oldavail = 0;
-	int avail;
-	boolean eof = false;
-
-	while (!eof)
-	  {
-	    avail = inpipe.available();
-
-	    if (avail > 65536)
-	      {
-		avail = 65536;
-	      }
-
-	    if (avail == 0)
-	      {
-		avail = 1024;
-	      }
-
-	    if (oldavail != avail)
-	      {
-		data = new byte[avail];
-	      }
-
-	    int count  = inpipe.read(data);	// we may block waiting for the schema dump thread here
-
-	    if (count == -1)
-	      {
-		eof = true;
-		continue;
-	      }
-
-	    //	    System.err.println("Read " + count + " bytes from xml schema dump pipe");
-
-	    try
-	      {
-		retVal = receiver.sendBytes(data, 0, count);
-
-		if (retVal != null)
-		  {
-		    if (!retVal.didSucceed())
-		      {
-			receiver.end(false);
-			return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
-							  ts.l("sendXML.error_text"));
-		      }
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
-						  ts.l("sendXML.error_exception_text",
-						       ex.getMessage()));
-	      }
-	  }
-
-	//	System.err.println("Finished sending XML schema dump.. avail == 0");
-
-	inpipe.close();
-
-	try
-	  {
-	    return receiver.end(true);
-	  }
-	catch (RemoteException ex)
-	  {
-	    ex.printStackTrace();
-
-	    return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
-					      ts.l("sendXML.error_exception_text",
-						   ex.getMessage()));
-	  }
-      }
-    catch (IOException ex)
-      {
-	ex.printStackTrace();
-
-	return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
-					  ts.l("sendXML.error_ioexception_text",
-					       ex.getMessage()));
-      }
+    return retVal;
   }
 
   /****************************************************************************

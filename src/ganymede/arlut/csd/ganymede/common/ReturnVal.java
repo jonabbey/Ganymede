@@ -63,6 +63,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.ganymede.rmi.Ganymediator;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.XMLSession;
+import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.ganymede.rmi.adminSession;
 import arlut.csd.ganymede.rmi.db_object;
 
@@ -259,6 +260,19 @@ public class ReturnVal implements java.io.Serializable {
   public XMLSession getXMLSession()
   {
     return (XMLSession) remoteObjectRef;
+  }
+
+  /** 
+   * <p>This method is used to get a remote {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference that the server
+   * wants to return to the client.  Used to provide XML dump results
+   * to a remote xmlclient.   May be null if permissions refused the
+   * dump attempt.</p>
+   */
+
+  public FileTransmitter getFileTransmitter()
+  {
+    return (FileTransmitter) remoteObjectRef;
   }
 
   /** 
@@ -810,6 +824,19 @@ public class ReturnVal implements java.io.Serializable {
   public void setXMLSession(XMLSession session)
   {
     this.remoteObjectRef = session;
+  }
+
+  /** 
+   * <p>This method is used to set a {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference that the client
+   * can retrieve from us.</p>
+   *
+   * <p>For use on the server-side.</p> 
+   */
+
+  public void setFileTransmitter(FileTransmitter transmitter)
+  {
+    this.remoteObjectRef = transmitter;
   }
 
   /** 

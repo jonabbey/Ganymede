@@ -75,7 +75,7 @@ import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLStartDocument;
 import arlut.csd.Util.XMLWarning;
 import arlut.csd.ganymede.common.ReturnVal;
-import arlut.csd.ganymede.rmi.FileReceiver;
+import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.XMLSession;
@@ -380,15 +380,15 @@ public final class xmlclient implements ClientListener {
 
     if (sendData && !sendSchema)
       {
-	retVal = session.getDataXML(new FileReceiverBase(new xmlclientPrintReceiver()), true);
+	retVal = session.getDataXML();
       }
     else if (sendSchema && !sendData)
       {
-	retVal = session.getSchemaXML(new FileReceiverBase(new xmlclientPrintReceiver()), true);
+	retVal = session.getSchemaXML();
       }
     else if (sendSchema && sendData)
       {
-	retVal = session.getXMLDump(new FileReceiverBase(new xmlclientPrintReceiver()), true);
+	retVal = session.getXMLDump();
       }
 
     if (retVal != null && !retVal.didSucceed())
@@ -399,6 +399,25 @@ public final class xmlclient implements ClientListener {
 	  {
 	    System.err.println(errorMessage);
 	  }
+      }
+
+    FileTransmitter transmitter = retVal.getFileTransmitter();
+
+    byte[] bytes = transmitter.getNextChunk();
+
+    try
+      {
+	while (bytes != null)
+	  {
+	    System.out.write(bytes);
+	    
+	    bytes = transmitter.getNextChunk();
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+	System.exit(1);
       }
 
     // and say goodbye
@@ -883,64 +902,5 @@ public final class xmlclient implements ClientListener {
   {
     System.err.println(e.getMessage());
     System.exit(1);
-  }
-}
-
-/**
- * This class is used to act as a receiver of server-transmitted XML materials
- * by the XML client.  The server talks to this receiver when the xmlclient
- * is given the -dumpschema or -dumpdata command line parameters.
- */
-
-class xmlclientPrintReceiver implements FileReceiver {
-
-  /**
-   * <p>This method is used to send chunks of a file, in order, to the
-   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
-   * if it doesn't want to stop receiving the file.  A null return value
-   * indicates success, keep sending.</p>
-   */
-  
-  public ReturnVal sendBytes(byte[] bytes)
-  {
-    try
-      {
-	System.out.write(bytes);
-      }
-    catch (IOException ex)
-      {
-	ex.printStackTrace();
-      }
-
-    return null;
-  }
-
-  /**
-   * <p>This method is used to send chunks of a file, in order, to the
-   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
-   * if it doesn't want to stop receiving the file.  A null return value
-   * indicates success, keep sending.</p>
-   */
-  
-  public ReturnVal sendBytes(byte[] bytes, int offset, int len)
-  {
-    System.out.write(bytes, offset, len); // yup, we don't need to catch IOException
-
-    return null;
-  }
-  
-  /**
-   * <p>This method is called to notify the FileReceiver that no more
-   * of the file will be transmitted.  The boolean parameter will
-   * be true if the file was completely sent, or false if the transmission
-   * is being aborted by the sender for some reason.</p>
-   *
-   * @return Returns true if the FileReceiver successfully received
-   * the file in its entirety.
-   */
-  
-  public ReturnVal end(boolean completed)
-  {
-    return null;
   }
 }
