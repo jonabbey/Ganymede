@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/12/08 21:06:21 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/12/09 00:21:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -841,6 +841,23 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	Date tomorrowMidnight = cal.getTime();
 	rolloverTime = tomorrowMidnight.getTime();
 
+	// if this is our first run of a builder task's file io prep,
+	// sweep through the backup directory and zip up any directories
+	// that match our pattern for day directories, before we create
+	// one for today's date
+	
+	if (firstRun)
+	  {
+	    try
+	      {
+		cleanBackupDirectory();
+	      }
+	    finally
+	      {
+		firstRun = false;
+	      }
+	  }
+
 	// okay, we've got our goal posts fixed, now handle the
 	// old directory and get a label for the new
 
@@ -854,22 +871,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	if (!newDirectory.exists())
 	  {
 	    newDirectory.mkdir();
-	  }
-      }
-
-    // if this is our first run of a builder task's file io prep,
-    // sweep through the backup directory and zip up any directories
-    // that match our pattern for day directories
-
-    if (firstRun)
-      {
-	try
-	  {
-	    cleanBackupDirectory();
-	  }
-	finally
-	  {
-	    firstRun = false;
 	  }
       }
 
@@ -958,10 +959,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	String yearString, monthString, dateString;
 
-	if (match.getSubStartIndex(0) == -1)
+	if (match.getSubStartIndex(1) != -1)
 	  {
-	    yearString = names[i].substring(match.getSubStartIndex(0),
-					    match.getSubEndIndex(0));
+	    yearString = names[i].substring(match.getSubStartIndex(1),
+					    match.getSubEndIndex(1));
 	  }
 	else
 	  {
@@ -969,10 +970,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	if (match.getSubStartIndex(1) == -1)
+	if (match.getSubStartIndex(2) != -1)
 	  {
-	    monthString = names[i].substring(match.getSubStartIndex(1),
-					     match.getSubEndIndex(1));
+	    monthString = names[i].substring(match.getSubStartIndex(2),
+					     match.getSubEndIndex(2));
 	  }
 	else
 	  {
@@ -980,10 +981,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	if (match.getSubStartIndex(2) == -1)
+	if (match.getSubStartIndex(3) != -1)
 	  {
-	    dateString = names[i].substring(match.getSubStartIndex(2),
-					    match.getSubEndIndex(2));
+	    dateString = names[i].substring(match.getSubStartIndex(3),
+					    match.getSubEndIndex(3));
 	  }
 	else
 	  {
@@ -1039,6 +1040,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		  {
 		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): not zipping " + basePath + names[i]);
 		  }
+	      }
+	    else
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): don't need to zip " + 
+			       basePath + names[i] + " yet.");
 	      }
 	  }
 	catch (NumberFormatException ex)
