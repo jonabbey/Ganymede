@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 1999/01/22 18:05:31 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 1999/01/27 21:45:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.99 $ %D%
+ * @version $Revision: 1.100 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -640,84 +640,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	fields.remove(field.getID());
       }
   }
-
-  /**
-   *
-   * This method scans through all fields defined in the DBObjectBase
-   * for this object type and determines if all required fields have
-   * been filled in.  If everything is ok, this method will return
-   * null.  If any required fields are found not to have been filled
-   * out, a ReturnVal will be returned with didSucceed() set to false
-   * and a dialog encoded describing the fields that need to be
-   * filled out before this object can be checked in to the database.<br><br>
-   *
-   * If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will not be
-   * called at transaction commit time.
-   *  
-   */
-
-  public final synchronized ReturnVal checkRequiredFields()
-  {
-    Vector localFields = new Vector();
-    DBObjectBaseField fieldDef;
-    DBField field;
-    StringBuffer errorBuf = new StringBuffer();
-
-    /* -- */
-
-    // assume that the sortedFields will not be changed
-    // at a time when this method is called.  A reasonable
-    // assumption, as sortedFields is only altered when
-    // the schema is being edited.
-
-    for (int i = 0; i < objectBase.sortedFields.size(); i++)
-      {
-	fieldDef = (DBObjectBaseField) objectBase.sortedFields.elementAt(i);
-
-	// we don't care at this point about built in fields
-
-	if (fieldDef.isBuiltIn())
-	  {
-	    continue;
-	  }
-
-	if (fieldRequired(this, fieldDef.getID()))
-	  {
-	    field = (DBField) getField(fieldDef.getID());
-
-	    if (field == null || !field.isDefined())
-	      {
-		localFields.addElement(fieldDef.getName());
-	      }
-	  }
-      }
-
-    // if all required fields checked out, return success
-
-    if (localFields.size() == 0)
-      {
-	return null;
-      }
-    
-    errorBuf.append("Error, ");
-    errorBuf.append(objectBase.getName());
-    errorBuf.append(" object ");
-    errorBuf.append(getLabel());
-    errorBuf.append(" has not been completely filled out.  The following fields need ");
-    errorBuf.append("to be filled in before this transaction can be committed:\n\n");
-    
-    for (int i = 0; i < localFields.size(); i++)
-      {
-	errorBuf.append((String) localFields.elementAt(i));
-	errorBuf.append("\n");
-      }
-
-    return Ganymede.createErrorDialog("Error, required fields not filled in",
-				      errorBuf.toString());
-  }
-
-
 
   /* -------------------- pseudo-static Customization hooks -------------------- 
 
@@ -1847,7 +1769,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * If inactivate() returns a success value, we expect that the object
    * will have a removal date set.<br><br>
    *
-   * IMPORTANT NOTE: If a custom object's inactivate() logic decides
+   * IMPORTANT NOTE 1: This method is intended to be called by the
+   * DBSession.inactivateDBObject() method, which establishes a
+   * checkpoint before calling inactivate.  If this method is not
+   * called by DBSession.inactivateDBObject(), you need to push
+   * a checkpoint with the key 'inactivate'+label, where label is
+   * the returned name of this object.
+   *
+   * IMPORTANT NOTE 2: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeInactivate() with a boolean
    * indicating ultimate success of the operation.<br><br>

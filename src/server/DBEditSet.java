@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/01/22 18:05:31 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/01/27 21:45:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -354,6 +354,11 @@ public class DBEditSet {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBEditSet.popCheckpoint(): seeking to pop " + name);
+      }
+
     found = false;
 
     for (int i = 0; i < checkpoints.size(); i++)
@@ -369,6 +374,17 @@ public class DBEditSet {
     if (!found)
       {
 	System.err.println("DBEditSet.popCheckpoint: couldn't find checkpoint for " + name);
+	System.err.println("\nCurrently registered checkpoints:");
+
+	for (int i = 0; i < checkpoints.size(); i++)
+	  {
+	    point = (DBCheckPoint) checkpoints.elementAt(i);
+	    
+	    System.err.println(i + ": " + point.name);
+	  }
+
+	System.err.println();
+
 	return null;
       }
 
@@ -382,9 +398,9 @@ public class DBEditSet {
 	  {
 	    found = true;
 	  }
-	else
+	else if (debug)
 	  {
-	    System.err.println("DBEditSet.popCheckpoint(): popping checkpoint " + point.name);
+	    System.err.println("DBEditSet.popCheckpoint(): popping overlaid checkpoint " + point.name);
 	  }
       }
 
@@ -843,7 +859,32 @@ public class DBEditSet {
 		if ((eObj.getStatus() != DBEditObject.DELETING) &&
 		    (eObj.getStatus() != DBEditObject.DROPPING))
 		  {
-		    retVal = eObj.checkRequiredFields();
+		    Vector missingFields = eObj.checkRequiredFields();
+		    
+		    if (missingFields != null)
+		      {
+			StringBuffer errorBuf = new StringBuffer();
+
+			errorBuf.append("Error, ");
+			errorBuf.append(eObj.getTypeName());
+			errorBuf.append(" object ");
+			errorBuf.append(eObj.getLabel());
+			errorBuf.append(" has not been completely filled out.  The following fields need ");
+			errorBuf.append("to be filled in before this transaction can be committed:\n\n");
+			
+			for (int j = 0; j < missingFields.size(); j++)
+			  {
+			    errorBuf.append((String) missingFields.elementAt(j));
+			    errorBuf.append("\n");
+			  }
+
+			retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
+							    errorBuf.toString());
+		      }
+		    else
+		      {
+			retVal = null;
+		      }
 		  }
 
 		if (retVal != null && !retVal.didSucceed())

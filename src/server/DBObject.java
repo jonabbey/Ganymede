@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/01/22 18:05:35 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/01/27 21:45:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.62 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.63 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -579,31 +579,29 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public db_field getLabelField()
   {
+    // check to see if getLabelHook() is used to generate a string
+    // label..  if so, there is no label field per se, and we'll
+    // return null.
+
     String result = objectBase.objectHook.getLabelHook(this);
 
-    if (result == null)
+    if (result != null)
       {
-	// no class for this object.. just go
-	// ahead and use the default label
-	// obtaining bit
+	return null;
+      }
 
-	short val = objectBase.getLabelField();
+    // no calculated label for this object.. just go ahead and use the
+    // default label obtaining bit
+    
+    short val = objectBase.getLabelField();
 
-	if (val == -1)
-	  {
-	    return null;
-	  }
-	else
-	  {
-	    // Ganymede.debug("Getting field " + val + " for label");
+    if (val != -1)
+      {
+	// Ganymede.debug("Getting field " + val + " for label");
 
-	    DBField f = (DBField) getField(val);
+	DBField f = (DBField) getField(val);
 
-	    if (f != null)
-	      {
-		return f;
-	      }
-	  }
+	return f;
       }
 
     return null;
@@ -1364,6 +1362,86 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     return (objectBase.canInactivate() && 
 	    (getFieldValueLocal(SchemaConstants.RemovalField) != null));
+  }
+
+  /**
+   *
+   * This method scans through all fields defined in the DBObjectBase
+   * for this object type and determines if all required fields have
+   * been filled in.  If everything is ok, this method will return
+   * null.  If any required fields are found not to have been filled
+   * out, this method returns a vector of field names that need to
+   * be filled out.
+   *
+   * This method is used by the transaction commit logic to ensure a
+   * consistent transaction. If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will not be
+   * called at transaction commit time.
+   *   
+   */
+
+  public final synchronized Vector checkRequiredFields()
+  {
+    Vector localFields = new Vector();
+    DBObjectBaseField fieldDef;
+    DBField field = null;
+
+    /* -- */
+
+    // assume that the sortedFields will not be changed
+    // at a time when this method is called.  A reasonable
+    // assumption, as sortedFields is only altered when
+    // the schema is being edited.
+
+    for (int i = 0; i < objectBase.sortedFields.size(); i++)
+      {
+	fieldDef = (DBObjectBaseField) objectBase.sortedFields.elementAt(i);
+
+	// we don't care about built in fields.. the transaction and
+	// editing logic will take care of them
+
+	if (fieldDef.isBuiltIn())
+	  {
+	    continue;
+	  }
+
+	try
+	  {
+	    if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
+	      {
+		field = (DBField) getField(fieldDef.getID());
+	    
+		if (field == null || !field.isDefined())
+		  {
+		    localFields.addElement(fieldDef.getName());
+		  }
+	      }
+	  }
+	catch (NullPointerException ex)
+	  {
+	    System.err.println("Null pointer exception in checkRequiredFields().");
+	    ex.printStackTrace();
+	    System.err.println("\n");
+
+	    if (fields == null)
+	      {
+		System.err.println("fields == null");
+	      }
+		
+	    System.err.println("My type is " + getTypeName() + "\nMy invid is " + getInvid());
+	  }
+      }
+
+    // if all required fields checked out, return null to signify success
+
+    if (localFields.size() == 0)
+      {
+	return null;
+      }
+    else
+      {
+	return localFields;
+      }
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 1999/01/26 05:10:49 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 1999/01/27 21:45:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -918,6 +918,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		classdef = null;
 	      }
 	  }
+
+	// if we don't have a custom object hook, use the default
 	
 	if (classdef == null)
 	  {
@@ -1945,6 +1947,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBEditObject getObjectHook()
   {
+    if (objectHook == null)
+      {
+	try
+	  {
+	    objectHook = createHook();
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Error, couldn't create hook in getObjectHook(). " + 
+				       ex.getMessage());
+	  }
+      }
+
     return objectHook;
   }
 

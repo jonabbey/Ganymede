@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/01/26 05:10:50 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/01/27 21:45:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -733,11 +733,17 @@ final public class DBSession {
 
     checkpoint(key);
 
-    System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
+    if (debug)
+      {
+	System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
+      }
 
     retVal = eObj.inactivate();
 
-    System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
+    if (debug)
+      {
+	System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
+      }
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -747,7 +753,7 @@ final public class DBSession {
 
 	    System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
 
-	    rollback(key);
+	    eObj.finalizeInactivate(false);
 	  }
 
 	// otherwise, we've got a wizard that the client will deal with.
