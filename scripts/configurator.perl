@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.27 $
-# $Date: 1999/01/21 20:01:07 $
+# $Revision: 1.28 $
+# $Date: 1999/01/21 22:56:40 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -129,22 +129,32 @@ kits:
 	\@cd $rootdir/src/schemas/bsd/custom_src; \\
 	build; \\
 	buildCustomJar
+	\@cd $rootdir/src/schemas/bsd/loader/souce; \\
+	build
 	\@echo "Compiling GASH schema kit"
 	\@cd $rootdir/src/schemas/gash/custom_src; \\
 	build; \\
 	buildCustomJar
+	\@cd $rootdir/src/schemas/gash/loader/souce; \\
+	build
 	\@echo "Compiling GASHARL schema kit"
 	\@cd $rootdir/src/schemas/gasharl/custom_src; \\
 	build; \\
 	buildCustomJar
+	\@cd $rootdir/src/schemas/gasharl/loader/souce; \\
+	build
 	\@echo "Compiling LINUX schema kit"
 	\@cd $rootdir/src/schemas/linux/custom_src; \\
 	build; \\
 	buildCustomJar
+	\@cd $rootdir/src/schemas/linux/loader/souce; \\
+	build
 	\@echo "Compiling Solaris NIS schema kit"
 	\@cd $rootdir/src/schemas/nisonly/custom_src; \\
 	build; \\
 	buildCustomJar
+	\@cd $rootdir/src/schemas/nisonly/loader/souce; \\
+	build
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
