@@ -8,8 +8,8 @@
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/12/02 09:39:09 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/12/02 09:49:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,6 +76,13 @@ public class copyFile {
 
   public static boolean copyFile(String inputFileName, String outputFileName) throws IOException
   {
+    File outFile = new File(outputFileName);
+
+    if (outFile.exists())
+      {
+	throw new IllegalArgumentException("Error, copyFile called with a pre-existing target");
+      }
+
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(inputFileName));
     BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(outputFileName));
     byte buffer[] = new byte[32767];
