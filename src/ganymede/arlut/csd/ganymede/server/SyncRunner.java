@@ -7,7 +7,7 @@
    Ganymede scheduler (when run, it executes the external service program for
    a given sync channel queue) and for tracking the data associated with the
    sync channel.
-   
+
    Created: 2 February 2005
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -17,9 +17,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2005
    The University of Texas at Austin
 
@@ -73,8 +73,8 @@ import java.util.Vector;
 import com.jclark.xml.output.UTF8XMLWriter;
 
 /*------------------------------------------------------------------------------
-                                                                           class
-                                                                      SyncRunner
+									   class
+								      SyncRunner
 
 ------------------------------------------------------------------------------*/
 
@@ -139,7 +139,7 @@ public class SyncRunner implements Runnable {
     this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
     this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
-    
+
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
     this.matrix = (Hashtable) f.matrix.clone();
@@ -298,7 +298,7 @@ public class SyncRunner implements Runnable {
   public boolean mayInclude(short baseID)
   {
     String x = getOption(baseID);
-    
+
     return (x != null && x.equals("1"));
   }
 
@@ -310,7 +310,7 @@ public class SyncRunner implements Runnable {
   public boolean mayInclude(DBObject object)
   {
     String x = getOption(object.getTypeID());
-    
+
     return (x != null && x.equals("1"));
   }
 
@@ -346,6 +346,11 @@ public class SyncRunner implements Runnable {
 	  case SchemaConstants.CreatorField:
 	  case SchemaConstants.ModificationDateField:
 	  case SchemaConstants.ModifierField:
+	    continue;
+	  }
+
+	if (object.isEmbedded() && memberField.getID() == SchemaConstants.ContainerField)
+	  {
 	    continue;
 	  }
 
@@ -531,7 +536,7 @@ public class SyncRunner implements Runnable {
 	      {
 		runtime = Runtime.getRuntime();
 	      }
-	    
+
 	    try
 	      {
 		FileOps.runProcess(invocation);
