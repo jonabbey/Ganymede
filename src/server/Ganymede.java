@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2001/05/12 23:04:07 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2001/05/13 00:13:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -669,7 +669,21 @@ public class Ganymede {
   {
     if (debug)
       {
-	System.err.println(string);
+	if (GanymedeServer.lSemaphore != null)
+	  {
+	    if (GanymedeServer.lSemaphore.checkEnabled() == null)
+	      {
+		System.err.println(GanymedeServer.lSemaphore.getCount() + "] " + string);
+	      }
+	    else
+	      {
+		System.err.println("*] " + string);
+	      }
+	  }
+	else
+	  {
+	    System.err.println(string);
+	  }
       }
 
     GanymedeAdmin.setStatus(string);
@@ -1560,10 +1574,10 @@ class memoryStatusTask implements Runnable, silentTask {
 	
 	if (count == 0)
 	  {
-	    Ganymede.debug(">> quarter-hourly memory status dump: " +
+	    Ganymede.debug(">> [" + new Date() + "] memory status dump: " +
 			   "in use = " + (rt.totalMemory() - rt.freeMemory()) +
 			   ", free = " + rt.freeMemory() +
-			   ", total = " + rt.totalMemory() + "[" + new Date() + "]");
+			   ", total = " + rt.totalMemory());
 	  }
       }
 
