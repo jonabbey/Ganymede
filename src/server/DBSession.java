@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -529,6 +529,10 @@ public class DBSession {
     editSet = null;
 
     lock.release();
+
+    // remember that we've cleared our lock
+
+    lock = null;
 
     Ganymede.debug("commitTransaction(): writeLock released");
 
