@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -176,24 +176,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    newObject = getSession().createDBObject(fieldDef.getTargetBase(),
 						    null, null);
-	    // link it in
-
-	    InvidDBField invf = (InvidDBField) newObject.getField(SchemaConstants.ContainerField);
-
-	    // we have to use setValueLocal because the permissions system will choke
-	    // on an unlinked embedded object.
-
-	    retVal = invf.setValueLocal(getInvid());
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		System.err.println("*Couldn't create embedded mapEntry object");
-	      }
-	    else
-	      {
-		System.err.println("Created embedded mapEntry object");
-	      }
-	    
 	    return newObject.getInvid();
 	  }
 	else
@@ -562,6 +544,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	else
 	  {
 	    retVal = new ReturnVal(false);
+
 	    JDialogBuff dialog = new JDialogBuff("Reactivate User",
 						 "You must set a password",
 						 "OK",
