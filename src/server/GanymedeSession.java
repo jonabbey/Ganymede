@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.81 $ %D%
+   Version: $Revision: 1.82 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2987,13 +2987,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // own ourself.  We'll then wind up with the default permission
     // object's objects owned privs.
 
-    useSelfPerm = userInvid != null && userInvid.equals(object.getInvid());
+    useSelfPerm = (userInvid != null) && userInvid.equals(object.getInvid());
+
+    // We also want to check to see whether the custom logic for this
+    // object type wants to grant ownership of this object.
+
+    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
+      {
+	useSelfPerm = true;
+      }
 
     // If the current persona owns the object, look to our
     // personaPerms to get the permissions applicable, else
     // look at the default perms
 
-    if (personaMatch(object) || useSelfPerm)
+    if (useSelfPerm || personaMatch(object))
       {
 	if (result == null)
 	  {
@@ -3120,11 +3128,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	objPerm = PermEntry.noPerms;
       }
 
+    // We also want to check to see whether the custom logic for this
+    // object type wants to grant ownership of this object.
+
+    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
+      {
+	useSelfPerm = true;
+      }
+
     // look to see if we have permissions set for the object.. this will
     // be our default permissions for each field in the object unless
     // we have an explicit other permission for the field
 
-    if (personaMatch(containingObj) || useSelfPerm)
+    if (useSelfPerm || personaMatch(containingObj))
       {
 	if (!forceObjPerm)
 	  {
