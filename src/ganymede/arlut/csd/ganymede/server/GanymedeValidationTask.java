@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -78,6 +78,14 @@ public class GanymedeValidationTask implements Runnable {
 
   public static final boolean debug = true;
 
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeValidationTask");
+
+
   // ---
 
   public GanymedeValidationTask()
@@ -104,13 +112,15 @@ public class GanymedeValidationTask implements Runnable {
 
     /* -- */
 
-    Ganymede.debug("Validation Task: Starting");
+    // "Validation Task: Starting"
+    Ganymede.debug(ts.l("run.starting"));
 
     String error = GanymedeServer.lSemaphore.checkEnabled();
 	
     if (error != null)
       {
-	Ganymede.debug("Deferring validation task - semaphore disabled: " + error);
+	// "Deferring validation task = semaphore disabled: {0}"
+	Ganymede.debug(ts.l("run.disabled", error));
 	return;
       }
 
@@ -122,7 +132,8 @@ public class GanymedeValidationTask implements Runnable {
 	  }
 	catch (RemoteException ex)
 	  {
-	    Ganymede.debug("Validation Task: Couldn't establish session");
+	    // "Validation Task: Couldn''t establish session:\n{0}"
+	    Ganymede.debug(ts.l("run.nosession", Ganymede.stackTrace(ex)));
 	    return;
 	  }
 
@@ -136,7 +147,8 @@ public class GanymedeValidationTask implements Runnable {
 	  {
 	    if (currentThread.isInterrupted())
 	      {
-		throw new InterruptedException("task interrupted.");
+		// "task interrupted."
+		throw new InterruptedException(ts.l("run.interrupted"));
 	      }
 
 	    base = (DBObjectBase) baseEnum.nextElement();
@@ -145,14 +157,15 @@ public class GanymedeValidationTask implements Runnable {
 	    
 	    if (debug)
 	      {
-		Ganymede.debug("Scanning base " + base.getName() + " for invalid objects");
+		// "Scanning base {0} for invalid objects"
+		Ganymede.debug(ts.l("run.scanning", base.getName()));
 	      }
 
 	    for (int i = 0; i < objects.size(); i++)
 	      {
 		if (currentThread.isInterrupted())
 		  {
-		    throw new InterruptedException("task interrupted.");
+		    throw new InterruptedException(ts.l("run.interrupted"));
 		  }
 
 		object = (DBObject) objects.elementAt(i);
@@ -161,16 +174,41 @@ public class GanymedeValidationTask implements Runnable {
 
 		if (missingFields != null)
 		  {
-		    Ganymede.debug(base.getName() + ":" + object.getLabel() + " is missing fields " +
-				   VectorUtils.vectorString(missingFields));
+		    // "{0}:{1} is missing fields {2}"
+		    Ganymede.debug(ts.l("run.missing", base.getName(), object.getLabel(), VectorUtils.vectorString(missingFields)));
+
 		    everythingsfine = false;
 		  }
 
-		ReturnVal retVal = object.getBase().getObjectHook().consistencyCheck(object);
+		ReturnVal retVal;
 
-		if (retVal != null && !retVal.didSucceed())
+		try
 		  {
-		    Ganymede.debug(base.getName() + ":" + object.getLabel() + " failed consistency check");
+		    retVal = object.getBase().getObjectHook().consistencyCheck(object);
+
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			String dialogText = retVal.getDialogText();
+			
+			if (dialogText != null)
+			  {
+			    // {0}:{1} failed consistency check: {2}
+			    Ganymede.debug(ts.l("run.inconsistent", base.getName(), object.getLabel(), dialogText));
+			  }
+			else
+			  {
+			    // {0}:{1} failed consistency check
+			    Ganymede.debug(ts.l("run.inconsistent_notext", base.getName(), object.getLabel()));
+			  }
+			
+			everythingsfine = false;
+		      }
+		  }
+		catch (Throwable ex)
+		  {
+		    // "{0}:{1} threw exception in consistencyCheck():\n{2}"
+		    Ganymede.debug(ts.l("run.exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
+
 		    everythingsfine = false;
 		  }
 	      }
@@ -178,20 +216,24 @@ public class GanymedeValidationTask implements Runnable {
 
 	if (everythingsfine)
 	  {
-	    Ganymede.debug("Validation Task: All objects in database checked out fine.");
+	    // "Validation Task: All objects in database checked out fine."
+	    Ganymede.debug(ts.l("run.ok"));
 	  }
 	else
 	  {
-	    Ganymede.debug("Validation Task: Some objects had missing fields.");
+	    // "Validation Task: Some objects had missing fields or were otherwise inconsistent."
+	    Ganymede.debug(ts.l("run.bad"));
 	  }
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete.");
+	// "GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete."
+	Ganymede.debug(ts.l("run.interrupted_explanation"));
       }
     catch (NotLoggedInException ex)
       {
-	Ganymede.debug("Mysterious not logged in exception: " + ex.getMessage());
+	// "Mysterious not logged in exception: {0}"
+	Ganymede.debug(ts.l("run.mysterious_nologin", Ganymede.stackTrace(ex)));
       }
     finally
       {
