@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -153,7 +153,7 @@ public class DBEditSet {
    * 
    */
 
-  synchronized boolean commit()
+  public synchronized boolean commit()
   {
     DBWriteLock wLock;
     Vector baseSet;
@@ -267,7 +267,7 @@ public class DBEditSet {
    *
    */
 
-  synchronized void release()
+  public synchronized void release()
   {
     while (objectsCreated.size() > 0)
       {
