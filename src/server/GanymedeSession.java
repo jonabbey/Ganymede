@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.96 $ %D%
+   Version: $Revision: 1.97 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3239,8 +3239,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	Ganymede.debug("Attempting to delete object: " + invid);
       }
 
-    if ((invid.getType() == SchemaConstants.PermBase) &&
-	(invid.getNum() == SchemaConstants.PermDefaultObj))
+    if ((invid.getType() == SchemaConstants.RoleBase) &&
+	(invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
 	setLastError("Can't delete default permissions definitions"); // for logging
 
@@ -3805,7 +3805,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    pField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermDefaultMatrix);
+    pField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleDefaultMatrix);
 
     if (pField == null)
       {
@@ -3837,14 +3837,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (permBase == null)
       {
-	permBase = Ganymede.db.getObjectBase(SchemaConstants.PermBase);
+	permBase = Ganymede.db.getObjectBase(SchemaConstants.RoleBase);
       }
 
     // first, make sure we have a copy of defaultObj
 
     if (permTimeStamp == null || !permTimeStamp.before(permBase.lastChange))
       {
-	defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
+	defaultObj = session.viewDBObject(SchemaConstants.RoleBase, SchemaConstants.RoleDefaultObj);
 
 	if (defaultObj == null)
 	  {
@@ -3926,7 +3926,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    resetDefaultPerms();
 
-	    permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix);
+	    permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
 
 	    if (permField == null)
 	      {
@@ -4008,7 +4008,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		resetDefaultPerms();
 
-		permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix);
+		permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
 
 		if (permField == null)
 		  {
@@ -4056,8 +4056,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			    // personaPerms is the union of all permissions applicable to objects that
 			    // are owned by this persona
 
-			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermMatrix);
-			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.PermDefaultMatrix);
+			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
+			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
 
 			    personaPerms = personaPerms.union(pmdbf).union(pmdbf2);
 			    defaultPerms = defaultPerms.union(pmdbf2);

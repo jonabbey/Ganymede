@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -567,39 +567,39 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	defaultInv = new Invid(SchemaConstants.PermBase,
-				SchemaConstants.PermDefaultObj);
+	defaultInv = new Invid(SchemaConstants.RoleBase,
+				SchemaConstants.RoleDefaultObj);
 
 	if (internalSession.session.viewDBObject(defaultInv) == null)
 	  {
-	    System.err.println("Creating the PermDefaultObj");
+	    System.err.println("Creating the RoleDefaultObj");
 
 	    // need to create the self perm object
 
-	    // create SchemaConstants.PermDefaultObj
+	    // create SchemaConstants.RoleDefaultObj
 
-	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, 
+	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.RoleBase, 
 									     defaultInv,
 									     null);
 	    
-	    s = (StringDBField) e_object.getField(SchemaConstants.PermName);
+	    s = (StringDBField) e_object.getField(SchemaConstants.RoleName);
 	    s.setValue("Default Permissions");
 	
 	    // By default, users will be able to view themselves and all their fields, anything
 	    // else will have to be manually configured by the supergash administrator.
 	
-	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermMatrix);
+	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleMatrix);
 	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); 
 
 	    // By default, users will not be able to view, create, or edit anything.  The supergash
 	    // administrator is free to reconfigure this.
 	
-	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermDefaultMatrix);
+	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleDefaultMatrix);
 	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false, false)); 
 	  }
 	else
 	  {
-	    System.err.println("Not Creating the PermDefaultObj");
+	    System.err.println("Not Creating the RoleDefaultObj");
 	  }
 
 	ReturnVal retVal = internalSession.commitTransaction();
