@@ -2,21 +2,24 @@
 
    LDAPBuilderTask.java
 
-   This class is intended to dump the Ganymede datastore to a Mac OS
+   This class is intended to dump the Directory Droid datastore to a Mac OS
    X/RFC 2307 LDAP environment by way of LDIF.
    
    Created: 22 March 2004
-   Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2004/03/24 04:22:03 $
+
+   Last Revision Changed: $Rev: 5456 $
+   Last Changed By: $Author: deepak $
+   Last Mod Date: $Date: 2004-07-19 15:57:58 -0500 (Mon, 19 Jul 2004) $
+   SVN URL: $HeadURL: http://db1/svn/ganymede/trunk/ddroid/src/schemas/gasharl/src/arlut/csd/ddroid/gasharl/LDAPBuilderTask.java $
+
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
-   Ganymede Directory Management System
+   Directory Droid Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   The University of Texas at Austin.
+   Copyright (C) 1996-2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -58,12 +61,12 @@ import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.FileOps;
 
+import net.iharder.xmlizable.Base64;
+
 import java.util.*;
 import java.text.*;
 import java.io.*;
 import java.rmi.*;
-
-import net.iharder.xmlizable.Base64;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,7 +76,7 @@ import net.iharder.xmlizable.Base64;
 
 /**
  *
- * This class is intended to dump the Ganymede datastore to a Mac OS
+ * This class is intended to dump the Directory Droid datastore to a Mac OS
  * X/RFC 2307 LDAP environment by way of LDIF.
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
@@ -124,8 +127,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   public boolean builderPhase1()
   {
     PrintWriter out;
-    boolean success = false;
-
+    
     /* -- */
 
     Ganymede.debug("LDAPBuilderTask builderPhase1 running");
@@ -157,7 +159,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open users.ldif file: " + ex);
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open users.ldif file: " + ex);
 	  }
 	
 	if (out != null)
@@ -188,7 +190,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open groups.ldif file: " + ex);
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open groups.ldif file: " + ex);
 	  }
 
 	if (out != null)
@@ -210,13 +212,64 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 		out.close();
 	      }
 	  }
+      }
 
-	success = true;
+    if (baseChanged(SchemaConstants.UserBase) ||
+        /* Groups */
+        baseChanged((short) 257) ||
+        /* User netgroups */
+        baseChanged((short) 270) ||
+        /* Systems */
+        baseChanged((short) 263) ||
+        /* System netgroups */
+        baseChanged((short) 271))
+      {
+        /* Reset some of our locals for this second pass */
+	out = null;
+  
+	try
+	  {
+	    out = openOutFile(path + "netgroups.ldif", "ldap");
+	  }
+	catch (IOException ex)
+	  {
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open netgroups.ldif file: " + ex);
+	  }
+	  
+	if (out != null)
+	  {
+	    try
+	      {
+		DBObject netgroup;
+		
+		// First we'll do the user netgroups
+		Enumeration netgroups = enumerateObjects((short) 270);
+		
+		while (netgroups.hasMoreElements())
+		  {
+		    netgroup = (DBObject) netgroups.nextElement();
+		    writeLDIFNetgroupEntry(out, netgroup);
+		  }
+		  
+		// And now for the system netgroups
+		netgroups = enumerateObjects((short) 271);
+    
+		while (netgroups.hasMoreElements())
+		  {
+		    netgroup = (DBObject) netgroups.nextElement();
+		    writeLDIFNetgroupEntry(out, netgroup);
+		  }
+	      }
+	    finally
+	      {
+		out.close();
+	      }
+	  }
       }
 
     Ganymede.debug("LDAPBuilderTask builderPhase1 completed");
 
-    return success;
+    return true;
   }
 
   /**
@@ -412,6 +465,83 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     out.println();
   }
+  
+  private void writeLDIFNetgroupEntry(PrintWriter out, DBObject netgroup)
+  {
+    String 
+      name,
+      membername,
+      attrvalue;
+    
+    Vector
+      contents, 
+      memberNetgroups;
+    
+    Invid
+      invid;
+      
+    /* Let's figure out what kind of netgroup this is: user or system */
+    short typeid = netgroup.getTypeID();
+    
+    if (typeid == 270)
+      {
+        /* This is a user netgroup */
+        name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+        contents = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
+        memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+      }
+    else
+      {
+        /* This is a system netgroup */
+        name = (String) netgroup.getFieldValueLocal(systemNetgroupSchema.NETGROUPNAME);
+        contents = netgroup.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
+        memberNetgroups = netgroup.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
+      }
+      
+    /* Write out the LDIF header for this netgroup. We'll make the CN the netgroup name. */
+    writeLDIF(out, "dn", "cn=" + name + ",cn=netgroups,dc=xserve");
+    writeLDIF(out, "objectclass", "nisNetgroup");
+    writeLDIF(out, "cn", name);
+    
+    if (contents != null)
+      {
+        for (Iterator iter = contents.iterator(); iter.hasNext();)
+          {
+            invid = (Invid) iter.next();
+            membername = getLabel(invid);
+            typeid = invid.getType();
+    
+            /* The members of this netgroup can either be User objects or System objects.
+             * We need to write out the correct LDIF triple for each case. An LDIF netgroup
+             * triple is of the form (hostname,username,domain), where each part is optional.
+             */
+            
+            if (typeid == SchemaConstants.UserBase)
+              {
+                writeLDIF(out, "nisNetgroupTriple", "(," + membername + ",)");
+              }
+            else if (typeid == 263) 
+              {
+                writeLDIF(out, "nisNetgroupTriple", "(" + membername + ",,)");
+              }
+          }
+      }
+     
+    /* This part handles prining out what sub-netgroups belong to this one. This
+     * is done by using the LDAP attribute "memberNisNetgroup". */
+    
+    if (memberNetgroups != null)
+      {
+        for (Iterator iter = memberNetgroups.iterator(); iter.hasNext();)
+          {
+            invid = (Invid) iter.next();
+            membername = getLabel(invid);
+            writeLDIF(out, "memberNisNetgroup", membername);
+          }
+      }
+     
+    out.println();    
+  }
 
   /**
    * This private method writes out an attribute/value pair, doing whatever encoding
@@ -447,7 +577,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     out.print(attribute);
     out.print(":: ");
     
-    String binaryEncoded = fixNewlines(Base64.encodeString(value));
+    String binaryEncoded = fixNewlines(Base64.encodeBytes(value.getBytes()));
 
     if (binaryEncoded.indexOf('\n') != -1)
       {
