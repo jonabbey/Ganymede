@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2001/06/29 07:58:42 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2001/06/29 20:01:42 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,16 +82,17 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.31 $ $Date: 2001/06/29 07:58:42 $ $Name:  $
+ * @version $Revision: 1.32 $ $Date: 2001/06/29 20:01:42 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
 
-public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener {
+public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener, 
+						     arlut.csd.Util.Compare {
 
   static final boolean debug = false;
 
-  // -- 
+  // ---
 
   int 
     width,
@@ -100,13 +101,32 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   DefaultListModel 
     model = new DefaultListModel();
 
-  private boolean
-    dragOk = false,
-    presorted = false,
-    allowCallback = false;
+  /**
+   * <p>If true, this JstringListBox will allow nodes to be dragged up and
+   * down in the list.</p>
+   */
+
+  private boolean dragOk = false;
+
+  /**
+   * <p>If true, the JstringListBox will sort items.  This variable is set
+   * by the value of the sort parameter in the most recent 
+   * {@link arlut.csd.JDataComponent.JstringListBox#load(java.util.Vector,int,boolean,arlut.csd.Util.Compare) load()}
+   * call.</p>
+   */
+
+  private boolean doSort = false;
+
+  /**
+   * <p>The callback we'l use to report user activities.</p>
+   */
 
   JsetValueCallback 
-    my_parent;
+    callback;
+
+  /**
+   * <p>The popup menu to be displayed on right-click.</p>
+   */
 
   JPopupMenu
     popup = null;
@@ -115,8 +135,13 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     startDragIndex = -1,
     dragNode = -1;
 
-  private int
-    selectedNode = -1;
+  /**
+   * <p>The comparator to use for putting items in sort order if the
+   * JstringListBox was most recently with sorting request.</p>
+   */
+
+  arlut.csd.Util.Compare
+    comparator;
 
   /* -- */
 
@@ -130,7 +155,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     addMouseListener(this);
     addMouseMotionListener(this);
+    setDragEnabled(true);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    getSelectionModel().addListSelectionListener(this);
   }
 
   /**
@@ -200,10 +227,19 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    return;
 	  }
 
-	if (sort)
-	  {
-	    presorted = false;
+	doSort = sort;
 
+	if (comparator == null)
+	  {
+	    this.comparator = this;
+	  }
+	else
+	  {
+	    this.comparator = comparator;
+	  }
+
+	if (doSort)
+	  {
 	    new VecQuickSort(items, comparator).sort();
 	  }
 	
@@ -295,6 +331,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
    * <li><b>ADD</b>Object has been selected.  Value is the object (or string) selected.</li>
    * <li><b>INSERT</b>Object has been double-clicked.  Value is the object (or string) double-clicked.</li>
+   * <li><b>MOVE</b>Object has been dragged up or down.  Value is an Integer for the index the object has been moved to.</li>
    * </ul>
    * </p>
    *
@@ -303,23 +340,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    *
    */
 
-  public void setCallback(JsetValueCallback parent)
+  public void setCallback(JsetValueCallback callback)
   {
     if (debug)
       {
 	System.out.println("Setting callback in JstringListBox");
       }
 
-    if (parent == null)
-      {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
-      }
-    
-    getSelectionModel().addListSelectionListener(this);
-
-    my_parent = parent;
-
-    allowCallback = true;
+    this.callback = callback;
   }
 
   /**
@@ -336,25 +364,23 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	lh = new listHandle((String)o, (String)o);
       }
-    else if (o instanceof listHandle)
+    else			// we'll throw a ClassCastException if we need to
       {
 	lh = (listHandle)o;
       }
-    else
-      {
-	System.err.println("You gave me an object that is neither String nor listHandle: " + o);
-      }
 
-    if (presorted)
+    if (doSort)
       {
 	int i = 0;
-	
 	int total = model.getSize();
-	while ((i < total) && (lh.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+
+	// find the insertion point
+
+	while ((i < total) && (comparator.compare(lh, model.getElementAt(i))>0))
 	  {
 	    i++;
 	  }
-	
+	    
 	insertHandleAt(lh, i);
       }
     else
@@ -556,13 +582,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	setSelectedValue(o, true); // use the JList.setSelectedValue(Object, boolean shouldScroll)
       }
-    else if (o instanceof String)
+    else			// we'll throw ClassCastException if we need to
       {
 	setSelectedLabel((String)o);
-      }
-    else
-      {
-	System.out.println("What kind of object? " + o);
       }
   }
 
@@ -657,15 +679,15 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	return;			// don't notify our container on deselect
       }
 
-    if (allowCallback)
+    if (callback != null)
       {
 	boolean ok = false;
 
 	try 
 	  {
-	    ok = my_parent.setValuePerformed(new JValueObject(this, 
-							      selectedIndex,
-							      JValueObject.ADD));
+	    ok = callback.setValuePerformed(new JValueObject(this, 
+							     selectedIndex,
+							     JValueObject.ADD));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
@@ -681,13 +703,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    //put it back
 	  }
       }
-    else
-      {
-	if (debug)
-	  {
-	    System.out.println("allowCallback = false");
-	  }
-      }
   }
 
   /**
@@ -698,7 +713,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void mouseClicked(MouseEvent e)
   {
-    if (allowCallback)
+    if (callback != null)
       {
 	if (SwingUtilities.isLeftMouseButton(e))
 	  {
@@ -718,9 +733,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 		try
 		  {
-		    ok = my_parent.setValuePerformed(new JValueObject(this, 
-								      index,
-								      JValueObject.INSERT));
+		    ok = callback.setValuePerformed(new JValueObject(this, 
+								     index,
+								     JValueObject.INSERT));
 		  }
 		catch (java.rmi.RemoteException rx)
 		  {
@@ -803,10 +818,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	dragNode = -1;
 	startDragIndex = -1;
-
 	return;
       }
 
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
     dragNode = locationToIndex(e.getPoint());
     startDragIndex = dragNode;
   }
@@ -821,16 +836,16 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (startDragIndex != -1)
       {
-	if (allowCallback && my_parent != null)
+	if (callback != null)
 	  {
 	    boolean ok = false;
 
 	    try 
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
-								  startDragIndex,
-								  JValueObject.MOVE,
-								  dragNode));
+		ok = callback.setValuePerformed(new JValueObject(this, 
+								 startDragIndex,
+								 JValueObject.MOVE,
+								 dragNode));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
@@ -844,6 +859,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
       }
 
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     dragNode = -1;
     startDragIndex = -1;
   }
@@ -896,7 +912,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void actionPerformed(ActionEvent e)
   {
-    if (allowCallback)
+    if (callback != null)
       {
 	if (e.getSource() instanceof JMenuItem)
 	  {
@@ -920,11 +936,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    try
 	      {
-		my_parent.setValuePerformed(new JValueObject(this,
-							     popUpIndex,
-							     JValueObject.PARAMETER,
-							     popSelectedItem,
-							     string));
+		callback.setValuePerformed(new JValueObject(this,
+							    popUpIndex,
+							    JValueObject.PARAMETER,
+							    popSelectedItem,
+							    string));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
@@ -932,5 +948,15 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	      }
 	  }
       }
+  }
+
+  /**
+   * <p>Default comparator, does a string comparison on the
+   * toString() output of the objects for ordering.</p>
+   */
+
+  public int compare(Object a, Object b)
+  {
+    return a.toString().compareTo(b.toString());
   }
 }
