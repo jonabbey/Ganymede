@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,8 +70,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public DBEditObject() throws RemoteException
+  public DBEditObject(DBObjectBase base) throws RemoteException
   {
+    this.objectBase = base;
     editset = null;		// this will be our cue to our static handle status for our methods
   }
 
@@ -155,6 +156,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	      case PASSWORD:
 		tmp = new PasswordDBField(this, fieldDef);
+		break;
+
+	      case IP:
+		tmp = new IPDBField(this, fieldDef);
 		break;
 
 	      }
@@ -250,6 +255,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		tmp = new PasswordDBField(this, (PasswordDBField) field);
 		break;
 
+	      case IP:
+		tmp = new IPDBField(this, (IPDBField) field);
+		break;
 	      }
 
 	    if (tmp != null)
@@ -302,6 +310,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		  case PASSWORD:
 		    tmp = new PasswordDBField(this, fieldDef);
+		    break;
+
+		  case IP:
+		    tmp = new IPDBField(this, fieldDef);
 		    break;
 
 		  }
@@ -471,6 +483,36 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public boolean canRead(DBSession session, DBObject object)
   {
     return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of DBField will
+   * wind up calling up to here to let us override the normal visibility
+   * process.
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    // by default, return the field definition's visibility
+
+    if (field.getFieldDef().base != this.objectBase)
+      {
+	throw new IllegalArgumentException("field/object mismatch");
+      }
+
+    return field.getFieldDef().isVisible(); 
   }
 
   /**
@@ -789,7 +831,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return true;
   }
-
 
   /**
    *
