@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2002/01/14 22:24:13 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2002/01/26 04:49:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.103 $ %D%
+ * @version $Revision: 1.104 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -229,6 +229,7 @@ final public class DBSession {
     store = null;
     GSession = null;
     lockVect = null;
+    key = null;
   }
 
   /**

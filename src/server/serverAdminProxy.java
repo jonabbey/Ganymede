@@ -11,15 +11,15 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/02/08 22:52:14 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2002/01/26 04:49:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.17 $ $Date: 2001/02/08 22:52:14 $
+ * @version $Revision: 1.18 $ $Date: 2002/01/26 04:49:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -116,14 +116,6 @@ public class serverAdminProxy implements Admin, Runnable {
    */
 
   private boolean done = false;
-
-  /**
-   * <p>If our commThread receives a remote exception when communicating
-   * with an admin console, this field will become non-null, and no more
-   * communications will be attempted with that console.</p>
-   */
-
-  private String errorCondition;
 
   /**
    * <p>Handy direct look-up table for events in eventBuffer</p>
@@ -409,12 +401,13 @@ public class serverAdminProxy implements Admin, Runnable {
   public void run()
   {
     adminEvent event;
+    String errorCondition = null;
 
     /* -- */
 
     try
       {
-	while (!done || (eventBuffer.size() != 0))
+	while (!(done && eventBuffer.size() == 0))
 	  {
 	    synchronized (eventBuffer)
 	      {
@@ -483,7 +476,6 @@ public class serverAdminProxy implements Admin, Runnable {
 	remoteConsole = null;
 	lookUp = null;
 	commThread = null;
-	errorCondition = null;
       }
   }
 

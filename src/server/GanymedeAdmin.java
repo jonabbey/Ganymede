@@ -9,15 +9,15 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2001/08/14 16:42:03 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2002/01/26 04:49:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.53 $ $Date: 2001/08/14 16:42:03 $
+ * @version $Revision: 1.54 $ $Date: 2002/01/26 04:49:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -88,7 +88,10 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   /**
    * Static vector of GanymedeAdmin instances, used to
-   * keep track of the attached admin consoles.
+   * keep track of the attached admin consoles.  
+   *
+   * Several other classes use this Vector, so we can't keep it private.
+   * Be sure and synchronize on consoles if you loop over it.
    */
 
   static Vector consoles = new Vector();
@@ -128,41 +131,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   private static long totalMem;
 
+  /* -----====================--------------------====================-----
 
-  /* --- */
+			         static methods
 
-  /**
-   * The name that the admin console authenticated with.  We
-   * keep it here rather than asking the console later so that
-   * the console can't decide it should call itself 'supergash'
-   * at some later point.
-   */
+     -----====================--------------------====================----- */
 
-  private String adminName;
-
-  /**
-   * The name or ip address of the system that this admin console
-   * is attached from.
-   */
-
-  private String clientHost;
-
-  /**
-   * If true, the admin console is attached with full privileges to
-   * run tasks, shut down the server, and so on.  If false, the user
-   * just has privileges to watch the server's operation.
-   */
-
-  private boolean fullprivs = false;
-
-  /**
-   * <p>A server-side proxy that maintains an event queue for the admin
-   * console attached to this GanymedeAdmin object.</p>
-   */
-
-  serverAdminProxy proxy;
-  
-  /* -- */
 
   /**
    * This static method is used to send debug log info to
@@ -203,11 +177,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	      }
 	    catch (RemoteException ex)
 	      {
-		// don't call Ganymede.debug() here or we'll get into an infinite
-		// loop if we have any problems.
-
-		System.err.println("Couldn't update Status on an admin console" + ex);
-		badConsoles.addElement(temp);
+		handleConsoleRMIFailure(temp, ex);
 	      }
 	  }
       }
@@ -231,33 +201,19 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	for (int i = 0; i < consoles.size(); i++)
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
-	    
-	    updateTransCount(temp);
+
+	    try
+	      {
+		temp.doUpdateTransCount();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-  /**
-   * This static method is used to send the current transcount
-   * to an individual consoles.
-   */
-
-  public static void updateTransCount(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we'll get into an
-	// infinite loop if we have any problems.
-
-	System.err.println("Couldn't update transaction count on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   /**
@@ -288,31 +244,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    updateLastDump(temp);
+	    try
+	      {
+		temp.doUpdateLastDump();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-  /**
-   * This method updates the last dump time on a single
-   * console
-   */
-
-  public static void updateLastDump(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.setLastDumpTime(GanymedeAdmin.lastDumpDate);
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we'll get into an infinite
-	// loop if we have any problems.
-	System.err.println("Couldn't update dump date on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   /**
@@ -344,32 +287,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    updateMemState(temp);
+	    try
+	      {
+		temp.doUpdateMemState();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-
-  /**
-   * This method updates the server's memory status on a
-   * single connected admin console.
-   */
-
-  public static void updateMemState(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.setMemoryState(GanymedeAdmin.freeMem, GanymedeAdmin.totalMem);
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we could get into an infinite
-	// loop if we have any problems.
-	System.err.println("Couldn't update memory state on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   /**
@@ -388,32 +317,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    updateCheckedOut(temp);
+	    try
+	      {
+		temp.doUpdateCheckedOut();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-  /**
-   * This method updates the objects checked out count on a single
-   * console
-   */
-
-  public static void updateCheckedOut(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we'll get into an infinite
-	// loop if we have any problems.
-
-	System.err.println("Couldn't update objects checked out count on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   public static void updateLocksHeld()
@@ -428,32 +343,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    updateLocksHeld(temp);
+	    try
+	      {
+		temp.doUpdateLocksHeld();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-  /**
-   * This method updates the number of locks held on a single
-   * console
-   */
-
-  public static void updateLocksHeld(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.setLocksHeld(Ganymede.db.lockSync.getLockCount());
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we'll get into an infinite
-	// loop if we have any problems.
-
-	System.err.println("Couldn't update locks held on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   /**
@@ -463,20 +364,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   public static void setState(String state)
   {
-    GanymedeAdmin.state = state;
-    setState();
-  }
-
-  /**
-   * This method updates the state on all
-   * attached consoles
-   */
-
-  public static void setState()
-  {
     GanymedeAdmin temp;
 
     /* -- */
+
+    GanymedeAdmin.state = state;
 
     synchronized (GanymedeAdmin.consoles)
       {
@@ -484,32 +376,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    setState(temp);
+	    try
+	      {
+		temp.doSetState();
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
 	  }
       }
 
     detachBadConsoles();
-  }
-
-  /**
-   * This method updates the state on a single
-   * console
-   */
-
-  public static void setState(GanymedeAdmin console)
-  {
-    try
-      {
-	console.proxy.changeState(GanymedeAdmin.state);
-      }
-    catch (RemoteException ex)
-      {
-	// don't call Ganymede.debug() here or we'll get into an infinite
-	// loop if we have any problems.
-
-	System.err.println("Couldn't update Status on an admin console" + ex);
-	badConsoles.addElement(console);
-      }
   }
 
   /**
@@ -538,12 +416,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	    
 	    try
 	      {
-		temp.proxy.changeUsers(entries);
+		temp.doRefreshUsers(entries);
 	      }
 	    catch (RemoteException ex)
 	      {
-		Ganymede.debug("Couldn't update user list on an admin console" + ex);
-		badConsoles.addElement(temp);
+		handleConsoleRMIFailure(temp, ex);
 	      }
 	  }
       }
@@ -578,18 +455,99 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	    try
 	      {
-		temp.proxy.changeTasks(scheduleHandles);
+		temp.doRefreshTasks(scheduleHandles);
 	      }
 	    catch (RemoteException ex)
 	      {
-		Ganymede.debug("Couldn't update task list on an admin console" + ex);
-		badConsoles.addElement(temp);
+		handleConsoleRMIFailure(temp, ex);
 	      }
 	  }
       }
 
     detachBadConsoles();
   }
+
+  /**
+   * <p>This method handles communications link failures.  Note that
+   * the serverAdminProxy will handle single instances of admin
+   * console RemoteExceptions so that only two RemoteExceptions in
+   * sequence will raise a RemoteException.</p>
+   */
+
+  private final static void handleConsoleRMIFailure(GanymedeAdmin console, RemoteException ex)
+  {
+    // don't use Ganymede.debug so that we can avoid infinite loops
+    // during error handling
+
+    System.err.println("Communications failure to " + console.toString());
+    badConsoles.addElement(console);
+  }
+
+  /**
+   * This is a private convenience function, it's purpose is to 
+   * out any consoles that we caught a remote exception from, 
+   * the context of a loop over consoles that we might interfere 
+   * here.
+   */
+   
+  private static void detachBadConsoles()
+  {
+    GanymedeAdmin temp;
+
+    /* -- */
+
+    synchronized (GanymedeAdmin.consoles)
+      {
+	for (int i=0; i < badConsoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) badConsoles.elementAt(i);
+
+	    // the logout() method will cause the console to remove
+	    // itself from the static GanymedeAdmin.consoles vecotr,
+	    // which is why we are synchronized on
+	    // GanymedeAdmin.consoles here.
+
+	    temp.logout("error communicating with console");
+	  }
+
+	badConsoles.setSize(0);
+      }
+  }
+
+  /* --- */
+
+  /**
+   * The name that the admin console authenticated with.  We
+   * keep it here rather than asking the console later so that
+   * the console can't decide it should call itself 'supergash'
+   * at some later point.
+   */
+
+  private String adminName;
+
+  /**
+   * The name or ip address of the system that this admin console
+   * is attached from.
+   */
+
+  private String clientHost;
+
+  /**
+   * If true, the admin console is attached with full privileges to
+   * run tasks, shut down the server, and so on.  If false, the user
+   * just has privileges to watch the server's operation.
+   */
+
+  private boolean fullprivs = false;
+
+  /**
+   * <p>A server-side proxy that maintains an event queue for the admin
+   * console attached to this GanymedeAdmin object.</p>
+   */
+
+  serverAdminProxy proxy;
+  
+  /* -- */
 
   /**
    * <p>This is the GanymedeAdmin constructor, used to create a new
@@ -623,17 +581,111 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     consoles.addElement(this);	// this can block if we are currently looping on consoles
 
-    admin.setServerStart(Ganymede.startTime);
-    updateTransCount(this);
-    updateLastDump(this);
-    updateCheckedOut(this);
-    updateLocksHeld(this);
-    updateMemState(this);
-    setState(this);
-    
-    refreshUsers();
-    refreshTasks();
+    try
+      {
+	admin.setServerStart(Ganymede.startTime);
+	doUpdateTransCount();
+	doUpdateTransCount();
+	doUpdateLastDump();
+	doUpdateCheckedOut();
+	doUpdateLocksHeld();
+	doUpdateMemState();
+	doSetState();
+	
+	doRefreshUsers(GanymedeServer.getUserTable());
+	doRefreshTasks(Ganymede.scheduler.reportTaskInfo());
+      }
+    catch (RemoteException ex)
+      {
+	handleConsoleRMIFailure(this, ex);
+      }
   }
+
+  /**
+   * <p>This private method is used to update this admin console
+   * handle's transaction count.</p>
+   */
+
+  private void doUpdateTransCount() throws RemoteException
+  {
+    proxy.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
+  }
+
+  /**
+   * This private method updates the last dump time on this admin
+   * console
+   */
+
+  private void doUpdateLastDump() throws RemoteException
+  {
+    proxy.setLastDumpTime(GanymedeAdmin.lastDumpDate);
+  }
+
+  /**
+   * This private method updates the memory statistics display on this
+   * admin console
+   */
+
+  private void doUpdateMemState() throws RemoteException
+  {
+    proxy.setMemoryState(GanymedeAdmin.freeMem, GanymedeAdmin.totalMem);
+  }
+
+  /**
+   * This private method updates the objects checked out display on
+   * this admin console 
+   */
+
+  private void doUpdateCheckedOut() throws RemoteException
+  {
+    proxy.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
+  }
+
+  /**
+   * This private method updates the number of locks held display on
+   * this admin console
+   */
+
+  private void doUpdateLocksHeld() throws RemoteException
+  {
+    proxy.setLocksHeld(Ganymede.db.lockSync.getLockCount());
+  }
+
+  /**
+   * This private method updates the server state display on
+   * this admin console
+   */
+
+  private void doSetState() throws RemoteException
+  {
+    proxy.changeState(GanymedeAdmin.state);
+  }
+
+  /**
+   * This private method updates the user status table on
+   * this admin console
+   */
+
+  private void doRefreshUsers(Vector entries) throws RemoteException
+  {
+    proxy.changeUsers(entries);
+  }
+
+  /**
+   * This private method updates the task status table on
+   * this admin console
+   */
+
+  private void doRefreshTasks(Vector scheduleHandles) throws RemoteException
+  {
+    proxy.changeTasks(scheduleHandles);
+  }
+
+  /* -----====================--------------------====================-----
+
+			    remotely callable methods
+
+     -----====================--------------------====================----- */
 
   /**
    *
@@ -702,16 +754,16 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   public void refreshMe() throws RemoteException
   {
     proxy.setServerStart(Ganymede.startTime);
-    updateTransCount(this);
-    updateLastDump(this);
-    updateCheckedOut(this);
-    updateLocksHeld(this);
-    updateMemState(this);
+    doUpdateTransCount();
+    doUpdateLastDump();
+    doUpdateCheckedOut();
+    doUpdateLocksHeld();
+    doUpdateMemState();
     proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
-    setState(this);
+    doSetState();
 
-    refreshUsers();
-    refreshTasks();
+    doRefreshUsers(GanymedeServer.getUserTable());
+    doRefreshTasks(Ganymede.scheduler.reportTaskInfo());
   }
 
   /**
@@ -1132,32 +1184,15 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
       }
   }
 
-  /**
-   * This is a private convenience function, it's purpose is to 
-   * out any consoles that we caught a remote exception from, 
-   * the context of a loop over consoles that we might interfere 
-   * here.
-   */
-   
-  private static void detachBadConsoles()
+  public String toString()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
-    synchronized (GanymedeAdmin.consoles)
+    if (fullprivs)
       {
-	for (int i=0; i < badConsoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) badConsoles.elementAt(i);
-
-	    // this will affect consoles, which is why we are
-	    // synchronized on GanymedeAdmin.consoles.
-
-	    temp.logout("error communicating with console");
-	  }
-
-	badConsoles.setSize(0);
+	return "console: " + adminName + " on " + clientHost + " with full access";
+      }
+    else
+      {
+	return "console: " + adminName + " on " + clientHost + " with monitor access";
       }
   }
 }

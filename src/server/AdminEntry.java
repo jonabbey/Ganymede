@@ -7,15 +7,15 @@
    
    Created: 3 February 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/01/29 02:32:52 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2002/01/26 04:49:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -49,6 +49,11 @@
 */
 
 package arlut.csd.ganymede;
+
+/**
+ * <p>Serializable data carrier object used by the Ganymede
+ * server to report a row of user status to the Ganymede admin console.</p>
+ */
 
 public class AdminEntry implements java.io.Serializable {
 
