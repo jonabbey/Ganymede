@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.1 $
-# $Date: 1999/01/20 00:33:15 $
+# $Revision: 1.2 $
+# $Date: 1999/01/21 00:44:22 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -58,12 +58,19 @@ system("rm -rf *");
 
 # Now link in all the base classes we need
 
-foreach $file (@ganymede_classes) {
-  print "Linking " . $file . ".class\n";
-  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file.".class", $file.".class");
-
-  if (!$result){
-    print "$! -- $file\n";
+foreach $family (@ganymede_classes) {
+  opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
+  @classes = grep /^$family[\$\.].*\.class$/, readdir SOURCEDIR;
+  closedir SOURCEDIR;
+  
+  foreach $file (@classes) {
+    print "Linking " . $file . "\n";
+    
+    $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
+    
+    if (!$result){
+      print "$! -- $file\n";
+    }
   }
 }
 

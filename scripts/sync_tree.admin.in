@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.3 $
-# $Date: 1999/01/21 00:26:26 $
+# $Revision: 1.4 $
+# $Date: 1999/01/21 00:44:22 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -22,9 +22,8 @@
 		     "Server", "Session", "SpaceNode",
 		     "ObjectHandle", "Ganymediator", "GanymediatorWizard",
 		     "GanymedeConfig", "adminSession",
-		     "SchemaEdit", "scheduleHandle");
-
-@class_families = ("GASHSchema", "NameSpaceEditor", "iAdmin", "GASHAdmin");
+		     "SchemaEdit", "scheduleHandle",
+		     "GASHSchema", "iAdmin");
 
 # What directory are we handling?
 
@@ -34,27 +33,13 @@ chdir("<#CLASSDIR#>/admin_classes/arlut/csd/ganymede") || die ("Couldn't change 
 
 system("rm -rf *");
 
-# Now link in all the base classes we need
-
-link("<#CLASSDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
-
-foreach $file (@ganymede_classes) {
-  print "Linking " . $file . ".class\n";
-  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file.".class", $file.".class");
-
-  if (!$result){
-    print "$! -- $file\n";
-  }
-}
-
 # Now the class families that we need to finish up
 
-print "Attempting to link class families\n";
-print "We may get some complaints here about file existing.. no problem.\n\n";
+print "Attempting to link classes\n";
 
-foreach $family (@class_families) {
+foreach $family (@ganymede_classes) {
   opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
-  @classes = grep /^$family/, readdir SOURCEDIR;
+  @classes = grep /^$family[\$\.].*\.class$/, readdir SOURCEDIR;
   closedir SOURCEDIR;
   
   foreach $file (@classes) {
@@ -103,6 +88,10 @@ foreach $file (@stubs) {
     print "$! -- $file\n";
   }
 }
+
+# Link the nice picture we use.
+
+link("<#CLASSDIR#>/arlut/csd/ganymede/admin.jpg", "admin.jpg");
 
 # Now we need to link in any gif files
 
