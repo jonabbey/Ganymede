@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2001/03/28 23:24:58 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2001/03/28 23:52:49 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -88,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
+ * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -592,25 +592,29 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	try
 	  {
-	    SwingUtilities.invokeAndWait(new Runnable() {
+	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
-		if (glogin.g_client != null)
+		gclient x = null;
+
+		synchronized (glogin.class)
 		  {
-		    glogin.g_client.setVisible(false);
-		    glogin.g_client.dispose();
-		    glogin.g_client.cleanUp();
-		    glogin.g_client = null;
+		    if (glogin.g_client != null)
+		      {
+			x = glogin.g_client;
+			glogin.g_client = null;
+		      }
+		  }
+
+		if (x != null)
+		  {
+		    x.setVisible(false);
+		    x.dispose();
+		    x.cleanUp();
 		  }
 	      }
 	    });
 	  }
 	catch (NullPointerException ex)
-	  {
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
-	catch (java.lang.reflect.InvocationTargetException ex)
 	  {
 	  }
 
@@ -897,7 +901,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
+ * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -991,7 +995,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
+ * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
  * @author Jonathan Abbey
  */
 

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2001/03/28 23:24:56 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2001/03/28 23:52:48 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.62 $ $Date: 2001/03/28 23:24:56 $ $Name:  $
+ * @version $Revision: 1.63 $ $Date: 2001/03/28 23:52:48 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1696,6 +1696,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * <p>This method provides a handy way to null out data structures held in
    * relationship to this framePanel, particularly network reference
    * resources.</p>
+   *
+   * <p>This method should be called on the Java GUI thread.</p>
    */
 
   public final void cleanUp()
@@ -1719,7 +1721,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     history = null;
     personae = null;
     history_panel = null;
-    containerPanels = null;
+
+    if (containerPanels != null)
+      {
+	for (int i = 0; i < containerPanels.size(); i++)
+	  {
+	    if (debug)
+	      {
+		println("Telling a containerPanel to stop loading.");
+	      }
+	    
+	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+	    cp.stopLoading();
+	  }
+
+	containerPanels = null;
+      }
+
     templates = null;
     createdList = null;
     exp_field = null;
