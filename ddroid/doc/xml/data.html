@@ -1,22 +1,22 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Directory Droid Data Loading/Dumping in XML</title>
+    <title>Ganymede Data Loading/Dumping in XML</title>
   </head>
 
   <BODY BGCOLOR="#FFFFFF">
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>Directory Droid Object Data Import/Export Definition in XML</b></h2></td>
+	<td colspan="1"><h2><b>Ganymede Object Data Import/Export Definition in XML</b></h2></td>
       </tr>
     </table>
 
-    <p>While the Directory Droid server is capable of expressing its schema
+    <p>While the Ganymede server is capable of expressing its schema
     definition information in the <b>&lt;ganyschema&gt;</b> section of
-    its XML file, this aspect of Directory Droid's XML support is bound to be
+    its XML file, this aspect of Ganymede's XML support is bound to be
     much less used than the data dumping and loading support.  This
     section discusses the <b>&lt;ganydata&gt;</b> element that may be
-    present in the Directory Droid XML file format.</p>
+    present in the Ganymede XML file format.</p>
 
 <center><table BORDER CELLPADDING=5 WIDTH="80%" >
 <tr>
@@ -62,7 +62,7 @@ which specify objects to be created, edited, inactivated, or deleted.
 
     <p>The <b>&lt;ganydata&gt;</b> element contains a series of
     <b>&lt;object&gt;</b> elements, each one corresponding to an
-    object in the Directory Droid database.  The <b>&lt;object&gt;</b>
+    object in the Ganymede database.  The <b>&lt;object&gt;</b>
     element itself may contain one element for each field in the
     object.  The open tag for the <b>object</b> element as exported
     contains possibly four attributes, those being <b>type</b>
@@ -134,7 +134,7 @@ number for the object designated by this <b>&lt;object&gt;</b>
 element.  The <b>num</b> attribute is used to select pre-existing
 objects on the server for editing, inactivation, or deletion.  If this
 <b>&lt;object&gt;</b> has an <b>action</b> attribute value that would
-cause a new object to be created on the Directory Droid server, the
+cause a new object to be created on the Ganymede server, the
 <b>num</b> attribute is simply ignored.</dd>
 
 <dt><b>action</b></dt>
@@ -156,14 +156,14 @@ If there is no <b>action</b> attribute specified at import time, the
 <b>&lt;object&gt;</b> element will be created if there is no object
 already on the server that matches the <b>id</b> or <b>num</b> object
 identifying attributes.  Otherwise, the pre-existing object on the
-Directory Droid server matching the identifying attributes will be checked
+Ganymede server matching the identifying attributes will be checked
 out for editing.
 </p>
 
 <p>
 If the <b>action</b> attribute is present and contains
 <b>"create"</b>, the <b>&lt;object&gt;</b> element will cause the
-Directory Droid xmlclient to create a new object, even if an object of the
+Ganymede xmlclient to create a new object, even if an object of the
 same type that matches the given <b>id</b> attribute already exists on
 the server.  In addition, in such cases all <b>&lt;invid&gt;</b>
 elements in the XML file with matching <b>type</b> and <b>id</b>
@@ -173,7 +173,7 @@ server that might match those identifying attributes.</p>
 </p>
 
 <p>If the <b>action</b> attribute is present and contains <b>"edit"</b>,
-the <b>&lt;object&gt;</b> element will cause the Directory Droid xmlclient
+the <b>&lt;object&gt;</b> element will cause the Ganymede xmlclient
 to seek to check the object out for editing from the server.  If no
 object exists on the server matching the <b>id</b> attribute, an
 error will be displayed and xmlclient will abort the transaction.</p>
@@ -305,7 +305,7 @@ following is not allowed:</p>
 <b>&lt;set&gt;</b> in a single field element.</p>
 
 <p>There are presently nine different types of data fields supported
-by the Directory Droid server, and each of these types has its own rules as
+by the Ganymede server, and each of these types has its own rules as
 to what kinds of elements are allowed within the field element and how
 they may be structured.  For the most part, these rules are very similar
 for all field types, with just the value carrying element type differing.
@@ -321,7 +321,7 @@ to the nine field types.</p>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;string&gt;</b> element contains data for Directory Droid string fields,
+The <b>&lt;string&gt;</b> element contains data for Ganymede string fields,
 but is mandatory only for vector string fields.  The
 <b>&lt;string&gt;</b> element is not necessary for scalar string
 fields, which support simply placing the content to be placed in the
@@ -378,7 +378,7 @@ by '<b>&amp;amp;</b>', and anything goes otherwise, including embedded newlines.
 <tr>
 <td COLSPAN="2">
 <p>The <b>&lt;boolean&gt;</b> element is an optional data element for
-Directory Droid boolean fields.  Since Directory Droid boolean fields are always
+Ganymede boolean fields.  Since Ganymede boolean fields are always
 scalar, you can simply place <b>true</b>, <b>t</b>, <b>false</b> or
 <b>f</b> (of whatever capitalization) between the field's start and
 end tags.  If you do use the older <b>&lt;boolean&gt;</b> element as a
@@ -438,7 +438,7 @@ of whatever capitalization.</dd>
 <tr>
 <td COLSPAN="2">
 <p>The <b>&lt;int&gt;</b> element is an optional data element for
-Directory Droid numeric fields.  Since Directory Droid numeric fields are always
+Ganymede numeric fields.  Since Ganymede numeric fields are always
 scalar, you can simply place a 32 bit signed integer value between the
 containing field's start and end tags. If you do use the older
 <b>&lt;int&gt;</b> element as a data container, the <b>&lt;int&gt;</b>
@@ -496,8 +496,8 @@ between the start and end tags of the containing field element.</dd>
 <td COLSPAN="2">
 The <b>&lt;float&gt;</b> element contains a 64 bit floating point
 value, corresponding to the IEEE 754-1985 specification, for use
-with Directory Droid float fields.
-As float fields are scalar in Directory Droid, only
+with Ganymede float fields.
+As float fields are scalar in Ganymede, only
 one <b>&lt;float&gt;</b> element at a time may be contained in a float field
 element.  The <b>&lt;float&gt;</b> element must be empty.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
@@ -553,7 +553,7 @@ number representation, with support for numbers of the form
 <tr>
 <td COLSPAN="2">
 The <b>&lt;ip&gt;</b> element contains an IPv4 or IPv6 address.  IP
-fields may be scalar or vector in Directory Droid. The <b>&lt;ip&gt;</b>
+fields may be scalar or vector in Ganymede. The <b>&lt;ip&gt;</b>
 element must be empty.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
@@ -580,7 +580,7 @@ element must be empty.
 <dt><b>val</b></dt>
 <dd>The contents of the mandatory <b>val</b> attribute holds
 an IPv4 string in standard dotted decimal form, or an IPv6 string, in
-any RFC 1884 format.  The Directory Droid server will decide, based on its
+any RFC 1884 format.  The Ganymede server will decide, based on its
 configuration, whether an IPv6 address will be accepted.  Even if IPv6
 addresses are supported, IPv4 strings will always be accepted, given
 the compatibility engineering the IPv6 folks have carried forth.</dd>
@@ -607,7 +607,7 @@ the compatibility engineering the IPv6 folks have carried forth.</dd>
 <td COLSPAN="2">
 The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit 
 time stamp with millisecond resolution centered at Midnight, January 1, 1970, UTC.
-As date fields are scalar in Directory Droid, only
+As date fields are scalar in Ganymede, only
 one <b>&lt;date&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;date&gt;</b> element must be empty.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
@@ -677,13 +677,13 @@ multiply a 32 bit timecode by 1,000.</dd>
 <tr>
 <td COLSPAN="2">
 The <b>&lt;password&gt;</b> element contains a Java password value.
-As password fields are scalar in Directory Droid, only one
+As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
 <b>&lt;password&gt;</b> element may contain any or all of the six
 optional attributes, <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
 <b>apachemd5crypt</b>, <b>lanman</b> and <b>ntmd4</b>.  If the <b>plaintext</b> attribute is
-present, all other hashes will be ignored, and the Directory Droid server
+present, all other hashes will be ignored, and the Ganymede server
 will generate new hashes as needed from the plaintext given. If none of the optional
 attributes are present, the password field will be cleared. All of
 these options are explained below.  <font size="-1"><a
@@ -777,9 +777,9 @@ information stored in this field in the server.</dd>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;invid&gt;</b> element contains a Directory Droid object reference
+The <b>&lt;invid&gt;</b> element contains a Ganymede object reference
 value, which is used to identify an object pointer in an invid
-field on the Directory Droid server.  The <b>&lt;invid&gt;</b> element must be empty.
+field on the Ganymede server.  The <b>&lt;invid&gt;</b> element must be empty.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
@@ -812,9 +812,9 @@ the kind of object this &lt;invid&gt; element is pointing to.</dd>
 
 <dd><p>This attribute, if present, contains a string that is meant to
 uniquely identify a target object of type matching the value of the
-type attribute in this &lt;invid&gt; element on the Directory Droid server.
+type attribute in this &lt;invid&gt; element on the Ganymede server.
 The targeted object may exist prior to XML file processing on the
-Directory Droid server, or it may be created by processing of other
+Ganymede server, or it may be created by processing of other
 &lt;object&gt; elements in the XML file by the xmlclient.  If an
 &lt;object&gt; element of matching type with matching <b>id</b>
 is defined with an <b>action</b> attribute value of <b>create</b>,
@@ -833,7 +833,7 @@ attribute rather than the <b>id</b> attribute.</p>
 
 <dt><b>num</b></dt>
 
-<dd>This attribute, if present, holds an object number on the Directory Droid
+<dd>This attribute, if present, holds an object number on the Ganymede
 server, and is used to address a pre-existing object on the server.  This
 attribute should only be used when you explicitly want to address an
 object on the server, regardless of whatever other activity the

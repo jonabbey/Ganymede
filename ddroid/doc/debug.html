@@ -1,15 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Directory Droid Debug and Diagnosis Guide</title>
+    <title>Ganymede Debug and Diagnosis Guide</title>
   </head>
 
   <body bgcolor="#FFFFFF">
-    <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Directory Droid Logo">
-    <h1><FONT FACE="Arial, Helvetica">Directory Droid Debug and Diagnosis<br>Release 1.0.12 - 1 March 2004</FONT></h1>
+    <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
+    <h1><FONT FACE="Arial, Helvetica">Ganymede Debug and Diagnosis<br>Release 1.0.12 - 1 March 2004</FONT></h1>
     <hr>
 
-    <p>The Directory Droid server, like most software, is not perfect
+    <p>The Ganymede server, like most software, is not perfect
     (<b><a href="#wild">*</a></b>).  Learning how to diagnose problems and obtain debug
     trace information is vital if you want to get your hands dirty
     with things.  It may even be vital if you don't, if you're
@@ -17,7 +17,7 @@
 
     <h2>Java Failure Modes and You</h2>
 
-    <p>Just about all of Directory Droid is written in Java, which means that
+    <p>Just about all of Ganymede is written in Java, which means that
     it has considerably different failure modes than you may be used
     to if you have developed software in C or C++.</p>
 
@@ -28,21 +28,21 @@
     either the Java Virtual Machine you are using has a bug, or that
     your program is actually a Java/C or Java/C++ hybrid, in which
     Java code calls to poorly-written C or C++ libraries.  Nothing in
-    Directory Droid is done in this way, so any time you see a catastrophic
+    Ganymede is done in this way, so any time you see a catastrophic
     program termination with a segmentation fault, bus error, or core
     dump, you should be thinking that it is a problem with your JVM,
-    your operating system, or your hardware.  Directory Droid may be doing
+    your operating system, or your hardware.  Ganymede may be doing
     something to expose a bug in your JVM or your operating system or
     your hardware, but it is the JVM's responsibility to keep Java
     code running correctly and safely.  Segfaulting or dumping core
     means that the JVM isn't keeping up its end of the deal.</p>
 
-    <p>At ARL:UT, our Directory Droid server regularly stays up indefinitely.
+    <p>At ARL:UT, our Ganymede server regularly stays up indefinitely.
     What that means is that the server tends to keep running until the
-    machine running the Directory Droid server needs to be taken down for
+    machine running the Ganymede server needs to be taken down for
     maintenance, or until I notice a bug in it that needs a server
     shutdown and restart to fix.  It has proven quite common for our
-    Directory Droid server to stay up for months at a time before one of
+    Ganymede server to stay up for months at a time before one of
     these two things happens, even as we have been developing the
     server.</p>
 
@@ -57,7 +57,7 @@
     to vanish.  The wrong users are allowed to edit the wrong
     objects. These things obviously will never happen to you with such
     a well-written, tested, and bullet proof piece of software as
-    Directory Droid 1.0, but I have occasionally seen this sort of thing
+    Ganymede 1.0, but I have occasionally seen this sort of thing
     before (<b><a href="#wild">*</a></b>).</p>
     
     <p>In those sorts of cases, the client or the server is acting
@@ -69,7 +69,7 @@
     encourage good design principles, but debugging these types of
     problems is just about the same in Java as it is in any other
     language.  Maybe a little harder in some ways, since Java programs,
-    and Directory Droid in particular, tend to be multithreaded.  The best
+    and Ganymede in particular, tend to be multithreaded.  The best
     tool I've found for debugging a lot of stuff is to edit the
     code, throw some intelligent System.err.println()'s in, and
     run through the code live and see what comes out.</p>
@@ -91,7 +91,7 @@
     function A.  If none of these functions catch the error, a general
     error reporting facility handles the problem.</p>
 
-    <p>What this means is that it is fairly unlikely that the Directory Droid
+    <p>What this means is that it is fairly unlikely that the Ganymede
     server will ever just roll over and die.  The sorts of errors that
     would immediately kill a program in C or C++ will simply cause an
     error condition to be reported.  The thread that hit the problem
@@ -102,7 +102,7 @@
     <h3>Exception Logging</h3>
 
     <p>There are two places where such an error can be reported by the
-    Directory Droid server.  The first is to the context where the '<a
+    Ganymede server.  The first is to the context where the '<a
     href="glossary.html#runServer">runServer</a>' command was issued.
     If you run the '<a href="glossary.html#runServer">runServer</a>'
     script from a system boot up script, the error messages will go
@@ -115,13 +115,13 @@
     <p>Most errors won't be reported to the command line, however.
     The reason for this is that the <a
     href="glossary.html#runServer">runServer</a> command doesn't
-    directly spawn most of the threads in the running Directory Droid server.
-    Most of the time that the Directory Droid server is doing anything, it is
+    directly spawn most of the threads in the running Ganymede server.
+    Most of the time that the Ganymede server is doing anything, it is
     doing it because a remote client connected to it over the network
     and asked it to do something.  These error messages wind up being
     shown on the display of the client whose network request
     encountered the problem.  Since you can't watch the console of
-    every client that talks to your Directory Droid server, you'll want to
+    every client that talks to your Ganymede server, you'll want to
     have them saved on the server where you can see them. If you check
     out the <a href="glossary.html#runServer">runServer</a> script in
     your server's <code>bin</code> directory, you will see that it
@@ -143,14 +143,14 @@
     would be worthwhile to shut down the server, start it with the JIT
     disabled, and see if you can get the same error condition to show
     up again.  If so, cut and paste the trace information with the
-    line numbers and send email to the Directory Droid mailing list at <a
+    line numbers and send email to the Ganymede mailing list at <a
     href="mailto:ganymede@arlut.utexas.edu">ganymede@arlut.utexas.edu</a>
     about it.</p>
 
     <h3>Deadlock</h3>
 
     <p>Here we get to the real achilles heel of multithreaded Java
-    programs, deadlock.  The Directory Droid server may have dozens of
+    programs, deadlock.  The Ganymede server may have dozens of
     independent threads each processing a network request or doing
     scheduled housekeeping operations.  These threads have to
     cooperate to make sure only one thread at a time is doing
@@ -172,7 +172,7 @@
     <p>It is this sort of freeze-up that poses the real problem in
     multithreaded Java servers.  Null pointers generally can't do it,
     bad array access attempts generally can't do it, but a thread
-    deadlock will bring the Directory Droid server's party to a stop very
+    deadlock will bring the Ganymede server's party to a stop very
     quickly.</p>
 
     <p>When this happens, you'll pretty much know it, because things
@@ -180,7 +180,7 @@
     clients may become unresponsive, network builds might not get
     made.</p>
 
-    <p>The Directory Droid server was carefully designed not to get into
+    <p>The Ganymede server was carefully designed not to get into
     deadlock, but over the last year I've discovered a number of cases
     in which it was vulnerable to it.  We were using the server in
     full production for over a year before one user finally managed to
@@ -214,18 +214,18 @@
 
     <p>The way to do this will vary depending on the JVM you are
     using.  Sun's JVM on Solaris and Linux has a very handy feature in
-    this regard.  Sending the Directory Droid server process a SIGQUIT signal
+    this regard.  Sending the Ganymede server process a SIGQUIT signal
     will cause the JVM running the server to print to STDOUT a
     complete list of all threads in the server, where they are, what
     they are doing, and what if anything they are waiting on.  With
     any luck, you will have started the server with its output being
     redirected to a <code>server.log</code> file, so you will have
     this output captured and ready to ship to <a
-    href="mailto:ganymede@arlut.utexas.edu">Directory Droid central</a> for
+    href="mailto:ganymede@arlut.utexas.edu">Ganymede central</a> for
     analysis.</p>
 
     <p>To do this, do a <code>ps</code> to find the Java process that
-      is running the Directory Droid server.  Keep in mind that on Linux,
+      is running the Ganymede server.  Keep in mind that on Linux,
       you'll see a <b>lot</b> of Java processes running.  These
       are actually the threads of the server being listed individually
       in the ps output.  Find the primary process entry, and type:</p>
@@ -235,7 +235,7 @@
     </pre>
 
     <p>where <code>&lt;procnum&gt;</code> is the process number for
-    the Directory Droid server.  You should see a nice long report of thread
+    the Ganymede server.  You should see a nice long report of thread
     information added to your <code>server.log</code> file.  Go ahead
     and kill off the server (<code>kill &lt;procnum&gt;</code>), save
     the <code>server.log</code> file, and send it in for analysis.</p>
@@ -261,7 +261,7 @@
     My Fault.  This includes things like someone pulling an ethernet
     cable out of the back of your server.  It includes things like
     having your DNS server get corrupted so that your clients can't
-    find your Directory Droid server.  It includes things like errors
+    find your Ganymede server.  It includes things like errors
     accidentally introduced into the external build scripts or plug-in
     classes.  Any or all of these things might result in exceptions
     being thrown in the server, and so may look like one of the other
@@ -271,14 +271,14 @@
     but understand that it may not be possible for anyone else to
     provide you quick answers to a local problem.</p>
 
-    <p>And remember that Directory Droid is licensed under the Gnu General
+    <p>And remember that Ganymede is licensed under the Gnu General
     Public License, and an important part of that is that there is no
-    warranty or guarantee of support for Directory Droid at all.  I and
+    warranty or guarantee of support for Ganymede at all.  I and
     others will try to help if we can, but the only guarantee you get
     is that you are free to try and figure out problems yourself, and
     to talk to others on the net about it, and that nobody will try
     and hide something from you in the process.  Speaking personally,
-    I've put way too much effort into Directory Droid to see bugs go unfixed,
+    I've put way too much effort into Ganymede to see bugs go unfixed,
     so you've got at least one other party interested in problems you
     find.</p>
 

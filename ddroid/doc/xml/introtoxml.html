@@ -19,9 +19,9 @@
       allows applications to define their own sets of tags for use
       according to the XML syntactical rules.  Using XML can be very
       simple or very complex, depending on how many of the fancy features
-      you try to use.  Directory Droid uses fairly simple XML, and this page
+      you try to use.  Ganymede uses fairly simple XML, and this page
       is intended to present the most basic facts about XML that you will
-      need to know to write syntactically valid XML files that Directory Droid
+      need to know to write syntactically valid XML files that Ganymede
       can handle.
     </p>
 
@@ -140,39 +140,39 @@
 	  is a proper subset of Unicode and require no special
 	  handling in <b>UTF-8</b> encoding.  International characters 
 	  may be used in XML files, but you must do so in a manner
-	  compliant with <b>UTF-8</b>.  Directory Droid will always emit XML files
+	  compliant with <b>UTF-8</b>.  Ganymede will always emit XML files
 	  using the standard UNIX end-of-line character, but as with any
-	  XML parser, Directory Droid can also handle DOS/Windows style line
+	  XML parser, Ganymede can also handle DOS/Windows style line
 	  termination when reading XML files.</p>
       </li>
 	  
       <li><p>There are limitations on what characters you can
 	  use for tag and attribute names.  The rules on this are
 	  somewhat complex, but for the purpose of XML use with
-	  Directory Droid at present, only the following characters will ever be
+	  Ganymede at present, only the following characters will ever be
 	  used:</p>
 
 	<pre>
            abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_
 	</pre>
 
-	<p>Eventually, Directory Droid may be elaborated so that it knows all 
+	<p>Eventually, Ganymede may be elaborated so that it knows all 
 	  of the rules for XML character limitations in the full
 	  Unicode character range, but for now, only the above
 	  characters will ever appear or be used in XML tag and
-	  attribute names for use with Directory Droid.</p>
+	  attribute names for use with Ganymede.</p>
       </li>
       <li><p>Unlike in HTML, the XML standard does not specify that whitespace
-	  can be ignored or contracted.  For Directory Droid's purposes, however,
+	  can be ignored or contracted.  For Ganymede's purposes, however,
 	  whitespace between tags is generally ignored, and newlines and
 	  indentation are nice for human readability but not necessary for
-	  Directory Droid's input parsing.  More on this as we discuss what Directory Droid
+	  Ganymede's input parsing.  More on this as we discuss what Ganymede
 	  does with XML, below.</p>
       </li>
     </ul>
 
     <p>That's about all you should need to know about XML, at least as
-    far as we'll need to talk about in discussing Directory Droid.  If you
+    far as we'll need to talk about in discussing Ganymede.  If you
     want to read about things like external reference entities,
     Document Type Definitions/DTD's, or the precise Backus-Naur style
     specification for what characters are allowed to go where when,

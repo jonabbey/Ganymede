@@ -11,18 +11,18 @@
       </tr>
     </table>
 
-    <p>Directory Droid exports and imports object and schema data using a
+    <p>Ganymede exports and imports object and schema data using a
     simple <a href="introtoxml.html">XML</a> format, in which the schema definition section and the
     object data sections comprise two separate elements.  The basic
-    structure of an <a href="introtoxml.html">XML</a> file for Directory Droid looks like this:</p>
+    structure of an <a href="introtoxml.html">XML</a> file for Ganymede looks like this:</p>
 
     <pre>
       &lt;ganymede major="1" minor="0" persona="**name**" password="**pass**" &gt;
         <a href="schema.html">&lt;ganyschema&gt;</a>
-           -- Optional Directory Droid Schema Definition Section Here --
+           -- Optional Ganymede Schema Definition Section Here --
         <a href="schema.html">&lt;/ganyschema&gt;</a>
         <a href="data.html">&lt;ganydata&gt;</a>
-           -- Optional Directory Droid Object Data Section Here --
+           -- Optional Ganymede Object Data Section Here --
         <a href="data.html">&lt;/ganydata&gt;</a>
       &lt;/ganymede&gt;
     </pre>
@@ -30,7 +30,7 @@
     <p>The <b>ganymede</b> element is the <a href="introtoxml.html">XML</a> file's <b>Document
     Element</b>, and has two mandatory attributes, <b>major</b> and
     <b>minor</b>, which specify the major and minor version numbers of
-    the Directory Droid <a href="introtoxml.html">XML</a> file format the file adheres to,
+    the Ganymede <a href="introtoxml.html">XML</a> file format the file adheres to,
       and two
       optional attributes, <b>persona</b> and <b>password</b>, which
       may be used to specify the username and password for the xmlclient
@@ -38,22 +38,22 @@
       in the file.</p>
 
     <p>The <b><a href="schema.html">ganyschema</a></b> element contains the schema definition
-    for the Directory Droid database.  This section contains definitions of
-    the types of objects that the Directory Droid server knows about,
+    for the Ganymede database.  This section contains definitions of
+    the types of objects that the Ganymede server knows about,
     including the fields defined for those objects and the constraints
     and relationships among those fields and objects.  The field
-    definitions in the Directory Droid schema definition section control what
-    fields may legally appear in the object data section of a Directory Droid
+    definitions in the Ganymede schema definition section control what
+    fields may legally appear in the object data section of a Ganymede
     <a href="introtoxml.html">XML</a> file, and what kind of data those fields are allowed to
     contain.</p>
 
     <p>The optional <b><a href="data.html">ganydata</a></b> element contains actual data
-    records from the Directory Droid database.  The <b><a href="data.html">ganydata</a></b> element
+    records from the Ganymede database.  The <b><a href="data.html">ganydata</a></b> element
     contains a number of <b>object</b> elements, each of which contain
-    the data for a single object in the Directory Droid database.</p>
+    the data for a single object in the Ganymede database.</p>
 
     <p>Each of these two sections are optional, but an <a href="introtoxml.html">XML</a> file
-    without one of these two sections is pointless, as far as Directory Droid
+    without one of these two sections is pointless, as far as Ganymede
     is concerned..</p>
 
     <hr>

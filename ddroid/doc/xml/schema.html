@@ -1,18 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Directory Droid Schema Representation in XML</title>
+    <title>Ganymede Schema Representation in XML</title>
   </head>
 
   <BODY BGCOLOR="#FFFFFF">
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>Directory Droid Schema Definition in XML</b></h2></td>
+	<td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
       </tr>
     </table> 
 
     <p>The <b>&lt;ganyschema&gt;</b> element defines the structure of
-      the Directory Droid database, what types of objects are defined, what
+      the Ganymede database, what types of objects are defined, what
       fields they have, what kind of data those fields can contained,
       and what everything is called.</p>
 
@@ -71,9 +71,9 @@
       <tr BGCOLOR="#CCCCFF">
 	<td colspan="1" align="right"><h3><b>&lt;object_type_definitions&gt;</b></h3></td></tr></table>
 
-    <p>In the Directory Droid server, all data stored is stored in the form
+    <p>In the Ganymede server, all data stored is stored in the form
     of fields, which are aggregated in objects.  Each object stored in
-    the Directory Droid server is of a certain type, such as a user, group,
+    the Ganymede server is of a certain type, such as a user, group,
     system, network, or whatever else has been defined in the server's
     schema.  The objects, in turn, may be grouped into categories.
     Categories are a way of grouping similar kinds of objects together
@@ -120,7 +120,7 @@
     &lt;/object_type_definitions&gt;
     </pre>
 
-    <p>This example is of a small portion of a Directory Droid server's
+    <p>This example is of a small portion of a Ganymede server's
     schema definition.  This fragment shows an object type called
     'System Events' which has three fields defined; a scalar string
     field called 'Event Token' which is connected to the 'eventtoken'
@@ -131,14 +131,14 @@
     category, which is contained in turn within a 'Admin-Level
     Objects' category.  The 'Categories' category is itself simply a
     container for the other categories.. it is the category root node.
-    All &lt;object_type_definitions&gt; elements in Directory Droid XML
+    All &lt;object_type_definitions&gt; elements in Ganymede XML
     schema definition sections should contain a top-level 'Categories'
     category, even if you don't want any categorical organization of
     object types in the client.  Note that all &lt;category&gt; elements
     that are opened are properly closed before the close of the
     &lt;object_type_definitions&gt; element.</p>
 
-    <p><a name="underscore">Whenever the Directory Droid server refers to object or field names,
+    <p><a name="underscore">Whenever the Ganymede server refers to object or field names,
     any spaces in the object or field name is replaced by an
     underscore in the XML file.  This is so that when actual instances
     of objects are recorded in the &lt;ganydata&gt; element, encoded
@@ -151,7 +151,7 @@
 	<td colspan="1" align="right"><h3><b>&lt;objectdef&gt;</b></h3></td></tr></table>
 
     <p>The <b>objectdef</b> element is used to define object types in the
-    Directory Droid server.  Each object type has a name and a numeric id,
+    Ganymede server.  Each object type has a name and a numeric id,
     which are defined in an open objectdef tag via the <b>'name'</b>
     and <b>'id'</b> attributes.  Both of these values must be unique
     within the &lt;ganyschema&gt; section.  The value of the
@@ -179,7 +179,7 @@
     <b>classdef</b> element has a <b>name</b> attribute whose value is
     the name of the Java class to be used. See <a
     href="customization/index.html">the DBEditObject subclassing
-    guide</a> for details on the use of custom classes in the Directory Droid
+    guide</a> for details on the use of custom classes in the Ganymede
     server. The <b>classdef</b> element must be empty.  That is, it
     must not contain any other elements.</p>
 
@@ -232,7 +232,7 @@
     object type.  These <b>fielddef</b> elements are listed in
     the order they should appear in the client.  The first <b>fielddef</b>
     element in an <b>objectdef</b> element will appear at the
-    top of the object editing window in the Directory Droid client, with
+    top of the object editing window in the Ganymede client, with
     subsequent <b>fielddef</b>'s in order below the first.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
@@ -241,7 +241,7 @@
 
     <p>The <b>&lt;fielddef&gt;</b> element is a complex one, with many
     possible component elements.  There are currently 9 different
-    kinds of fields supported by the Directory Droid server, and each of
+    kinds of fields supported by the Ganymede server, and each of
     these field types have different options available.  The open tag
     for the <b>fielddef</b> element itself is fairly simple, however.
     It has just two attributes, both mandatory.  These are the same as
@@ -265,14 +265,14 @@
     <p>The <b>comment</b> element is a text containing element.  All
     text between the opening <b>&lt;comment&gt;</b> tag and the
     closing <b>&lt;/comment&gt;</b> tags is treated as a comment to
-    attach to the field.  The Directory Droid GUI client will show this text
+    attach to the field.  The Ganymede GUI client will show this text
     as a pop-up tooltip if the user lets the mouse linger on the GUI
     component.  Aside from some text, however, the <b>comment</b>
     element should not contain any subelements.</p>
 
     <p>The <b>invisible</b> element is an optional empty element,
     signifying that the field defined by the containing
-    <b>fielddef</b> element should not be visible in the Directory Droid
+    <b>fielddef</b> element should not be visible in the Ganymede
     client.  This is used to establish invisible scratch fields used
     by custom code associated with the containing <b>objectdef</b>
     element for various purposes.  This is a rather unusual element to
@@ -325,7 +325,7 @@
 	<td>password</td><td>Password Field</td><td>NO</td>
       </tr>
       <tr>
-	<td>permmatrix</td><td>Directory Droid Permissions Matrix</td><td>NO</td>
+	<td>permmatrix</td><td>Ganymede Permissions Matrix</td><td>NO</td>
       </tr>
     </table>
 
@@ -355,7 +355,7 @@
     </pre>
 
     <p>would describe a vector string field that could contain up to
-    100 strings in the field.  Vector fields in Directory Droid can not hold
+    100 strings in the field.  Vector fields in Ganymede can not hold
     more than 32767 elements, so if no <b>maxSize</b> attribute is
     defined, an implicit value of 32767 is still in effect.</p>
 
@@ -393,7 +393,7 @@
 	    The <b>maxlength</b> element is an empty element with a
 	    single attribute, <b>val</b>, which contains a numeric
 	    value specifying the maximum number of characters allowed
-	    in this string field.  The Directory Droid server supports string
+	    in this string field.  The Ganymede server supports string
 	    values of up to 32767 characters in length, and this limit
 	    is present implicitly if the <b>maxlength</b> element is
 	    not present in a string field definition.
@@ -445,7 +445,7 @@
 	<td></td><td>multiline</td>
 	<td><p>
 	    The <b>multiline</b> element is an empty element with no attributes.
-	    This element signifies that this field should be presented in the Directory Droid
+	    This element signifies that this field should be presented in the Ganymede
 	    client as a multiline string area rather than a single line text field.
 	  </p></td>
 	<td>&lt;multiline/&gt;</td>
@@ -490,7 +490,7 @@
 	  encoded (underscores for spaces) name of the object type to
 	  point to, while the <b>id</b> attribute contains the integer
 	  numberic id of the object type pointed to.  Both may be
-	  specified, in which case the Directory Droid server will verify
+	  specified, in which case the Ganymede server will verify
 	  that both the id number and the object name are consistent,
 	  or either one alone may be used.</p>
 	  
@@ -508,7 +508,7 @@
 	  <p>The <b>targetfield</b> element is an optional empty
 	  element that specifies the field that this invid field is to
 	  be linked with.  If a <b>targetfield</b> is specified, the
-	  Directory Droid server will maintain a symmetric link between this
+	  Ganymede server will maintain a symmetric link between this
 	  invid field and the target field in objects linked to
 	  this field.  The target field may be identified using either
 	  a <b>name</b> or an <b>id</b> attribute.</p>
@@ -517,7 +517,7 @@
 	  encoded (underscores for spaces) name of the field to point
 	  to, while the <b>id</b> attribute contains the integer
 	  numberic id of the field pointed to.  Both may be specified,
-	  in which case the Directory Droid server will verify that both the
+	  in which case the Ganymede server will verify that both the
 	  id number and the field name are consistent, or either one
 	  alone may be used.</p>
 	</td>
@@ -583,16 +583,16 @@
 	    The <b>maxlength</b> element is an empty element with a
 	    single attribute, <b>val</b>, which contains a numeric
 	    value specifying the maximum number of characters allowed
-	    in this password field.  The Directory Droid server supports string
+	    in this password field.  The Ganymede server supports string
 	    values of up to 32767 characters in length, and this limit
 	    is present implicitly if the <b>maxlength</b> element is
 	    not present in a password field definition.
 	  </p>
 	  <p>
-	    The <b>crypt</b> encryption hash method supported by Directory Droid
+	    The <b>crypt</b> encryption hash method supported by Ganymede
 	    only considers the first 8 characters of the password in
 	    generating the authentication hash, so setting a maxlength
-	    larger than 8 characters will not guarantee that Directory Droid
+	    larger than 8 characters will not guarantee that Ganymede
 	    will require the full password length for login authentication
 	    if the <b>crypt</b> method is used.
 	  </p>
@@ -623,7 +623,7 @@
 	<td></td><td>crypted</td>
 	<td>
 	  <p>The <b>crypted</b> element is an optional, empty element.
-	  If this element is present, the Directory Droid server will store
+	  If this element is present, the Ganymede server will store
 	  the contents of this password in UNIX crypt() format.</p>
 	</td>
 	<td>&lt;crypted/&gt;</td>
@@ -632,7 +632,7 @@
 	<td></td><td>md5crypted</td>
 	<td>
 	  <p>The <b>md5crypted</b> element is an optional, empty
-	  element.  If this element is present, the Directory Droid server
+	  element.  If this element is present, the Ganymede server
 	  will store the contents of this password in FreeBSD-style
 	  md5crypt() format.</p>
 	</td>
@@ -642,7 +642,7 @@
 	<td></td><td>apacheMd5crypted</td>
 	<td>
 	  <p>The <b>apacheMd5crypted</b> element is an optional, empty
-	  element.  If this element is present, the Directory Droid server
+	  element.  If this element is present, the Ganymede server
 	  will store the contents of this password in Apache-style
 	  md5crypt() format.</p>
 	</td>
@@ -652,7 +652,7 @@
 	<td></td><td>winHashed</td>
 	<td>
 	  <p>The <b>winHashed</b> element is an optional, empty
-	  element.  If this element is present, the Directory Droid server
+	  element.  If this element is present, the Ganymede server
 	  will store the contents of this password in the two
           Windows NT compatible hash formats used in the Samba
 	  encrypted password file.</p>
@@ -663,9 +663,9 @@
 	<td></td><td>plaintext</td> 
 	<td>
 	  <p>The <b>plaintext</b> element is an optional, empty
-	  element.  If this element is present, the Directory Droid server
+	  element.  If this element is present, the Ganymede server
 	  will store the plaintext of passwords stored in this field
-	  to disk.  Normally, if the Directory Droid server has either
+	  to disk.  Normally, if the Ganymede server has either
 	  <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
 	  or <b>winHashed</b> set, the server will never dump the
 	  plaintext of passwords in this field to disk, as it is
@@ -694,7 +694,7 @@
     objects.</p>
 
     <p>Note also the newline in the middle of the <b>Groups</b> field
-    comment, which is actually preserved faithfully in the Directory Droid
+    comment, which is actually preserved faithfully in the Ganymede
     database.</p>
 
     <pre>
@@ -702,7 +702,7 @@
             &lt;classdef name="arlut.csd.ganymede.custom.userCustom"/&gt;
             &lt;label fieldid="100"/&gt;
             &lt;fielddef name="Username" id="100"&gt;
-              &lt;comment&gt;User name for an individual privileged to log into Directory Droid and/or the network&lt;/comment&gt;
+              &lt;comment&gt;User name for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
               &lt;typedef type="string"&gt;
                 &lt;maxlength val="8"/&gt;
                 &lt;badchars val=" :"/&gt;
@@ -716,7 +716,7 @@
               &lt;/typedef&gt;
             &lt;/fielddef&gt;
             &lt;fielddef name="Password" id="101"&gt;
-              &lt;comment&gt;Password for an individual privileged to log into Directory Droid and/or the network&lt;/comment&gt;
+              &lt;comment&gt;Password for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
               &lt;typedef type="password"&gt;
                 &lt;minlength val="3"/&gt;
                 &lt;maxlength val="32"/&gt;
@@ -786,7 +786,7 @@ Limited to 16 for NFS.&lt;/comment&gt;
               &lt;/typedef&gt;
             &lt;/fielddef&gt;
             &lt;fielddef name="Home_Directory" id="262"&gt;
-              &lt;comment&gt;UNIX default directory, normally assigned by Directory Droid&lt;/comment&gt;
+              &lt;comment&gt;UNIX default directory, normally assigned by Ganymede&lt;/comment&gt;
               &lt;typedef type="string"&gt;
                 &lt;maxlength val="128"/&gt;
                 &lt;badchars val=" :"/&gt;
