@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2002/10/05 07:18:00 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2002/10/05 07:45:39 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -822,7 +822,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }
 
-    if (e.getSource() instanceof JstringField)
+    if (e.getSource() instanceof JstringField ||
+	e.getSource() instanceof JnumberField ||
+	e.getSource() instanceof JfloatField)
       {
 	OkButton.doClick();
       }
