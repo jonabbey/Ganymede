@@ -120,9 +120,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
     for (int i = 0; i< total; i++)
       {
 	personaContainer pc = null;
+	boolean thisOneEditable = false;
 	try
 	  {
-	    boolean thisOneEditable = editable && field.isEditable();
+	    thisOneEditable = editable && field.isEditable();
+
 	    Invid thisInvid = (Invid)personas.elementAt(i);
 	    if (thisOneEditable)
 	      {
@@ -134,10 +136,10 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		      {
 			System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
 		      }
-
+		    
 		    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
 		    ob = Vrv.getObject();
-		
+		    
 		    if (ob == null)
 		      {
 			System.out.println("That didn't work...its still not giving me anything back.  Giving up.");
@@ -165,12 +167,15 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		    pc = new personaContainer(thisInvid, i, thisOneEditable, this, ob);
 		  }
 	      }		
-	  }
+      	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not check if the field is editable: " + rx);
+	    if (debug)
+	      {
+		gc.showErrorMessage("Could not check if the field is editable: " + rx);
+	      }
 	  }
-
+	
 	panels.put(new Integer(i), pc);
 	middle.addTab("Persona " + i, pc);
 
@@ -227,7 +232,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    // Tell the persona about the user
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
 	    
-	    personaContainer pc = new personaContainer(null, index, editable, this, newObject);
+	    personaContainer pc = new personaContainer(newObject.getInvid(), index, editable, this, newObject);
 	    middle.addTab("New Persona " + index, pc);
 
 	    pc.run();
@@ -270,6 +275,10 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	personaContainer pc = (personaContainer)panels.get(new Integer(middle.getSelectedIndex()));
 	Invid invid = pc.getInvid();
+
+	if (invid == null) {
+	  throw new NullPointerException("invid is null");
+	}
 
 	StringDialog d = new StringDialog(gc, "Confirm deletion", "Are you sure you want to delete persona " + middle.getTitleAt(middle.getSelectedIndex()) + "?", true);
 
@@ -459,6 +468,7 @@ class personaContainer extends JScrollPane implements Runnable{
 	if ((label != null) && (!label.equals("null")))
 	  {
 	    pp.middle.setTitleAt(index, label);
+	    pp.middle.repaint();
 	  }
 	
 	containerPanel cp = new containerPanel(object,
