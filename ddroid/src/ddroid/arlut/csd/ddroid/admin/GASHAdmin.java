@@ -161,7 +161,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public GASHAdmin() 
   {
-    admin_logo = PackageResources.getImageResource(this, "admin.gif", getClass());
+    admin_logo = PackageResources.getImageResource(this, "ddroid_admin.jpg", getClass());
     GASHAdmin.applet = this;
   }
 
@@ -284,7 +284,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       {
 	JLabel image = new JLabel(new ImageIcon(admin_logo));
 	image.setOpaque(true);
-	image.setBackground(Color.black);
+	image.setBackground(new Color(111,207,247));
 
 	gbc.fill = GridBagConstraints.BOTH;
 	gbc.gridx = 0;

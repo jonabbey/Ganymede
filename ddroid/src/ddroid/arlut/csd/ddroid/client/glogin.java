@@ -335,7 +335,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     
     // Dowload the ganymede logo using the appropriate method
     
-    ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
+    ganymede_logo = PackageResources.getImageResource(this, "ddroid.jpg", getClass());
     
     if (WeAreApplet)
       {
