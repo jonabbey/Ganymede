@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.6 $ %D%
+ * @version $Revision: 1.7 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -2471,63 +2471,74 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos[colDrag]);
 	  }
 
-	if ((x > rt.colPos[colDrag-1] + mincolwidth) && (x < rt.colPos[colDrag+1] - mincolwidth))
+	// if we have gone past the edge of our valid column adjust region,
+	// restrict it to a valid range
+
+	if (x <= rt.colPos[colDrag-1] + mincolwidth)
 	  {
+	    x = rt.colPos[colDrag-1] + mincolwidth + 1;
+	  }
+
+	if (x >= rt.colPos[colDrag+1] - mincolwidth)
+	  {
+	    x = rt.colPos[colDrag+1] - mincolwidth - 1;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Adjusting column " + colDrag);
+	  }
+
+	rt.colPos[colDrag] = x;
+
+	if (rt.hbar_visible)
+	  {
+	    // we are not scaled
+
 	    if (debug)
 	      {
-		System.err.println("Adjusting column " + colDrag);
+		System.err.println("Adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
+				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
+				   rt.cols[colDrag].origWidth);
 	      }
 
-	    rt.colPos[colDrag] = x;
+	    rt.cols[colDrag - 1].origWidth = x - rt.colPos[colDrag - 1] - rt.vLineThickness;
+	    rt.cols[colDrag].origWidth = rt.colPos[colDrag + 1] - x - rt.vLineThickness;
 
-	    if (rt.hbar_visible)
+	    if (debug)
 	      {
-		// we are not scaled
-
-		if (debug)
-		  {
-		    System.err.println("Adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
-				       rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				       rt.cols[colDrag].origWidth);
-		  }
-
-		rt.cols[colDrag - 1].origWidth = x - rt.colPos[colDrag - 1] - rt.vLineThickness;
-		rt.cols[colDrag].origWidth = rt.colPos[colDrag + 1] - x - rt.vLineThickness;
-
-		if (debug)
-		  {
-		    System.err.println("Adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
-				       rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				       rt.cols[colDrag].origWidth);
-		  }
+		System.err.println("Adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
+				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
+				   rt.cols[colDrag].origWidth);
 	      }
-	    else
-	      {
-		// we are probably scaled
-
-		if (debug)
-		  {
-		    System.err.println("Scaling and adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
-				       rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				       rt.cols[colDrag].origWidth);
-		    System.err.println("scalefact = " + rt.scalefact);
-		  }
-
-		x1 = rt.cols[colDrag-1].origWidth;
-		rt.cols[colDrag-1].origWidth = ((x - rt.colPos[colDrag - 1] - rt.vLineThickness) / rt.scalefact);
-		rt.cols[colDrag].origWidth += x1 - rt.cols[colDrag - 1].origWidth;
-
-		if (debug)
-		  {
-		    System.err.println("Scaling and adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
-				       rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
-				       rt.cols[colDrag].origWidth);		
-		  }
-	      }
-	    rt.calcCols();	// update colPos[] based on origColWidths[]
-	    render();
-	    repaint();
 	  }
+	else
+	  {
+	    // we are probably scaled
+
+	    if (debug)
+	      {
+		System.err.println("Scaling and adjusting..OLD cols["+(colDrag-1)+"].origWidth = " +
+				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
+				   rt.cols[colDrag].origWidth);
+		System.err.println("scalefact = " + rt.scalefact);
+	      }
+
+	    x1 = rt.cols[colDrag-1].origWidth;
+	    rt.cols[colDrag-1].origWidth = ((x - rt.colPos[colDrag - 1] - rt.vLineThickness) / rt.scalefact);
+	    rt.cols[colDrag].origWidth += x1 - rt.cols[colDrag - 1].origWidth;
+
+	    if (debug)
+	      {
+		System.err.println("Scaling and adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
+				   rt.cols[colDrag-1].origWidth + ", cols["+colDrag+"].origWidth = " +
+				   rt.cols[colDrag].origWidth);		
+	      }
+	  }
+	rt.calcCols();	// update colPos[] based on origColWidths[]
+	render();
+	repaint();
+      }
 	else
 	  {
 	    // even if we couldn't recalc the column due to a minimum
@@ -2547,10 +2558,6 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	colXOR = -1;
 
 	return;
-      }
-
-    colDrag = 0;
-    colXOR = -1;
   }
 
   // private popupmenu handler
@@ -2641,13 +2648,19 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
     rt.menuRow = clickRow;
     rt.menuCol = clickCol;
 
-    System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
+    if (debug)
+      {
+	System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
+      }
 
     cell = ((tableRow) rt.rows.elementAt(clickRow)).cells[clickCol];
 
     if (cell.menu != null)
       {
-	System.err.println("Showing cell menu");
+	if (debug)
+	  {
+	    System.err.println("Showing cell menu");
+	  }
 	cell.menu.show(this, x, y);
 	return;
       }
@@ -2656,14 +2669,20 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 
     if (col.menu != null)
       {
-	System.err.println("Showing column menu");
+	if (debug)
+	  {
+	    System.err.println("Showing column menu");
+	  }
 	col.menu.show(this, x, y);
 	return;
       }
 
     if (rt.menu != null)
       {
-	System.err.println("Showing topLevel menu");
+	if (debug)
+	  {
+	    System.err.println("Showing topLevel menu");
+	  }
 	rt.menu.show(this,x,y);
 	return;
       }
@@ -2706,9 +2725,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos[colDrag]);
 	  }
 
-	// minimum col width is 20 pixels
-
-	if ((x > rt.colPos[colDrag-1] + 20) && (x < rt.colPos[colDrag+1] - 20))
+	if ((x > (rt.colPos[colDrag-1] + mincolwidth + 1)) && (x < rt.colPos[colDrag+1] - mincolwidth - 1))
 	  {
 	    bg.setXORMode(Color.red); // needs to be settable
 	    if (colXOR != -1)
