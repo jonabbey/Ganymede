@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/10/25 05:28:23 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/10/25 21:31:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,6 +115,29 @@ public abstract class XMLItem {
   public void setChildren(XMLItem[] children)
   {
     this.children = children;
+  }
+
+  /**
+   * <P>This method unlinks this XMLItem and any subnodes of
+   * it from each other, as well as clearing this XMLItem's
+   * parent reference.  After this is called, children
+   * and parent will both be null-valued.</P>
+   */
+
+  public void dissolve()
+  {
+    parent = null;
+
+    if (children != null)
+      {
+	for (int i = 0; i < children.length; i++)
+	  {
+	    children[i].dissolve();
+	    children[i] = null;
+	  }
+      }
+
+    children = null;
   }
 
   /**
@@ -242,5 +265,31 @@ public abstract class XMLItem {
   public String getCleanString()
   {
     throw new IllegalArgumentException("not an XMLCharData.");
+  }
+
+  /**
+   * <P>This debug method prints out this item and all items
+   * under this item if this item is the top node in a
+   * tree.</P>
+   */
+
+  public void debugPrintTree(int indentLevel)
+  {
+    for (int i = 0; i < indentLevel; i++)
+      {
+	System.err.print("  ");
+      }
+
+    System.err.println(this.toString());
+
+    if (children != null)
+      {
+	indentLevel++;
+
+	for (int i = 0; i < children.length; i++)
+	  {
+	    children[i].debugPrintTree(indentLevel);
+	  }
+      }
   }
 }
