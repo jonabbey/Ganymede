@@ -6,15 +6,15 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/08/03 21:01:38 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/11/17 00:10:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -459,7 +459,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     return null;
   }
-
 
   /** 
    * <P>This method creates a new {@link
@@ -956,10 +955,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public synchronized void release()
   {
-    DBObjectBase base;
-
-    /* -- */
-
     Ganymede.debug("DBSchemaEdit: releasing");
 
     if (!locked)
@@ -1030,4 +1025,3 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
   }
 }
-

@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2001/08/03 21:01:39 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2001/11/17 00:10:40 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -142,7 +142,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     fieldEditPane,
     namespaceEditPane,
     baseEditPane;
-
 
   BaseEditor
     be;
@@ -1370,8 +1369,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't commit: " + ex);
 	  }
 
+	editor = null;
+
 	schemaMI.setEnabled(true);
 	setVisible(false);
+
+	// speed up GC a little bit
+
+	cleanup();
       }
     else if (event.getSource() == cancelButton)
       {
@@ -1384,27 +1389,98 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
 
-	// speed up GC a little bit
-
-	this.editor = null;
-	this.be = null;
-	this.fe = null;
-	this.ne = null;
-	this.ce = null;
-	this.rootCategory = null;
-	this.objects = null;
-	this.tree = null;
+	editor = null;
 
 	schemaMI.setEnabled(true);
-
-	this.schemaMI = null;
-
 	setVisible(false);
+
+	// speed up GC a little bit
+
+	cleanup();
       }
     else
       {
 	System.err.println("Unknown Action Performed in GASHSchema");
       }
+  }
+
+  /**
+   * <p>Make sure that we clean up and get rid of our
+   * remote references to the server's schema editing
+   * objects if our window is closed on us.</p>
+   */
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    if (e.getID() == WindowEvent.WINDOW_CLOSED)
+      {
+	super.processWindowEvent(e);
+	cleanup();
+      }
+    else
+      {
+	super.processWindowEvent(e);
+      }
+  }
+
+  /**
+   * <p>GC-aiding dissolution method.  Should be called after the
+   * schema editor window has been removed from view, on the GUI
+   * thread.</p>
+   */
+
+  private void cleanup()
+  {
+    if (this.editor != null)
+      {
+	try
+	  {
+	    this.editor.release();
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't release: " + ex);
+	  }
+
+	this.editor = null;
+      }
+
+    if (this.attribCardPane != null)
+      {
+	this.attribCardPane.removeAll();
+	this.attribCardPane = null;
+      }
+
+    if (this.be != null)
+      {
+	this.be.cleanup();
+	this.be = null;
+      }
+
+    if (this.fe != null)
+      {
+	this.fe.cleanup();
+	this.fe = null;
+      }
+
+    if (this.ne != null)
+      {
+	this.ne.cleanup();
+	this.ne = null;
+      }
+    
+    if (this.ce != null)
+      {
+	this.ce.cleanup();
+	this.ce = null;
+      }
+
+    this.rootCategory = null;
+    this.objects = null;
+    this.tree = null;
+    this.schemaMI = null;
+
+    this.removeAll();		// should be done on GUI thread
   }
 
   // **
@@ -2373,6 +2449,29 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     gbl.setConstraints(comp, gbc);
     parent.add(comp);
   }
+
+  /**
+   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   */
+
+  public void cleanup()
+  {
+    this.node = null;
+    this.space = null;	// remote reference
+    this.nameS = null;
+    this.spaceL = null;
+    this.caseCB = null;
+    this.nameJPanel = null;
+    this.owner = null;
+    this.currentNameSpaceLabel = null;
+
+    this.gbl = null;
+    this.gbc = null;
+
+    // and clean up the AWT's linkages
+
+    this.removeAll();		// should be done on GUI thread
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -2519,4 +2618,24 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     parent.add(comp);
   }
 
+  /**
+   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   */
+
+  public void cleanup()
+  {
+    this.owner = null;
+    this.catJPanel = null;
+    this.catNameS = null;
+    this.catNode = null;
+
+    this.category = null;	// remote reference
+
+    this.gbl = null;
+    this.gbc = null;
+
+    // and clean up the AWT's linkages
+
+    this.removeAll();		// should be done on GUI thread
+  }
 }

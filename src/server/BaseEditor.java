@@ -5,8 +5,8 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/03/25 05:36:37 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2001/11/17 00:10:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -15,7 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -442,6 +443,29 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     gbc.weightx = 1.0;
     gbl.setConstraints(comp, gbc);
     parent.add(comp);
+  }
+
+  /**
+   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   */
+
+  public void cleanup()
+  {
+    this.baseNode = null;
+    this.base = null;	// remote reference
+    this.typeN = null;
+    this.nameS = null;
+    this.classS = null;
+    this.labelC = null;
+    this.editPanel = null;
+    this.owner = null;
+
+    this.gbl = null;
+    this.gbc = null;
+
+    // and clean up the AWT's linkages
+
+    this.removeAll();		// should be done on GUI thread
   }
 }
 

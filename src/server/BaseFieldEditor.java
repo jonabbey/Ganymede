@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/07/09 07:15:50 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/11/17 00:10:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -2003,5 +2003,55 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    throw new RuntimeException("Remote exception setting comment: " +rx);
 	  }
       }
+  }
+
+  /**
+   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   */
+
+  public void cleanup()
+  {
+    this.fieldNode = null;
+    this.fieldDef = null;	// remote reference
+    this.editPanel = null;
+    this.owner = null;
+    this.changeLabelTypeDialog = null;
+    this.commentT = null;
+
+    this.nameS = null;
+    this.trueLabelS = null;
+    this.falseLabelS = null;
+    this.OKCharS = null;
+    this.BadCharS = null;
+    this.regexpS = null;
+    this.regexpDescS = null;
+
+    this.idN = null;
+    this.maxArrayN = null;
+    this.minLengthN = null;
+    this.maxLengthN = null;
+
+    this.vectorCF = null;
+    this.labeledCF = null;
+    this.editInPlaceCF = null;
+    this.cryptedCF = null;
+    this.md5cryptedCF = null;
+    this.winHashcryptedCF = null;
+    this.plainTextCF = null;
+    this.multiLineCF = null;
+
+    this.typeC = null;
+    this.namespaceC = null;
+    this.targetC = null;
+    this.fieldC = null;
+
+    this.rowHash = null;
+
+    this.gbl = null;
+    this.gbc = null;
+
+    // and clean up the AWT's linkages
+
+    this.removeAll();		// should be done on GUI thread
   }
 }
