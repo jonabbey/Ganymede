@@ -5,8 +5,8 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2001/07/27 01:57:25 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2001/07/27 04:15:15 $
    Release: $Name:  $
 
    Module By: Brian O'Mara omara@arlut.utexas.edu
@@ -15,7 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -336,7 +337,11 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     // Get the tree part of the JTreeTable- useful later
 
     tree = treeTable.getTree();
-    
+
+    // set up the custom renderer to let us show a distinct icon
+    // for built-in fields
+
+    tree.setCellRenderer(new permEditorTreeRenderer(this));
     
     // Expand all visible base nodes on startup 
     
@@ -525,9 +530,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    createOK = viewOK = editOK = deleteOK = true;
 	  }
 
-
 	// Initialize a PermRow object for this base and
 	// add it to the tree structure 
+
 	boolean[] basePermBitsAry = {baseView, baseCreate, baseEdit, baseDelete};
  	boolean[] basePermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
@@ -535,7 +540,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
 	baseNode= new DefaultMutableTreeNode(basePermRow);
 	rootNode.add(baseNode);
-
 
 	// Now go through the fields
 
@@ -547,14 +551,20 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	  {
 	    template = (FieldTemplate) fields.elementAt(j);
 
-	    /*
-	      // we don't want to show built-in fields
-	      
-	      if (template.isBuiltIn())
+	    // don't show fields the user doesn't need to know about
+
+	    if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
 	      {
-	      continue;
+		continue;
 	      }
-	    */
+
+	    if (template.getID() == SchemaConstants.CreationDateField ||
+		template.getID() == SchemaConstants.CreatorField ||
+		template.getID() == SchemaConstants.ModificationDateField ||
+		template.getID() == SchemaConstants.ModifierField)
+	      {
+		continue;
+	      }
 
 	    // get the permission set for this field
 	    // (The following logic is unchanged from the original perm editor)
@@ -622,6 +632,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    boolean[] fieldPermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
 	    PermRow templatePermRow = new PermRow(base, template, fieldPermBitsAry, fieldPermBitsOKAry, visibleField);
+	    templatePermRow.setBuiltIn(template.isBuiltIn());
 	    
 	    fieldNode = new DefaultMutableTreeNode(templatePermRow);
 	    baseNode.add(fieldNode);
@@ -919,6 +930,7 @@ class PermRow {
   private boolean enabled;
   private boolean changed;
   private String name;
+  private boolean builtIn;
 
   //
   // Constructor  
@@ -988,6 +1000,16 @@ class PermRow {
   //
   // Methods to check and set values of perm bits
   //
+
+  public boolean isBuiltIn()
+  {
+    return builtIn;
+  }
+
+  public void setBuiltIn(boolean builtIn)
+  {
+    this.builtIn = builtIn;
+  }
 
   public boolean isVisible() 
   {
@@ -1411,6 +1433,49 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
 	  }
       }
   }
-  
+}
+
+/**
+ * <p>Custom tree renderer for the Ganymede client's permissions
+ * editor treeTable.</p>
+ */
+
+class permEditorTreeRenderer extends DefaultTreeCellRenderer
+{
+  ImageIcon builtInIcon;
+  ImageIcon standardIcon;
+
+  /* -- */
+
+  public permEditorTreeRenderer(perm_editor parent)
+  {
+    builtInIcon = new ImageIcon(PackageResources.getImageResource(parent, "list.gif", getClass()));
+    standardIcon = new ImageIcon(PackageResources.getImageResource(parent, "i043.gif", getClass()));
+  }
+
+  public Component getTreeCellRendererComponent(JTree tree, Object value,
+						boolean selected,
+						boolean expanded,
+						boolean leaf,
+						int row,
+						boolean hasFocus)
+  {
+    if (leaf)
+      {
+	DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+	PermRow myRow = (PermRow) node.getUserObject();
+
+	if (myRow.isBuiltIn())
+	  {
+	    setLeafIcon(builtInIcon);
+	  }
+	else
+	  {
+	    setLeafIcon(standardIcon);
+	  }
+      }
+
+    return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+  }
 }
 
