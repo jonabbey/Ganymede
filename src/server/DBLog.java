@@ -11,7 +11,7 @@
    StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -434,6 +434,7 @@ public class DBLog {
     DBLogEvent event;
     Enumeration enum;
     Hashtable mailOuts = new Hashtable();
+    Object ref;
 
     /* -- */
     
@@ -461,15 +462,23 @@ public class DBLog {
     
     for (int i = 0; i < logEvents.size(); i++)
       {
-	event = (DBLogEvent) logEvents.elementAt(i); 
+	ref = logEvents.elementAt(i);
 
-	for (int j = 0; j < event.objects.size(); j++)
+	if (ref instanceof DBLogEvent)
 	  {
-	    Invid inv = (Invid) event.objects.elementAt(j);
+	    event = (DBLogEvent) ref;
 
-	    if (!objects.contains(inv))
+	    if (event.objects != null)
 	      {
-		objects.addElement(inv);
+		for (int j = 0; j < event.objects.size(); j++)
+		  {
+		    Invid inv = (Invid) event.objects.elementAt(j);
+		    
+		    if (!objects.contains(inv))
+		      {
+			objects.addElement(inv);
+		      }
+		  }
 	      }
 	  }
       }
@@ -495,26 +504,62 @@ public class DBLog {
 	    System.err.println("DBLog.logTransaction(): logging event: " + event.description);
 	  }
 
-	// first, if we have a recognizable object-specific event happening,
-	// send out the notification for it.
+	if (event.subject == null)
+	  {
+	    // first, if we have a recognizable object-specific event
+	    // happening, send out the notification for it.  Note that by
+	    // doing so, we are doing this independently of the
+	    // transaction notification consolidation done by
+	    // appendMailOut()..
+	
+	    sendObjectMail(event, transdescrip);
+	
+	    // now, go ahead and add to the mail buffers we are prepping
+	    // to describe this whole transaction
+	
+	    // we are keeping a bunch of buffers, one for each combination
+	    // of email addresses that we've encountered.. different
+	    // addresses or groups of addresses may get a different subset
+	    // of the mail for this transaction, the mailOut logic handles
+	    // that.
+	
+	    // appendMailOut() takes care of calling calculateMailTargets()
+	    // on event, which handles calculating who needs to receive
+	    // email about this event.
+	
+	    appendMailOut(event, mailOuts);
+	    event.writeEntry(logWriter, currentTime, transactionID);
+	  }
+	else
+	  {
+	    // we've got a generic transactional mail event, process it.
 
-	sendObjectMail(event, transdescrip);
+	    event.writeEntry(logWriter, currentTime, transactionID);
 
-	// now, go ahead and add to the mail buffers we are prepping
-	// to describe this whole transaction
+	    try
+	      {
+		String message = event.description;
 
-	// we are keeping a bunch of buffers, one for each combination
-	// of email addresses that we've encountered.. different
-	// addresses or groups of addresses may get a different subset
-	// of the mail for this transaction, the mailOut logic handles
-	// that.
+		message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-	// appendMailOut() takes care of calling calculateMailTargets()
-	// on event, which handles calculating who needs to receive
-	// email about this event.
+		message = message + "\n\n" + signature;
 
-	appendMailOut(event, mailOuts);
-	event.writeEntry(logWriter, currentTime, transactionID);
+		// bombs away!
+		
+		mailer.sendmsg(Ganymede.returnaddrProperty,
+			       event.notifyVect,
+			       "Ganymede: " + event.subject,
+			       message);
+	      }
+	    catch (UnknownHostException ex)
+	      {
+		throw new RuntimeException("Couldn't figure address " + ex);
+	      }
+	    catch (IOException ex)
+	      {
+		throw new RuntimeException("IO problem " + ex);
+	      }
+	  }
       }
 
     // write out an end-of-transaction line to the log
