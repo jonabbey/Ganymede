@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/10/29 16:14:11 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/10/29 21:46:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -791,7 +791,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    */
 
-  public ReturnVal setValue(Object value, boolean local)
+  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     return Ganymede.createErrorDialog("Server: Error in PermissionMatrixDBField.setValue()",
 				      "Error.. can't call setValue() on a PermissionMatrixDBField");

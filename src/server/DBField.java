@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 1999/10/29 17:58:12 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 1999/10/29 21:46:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -391,7 +391,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (!isVector())
       {
-	return target.setValue(getValue(), local);
+	return target.setValue(getValue(), local, true); // inhibit wizards..
       }
     else
       {
@@ -410,7 +410,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	for (int i = 0; i < valuesToCopy.size(); i++)
 	  {
-	    retVal = target.addElement(valuesToCopy.elementAt(i), local);
+	    retVal = target.addElement(valuesToCopy.elementAt(i), local, true); // inhibit wizards
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
@@ -647,7 +647,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	while ((tempResult == null || tempResult.didSucceed()) && 
 	       values.size() > 0)
 	  {
-	    tempResult = deleteElement(0, local);
+	    tempResult = deleteElement(0, local, false);
 	  }
 
 	if (tempResult != null && !tempResult.didSucceed())
@@ -663,7 +663,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
     else
       {
-	return setValue(null, local);
+	return setValue(null, local, false);
       }
   }
 
@@ -957,7 +957,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     // do the thing, calling into our subclass
 
-    result = setValue(value, false);
+    result = setValue(value, false, false);
 
     return rescanThisField(result);
   }
@@ -975,7 +975,24 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal setValueLocal(Object value)
   {
-    return setValue(value, true);
+    return setValue(value, true, false);
+  }
+
+  /**
+   * <P>Sets the value of this field, if a scalar.</P>
+   *
+   * <P><B>This method is server-side only.</B></P>
+   *
+   * <P>The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.</P>
+   *
+   * @param value Value to set this field to
+   * @param local If true, permissions checking will be skipped
+   */
+
+  public final ReturnVal setValue(Object submittedValue, boolean local)
+  {
+    return setValue(submittedValue, local, false);
   }
 
   /**
@@ -991,9 +1008,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    *
    * @param value Value to set this field to
    * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
    */
 
-  public synchronized ReturnVal setValue(Object submittedValue, boolean local)
+  public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1028,7 +1046,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 	
@@ -1219,7 +1237,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("invalid index " + index);
       }
 
-    return rescanThisField(setElement(index, value, false));
+    return rescanThisField(setElement(index, value, false, false));
   }
 
   /**
@@ -1255,7 +1273,23 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("invalid index " + index);
       }
 
-    return setElement(index, value, true);
+    return setElement(index, value, true, false);
+  }
+
+  /**
+   * <p>Sets the value of an element of this field, if a vector.</p>
+   *
+   * <p>Server-side method only</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  A null result means the
+   * operation was carried out successfully and no information
+   * needed to be passed back about side-effects.</p>
+   */
+
+  public final ReturnVal setElement(int index, Object submittedValue, boolean local)
+  {
+    return setElement(index, submittedValue, local, false);
   }
 
   /**
@@ -1269,7 +1303,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * needed to be passed back about side-effects.</p>
    */
   
-  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local)
+  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1293,7 +1327,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -1384,7 +1418,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal addElement(Object value)
   {
-    return rescanThisField(addElement(value, false));
+    return rescanThisField(addElement(value, false, false));
   }
 
   /**
@@ -1399,7 +1433,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal addElementLocal(Object value)
   {
-    return addElement(value, true);
+    return addElement(value, true, false);
   }
 
   /**
@@ -1410,9 +1444,31 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
+   *
+   * @param submittedValue Value to be added
+   * @param local If true, permissions checking will be skipped
    */
 
-  public synchronized ReturnVal addElement(Object submittedValue, boolean local)
+  public final ReturnVal addElement(Object submittedValue, boolean local)
+  {
+    return addElement(submittedValue, local, false);
+  }
+
+  /**
+   * <P>Adds an element to the end of this field, if a vector.</P>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <P>The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.</P>
+   *
+   * @param submittedValue Value to be added
+   * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
+   */
+
+  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1451,7 +1507,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -1526,7 +1582,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal deleteElement(int index)
   {
-    return rescanThisField(deleteElement(index, false));
+    return rescanThisField(deleteElement(index, false, false));
   }
 
   /**
@@ -1540,7 +1596,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal deleteElementLocal(int index)
   {
-    return deleteElement(index, true);
+    return deleteElement(index, true, false);
   }
 
   /**
@@ -1552,7 +1608,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local)
+  public final ReturnVal deleteElement(int index, boolean local)
+  {
+    return deleteElement(index, local, false);
+  }
+
+  /**
+   * <p>Deletes an element of this field, if a vector.</p>
+   *
+   * <p>Server-side method only</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
+   */
+
+  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1580,7 +1650,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -1648,7 +1718,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal deleteElement(Object value)
   {
-    return rescanThisField(deleteElement(value, false));
+    return rescanThisField(deleteElement(value, false, false));
   }
 
   /**
@@ -1662,7 +1732,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final ReturnVal deleteElementLocal(Object value)
   {
-    return deleteElement(value, true);
+    return deleteElement(value, true, false);
   }
 
   /**
@@ -1674,7 +1744,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(Object value, boolean local)
+  public final ReturnVal deleteElement(Object value, boolean local)
+  {
+    return deleteElement(value, local, false);
+  }
+
+  /**
+   * <p>Deletes an element of this field, if a vector.</p>
+   *
+   * <p>Server-side method only</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElement will
+   * encode an order to rescan this field.</p>
+   */
+
+  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards)
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -1708,7 +1792,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					  ", not present in field " + getName());
       }
 
-    return deleteElement(index, local);	// *sync* DBNameSpace possible
+    return deleteElement(index, local, noWizards);	// *sync* DBNameSpace possible
   }
 
   /**

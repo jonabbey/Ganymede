@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/10/07 23:13:09 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/10/29 21:46:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -371,7 +371,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
-  public ReturnVal setValue(Object value, boolean local)
+  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -429,7 +429,7 @@ public class IPDBField extends DBField implements ip_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -543,7 +543,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
   
-  public ReturnVal setElement(int index, Object value, boolean local)
+  public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards)
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -599,7 +599,7 @@ public class IPDBField extends DBField implements ip_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -696,7 +696,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
-  public ReturnVal addElement(Object value, boolean local)
+  public ReturnVal addElement(Object value, boolean local, boolean noWizards)
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -757,7 +757,7 @@ public class IPDBField extends DBField implements ip_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 

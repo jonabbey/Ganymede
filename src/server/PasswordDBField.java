@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/10/29 16:14:10 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/10/29 21:46:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -836,7 +836,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * may optionally pass back a dialog.</p> 
    */
 
-  public ReturnVal setValue(Object value, boolean local)
+  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     throw new IllegalArgumentException("can't directly set the value on a password field");
   }

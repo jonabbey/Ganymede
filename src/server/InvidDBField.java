@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 1999/10/07 21:04:08 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 1999/10/29 21:46:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.111 $ %D%
+ * @version $Revision: 1.112 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2258,12 +2258,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param value the value to set this field to, and Invid
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
+   * @param noWizards If true, wizards will be skipped
    *
    * @see arlut.csd.ganymede.DBSession
    * 
    */
 
-  public synchronized ReturnVal setValue(Object value, boolean local)
+  public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -2311,7 +2312,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 	
@@ -2448,12 +2449,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param value The value to put into this vector.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
+   * @param noWizards If true, wizards will be skipped
    *
    * @see arlut.csd.ganymede.DBSession
    *
    */
   
-  public synchronized ReturnVal setElement(int index, Object value, boolean local)
+  public synchronized ReturnVal setElement(int index, Object value, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -2607,7 +2609,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * 
    */
 
-  public synchronized ReturnVal addElement(Object value, boolean local)
+  public synchronized ReturnVal addElement(Object value, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -2662,7 +2664,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -3018,7 +3020,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local)
+  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -3053,7 +3055,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = "del" + remote.toString();
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 
