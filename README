@@ -49,6 +49,21 @@ Things you will need to get started:
 
 --
 
+You can always find Ganymede at the Ganymede web site:
+
+  http://www.arlut.utexas.edu/gash2/
+
+as well as via ftp:
+
+  ftp://ftp.arlut.utexas.edu/pub/ganymede/
+
+and you can even get direct access to our Subversion repository.  The
+latest trunk is at:
+
+  http://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede
+
+--
+
 We are intensely interested in any feedback from you folks, and we are
 committed to making this software the best we can make it.  Please
 send comments to the mailing list at ganymede@arlut.utexas.edu.
@@ -57,5 +72,3 @@ Thanks,
 
   Jonathan Abbey - Ganymede Guy
   jonabbey@arlut.utexas.edu
-
-Ganymede web page - http://www.arlut.utexas.edu/gash2/
