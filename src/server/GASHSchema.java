@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -688,14 +688,18 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       }
     else
       {
+	card.show(attribCardPane, "empty");
       }
   }
 
-  public void treeNodeUnSelected(treeNode node)
+  public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
-    card.show(attribCardPane, "empty");
-    // attribCardPane.show(emptyPane);
-    //    attribCardPane.select(emptyPane);
+    if (! otherNode)
+      {
+	card.show(attribCardPane, "empty");
+      }
+	// attribCardPane.show(emptyPane);
+	//    attribCardPane.select(emptyPane);
     System.out.println("node " + node.getText() + " unselected");
   }
 
@@ -940,6 +944,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 		bNode.getBase().deleteField(fNode.getField());
 		refreshFields(bNode.getBase(), true);
 		ne.refreshSpaceList();
+		be.refreshLabelChoice();
 	      }
 	    else
 	      {
@@ -1032,14 +1037,29 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
 ------------------------------------------------------------------------------*/
 
-class BaseEditor extends ScrollPane implements setValueCallback, ActionListener {
+class BaseEditor extends ScrollPane implements setValueCallback, ActionListener, ItemListener {
 
-  Base base;
-  numberField typeN;
-  stringField nameS, classS;
-  componentAttr ca;
-  Panel editPanel;
-  GASHSchema owner;
+  Base 
+    base;
+
+  numberField 
+    typeN;
+
+  stringField 
+    nameS, 
+    classS;
+
+  Choice
+    labelC;
+
+  componentAttr 
+    ca;
+
+  Panel 
+    editPanel;
+
+  GASHSchema
+     owner;
 
   /* -- */
 
@@ -1074,6 +1094,10 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", 2);
 
+    labelC = new Choice();
+    labelC.addItemListener(this);
+    addRow(editPanel, labelC, "Label:", 3);
+
     add(editPanel);
     //    doLayout();
   }
@@ -1093,6 +1117,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 	typeN.setValue(base.getTypeID());
 	nameS.setText(base.getName());
 	classS.setText(base.getClassName());
+	refreshLabelChoice();
       }
     catch (RemoteException ex)
       {
@@ -1100,6 +1125,114 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
       }
   }
 
+  public void refreshLabelChoice()
+    {
+      labelC.removeAll();
+      Vector fields = null;
+      if (base == null)
+	{
+	  System.out.println("base is null, not refreshing labelC");
+	}
+      else
+	{
+	  try
+	    {
+	      fields = base.getFields();
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("exception getting fields: " + rx);
+	    }
+	  
+	  
+	  labelC.add("<none>");
+	  BaseField currentField;
+	  String labelField = null;
+	  if (fields == null)
+	    {
+	      System.out.println("No fields to add");
+	    }
+	  else
+	    {
+	      for (int i = 0; i < fields.size() ; i++)
+		{
+		  currentField = (BaseField)fields.elementAt(i);
+		  if (currentField != null)
+		    {
+		      try
+			{
+			  if (currentField.isString() || currentField.isNumeric())
+			    {
+			      labelC.add(currentField.getName());
+			    }
+			}
+		      catch (RemoteException rx)
+			{
+			  throw new IllegalArgumentException("exception getting field name: " + rx);
+			}
+		    }
+		  
+		}
+	      try
+		{
+		  labelField = base.getLabelFieldName();
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new IllegalArgumentException("Exception getting base label: " + rx);
+		}
+	      if (labelField == null)
+		{
+		  System.out.println("selecting <none>");
+		  labelC.select("<none>");
+		}
+	      else
+		{
+		  try
+		    {
+		      System.out.println("selecting label: " + labelField);
+		      labelC.select(labelField);
+		    }
+		  catch (NullPointerException ex)
+		    {
+		      System.out.println("Attempted to set label to field not in choice, setting it to <none>");
+		      labelC.select("<none>");
+		      
+		    }
+		}
+		
+	    }
+	}
+    }
+
+  public void itemStateChanged(ItemEvent e)
+    {
+      System.out.println("itemStateChanged");
+      String label = null;
+
+      if (e.getItemSelectable() == labelC)
+	{
+	  try
+	    {
+	      label = labelC.getSelectedItem();
+	      System.out.println("setting label to " + label);
+	      if ((label == null) || (label.equals("<none>")))
+		{
+		  System.out.println("Setting label field to null");
+		  base.setLabelField(null);
+		}
+	      else
+		{
+		  System.out.println("Setting label field to " + label);
+		  base.setLabelField(label);
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("exception setting label field: " + rx);
+	    }
+	}
+    }
   public boolean setValuePerformed(ValueObject v)
   {
     Component source;
@@ -1940,12 +2073,69 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     String oldBaseName = null;
     short baseID;
     Base oldBase;
+    Base currentBase = null;
+    String currentLabel = null;
+    String currentFieldName = null;
 
     /* -- */
 
     if (e.getItemSelectable() == typeC)
       {
 	item = typeC.getSelectedItem();
+	System.out.println("  item= " + item);
+	
+	if (!item.equals("Numeric") && !item.equals("String"))
+	  //Now it can't be a label
+	  {
+	    //So was it a label before?
+	    try
+	      {
+		currentBase = fieldDef.getBase();
+		System.out.println("currentBase= " + currentBase.getName());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("exception getting base: " + rx);
+	      }
+
+	    try
+	      {
+		currentLabel = currentBase.getLabelFieldName();
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("exception getting label: " + rx);
+	      }
+
+	    try
+	      {
+		currentFieldName = fieldDef.getName();
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("exception getting field name: " + rx);
+	      }
+
+	    System.out.println("fieldname= " + currentFieldName);
+	    System.out.println("  label= " + currentLabel);
+	    
+	    if ((currentFieldName != null) && currentLabel.equals(currentFieldName))
+	      {
+		System.out.println("problem: changing the label");
+		try
+		  {
+		    currentBase.setLabelField((String)null);
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new IllegalArgumentException("exception setting label to null: " + rx);
+		  }
+	      }
+	    else
+	      {
+		System.out.println("not the label, don't worry");
+	      }
+	  }
 	changeTypeChoice(item);
 	refreshFieldEdit();
       }
