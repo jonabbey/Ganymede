@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:05:56 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/02/10 05:33:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,7 +81,6 @@ public interface adminSession extends Remote {
   boolean     stopTask(String name) throws RemoteException;
   boolean     disableTask(String name) throws RemoteException;
   boolean     enableTask(String name) throws RemoteException;
-  boolean     rescheduleTask(String name, Date time, int interval) throws RemoteException;
 
   SchemaEdit  editSchema() throws RemoteException;
 }

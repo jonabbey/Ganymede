@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/01/22 18:05:54 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/02/10 05:33:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -326,19 +326,44 @@ public interface SchemaConstants {
   //
 
   /**
-   * Records of GanymedeBuilderTask classes we want to attach to the server
+   * Records of task classes we want to attach to the server
    */
-  final static short BuilderBase = 5;
+  final static short TaskBase = 5;
 
   /**
-   * name of this builder task (i.e., DNSBuilder, NISBuilder)
+   * name of this task (i.e., DNSBuilder, NISBuilder)
    */
-  final static short BuilderTaskName = 100; 
+  final static short TaskName = 100; 
 
   /**
    * what is the fully qualified classname for this builder task?
    */
-  final static short BuilderTaskClass = 101;
+  final static short TaskClass = 101;
+
+  /**
+   * boolean: should this task be scheduled for execution when a transaction is committed
+   */
+  final static short TaskRunOnCommit = 102;
+
+  /**
+   * boolean: should this task be scheduled for execution at regular intevals?
+   */
+  final static short TaskRunPeriodically = 103;
+
+  /**
+   * string: what is the inteval unit for periodic execution
+   */
+  final static short TaskPeriodUnit = 104;
+
+  /**
+   * numeric: how many period units between task execution?
+   */
+  final static short TaskPeriodCount = 105;
+
+  /**
+   * date: anchor point used to determine time of day, week, etc.
+   */
+  final static short TaskPeriodAnchor = 106;
 
   /**
    * what's the last base we currently have defined as a mandatory base? 

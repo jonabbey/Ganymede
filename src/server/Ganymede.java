@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/02/04 22:01:53 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/02/10 05:33:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -385,43 +385,9 @@ public class Ganymede {
     scheduler = new GanymedeScheduler(true);
     new Thread(scheduler).start();
 
-    // throw in a couple of tasks, just for grins
+    // and install the tasks listed in the database
 
-    Date time, currentTime;
-    Calendar cal = Calendar.getInstance();
-
-    currentTime = new Date();
-
-    cal.setTime(currentTime);
-
-    cal.add(Calendar.HOUR, 6);
-
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY),
-				cal.get(Calendar.MINUTE),
-				1440, 
-				new gcTask(), "Garbage Collection Task");
-
-    cal.setTime(currentTime);
-    cal.add(Calendar.MINUTE, 10);
-
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY),
-				cal.get(Calendar.MINUTE),
-				120, 
-				new dumpTask(), "Database Dumper Task");
-
-    //    scheduler.addActionOnDemand(new sampleTask("Demand Test"), "Demand Test");
-    
-    scheduler.addDailyAction(0, 0, new GanymedeExpirationTask(), "Expiration Task");
-
-    scheduler.addDailyAction(12, 0, new GanymedeWarningTask(), "Warning Task");
-
-    scheduler.addActionOnDemand(new GanymedeValidationTask(), "Database Consistency Check");
-
-    scheduler.addActionOnDemand(new dumpAndArchiveTask(), "Archive Task");
-
-    // and install the builder tasks listed in the database
-
-    registerBuilderTasks();
+    registerTasks();
 
     // and wa-la
 
@@ -703,11 +669,11 @@ public class Ganymede {
    *
    */
 
-  static private void registerBuilderTasks()
+  static private void registerTasks()
   {
     String builderName;
     String builderClass;
-    Vector objects = internalSession.getObjects(SchemaConstants.BuilderBase);
+    Vector objects = internalSession.getObjects(SchemaConstants.TaskBase);
     DBObject object;
     Class classdef;
 
@@ -722,54 +688,29 @@ public class Ganymede {
 
 	for (int i = 0; i < objects.size(); i++)
 	  {
+	    object = (DBObject) objects.elementAt(i);
+
 	    if (debug)
 	      {
-		System.err.println("Processing builder task object # " + i);
+		System.err.println("Processing task object for " + object);
 	      }
 
-	    object = (DBObject) objects.elementAt(i);
-	    
-	    builderName = (String) object.getFieldValue(SchemaConstants.BuilderTaskName);
-	    builderClass = (String) object.getFieldValue(SchemaConstants.BuilderTaskClass);
+	    scheduler.registerTaskObject(object);
 
-	    if (builderName != null && builderClass != null)
+	    if (object.isSet(SchemaConstants.TaskRunOnCommit))
 	      {
-		try
-		  {
-		    classdef = Class.forName(builderClass);
-		  }
-		catch (ClassNotFoundException ex)
-		  {
-		    System.err.println("Ganymede.registerBuilderTasks(): class definition could not be found: " + ex);
-		    classdef = null;
-		  }
-		
-		GanymedeBuilderTask task = null;
+		builderTasks.addElement((String) object.getFieldValueLocal(SchemaConstants.TaskName));
 
-		try
+		if (debug)
 		  {
-		    task = (GanymedeBuilderTask) classdef.newInstance(); // using no param constructor
-		  }
-		catch (IllegalAccessException ex)
-		  {
-		    System.err.println("IllegalAccessException " + ex);
-		  }
-		catch (InstantiationException ex)
-		  {
-		    System.err.println("InstantiationException " + ex);
-		  }
-
-		if (task != null)
-		  {
-		    scheduler.addActionOnDemand(task, builderName);
-		    builderTasks.addElement(builderName);
+		    System.err.println("Registering " + object + " for execution on transaction commit.");
 		  }
 	      }
 	  }
       }
     else
       {
-	System.err.println("** No builder tasks found in database!");
+	System.err.println("** No tasks found in database!");
       }
   }
 
@@ -1013,7 +954,7 @@ class dumpTask implements Runnable {
 
 class dumpAndArchiveTask implements Runnable {
 
-  public dumpTask()
+  public dumpAndArchiveTask()
   {
   }
 

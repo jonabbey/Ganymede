@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/01/22 18:05:45 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 1999/02/10 05:33:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -584,11 +584,19 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     return aSession;
   }
 
+  /**
+   *
+   * This method is used by directLoader code to dump the
+   * database to disk at the end of the bulk-loading
+   * process.
+   *
+   */
+
   public synchronized void dump()
   {
     try
       {
-	Ganymede.db.dump(Ganymede.dbFilename, false); // don't release lock
+	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive
       }
     catch (IOException ex)
       {

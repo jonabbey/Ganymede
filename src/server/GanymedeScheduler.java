@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:44 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/02/10 05:33:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,8 @@ package arlut.csd.ganymede;
 
 import java.util.*;
 
+import arlut.csd.Util.VectorUtils;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                GanymedeScheduler
@@ -74,6 +76,7 @@ public class GanymedeScheduler extends Thread {
 
   static final int minsPerDay = 1440;
   static final boolean debug = false;
+  static final boolean logStuff = true;
 
   /**
    *
@@ -87,32 +90,27 @@ public class GanymedeScheduler extends Thread {
     new Thread(scheduler).start();
 
     Date time, currentTime;
-    Calendar cal = Calendar.getInstance();
 
     currentTime = new Date();
 
-    cal.setTime(currentTime);
+    scheduler.addTimedAction(currentTime,
+			     new sampleTask("sample task 1"), 
+			     "sample task 1");
 
-    cal.add(Calendar.MINUTE, 1);
+    currentTime = new Date(currentTime.getTime() + 1000*60);
 
-    scheduler.addAction(cal.getTime(), 
-			new sampleTask("sample task 1"), 
-			"sample task 1");
-
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY), 
-				cal.get(Calendar.MINUTE), 1,
+    scheduler.addPeriodicAction(currentTime, 1,
 				new sampleTask("sample task 2"), "sample task 2");
 
-    cal.add(Calendar.MINUTE, 1);
+    currentTime = new Date(currentTime.getTime() + 1000*60);
 
-    scheduler.addAction(cal.getTime(), 
+    scheduler.addTimedAction(currentTime,
 			new sampleTask("sample task 3"),
 			"sample task 3");
 
-    cal.add(Calendar.MINUTE, 1);
+    currentTime = new Date(currentTime.getTime() + 1000*60);
 
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY), 
-				cal.get(Calendar.MINUTE), 1,
+    scheduler.addPeriodicAction(currentTime, 1,
 				new sampleTask("sample task 4"), "sample task 4");
   }
 
@@ -122,8 +120,17 @@ public class GanymedeScheduler extends Thread {
   private Hashtable currentlyScheduled = new Hashtable();
   private Hashtable currentlyRunning = new Hashtable();
   private Hashtable onDemand = new Hashtable();
+
   private Vector taskList = new Vector();	// for reporting to admin consoles
   private boolean taskListInitialized = false;
+
+  /**
+   *
+   * if true, the scheduler will attempt to notify the GanymedeAdmin class when
+   * tasks are scheduled and/or completed.
+   *
+   */
+
   private boolean reportTasks;
 
   /**
@@ -143,9 +150,147 @@ public class GanymedeScheduler extends Thread {
 
   /**
    *
-   * This method is used to add a task to the scheduler that will not
-   * be scheduled until specifically requested. 
+   * This method is used to register a task DBObject record in this
+   * scheduler.
    *
+   */
+
+  public synchronized void registerTaskObject(DBObject object)
+  {
+    String taskName;
+    String taskClass;
+    Class classdef;
+
+    /* -- */
+
+    taskName = (String) object.getFieldValue(SchemaConstants.TaskName);
+    taskClass = (String) object.getFieldValue(SchemaConstants.TaskClass);
+
+    if (taskName == null || taskClass == null)
+      {
+	throw new IllegalArgumentException("task object not filled out adequately");
+      }
+
+    try
+      {
+	classdef = Class.forName(taskClass);
+      }
+    catch (ClassNotFoundException ex)
+      {
+	System.err.println("GanymedeScheduler.registerTaskObject(): class definition could not be found: " + ex);
+	classdef = null;
+      }
+		
+    Runnable task = null;
+
+    try
+      {
+	task = (Runnable) classdef.newInstance(); // using no param constructor
+      }
+    catch (IllegalAccessException ex)
+      {
+	System.err.println("IllegalAccessException " + ex);
+      }
+    catch (InstantiationException ex)
+      {
+	System.err.println("InstantiationException " + ex);
+      }
+    
+    if (task == null)
+      {
+	return;
+      }
+
+    // if we're not doing a periodic task, just add the task to our
+    // demand queue and let the Ganymede initialization code take
+    // care of associating the task with the transaction commit
+    // process.
+
+    if (!object.isSet(SchemaConstants.TaskRunPeriodically))
+      {
+	addActionOnDemand(task, taskName);
+	return;
+      }
+
+    // We've got a periodic task.. set er up.
+
+    String periodType = (String) object.getFieldValueLocal(SchemaConstants.TaskPeriodUnit);
+    int periodMinutes;
+    int periodCount = ((Integer) object.getFieldValueLocal(SchemaConstants.TaskPeriodCount)).intValue();
+    Date periodAnchor = (Date) object.getFieldValueLocal(SchemaConstants.TaskPeriodAnchor);
+    long periodInterval, anchorTime, nowTime, nextRunTime;
+    
+    if (periodType.equals("Minutes"))
+      {
+	periodMinutes = 1;
+      }
+    else if (periodType.equals("Hours"))
+      {
+	periodMinutes = 60;
+      }
+    else if (periodType.equals("Days"))
+      {
+	periodMinutes = 1440;
+      }
+    else if (periodType.equals("Weeks"))
+      {
+	periodMinutes = 10080;
+      }
+    else 
+      {
+	throw new RuntimeException("GanymedeScheduler Error.. can't register " + 
+				   taskName + " with unknown period type.");
+      }
+    
+    periodMinutes *= periodCount;
+    
+    periodInterval = periodMinutes * 60 * 1000;
+    
+    // we need to find the next moment to run the task with, using the periodAnchor
+    
+    if (periodAnchor == null)
+      {
+	anchorTime = System.currentTimeMillis();
+	nextRunTime = anchorTime + periodInterval;
+      }
+    else
+      {
+	anchorTime = periodAnchor.getTime();
+	nowTime = System.currentTimeMillis();
+
+	if (anchorTime <= nowTime)
+	  {
+	    // we want the first time this task is run to be the
+	    // first time after the current time that is an even
+	    // multiple of periodInterval after anchorTime
+
+	    long periodsPassed = (nowTime - anchorTime) / periodInterval;
+	    nextRunTime = anchorTime + periodInterval * (periodsPassed + 1);
+	  }
+	else
+	  {
+	    // hm. We could just take anchorTime as the first time to run
+	    // the task, but I'd prefer to use the periodAnchor solely as
+	    // a sign for what time of day, what day of week to run the
+	    // task on.  So, we need to calculate when we next come up
+	    // to an even number of intervals before the anchor time.
+
+	    long periodsAway = (anchorTime - nowTime) / periodInterval;
+	    nextRunTime = anchorTime - periodInterval * periodsAway;
+	  }
+      }
+
+    addPeriodicAction(new Date(nextRunTime), periodMinutes, task, taskName);
+  }
+
+  /**
+   *
+   * This method is used to add a task to the scheduler that will not
+   * be scheduled until specifically requested.<BR>
+   *
+   * If a task with the given name is already registered with the
+   * scheduler, that task will be removed from the scheduling queue
+   * and registered anew as an on-demand task.
    *
    */
 
@@ -161,14 +306,19 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || 
-	currentlyScheduled.containsKey(name) ||
-	onDemand.containsKey(name))
-      {
-	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
-      }
+    handle = unregisterTask(name);
 
-    handle = new scheduleHandle(this, null, 0, task, name);
+    if (handle == null)
+      {
+	handle = new scheduleHandle(this, null, 0, task, name);
+      }
+    else
+      {
+	handle.startTime = null;
+	handle.setInterval(0);
+	handle.task = task;
+	handle.reregister = true;
+      }
 
     onDemand.put(handle.name, handle);
   }
@@ -177,11 +327,15 @@ public class GanymedeScheduler extends Thread {
    *
    * This method is used to add an action to be run once, at a specific time.
    *
+   * If a task with the given name is already registered with the
+   * scheduler, that task will be removed from the scheduling queue
+   * and registered anew as an on-demand task.
+   *
    */
 
-  public synchronized void addAction(Date time, 
-				     Runnable task,
-				     String name)
+  public synchronized void addTimedAction(Date time, 
+					  Runnable task,
+					  String name)
   {
     scheduleHandle handle;
 
@@ -192,27 +346,40 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
-	onDemand.containsKey(name))
+    handle = unregisterTask(name);
+
+    if (handle == null)
       {
-	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
+	handle = new scheduleHandle(this, time, 0, task, name);
+      }
+    else
+      {
+	handle.startTime = time;
+	handle.setInterval(0);
+	handle.task = task;
+	handle.reregister = true;
       }
 
-    handle = new scheduleHandle(this, time, 0, task, name);
     scheduleTask(handle);
-    
-    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
+
+    if (logStuff)
+      {
+	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
+      }
   }
 
   /**
    *
    * This method is used to add an action to be run every day at a specific time.
    *
+   * If a task with the given name is already registered with the
+   * scheduler, that task will be removed from the scheduling queue
+   * and registered anew as an on-demand task.
+   *
    */
 
   public synchronized void addDailyAction(int hour, int minute, 
-					  Runnable task,
-					  String name)
+					  Runnable task, String name)
   {
     scheduleHandle handle;
     Date time, currentTime;
@@ -225,11 +392,7 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
-	onDemand.containsKey(name))
-      {
-	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
-      }
+    handle = unregisterTask(name);
 
     currentTime = new Date();
 
@@ -247,29 +410,46 @@ public class GanymedeScheduler extends Thread {
 
     time = cal.getTime();
 
-    handle = new scheduleHandle(this, time, minsPerDay, task, name);
+    if (handle == null)
+      {
+	handle = new scheduleHandle(this, time, minsPerDay, task, name);
+      }
+    else
+      {
+	handle.startTime = time;
+	handle.setInterval(minsPerDay);
+	handle.task = task;
+	handle.reregister = true;
+      }
+
     scheduleTask(handle);
 
-    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
+    if (logStuff)
+      {
+	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
+      }
   }
 
   /**
+   *
    * This method is used to add an action to be run at a specific
-   * initial time, and every <intervalMinutes> thereafter.  
+   * initial time, and every &lt;intervalMinutes&gt; thereafter.  
    *
    * The scheduler will not reschedule a task until the last scheduled
    * instance of the task has completed.
    *
+   * If a task with the given name is already registered with the
+   * scheduler, that task will be removed from the scheduling queue
+   * and registered anew as an on-demand task.
+   *
    */
 
-  public synchronized void addPeriodicAction(int hour, int minute, 
+  public synchronized void addPeriodicAction(Date firstTime,
 					     int intervalMinutes, 
 					     Runnable task,
 					     String name)
   {
     scheduleHandle handle;
-    Date time, currentTime;
-    Calendar cal = Calendar.getInstance();
 
     /* -- */
 
@@ -278,34 +458,58 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
-	onDemand.containsKey(name))
+    handle = unregisterTask(name);
+
+    if (handle == null)
       {
-	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
+	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name);
       }
-
-    currentTime = new Date();
-
-    cal.setTime(currentTime);
-
-    cal.set(Calendar.HOUR_OF_DAY, hour);
-    cal.set(Calendar.MINUTE, minute);
-
-    time = cal.getTime();
-
-    if (time.before(currentTime))
+    else
       {
-	cal.add(Calendar.DATE, 1); // advance to this time tomorrow
+	handle.startTime = firstTime;
+	handle.setInterval(intervalMinutes);
+	handle.task = task;
+	handle.reregister = true;
       }
-
-    time = cal.getTime();
-
-    handle = new scheduleHandle(this, time, intervalMinutes, task, name);
 
     scheduleTask(handle);
 
-    System.err.println("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + time);
-    System.err.println("                    Task will repeat every " + intervalMinutes + " minutes");
+    if (logStuff)
+      {
+	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
+	System.err.println("                    Task will repeat every " + intervalMinutes + " minutes");
+      }
+  }
+
+  /**
+   *
+   * This method unregisters the named task so that it can be
+   * rescheduled with different parameters, or simply removed.
+   * 
+   */
+
+  public synchronized scheduleHandle unregisterTask(String name)
+  {
+    scheduleHandle oldHandle = null;
+
+    /* -- */
+
+    if (currentlyScheduled.containsKey(name))
+      {
+	oldHandle = (scheduleHandle) currentlyScheduled.remove(name);
+      }
+    
+    if (onDemand.containsKey(name))
+      {
+	oldHandle = (scheduleHandle) onDemand.remove(name);
+      }
+
+    if (oldHandle != null)
+      {
+	oldHandle.unregister();
+      }
+
+    return oldHandle;
   }
 
   /**
@@ -372,7 +576,10 @@ public class GanymedeScheduler extends Thread {
 
 	if (handle != null)
 	  {
-	    handle.rerun = true;
+	    // currently running.. tell it to reschedule itself when
+	    // it finishes
+
+	    handle.runOnCompletion();
 	    updateTaskInfo(true);
 	    return true;
 	  }
@@ -502,72 +709,6 @@ public class GanymedeScheduler extends Thread {
 
   /**
    *
-   * This method is provided to allow an admin console to reschedule
-   * the next invocation time of a named task, and to change the
-   * interval in minutes between invocations of this task.
-   *
-   * @param name The name of the task to be rescheduled
-   * @param time The desired time of the next invocation.  If the task
-   * is currently running, this time will be overridden by the task's
-   * prescribed runtime interval.
-   * @param interval The time, in minutes, between invocations of this
-   * task.  If interval is less than 1, the interval for this task
-   * will not be changed.
-   *
-   *
-   * @return true if the task was found and rescheduled
-   *
-   */
-
-  public synchronized boolean rescheduleTask(String name, Date time, int interval)
-  {
-    scheduleHandle handle = null;
-    boolean changed = false;
-
-    /* -- */
-
-    handle = (scheduleHandle) currentlyRunning.get(name);
-
-    if (handle == null)
-      {
-	handle = (scheduleHandle) currentlyScheduled.get(name);
-      }
-
-    if (handle == null)
-      {
-	return false;		// couldn't find it
-      }
-    else
-      {
-	if (time != null)
-	  {
-	    handle.startTime = time;
-	    
-	    if (time.getTime() < nextAction.getTime())
-	      {
-		changed = true;
-		nextAction.setTime(time.getTime());
-		notify();	// let the scheduler know about our newly scheduled event
-	      }
-	  }
-
-	if (interval > 0)
-	  {
-	    changed = true;
-	    handle.setInterval(interval);
-	  }
-
-	if (changed)
-	  {
-	    updateTaskInfo(true);
-	  }
-
-	return changed;
-      }
-  }
-
-  /**
-   *
    * This method is responsible for carrying out the scheduling
    * work of this class.
    *
@@ -587,7 +728,10 @@ public class GanymedeScheduler extends Thread {
 
     try
       {
-	System.err.println("Ganymede Scheduler: scheduling task started");
+	if (logStuff)
+	  {
+	    System.err.println("Ganymede Scheduler: scheduling task started");
+	  }
 
 	while (true)
 	  {
@@ -703,9 +847,17 @@ public class GanymedeScheduler extends Thread {
       }
     finally 
       {
-	System.err.println("Ganymede Scheduler going down");
+	if (logStuff)
+	  {
+	    System.err.println("Ganymede Scheduler going down");
+	  }
+
 	cleanUp();
-	System.err.println("Ganymede Scheduler exited");
+
+	if (logStuff)
+	  {
+	    System.err.println("Ganymede Scheduler exited");
+	  }
       }
   }
 
@@ -721,7 +873,10 @@ public class GanymedeScheduler extends Thread {
     if ((currentlyScheduled.remove(handle.name) != null) ||
 	(onDemand.remove(handle.name) != null))
       {
-	System.err.println("Ganymede Scheduler: running " + handle.name);
+	if (logStuff)
+	  {
+	    System.err.println("Ganymede Scheduler: running " + handle.name);
+	  }
 
 	currentlyRunning.put(handle.name, handle);
 	handle.runTask();
@@ -742,7 +897,10 @@ public class GanymedeScheduler extends Thread {
   {
     if (currentlyRunning.remove(handle.name) != null)
       {
-	System.err.println("Ganymede Scheduler: " + handle.name + " completed");
+	if (logStuff)
+	  {
+	    System.err.println("Ganymede Scheduler: " + handle.name + " completed");
+	  }
 
 	// we need to check to see if the task was ordinarily scheduled to
 	// start at some time in the future to handle the case where a
@@ -758,7 +916,11 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    if (handle.reschedule())
 	      {
-		System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
+		if (logStuff)
+		  {
+		    System.err.println("Ganymede Scheduler: rescheduling task " + 
+				       handle.name + " for " + handle.startTime);
+		  }
 		
 		scheduleTask(handle);
 	      }
@@ -779,7 +941,8 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-	System.err.println("Ganymede Scheduler: confusion! Couldn't find task " + handle.name + " on the runnng list");
+	System.err.println("Ganymede Scheduler: confusion! Couldn't find task " + 
+			   handle.name + " on the runnng list");
       }
   }
 
@@ -861,19 +1024,19 @@ public class GanymedeScheduler extends Thread {
 	enum = currentlyScheduled.elements();
 	while (enum.hasMoreElements())
 	  {
-	    taskList.addElement(enum.nextElement());
+	    VectorUtils.unionAdd(taskList, enum.nextElement());
 	  }
     
 	enum = currentlyRunning.elements();
 	while (enum.hasMoreElements())
 	  {
-	    taskList.addElement(enum.nextElement());
+	    VectorUtils.unionAdd(taskList, enum.nextElement());
 	  }
 
 	enum = onDemand.elements();
 	while (enum.hasMoreElements())
 	  {
-	    taskList.addElement(enum.nextElement());
+	    VectorUtils.unionAdd(taskList, enum.nextElement());
 	  }
 
 	taskListInitialized = true;

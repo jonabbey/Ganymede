@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/01/22 18:05:43 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/02/10 05:33:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -663,7 +663,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     try
       {
-	Ganymede.db.dump(Ganymede.dbFilename, false); // don't release lock
+	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
       }
     catch (IOException ex)
       {
@@ -746,8 +746,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     try
       {
-	Ganymede.db.dump(Ganymede.dbFilename, true); // release the
-				                     // lock when the dump is complete
+	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
       }
     catch (IOException ex)
       {
@@ -923,11 +922,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   public boolean enableTask(String name)
   {
     return Ganymede.scheduler.enableTask(name);
-  }
-  
-  public boolean rescheduleTask(String name, Date time, int interval)
-  {
-    return false;
   }
 
   /**

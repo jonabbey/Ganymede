@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/01/22 18:05:27 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/02/10 05:33:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -182,7 +182,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     if (isEditable(local))
       {
-	value = new Boolean(false);
+	value = Boolean.FALSE;
 	return null;
       }
 

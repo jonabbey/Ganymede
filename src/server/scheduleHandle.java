@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:06:00 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/02/10 05:33:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,26 +72,69 @@ public class scheduleHandle implements java.io.Serializable {
 
   static final boolean debug = false;
 
+  // ---
+
   // we pass these attributes along to the admin console for it to display
 
   boolean isRunning;
   boolean suspend;
-  boolean rerun;		// if we are doing a on-demand and we get a request while running it,
-				// we'll want to immediately re-run it
+
+  /**
+   * if we are doing a on-demand and we get a request while running it,
+   * we'll want to immediately re-run it on completion
+   */
+
+  boolean rerun;
+
+  /**
+   * When will this task next be issued?
+   */
+
   Date startTime;
-  Date incepDate;		// when was this task first registered?  used to present a
-				// consistent list on the client
+
+  /**
+   * when was this task first registered?  used to present a
+   * consistently sorted list on the client
+   */
+
+  Date incepDate;
+
+  /**
+   * For reporting our interval status to the admin console
+   */
 
   String intervalString;
+
+  /**
+   * For reporting our name to the admin console
+   */
+
   String name;
 
+  //
   // non-serializable, for use on the server only
+  //
 
-  transient int interval;			// 0 if this is a one-shot, otherwise, the count in minutes
+  /**
+   * 0 if this is a one-shot, otherwise, the count in minutes
+   */
+
+  transient int interval;
+
+  /**
+   * if this field is set to false, the Ganymede Scheduler will
+   * not register this task for subsequent execution on completion
+   * of execution.
+   */
+
+  transient boolean reregister = true;
+
+  /**
+   * The task to run
+   */
   transient Runnable task;
   transient Thread thread, monitor;
   transient GanymedeScheduler scheduler = null;
-  
 
   /* -- */
 
@@ -112,6 +155,8 @@ public class scheduleHandle implements java.io.Serializable {
 
     setInterval(interval);
 
+    // remember when we were created
+
     incepDate = new Date();
   }
 
@@ -120,7 +165,7 @@ public class scheduleHandle implements java.io.Serializable {
    * This server-side method causes the task represented by this scheduleHandle to
    * be spawned into a new thread.
    *
-   * This method is invalid on the server.
+   * This method is invalid on the client.
    *
    */
 
@@ -217,6 +262,22 @@ public class scheduleHandle implements java.io.Serializable {
 
   /**
    *
+   * This method returns true if this task is not scheduled for periodic execution
+   *
+   */
+
+  synchronized boolean isOnDemand()
+  {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
+    return interval == 0;
+  }
+
+  /**
+   *
    * Server-side method to request that this task be re-run after
    * its current completion.  Intended for on-demand tasks.
    *
@@ -230,6 +291,24 @@ public class scheduleHandle implements java.io.Serializable {
       }
 
     rerun = true;
+  }
+
+  /**
+   *
+   * Server-side method to request that this task not be kept after its
+   * current completion.  Used to remove a task from the Ganymede scheduler.
+   *
+   */
+
+  synchronized void unregister()
+  {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
+    reregister = false;
+    rerun = false;
   }
 
   /**
@@ -282,6 +361,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     suspend = false;
   }
+
 
   /**
    *

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/02/08 21:35:26 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 1999/02/10 05:33:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.64 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.65 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -497,6 +497,18 @@ public class DBObject implements db_object, FieldType, Remote {
   public final DBObjectBase getBase()
   {
     return objectBase;
+  }
+
+  /**
+   *
+   * Provide easy server-side access to this object's name in a String
+   * context.
+   *
+   */
+
+  public String toString()
+  {
+    return getLabel();
   }
 
   /**

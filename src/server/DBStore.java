@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 1999/02/04 22:01:52 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 1999/02/10 05:33:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,7 +51,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
-import java.util.text.*;
+import java.text.*;
 import java.rmi.*;
 
 import arlut.csd.Util.zipIt;
@@ -430,14 +430,16 @@ public class DBStore {
 	      {
 		if (archiveIt)
 		  {
-		    File directory = new File(dbFile.getPath());
+		    String directoryName = dbFile.getParent();
+
+		    File directory = new File(directoryName);
 
 		    if (!directory.isDirectory())
 		      {
-			throw new IOException("Error, couldn't find output directory to backup.");
+			throw new IOException("Error, couldn't find output directory to backup: " + directoryName);
 		      }
 
-		    File oldDirectory = new File(dbFile.getPath() + File.separator + "old");
+		    File oldDirectory = new File(directoryName + File.separator + "old");
 		    
 		    if (!oldDirectory.exists())
 		      {
@@ -448,7 +450,7 @@ public class DBStore {
 								java.util.Locale.US);
 		    String label = formatter.format(new Date());
 
-		    String zipFileName = dbFile.getPath() + File.separator + "old" + File.separator + label + "db.zip";
+		    String zipFileName = directoryName + File.separator + "old" + File.separator + label + "db.zip";
 
 		    Vector fileNameVect = new Vector();
 		    fileNameVect.addElement(filename);
@@ -708,7 +710,7 @@ public class DBStore {
 		  {
 		    base.partialEmit(out); // gotta retain admin login ability
 		  }
-		else if (base.type_code == SchemaConstants.BuilderBase)
+		else if (base.type_code == SchemaConstants.TaskBase)
 		  {
 		    base.emit(out, true); // save the builder information
 		  }
@@ -1698,17 +1700,17 @@ public class DBStore {
     
 	setBase(b);
 
-	// create Builder Task Base
+	// create Task Base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Builder Task";
-	b.type_code = (short) SchemaConstants.BuilderBase; // 5
+	b.object_name = "Task";
+	b.type_code = (short) SchemaConstants.TaskBase; // 5
 	b.displayOrder = b.type_code;
 
 	adminCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.BuilderTaskName;
+	bf.field_code = SchemaConstants.TaskName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Task Name";
 	bf.field_order = 1;
@@ -1717,11 +1719,10 @@ public class DBStore {
 	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Name of this plug-in builder task";
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.BuilderTaskClass;
+	bf.field_code = SchemaConstants.TaskClass;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Classname";
 	bf.badChars = "/:";
@@ -1731,7 +1732,7 @@ public class DBStore {
 	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
 	b.fieldTable.put(bf);
 
-	b.setLabelField(SchemaConstants.BuilderTaskName);
+	b.setLabelField(SchemaConstants.TaskName);
     
 	setBase(b);
       }
@@ -1791,10 +1792,10 @@ public class DBStore {
     i.addElementLocal(inv);
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValueLocal(new Boolean(true));
+    b.setValueLocal(Boolean.TRUE);
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValueLocal(new Boolean(true));
+    b.setValueLocal(Boolean.TRUE);
 
     // create a monitor admin persona object 
 
@@ -1823,10 +1824,10 @@ public class DBStore {
       }
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValueLocal(new Boolean(true));
+    b.setValueLocal(Boolean.TRUE);
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValueLocal(new Boolean(false));
+    b.setValueLocal(Boolean.FALSE);
 
     // create SchemaConstants.PermDefaultObj
 
