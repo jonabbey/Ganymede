@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/06/26 20:43:26 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/07/07 01:21:00 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.15 $ $Date: 2000/06/26 20:43:26 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2000/07/07 01:21:00 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1000,6 +1000,11 @@ public class xmlfield implements FieldType {
 
 		if (needToBeCreated != null)
 		  {
+		    if (debug)
+		      {
+			System.err.println("Need to create " + needToBeCreated.size() + " embedded objects");
+		      }
+
 		    for (int i = 0; i < needToBeCreated.size(); i++)
 		      {
 			Object x = needToBeCreated.elementAt(i);
@@ -1039,6 +1044,10 @@ public class xmlfield implements FieldType {
 			    object.objref = result.getObject();
 			  }
 
+			// remember that we created this embedded
+			// object, so that we can refer to it
+			// elsewhere by its id
+
 			xmlclient.xc.embeddedObjects.addElement(object);
 
 			// register any non-invids on this embedded
@@ -1057,9 +1066,19 @@ public class xmlfield implements FieldType {
 
 		if (needToBeEdited != null)
 		  {
+		    if (debug)
+		      {
+			System.err.println("Need to edit " + needToBeEdited.size() + " embedded objects");
+		      }
+
 		    for (int i = 0; i < needToBeEdited.size(); i++)
 		      {
 			xmlobject object = (xmlobject) needToBeEdited.elementAt(i);
+
+			if (debug)
+			  {
+			    System.err.println("Editing embedded object " + object);
+			  }
 
 			result = object.editOnServer(xmlclient.xc.session);
 			
@@ -1079,6 +1098,10 @@ public class xmlfield implements FieldType {
 			      }
 			  }
 
+			// remember that we edited this embedded
+			// object so that we can fixup any invids
+			// after all is said and done
+
 			xmlclient.xc.embeddedObjects.addElement(object);
 
 			// register any non-invids on this embedded
@@ -1097,6 +1120,11 @@ public class xmlfield implements FieldType {
 
 		if (needToBeRemoved != null)
 		  {
+		    if (debug)
+		      {
+			System.err.println("Need to remove " + needToBeRemoved.size() + " embedded objects");
+		      }
+
 		    for (int i = 0; i < needToBeRemoved.size(); i++)
 		      {
 			Invid invid = (Invid) needToBeRemoved.elementAt(i);
@@ -1243,6 +1271,10 @@ public class xmlfield implements FieldType {
 	  {
 	    invids.addElement(invid);
 	  }
+	else if (debug)
+	  {
+	    System.err.println("Couldn't find invid for " + x);
+	  }
       }
 
     return invids;
@@ -1284,6 +1316,10 @@ public class xmlfield implements FieldType {
 	    if (((xmlobject) x).getInvid() != null)
 	      {
 		objects.addElement(x);
+	      }
+	    else if (debug)
+	      {
+		System.err.println("Couldn't find invid for " + x);
 	      }
 	  }
 	else
